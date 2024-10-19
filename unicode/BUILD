@@ -27,3 +27,13 @@ cc_test(
     size = "small",
 )
 
+cc_binary(
+    name = "ucd_benchmark",
+    srcs = ["ucd_benchmark.cpp"],
+    deps = [
+        ":ucd",
+        "@google_benchmark//:benchmark",
+    ],
+    testonly = True,
+)
+
