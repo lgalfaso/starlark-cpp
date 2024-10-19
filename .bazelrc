@@ -1,0 +1,15 @@
+common --enable_platform_specific_config
+common --action_env=BAZEL_CXXOPTS="-std=c++2b"
+common --java_language_version=21 --java_runtime_version=remotejdk_21
+common --tool_java_language_version=21 --tool_java_runtime_version=remotejdk_21
+common:macos --cxxopt=-Xclang --cxxopt=-nostdsysteminc
+
+build --experimental_enable_bzlmod --cxxopt=-std=c++2b --cxxopt=-fconstexpr-steps=40000000
+
+build:asan --strip=never
+build:asan --copt -fsanitize=address
+build:asan --copt -DADDRESS_SANITIZER
+build:asan --copt -O1
+build:asan --copt -g
+build:asan --copt -fno-omit-frame-pointer
+build:asan --linkopt -fsanitize=address
