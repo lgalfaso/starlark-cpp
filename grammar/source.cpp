@@ -4,6 +4,8 @@
 
 #include <bit>
 
+using std::string_view;
+
 namespace grammar {
 
 namespace {
@@ -16,7 +18,11 @@ bool is_utf8_continue(char input) {
 
 const std::uint64_t source::invalid_codepoint;
 
-source::source(std::string_view source_code) : source_code(source_code) {}
+source::source(string_view source_code) : source_code(source_code) {}
+
+std::size_t source::get_pos() const {
+  return pos;
+}
 
 std::uint64_t source::peek_codepoint() const {
   if (pos >= source_code.length()) {
@@ -50,6 +56,17 @@ std::uint64_t source::peek_codepoint() const {
     default:
       return invalid_codepoint;
   }
+}
+
+bool source::capture(string_view input) {
+  if (source_code.length() - pos < input.length()) {
+    return false;
+  }
+  if (source_code.substr(pos, input.length()) == input) {
+    pos += input.length();
+    return true;
+  }
+  return false;
 }
 
 }  // namespace grammar

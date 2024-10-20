@@ -44,4 +44,31 @@ TEST(SourceTest, PeekCodepoint) {
   EXPECT_EQ(source::invalid_codepoint, source("\xf0\x92\x8d\xc5").peek_codepoint());
 }
 
+TEST(SourceTest, Capture) {
+  {
+    source s("");
+    EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(true, s.capture(""));
+    EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(false, s.capture("a"));
+    EXPECT_EQ(0, s.get_pos());
+  }
+  {
+    source s("abc");
+    EXPECT_EQ(true, s.capture(""));
+    EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(true, s.capture("a"));
+    EXPECT_EQ(1, s.get_pos());
+    EXPECT_EQ(false, s.capture("a"));
+    EXPECT_EQ(1, s.get_pos());
+    EXPECT_EQ(true, s.capture("b"));
+    EXPECT_EQ(2, s.get_pos());
+  }
+  {
+    source s("abc");
+    EXPECT_EQ(false, s.capture("abcdef"));
+    EXPECT_EQ(0, s.get_pos());
+  }
+}
+
 }  // namespace
