@@ -12,6 +12,7 @@ namespace grammar {
 class source {
  public:
   explicit source(std::string_view source_code);
+  bool is_end() const;
   std::size_t get_pos() const;
   std::uint64_t peek_codepoint() const;
   bool capture(std::string_view input);

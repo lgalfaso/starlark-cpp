@@ -20,6 +20,10 @@ const std::uint64_t source::invalid_codepoint;
 
 source::source(string_view source_code) : source_code(source_code) {}
 
+bool source::is_end() const {
+  return pos == source_code.length();
+}
+
 std::size_t source::get_pos() const {
   return pos;
 }

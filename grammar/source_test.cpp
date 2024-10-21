@@ -48,21 +48,32 @@ TEST(SourceTest, Capture) {
   {
     source s("");
     EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(true, s.is_end());
     EXPECT_EQ(true, s.capture(""));
     EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(true, s.is_end());
     EXPECT_EQ(false, s.capture("a"));
     EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(true, s.is_end());
   }
   {
     source s("abc");
+    EXPECT_EQ(false, s.is_end());
     EXPECT_EQ(true, s.capture(""));
     EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(false, s.is_end());
     EXPECT_EQ(true, s.capture("a"));
     EXPECT_EQ(1, s.get_pos());
+    EXPECT_EQ(false, s.is_end());
     EXPECT_EQ(false, s.capture("a"));
     EXPECT_EQ(1, s.get_pos());
+    EXPECT_EQ(false, s.is_end());
     EXPECT_EQ(true, s.capture("b"));
     EXPECT_EQ(2, s.get_pos());
+    EXPECT_EQ(false, s.is_end());
+    EXPECT_EQ(true, s.capture("c"));
+    EXPECT_EQ(3, s.get_pos());
+    EXPECT_EQ(true, s.is_end());
   }
   {
     source s("abc");
