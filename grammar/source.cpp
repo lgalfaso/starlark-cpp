@@ -28,6 +28,13 @@ std::size_t source::get_pos() const {
   return pos;
 }
 
+char source::peek(std::size_t delta) const {
+  if (delta >= source_code.length() - pos) {
+    return 0;
+  }
+  return source_code[pos + delta];
+}
+
 std::uint64_t source::peek_codepoint() const {
   if (pos >= source_code.length()) {
     return invalid_codepoint;

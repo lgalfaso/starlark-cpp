@@ -4,11 +4,23 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <limits>
+
 #include "grammar/source.hpp"
 
 using grammar::source;
 
 namespace {
+
+TEST(SourceTest, Peek) {
+  source s("abc");
+  EXPECT_EQ('a', s.peek());
+  EXPECT_EQ('b', s.peek(1));
+  EXPECT_EQ('c', s.peek(2));
+  EXPECT_EQ('\0', s.peek(3));
+  EXPECT_EQ('\0', s.peek(std::numeric_limits<std::size_t>::max() - 1));
+  EXPECT_EQ('\0', s.peek(std::numeric_limits<std::size_t>::max()));
+}
 
 TEST(SourceTest, PeekCodepoint) {
   EXPECT_EQ('a', source("a").peek_codepoint());

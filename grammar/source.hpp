@@ -14,6 +14,7 @@ class source {
   explicit source(std::string_view source_code);
   bool is_end() const;
   std::size_t get_pos() const;
+  char peek(std::size_t delta = 0) const;
   std::uint64_t peek_codepoint() const;
   bool capture(std::string_view input);
 
