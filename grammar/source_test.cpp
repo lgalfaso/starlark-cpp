@@ -56,6 +56,21 @@ TEST(SourceTest, PeekCodepoint) {
   EXPECT_EQ(source::invalid_codepoint, source("\xf0\x92\x8d\xc5").peek_codepoint());
 }
 
+TEST(SourceTest, Skip) {
+  source s("abc");
+  s.skip(0);
+  EXPECT_EQ(0, s.get_pos());
+  s.skip();
+  EXPECT_EQ(1, s.get_pos());
+  s.skip(2);
+  EXPECT_EQ(3, s.get_pos());
+  s.skip();
+  EXPECT_EQ(3, s.get_pos());
+  s.skip();
+  s.skip(std::numeric_limits<std::size_t>::max());
+  EXPECT_EQ(3, s.get_pos());
+}
+
 TEST(SourceTest, Capture) {
   {
     source s("");

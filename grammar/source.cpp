@@ -69,6 +69,14 @@ std::uint64_t source::peek_codepoint() const {
   }
 }
 
+void source::skip(std::size_t delta) {
+  if (delta >= source_code.length() - pos) {
+    pos = source_code.length();
+  } else {
+    pos += delta;
+  }
+}
+
 bool source::capture(string_view input) {
   if (source_code.length() - pos < input.length()) {
     return false;
