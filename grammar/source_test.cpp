@@ -54,6 +54,15 @@ TEST(SourceTest, PeekCodepoint) {
   EXPECT_EQ(source::invalid_codepoint, source("\xf0\x92\xcd\x85").peek_codepoint());
   EXPECT_EQ(source::invalid_codepoint, source("\xf0\x92\x8d\x05").peek_codepoint());
   EXPECT_EQ(source::invalid_codepoint, source("\xf0\x92\x8d\xc5").peek_codepoint());
+
+  // Overlong encoding.
+  EXPECT_EQ(source::invalid_codepoint, source("\xc0\xbf").peek_codepoint());
+  EXPECT_EQ(source::invalid_codepoint, source("\xc1\xbf").peek_codepoint());
+  EXPECT_EQ(0x7f, source("\x7f").peek_codepoint());
+  EXPECT_EQ(source::invalid_codepoint, source("\xe0\x9f\xbf").peek_codepoint());
+  EXPECT_EQ(0x7ff, source("\xdf\xbf").peek_codepoint());
+  EXPECT_EQ(source::invalid_codepoint, source("\xf0\x8f\xbf\xbf").peek_codepoint());
+  EXPECT_EQ(0xffff, source("\xef\xbf\xbf").peek_codepoint());
 }
 
 TEST(SourceTest, Skip) {

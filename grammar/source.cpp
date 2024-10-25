@@ -53,13 +53,22 @@ std::uint64_t source::peek_codepoint() const {
     case 0:
       return current_char;
     case 2:
+      if (source_code[pos] == '\xc0' || source_code[pos] == '\xc1') {
+        return invalid_codepoint;
+      }
       return (static_cast<std::uint64_t>(source_code[pos    ]) & 0x1f) << 6 |
              (static_cast<std::uint64_t>(source_code[pos + 1]) & 0x3f);
     case 3:
+      if (source_code[pos] == '\xe0' && ((unsigned char)source_code[pos + 1]) < 0xa0) {
+        return invalid_codepoint;
+      }
       return (static_cast<std::uint64_t>(source_code[pos    ]) & 0x0f) << 12 |
              (static_cast<std::uint64_t>(source_code[pos + 1]) & 0x3f) << 6 |
              (static_cast<std::uint64_t>(source_code[pos + 2]) & 0x3f);
     case 4:
+      if (source_code[pos] == '\xf0' && ((unsigned char)source_code[pos + 1]) < 0x90) {
+        return invalid_codepoint;
+      }
       return (static_cast<std::uint64_t>(source_code[pos    ]) & 0x07) << 18 |
              (static_cast<std::uint64_t>(source_code[pos + 1]) & 0x3f) << 12 |
              (static_cast<std::uint64_t>(source_code[pos + 2]) & 0x3f) << 6 |
