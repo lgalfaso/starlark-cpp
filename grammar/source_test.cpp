@@ -63,6 +63,10 @@ TEST(SourceTest, PeekCodepoint) {
   EXPECT_EQ(0x7ff, source("\xdf\xbf").peek_codepoint());
   EXPECT_EQ(source::invalid_codepoint, source("\xf0\x8f\xbf\xbf").peek_codepoint());
   EXPECT_EQ(0xffff, source("\xef\xbf\xbf").peek_codepoint());
+
+  // The largest possible Unicode character is 0x10FFFF.
+  EXPECT_EQ(source::invalid_codepoint, source("\xf4\x90\x80\x80").peek_codepoint());
+  EXPECT_EQ(0x10ffff, source("\xf4\x8f\xbf\xbf").peek_codepoint());
 }
 
 TEST(SourceTest, Skip) {

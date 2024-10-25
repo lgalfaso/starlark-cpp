@@ -69,6 +69,9 @@ std::uint64_t source::peek_codepoint() const {
       if (source_code[pos] == '\xf0' && ((unsigned char)source_code[pos + 1]) < 0x90) {
         return invalid_codepoint;
       }
+      if (source_code[pos] == '\xf4' && ((unsigned char)source_code[pos + 1]) >= 0x90) {
+        return invalid_codepoint;
+      }
       return (static_cast<std::uint64_t>(source_code[pos    ]) & 0x07) << 18 |
              (static_cast<std::uint64_t>(source_code[pos + 1]) & 0x3f) << 12 |
              (static_cast<std::uint64_t>(source_code[pos + 2]) & 0x3f) << 6 |
