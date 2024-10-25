@@ -10,7 +10,7 @@ namespace grammar {
 
 namespace {
 
-bool is_utf8_continue(char input) {
+inline bool is_utf8_continue(char input) {
   return (((unsigned char)input) & 0xc0) == 0x80;
 }
 
