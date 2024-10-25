@@ -1,7 +1,5 @@
 // Copyright 2024 Lucas Mirelmann
 
-#include <iostream>
-
 #include "grammar/numeric_parser.hpp"
 
 namespace grammar {
