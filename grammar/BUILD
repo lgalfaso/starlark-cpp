@@ -16,3 +16,22 @@ cc_test(
     size = "small",
 )
 
+cc_library(
+    name = "numeric_parser",
+    srcs = ["numeric_parser.cpp"],
+    hdrs = ["numeric_parser.hpp"],
+    deps = [
+        ":source",
+    ],
+)
+
+cc_test(
+    name = "numeric_parser_test",
+    srcs = ["numeric_parser_test.cpp"],
+    deps = [
+        ":numeric_parser",
+        "@googletest//:gtest_main",
+    ],
+    size = "small",
+)
+
