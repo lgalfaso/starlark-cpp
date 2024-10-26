@@ -2,6 +2,24 @@
 
 load("//unicode/extract:extract.bzl", "extract_ucd")
 
+cc_library(
+    name = "encode",
+    srcs = ["encode.cpp"],
+    hdrs = ["encode.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "encode_test",
+    srcs = ["encode_test.cpp"],
+    deps = [
+        ":encode",
+        "@googletest//:gtest_main",
+        "//grammar:source",
+    ],
+    size = "small",
+)
+
 extract_ucd(
     name = "ucd_extract",
     output_cc = "ucd_codepoints.cpp",
@@ -12,6 +30,7 @@ cc_library(
     name = "ucd",
     srcs = ["ucd_codepoints.cpp"],
     hdrs = ["ucd_codepoints.hpp"],
+    visibility = ["//visibility:public"],
 )
 
 cc_test(
