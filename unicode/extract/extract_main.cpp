@@ -61,7 +61,7 @@ void print_codepoints(
 
   // TODO(lmirelmann): It should be possible to replace many of
   // the calls to `fprintf` with `fwrite`.
-  std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> new_blocks;
+  std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> blocks;
   {
     // Split into chunks. Each chunk will be a single bitset.
     constexpr int MAX_GAP_SIZE = (1 << 16) - 1;
@@ -72,9 +72,9 @@ void print_codepoints(
       if (create_new_block ||
           cps.first - previous_max > MAX_GAP_SIZE ||
           cps.second - cps.first > MAX_GAP_SIZE) {
-        new_blocks.emplace_back();
+        blocks.emplace_back();
       }
-      new_blocks.back().push_back(cps);
+      blocks.back().push_back(cps);
       previous_max = cps.second;
       create_new_block = cps.second - cps.first > MAX_GAP_SIZE;
     }
@@ -84,8 +84,8 @@ void print_codepoints(
     // The bitsets position 0 comes from the last character in the string.
     constexpr int CODEPOINTS_PER_LINE = 64;
 
-    for (std::size_t pos = 0; pos < new_blocks.size(); ++pos) {
-      const auto& mini_block = new_blocks[pos];
+    for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
+      const auto& mini_block = blocks[pos];
       if (mini_block.size() == 1) {
         continue;
       }
@@ -122,8 +122,8 @@ void print_codepoints(
     // Print the functions that check for the codepoints.
     fprintf(output, "bool %s(std::uint64_t codepoint) {\n", fn.c_str());
     bool add_blank_line = false;
-    for (std::size_t pos = 0; pos < new_blocks.size(); ++pos) {
-      const auto& mini_block = new_blocks[pos];
+    for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
+      const auto& mini_block = blocks[pos];
       if (mini_block.size() == 1) {
         continue;
       }
@@ -136,24 +136,21 @@ void print_codepoints(
     if (add_blank_line) {
       fprintf(output, "\n");
     }
-    for (std::size_t pos = 0; pos < new_blocks.size(); ++pos) {
-      const auto& mini_block = new_blocks[pos];
+    for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
+      const auto& mini_block = blocks[pos];
       if (pos == 0) {
         fprintf(output, "  return ");
       } else {
         fprintf(output, " ||\n         ");
       }
-      const auto min_cp = mini_block.front().first;
-      const auto max_cp = mini_block.back().second;
-      const bool has_zeros = mini_block.size() != 1;
+      auto min_cp = mini_block.front().first;
+      auto max_cp = mini_block.back().second;
       if (min_cp == max_cp) {
         fprintf(output, "(codepoint == 0x%llX)", min_cp);
+      } else if (mini_block.size() != 1) {
+        fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX && all_cp_%lu[codepoint - 0x%llX])", min_cp, max_cp, pos, min_cp);
       } else {
-        fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX", min_cp, max_cp);
-        if (has_zeros) {
-          fprintf(output, " && all_cp_%lu[codepoint - 0x%llX]", pos, min_cp);
-        }
-        fprintf(output, ")");
+        fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX)", min_cp, max_cp);
       }
     }
     fprintf(output, ";\n}\n\n");
