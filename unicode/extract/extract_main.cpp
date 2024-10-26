@@ -1,6 +1,6 @@
 // Copyright 2024 Lucas Mirelmann
 
-#include <iostream>
+#include <algorithm>
 #include <map>
 #include <set>
 #include <string>
@@ -46,6 +46,23 @@ const char* CPP_FOOTER = R"CPP(}  // namespace ucd
 
 )CPP";
 
+constexpr int CODEPOINTS_PER_LINE = 64;
+
+void print_in_multiple_lines(const char* characters, int& count, uint64_t to_print, FILE* output) {
+  while (to_print != 0) {
+    if (count % CODEPOINTS_PER_LINE == 0) {
+      if (count != 0) {
+        fwrite("\"\n", 1, 2, output);
+      }
+      fwrite("    \"", 1, 5, output);
+    }
+    uint64_t will_print = std::min<uint64_t>(CODEPOINTS_PER_LINE - (count % CODEPOINTS_PER_LINE), to_print);
+    fwrite(characters, 1, will_print, output);
+    count += will_print;
+    to_print -= will_print;
+  }
+}
+
 void print_codepoints(
       FILE* output,
       const std::set<std::pair<std::uint64_t, std::uint64_t>>& set,
@@ -59,8 +76,6 @@ void print_codepoints(
     return;
   }
 
-  // TODO(lmirelmann): It should be possible to replace many of
-  // the calls to `fprintf` with `fwrite`.
   std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> blocks;
   {
     // Split into chunks. Each chunk will be a single bitset.
@@ -82,7 +97,8 @@ void print_codepoints(
   {
     // Print the strings that will be used to initalize the bitsets.
     // The bitsets position 0 comes from the last character in the string.
-    constexpr int CODEPOINTS_PER_LINE = 64;
+    std::string zeros_string(CODEPOINTS_PER_LINE, '0');
+    std::string ones_string(CODEPOINTS_PER_LINE, '1');
 
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
@@ -94,28 +110,11 @@ void print_codepoints(
       std::uint64_t previous_min = mini_block.back().second + 1;
       for (auto it = mini_block.rbegin(); it < mini_block.rend(); ++it) {
         auto [min_cp, max_cp] = *it;
-        // TODO(lmirelmann): This could be done somehow more efficient by printing
-        // all the needed `0`s or `1`s in the row in one call.
-        for (uint64_t i = 0; i < previous_min - max_cp - 1; ++i) {
-          if (count % CODEPOINTS_PER_LINE == 0) {
-            fprintf(output, "\"\n    \"");
-          }
-          fwrite("0", 1, 1, output);
-          ++count;
-        }
-        for (auto i = min_cp; i <= max_cp; ++i) {
-          if (count % CODEPOINTS_PER_LINE == 0) {
-            if (count != 0) {
-              fprintf(output, "\"\n");
-            }
-            fprintf(output, "    \"");
-          }
-          fwrite("1", 1, 1, output);
-          ++count;
-        }
+        print_in_multiple_lines(zeros_string.c_str(), count, previous_min - max_cp - 1, output);
+        print_in_multiple_lines(ones_string.c_str(), count, max_cp - min_cp + 1, output);
         previous_min = min_cp;
       }
-      fprintf(output, "\";\n\n");
+      fwrite("\";\n\n", 1, 4, output);
     }
   }
   {
@@ -134,14 +133,14 @@ void print_codepoints(
               pos, fn.c_str(), pos);
     }
     if (add_blank_line) {
-      fprintf(output, "\n");
+      fwrite("\n", 1, 1, output);
     }
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
       if (pos == 0) {
-        fprintf(output, "  return ");
+        fwrite("  return ", 1, 9, output);
       } else {
-        fprintf(output, " ||\n         ");
+        fwrite(" ||\n         ", 1, 13, output);
       }
       auto min_cp = mini_block.front().first;
       auto max_cp = mini_block.back().second;
@@ -153,7 +152,7 @@ void print_codepoints(
         fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX)", min_cp, max_cp);
       }
     }
-    fprintf(output, ";\n}\n\n");
+    fwrite(";\n}\n\n", 1, 5, output);
   }
 }
 
