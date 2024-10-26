@@ -59,119 +59,105 @@ void print_codepoints(
     return;
   }
 
-  std::vector<std::tuple<std::uint64_t, std::uint64_t, bool>> blocks;
-  // TODO(lmirelmann): Given that this method takes non-overlapping,
-  // ranges, then it should be possible to implement this using only the
-  // ranges without transfoming it to a flat structure.
-  std::set<std::uint64_t> all_cps;
+  // TODO(lmirelmann): It should be possible to replace many of
+  // the calls to `fprintf` with `fwrite`.
+  std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> new_blocks;
   {
+    // Split into chunks. Each chunk will be a single bitset.
     constexpr int MAX_GAP_SIZE = (1 << 16) - 1;
-    std::set<std::pair<std::uint64_t, std::uint64_t>> new_set;
+
+    bool create_new_block = true;
+    std::uint64_t previous_max = 0;
     for (const auto& cps : set) {
-      if (cps.second - cps.first >= MAX_GAP_SIZE) {
-        blocks.emplace_back(cps.first, cps.second, false);
-      } else {
-        new_set.insert(cps);
+      if (create_new_block ||
+          cps.first - previous_max > MAX_GAP_SIZE ||
+          cps.second - cps.first > MAX_GAP_SIZE) {
+        new_blocks.emplace_back();
       }
+      new_blocks.back().push_back(cps);
+      previous_max = cps.second;
+      create_new_block = cps.second - cps.first > MAX_GAP_SIZE;
     }
+  }
+  {
+    // Print the strings that will be used to initalize the bitsets.
+    // The bitsets position 0 comes from the last character in the string.
+    constexpr int CODEPOINTS_PER_LINE = 64;
 
-    if (!new_set.empty()) {
-      std::uint64_t min_cp = new_set.begin()->first;
-      for (const auto& cps : new_set) {
-        min_cp = std::min(min_cp, cps.first);
-        for (std::uint64_t cp = cps.first; cp <= cps.second; ++cp) {
-          all_cps.insert(cp);
-        }
+    for (std::size_t pos = 0; pos < new_blocks.size(); ++pos) {
+      const auto& mini_block = new_blocks[pos];
+      if (mini_block.size() == 1) {
+        continue;
       }
-      std::uint64_t max_cp = *all_cps.rbegin();
-
-      std::uint64_t gap = 0;
-      bool found_zero = false;
-      std::uint64_t start = min_cp;
-      std::uint64_t end = min_cp;
-      bool in_gap = true;
-      for (std::uint64_t i = min_cp; i <= max_cp; ++i) {
-        if (in_gap) {
-          if (all_cps.contains(i)) {
-            start = i;
-            end = i;
-            found_zero = false;
-            gap = 0;
-            in_gap = false;
+      fprintf(output, "constexpr const char* %s_bitset_%lu =\n", fn.c_str(), pos);
+      int count = 0;
+      std::uint64_t previous_min = mini_block.back().second + 1;
+      for (auto it = mini_block.rbegin(); it < mini_block.rend(); ++it) {
+        auto [min_cp, max_cp] = *it;
+        // TODO(lmirelmann): This could be done somehow more efficient by printing
+        // all the needed `0`s or `1`s in the row in one call.
+        for (uint64_t i = 0; i < previous_min - max_cp - 1; ++i) {
+          if (count % CODEPOINTS_PER_LINE == 0) {
+            fprintf(output, "\"\n    \"");
           }
-        } else {
-          if (all_cps.contains(i)) {
-            gap = 0;
-            found_zero |= (end + 1 != i);
-            end = i;
-          } else {
-            if (gap == MAX_GAP_SIZE) {
-              blocks.emplace_back(start, end, found_zero);
-              in_gap = true;
-            } else {
-              ++gap;
+          fwrite("0", 1, 1, output);
+          ++count;
+        }
+        for (auto i = min_cp; i <= max_cp; ++i) {
+          if (count % CODEPOINTS_PER_LINE == 0) {
+            if (count != 0) {
+              fprintf(output, "\"\n");
             }
+            fprintf(output, "    \"");
           }
+          fwrite("1", 1, 1, output);
+          ++count;
         }
+        previous_min = min_cp;
       }
-      blocks.emplace_back(start, end, found_zero);
+      fprintf(output, "\";\n\n");
     }
   }
-
-  constexpr int CODEPOINTS_PER_LINE = 64;
-
-  for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
-    const auto& [min_cp, max_cp, found_zero] = blocks[pos];
-    if (!found_zero) {
-      continue;
+  {
+    // Print the functions that check for the codepoints.
+    fprintf(output, "bool %s(std::uint64_t codepoint) {\n", fn.c_str());
+    bool add_blank_line = false;
+    for (std::size_t pos = 0; pos < new_blocks.size(); ++pos) {
+      const auto& mini_block = new_blocks[pos];
+      if (mini_block.size() == 1) {
+        continue;
+      }
+      add_blank_line = true;
+      fprintf(output,
+              "  static constexpr std::bitset<0x%llX> all_cp_%lu(%s_bitset_%lu);\n",
+              mini_block.back().second + 1 - mini_block.front().first,
+              pos, fn.c_str(), pos);
     }
-    fprintf(output, "constexpr const char* %s_bitset_%lu =\n", fn.c_str(), pos);
-    for (std::uint64_t i = min_cp; i <= max_cp; ++i) {
-      if ((i - min_cp) % CODEPOINTS_PER_LINE == 0) {
-        if ((i - min_cp) != 0) {
-          fprintf(output, "\"\n");
+    if (add_blank_line) {
+      fprintf(output, "\n");
+    }
+    for (std::size_t pos = 0; pos < new_blocks.size(); ++pos) {
+      const auto& mini_block = new_blocks[pos];
+      if (pos == 0) {
+        fprintf(output, "  return ");
+      } else {
+        fprintf(output, " ||\n         ");
+      }
+      const auto min_cp = mini_block.front().first;
+      const auto max_cp = mini_block.back().second;
+      const bool has_zeros = mini_block.size() != 1;
+      if (min_cp == max_cp) {
+        fprintf(output, "(codepoint == 0x%llX)", min_cp);
+      } else {
+        fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX", min_cp, max_cp);
+        if (has_zeros) {
+          fprintf(output, " && all_cp_%lu[codepoint - 0x%llX]", pos, min_cp);
         }
-        fprintf(output, "    \"");
+        fprintf(output, ")");
       }
-      fprintf(output, all_cps.contains(max_cp + min_cp - i) ? "1" : "0");
     }
-    fprintf(output, "\";\n\n");
+    fprintf(output, ";\n}\n\n");
   }
-
-  fprintf(output, "bool %s(std::uint64_t codepoint) {\n", fn.c_str());
-  bool add_blank_line = false;
-  for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
-    const auto& [min_cp, max_cp, found_zero] = blocks[pos];
-    if (!found_zero) {
-      continue;
-    }
-    add_blank_line = true;
-    fprintf(output,
-            "  static constexpr std::bitset<0x%llX>"
-            " all_cp_%lu(%s_bitset_%lu);\n",
-            max_cp + 1 - min_cp, pos, fn.c_str(), pos);
-  }
-  if (add_blank_line) {
-    fprintf(output, "\n");
-  }
-  for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
-    const auto& [min_cp, max_cp, found_zero] = blocks[pos];
-    if (pos == 0) {
-      fprintf(output, "  return ");
-    } else {
-      fprintf(output, " ||\n         ");
-    }
-    if (min_cp == max_cp) {
-      fprintf(output, "(codepoint == 0x%llX)", min_cp);
-    } else {
-      fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX", min_cp, max_cp);
-      if (found_zero) {
-        fprintf(output, " && all_cp_%lu[codepoint - 0x%llX]", pos, min_cp);
-      }
-      fprintf(output, ")");
-    }
-  }
-  fprintf(output, ";\n}\n\n");
 }
 
 void write_header(const char* output_file,
