@@ -3,11 +3,10 @@
 #ifndef UNICODE_EXTRACT_EXTRACT_HPP_
 #define UNICODE_EXTRACT_EXTRACT_HPP_
 
-#include <cstdio>
+#include <cstdint>
 #include <map>
 #include <set>
 #include <string>
-#include <vector>
 #include <utility>
 
 namespace ucd {

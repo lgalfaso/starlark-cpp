@@ -2,12 +2,6 @@
 
 #include "unicode/extract/extract.hpp"
 
-#include <iostream>
-#include <cstdio>
-#include <string>
-#include <utility>
-#include <vector>
-
 namespace ucd {
 
 std::set<std::string> binary_unicode_properties = {

@@ -34,7 +34,6 @@ const char* CPP_HEADER = R"CPP(// Copyright 2024 Lucas Mirelmann
 // Generated file, do not edit.
 
 #include <bitset>
-#include <set>
 
 #include "%s"
 
