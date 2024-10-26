@@ -17,9 +17,13 @@ class source {
   char peek(std::size_t delta = 0) const;
   std::uint64_t peek_codepoint() const;
   void skip(std::size_t delta = 1);
+  void skip_codepoint();
   bool capture(std::string_view input);
 
-  static const std::uint64_t invalid_codepoint = 0xffff'ffff'ffff'fffful;
+  // Unicode replacement character.
+  static const std::uint64_t replacement_character = 0xfffdul;
+  // Unicode byte order mark.
+  static const std::uint64_t bom_character = 0xfefful;
 
  private:
   const std::string_view source_code;

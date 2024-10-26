@@ -16,9 +16,14 @@ inline bool is_utf8_continue(char input) {
 
 }  // namespace
 
-const std::uint64_t source::invalid_codepoint;
+const std::uint64_t source::replacement_character;
 
-source::source(string_view source_code) : source_code(source_code) {}
+source::source(string_view source_code) : source_code(source_code) {
+  // If the source code starts with a BOM, then ignore it.
+  if (peek_codepoint() == bom_character) {
+    skip_codepoint();
+  }
+}
 
 bool source::is_end() const {
   return pos == source_code.length();
@@ -37,16 +42,16 @@ char source::peek(std::size_t delta) const {
 
 std::uint64_t source::peek_codepoint() const {
   if (pos >= source_code.length()) {
-    return invalid_codepoint;
+    return replacement_character;
   }
   const unsigned char current_char = source_code[pos];
   int length = std::countl_one(current_char);
   if (length > source_code.length() - pos) {
-    return invalid_codepoint;
+    return replacement_character;
   }
   for (int i = 1; i < length; ++i) {
     if (!is_utf8_continue(source_code[pos + i])) {
-      return invalid_codepoint;
+      return replacement_character;
     }
   }
   switch (length) {
@@ -54,30 +59,33 @@ std::uint64_t source::peek_codepoint() const {
       return current_char;
     case 2:
       if (source_code[pos] == '\xc0' || source_code[pos] == '\xc1') {
-        return invalid_codepoint;
+        return replacement_character;
       }
       return (static_cast<std::uint64_t>(source_code[pos    ]) & 0x1f) << 6 |
              (static_cast<std::uint64_t>(source_code[pos + 1]) & 0x3f);
     case 3:
       if (source_code[pos] == '\xe0' && ((unsigned char)source_code[pos + 1]) < 0xa0) {
-        return invalid_codepoint;
+        return replacement_character;
+      }
+      if (source_code[pos] == '\xed' && ((unsigned char)source_code[pos + 1]) >= 0xa0) {
+        return replacement_character;
       }
       return (static_cast<std::uint64_t>(source_code[pos    ]) & 0x0f) << 12 |
              (static_cast<std::uint64_t>(source_code[pos + 1]) & 0x3f) << 6 |
              (static_cast<std::uint64_t>(source_code[pos + 2]) & 0x3f);
     case 4:
       if (source_code[pos] == '\xf0' && ((unsigned char)source_code[pos + 1]) < 0x90) {
-        return invalid_codepoint;
+        return replacement_character;
       }
       if (source_code[pos] == '\xf4' && ((unsigned char)source_code[pos + 1]) >= 0x90) {
-        return invalid_codepoint;
+        return replacement_character;
       }
       return (static_cast<std::uint64_t>(source_code[pos    ]) & 0x07) << 18 |
              (static_cast<std::uint64_t>(source_code[pos + 1]) & 0x3f) << 12 |
              (static_cast<std::uint64_t>(source_code[pos + 2]) & 0x3f) << 6 |
              (static_cast<std::uint64_t>(source_code[pos + 3]) & 0x3f);
     default:
-      return invalid_codepoint;
+      return replacement_character;
   }
 }
 
@@ -86,6 +94,26 @@ void source::skip(std::size_t delta) {
     pos = source_code.length();
   } else {
     pos += delta;
+  }
+}
+
+void source::skip_codepoint() {
+  if (pos >= source_code.length()) {
+    return;
+  }
+  const unsigned char current_char = source_code[pos];
+  int length = std::countl_one(current_char);
+  pos++;
+  if (length == 0 ||  // Ascii char.
+      length == 1 || length > 4) {  // Invalid first byte.
+    return;
+  }
+  for (int i = 1; i < length && pos < source_code.length(); ++i) {
+    if (is_utf8_continue(source_code[pos])) {
+      ++pos;
+    } else {
+      break;
+    }
   }
 }
 
