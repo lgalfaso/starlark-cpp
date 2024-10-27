@@ -4,7 +4,7 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
-#include "unicode/ucd_codepoints.hpp"
+#include "unicode/ucd_code_points.hpp"
 
 namespace {
 

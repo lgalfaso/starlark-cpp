@@ -2,11 +2,13 @@
 
 #include "grammar/numeric_parser.hpp"
 
+using unicode::utf8_reader;
+
 namespace grammar {
 
 namespace {
 
-std::optional<std::string> read_number_over(std::string_view chars, source& input) {
+std::optional<std::string> read_number_over(std::string_view chars, utf8_reader& input) {
   std::string result;
   bool accepted_digit = false;
   while (input.pending()) {
@@ -30,7 +32,7 @@ std::optional<std::string> read_number_over(std::string_view chars, source& inpu
 }  // namespace
 
 
-std::optional<std::string> read_number(source& input) {
+std::optional<std::string> read_number(utf8_reader& input) {
   std::string result;
 
   if (input.capture("0x") || input.capture("0X")) {

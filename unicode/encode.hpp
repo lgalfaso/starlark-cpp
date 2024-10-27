@@ -6,11 +6,11 @@
 #include <cstdint>
 #include <string>
 
-namespace ucd {
+namespace unicode {
 
 std::string utf8_encode_code_point(std::uint64_t character);
 
-}  // namespace ucd
+}  // namespace unicode
 
 #endif  // UNICODE_ENCODE_HPP_
 

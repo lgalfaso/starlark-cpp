@@ -6,13 +6,13 @@
 #include <string>
 #include <optional>
 
-#include "grammar/source.hpp"
+#include "unicode/utf8_reader.hpp"
 
 #pragma GCC visibility push(default)
 
 namespace grammar {
 
-std::optional<std::string> read_number(source& input);
+std::optional<std::string> read_number(unicode::utf8_reader& input);
 
 }  // namespace grammar
 

@@ -1,23 +1,23 @@
 // Copyright 2024 Lucas Mirelmann
 
-#ifndef GRAMMAR_SOURCE_HPP_
-#define GRAMMAR_SOURCE_HPP_
+#ifndef UNICODE_UTF8_READER_HPP_
+#define UNICODE_UTF8_READER_HPP_
 
 #include <string_view>
 
 #pragma GCC visibility push(default)
 
-namespace grammar {
+namespace unicode {
 
-class source {
+class utf8_reader {
  public:
-  explicit source(std::string_view input);
+  explicit utf8_reader(std::string_view input);
   bool pending() const;
   std::size_t pos() const;
   char peek(std::size_t delta = 0) const;
-  std::uint64_t peek_codepoint() const;
+  std::uint64_t peek_code_point() const;
   void skip(std::size_t delta = 1);
-  void skip_codepoint();
+  void skip_code_point();
   bool capture(std::string_view candidate);
 
   // Unicode replacement character.
@@ -30,9 +30,9 @@ class source {
   std::size_t input_pos = 0;
 };
 
-}  // namespace grammar
+}  // namespace unicode
 
 #pragma GCC visibility pop
 
-#endif  // GRAMMAR_SOURCE_HPP_
+#endif  // UNICODE_UTF8_READER_HPP_
 

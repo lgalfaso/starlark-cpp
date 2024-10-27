@@ -1,12 +1,12 @@
 // Copyright 2024 Lucas Mirelmann
 
-#include "grammar/source.hpp"
+#include "unicode/utf8_reader.hpp"
 
 #include <bit>
 
 using std::string_view;
 
-namespace grammar {
+namespace unicode {
 
 namespace {
 
@@ -16,31 +16,31 @@ inline bool is_utf8_continue(char input) {
 
 }  // namespace
 
-const std::uint64_t source::replacement_character;
+const std::uint64_t utf8_reader::replacement_character;
 
-source::source(string_view input) : input(input) {
+utf8_reader::utf8_reader(string_view input) : input(input) {
   // If the source code starts with a BOM, then ignore it.
-  if (peek_codepoint() == bom_character) {
-    skip_codepoint();
+  if (peek_code_point() == bom_character) {
+    skip_code_point();
   }
 }
 
-bool source::pending() const {
+bool utf8_reader::pending() const {
   return input_pos < input.length();
 }
 
-std::size_t source::pos() const {
+std::size_t utf8_reader::pos() const {
   return input_pos;
 }
 
-char source::peek(std::size_t delta) const {
+char utf8_reader::peek(std::size_t delta) const {
   if (delta >= input.length() - input_pos) {
     return 0;
   }
   return input[input_pos + delta];
 }
 
-std::uint64_t source::peek_codepoint() const {
+std::uint64_t utf8_reader::peek_code_point() const {
   if (!pending()) {
     return replacement_character;
   }
@@ -89,7 +89,7 @@ std::uint64_t source::peek_codepoint() const {
   }
 }
 
-void source::skip(std::size_t delta) {
+void utf8_reader::skip(std::size_t delta) {
   if (delta >= input.length() - input_pos) {
     input_pos = input.length();
   } else {
@@ -97,7 +97,7 @@ void source::skip(std::size_t delta) {
   }
 }
 
-void source::skip_codepoint() {
+void utf8_reader::skip_code_point() {
   if (!pending()) {
     return;
   }
@@ -117,7 +117,7 @@ void source::skip_codepoint() {
   }
 }
 
-bool source::capture(string_view candidate) {
+bool utf8_reader::capture(string_view candidate) {
   if (input.length() - input_pos < candidate.length()) {
     return false;
   }
@@ -128,5 +128,5 @@ bool source::capture(string_view candidate) {
   return false;
 }
 
-}  // namespace grammar
+}  // namespace unicode
 

@@ -2,7 +2,7 @@
 
 #include "unicode/encode.hpp"
 
-namespace ucd {
+namespace unicode {
 
 std::string utf8_encode_code_point(std::uint64_t character) {
   std::string result;
@@ -26,6 +26,6 @@ std::string utf8_encode_code_point(std::uint64_t character) {
   return result;
 }
 
-}  // namespace ucd
+}  // namespace unicode
 
 

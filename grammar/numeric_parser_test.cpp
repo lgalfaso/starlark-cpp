@@ -6,13 +6,13 @@
 
 #include "grammar/numeric_parser.hpp"
 
-using grammar::source;
 using grammar::read_number;
+using unicode::utf8_reader;
 
 namespace {
 
 void check(std::string_view input, std::optional<std::string> expected) {
-  source s(input);
+  utf8_reader s(input);
   EXPECT_EQ(read_number(s), expected);
 }
 

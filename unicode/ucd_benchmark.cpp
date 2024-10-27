@@ -2,7 +2,7 @@
 
 #include "benchmark/benchmark.h"
 
-#include "unicode/ucd_codepoints.hpp"
+#include "unicode/ucd_code_points.hpp"
 
 namespace ucd_benchmark {
 
