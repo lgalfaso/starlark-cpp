@@ -4,26 +4,25 @@
 
 namespace unicode {
 
-std::string utf8_encode_code_point(std::uint64_t character) {
-  std::string result;
+void utf8_encode_code_point(std::uint64_t character, std::string& output) {
   if (character <= 0x7f) {
-    result += (char)character;
+    output += (char)character;
   } else if (character <= 0x7ff) {
-    result += ('\xc0' | (char)(character >> 6));
-    result += ('\x80' | (char)(character & 0x3f));
+    output += ('\xc0' | (char)(character >> 6));
+    output += ('\x80' | (char)(character & 0x3f));
   } else if (0xd800 <= character && character <= 0xdfff) {
     // No-op. Characters in this block will not be encoded.
   } else if (character <= 0xffff) {
-    result += ('\xe0' | (char)(character >> 12));
-    result += ('\x80' | (char)((character >> 6) & 0x3f));
-    result += ('\x80' | (char)(character & 0x3f));
+    output += ('\xe0' | (char)(character >> 12));
+    output += ('\x80' | (char)((character >> 6) & 0x3f));
+    output += ('\x80' | (char)(character & 0x3f));
   } else if (character <= 0x10'ffff) {
-    result += ('\xf0' | (char)(character >> 18));
-    result += ('\x80' | (char)((character >> 12) & 0x3f));
-    result += ('\x80' | (char)((character >> 6) & 0x3f));
-    result += ('\x80' | (char)(character & 0x3f));
+    output += ('\xf0' | (char)(character >> 18));
+    output += ('\x80' | (char)((character >> 12) & 0x3f));
+    output += ('\x80' | (char)((character >> 6) & 0x3f));
+    output += ('\x80' | (char)(character & 0x3f));
   }
-  return result;
+  return;
 }
 
 }  // namespace unicode

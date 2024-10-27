@@ -14,7 +14,8 @@ namespace {
 
 TEST(EncodeTest, AllCharacter) {
   for (int i = 0; i <= 0x10'ffff; ++i) {
-    std::string encoded = utf8_encode_code_point(i);
+    std::string encoded;
+    utf8_encode_code_point(i, encoded);
     if (0xd800 <= i && i <= 0xdfff) {  // Surrogates area
       EXPECT_EQ("", encoded);
     } else if (i == 0xfeff) {  // BOM
@@ -23,7 +24,12 @@ TEST(EncodeTest, AllCharacter) {
       EXPECT_EQ(i, utf8_reader(encoded).peek_code_point());
     }
   }
-  EXPECT_EQ("", utf8_encode_code_point(0x11'0000));
+}
+
+TEST(EncodeTest, OutsideUnicodeRange) {
+  std::string encoded;
+  utf8_encode_code_point(0x11'0000, encoded);
+  EXPECT_EQ("", encoded);
 }
 
 }  // namespace
