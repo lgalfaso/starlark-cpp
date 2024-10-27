@@ -20,3 +20,9 @@ cc_test(
     size = "small",
 )
 
+cc_library(
+    name = "quoted",
+    srcs = ["quoted.cpp"],
+    hdrs = ["quoted.hpp"],
+)
+
