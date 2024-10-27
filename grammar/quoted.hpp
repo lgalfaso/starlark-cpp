@@ -1,7 +1,7 @@
 // Copyright 2024 Lucas Mirelmann
 
-#ifndef GRAMMAR_TOKEN_HPP_
-#define GRAMMAR_TOKEN_HPP_
+#ifndef GRAMMAR_QUOTED_HPP_
+#define GRAMMAR_QUOTED_HPP_
 
 #include <string>
 
@@ -15,4 +15,4 @@ std::string quoted(const std::string& input);
 
 #pragma GCC visibility pop
 
-#endif  // GRAMMAR_TOKEN_HPP_
+#endif  // GRAMMAR_QUOTED_HPP_
