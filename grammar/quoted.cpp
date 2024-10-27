@@ -23,5 +23,5 @@ std::string quoted(const std::string& input) {
   return result;
 }
 
-
 }  // namespace grammar
+
