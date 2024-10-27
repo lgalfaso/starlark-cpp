@@ -45,7 +45,7 @@ TEST(SourceTest, PeekCodepoint) {
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xfc\xbf\xbf\xbf\xbf\xbf").peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xfe\xbf\xbf\xbf\xbf\xbf\xbf").peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xff\xbf\xbf\xbf\xbf\xbf\xbf\xbf").peek_code_point());
-  
+
   // Invalid follow-up byte
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8\x34").peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8\xf4").peek_code_point());

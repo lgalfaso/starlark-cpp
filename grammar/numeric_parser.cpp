@@ -92,7 +92,7 @@ std::optional<std::string> read_number(utf8_reader& input) {
     if (!accepted_digit) {
       return {};
     }
-  } 
+  }
   return result;
 }
 
