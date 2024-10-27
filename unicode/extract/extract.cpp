@@ -8,7 +8,7 @@ std::set<std::string> binary_unicode_properties = {
   "XID_Continue", "XID_Start"
 };
 
-void read_all_codepoints(const char* file,
+void read_all_code_points(const char* file,
     std::map<std::string,
              std::set<std::pair<std::uint64_t, std::uint64_t>>>& set) {
   FILE* fp = fopen(file, "r");

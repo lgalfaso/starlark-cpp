@@ -64,13 +64,13 @@ void print_in_multiple_lines(const char* characters, int& count, uint64_t to_pri
   }
 }
 
-void print_codepoints(
+void print_code_points(
       FILE* output,
       const std::set<std::pair<std::uint64_t, std::uint64_t>>& set,
                       const std::string& fn) {
   if (set.size() == 0) {
     fprintf(output,
-            "bool %s(std::uint64_t codepoint) {\n"
+            "bool %s(std::uint64_t code_point) {\n"
             "  return false;\n"
             "}\n\n",
             fn.c_str());
@@ -119,8 +119,8 @@ void print_codepoints(
     }
   }
   {
-    // Print the functions that check for the codepoints.
-    fprintf(output, "bool %s(std::uint64_t codepoint) {\n", fn.c_str());
+    // Print the functions that check for the code points.
+    fprintf(output, "bool %s(std::uint64_t code_point) {\n", fn.c_str());
     bool add_blank_line = false;
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
@@ -146,11 +146,11 @@ void print_codepoints(
       auto min_cp = mini_block.front().first;
       auto max_cp = mini_block.back().second;
       if (min_cp == max_cp) {
-        fprintf(output, "(codepoint == 0x%llX)", min_cp);
+        fprintf(output, "(code_point == 0x%llX)", min_cp);
       } else if (mini_block.size() != 1) {
-        fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX && all_cp_%lu[codepoint - 0x%llX])", min_cp, max_cp, pos, min_cp);
+        fprintf(output, "(0x%llX <= code_point && code_point <= 0x%llX && all_cp_%lu[code_point - 0x%llX])", min_cp, max_cp, pos, min_cp);
       } else {
-        fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX)", min_cp, max_cp);
+        fprintf(output, "(0x%llX <= code_point && code_point <= 0x%llX)", min_cp, max_cp);
       }
     }
     FWRITE(";\n}\n\n", output);
@@ -189,14 +189,14 @@ void write_impl(const char* derived_core_properties_file,
   std::map<std::string,
            std::set<std::pair<std::uint64_t,
                                 std::uint64_t>>> binary_properties;
-  ucd::read_all_codepoints(derived_core_properties_file, binary_properties);
+  ucd::read_all_code_points(derived_core_properties_file, binary_properties);
 
   for (const auto& binary_property : ucd::binary_unicode_properties) {
     if (binary_properties[binary_property].empty()) {
       exit(1);
     }
     std::string name = "is_" + binary_property;
-    print_codepoints(cc_output, binary_properties[binary_property],
+    print_code_points(cc_output, binary_properties[binary_property],
                      name);
   }
 

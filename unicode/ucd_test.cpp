@@ -11,7 +11,7 @@ namespace {
 const char* XID_Start = "XID_Start";
 const char* XID_Continue = "XID_Continue";
 
-void read_codepoints(const char* file,
+void read_code_points(const char* file,
                      std::set<std::uint64_t>& set,
                      const char* category) {
   FILE* fp = fopen(file, "r");
@@ -59,7 +59,7 @@ TEST(UcdTest, IsXIdStart) {
       "/_main~_repo_rules~ucd/DerivedCoreProperties.txt";
 
   std::set<std::uint64_t> all_cps;
-  read_codepoints(path.c_str(), all_cps, XID_Start);
+  read_code_points(path.c_str(), all_cps, XID_Start);
 
   for (int i = 0; i <= max_unicode; ++i) {
     EXPECT_EQ(all_cps.contains(i), ucd::is_XID_Start(i));
@@ -75,7 +75,7 @@ TEST(UcdTest, XIsIdContinue) {
       "/_main~_repo_rules~ucd/DerivedCoreProperties.txt";
 
   std::set<std::uint64_t> all_cps;
-  read_codepoints(path.c_str(), all_cps, XID_Continue);
+  read_code_points(path.c_str(), all_cps, XID_Continue);
 
   for (int i = 0; i <= max_unicode; ++i) {
     EXPECT_EQ(all_cps.contains(i), ucd::is_XID_Continue(i));

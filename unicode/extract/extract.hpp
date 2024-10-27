@@ -13,7 +13,7 @@ namespace ucd {
 
 extern std::set<std::string> binary_unicode_properties;
 
-void read_all_codepoints(const char* file,
+void read_all_code_points(const char* file,
     std::map<std::string,
              std::set<std::pair<std::uint64_t, std::uint64_t>>>& set);
 
