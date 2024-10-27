@@ -11,14 +11,14 @@ namespace grammar {
 
 class source {
  public:
-  explicit source(std::string_view source_code);
-  bool is_end() const;
-  std::size_t get_pos() const;
+  explicit source(std::string_view input);
+  bool pending() const;
+  std::size_t pos() const;
   char peek(std::size_t delta = 0) const;
   std::uint64_t peek_codepoint() const;
   void skip(std::size_t delta = 1);
   void skip_codepoint();
-  bool capture(std::string_view input);
+  bool capture(std::string_view candidate);
 
   // Unicode replacement character.
   static const std::uint64_t replacement_character = 0xfffdul;
@@ -26,8 +26,8 @@ class source {
   static const std::uint64_t bom_character = 0xfefful;
 
  private:
-  const std::string_view source_code;
-  std::size_t pos = 0;
+  const std::string_view input;
+  std::size_t input_pos = 0;
 };
 
 }  // namespace grammar

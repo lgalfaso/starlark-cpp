@@ -9,7 +9,7 @@ namespace {
 std::optional<std::string> read_number_over(std::string_view chars, source& input) {
   std::string result;
   bool accepted_digit = false;
-  while (!input.is_end()) {
+  while (input.pending()) {
     auto next = input.peek();
     if (chars.find(next) == std::string_view::npos) {
       break;
@@ -21,7 +21,7 @@ std::optional<std::string> read_number_over(std::string_view chars, source& inpu
   if (!accepted_digit) {
     return {};
   }
-  if (!input.is_end() && isdigit(input.peek())) {
+  if (input.pending() && isdigit(input.peek())) {
     return {};
   }
   return result;
@@ -51,7 +51,7 @@ std::optional<std::string> read_number(source& input) {
     bool found_dot = false;
     bool found_e = false;
     bool accepted_digit = false;
-    while (!input.is_end()) {
+    while (input.pending()) {
       auto next = input.peek();
       if (next == '.') {
         if (found_dot || found_e) {

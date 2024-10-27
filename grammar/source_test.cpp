@@ -147,24 +147,24 @@ TEST(SourceTest, SurrogatesArea) {
 TEST(SourceTest, Skip) {
   source s("abc");
   s.skip(0);
-  EXPECT_EQ(0, s.get_pos());
+  EXPECT_EQ(0, s.pos());
   s.skip();
-  EXPECT_EQ(1, s.get_pos());
+  EXPECT_EQ(1, s.pos());
   s.skip(2);
-  EXPECT_EQ(3, s.get_pos());
+  EXPECT_EQ(3, s.pos());
   s.skip();
-  EXPECT_EQ(3, s.get_pos());
+  EXPECT_EQ(3, s.pos());
   s.skip();
   s.skip(std::numeric_limits<std::size_t>::max());
-  EXPECT_EQ(3, s.get_pos());
+  EXPECT_EQ(3, s.pos());
 }
 
 void checkSkipCodepoint(const char* input, std::size_t input_length, std::size_t expected_pos) {
   std::string_view source_code(input, input_length);
   source s(source_code);
-  EXPECT_EQ(0, s.get_pos());
+  EXPECT_EQ(0, s.pos());
   s.skip_codepoint();
-  EXPECT_EQ(expected_pos, s.get_pos());
+  EXPECT_EQ(expected_pos, s.pos());
 }
 
 TEST(SourceTest, SkipCodepoint) {
@@ -196,38 +196,38 @@ TEST(SourceTest, SkipCodepoint) {
 TEST(SourceTest, Capture) {
   {
     source s("");
-    EXPECT_EQ(0, s.get_pos());
-    EXPECT_EQ(true, s.is_end());
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(false, s.pending());
     EXPECT_EQ(true, s.capture(""));
-    EXPECT_EQ(0, s.get_pos());
-    EXPECT_EQ(true, s.is_end());
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(false, s.pending());
     EXPECT_EQ(false, s.capture("a"));
-    EXPECT_EQ(0, s.get_pos());
-    EXPECT_EQ(true, s.is_end());
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(false, s.pending());
   }
   {
     source s("abc");
-    EXPECT_EQ(false, s.is_end());
+    EXPECT_EQ(true, s.pending());
     EXPECT_EQ(true, s.capture(""));
-    EXPECT_EQ(0, s.get_pos());
-    EXPECT_EQ(false, s.is_end());
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(true, s.pending());
     EXPECT_EQ(true, s.capture("a"));
-    EXPECT_EQ(1, s.get_pos());
-    EXPECT_EQ(false, s.is_end());
+    EXPECT_EQ(1, s.pos());
+    EXPECT_EQ(true, s.pending());
     EXPECT_EQ(false, s.capture("a"));
-    EXPECT_EQ(1, s.get_pos());
-    EXPECT_EQ(false, s.is_end());
+    EXPECT_EQ(1, s.pos());
+    EXPECT_EQ(true, s.pending());
     EXPECT_EQ(true, s.capture("b"));
-    EXPECT_EQ(2, s.get_pos());
-    EXPECT_EQ(false, s.is_end());
+    EXPECT_EQ(2, s.pos());
+    EXPECT_EQ(true, s.pending());
     EXPECT_EQ(true, s.capture("c"));
-    EXPECT_EQ(3, s.get_pos());
-    EXPECT_EQ(true, s.is_end());
+    EXPECT_EQ(3, s.pos());
+    EXPECT_EQ(false, s.pending());
   }
   {
     source s("abc");
     EXPECT_EQ(false, s.capture("abcdef"));
-    EXPECT_EQ(0, s.get_pos());
+    EXPECT_EQ(0, s.pos());
   }
 }
 
