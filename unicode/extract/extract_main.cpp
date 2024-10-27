@@ -47,16 +47,18 @@ const char* CPP_FOOTER = R"CPP(}  // namespace ucd
 
 constexpr int CODEPOINTS_PER_LINE = 64;
 
+#define FWRITE(STR, OUTPUT) fwrite(STR, sizeof(char), std::strlen(STR), OUTPUT)
+
 void print_in_multiple_lines(const char* characters, int& count, uint64_t to_print, FILE* output) {
   while (to_print != 0) {
     if (count % CODEPOINTS_PER_LINE == 0) {
       if (count != 0) {
-        fwrite("\"\n", 1, 2, output);
+        FWRITE("\"\n", output);
       }
-      fwrite("    \"", 1, 5, output);
+      FWRITE("    \"", output);
     }
     uint64_t will_print = std::min<uint64_t>(CODEPOINTS_PER_LINE - (count % CODEPOINTS_PER_LINE), to_print);
-    fwrite(characters, 1, will_print, output);
+    fwrite(characters, sizeof(char), will_print, output);
     count += will_print;
     to_print -= will_print;
   }
@@ -113,7 +115,7 @@ void print_codepoints(
         print_in_multiple_lines(ones_string.c_str(), count, max_cp - min_cp + 1, output);
         previous_min = min_cp;
       }
-      fwrite("\";\n\n", 1, 4, output);
+      FWRITE("\";\n\n", output);
     }
   }
   {
@@ -132,14 +134,14 @@ void print_codepoints(
               pos, fn.c_str(), pos);
     }
     if (add_blank_line) {
-      fwrite("\n", 1, 1, output);
+      FWRITE("\n", output);
     }
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
       if (pos == 0) {
-        fwrite("  return ", 1, 9, output);
+        FWRITE("  return ", output);
       } else {
-        fwrite(" ||\n         ", 1, 13, output);
+        FWRITE(" ||\n         ", output);
       }
       auto min_cp = mini_block.front().first;
       auto max_cp = mini_block.back().second;
@@ -151,7 +153,7 @@ void print_codepoints(
         fprintf(output, "(0x%llX <= codepoint && codepoint <= 0x%llX)", min_cp, max_cp);
       }
     }
-    fwrite(";\n}\n\n", 1, 5, output);
+    FWRITE(";\n}\n\n", output);
   }
 }
 
@@ -198,7 +200,7 @@ void write_impl(const char* derived_core_properties_file,
                      name);
   }
 
-  fwrite(CPP_FOOTER, sizeof CPP_FOOTER[0], strlen(CPP_FOOTER), cc_output);
+  FWRITE(CPP_FOOTER, cc_output);
   fclose(cc_output);
 }
 
