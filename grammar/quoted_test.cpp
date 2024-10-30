@@ -20,4 +20,8 @@ TEST(QuotedTest, CommonStrings) {
   EXPECT_EQ("\"\\\\\\\"\"", quoted("\\\""));
 }
 
+TEST(QuotedTest, SpecialCharacters) {
+  EXPECT_EQ("\"\\a\\b\\f\\n\\r\\t\\v\"", quoted("\a\b\f\n\r\t\v"));
+}
+
 }  // namespace
