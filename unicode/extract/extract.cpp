@@ -1,5 +1,7 @@
 // Copyright 2024 Lucas Mirelmann
 
+#include <cstdlib>
+
 #include "unicode/extract/extract.hpp"
 
 namespace ucd {
@@ -16,7 +18,7 @@ void read_all_code_points(const char* file,
   size_t len = 0;
 
   if (fp == nullptr) {
-    exit(1);
+    std::exit(1);
   }
 
   int start, end, count1, count2;
@@ -35,12 +37,12 @@ void read_all_code_points(const char* file,
         ++sline;
       }
       if (sline[0] != ';') {
-        exit(1);
+        std::exit(1);
       }
       ++sline;
       while (std::sscanf(sline, " %99[0-9a-zA-Z_]%n", alias, &count1) > 0) {
         if (strlen(alias) == 99) {
-          exit(1);
+          std::exit(1);
         }
         sline += count1;
         if (!binary_unicode_properties.contains(alias)) {
