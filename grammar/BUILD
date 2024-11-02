@@ -26,3 +26,13 @@ cc_library(
     hdrs = ["quoted.hpp"],
 )
 
+cc_test(
+    name = "quoted_test",
+    srcs = ["quoted_test.cpp"],
+    deps = [
+        ":quoted",
+        "@googletest//:gtest_main",
+    ],
+    size = "small",
+)
+
