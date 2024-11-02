@@ -193,36 +193,71 @@ TEST(SourceTest, SkipCodepoint) {
   checkSkipCodepoint("\xf0\x8f\xbf\x{bf}abc", 7, 4);
 }
 
+TEST(SourceTest, Next) {
+  {
+    utf8_reader s("");
+    EXPECT_EQ(true, s.next(""));
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(false, s.next("a"));
+    EXPECT_EQ(0, s.pos());
+  }
+  {
+    utf8_reader s("abc");
+    EXPECT_EQ(true, s.next(""));
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(true, s.next("a"));
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(true, s.next("a"));
+    EXPECT_EQ(0, s.pos());
+    EXPECT_EQ(false, s.next("b"));
+    EXPECT_EQ(0, s.pos());
+  }
+}
+
 TEST(SourceTest, Capture) {
   {
     utf8_reader s("");
     EXPECT_EQ(0, s.pos());
-    EXPECT_EQ(false, s.pending());
+    EXPECT_EQ(true, s.empty());
+    EXPECT_EQ(0, s.pending());
     EXPECT_EQ(true, s.capture(""));
     EXPECT_EQ(0, s.pos());
-    EXPECT_EQ(false, s.pending());
+    EXPECT_EQ(true, s.empty());
+    EXPECT_EQ(0, s.pending());
     EXPECT_EQ(false, s.capture("a"));
     EXPECT_EQ(0, s.pos());
-    EXPECT_EQ(false, s.pending());
+    EXPECT_EQ(true, s.empty());
+    EXPECT_EQ(0, s.pending());
   }
   {
     utf8_reader s("abc");
-    EXPECT_EQ(true, s.pending());
+    EXPECT_EQ(false, s.empty());
+    EXPECT_EQ(3, s.pending());
+
     EXPECT_EQ(true, s.capture(""));
     EXPECT_EQ(0, s.pos());
-    EXPECT_EQ(true, s.pending());
+    EXPECT_EQ(false, s.empty());
+    EXPECT_EQ(3, s.pending());
+
     EXPECT_EQ(true, s.capture("a"));
     EXPECT_EQ(1, s.pos());
-    EXPECT_EQ(true, s.pending());
+    EXPECT_EQ(false, s.empty());
+    EXPECT_EQ(2, s.pending());
+
     EXPECT_EQ(false, s.capture("a"));
     EXPECT_EQ(1, s.pos());
-    EXPECT_EQ(true, s.pending());
+    EXPECT_EQ(false, s.empty());
+    EXPECT_EQ(2, s.pending());
+
     EXPECT_EQ(true, s.capture("b"));
     EXPECT_EQ(2, s.pos());
-    EXPECT_EQ(true, s.pending());
+    EXPECT_EQ(false, s.empty());
+    EXPECT_EQ(1, s.pending());
+
     EXPECT_EQ(true, s.capture("c"));
     EXPECT_EQ(3, s.pos());
-    EXPECT_EQ(false, s.pending());
+    EXPECT_EQ(true, s.empty());
+    EXPECT_EQ(0, s.pending());
   }
   {
     utf8_reader s("abc");

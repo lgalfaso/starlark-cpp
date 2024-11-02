@@ -25,8 +25,12 @@ utf8_reader::utf8_reader(string_view input) : input(input) {
   }
 }
 
-bool utf8_reader::pending() const {
-  return input_pos < input.length();
+bool utf8_reader::empty() const {
+  return input_pos >= input.length();
+}
+
+std::size_t utf8_reader::pending() const {
+  return input.length() - input_pos;
 }
 
 std::size_t utf8_reader::pos() const {
@@ -34,19 +38,19 @@ std::size_t utf8_reader::pos() const {
 }
 
 char utf8_reader::peek(std::size_t delta) const {
-  if (delta >= input.length() - input_pos) {
+  if (delta >= pending()) {
     return 0;
   }
   return input[input_pos + delta];
 }
 
 std::uint64_t utf8_reader::peek_code_point() const {
-  if (!pending()) {
+  if (empty()) {
     return replacement_character;
   }
   const unsigned char current_char = input[input_pos];
   int length = std::countl_one(current_char);
-  if (length > input.length() - input_pos) {
+  if (length > pending()) {
     return replacement_character;
   }
   for (int i = 1; i < length; ++i) {
@@ -90,7 +94,7 @@ std::uint64_t utf8_reader::peek_code_point() const {
 }
 
 void utf8_reader::skip(std::size_t delta) {
-  if (delta >= input.length() - input_pos) {
+  if (delta >= pending()) {
     input_pos = input.length();
   } else {
     input_pos += delta;
@@ -98,7 +102,7 @@ void utf8_reader::skip(std::size_t delta) {
 }
 
 void utf8_reader::skip_code_point() {
-  if (!pending()) {
+  if (empty()) {
     return;
   }
   const unsigned char current_char = input[input_pos];
@@ -117,8 +121,18 @@ void utf8_reader::skip_code_point() {
   }
 }
 
+bool utf8_reader::next(string_view candidate) {
+  if (pending() < candidate.length()) {
+    return false;
+  }
+  if (input.substr(input_pos, candidate.length()) == candidate) {
+    return true;
+  }
+  return false;
+}
+
 bool utf8_reader::capture(string_view candidate) {
-  if (input.length() - input_pos < candidate.length()) {
+  if (pending() < candidate.length()) {
     return false;
   }
   if (input.substr(input_pos, candidate.length()) == candidate) {

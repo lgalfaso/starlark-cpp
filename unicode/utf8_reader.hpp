@@ -12,12 +12,14 @@ namespace unicode {
 class utf8_reader {
  public:
   explicit utf8_reader(std::string_view input);
-  bool pending() const;
+  bool empty() const;
+  std::size_t pending() const;
   std::size_t pos() const;
   char peek(std::size_t delta = 0) const;
   std::uint64_t peek_code_point() const;
   void skip(std::size_t delta = 1);
   void skip_code_point();
+  bool next(std::string_view candidate);
   bool capture(std::string_view candidate);
 
   // Unicode replacement character.
