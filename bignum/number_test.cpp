@@ -414,6 +414,12 @@ TEST(Number, DivisionSmall) {
   }
 }
 
+TEST(Number, DivionUnderflow) {
+  number p = number::parse_hex(kBigPrime);
+  auto [res, rem] = number::div(p, number(3));
+  EXPECT_EQ(p, res * number(3) + rem);
+}
+
 TEST(Number, DivisionBig) {
   for (int j = 4; j < 16; ++j) {
     for (int i = 0; i < 4; ++i) {

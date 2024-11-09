@@ -431,11 +431,20 @@ std::pair<number, number> number::div(const number& dividend,
     int shift_factor = (dividend_bit_size - number(base_divisor).bit_size()) -
                        (divisor_bit_size - bits_in_factor);
     base_division_number <<= shift_factor;
-    base_op(r.values_, (base_division_number * divisor).values_, &r.values_,
-            dec_op);
+    number base_division_times_divisor = base_division_number * divisor;
+    if (abs_cmp(r.values_, base_division_times_divisor.values_) < 0) {
+      if (shift_factor == 0) {
+        break;
+      }
+      base_division_number >>= 1;
+      base_division_times_divisor >>= 1;
+    }
     base_op(d.values_, base_division_number.values_, &d.values_, add_op);
-    r.normalize();
     d.normalize();
+
+    base_op(r.values_, base_division_times_divisor.values_, &r.values_,
+            dec_op);
+    r.normalize();
   }
   while (abs_cmp(r.values_, divisor.values_) >= 0) {
     base_op(r.values_, divisor.values_, &r.values_, dec_op);
