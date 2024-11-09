@@ -11,6 +11,7 @@
 #include "grammar/lexer.hpp"
 #include "grammar/quoted.hpp"
 
+using bignum::number;
 using grammar::lexer;
 using grammar::quoted;
 using grammar::token_type;
@@ -103,6 +104,30 @@ std::map<token_type, std::string> mapping = {
   {token_type::yield, "YIELD"},
 };
 
+std::string to_string(const number& num) {
+  std::string result;
+  if (num == number::zero) {
+    result = "0";
+    return result;
+  }
+  number ref(num);
+  bool neg = false;
+  if (ref.sign()) {
+    neg = true;
+    ref.neg();
+  }
+  while (ref != number::zero) {
+    const auto [res, rem] = number::div(ref, number(10));
+    ref = res;
+    auto num = rem.bits(0, 4);
+    result = (char)(num + '0') + result;
+  }
+  if (neg) {
+    result = "-" + result;
+  }
+  return result;
+}
+
 std::vector<std::string> readTokens(lexer& input) {
   std::vector<std::string> parts;
   do {
@@ -118,7 +143,7 @@ std::vector<std::string> readTokens(lexer& input) {
       parts.back() += ")";
     } else if (current_token.type() == token_type::int_) {
       parts.back() += "(";
-      parts.back() += std::to_string(current_token.int_value());
+      parts.back() += to_string(current_token.int_value());
       parts.back() += ")";
     } else if (current_token.type() == token_type::float_) {
       parts.back() += "(";
@@ -188,13 +213,12 @@ man = []  # Another comment.
 TEST(LexerTest, Integer) {
   check("1", "INT(1) NEWLINE EOF");
   check("1234567890", "INT(1234567890) NEWLINE EOF");
+  check("01234567890", "INT(1234567890) NEWLINE EOF");
   check("0o1234567", "INT(342391) NEWLINE EOF");
   check("0O1234567", "INT(342391) NEWLINE EOF");
   check("0x1234567890", "INT(78187493520) NEWLINE EOF");
   check("0X1234567890", "INT(78187493520) NEWLINE EOF");
-  // TODO(lmirelmann): This will stop being an error once there
-  // is a big int implementation.
-  check("12345678901234567890", "ILLEGAL(\"12345678901234567890\") NEWLINE EOF");
+  check("12345678901234567890", "INT(12345678901234567890) NEWLINE EOF");
 }
 
 TEST(LexerTest, Float) {

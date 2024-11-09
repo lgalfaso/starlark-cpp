@@ -118,6 +118,42 @@ int isoctal(int c) {
   return '0' <= c && c <= '7' ? 1 : 0;
 }
 
+bignum::number parse_number(std::string_view input, const char** end_ptr) {
+  int base;
+  std::size_t pos = 0;
+  if (input.starts_with("0x") || input.starts_with("0X")) {
+    pos += 2;
+    base = 16;
+  } else if (input.starts_with("0") || input.starts_with("0")) {
+    pos += 1;
+    base = 8;
+  } else {
+    base = 10;
+  }
+  bignum::number result;
+  for (; pos < input.length(); ++pos) {
+    int c = input[pos];
+    if ('0' <= c && c <= '9') {
+      c -= '0';
+    } else if ('a' <= c && c <= 'z') {
+      c -= 'a' - 10;
+    } else if ('A' <= c && c <= 'Z') {
+      c -= 'A' - 10;
+    } else {
+      break;
+    }
+    if (c >= base) {
+      break;
+    }
+    result *= bignum::number(base);
+    result += bignum::number(c);
+  }
+  if (end_ptr != nullptr) {
+    *end_ptr = &input[pos];
+  }
+  return result;
+}
+
 }  // namespace
 
 lexer::lexer(std::string_view input) : current(token_type::bof, 0, 0), source_code(input), indent_stack(1) {}
@@ -337,10 +373,9 @@ void lexer::read_numeric() {
     }
     current = token{token_type::float_, start, source_code.pos(), double_value};
   } else {
-    errno = 0;
-    char* end;
-    std::int64_t int_value = std::strtol(value.c_str(), &end, 0);
-    if (errno == ERANGE || end != &value.back() + 1) {
+    const char* end;
+    bignum::number int_value = parse_number(value, &end);
+    if (end != &value.back() + 1) {
       add_error("Unable to parse numeric value", start);
       current = token{token_type::illegal, start, source_code.pos(), value};
       return;

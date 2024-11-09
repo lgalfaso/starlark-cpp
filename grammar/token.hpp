@@ -7,6 +7,8 @@
 #include <string_view>
 #include <variant>
 
+#include "bignum/number.hpp"
+
 #pragma GCC visibility push(default)
 
 namespace grammar {
@@ -104,12 +106,12 @@ enum class token_type {
 class token {
  public:
   token(token_type type, std::size_t start, std::size_t end);
-  token(token_type type, std::size_t start, std::size_t end, std::int64_t value);
+  token(token_type type, std::size_t start, std::size_t end, const bignum::number& value);
   token(token_type type, std::size_t start, std::size_t end, double value);
   token(token_type type, std::size_t start, std::size_t end, const std::string& value);
   token_type type() const;
   void set_type(token_type new_type);
-  std::int64_t int_value() const;
+  const bignum::number& int_value() const;
   double double_value() const;
   const std::string& string_value() const;
   std::size_t start() const;
@@ -119,8 +121,7 @@ class token {
   token_type tok_type;
   std::size_t tok_start;
   std::size_t tok_end;
-  // TODO(lmirelmann): The data type `int` should be of arbitrary magnitude.
-  std::variant<std::int64_t, double, std::string> value;
+  std::variant<double, bignum::number, std::string> value;
 
   static const std::string empty_string;
 };

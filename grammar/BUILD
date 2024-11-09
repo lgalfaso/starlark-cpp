@@ -78,6 +78,9 @@ cc_library(
     name = "token",
     srcs = ["token.cpp"],
     hdrs = ["token.hpp"],
+    deps = [
+        "//bignum:number",
+    ],
     visibility = ["//visibility:public"],
 )
 

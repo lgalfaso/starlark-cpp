@@ -6,7 +6,7 @@ namespace grammar {
 
 token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end) {}
 
-token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end, std::int64_t value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end, const bignum::number& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
 token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end, double value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
@@ -20,11 +20,11 @@ void token::set_type(token_type new_type) {
   tok_type = new_type;
 }
 
-std::int64_t token::int_value() const {
-  if (std::holds_alternative<std::int64_t>(value)) {
-    return std::get<std::int64_t>(value);
+const bignum::number& token::int_value() const {
+  if (std::holds_alternative<bignum::number>(value)) {
+    return std::get<bignum::number>(value);
   }
-  return 0;
+  return bignum::number::zero;
 }
 
 double token::double_value() const {
