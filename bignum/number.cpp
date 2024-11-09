@@ -158,6 +158,34 @@ std::string number::hex() const {
   return ss.str();
 }
 
+std::string number::to_string(int base) const {
+  static const char nums[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+  if (base < 2 || base > 36) {
+    return "";
+  }
+  std::string result;
+  if (*this == number::zero) {
+    result = "0";
+    return result;
+  }
+  number ref(*this);
+  bool neg = false;
+  if (ref.sign()) {
+    neg = true;
+    ref.neg();
+  }
+  number num_base(base);
+  while (ref != number::zero) {
+    const auto [res, rem] = number::div(ref, num_base);
+    ref = res;
+    result = nums[rem.at(0)] + result;
+  }
+  if (neg) {
+    result = "-" + result;
+  }
+  return result;
+}
+
 std::ostream& operator<<(std::ostream& os, const number& other) {
   os << other.hex();
   return os;

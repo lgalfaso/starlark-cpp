@@ -104,30 +104,6 @@ std::map<token_type, std::string> mapping = {
   {token_type::yield, "YIELD"},
 };
 
-std::string to_string(const number& num) {
-  std::string result;
-  if (num == number::zero) {
-    result = "0";
-    return result;
-  }
-  number ref(num);
-  bool neg = false;
-  if (ref.sign()) {
-    neg = true;
-    ref.neg();
-  }
-  while (ref != number::zero) {
-    const auto [res, rem] = number::div(ref, number(10));
-    ref = res;
-    auto num = rem.bits(0, 4);
-    result = (char)(num + '0') + result;
-  }
-  if (neg) {
-    result = "-" + result;
-  }
-  return result;
-}
-
 std::vector<std::string> readTokens(lexer& input) {
   std::vector<std::string> parts;
   do {
@@ -143,7 +119,7 @@ std::vector<std::string> readTokens(lexer& input) {
       parts.back() += ")";
     } else if (current_token.type() == token_type::int_) {
       parts.back() += "(";
-      parts.back() += to_string(current_token.int_value());
+      parts.back() += current_token.int_value().to_string(10);
       parts.back() += ")";
     } else if (current_token.type() == token_type::float_) {
       parts.back() += "(";
