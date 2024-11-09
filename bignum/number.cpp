@@ -408,6 +408,7 @@ number number::operator*(const number& other) const {
 // static.
 std::pair<number, number> number::div(const number& dividend,
                                       const number& divisor) {
+  int s_shift = kBitsInBase;
   if (divisor == zero) {
     return std::make_pair(zero, zero);
   }
@@ -417,11 +418,12 @@ std::pair<number, number> number::div(const number& dividend,
   if (abs_cmp(dividend.values_, divisor.values_) < 0) {
     return std::make_pair(zero, dividend);
   }
-  number d, r = dividend;
-  int divisor_bit_size = divisor.bit_size();
+  number dd = divisor << s_shift;
+  number d, r = dividend << s_shift;
+  int divisor_bit_size = dd.bit_size();
   int dividend_bit_size;
   int r_d = std::max(0, divisor_bit_size - (kBitsInBase >> 1));
-  nbase factor = divisor.bits(r_d, kBitsInBase >> 1) + 1;
+  nbase factor = dd.bits(r_d, kBitsInBase >> 1) + 1;
   int bits_in_factor = number(factor).bit_size();
   while ((dividend_bit_size = r.bit_size()) > divisor_bit_size) {
     int r_s = std::max(0, dividend_bit_size - kBitsInBase);
@@ -431,29 +433,29 @@ std::pair<number, number> number::div(const number& dividend,
     int shift_factor = (dividend_bit_size - number(base_divisor).bit_size()) -
                        (divisor_bit_size - bits_in_factor);
     base_division_number <<= shift_factor;
-    number base_division_times_divisor = base_division_number * divisor;
-    if (abs_cmp(r.values_, base_division_times_divisor.values_) < 0) {
+    number base_division_times_dd = base_division_number * dd;
+    if (abs_cmp(r.values_, base_division_times_dd.values_) < 0) {
       if (shift_factor == 0) {
         break;
       }
       base_division_number >>= 1;
-      base_division_times_divisor >>= 1;
+      base_division_times_dd >>= 1;
     }
     base_op(d.values_, base_division_number.values_, &d.values_, add_op);
     d.normalize();
 
-    base_op(r.values_, base_division_times_divisor.values_, &r.values_,
+    base_op(r.values_, base_division_times_dd.values_, &r.values_,
             dec_op);
     r.normalize();
   }
-  while (abs_cmp(r.values_, divisor.values_) >= 0) {
-    base_op(r.values_, divisor.values_, &r.values_, dec_op);
+  while (abs_cmp(r.values_, dd.values_) >= 0) {
+    base_op(r.values_, dd.values_, &r.values_, dec_op);
     base_op(d.values_, one.values_, &d.values_, add_op);
     r.normalize();
     d.normalize();
   }
-  d.sign_ = dividend.sign_ ^ divisor.sign_;
-  return std::make_pair(d, r);
+  d.sign_ = dividend.sign_ ^ dd.sign_;
+  return std::make_pair(d, r >> s_shift);
 }
 
 number& number::operator%=(const number& other) {
