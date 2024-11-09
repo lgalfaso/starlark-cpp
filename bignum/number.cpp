@@ -62,15 +62,15 @@ int exponentiation_mask_size(int bit_size) {
 
 number::number() : sign_(false) {}
 
-number::number(number::base base_value) : sign_(false) {
-  if (base_value != 0) {
-    values_.push_back(base_value);
+number::number(number::nbase value) : sign_(false) {
+  if (value != 0) {
+    values_.push_back(value);
   }
 }
 
-number::base number::at(values_size_type pos) const {
+number::nbase number::at(values_size_type pos) const {
   if (values_.size() <= pos) {
-    return base{0};
+    return nbase{0};
   }
   return values_[pos];
 }
@@ -89,7 +89,7 @@ int number::countr_zero() const {
 
 int number::bit_size() const {
   if (values_.empty()) return 0;
-  return values_.size() * kBitsInBase - std::countl_zero<base>(values_.back());
+  return values_.size() * kBitsInBase - std::countl_zero<nbase>(values_.back());
 }
 
 bool number::bit(int pos) const {
@@ -98,11 +98,11 @@ bool number::bit(int pos) const {
   return ((r >> (pos % kBitsInBase)) & 1) == 1;
 }
 
-number::base number::bits(int pos, int length) const {
-  if (pos < 0 || length <= 0) return base{0};
+number::nbase number::bits(int pos, int length) const {
+  if (pos < 0 || length <= 0) return nbase{0};
   int base_pos = pos / kBitsInBase;
   int rem_pos = pos % kBitsInBase;
-  base b;
+  nbase b;
   if (rem_pos == 0) {
     b = at(base_pos);
   } else {
@@ -110,7 +110,7 @@ number::base number::bits(int pos, int length) const {
         (at(base_pos + 1) << (kBitsInBase - rem_pos));
   }
   if (length >= kBitsInBase) return b;
-  return ((base{1} << length) - base{1}) & b;
+  return ((nbase{1} << length) - nbase{1}) & b;
 }
 
 // static const.
@@ -209,7 +209,7 @@ bool number::operator==(const number& other) const {
   return cmp(other) == 0;
 }
 
-number::base parse_hex_digit(const char& input) {
+number::nbase parse_hex_digit(const char& input) {
   if ('0' <= input && input <= '9') {
     return input - '0';
   }
@@ -245,7 +245,7 @@ number& number::mod_pow2(int power) {
     return *this;
   }
   values_.resize((power + kBitsInBase - 1) / kBitsInBase);
-  values_.back() &= (~((base)0)) >> (kBitsInBase - 1 - (power + kBitsInBase -1) % kBitsInBase);
+  values_.back() &= (~nbase{0}) >> (kBitsInBase - 1 - (power + kBitsInBase -1) % kBitsInBase);
   normalize();
   return *this;
 }
@@ -254,9 +254,9 @@ number& number::mod_pow2(int power) {
 number number::parse_hex(std::string_view input) {
   number result;
   int partial_hex_size = 0;
-  base partial = 0;
+  nbase partial = 0;
   for (auto it = input.crbegin(); it != input.crend(); ++it) {
-    base hex_value = parse_hex_digit(*it);
+    nbase hex_value = parse_hex_digit(*it);
     if (hex_value != 0xff) {
       partial += (hex_value << (4 * partial_hex_size));
       partial_hex_size++;
@@ -277,13 +277,13 @@ number number::parse_hex(std::string_view input) {
 }
 
 // static.
-bool number::add_op(const base a, const base b, base* to) {
+bool number::add_op(const nbase a, const nbase b, nbase* to) {
   *to = a + b;
   return a > *to;
 }
 
 // static.
-bool number::dec_op(const base a, const base b, base* to) {
+bool number::dec_op(const nbase a, const nbase b, nbase* to) {
   *to = a - b;
   return a < *to;
 }
@@ -295,7 +295,7 @@ bool number::cmp_values(const values_type& a, const values_type& b) {
 
 // static.
 void number::base_op(const values_type& a, const values_type& b, values_type* c,
-                     bool(&op)(const base a, const base b, base* to)) {
+                     bool(&op)(const nbase a, const nbase b, nbase* to)) {
   const auto& [small, big] = std::minmax(a, b, cmp_values);
   const auto size_small = small.size();
   const auto size_big = big.size();
@@ -304,9 +304,9 @@ void number::base_op(const values_type& a, const values_type& b, values_type* c,
   const auto* data_big = big.data();
   auto* data_c = c->data();
   values_size_type i;
-  base carry = 0;
+  nbase carry = 0;
   for (i = 0; i < size_small; ++i) {
-    base new_carry = 0;
+    nbase new_carry = 0;
     if (op(data_big[i], data_small[i], &data_c[i])) {
       ++new_carry;
     }
@@ -360,7 +360,7 @@ number number::operator-(const number& other) const {
 }
 
 // static.
-void number::mult_op(base a, base b, base* high, base* low) {
+void number::mult_op(const nbase a, const nbase b, nbase* high, nbase* low) {
   using u128 = unsigned __int128;
   u128 result = u128(a) * b;
   *low = result;
@@ -380,7 +380,7 @@ void number::long_mult(
   values_type carry(a_size + b_size, 0);
   for (values_size_type i = 0; i < a_size; ++i) {
     for (values_size_type j = 0; j < b_size; ++j) {
-      base high, low;
+      nbase high, low;
       mult_op(a_begin[i], b_begin[j], &high, &low);
       if (add_op(mult[i+j], low, &mult[i+j])) {
         ++carry[i+j+1];
@@ -421,12 +421,12 @@ std::pair<number, number> number::div(const number& dividend,
   int divisor_bit_size = divisor.bit_size();
   int dividend_bit_size;
   int r_d = std::max(0, divisor_bit_size - (kBitsInBase >> 1));
-  base factor = divisor.bits(r_d, kBitsInBase >> 1) + 1;
+  nbase factor = divisor.bits(r_d, kBitsInBase >> 1) + 1;
   int bits_in_factor = number(factor).bit_size();
   while ((dividend_bit_size = r.bit_size()) > divisor_bit_size) {
     int r_s = std::max(0, dividend_bit_size - kBitsInBase);
-    base base_divisor = r.bits(r_s, kBitsInBase);
-    base base_division = base_divisor / factor;
+    nbase base_divisor = r.bits(r_s, kBitsInBase);
+    nbase base_division = base_divisor / factor;
     number base_division_number(base_division);
     int shift_factor = (dividend_bit_size - number(base_divisor).bit_size()) -
                        (divisor_bit_size - bits_in_factor);
@@ -537,7 +537,7 @@ void number::shift(int pos) {
   }
   // Now, pos >= 0.
   if (big_steps > 0) {
-    if (values_.size() <= static_cast<base>(big_steps)) {
+    if (values_.size() <= static_cast<nbase>(big_steps)) {
       values_.clear();
     } else {
       values_.erase(values_.cbegin(), values_.cbegin() + big_steps);
@@ -628,10 +628,10 @@ std::tuple<number, number, number> number::gcd(const number& x,
 }
 
 // static.
-number::base number::inverse_mod_base(const base a) {
-  // If base is n bits long, then we have to calculate
+number::nbase number::inverse_mod_base(const nbase a) {
+  // If nbase is n bits long, then we have to calculate
   //     `a^(2^(n - 1) - 1) mod 2^n`.
-  base result = a;
+  nbase result = a;
   // At the end of each iteration, `result == a^(2^(i - 1) - 1) mod 2^n`.
   // Before the loop, `result == a`, this is,
   //     `result == a^1 == a^(2 - 1) == a^(2^(2 - 1) - 1)`.
@@ -647,12 +647,12 @@ number::base number::inverse_mod_base(const base a) {
 // static.
 // This method makes the assumtion that `0 ≤ x, y < m` and that
 // `gcd(m, 2) == 1`.
-number number::montgomery(const number& m, const base& inv_m, const number& x,
+number number::montgomery(const number& m, const nbase& inv_m, const number& x,
                           const number& y) {
   if (m.length() == 0) return zero;
   number a;
   for (values_size_type i = 0; i < m.values_.size(); ++i) {
-    base u = (a.at(0) + x.at(i) * y.at(0)) * inv_m;
+    nbase u = (a.at(0) + x.at(i) * y.at(0)) * inv_m;
     a = (a + number(x.at(i)) * y + number(u) * m) >> kBitsInBase;
   }
   if (a >= m) {
@@ -717,9 +717,9 @@ number& number::pow_mod(const number& power, const number& modulus) {
 
     int mask_size = exponentiation_mask_size(power.bit_size());
     // Build the work that will be used.
-    base mask = (~((base)0)) >> (kBitsInBase - mask_size);
+    nbase mask = (~nbase{0}) >> (kBitsInBase - mask_size);
     number power_(power);
-    std::vector<std::pair<int, base>> work;
+    std::vector<std::pair<int, nbase>> work;
     while (power_ != zero) {
       int p2 = 0;
       while (power_.even()) {
@@ -730,7 +730,7 @@ number& number::pow_mod(const number& power, const number& modulus) {
       power_ >>= mask_size;
     }
 
-    base inv_m = -inverse_mod_base(q.at(0));
+    nbase inv_m = -inverse_mod_base(q.at(0));
     std::vector<number> windows;
     windows.emplace_back(montgomery(q, inv_m, x_1,
         (one << (2 * kBitsInBase * q.length())) % q));

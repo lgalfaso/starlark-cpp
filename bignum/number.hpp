@@ -20,11 +20,11 @@ namespace bignum {
 
 class number {
  public:
-  typedef uint64_t base;
-  typedef std::vector<base> values_type;
-  typedef std::vector<base>::size_type values_size_type;
-  static constexpr int kBitsInBase = sizeof(base) * CHAR_BIT;
-  static constexpr int kBaseHexSize = CHAR_BIT * sizeof(base) / 4;
+  typedef uint64_t nbase;
+  typedef std::vector<nbase> values_type;
+  typedef std::vector<nbase>::size_type values_size_type;
+  static constexpr int kBitsInBase = sizeof(nbase) * CHAR_BIT;
+  static constexpr int kBaseHexSize = CHAR_BIT * sizeof(nbase) / 4;
 
  private:
   values_type values_;
@@ -40,7 +40,7 @@ class number {
   // Move constructor.
   number(number&&) = default;
 
-  explicit number(base base_value);
+  explicit number(nbase value);
 
   // Returns whether the number is negative.
   bool sign() const;
@@ -50,7 +50,7 @@ class number {
 
   int bit_size() const;
   bool bit(int pos) const;
-  base bits(int pos, int length) const;
+  nbase bits(int pos, int length) const;
 
   // Returns whether the number is even.
   bool even() const;
@@ -112,17 +112,17 @@ class number {
                                        const number& divisor);
 
  private:
-  base at(values_size_type pos) const;
+  nbase at(values_size_type pos) const;
   int countr_zero() const;
   static void normalize(values_type* a);
   static bool cmp_values(const values_type& a, const values_type& b);
   static int abs_cmp(const values_type& a, const values_type& b);
   static void base_op(const values_type& a, const values_type& b,
                       values_type* c,
-                      bool(&op)(const base a, const base b, base* to));
-  static bool add_op(const base a, const base b, base* to);
-  static bool dec_op(const base a, const base b, base* to);
-  static void mult_op(base a, base b, base* high, base* low);
+                      bool(&op)(const nbase a, const nbase b, nbase* to));
+  static bool add_op(const nbase a, const nbase b, nbase* to);
+  static bool dec_op(const nbase a, const nbase b, nbase* to);
+  static void mult_op(const nbase a, const nbase b, nbase* high, nbase* low);
   static void long_mult(
     const values_type::const_iterator& a_begin,
     const values_type::const_iterator& a_end,
@@ -136,8 +136,8 @@ class number {
     const values_type::const_iterator& b_begin,
     const values_type::const_iterator& b_end,
     values_type* c);
-  static base inverse_mod_base(const base a);
-  static number montgomery(const number& m, const base& inv_m, const number& x,
+  static nbase inverse_mod_base(const nbase a);
+  static number montgomery(const number& m, const nbase& inv_m, const number& x,
                            const number& y);
   number& mod_pow2(int power);
   void normalize();

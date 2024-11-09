@@ -22,20 +22,20 @@ TEST(Number, SignIsFalseForZero) {
 }
 
 TEST(Number, ConstructorUsingBase) {
-  number num((number::base) 0x12345);
+  number num((number::nbase) 0x12345);
   EXPECT_EQ("0x12345", num.hex());
   EXPECT_EQ(1, num.length());
 }
 
 TEST(Number, ConstructorUsingBaseSetToZero) {
-  number num((number::base) 0);
+  number num((number::nbase) 0);
   EXPECT_EQ("0x0", num.hex());
   EXPECT_EQ(0, num.length());
 }
 
 TEST(Number, Negate) {
-  number num_1((number::base) 0x1234);
-  number num_2((number::base) 0);
+  number num_1((number::nbase) 0x1234);
+  number num_2((number::nbase) 0);
   EXPECT_EQ("-0x1234", num_1.neg().hex());
   EXPECT_EQ("0x0", num_2.neg().hex());
 }
@@ -452,13 +452,13 @@ TEST(Number, ModPowSimple) {
 TEST(Number, ModPowSimpleEvenMod) {
   number p = number::parse_hex(kBigPrime);
   number r = number::parse_hex(kBigNumber);
-  number::base power2 = 50;
+  number::nbase power2 = 50;
   EXPECT_EQ(number::one, r.pow_mod((p - number::one) * (number::one << power2), p * (number::one << (power2 - 1))));
 }
 
 TEST(Number, ModPowSimplePower2Mod) {
   number r = number::parse_hex(kBigNumber);
-  number::base power2 = 500;
+  number::nbase power2 = 500;
   EXPECT_EQ(number::one, r.pow_mod(number::one << power2, number::one << (power2 - 1)));
 }
 
