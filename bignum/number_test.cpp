@@ -459,11 +459,176 @@ TEST(Number, DivionUnderflow) {
   EXPECT_EQ(p, res * number(3) + rem);
 }
 
-TEST(Number, DivisionBig) {
-  for (int j = 4; j < 16; ++j) {
+TEST(Number, DivisionSmallPower2) {
+  number p(3);
+  for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
       number n = number::one << (sizeof(kBigPrime) * j);
-      number p = number::parse_hex(kBigPrime);
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionSmallPowerTwoMinusOne) {
+  number p(3);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = (number::one << (sizeof(kBigPrime) * j)) - number::one;
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionSmallPower2Div) {
+  number p = number::one << 256;
+  number w = number::parse_hex(kBigNumber);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = w << (sizeof(kBigPrime) * j);
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionSmallPowerTwoMinusOneiDiv) {
+  number p = (number::one << 256) - number::one;
+  number w = number::parse_hex(kBigNumber);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = (w << (sizeof(kBigPrime) * j)) - number::one;
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionSmallPowerTwoPlusOneDiv) {
+  number p = (number::one << 256) + number::one;
+  number w = number::parse_hex(kBigNumber);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = (w << (sizeof(kBigPrime) * j)) - number::one;
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionBigPower2) {
+  number p = number::parse_hex(kBigPrime);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = number::one << (sizeof(kBigPrime) * j);
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionBigPowerTwoMinusOne) {
+  number p = number::parse_hex(kBigPrime);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = (number::one << (sizeof(kBigPrime) * j)) - number::one;
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionBigPower2BigTop) {
+  number w = number::parse_hex(kBigNumber);
+  number p = number::parse_hex(kBigPrime);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = w << (sizeof(kBigPrime) * j);
+      if ((i & 1) != 0) n.neg();
+      if ((i & 2) != 0) p.neg();
+      number d, r;
+      std::tie(d, r) = number::div(n, p);
+      if (!r.sign()) {
+        EXPECT_TRUE(number::zero <= r);
+      } else {
+        EXPECT_TRUE(r <= number::zero);
+      }
+      EXPECT_LT(r.abs_cmp(p), 0);
+      EXPECT_EQ(n, d * p + r);
+    }
+  }
+}
+
+TEST(Number, DivisionBigPowerTwoMinusOneBigTop) {
+  number w = number::parse_hex(kBigNumber);
+  number p = number::parse_hex(kBigPrime);
+  for (int j = 4; j < 64; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      number n = (w << (sizeof(kBigPrime) * j)) - number::one;
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;

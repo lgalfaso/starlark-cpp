@@ -452,19 +452,25 @@ std::pair<number, number> number::div(const number& dividend,
   int dividend_bit_size;
   int r_d = std::max(0, divisor_bit_size - (kBitsInBase >> 1));
   nbase factor = dd.bits(r_d, kBitsInBase >> 1) + 1;
-  int bits_in_factor = number(factor).bit_size();
+  int bits_in_factor = kBitsInBase - std::countl_zero(factor);
   while ((dividend_bit_size = r.bit_size()) > divisor_bit_size) {
     int r_s = std::max(0, dividend_bit_size - kBitsInBase);
     nbase base_divisor = r.bits(r_s, kBitsInBase);
     nbase base_division = base_divisor / factor;
     number base_division_number(base_division);
-    int shift_factor = (dividend_bit_size - number(base_divisor).bit_size()) -
+    int shift_factor = (dividend_bit_size - (kBitsInBase - std::countl_zero(base_divisor))) -
                        (divisor_bit_size - bits_in_factor);
-    base_division_number <<= shift_factor;
-    number base_division_times_dd = base_division_number * dd;
+    number base_division_times_dd;
+    if (shift_factor > 0) {
+      base_division_times_dd = (dd * base_division_number) << shift_factor;
+      base_division_number <<= shift_factor;
+    } else {
+      base_division_number <<= shift_factor;
+      base_division_times_dd = dd * base_division_number;
+    }
     if (abs_cmp(r.values_, base_division_times_dd.values_) < 0) {
-      if (shift_factor == 0) {
-        break;
+      if ((base_division_number.at(0) & 1) != 0) {
+        base_division_times_dd -= dd;
       }
       base_division_number >>= 1;
       base_division_times_dd >>= 1;
