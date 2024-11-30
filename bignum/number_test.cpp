@@ -675,6 +675,13 @@ TEST(Number, ModPowSimplePower2Mod) {
   EXPECT_EQ(number::one, r.pow_mod(number::one << power2, number::one << (power2 - 1)));
 }
 
+TEST(Number, ModPowOdd) {
+  number result = "5eb71a8bd609c2e5aefc8fe4b2e5d551eef7de5f980c0c4c614fecff165c5296de6df9e8c6d85adfa93e5bab99ffa6626afba78defd3ce1055e9549f8a3064d9edfa72d27f095ce84b6f478740835b33f4f96a262d5a1432014b41fe89c8179964712fa482ef78c3d8035bfd16f9626f4e8c1cfc4b9cebc19c326cbd61e9939e059d65c1964cf31e9e684b8b4892d3532ebefc54a9df552ad03b77e6109492c598923bcc90e22a12dc79c93bff7baa111ec8988da937bda38f8812bc3a7d2cce60add7e9242f0ff1d61ea71b5e62697ad9111899a362023b0e0554af8edd608c309c8a7dad28a9c241a10ce2e9363347acf0758f7efcfb1e37d5fd7b39caaa41d04c1328804a8659d030ae23c49168e6db4f7183c81f6df62840859b0a625d9c7c9ec38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e3916e9701"_number;
+  number p = number::parse_hex(kBigPrime);
+  number r = number::parse_hex(kBigNumber);
+  EXPECT_EQ(result, r.pow_mod(p - number::one, p << 12));
+}
+
 TEST(Number, ModPow) {
   number p = number::parse_hex(kBigPrime);
   number e = "10001"_number;
