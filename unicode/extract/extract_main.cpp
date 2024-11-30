@@ -1,5 +1,7 @@
 // Copyright 2024 Lucas Mirelmann
 
+#include <cstring>
+
 #include <algorithm>
 #include <map>
 #include <set>

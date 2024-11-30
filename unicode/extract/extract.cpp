@@ -1,6 +1,7 @@
 // Copyright 2024 Lucas Mirelmann
 
 #include <cstdlib>
+#include <cstring>
 
 #include "unicode/extract/extract.hpp"
 
