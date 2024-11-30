@@ -121,10 +121,10 @@ int isoctal(int c) {
 bignum::number parse_number(std::string_view input, const char** end_ptr) {
   int base;
   std::size_t pos = 0;
-  if (input.starts_with("0x") || input.starts_with("0X")) {
+  if (input.starts_with("0x")) {
     pos += 2;
     base = 16;
-  } else if (input.starts_with("0") || input.starts_with("0")) {
+  } else if (input.starts_with("0")) {
     pos += 1;
     base = 8;
   } else {
@@ -363,7 +363,7 @@ void lexer::read_numeric() {
   }
   auto value = optional_value.value();
   if (value.find('.') != std::string::npos ||
-      value.find('e') != std::string::npos) {
+      (!value.starts_with("0x") && value.find('e') != std::string::npos)) {
     char* end;
     double double_value = std::strtod(value.c_str(), &end);
     if (double_value == HUGE_VAL || end != &value.back() + 1) {

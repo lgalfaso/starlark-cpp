@@ -18,7 +18,7 @@ using grammar::token_type;
 
 namespace {
 
-std::map<token_type, std::string> mapping = {
+const std::map<token_type, std::string> mapping = {
   {token_type::ampersand, "AMPERSAND"},
   {token_type::ampersand_equals, "AMPERSAND_EQUALS"},
   {token_type::and_, "AND"},
@@ -73,7 +73,6 @@ std::map<token_type, std::string> mapping = {
   {token_type::nonlocal, "NONLOCAL"},
   {token_type::not_, "NOT"},
   {token_type::not_equals, "NOT_EQUALS"},
-  {token_type::not_in, "NOT_IN"},
   {token_type::or_, "OR"},
   {token_type::outdent, "OUTDENT"},
   {token_type::pass, "PASS"},
@@ -109,7 +108,7 @@ std::vector<std::string> readTokens(lexer& input) {
   do {
     input.next_token();
     const auto& current_token = input.current_token();
-    parts.push_back(mapping[current_token.type()]);
+    parts.push_back(mapping.at(current_token.type()));
     if (current_token.type() == token_type::identifier ||
         current_token.type() == token_type::string ||
         current_token.type() == token_type::bytes ||
@@ -194,6 +193,7 @@ TEST(LexerTest, Integer) {
   check("0O1234567", "INT(342391) NEWLINE EOF");
   check("0x1234567890", "INT(78187493520) NEWLINE EOF");
   check("0X1234567890", "INT(78187493520) NEWLINE EOF");
+  check("0X1234567890ABCDEFabcdef", "INT(22007822917795467892608495) NEWLINE EOF");
   check("12345678901234567890", "INT(12345678901234567890) NEWLINE EOF");
 }
 
@@ -362,6 +362,17 @@ foo = b"bar\u1234"
 foo = b"bar\U00012345"
 )starlark",
         "IDENTIFIER(\"foo\") EQUALS ILLEGAL(\"bar\") IDENTIFIER(\"U00012345\") ILLEGAL(\"\") NEWLINE EOF");
+}
+
+TEST(LexerTest, InNotIn) {
+  check(R"starlark(
+1 in [1, 2, 3]
+)starlark",
+        "INT(1) IN LBRACKET INT(1) COMMA INT(2) COMMA INT(3) RBRACKET NEWLINE EOF");
+  check(R"starlark(
+4 not in (1, 2, 3)
+)starlark",
+        "INT(4) NOT IN LPAREN INT(1) COMMA INT(2) COMMA INT(3) RPAREN NEWLINE EOF");
 }
 
 }  // namespace
