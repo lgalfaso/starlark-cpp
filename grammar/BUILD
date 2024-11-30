@@ -1,6 +1,7 @@
 # Copyright 2024 Lucas Mirelmann
 
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
+load("//grammar:starlark_proto_encoder.bzl", "starlark_proto_encoder")
 
 cc_library(
     name = "lexer",
@@ -57,6 +58,73 @@ cc_test(
     ],
     size = "small",
 )
+
+cc_library(
+    name = "parser",
+    srcs = ["parser.cpp"],
+    hdrs = ["parser.hpp"],
+    deps = [
+        ":lexer",
+        "//grammar/proto:starlark_cc_proto",
+        "//third-party:defer",
+    ],
+)
+
+cc_binary(
+    name = "parser_proto_encoder",
+    srcs = ["parser_proto_encoder.cpp"],
+    deps = [
+        "@protobuf//:protobuf",
+        "//grammar/proto:starlark_cc_proto",
+        "//third-party:defer",
+    ],
+    testonly = True,
+)
+
+[[
+  starlark_proto_encoder(
+      name = "parser_test_encoder_" + f.replace("/", "_"),
+      input = [f.removesuffix(".star") + ".txtpb"],
+      testonly = True,
+  ),
+  cc_test(
+      name = "parser_test_" + f.replace("/", "_"),
+      srcs = ["parser_test.cpp"],
+      args = [
+          "$(location " + f + ")",
+          "$(location :parser_test_encoder_" + f.replace("/", "_") + ")",
+      ],
+      deps = [
+          ":parser",
+          "@googletest//:gtest_main",
+          "@protobuf//:protobuf",
+          "//grammar/proto:starlark_cc_proto",
+          "//third-party:defer",
+      ],
+      data = [
+          f,
+          ":parser_test_encoder_" + f.replace("/", "_"),
+      ],
+  )] for f in glob(["parser_tests/*.star"])]
+
+[
+  cc_test(
+      name = "parser_test_" + f.replace("/", "_"),
+      srcs = ["parser_test_invalid.cpp"],
+      args = [
+          "$(location " + f + ")",
+      ],
+      deps = [
+          ":parser",
+          "@googletest//:gtest_main",
+          "@protobuf//:protobuf",
+          "//grammar/proto:starlark_cc_proto",
+          "//third-party:defer",
+      ],
+      data = [
+          f,
+      ],
+  ) for f in glob(["parser_tests_invalid/*.star"])]
 
 cc_library(
     name = "quoted",

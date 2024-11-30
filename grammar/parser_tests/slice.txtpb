@@ -1,0 +1,337 @@
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+            index {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+            slice {
+              start {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+            slice {
+              start {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+              end {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+            slice {
+              start {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+            slice {
+              start {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+              step {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+            slice {
+              start {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+              end {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+            slice {
+              start {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+              end {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+              step {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          slice_expression {
+            primary_expression {
+              slice_expression {
+                primary_expression {
+                  operand {
+                    identifier: "a"
+                  }
+                }
+                index {
+                  value {
+                    primary_expression {
+                      operand {
+                        int_value: "1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            index {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "3"
+          }
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,64 @@
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier: "foo"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      tuple {
+        value {
+          primary_expression {
+            operand {
+              identifier: "a"
+            }
+          }
+        }
+        value {
+          primary_expression {
+            operand {
+              identifier: "b"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      tuple {
+        value {
+          primary_expression {
+            operand {
+              identifier: "b"
+            }
+          }
+        }
+        value {
+          primary_expression {
+            operand {
+              identifier: "a"
+            }
+          }
+        }
+      }
+    }
+  }
+}

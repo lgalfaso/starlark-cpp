@@ -1,0 +1,69 @@
+ statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier: "a"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            identifier: "x"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier: "b"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            identifier: "y"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier: "c"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            identifier: "w"
+          }
+        }
+      }
+    }
+  }
+}

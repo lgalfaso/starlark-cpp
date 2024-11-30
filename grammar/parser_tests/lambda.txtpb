@@ -1,0 +1,183 @@
+statement {
+  expression_statement {
+    expression {
+      value {
+        lambda_expression {
+          test {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        lambda_expression {
+          parameter {
+            identifier: "x"
+          }
+          test {
+            if_expression {
+              if_value {
+                primary_expression {
+                  operand {
+                    identifier: "True"
+                  }
+                }
+              }
+              if_test {
+                primary_expression {
+                  operand {
+                    identifier: "x"
+                  }
+                }
+              }
+              else_value {
+                primary_expression {
+                  operand {
+                    identifier: "False"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        lambda_expression {
+          parameter {
+            identifier: "x"
+          }
+          parameter {
+            identifier: "y"
+          }
+          test {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        lambda_expression {
+          parameter {
+            star {
+            }
+          }
+          test {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        lambda_expression {
+          parameter {
+            identifier: "x"
+            star {
+            }
+          }
+          test {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        lambda_expression {
+          parameter {
+            identifier: "x"
+            star_star {
+            }
+          }
+          test {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        lambda_expression {
+          parameter {
+            identifier: "x"
+          }
+          test {
+            lambda_expression {
+              parameter {
+                identifier: "y"
+              }
+              test {
+                binary_expression {
+                  lhs {
+                    primary_expression {
+                      operand {
+                        identifier: "x"
+                      }
+                    }
+                  }
+                  operator: PLUS
+                  rhs {
+                    primary_expression {
+                      operand {
+                        identifier: "y"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

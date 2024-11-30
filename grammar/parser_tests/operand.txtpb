@@ -1,0 +1,579 @@
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            identifier: "identifier"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1234"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            float_value: 3.14
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            string_value: "this is a string"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            bytes_value: "these are bytes"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            list_expression {
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            list_expression {
+              element {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            list_expression {
+              element {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+              element {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+              element {
+                primary_expression {
+                  operand {
+                    int_value: "3"
+                  }
+                }
+              }
+              element {
+                primary_expression {
+                  operand {
+                    int_value: "4"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            list_comprehension {
+              test {
+                primary_expression {
+                  operand {
+                    identifier: "x"
+                  }
+                }
+              }
+              clause {
+                for_clause {
+                  loop_variable {
+                    operand {
+                      identifier: "x"
+                    }
+                  }
+                  in {
+                    primary_expression {
+                      operand {
+                        identifier: "foo"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            list_comprehension {
+              test {
+                primary_expression {
+                  operand {
+                    identifier: "x"
+                  }
+                }
+              }
+              clause {
+                for_clause {
+                  loop_variable {
+                    operand {
+                      identifier: "x"
+                    }
+                  }
+                  in {
+                    primary_expression {
+                      operand {
+                        identifier: "foo"
+                      }
+                    }
+                  }
+                }
+              }
+              clause {
+                if_clause {
+                  binary_expression {
+                    lhs {
+                      binary_expression {
+                        lhs {
+                          primary_expression {
+                            operand {
+                              identifier: "x"
+                            }
+                          }
+                        }
+                        operator: PERCENT
+                        rhs {
+                          primary_expression {
+                            operand {
+                              int_value: "2"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    operator: EQUALS_EQUALS
+                    rhs {
+                      primary_expression {
+                        operand {
+                          int_value: "0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            dictionary_expression {
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            dictionary_expression {
+              entry {
+                key {
+                  primary_expression {
+                    operand {
+                      string_value: "a"
+                    }
+                  }
+                }
+                value {
+                  primary_expression {
+                    operand {
+                      int_value: "1"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            dictionary_expression {
+              entry {
+                key {
+                  primary_expression {
+                    operand {
+                      string_value: "a"
+                    }
+                  }
+                }
+                value {
+                  primary_expression {
+                    operand {
+                      int_value: "1"
+                    }
+                  }
+                }
+              }
+              entry {
+                key {
+                  primary_expression {
+                    operand {
+                      string_value: "b"
+                    }
+                  }
+                }
+                value {
+                  primary_expression {
+                    operand {
+                      int_value: "2"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            dictionary_comprehension {
+              entry {
+                key {
+                  primary_expression {
+                    operand {
+                      identifier: "x"
+                    }
+                  }
+                }
+                value {
+                  primary_expression {
+                    operand {
+                      identifier: "x"
+                    }
+                  }
+                }
+              }
+              clause {
+                for_clause {
+                  loop_variable {
+                    operand {
+                      identifier: "x"
+                    }
+                  }
+                  in {
+                    primary_expression {
+                      operand {
+                        identifier: "words"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            dictionary_comprehension {
+              entry {
+                key {
+                  primary_expression {
+                    operand {
+                      identifier: "x"
+                    }
+                  }
+                }
+                value {
+                  binary_expression {
+                    lhs {
+                      primary_expression {
+                        operand {
+                          identifier: "x"
+                        }
+                      }
+                    }
+                    operator: PLUS
+                    rhs {
+                      primary_expression {
+                        operand {
+                          identifier: "x"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              clause {
+                for_clause {
+                  loop_variable {
+                    operand {
+                      identifier: "x"
+                    }
+                  }
+                  in {
+                    primary_expression {
+                      operand {
+                        identifier: "words"
+                      }
+                    }
+                  }
+                }
+              }
+              clause {
+                if_clause {
+                  binary_expression {
+                    lhs {
+                      binary_expression {
+                        lhs {
+                          primary_expression {
+                            operand {
+                              identifier: "x"
+                            }
+                          }
+                        }
+                        operator: PERCENT
+                        rhs {
+                          primary_expression {
+                            operand {
+                              int_value: "2"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    operator: EQUALS_EQUALS
+                    rhs {
+                      primary_expression {
+                        operand {
+                          int_value: "0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      tuple { }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      tuple {
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      tuple {
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+        value {
+          primary_expression {
+            operand {
+              int_value: "2"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        binary_expression {
+          lhs {
+            primary_expression {
+              operand {
+                expression {
+                  value {
+                    binary_expression {
+                      lhs {
+                        primary_expression {
+                          operand {
+                            int_value: "1"
+                          }
+                        }
+                      }
+                      operator: PLUS
+                      rhs {
+                        primary_expression {
+                          operand {
+                            int_value: "2"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          operator: STAR
+          rhs {
+            primary_expression {
+              operand {
+                int_value: "3"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

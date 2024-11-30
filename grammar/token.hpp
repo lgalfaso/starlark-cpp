@@ -72,7 +72,6 @@ enum class token_type {
   nonlocal,
   not_,
   not_equals,
-  not_in,
   or_,
   outdent,
   pass,

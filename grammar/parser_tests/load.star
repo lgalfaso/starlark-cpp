@@ -1,0 +1,7 @@
+load("foo")
+load("foo",)
+load("foo", "bar")
+load("foo", "bar",)
+load("foo", man = "bar")
+load("foo", man = "bar", x = "y")
+load("foo", man = "bar", x = "y", )

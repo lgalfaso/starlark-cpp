@@ -1,0 +1,62 @@
+statement {
+  load_statement {
+    module: "foo"
+  }
+}
+statement {
+  load_statement {
+    module: "foo"
+  }
+}
+statement {
+  load_statement {
+    module: "foo"
+    load_params {
+      remote_name: "bar"
+    }
+  }
+}
+statement {
+  load_statement {
+    module: "foo"
+    load_params {
+      remote_name: "bar"
+    }
+  }
+}
+statement {
+  load_statement {
+    module: "foo"
+    load_params {
+      local_name: "man"
+      remote_name: "bar"
+    }
+  }
+}
+statement {
+  load_statement {
+    module: "foo"
+    load_params {
+      local_name: "man"
+      remote_name: "bar"
+    }
+    load_params {
+      local_name: "x"
+      remote_name: "y"
+    }
+  }
+}
+statement {
+  load_statement {
+    module: "foo"
+    load_params {
+      local_name: "man"
+      remote_name: "bar"
+    }
+    load_params {
+      local_name: "x"
+      remote_name: "y"
+    }
+  }
+}
+

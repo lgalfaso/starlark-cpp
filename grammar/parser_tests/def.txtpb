@@ -1,0 +1,29 @@
+statement {
+  def_statement {
+    function_name: "foo"
+    statement {
+      pass_statement { }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name: "bar"
+    parameter {
+      identifier: "x"
+    }
+    statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

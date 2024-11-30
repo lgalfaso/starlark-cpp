@@ -1,0 +1,290 @@
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              call_expression {
+                primary_expression {
+                  call_expression {
+                    primary_expression {
+                      operand {
+                        identifier: "foo"
+                      }
+                    }
+                    argument {
+                      value {
+                        primary_expression {
+                          operand {
+                            int_value: "1"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                argument {
+                  value {
+                    primary_expression {
+                      operand {
+                        int_value: "2"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            argument {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            argument {
+              named_argument {
+                identifier: "bar"
+                value {
+                  primary_expression {
+                    operand {
+                      int_value: "1"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            argument {
+              star_argument {
+                primary_expression {
+                  operand {
+                    identifier: "bar"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          call_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            argument {
+              star_star_argument {
+                primary_expression {
+                  operand {
+                    identifier: "bar"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

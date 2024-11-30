@@ -1,0 +1,53 @@
+// Copyright 2024 Lucas Mirelmann
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <google/protobuf/io/zero_copy_stream.h>
+#include <google/protobuf/text_format.h>
+
+#include "grammar/proto/starlark.pb.h"
+#include "third-party/defer.hpp"
+
+using google::protobuf::TextFormat;
+using google::protobuf::io::FileInputStream;
+using starlark::File;
+
+int main(int argc, char* argv[]) {
+  if (argc != 3) {
+    return 1;
+  }
+
+  int in_fd = open(argv[1], O_RDONLY);
+  if (in_fd < 0) {
+    return 2;
+  }
+  defer { close(in_fd); };
+
+  auto input = std::make_unique<FileInputStream>(in_fd);
+  File starlark_file;
+  if (!TextFormat::Parse(input.get(), &starlark_file)) {
+    return 3;
+  }
+
+#ifdef __APPLE__
+  int out_fd = open(argv[2], O_WRONLY | O_CREAT | O_EXCL);
+#else
+  int out_fd = open(argv[2], O_WRONLY | O_CREAT | O_EXCL, S_IRUSR);
+#endif
+  if (out_fd < 0) {
+    return 4;
+  }
+  defer { close(out_fd); };
+
+  if (!starlark_file.SerializeToFileDescriptor(out_fd)) {
+    return 5;
+  }
+  if (fchmod(out_fd, S_IRUSR) != 0) {
+    return 6;
+  }
+
+  return 0;
+}
+

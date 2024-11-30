@@ -1,0 +1,187 @@
+statement {
+  expression_statement {
+    expression {
+      value {
+        unary_expression {
+          operator: MINUS
+          test {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        unary_expression {
+          operator: PLUS
+          test {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        unary_expression {
+          operator: TILDE
+          test {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        unary_expression {
+          operator: NOT
+          test {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        unary_expression {
+          operator: NOT
+          test {
+            unary_expression {
+              operator: NOT
+              test {
+                unary_expression {
+                  operator: NOT
+                  test {
+                    unary_expression {
+                      operator: NOT
+                      test {
+                        unary_expression {
+                          operator: NOT
+                          test {
+                            unary_expression {
+                              operator: NOT
+                              test {
+                                unary_expression {
+                                  operator: NOT
+                                  test {
+                                    primary_expression {
+                                      operand {
+                                        identifier: "True"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        unary_expression {
+          operator: PLUS
+          test {
+            unary_expression {
+              operator: PLUS
+              test {
+                unary_expression {
+                  operator: PLUS
+                  test {
+                    unary_expression {
+                      operator: PLUS
+                      test {
+                        unary_expression {
+                          operator: PLUS
+                          test {
+                            primary_expression {
+                              operand {
+                                int_value: "1"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        unary_expression {
+          operator: PLUS
+          test {
+            unary_expression {
+              operator: MINUS
+              test {
+                unary_expression {
+                  operator: TILDE
+                  test {
+                    primary_expression {
+                      operand {
+                        int_value: "1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

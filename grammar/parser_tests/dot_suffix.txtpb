@@ -1,0 +1,41 @@
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          dot_expression {
+            primary_expression {
+              operand {
+                identifier: "foo"
+              }
+            }
+            identifier: "bar"
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          dot_expression {
+            primary_expression {
+              dot_expression {
+                primary_expression {
+                  operand {
+                    identifier: "foo"
+                  }
+                }
+                identifier: "bar"
+              }
+            }
+            identifier: "baz"
+          }
+        }
+      }
+    }
+  }
+}

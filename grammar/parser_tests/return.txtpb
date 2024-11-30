@@ -1,0 +1,28 @@
+statement {
+  def_statement {
+    function_name: "foo"
+    statement {
+      return_statement {
+      }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name: "bar"
+    statement {
+      return_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

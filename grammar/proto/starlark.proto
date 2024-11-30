@@ -1,0 +1,283 @@
+syntax = "proto3";
+
+package starlark;
+
+message File {
+  repeated Statement statement = 1;
+}
+
+message Statement {
+  oneof statement_type {
+    DefStmt def_statement = 1;
+    IfStmt if_statement = 2;
+    ForStmt for_statement = 3;
+    ReturnStmt return_statement = 4;
+    BreakStmt break_statement = 5;
+    ContinueStmt continue_statement = 6;
+    PassStmt pass_statement = 7;
+    AssignStmt assign_statement = 8;
+    ExprStmt expression_statement = 9;
+    LoadStmt load_statement = 10;
+  }
+}
+
+message DefStmt {
+  string function_name = 1;
+  repeated Parameter parameter = 2;
+  repeated Statement statement = 3;
+}
+
+message Parameter {
+  string identifier = 1;
+  oneof parameter_type {
+    Test initialization = 2;
+    Star star = 3;
+    StarStar star_star = 4;
+  }
+
+  message Star {}
+
+  message StarStar {}
+}
+
+message IfStmt {
+  Test test = 1;
+  repeated Statement statement = 2;
+  repeated ElseIf elif = 3;
+  repeated Statement else_statement = 4;
+
+  message ElseIf {
+    Test test = 1;
+    repeated Statement statement = 2;
+  }
+}
+
+message ForStmt {
+  // In Python, it is possible for a `target_list` to have a dangling comma. In this case
+  // Python handles this as a tuple deconstruction. Given that Starlark does not allow
+  // for dangling commas, then if there is one `loop_variable` it is a single target
+  // and if there are multiple, it is a tuple deconstruction.
+  repeated PrimaryExpr loop_variable = 1;
+  Expression expression = 2;
+  repeated Statement statement = 3;
+}
+
+message ReturnStmt {
+  Expression expression = 1;
+}
+
+message BreakStmt {}
+
+message ContinueStmt {}
+
+message PassStmt {}
+
+message AssignStmt {
+  Expression lhs = 1;
+  AssignOperator op = 2;
+  Expression rhs = 3;
+
+  enum AssignOperator {
+    UNKNOWN = 0;
+    EQUALS = 1;
+    PLUS_EQUALS = 2;
+    MINUS_EQUALS = 3;
+    STAR_EQUALS = 4;
+    SLASH_EQUALS = 5;
+    SLASH_SLASH_EQUALS = 6;
+    PERCENT_EQUALS = 7;
+    AMP_EQUALS = 8;
+    PIPE_EQUALS = 9;
+    HAT_EQUALS = 10;
+    LESS_LESS_EQUALS = 11;
+    GREATER_GREATER_EQUALS = 12;
+  }
+}
+
+// TODO(lmirelmann): Think whether this message should be removed, and replaced with just `Expression`.
+message ExprStmt {
+  Expression expression = 1;
+}
+
+message LoadStmt {
+  string module = 1;
+  repeated LoadParams load_params = 2;
+
+  message LoadParams {
+    string local_name = 1;
+    string remote_name = 2;
+  }
+}
+
+message Test {
+  oneof test_type {
+    IfExpr if_expression = 1;
+    PrimaryExpr primary_expression = 2;
+    UnaryExpr unary_expression = 3;
+    BinaryExpr binary_expression = 4;
+    LambdaExpr lambda_expression  = 5;
+  }
+
+  message IfExpr {
+    Test if_value = 1;
+    Test if_test = 2;
+    Test else_value = 3;
+  }
+
+  message UnaryExpr {
+    UnaryOperator operator = 1;
+    Test test = 2;
+
+    enum UnaryOperator {
+      UNNKNOWN = 0;
+      PLUS = 1;
+      MINUS = 2;
+      TILDE = 3;
+      NOT = 4;
+    }
+  }
+
+  message BinaryExpr {
+    Test lhs = 1;
+    BinaryOperator operator = 2;
+    Test rhs = 3;
+
+    enum BinaryOperator {
+      UNKNOWN = 0;
+      OR = 1;
+      AND = 2;
+      EQUALS_EQUALS = 3;
+      BANG_EQUALS = 4;
+      LESS_THAN = 5;
+      GREATER_THAN = 6;
+      LESS_THAN_EQUALS = 7;
+      GREATER_THAN_EQUALS = 8;
+      IN = 9;
+      NOT_IN = 10;
+      PIPE = 11;
+      HAT = 12;
+      AMPERSAND = 13;
+      LESS_THAN_LESS_THAN = 14;
+      GREATER_THAN_GREATER_THAN = 15;
+      MINUS = 16;
+      PLUS = 17;
+      STAR = 18;
+      PERCENT = 19;
+      SLASH = 20;
+      SLASH_SLASH = 21;
+    }
+  }
+
+  message LambdaExpr {
+    repeated Parameter parameter = 1;
+    Test test = 2;
+  }
+}
+
+message PrimaryExpr {
+  oneof primary_expression_type {
+    Operand operand = 1;
+    DotExpr dot_expression = 2;
+    CallExpr call_expression = 3;
+    SliceExpr slice_expression = 4;
+  }
+
+  message Operand {
+    oneof operand_type {
+      string identifier = 1;
+      string int_value = 2;
+      double float_value = 3;
+      string string_value = 4;
+      string bytes_value = 5;
+      ListExpr list_expression = 6;
+      ListComp list_comprehension = 7;
+      DictExpr dictionary_expression = 8;
+      DictComp dictionary_comprehension = 9;
+      Expression expression = 10;
+    }
+
+    message ListExpr {
+      repeated Test element = 1;
+    }
+    message ListComp {
+      Test test = 1;
+      repeated CompClause clause = 2;
+    }
+    message DictExpr {
+      repeated Entry entry = 1;
+    }
+    message DictComp {
+      Entry entry = 1;
+      repeated CompClause clause = 2;
+    }
+    message CompClause {
+      oneof comp_clause_type {
+        ForClause for_clause = 1;
+        Test if_clause = 2;
+      }
+
+      message ForClause {
+        repeated PrimaryExpr loop_variable = 1;
+        Test in = 2;
+      }
+    }
+
+    message Entry {
+      Test key = 1;
+      Test value = 2;
+    }
+  }
+
+  message DotExpr {
+    PrimaryExpr primary_expression = 1;
+    string identifier = 2;
+  }
+
+  message CallExpr {
+    PrimaryExpr primary_expression = 1;
+    repeated Argument argument = 2;
+
+    message Argument {
+      oneof argument_type {
+        Test value = 1;
+        NamedArgument named_argument = 2;
+        Test star_argument = 3;
+        Test star_star_argument = 4;
+      }
+
+      message NamedArgument {
+        string identifier = 1;
+        Test value = 2;
+      }
+    }
+  }
+
+  message SliceExpr {
+    PrimaryExpr primary_expression = 1;
+    oneof slice_type {
+      Expression index = 2;
+      Slice slice = 3;
+    }
+
+    // The spec states that it is possible to have a slice that `start` is
+    // of type `Expression`, but it is unclear how that would work.
+    // https://github.com/bazelbuild/starlark/issues/291
+    message Slice {
+      Test start = 1;
+      Test end = 2;
+      Test step = 3;
+    }
+  }
+}
+
+message Expression {
+  oneof expression_type {
+    Test value = 1;
+    Tuple tuple = 2;
+  }
+
+  message Tuple {
+    repeated Test value = 1;
+  }
+}
+

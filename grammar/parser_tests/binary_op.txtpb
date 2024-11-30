@@ -1,0 +1,50 @@
+statement {
+  expression_statement {
+    expression {
+      value {
+        binary_expression {
+          lhs {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+          }
+          operator: IN
+          rhs {
+            primary_expression {
+              operand {
+                identifier: "b"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        binary_expression {
+          lhs {
+            primary_expression {
+              operand {
+                identifier: "a"
+              }
+            }
+          }
+          operator: NOT_IN
+          rhs {
+            primary_expression {
+              operand {
+                identifier: "b"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

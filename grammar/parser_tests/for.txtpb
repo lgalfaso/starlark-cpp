@@ -1,0 +1,102 @@
+statement {
+  for_statement {
+    loop_variable {
+      operand {
+        identifier: "a"
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            list_expression {
+              element {
+                primary_expression {
+                  operand {
+                    identifier: "x"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    statement {
+      pass_statement {
+      }
+    }
+  }
+}
+statement {
+  for_statement {
+    loop_variable {
+      operand {
+        identifier: "a"
+      }
+    }
+    loop_variable {
+      operand {
+        identifier: "b"
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            identifier: "x"
+          }
+        }
+      }
+    }
+    statement {
+      pass_statement {
+      }
+    }
+  }
+}
+statement {
+  for_statement {
+    loop_variable {
+      operand {
+        identifier: "a"
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            identifier: "x"
+          }
+        }
+      }
+    }
+    statement {
+      break_statement {
+      }
+    }
+  }
+}
+statement {
+  for_statement {
+    loop_variable {
+      operand {
+        identifier: "a"
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            identifier: "x"
+          }
+        }
+      }
+    }
+    statement {
+      continue_statement {
+      }
+    }
+  }
+}
+

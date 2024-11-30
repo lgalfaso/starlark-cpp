@@ -1,0 +1,307 @@
+statement {
+  if_statement {
+    test {
+      primary_expression {
+        operand {
+          identifier: "True"
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier: "False"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  if_statement {
+    test {
+      primary_expression {
+        operand {
+          identifier: "False"
+        }
+      }
+    }
+    statement {
+      pass_statement {
+      }
+    }
+    else_statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier: "True"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  if_statement {
+    test {
+      primary_expression {
+        operand {
+          identifier: "a"
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier: "b"
+          }
+        }
+      }
+      statement {
+        expression_statement {
+          expression {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "2"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  if_statement {
+    test {
+      primary_expression {
+        operand {
+          identifier: "a"
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier: "b"
+          }
+        }
+      }
+      statement {
+        expression_statement {
+          expression {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "2"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    else_statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                int_value: "3"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  if_statement {
+    test {
+      primary_expression {
+        operand {
+          identifier: "a"
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier: "b"
+          }
+        }
+      }
+      statement {
+        expression_statement {
+          expression {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "2"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier: "c"
+          }
+        }
+      }
+      statement {
+        expression_statement {
+          expression {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "3"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  if_statement {
+    test {
+      primary_expression {
+        operand {
+          identifier: "a"
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier: "b"
+          }
+        }
+      }
+      statement {
+        expression_statement {
+          expression {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "2"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier: "c"
+          }
+        }
+      }
+      statement {
+        expression_statement {
+          expression {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "3"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    else_statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              operand {
+                int_value: "4"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
