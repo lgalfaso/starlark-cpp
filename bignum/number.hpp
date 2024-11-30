@@ -7,6 +7,8 @@
 #ifndef BIGNUM_NUMBER_HPP_
 #define BIGNUM_NUMBER_HPP_
 
+#include <cstdint>
+
 #include <climits>
 #include <compare>
 #include <ostream>
