@@ -152,3 +152,13 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+cc_test(
+    name = "token_test",
+    srcs = ["token_test.cpp"],
+    deps = [
+        ":token",
+        "@googletest//:gtest_main",
+    ],
+    size = "small",
+)
+
