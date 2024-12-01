@@ -19,6 +19,7 @@ class parser {
   const std::vector<std::string>& get_errors() const;
 
  private:
+  // TODO(lmirelmann): There should be a way to know whether there are any lexer errors.
   lexer lex;
   std::vector<std::string> errors;
   std::vector<int> nested_loops;
