@@ -124,7 +124,19 @@ cc_binary(
       data = [
           f,
       ],
-  ) for f in glob(["parser_tests_invalid/*.star"])]
+  ) for f in glob(["parser_tests_invalid/*.star"])
+]
+
+cc_fuzz_test(
+    name = "parser_fuzz_test",
+    srcs = ["parser_fuzz_test.cpp"],
+    deps = [
+        ":parser",
+    ],
+    corpus = [
+        "//grammar/parser_fuzz_test_corpus:corpus_filegroup",
+    ],
+)
 
 cc_library(
     name = "quoted",
