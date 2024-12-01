@@ -169,6 +169,7 @@ void checkSkipCodepoint(const char* input, std::size_t input_length, std::size_t
 
 TEST(SourceTest, SkipCodepoint) {
   // Normal encoding.
+  checkSkipCodepoint("", 0, 0);
   checkSkipCodepoint("abc", 3, 1);
   checkSkipCodepoint("\xc8\x{b4}abc", 5, 2);
   checkSkipCodepoint("\xe1\x88\x{b4}abc", 6, 3);
