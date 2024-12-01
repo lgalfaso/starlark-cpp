@@ -189,11 +189,11 @@ void lexer::tokenize() {
 
   if (pending_indents < 0) {
     pending_indents++;
-    current = token(token_type::outdent, source_code.pos() - 1, source_code.pos());
+    current = token(token_type::outdent, source_code.pos(), source_code.pos());
     return;
   } else if (pending_indents > 0) {
     pending_indents--;
-    current = token(token_type::indent, source_code.pos() - 1, source_code.pos());
+    current = token(token_type::indent, source_code.pos() - (indent_stack.back() - indent_stack[indent_stack.size() - 2]), source_code.pos());
     return;
   }
 
