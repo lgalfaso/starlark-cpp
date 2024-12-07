@@ -128,7 +128,7 @@ File parser::parse_file() {
   return result;
 }
 
-const std::vector<std::string>& parser::parser_errors() const {
+const std::vector<std::pair<std::string, std::size_t>>& parser::parser_errors() const {
   return errors;
 }
 
@@ -243,7 +243,7 @@ bool parser::expect(token_type expected_token) {
 }
 
 void parser::add_error(const std::string& error_message) {
-  errors.push_back(error_message);
+  errors.emplace_back(error_message, lex.current_token().start());
   recover = true;
 }
 
