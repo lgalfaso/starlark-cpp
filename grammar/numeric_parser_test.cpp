@@ -11,68 +11,69 @@ using unicode::utf8_reader;
 
 namespace {
 
-void check(std::string_view input, std::optional<std::string> expected) {
+void check(std::string_view input, std::optional<std::string> expected, int expected_pos) {
   utf8_reader s(input);
   EXPECT_EQ(read_number(s), expected);
+  EXPECT_EQ(s.pos(), expected_pos);
 }
 
 TEST(NumericParser, Hex) {
-  check("0x0123456789abcdef", "0x123456789abcdef");
-  check("0X0123456789abcdef", "0x123456789abcdef");
-  check("0x0123456789abcdefABCDEF", "0x123456789abcdefABCDEF");
-  check("0x0123456789abcdef or 1", "0x123456789abcdef");
-  check("0x0123456789abcdefor1", "0x123456789abcdef");
-  check("0x0", "0");
-  check("0x0 - 4", "0");
-  check("0x", {});
-  check("0xg", {});
+  check("0x0123456789abcdef", "0x123456789abcdef", 18);
+  check("0X0123456789abcdef", "0x123456789abcdef", 18);
+  check("0x0123456789abcdefABCDEF", "0x123456789abcdefABCDEF", 24);
+  check("0x0123456789abcdef or 1", "0x123456789abcdef", 18);
+  check("0x0123456789abcdefor1", "0x123456789abcdef", 18);
+  check("0x0", "0", 3);
+  check("0x0 - 4", "0", 3);
+  check("0x", {}, 2);
+  check("0xg", {}, 2);
 }
 
 TEST(NumericParser, Octal) {
-  check("0o01234567", "01234567");
-  check("0O01234567", "01234567");
-  check("0o0", "0");
-  check("0o0 - 4", "0");
-  check("0o", {});
-  check("0o8", {});
-  check("0o08", {});
+  check("0o01234567", "01234567", 10);
+  check("0O01234567", "01234567", 10);
+  check("0o0", "0", 3);
+  check("0o0 - 4", "0", 3);
+  check("0o", {}, 2);
+  check("0o8", {}, 3);
+  check("0o08", {}, 4);
 }
 
 TEST(NumericParser, Integer) {
-  check("1234 - 4321", "1234");
-  check("0 - 4321", "0");
-  check("0", "0");
-  check("0123456789", "123456789");
+  check("1234 - 4321", "1234", 4);
+  check("0 - 4321", "0", 1);
+  check("0", "0", 1);
+  check("0123456789", "123456789", 10);
 }
 
 TEST(NumericParser, Float) {
-  check(".1234-4321", ".1234");
-  check("1234.56789-4321", "1234.56789");
-  check("1234.-4321", "1234.");
-  check("1234.56789.to_string() - 4321", "1234.56789");
+  check(".1234-4321", ".1234", 5);
+  check("1234.56789-4321", "1234.56789", 10);
+  check("1234.-4321", "1234.", 5);
+  check("1234.56789.to_string() - 4321", "1234.56789", 10);
 
-  check("1234e1-4321", "1234e1");
-  check(".1234e1-4321", ".1234e1");
-  check("12.34e1-4321", "12.34e1");
-  check("1234.e1-4321", "1234.e1");
-  check("1234e.1-4321", {});
-  check("1234e1.to_string() - 4321", "1234e1");
-  check("1234E1-4321", "1234e1");
+  check("1234e1-4321", "1234e1", 6);
+  check(".1234e1-4321", ".1234e1", 7);
+  check("12.34e1-4321", "12.34e1", 7);
+  check("1234.e1-4321", "1234.e1", 7);
+  check("1234e.1-4321", {}, 5);
+  check("1234e1.to_string() - 4321", "1234e1", 6);
+  check("1234E1-4321", "1234e1", 6);
 
-  check("1234e-1-4321", "1234e-1");
-  check("1234e+1-4321", "1234e1");
-  check("1234e+-1-4321", {});
-  check("1234e-+1-4321", {});
-  check("1234e- 1", {});
+  check("1234e-1-4321", "1234e-1", 7);
+  check("1234e+1-4321", "1234e1", 7);
+  check("1234e+-1-4321", {}, 6);
+  check("1234e-+1-4321", {}, 6);
+  check("1234e- 1", {}, 6);
 
-  check("1234e1echo-4321", "1234e1");
-  check("1234e - 4321", {});
-  check(".e1-4321", {});
+  check("1234e1echo-4321", "1234e1", 6);
+  check("1234e - 4321", {}, 5);
+  check(".e1-4321", {}, 1);
 }
 
 TEST(NumericParser, Invalid) {
-  check("", {});
-  check("foo", {});
+  check("", {}, 0);
+  check("foo", {}, 0);
 }
 
 }  // namespace

@@ -396,7 +396,7 @@ void lexer::read_string() {
     } else if (source_code.capture("b")) {
       is_bytes = true;
     } else {
-      add_error("Unterminated string", start);
+      add_error("Unterminated string", source_code.pos());
       current = token{token_type::illegal, start, source_code.pos(), result};
       return;
     }
@@ -423,7 +423,8 @@ void lexer::read_string() {
         result += source_code.peek();
         source_code.skip();
         break;
-      case '\\':
+      case '\\': {
+        auto escape_start = source_code.pos();
         if (is_raw) {
           // Add the character '\\' and the following one, with these exceptions:
           // "\r\n" => "\n"
@@ -480,7 +481,7 @@ void lexer::read_string() {
           case '\r':
             source_code.skip();
             if (!source_code.capture("\n")) {
-              add_error("Unterminated string", start);
+              add_error("Invalid line continuation", source_code.pos());
               found_errors = true;
             }
             break;
@@ -493,51 +494,52 @@ void lexer::read_string() {
           case '6':
           case '7':
             if (!read_escaped_char(result, !is_bytes, is_bytes ? 255 : 127, 1, 3, 8)) {
-              add_error("Invalid escape sequence", start);
+              add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             break;
           case 'x':
             source_code.skip();
             if (!read_escaped_char(result, !is_bytes, is_bytes ? 255 : 127, 2, 2, 16)) {
-              add_error("Invalid escape sequence", start);
+              add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             break;
           case 'u':
             if (is_bytes) {
-              add_error("Invalid escape sequence", start);
+              add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             source_code.skip();
             if (!read_escaped_char(result, true, 0x10ffff, 4, 4, 16)) {
-              add_error("Invalid escape sequence", start);
+              add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             break;
           case 'U':
             if (is_bytes) {
-              add_error("Invalid escape sequence", start);
+              add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             source_code.skip();
             if (!read_escaped_char(result, true, 0x10ffff, 8, 8, 16)) {
-              add_error("Invalid escape sequence", start);
+              add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             break;
           default:
-            add_error("Invalid escape sequence", start);
+            add_error("Invalid escape sequence", escape_start);
             found_errors = true;
         }
         break;
+      }
       case '\n':
         if (is_triple) {
           result += source_code.peek();
           source_code.skip();
           break;
         }
-        add_error("Unterminated string", start);
+        add_error("Unterminated string", source_code.pos());
         current = token{token_type::illegal, start, source_code.pos(), result};
         return;
       case '\r':
@@ -550,7 +552,7 @@ void lexer::read_string() {
     }
   }
 
-  add_error("Unterminated string", start);
+  add_error("Unterminated string", source_code.pos());
   current = token{token_type::illegal, start, source_code.pos(), result};
 }
 

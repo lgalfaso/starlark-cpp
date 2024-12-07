@@ -104,7 +104,7 @@ const std::map<token_type, std::string> mapping = {
   {token_type::yield, "YIELD"},
 };
 
-std::vector<std::string> readTokens(lexer& input) {
+std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
   std::vector<std::string> parts;
   do {
     input.next_token();
@@ -112,10 +112,13 @@ std::vector<std::string> readTokens(lexer& input) {
     parts.push_back(mapping.at(current_token.type()));
     if (current_token.type() == token_type::identifier ||
         current_token.type() == token_type::string ||
-        current_token.type() == token_type::bytes ||
-        current_token.type() == token_type::illegal) {
+        current_token.type() == token_type::bytes) {
       parts.back() += "(";
       parts.back() += quoted(current_token.string_value());
+      parts.back() += ")";
+    } else if (current_token.type() == token_type::illegal) {
+      parts.back() += "(";
+      parts.back() += quoted(original.substr(current_token.start(), current_token.end() - current_token.start()));
       parts.back() += ")";
     } else if (current_token.type() == token_type::int_) {
       parts.back() += "(";
@@ -147,13 +150,13 @@ std::string join(const std::vector<std::string>& parts) {
 
 void check(std::string_view input, std::string_view expected) {
   lexer l(input);
-  EXPECT_EQ(expected, join(readTokens(l)));
+  EXPECT_EQ(expected, join(read_tokens(l, input)));
   EXPECT_THAT(l.errors(), IsEmpty());
 }
 
 void checkComments(std::string_view input, const std::vector<std::string>& expected_comments) {
   lexer l(input);
-  readTokens(l);
+  read_tokens(l, input);
   std::vector<std::string> comments;
   for (const auto& [comment_start, comment_end] : l.comments()) {
     comments.emplace_back(input.substr(comment_start, comment_end - comment_start));
@@ -163,11 +166,13 @@ void checkComments(std::string_view input, const std::vector<std::string>& expec
 
 void checkErrors(std::string_view input, std::string_view expected, const std::vector<std::string>& expected_errors) {
   lexer l(input);
-  EXPECT_EQ(expected, join(readTokens(l)));
+  EXPECT_EQ(expected, join(read_tokens(l, input)));
 
   std::vector<std::string> errors;
   for (const auto& [error_message, error_pos] : l.errors()) {
     errors.emplace_back(error_message);
+    errors.back() += ":";
+    errors.back() += std::to_string(error_pos);
   }
   EXPECT_EQ(expected_errors, errors);
 }
@@ -197,7 +202,7 @@ TEST(LexerTest, Integer) {
   check("01234567890", "INT(1234567890):0:11 NEWLINE:11:11 EOF:11:11");
   check("0o1234567", "INT(342391):0:9 NEWLINE:9:9 EOF:9:9");
   check("0O1234567", "INT(342391):0:9 NEWLINE:9:9 EOF:9:9");
-  checkErrors("0o18", "ILLEGAL(\"\"):0:3 INT(8):3:4 NEWLINE:4:4 EOF:4:4", { "Unable to parse numeric value" });
+  checkErrors("0o18", "ILLEGAL(\"0o18\"):0:4 NEWLINE:4:4 EOF:4:4", { "Unable to parse numeric value:0" });
   check("0x1234567890", "INT(78187493520):0:12 NEWLINE:12:12 EOF:12:12");
   check("0X1234567890", "INT(78187493520):0:12 NEWLINE:12:12 EOF:12:12");
   check("0X1234567890ABCDEFabcdef", "INT(22007822917795467892608495):0:24 NEWLINE:24:24 EOF:24:24");
@@ -208,14 +213,14 @@ TEST(LexerTest, Float) {
   check("1.0", "FLOAT(1.000000):0:3 NEWLINE:3:3 EOF:3:3");
   check("1234567890.0", "FLOAT(1234567890.000000):0:12 NEWLINE:12:12 EOF:12:12");
   check(".1234", "FLOAT(0.123400):0:5 NEWLINE:5:5 EOF:5:5");
-  checkErrors("2e308", "ILLEGAL(\"2e308\"):0:5 NEWLINE:5:5 EOF:5:5", {"Unable to parse numeric value"});
+  checkErrors("2e308", "ILLEGAL(\"2e308\"):0:5 NEWLINE:5:5 EOF:5:5", {"Unable to parse numeric value:0"});
 }
 
 TEST(LexerTest, Identifier) {
   check("abc", "IDENTIFIER(\"abc\"):0:3 NEWLINE:3:3 EOF:3:3");
   check("şpěćïåł", "IDENTIFIER(\"\\305\\237p\\304\\233\\304\\207\\303\\257\\303\\245\\305\\202\"):0:13 NEWLINE:13:13 EOF:13:13");
   check("r a b c", "IDENTIFIER(\"r\"):0:1 IDENTIFIER(\"a\"):2:3 IDENTIFIER(\"b\"):4:5 IDENTIFIER(\"c\"):6:7 NEWLINE:7:7 EOF:7:7");
-  checkErrors("\xf2\x92\x8d\x{85}", "ILLEGAL(\"\\362\\222\\215\\205\"):0:4 NEWLINE:4:4 EOF:4:4", {"Unexpected character"});
+  checkErrors("\xf2\x92\x8d\x{85}", "ILLEGAL(\"\\362\\222\\215\\205\"):0:4 NEWLINE:4:4 EOF:4:4", {"Unexpected character:0"});
 }
 
 TEST(LexerTest, SimpleFunctionCall) {
@@ -284,7 +289,7 @@ foo = '''b"""a"""r'''
   checkErrors(R"starlark(
 foo = """bar
 )starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\\n\"):7:14 NEWLINE:14:14 EOF:14:14", { "Unterminated string" });
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"\\\"\\\"bar\\n\"):7:14 NEWLINE:14:14 EOF:14:14", { "Unterminated string:14" });
 }
 
 TEST(LexerTest, StringsEscapeSequences) {
@@ -304,8 +309,8 @@ foo = "bar\
   check("foo = \"bar\\\r\n\"",
         "IDENTIFIER(\"foo\"):0:3 EQUALS:4:5 STRING(\"bar\"):6:14 NEWLINE:14:14 EOF:14:14");
   checkErrors("foo = \"bar\\\r\"",
-      "IDENTIFIER(\"foo\"):0:3 EQUALS:4:5 ILLEGAL(\"bar\"):6:13 NEWLINE:13:13 EOF:13:13",
-      { "Unterminated string" });
+      "IDENTIFIER(\"foo\"):0:3 EQUALS:4:5 ILLEGAL(\"\\\"bar\\\\\\r\\\"\"):6:13 NEWLINE:13:13 EOF:13:13",
+      { "Invalid line continuation:12" });
   check(R"starlark(
 foo = "bar\0"
 )starlark",
@@ -321,8 +326,8 @@ foo = "bar\177"
   checkErrors(R"starlark(
 foo = "bar\377"
 )starlark",
-      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:16 NEWLINE:16:17 EOF:17:17",
-      { "Invalid escape sequence" });
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\377\\\"\"):7:16 NEWLINE:16:17 EOF:17:17",
+      { "Invalid escape sequence:11" });
   check(R"starlark(
 foo = "bar\1777"
 )starlark",
@@ -334,8 +339,8 @@ foo = "bar\x7f"
   checkErrors(R"starlark(
 foo = "bar\x80"
 )starlark",
-      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:16 NEWLINE:16:17 EOF:17:17",
-      { "Invalid escape sequence" });
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\x80\\\"\"):7:16 NEWLINE:16:17 EOF:17:17",
+      { "Invalid escape sequence:11" });
   check(R"starlark(
 foo = "bar\u1234"
 )starlark",
@@ -346,28 +351,28 @@ foo = "bar\U00012345"
         "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 STRING(\"bar\\360\\222\\215\\205\"):7:22 NEWLINE:22:23 EOF:23:23");
   checkErrors(R"starlark(
 foo = "bar\U00012)starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:18 NEWLINE:18:18 EOF:18:18",
-       { "Invalid escape sequence", "Unterminated string" });
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\U00012\"):7:18 NEWLINE:18:18 EOF:18:18",
+       { "Invalid escape sequence:11", "Unterminated string:18" });
   checkErrors(R"starlark(
 foo = "bar\u12")starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:16 NEWLINE:16:16 EOF:16:16",
-       { "Invalid escape sequence" });
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\u12\\\"\"):7:16 NEWLINE:16:16 EOF:16:16",
+       { "Invalid escape sequence:11" });
   checkErrors(R"starlark(
 foo = "bar\U00012")starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:19 NEWLINE:19:19 EOF:19:19",
-       { "Invalid escape sequence" });
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\U00012\\\"\"):7:19 NEWLINE:19:19 EOF:19:19",
+       { "Invalid escape sequence:11" });
   checkErrors(R"starlark(
 foo = "bar\U00012 ")starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar \"):7:20 NEWLINE:20:20 EOF:20:20",
-       { "Invalid escape sequence" });
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\U00012 \\\"\"):7:20 NEWLINE:20:20 EOF:20:20",
+       { "Invalid escape sequence:11" });
   checkErrors(R"starlark(
 foo = "bar\UFFFFFFFF")starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:22 NEWLINE:22:22 EOF:22:22",
-       { "Invalid escape sequence" });
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\UFFFFFFFF\\\"\"):7:22 NEWLINE:22:22 EOF:22:22",
+       { "Invalid escape sequence:11" });
   checkErrors(R"starlark(
 foo = "bar\z")starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"barz\"):7:14 NEWLINE:14:14 EOF:14:14",
-       { "Invalid escape sequence" });
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"\\\"bar\\\\z\\\"\"):7:14 NEWLINE:14:14 EOF:14:14",
+       { "Invalid escape sequence:11" });
   check(R"starlark(
 foo = "bar")starlark",
         "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 STRING(\"bar\"):7:13 NEWLINE:13:13 EOF:13:13");
@@ -400,13 +405,13 @@ foo = b"bar\x80"
   checkErrors(R"starlark(
 foo = b"bar\u1234"
 )starlark",
-      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\\341\\210\\264\"):7:19 NEWLINE:19:20 EOF:20:20",
-      { "Invalid escape sequence" });
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"b\\\"bar\\\\u1234\\\"\"):7:19 NEWLINE:19:20 EOF:20:20",
+      { "Invalid escape sequence:12" });
   checkErrors(R"starlark(
 foo = b"bar\U00012345"
 )starlark",
-      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\\360\\222\\215\\205\"):7:23 NEWLINE:23:24 EOF:24:24",
-      { "Invalid escape sequence" });
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"b\\\"bar\\\\U00012345\\\"\"):7:23 NEWLINE:23:24 EOF:24:24",
+      { "Invalid escape sequence:12" });
 }
 
 TEST(LexerTest, InNotIn) {

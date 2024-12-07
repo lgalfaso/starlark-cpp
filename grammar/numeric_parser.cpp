@@ -24,13 +24,16 @@ std::optional<std::string> read_number_over(std::string_view chars, utf8_reader&
     result += next;
     input.skip();
   }
+  if (!input.empty() && isdigit(input.peek())) {
+    while (!input.empty() && isdigit(input.peek())) {
+      input.skip();
+    }
+    return {};
+  }
   if (!accepted_digit) {
     return {};
   }
-  if (!input.empty() && isdigit(input.peek())) {
-    return {};
-  }
-  if (result.empty() && accepted_digit) {
+  if (result.empty()) {
     result = "0";
   }
   return result;
