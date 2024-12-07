@@ -6,6 +6,7 @@ common --experimental_enable_bzlmod
 
 common:macos --cxxopt=-fconstexpr-steps=40000000
 coverage --cxxopt=-fno-inline --cxxopt=-fno-exceptions
+coverage --combined_report=lcov --experimental_generate_llvm_lcov=false --features=-coverage --copt=-coverage --linkopt=-coverage --test_env=GCOV_PREFIX_STRIP=10 --test_env=COVERAGE_GCOV_PATH=/usr/local/opt/llvm/bin/llvm-cov
 
 build:asan --strip=never
 build:asan --copt -fsanitize=address
