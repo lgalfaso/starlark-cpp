@@ -1,0 +1,2 @@
+load("module", foo = bar)
+
