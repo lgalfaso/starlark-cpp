@@ -10,7 +10,7 @@ b"these are bytes"
 [x for x in foo if x % 2 == 0]
 {}
 {'a': 1}
-{'a': 1, 'b': 2}
+{'a': 1, 'b': 2,}
 {x: x for x in words}
 {x: x + x for x in words if x % 2 == 0}
 ()

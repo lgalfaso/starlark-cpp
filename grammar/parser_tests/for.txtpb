@@ -99,4 +99,122 @@ statement {
     }
   }
 }
+statement {
+  for_statement {
+    loop_variable {
+      operand {
+        identifier: "a"
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            identifier: "x"
+          }
+        }
+      }
+    }
+    statement {
+      continue_statement {
+      }
+    }
+  }
+}
+statement {
+  for_statement {
+    loop_variable {
+      dot_expression {
+        primary_expression {
+          operand {
+            identifier: "a"
+          }
+        }
+        identifier: "b"
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            identifier: "x"
+          }
+        }
+      }
+    }
+    statement {
+      continue_statement {
+      }
+    }
+  }
+}
+statement {
+  for_statement {
+    loop_variable {
+      operand {
+        expression {
+          tuple {
+            value {
+              primary_expression {
+                operand {
+                  identifier: "a"
+                }
+              }
+            }
+            value {
+              primary_expression {
+                operand {
+                  identifier: "b"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            identifier: "x"
+          }
+        }
+      }
+    }
+    statement {
+      continue_statement {
+      }
+    }
+  }
+}
+statement {
+  for_statement {
+    loop_variable {
+      operand {
+        identifier: "a"
+      }
+    }
+    expression {
+      value {
+        primary_expression {
+          operand {
+            list_expression {
+              element {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    statement {
+      continue_statement {
+      }
+    }
+  }
+}
 

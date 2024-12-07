@@ -27,3 +27,44 @@ statement {
     }
   }
 }
+statement {
+  def_statement {
+    function_name: "man"
+    parameter {
+      identifier: "x"
+      initialization {
+        primary_expression {
+          operand {
+            identifier: "True"
+          }
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        expression {
+          value {
+            primary_expression {
+              call_expression {
+                primary_expression {
+                  operand {
+                    identifier: "print"
+                  }
+                }
+                argument {
+                  value {
+                    primary_expression {
+                      operand {
+                        identifier: "x"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
