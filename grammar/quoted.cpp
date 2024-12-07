@@ -6,7 +6,7 @@
 
 namespace grammar {
 
-std::string quoted(const std::string& input) {
+std::string quoted(std::string_view input) {
   std::string result;
   result += "\"";
   for (unsigned char c : input) {

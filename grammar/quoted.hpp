@@ -3,13 +3,13 @@
 #ifndef GRAMMAR_QUOTED_HPP_
 #define GRAMMAR_QUOTED_HPP_
 
-#include <string>
+#include <string_view>
 
 #pragma GCC visibility push(default)
 
 namespace grammar {
 
-std::string quoted(const std::string& input);
+std::string quoted(std::string_view input);
 
 }  // namespace grammar
 
