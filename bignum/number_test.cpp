@@ -438,6 +438,23 @@ TEST(Number, ToString) {
   EXPECT_EQ("-1", number(1).neg().to_string(10));
 }
 
+TEST(Number, DivisionUnits) {
+  number n = "fedcba"_number;
+  number d, r;
+  std::tie(d, r) = number::div(n, number::one);
+  EXPECT_EQ(r, number::zero);
+  EXPECT_EQ(d, n);
+  std::tie(d, r) = number::div(n, -number::one);
+  EXPECT_EQ(r, number::zero);
+  EXPECT_EQ(d, n);
+  std::tie(d, r) = number::div(-n, number::one);
+  EXPECT_EQ(r, number::zero);
+  EXPECT_EQ(d, -n);
+  std::tie(d, r) = number::div(-n, -number::one);
+  EXPECT_EQ(r, number::zero);
+  EXPECT_EQ(d, -n);
+}
+
 TEST(Number, DivisionSmall) {
   for (int i = 0; i < 4; ++i) {
     number n = number::one << 40;

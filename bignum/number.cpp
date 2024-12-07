@@ -11,8 +11,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include <iostream>
-
 namespace bignum {
 
 namespace {
@@ -184,11 +182,6 @@ std::string number::to_string(int base) const {
     result = "-" + result;
   }
   return result;
-}
-
-std::ostream& operator<<(std::ostream& os, const number& other) {
-  os << other.hex();
-  return os;
 }
 
 number& number::neg() {
@@ -378,8 +371,9 @@ number number::operator+(const number& other) const {
   return result += other;
 }
 
-number& number::operator-() {
-  return this->neg();
+number number::operator-() const {
+  number result(*this);
+  return result.neg();
 }
 
 number number::operator-(const number& other) const {

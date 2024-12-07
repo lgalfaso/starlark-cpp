@@ -11,7 +11,6 @@
 
 #include <climits>
 #include <compare>
-#include <ostream>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -84,7 +83,7 @@ class number {
   number& operator+=(const number& other);
   number operator+(const number& b) const;
   number& operator-=(const number& other);
-  number& operator-();
+  number operator-() const;
   number operator-(const number& b) const;
   number& operator*=(const number& other);
   number operator*(const number& b) const;
@@ -148,7 +147,6 @@ class number {
   void shift(int pos);
 };
 
-std::ostream& operator<<(std::ostream& os, const number& other);
 
 inline number operator""_number(const char* input, std::size_t size) {
   return number::parse_hex(std::string_view(input, size));
