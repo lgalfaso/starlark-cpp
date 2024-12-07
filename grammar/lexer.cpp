@@ -404,23 +404,20 @@ void lexer::read_string() {
   bool is_single_quote = source_code.peek() == '\'';
   source_code.skip();
   bool is_triple = source_code.capture(is_single_quote ? "''" : "\"\"");
+  bool found_errors = false;
   while (!source_code.empty()) {
     switch (source_code.peek()) {
       case '\'':
       case '"':
-        if (is_single_quote ^ (source_code.peek() == '\'')) {
-          result += source_code.peek();
-          source_code.skip();
-          break;
-        }
-        if (!is_triple) {
-          source_code.skip();
-          current = token{is_bytes ? token_type::bytes : token_type::string, start, source_code.pos(), result};
-          return;
-        }
-        if (( is_single_quote && source_code.capture("'''")) ||
-            (!is_single_quote && source_code.capture("\"\"\""))) {
-          current = token{is_bytes ? token_type::bytes : token_type::string, start, source_code.pos(), result};
+        if ((!is_triple &&  is_single_quote && source_code.capture("'")) ||
+            (!is_triple && !is_single_quote && source_code.capture("\"")) ||
+            ( is_triple &&  is_single_quote && source_code.capture("'''")) ||
+            ( is_triple && !is_single_quote && source_code.capture("\"\"\""))) {
+          if (found_errors) {
+            current = token{token_type::illegal, start, source_code.pos(), result};
+          } else {
+            current = token{is_bytes ? token_type::bytes : token_type::string, start, source_code.pos(), result};
+          }
           return;
         }
         result += source_code.peek();
@@ -434,9 +431,7 @@ void lexer::read_string() {
           result += source_code.peek();
           source_code.skip();
           if (source_code.empty()) {
-            add_error("Unterminated string", start);
-            current = token{token_type::illegal, start, source_code.pos(), result};
-            return;
+            break;
           }
           if (source_code.capture("\r\n") || source_code.capture("\r")) {
             result += "\n";
@@ -448,9 +443,7 @@ void lexer::read_string() {
         }
         source_code.skip();
         if (source_code.empty()) {
-          add_error("Unterminated string", start);
-          current = token{token_type::illegal, start, source_code.pos(), result};
-          return;
+          break;
         }
         switch (source_code.peek()) {
           case 'a':
@@ -488,8 +481,7 @@ void lexer::read_string() {
             source_code.skip();
             if (!source_code.capture("\n")) {
               add_error("Unterminated string", start);
-              current = token{token_type::illegal, start, source_code.pos(), result};
-              return;
+              found_errors = true;
             }
             break;
           case '0':
@@ -502,48 +494,41 @@ void lexer::read_string() {
           case '7':
             if (!read_escaped_char(result, !is_bytes, is_bytes ? 255 : 127, 1, 3, 8)) {
               add_error("Invalid escape sequence", start);
-              current = token{token_type::illegal, start, source_code.pos(), result};
-              return;
+              found_errors = true;
             }
             break;
           case 'x':
             source_code.skip();
             if (!read_escaped_char(result, !is_bytes, is_bytes ? 255 : 127, 2, 2, 16)) {
               add_error("Invalid escape sequence", start);
-              current = token{token_type::illegal, start, source_code.pos(), result};
-              return;
+              found_errors = true;
             }
             break;
           case 'u':
             if (is_bytes) {
               add_error("Invalid escape sequence", start);
-              current = token{token_type::illegal, start, source_code.pos(), result};
-              return;
+              found_errors = true;
             }
             source_code.skip();
             if (!read_escaped_char(result, true, 0x10ffff, 4, 4, 16)) {
               add_error("Invalid escape sequence", start);
-              current = token{token_type::illegal, start, source_code.pos(), result};
-              return;
+              found_errors = true;
             }
             break;
           case 'U':
             if (is_bytes) {
               add_error("Invalid escape sequence", start);
-              current = token{token_type::illegal, start, source_code.pos(), result};
-              return;
+              found_errors = true;
             }
             source_code.skip();
             if (!read_escaped_char(result, true, 0x10ffff, 8, 8, 16)) {
               add_error("Invalid escape sequence", start);
-              current = token{token_type::illegal, start, source_code.pos(), result};
-              return;
+              found_errors = true;
             }
             break;
           default:
             add_error("Invalid escape sequence", start);
-            current = token{token_type::illegal, start, source_code.pos(), result};
-            return;
+            found_errors = true;
         }
         break;
       case '\n':
