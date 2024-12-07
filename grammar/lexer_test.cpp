@@ -15,6 +15,7 @@ using bignum::number;
 using grammar::lexer;
 using grammar::quoted;
 using grammar::token_type;
+using testing::IsEmpty;
 
 namespace {
 
@@ -147,6 +148,7 @@ std::string join(const std::vector<std::string>& parts) {
 void check(std::string_view input, std::string_view expected) {
   lexer l(input);
   EXPECT_EQ(expected, join(readTokens(l)));
+  EXPECT_THAT(l.errors(), IsEmpty());
 }
 
 void checkComments(std::string_view input, const std::vector<std::string>& expected_comments) {
@@ -195,6 +197,7 @@ TEST(LexerTest, Integer) {
   check("01234567890", "INT(1234567890):0:11 NEWLINE:11:11 EOF:11:11");
   check("0o1234567", "INT(342391):0:9 NEWLINE:9:9 EOF:9:9");
   check("0O1234567", "INT(342391):0:9 NEWLINE:9:9 EOF:9:9");
+  checkErrors("0o18", "ILLEGAL(\"\"):0:3 INT(8):3:4 NEWLINE:4:4 EOF:4:4", { "Unable to parse numeric value" });
   check("0x1234567890", "INT(78187493520):0:12 NEWLINE:12:12 EOF:12:12");
   check("0X1234567890", "INT(78187493520):0:12 NEWLINE:12:12 EOF:12:12");
   check("0X1234567890ABCDEFabcdef", "INT(22007822917795467892608495):0:24 NEWLINE:24:24 EOF:24:24");
@@ -212,6 +215,7 @@ TEST(LexerTest, Identifier) {
   check("abc", "IDENTIFIER(\"abc\"):0:3 NEWLINE:3:3 EOF:3:3");
   check("şpěćïåł", "IDENTIFIER(\"\\305\\237p\\304\\233\\304\\207\\303\\257\\303\\245\\305\\202\"):0:13 NEWLINE:13:13 EOF:13:13");
   check("r a b c", "IDENTIFIER(\"r\"):0:1 IDENTIFIER(\"a\"):2:3 IDENTIFIER(\"b\"):4:5 IDENTIFIER(\"c\"):6:7 NEWLINE:7:7 EOF:7:7");
+  checkErrors("\xf2\x92\x8d\x{85}", "ILLEGAL(\"\\362\\222\\215\\205\"):0:4 NEWLINE:4:4 EOF:4:4", {"Unexpected character"});
 }
 
 TEST(LexerTest, SimpleFunctionCall) {
@@ -295,8 +299,9 @@ foo = "bar\
         "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 STRING(\"bar\"):7:14 NEWLINE:14:15 EOF:15:15");
   check("foo = \"bar\\\r\n\"",
         "IDENTIFIER(\"foo\"):0:3 EQUALS:4:5 STRING(\"bar\"):6:14 NEWLINE:14:14 EOF:14:14");
-  check("foo = \"bar\\\r\"",
-        "IDENTIFIER(\"foo\"):0:3 EQUALS:4:5 ILLEGAL(\"bar\"):6:12 ILLEGAL(\"\"):12:13 NEWLINE:13:13 EOF:13:13");
+  checkErrors("foo = \"bar\\\r\"",
+      "IDENTIFIER(\"foo\"):0:3 EQUALS:4:5 ILLEGAL(\"bar\"):6:12 ILLEGAL(\"\"):12:13 NEWLINE:13:13 EOF:13:13",
+      { "Unterminated string", "Unterminated string" });
   check(R"starlark(
 foo = "bar\0"
 )starlark",
@@ -309,10 +314,11 @@ foo = "bar\1"
 foo = "bar\177"
 )starlark",
         "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 STRING(\"bar\\177\"):7:16 NEWLINE:16:17 EOF:17:17");
-  check(R"starlark(
+  checkErrors(R"starlark(
 foo = "bar\377"
 )starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:15 ILLEGAL(\"\"):15:16 NEWLINE:16:17 EOF:17:17");
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:15 ILLEGAL(\"\"):15:16 NEWLINE:16:17 EOF:17:17",
+      { "Invalid escape sequence", "Unterminated string" });
   check(R"starlark(
 foo = "bar\1777"
 )starlark",
@@ -321,10 +327,11 @@ foo = "bar\1777"
 foo = "bar\x7f"
 )starlark",
         "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 STRING(\"bar\\177\"):7:16 NEWLINE:16:17 EOF:17:17");
-  check(R"starlark(
+  checkErrors(R"starlark(
 foo = "bar\x80"
 )starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:15 ILLEGAL(\"\"):15:16 NEWLINE:16:17 EOF:17:17");
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:15 ILLEGAL(\"\"):15:16 NEWLINE:16:17 EOF:17:17",
+      { "Invalid escape sequence", "Unterminated string" });
   check(R"starlark(
 foo = "bar\u1234"
 )starlark",
@@ -333,6 +340,22 @@ foo = "bar\u1234"
 foo = "bar\U00012345"
 )starlark",
         "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 STRING(\"bar\\360\\222\\215\\205\"):7:22 NEWLINE:22:23 EOF:23:23");
+  checkErrors(R"starlark(
+foo = b"bar\U00012)starlark",
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:13 IDENTIFIER(\"U00012\"):13:19 NEWLINE:19:19 EOF:19:19",
+       { "Invalid escape sequence" });
+  checkErrors(R"starlark(
+foo = "bar\U00012")starlark",
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:18 ILLEGAL(\"\"):18:19 NEWLINE:19:19 EOF:19:19",
+       { "Invalid escape sequence", "Unterminated string" });
+  checkErrors(R"starlark(
+foo = "bar\U00012 ")starlark",
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:18 ILLEGAL(\"\"):19:20 NEWLINE:20:20 EOF:20:20",
+       { "Invalid escape sequence", "Unterminated string" });
+  checkErrors(R"starlark(
+foo = "bar\UFFFFFFFF")starlark",
+        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:21 ILLEGAL(\"\"):21:22 NEWLINE:22:22 EOF:22:22",
+       { "Invalid escape sequence", "Unterminated string" });
 }
 
 TEST(LexerTest, RawStrings) {
@@ -359,14 +382,16 @@ foo = b"bar\x7f"
 foo = b"bar\x80"
 )starlark",
         "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 BYTES(\"bar\\200\"):7:17 NEWLINE:17:18 EOF:18:18");
-  check(R"starlark(
+  checkErrors(R"starlark(
 foo = b"bar\u1234"
 )starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:13 IDENTIFIER(\"u1234\"):13:18 ILLEGAL(\"\"):18:19 NEWLINE:19:20 EOF:20:20");
-  check(R"starlark(
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:13 IDENTIFIER(\"u1234\"):13:18 ILLEGAL(\"\"):18:19 NEWLINE:19:20 EOF:20:20",
+      { "Invalid escape sequence", "Unterminated string" });
+  checkErrors(R"starlark(
 foo = b"bar\U00012345"
 )starlark",
-        "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:13 IDENTIFIER(\"U00012345\"):13:22 ILLEGAL(\"\"):22:23 NEWLINE:23:24 EOF:24:24");
+      "IDENTIFIER(\"foo\"):1:4 EQUALS:5:6 ILLEGAL(\"bar\"):7:13 IDENTIFIER(\"U00012345\"):13:22 ILLEGAL(\"\"):22:23 NEWLINE:23:24 EOF:24:24",
+      { "Invalid escape sequence", "Unterminated string" });
 }
 
 TEST(LexerTest, InNotIn) {

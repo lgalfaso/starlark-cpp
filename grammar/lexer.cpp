@@ -358,6 +358,7 @@ void lexer::read_numeric() {
   auto optional_value = read_number(source_code);
   if (!optional_value.has_value()) {
     add_error("Unable to parse numeric value", start);
+    // TODO(lmirelmann): Put into the token the illegal representation.
     current = token{token_type::illegal, start, source_code.pos(), ""};
     return;
   }
