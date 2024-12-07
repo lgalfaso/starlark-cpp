@@ -34,6 +34,6 @@ TEST(Parser, TestCase) {
 
   parser star_parser(starlark_program);
   File actual_starlark_file = star_parser.parse_file();
-  EXPECT_THAT(star_parser.get_errors(), Not(IsEmpty()));
+  EXPECT_FALSE(star_parser.parser_errors().empty() && star_parser.lexer_errors().empty());
 }
 

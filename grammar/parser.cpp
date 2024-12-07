@@ -94,6 +94,7 @@ bool is_target(const PrimaryExpr& primary_expression) {
 bool is_target(const Expression& expression) {
   switch (expression.expression_type_case()) {
     case Expression::kValue:
+    case Expression::EXPRESSION_TYPE_NOT_SET:
       return expression.value().has_primary_expression() &&
         is_target(expression.value().primary_expression());
       break;
@@ -105,8 +106,6 @@ bool is_target(const Expression& expression) {
         }
       }
       return true;
-    case Expression::EXPRESSION_TYPE_NOT_SET:
-      return false;
   }
 }
 
@@ -129,8 +128,12 @@ File parser::parse_file() {
   return result;
 }
 
-const std::vector<std::string>& parser::get_errors() const {
+const std::vector<std::string>& parser::parser_errors() const {
   return errors;
+}
+
+const std::vector<std::pair<std::string, std::size_t>>& parser::lexer_errors() const {
+  return lex.errors();
 }
 
 bool parser::capture(token_type expected_token) {
@@ -562,6 +565,10 @@ Test parser::parse_test(int precedence) {
 PrimaryExpr parser::parse_primary() {
   PrimaryExpr result;
   *result.mutable_operand() = parse_operand();
+  if (result.operand().expression().value().has_primary_expression()) {
+    PrimaryExpr new_result = result.operand().expression().value().primary_expression();
+    result.Swap(&new_result);
+  }
   for (;;) {
     if (capture(token_type::dot)) {
       PrimaryExpr new_result;
@@ -641,10 +648,7 @@ PrimaryExpr::Operand parser::parse_operand() {
     result = parse_list();
   } else if (is_current(token_type::lbrace)) {
     result = parse_dict();
-  } else if (is_current(token_type::lparen)) {
-    if (!expect(token_type::lparen)) {
-      return result;
-    }
+  } else if (capture(token_type::lparen)) {
     *result.mutable_expression() = parse_expression(true);
     if (!expect(token_type::rparen)) {
       return result;

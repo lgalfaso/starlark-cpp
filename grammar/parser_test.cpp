@@ -44,6 +44,7 @@ TEST(Parser, TestCase) {
   EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_file, starlark_file)) <<
       "Expected: " << starlark_file.DebugString() << "\n" <<
       "Actual:   " << actual_starlark_file.DebugString() << "\n";
-  EXPECT_THAT(star_parser.get_errors(), IsEmpty());
+  EXPECT_THAT(star_parser.parser_errors(), IsEmpty());
+  EXPECT_THAT(star_parser.lexer_errors(), IsEmpty());
 }
 

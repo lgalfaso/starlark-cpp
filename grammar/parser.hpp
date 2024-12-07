@@ -16,7 +16,8 @@ class parser {
  public:
   parser(std::string_view input);
   starlark::File parse_file();
-  const std::vector<std::string>& get_errors() const;
+  const std::vector<std::string>& parser_errors() const;
+  const std::vector<std::pair<std::string, std::size_t>>& lexer_errors() const;
 
  private:
   // TODO(lmirelmann): There should be a way to know whether there are any lexer errors.
