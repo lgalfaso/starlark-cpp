@@ -4,7 +4,10 @@
       value {
         primary_expression {
           operand {
-            identifier: "a"
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
           }
         }
       }
@@ -14,7 +17,10 @@
       value {
         primary_expression {
           operand {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
         }
       }
@@ -27,7 +33,10 @@ statement {
       value {
         primary_expression {
           operand {
-            identifier: "b"
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
           }
         }
       }
@@ -37,7 +46,10 @@ statement {
       value {
         primary_expression {
           operand {
-            identifier: "y"
+            identifier {
+              name: "y"
+              nfkc_name: "y"
+            }
           }
         }
       }
@@ -50,7 +62,10 @@ statement {
       value {
         primary_expression {
           operand {
-            identifier: "c"
+            identifier {
+              name: "c"
+              nfkc_name: "c"
+            }
           }
         }
       }
@@ -60,7 +75,10 @@ statement {
       value {
         primary_expression {
           operand {
-            identifier: "w"
+            identifier {
+              name: "w"
+              nfkc_name: "w"
+            }
           }
         }
       }

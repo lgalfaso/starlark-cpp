@@ -6,7 +6,10 @@ statement {
           lhs {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
           }
@@ -14,7 +17,10 @@ statement {
           rhs {
             primary_expression {
               operand {
-                identifier: "b"
+                identifier {
+                  name: "b"
+                  nfkc_name: "b"
+                }
               }
             }
           }
@@ -31,7 +37,10 @@ statement {
           lhs {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
           }
@@ -39,7 +48,10 @@ statement {
           rhs {
             primary_expression {
               operand {
-                identifier: "b"
+                identifier {
+                  name: "b"
+                  nfkc_name: "b"
+                }
               }
             }
           }

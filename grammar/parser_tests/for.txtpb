@@ -2,7 +2,10 @@ statement {
   for_statement {
     loop_variable {
       operand {
-        identifier: "a"
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+        }
       }
     }
     expression {
@@ -13,7 +16,10 @@ statement {
               element {
                 primary_expression {
                   operand {
-                    identifier: "x"
+                    identifier {
+                      name: "x"
+                      nfkc_name: "x"
+                    }
                   }
                 }
               }
@@ -32,19 +38,28 @@ statement {
   for_statement {
     loop_variable {
       operand {
-        identifier: "a"
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+        }
       }
     }
     loop_variable {
       operand {
-        identifier: "b"
+        identifier {
+          name: "b"
+          nfkc_name: "b"
+        }
       }
     }
     expression {
       value {
         primary_expression {
           operand {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
         }
       }
@@ -59,14 +74,20 @@ statement {
   for_statement {
     loop_variable {
       operand {
-        identifier: "a"
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+        }
       }
     }
     expression {
       value {
         primary_expression {
           operand {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
         }
       }
@@ -81,14 +102,20 @@ statement {
   for_statement {
     loop_variable {
       operand {
-        identifier: "a"
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+        }
       }
     }
     expression {
       value {
         primary_expression {
           operand {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
         }
       }
@@ -103,14 +130,20 @@ statement {
   for_statement {
     loop_variable {
       operand {
-        identifier: "a"
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+        }
       }
     }
     expression {
       value {
         primary_expression {
           operand {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
         }
       }
@@ -127,17 +160,26 @@ statement {
       dot_expression {
         primary_expression {
           operand {
-            identifier: "a"
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
           }
         }
-        identifier: "b"
+        identifier {
+          name: "b"
+          nfkc_name: "b"
+        }
       }
     }
     expression {
       value {
         primary_expression {
           operand {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
         }
       }
@@ -157,14 +199,20 @@ statement {
             value {
               primary_expression {
                 operand {
-                  identifier: "a"
+                  identifier {
+                    name: "a"
+                    nfkc_name: "a"
+                  }
                 }
               }
             }
             value {
               primary_expression {
                 operand {
-                  identifier: "b"
+                  identifier {
+                    name: "b"
+                    nfkc_name: "b"
+                  }
                 }
               }
             }
@@ -176,7 +224,10 @@ statement {
       value {
         primary_expression {
           operand {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
         }
       }
@@ -191,7 +242,10 @@ statement {
   for_statement {
     loop_variable {
       operand {
-        identifier: "a"
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+        }
       }
     }
     expression {

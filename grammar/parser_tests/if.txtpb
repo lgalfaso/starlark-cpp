@@ -3,7 +3,10 @@ statement {
     test {
       primary_expression {
         operand {
-          identifier: "True"
+          identifier {
+            name: "True"
+            nfkc_name: "True"
+          }
         }
       }
     }
@@ -13,7 +16,10 @@ statement {
           value {
             primary_expression {
               operand {
-                identifier: "False"
+                identifier {
+                  name: "False"
+                  nfkc_name: "False"
+                }
               }
             }
           }
@@ -27,7 +33,10 @@ statement {
     test {
       primary_expression {
         operand {
-          identifier: "False"
+          identifier {
+            name: "False"
+            nfkc_name: "False"
+          }
         }
       }
     }
@@ -41,7 +50,10 @@ statement {
           value {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -55,7 +67,10 @@ statement {
     test {
       primary_expression {
         operand {
-          identifier: "a"
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+          }
         }
       }
     }
@@ -76,7 +91,10 @@ statement {
       test {
         primary_expression {
           operand {
-            identifier: "b"
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
           }
         }
       }
@@ -101,7 +119,10 @@ statement {
     test {
       primary_expression {
         operand {
-          identifier: "a"
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+          }
         }
       }
     }
@@ -122,7 +143,10 @@ statement {
       test {
         primary_expression {
           operand {
-            identifier: "b"
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
           }
         }
       }
@@ -160,7 +184,10 @@ statement {
     test {
       primary_expression {
         operand {
-          identifier: "a"
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+          }
         }
       }
     }
@@ -181,7 +208,10 @@ statement {
       test {
         primary_expression {
           operand {
-            identifier: "b"
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
           }
         }
       }
@@ -203,7 +233,10 @@ statement {
       test {
         primary_expression {
           operand {
-            identifier: "c"
+            identifier {
+              name: "c"
+              nfkc_name: "c"
+            }
           }
         }
       }
@@ -228,7 +261,10 @@ statement {
     test {
       primary_expression {
         operand {
-          identifier: "a"
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+          }
         }
       }
     }
@@ -249,7 +285,10 @@ statement {
       test {
         primary_expression {
           operand {
-            identifier: "b"
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
           }
         }
       }
@@ -271,7 +310,10 @@ statement {
       test {
         primary_expression {
           operand {
-            identifier: "c"
+            identifier {
+              name: "c"
+              nfkc_name: "c"
+            }
           }
         }
       }

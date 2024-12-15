@@ -1,6 +1,9 @@
 statement {
   def_statement {
-    function_name: "foo"
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
+    }
     statement {
       return_statement {
       }
@@ -9,7 +12,10 @@ statement {
 }
 statement {
   def_statement {
-    function_name: "bar"
+    function_name {
+      name: "bar"
+      nfkc_name: "bar"
+    }
     statement {
       return_statement {
         expression {

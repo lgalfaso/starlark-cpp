@@ -4,7 +4,10 @@ statement {
       value {
         primary_expression {
           operand {
-            identifier: "a"
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
           }
         }
       }

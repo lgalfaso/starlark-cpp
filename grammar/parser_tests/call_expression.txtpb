@@ -6,7 +6,10 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
           }
@@ -23,7 +26,10 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
             argument {
@@ -49,7 +55,10 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
             argument {
@@ -93,7 +102,10 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
             argument {
@@ -119,7 +131,10 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
             argument {
@@ -167,7 +182,10 @@ statement {
                   call_expression {
                     primary_expression {
                       operand {
-                        identifier: "foo"
+                        identifier {
+                          name: "foo"
+                          nfkc_name: "foo"
+                        }
                       }
                     }
                     argument {
@@ -215,12 +233,18 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
             argument {
               named_argument {
-                identifier: "bar"
+                identifier {
+                  name: "bar"
+                  nfkc_name: "bar"
+                }
                 value {
                   primary_expression {
                     operand {
@@ -244,14 +268,20 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
             argument {
               star_argument {
                 primary_expression {
                   operand {
-                    identifier: "bar"
+                    identifier {
+                      name: "bar"
+                      nfkc_name: "bar"
+                    }
                   }
                 }
               }
@@ -270,14 +300,20 @@ statement {
           call_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
             argument {
               star_star_argument {
                 primary_expression {
                   operand {
-                    identifier: "bar"
+                    identifier {
+                      name: "bar"
+                      nfkc_name: "bar"
+                    }
                   }
                 }
               }

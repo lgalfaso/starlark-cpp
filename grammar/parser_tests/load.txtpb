@@ -28,7 +28,10 @@ statement {
   load_statement {
     module: "foo"
     load_params {
-      local_name: "man"
+      local_name {
+        name: "man"
+        nfkc_name: "man"
+      }
       remote_name: "bar"
     }
   }
@@ -37,11 +40,17 @@ statement {
   load_statement {
     module: "foo"
     load_params {
-      local_name: "man"
+      local_name {
+        name: "man"
+        nfkc_name: "man"
+      }
       remote_name: "bar"
     }
     load_params {
-      local_name: "x"
+      local_name {
+        name: "x"
+        nfkc_name: "x"
+      }
       remote_name: "y"
     }
   }
@@ -50,11 +59,17 @@ statement {
   load_statement {
     module: "foo"
     load_params {
-      local_name: "man"
+      local_name {
+        name: "man"
+        nfkc_name: "man"
+      }
       remote_name: "bar"
     }
     load_params {
-      local_name: "x"
+      local_name {
+        name: "x"
+        nfkc_name: "x"
+      }
       remote_name: "y"
     }
   }

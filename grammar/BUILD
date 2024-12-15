@@ -70,6 +70,7 @@ cc_library(
         ":lexer",
         "//grammar/proto:starlark_cc_proto",
         "//third-party:defer",
+        "//unicode:normalization",
     ],
 )
 

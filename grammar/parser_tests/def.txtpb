@@ -1,6 +1,9 @@
 statement {
   def_statement {
-    function_name: "foo"
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
+    }
     statement {
       pass_statement { }
     }
@@ -8,9 +11,15 @@ statement {
 }
 statement {
   def_statement {
-    function_name: "bar"
+    function_name {
+      name: "bar"
+      nfkc_name: "bar"
+    }
     parameter {
-      identifier: "x"
+      identifier {
+        name: "x"
+        nfkc_name: "x"
+      }
     }
     statement {
       expression_statement {
@@ -18,7 +27,10 @@ statement {
           value {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -29,13 +41,22 @@ statement {
 }
 statement {
   def_statement {
-    function_name: "man"
+    function_name {
+      name: "man"
+      nfkc_name: "man"
+    }
     parameter {
-      identifier: "x"
+      identifier {
+        name: "x"
+        nfkc_name: "x"
+      }
       initialization {
         primary_expression {
           operand {
-            identifier: "True"
+            identifier {
+              name: "True"
+              nfkc_name: "True"
+            }
           }
         }
       }
@@ -48,14 +69,20 @@ statement {
               call_expression {
                 primary_expression {
                   operand {
-                    identifier: "print"
+                    identifier {
+                      name: "print"
+                      nfkc_name: "print"
+                    }
                   }
                 }
                 argument {
                   value {
                     primary_expression {
                       operand {
-                        identifier: "x"
+                        identifier {
+                          name: "x"
+                          nfkc_name: "x"
+                        }
                       }
                     }
                   }

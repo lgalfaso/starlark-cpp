@@ -6,7 +6,10 @@ statement {
           slice_expression {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
             index {
@@ -42,7 +45,10 @@ statement {
           slice_expression {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
             slice {
@@ -78,7 +84,10 @@ statement {
           slice_expression {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
             slice {
@@ -121,7 +130,10 @@ statement {
           slice_expression {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
             slice {
@@ -157,7 +169,10 @@ statement {
           slice_expression {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
             slice {
@@ -200,7 +215,10 @@ statement {
           slice_expression {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
             slice {
@@ -243,7 +261,10 @@ statement {
           slice_expression {
             primary_expression {
               operand {
-                identifier: "a"
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
               }
             }
             slice {
@@ -295,7 +316,10 @@ statement {
               slice_expression {
                 primary_expression {
                   operand {
-                    identifier: "a"
+                    identifier {
+                      name: "a"
+                      nfkc_name: "a"
+                    }
                   }
                 }
                 index {

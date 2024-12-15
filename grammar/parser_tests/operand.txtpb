@@ -4,7 +4,10 @@ statement {
       value {
         primary_expression {
           operand {
-            identifier: "identifier"
+            identifier {
+              name: "identifier"
+              nfkc_name: "identifier"
+            }
           }
         }
       }
@@ -150,7 +153,10 @@ statement {
               test {
                 primary_expression {
                   operand {
-                    identifier: "x"
+                    identifier {
+                      name: "x"
+                      nfkc_name: "x"
+                    }
                   }
                 }
               }
@@ -158,13 +164,19 @@ statement {
                 for_clause {
                   loop_variable {
                     operand {
-                      identifier: "x"
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
                     }
                   }
                   in {
                     primary_expression {
                       operand {
-                        identifier: "foo"
+                        identifier {
+                          name: "foo"
+                          nfkc_name: "foo"
+                        }
                       }
                     }
                   }
@@ -187,7 +199,10 @@ statement {
               test {
                 primary_expression {
                   operand {
-                    identifier: "x"
+                    identifier {
+                      name: "x"
+                      nfkc_name: "x"
+                    }
                   }
                 }
               }
@@ -195,13 +210,19 @@ statement {
                 for_clause {
                   loop_variable {
                     operand {
-                      identifier: "x"
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
                     }
                   }
                   in {
                     primary_expression {
                       operand {
-                        identifier: "foo"
+                        identifier {
+                          name: "foo"
+                          nfkc_name: "foo"
+                        }
                       }
                     }
                   }
@@ -215,7 +236,10 @@ statement {
                         lhs {
                           primary_expression {
                             operand {
-                              identifier: "x"
+                              identifier {
+                                name: "x"
+                                nfkc_name: "x"
+                              }
                             }
                           }
                         }
@@ -348,14 +372,20 @@ statement {
                 key {
                   primary_expression {
                     operand {
-                      identifier: "x"
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
                     }
                   }
                 }
                 value {
                   primary_expression {
                     operand {
-                      identifier: "x"
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
                     }
                   }
                 }
@@ -364,13 +394,19 @@ statement {
                 for_clause {
                   loop_variable {
                     operand {
-                      identifier: "x"
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
                     }
                   }
                   in {
                     primary_expression {
                       operand {
-                        identifier: "words"
+                        identifier {
+                          name: "words"
+                          nfkc_name: "words"
+                        }
                       }
                     }
                   }
@@ -394,7 +430,10 @@ statement {
                 key {
                   primary_expression {
                     operand {
-                      identifier: "x"
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
                     }
                   }
                 }
@@ -403,7 +442,10 @@ statement {
                     lhs {
                       primary_expression {
                         operand {
-                          identifier: "x"
+                          identifier {
+                            name: "x"
+                            nfkc_name: "x"
+                          }
                         }
                       }
                     }
@@ -411,7 +453,10 @@ statement {
                     rhs {
                       primary_expression {
                         operand {
-                          identifier: "x"
+                          identifier {
+                            name: "x"
+                            nfkc_name: "x"
+                          }
                         }
                       }
                     }
@@ -422,13 +467,19 @@ statement {
                 for_clause {
                   loop_variable {
                     operand {
-                      identifier: "x"
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
                     }
                   }
                   in {
                     primary_expression {
                       operand {
-                        identifier: "words"
+                        identifier {
+                          name: "words"
+                          nfkc_name: "words"
+                        }
                       }
                     }
                   }
@@ -442,7 +493,10 @@ statement {
                         lhs {
                           primary_expression {
                             operand {
-                              identifier: "x"
+                              identifier {
+                                name: "x"
+                                nfkc_name: "x"
+                              }
                             }
                           }
                         }

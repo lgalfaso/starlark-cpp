@@ -6,7 +6,10 @@ statement {
           test {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -21,28 +24,40 @@ statement {
       value {
         lambda_expression {
           parameter {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
           test {
             if_expression {
               if_value {
                 primary_expression {
                   operand {
-                    identifier: "True"
+                    identifier {
+                      name: "True"
+                      nfkc_name: "True"
+                    }
                   }
                 }
               }
               if_test {
                 primary_expression {
                   operand {
-                    identifier: "x"
+                    identifier {
+                      name: "x"
+                      nfkc_name: "x"
+                    }
                   }
                 }
               }
               else_value {
                 primary_expression {
                   operand {
-                    identifier: "False"
+                    identifier {
+                      name: "False"
+                      nfkc_name: "False"
+                    }
                   }
                 }
               }
@@ -59,15 +74,24 @@ statement {
       value {
         lambda_expression {
           parameter {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
           parameter {
-            identifier: "y"
+            identifier {
+              name: "y"
+              nfkc_name: "y"
+            }
           }
           test {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -88,7 +112,10 @@ statement {
           test {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -103,14 +130,20 @@ statement {
       value {
         lambda_expression {
           parameter {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
             star {
             }
           }
           test {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -125,14 +158,20 @@ statement {
       value {
         lambda_expression {
           parameter {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
             star_star {
             }
           }
           test {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -147,19 +186,28 @@ statement {
       value {
         lambda_expression {
           parameter {
-            identifier: "x"
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
           }
           test {
             lambda_expression {
               parameter {
-                identifier: "y"
+                identifier {
+                  name: "y"
+                  nfkc_name: "y"
+                }
               }
               test {
                 binary_expression {
                   lhs {
                     primary_expression {
                       operand {
-                        identifier: "x"
+                        identifier {
+                          name: "x"
+                          nfkc_name: "x"
+                        }
                       }
                     }
                   }
@@ -167,7 +215,10 @@ statement {
                   rhs {
                     primary_expression {
                       operand {
-                        identifier: "y"
+                        identifier {
+                          name: "y"
+                          nfkc_name: "y"
+                        }
                       }
                     }
                   }

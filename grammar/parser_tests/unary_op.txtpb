@@ -61,7 +61,10 @@ statement {
           test {
             primary_expression {
               operand {
-                identifier: "True"
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
               }
             }
           }
@@ -97,7 +100,10 @@ statement {
                                   test {
                                     primary_expression {
                                       operand {
-                                        identifier: "True"
+                                        identifier {
+                                          name: "True"
+                                          nfkc_name: "True"
+                                        }
                                       }
                                     }
                                   }

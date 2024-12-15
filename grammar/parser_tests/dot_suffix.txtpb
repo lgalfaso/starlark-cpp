@@ -6,10 +6,16 @@ statement {
           dot_expression {
             primary_expression {
               operand {
-                identifier: "foo"
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                }
               }
             }
-            identifier: "bar"
+            identifier {
+              name: "bar"
+              nfkc_name: "bar"
+            }
           }
         }
       }
@@ -26,13 +32,22 @@ statement {
               dot_expression {
                 primary_expression {
                   operand {
-                    identifier: "foo"
+                    identifier {
+                      name: "foo"
+                      nfkc_name: "foo"
+                    }
                   }
                 }
-                identifier: "bar"
+                identifier {
+                  name: "bar"
+                  nfkc_name: "bar"
+                }
               }
             }
-            identifier: "baz"
+            identifier {
+              name: "baz"
+              nfkc_name: "baz"
+            }
           }
         }
       }
