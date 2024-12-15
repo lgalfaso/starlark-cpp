@@ -6,6 +6,8 @@
 
 #include "unicode/ucd_code_points.hpp"
 
+using testing::SizeIs;
+
 namespace {
 
 const char* XID_Start = "XID_Start";
@@ -51,13 +53,10 @@ void read_code_points(const char* file,
 constexpr int max_unicode = 0x10FFFF;
 
 TEST(UcdTest, IsXIdStart) {
-  auto test_srcdir = std::getenv("TEST_SRCDIR");
-  if (test_srcdir == nullptr) {
-    GTEST_SKIP() << "TEST_SRCDIR not defined";
-  }
-  std::string path = std::string {test_srcdir} +
-      "/_main~_repo_rules~ucd/DerivedCoreProperties.txt";
+  const auto& argv = ::testing::internal::GetArgvs();
+  ASSERT_THAT(argv, SizeIs(2));
 
+  std::string path = argv[1];
   std::set<std::uint64_t> all_cps;
   read_code_points(path.c_str(), all_cps, XID_Start);
 
@@ -67,13 +66,10 @@ TEST(UcdTest, IsXIdStart) {
 }
 
 TEST(UcdTest, XIsIdContinue) {
-  auto test_srcdir = std::getenv("TEST_SRCDIR");
-  if (test_srcdir == nullptr) {
-    GTEST_SKIP() << "TEST_SRCDIR not defined";
-  }
-  std::string path = std::string {test_srcdir} +
-      "/_main~_repo_rules~ucd/DerivedCoreProperties.txt";
+  const auto& argv = ::testing::internal::GetArgvs();
+  ASSERT_THAT(argv, SizeIs(2));
 
+  std::string path = argv[1];
   std::set<std::uint64_t> all_cps;
   read_code_points(path.c_str(), all_cps, XID_Continue);
 

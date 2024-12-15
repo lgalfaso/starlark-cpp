@@ -57,6 +57,9 @@ cc_test(
         ":ucd",
         "@googletest//:gtest_main",
     ],
+    args = [
+        "$(location @ucd//:DerivedCoreProperties.txt)",
+    ],
     data = [
         "@ucd//:DerivedCoreProperties.txt",
     ],
