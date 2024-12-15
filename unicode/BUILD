@@ -22,6 +22,35 @@ cc_test(
 )
 
 cc_library(
+    name = "normalization",
+    srcs = ["normalization.cpp"],
+    hdrs = ["normalization.hpp"],
+    deps = [
+        ":encode",
+        ":ucd",
+        ":utf8_reader",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "normalization_test",
+    srcs = ["normalization_test.cpp"],
+    deps = [
+        ":normalization",
+        ":ucd",
+        "@googletest//:gtest_main",
+    ],
+    args = [
+        "$(location @ucd//:NormalizationTest.txt)",
+    ],
+    data = [
+        "@ucd//:NormalizationTest.txt",
+    ],
+    size = "small",
+)
+
+cc_library(
     name = "utf8_reader",
     srcs = ["utf8_reader.cpp"],
     hdrs = ["utf8_reader.hpp"],
