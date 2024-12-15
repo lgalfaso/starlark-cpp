@@ -11,9 +11,33 @@ std::set<std::string> binary_unicode_properties = {
   "XID_Continue", "XID_Start"
 };
 
+void read_raw_code_points(const char* file,
+                          std::set<std::uint32_t>& set) {
+  FILE* fp = fopen(file, "r");
+  char* line = nullptr;
+  size_t len = 0;
+
+  if (fp == nullptr) {
+    std::exit(1);
+  }
+
+  while ((getline(&line, &len, fp)) != -1) {
+    int code_point;
+    int count = std::sscanf(line, "%x", &code_point);
+    if (count > 0) {
+      set.insert(code_point);
+    }
+  }
+
+  fclose(fp);
+  if (line) {
+    free(line);
+  }
+}
+
 void read_all_code_points(const char* file,
     std::map<std::string,
-             std::set<std::pair<std::uint64_t, std::uint64_t>>>& set) {
+             std::set<std::pair<std::uint32_t, std::uint32_t>>>& set) {
   FILE* fp = fopen(file, "r");
   char* line = nullptr;
   size_t len = 0;
@@ -55,6 +79,79 @@ void read_all_code_points(const char* file,
           set[alias].insert(std::make_pair(start, end));
         }
       }
+    }
+  }
+
+  fclose(fp);
+  if (line) {
+    free(line);
+  }
+}
+
+void read_unicode_data(const char* file,
+    std::map<std::uint32_t,
+             std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+  FILE* fp = fopen(file, "r");
+  char* line = nullptr;
+  size_t len = 0;
+
+  if (fp == nullptr) {
+    std::exit(1);
+  }
+
+  int previous_code = 0;
+  while ((getline(&line, &len, fp)) != -1) {
+    if (len > 0) {
+      char* sline = line;
+      int code, length;
+      int count = std::sscanf(sline, "%x%n", &code, &length);
+      if (count != 1) {
+        exit(1);
+      }
+      sline += length;
+      for (int i = 0; i < 3; sline++) {
+        if (sline[0] == ';') {
+          ++i;
+        }
+      }
+      std::uint32_t ccc;
+      count = std::sscanf(sline, "%d%n", &ccc, &length);
+      if (count != 1) {
+        exit(1);
+      }
+      sline += length;
+      for (int i = 0; i < 2; sline++) {
+        if (sline[0] == ';') {
+          ++i;
+        }
+      }
+      bool canonical = true;
+      if (sline[0] == '<') {
+        canonical = false;
+        while (sline[0] != ' ') {
+          ++sline;
+        }
+      }
+      std::vector<std::uint32_t> decomposition;
+      while (sline[0] != ';') {
+        int decomposition_code;
+        count = std::sscanf(sline, "%x%n", &decomposition_code, &length);
+        if (count != 1) {
+          exit(1);
+        }
+        decomposition.push_back(decomposition_code);
+        sline += length;
+      }
+      if (std::strstr(line, "Last>") != nullptr) {
+        if (decomposition.size() > 0) {
+          exit(1);
+        }
+        for (int i = previous_code + 1; i < code; ++i) {
+          unicode_data.emplace(i, std::make_tuple(ccc, canonical, std::move(decomposition)));
+        }
+      }
+      unicode_data.emplace(code, std::make_tuple(ccc, canonical, std::move(decomposition)));
+      previous_code = code;
     }
   }
 

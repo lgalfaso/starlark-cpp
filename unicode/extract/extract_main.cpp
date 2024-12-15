@@ -21,7 +21,20 @@ const char* HPP_HEADER = R"CPP(// Copyright 2024 Lucas Mirelmann
 
 #include <cstdint>
 
+#include <optional>
+#include <vector>
+
 namespace ucd {
+
+bool is_assigned(std::uint32_t code_point);
+
+bool is_compatibility_decomposition(std::uint32_t code_point);
+
+const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point);
+
+int ccc(std::uint32_t code_point);
+
+std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs);
 
 )CPP";
 
@@ -36,6 +49,7 @@ const char* CPP_HEADER = R"CPP(// Copyright 2024 Lucas Mirelmann
 // Generated file, do not edit.
 
 #include <bitset>
+#include <map>
 
 #include "%s"
 
@@ -51,7 +65,7 @@ constexpr int CODEPOINTS_PER_LINE = 64;
 
 #define FWRITE(STR, OUTPUT) fwrite(STR, sizeof(char), std::strlen(STR), OUTPUT)
 
-void print_in_multiple_lines(const char* characters, int& count, uint64_t to_print, FILE* output) {
+void print_in_multiple_lines(const char* characters, int& count, uint32_t to_print, FILE* output) {
   while (to_print != 0) {
     if (count % CODEPOINTS_PER_LINE == 0) {
       if (count != 0) {
@@ -59,7 +73,7 @@ void print_in_multiple_lines(const char* characters, int& count, uint64_t to_pri
       }
       FWRITE("    \"", output);
     }
-    uint64_t will_print = std::min<uint64_t>(CODEPOINTS_PER_LINE - (count % CODEPOINTS_PER_LINE), to_print);
+    uint32_t will_print = std::min<uint32_t>(CODEPOINTS_PER_LINE - (count % CODEPOINTS_PER_LINE), to_print);
     fwrite(characters, sizeof(char), will_print, output);
     count += will_print;
     to_print -= will_print;
@@ -68,24 +82,24 @@ void print_in_multiple_lines(const char* characters, int& count, uint64_t to_pri
 
 void print_code_points(
       FILE* output,
-      const std::set<std::pair<std::uint64_t, std::uint64_t>>& set,
+      const std::set<std::pair<std::uint32_t, std::uint32_t>>& set,
                       const std::string& fn) {
   if (set.size() == 0) {
     fprintf(output,
-            "bool %s(std::uint64_t code_point) {\n"
+            "bool %s(std::uint32_t code_point) {\n"
             "  return false;\n"
             "}\n\n",
             fn.c_str());
     return;
   }
 
-  std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> blocks;
+  std::vector<std::vector<std::pair<std::uint32_t, std::uint32_t>>> blocks;
   {
     // Split into chunks. Each chunk will be a single bitset.
     constexpr int MAX_GAP_SIZE = (1 << 16) - 1;
 
     bool create_new_block = true;
-    std::uint64_t previous_max = 0;
+    std::uint32_t previous_max = 0;
     for (const auto& cps : set) {
       if (create_new_block ||
           cps.first - previous_max > MAX_GAP_SIZE ||
@@ -110,7 +124,7 @@ void print_code_points(
       }
       fprintf(output, "constexpr const char* %s_bitset_%lu =\n", fn.c_str(), pos);
       int count = 0;
-      std::uint64_t previous_min = mini_block.back().second + 1;
+      std::uint32_t previous_min = mini_block.back().second + 1;
       for (auto it = mini_block.rbegin(); it < mini_block.rend(); ++it) {
         auto [min_cp, max_cp] = *it;
         print_in_multiple_lines(zeros_string.c_str(), count, previous_min - max_cp - 1, output);
@@ -122,7 +136,7 @@ void print_code_points(
   }
   {
     // Print the functions that check for the code points.
-    fprintf(output, "bool %s(std::uint64_t code_point) {\n", fn.c_str());
+    fprintf(output, "bool %s(std::uint32_t code_point) {\n", fn.c_str());
     bool add_blank_line = false;
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
@@ -131,7 +145,7 @@ void print_code_points(
       }
       add_blank_line = true;
       fprintf(output,
-              "  static constexpr std::bitset<0x%llX> all_cp_%lu(%s_bitset_%lu);\n",
+              "  static constexpr std::bitset<0x%X> all_cp_%lu(%s_bitset_%lu);\n",
               mini_block.back().second + 1 - mini_block.front().first,
               pos, fn.c_str(), pos);
     }
@@ -148,15 +162,141 @@ void print_code_points(
       auto min_cp = mini_block.front().first;
       auto max_cp = mini_block.back().second;
       if (min_cp == max_cp) {
-        fprintf(output, "(code_point == 0x%llX)", min_cp);
+        fprintf(output, "(code_point == 0x%X)", min_cp);
       } else if (mini_block.size() != 1) {
-        fprintf(output, "(0x%llX <= code_point && code_point <= 0x%llX && all_cp_%lu[code_point - 0x%llX])", min_cp, max_cp, pos, min_cp);
+        fprintf(output, "(0x%X <= code_point && code_point <= 0x%X && all_cp_%lu[code_point - 0x%X])", min_cp, max_cp, pos, min_cp);
       } else {
-        fprintf(output, "(0x%llX <= code_point && code_point <= 0x%llX)", min_cp, max_cp);
+        fprintf(output, "(0x%X <= code_point && code_point <= 0x%X)", min_cp, max_cp);
       }
     }
     FWRITE(";\n}\n\n", output);
   }
+}
+
+void print_decomposition(FILE* output, const std::map<std::uint32_t,
+               std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+  FWRITE("const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point) {\n", output);
+  FWRITE("  static const std::vector<std::uint32_t> default_value;\n", output);
+  FWRITE("  static const std::map<std::uint32_t, std::vector<std::uint32_t>> all_dc = {", output);
+  int pos = 0;
+  for (const auto& entry : unicode_data) {
+    const auto& dc = std::get<2>(entry.second);
+    if (dc.size() != 0) {
+      if (pos % 6 == 0) {
+        FWRITE("\n   ", output);
+      }
+      fprintf(output, " {0x%05X, {", entry.first);
+      for (auto c : dc) {
+        fprintf(output, " 0x%05X,", c);
+      }
+      FWRITE("}},", output);
+      ++pos;
+    }
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto dc_candidate = all_dc.find(code_point); dc_candidate != all_dc.end()) {\n", output);
+  FWRITE("    return dc_candidate->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return default_value;\n", output);
+  FWRITE("}\n\n", output);
+}
+
+void print_ccc(FILE* output, const std::map<std::uint32_t,
+               std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+  FWRITE("int ccc(std::uint32_t code_point) {\n", output);
+  FWRITE("  static const std::map<std::uint32_t, int> all_ccc = {", output);
+  int pos = 0;
+  for (const auto& entry : unicode_data) {
+    if (std::get<0>(entry.second) != 0) {
+      if (pos % 6 == 0) {
+        FWRITE("\n   ", output);
+      }
+      fprintf(output, " {0x%05X, %3d},", entry.first, std::get<0>(entry.second));
+      ++pos;
+    }
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto ccc_candidate = all_ccc.find(code_point); ccc_candidate != all_ccc.end()) {\n", output);
+  FWRITE("    return ccc_candidate->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return 0;\n", output);
+  FWRITE("}\n\n", output);
+}
+
+void print_canonical_composition(FILE* output, const std::map<std::uint32_t,
+               std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data,
+               const std::set<std::uint32_t>& comp_exclusions) {
+  FWRITE("std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs) {\n", output);
+  FWRITE("  static const std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> all_cc = {", output);
+  int pos = 0;
+  for (const auto& entry : unicode_data) {
+    if (std::get<0>(entry.second) == 0 && std::get<1>(entry.second) && !comp_exclusions.contains(entry.first)) {
+      auto& cc = std::get<2>(entry.second);
+      if (cc.size() == 0 || cc.size() == 1) {
+        continue;
+      }
+      if (cc.size() != 2) {
+        exit(1);
+      }
+      // If the decomposition begins with a non-starter, then this is not a candidate for composition.
+      if (std::get<0>(unicode_data.at(cc[0])) != 0) {
+        continue;
+      }
+      if (pos % 6 == 0) {
+        FWRITE("\n   ", output);
+      }
+      fprintf(output, " {{0x%05X, 0x%05X}, 0x%05X},", cc[0], cc[1], entry.first);
+      ++pos;
+    }
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto cc_candidate = all_cc.find(std::make_pair(lhs, rhs)); cc_candidate != all_cc.end()) {\n", output);
+  FWRITE("    return cc_candidate->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return {};\n", output);
+  FWRITE("}\n\n", output);
+}
+
+
+std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::set<std::uint32_t>& input) {
+  std::set<std::pair<std::uint32_t, std::uint32_t>> result;
+  std::uint32_t min = 0;
+  std::uint32_t previous = 0;
+  bool first = true;
+  for (const auto& entry : input) {
+    if (first) {
+      min = entry;
+      first = false;
+    } else if (previous + 1 != entry) {
+      result.emplace(min, previous);
+      min = entry;
+    }
+    previous = entry;
+  }
+  if (!first) {
+    result.emplace(min, previous);
+  }
+  return result;
+}
+
+template<typename T>
+std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::map<std::uint32_t, T>& input) {
+  std::set<std::uint32_t> keys;
+  for (const auto& entry : input) {
+    keys.insert(entry.first);
+  }
+  return create_ranges(keys);
+}
+
+std::set<std::pair<std::uint32_t, std::uint32_t>> compatibility_set(
+    const std::map<std::uint32_t, std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+  std::set<std::uint32_t> keys;
+  for (const auto& entry : unicode_data) {
+    if (!std::get<1>(entry.second)) {
+      keys.insert(entry.first);
+    }
+  }
+  return create_ranges(keys);
 }
 
 void write_header(const char* output_file,
@@ -174,7 +314,7 @@ void write_header(const char* output_file,
   fprintf(h_output, HPP_HEADER, header_guard.c_str(), header_guard.c_str());
 
   for (const auto& binary_property : ucd::binary_unicode_properties) {
-    fprintf(h_output, "bool is_%s(std::uint64_t);\n\n",
+    fprintf(h_output, "bool is_%s(std::uint32_t);\n\n",
             binary_property.c_str());
   }
 
@@ -183,23 +323,40 @@ void write_header(const char* output_file,
 }
 
 void write_impl(const char* derived_core_properties_file,
+                const char* unicode_data_file,
+                const char* composition_exclusions,
                 const char* output_file,
                 const char* include_h) {
   FILE* cc_output = fopen(output_file, "w");
   fprintf(cc_output, CPP_HEADER, include_h);
 
-  std::map<std::string,
-           std::set<std::pair<std::uint64_t,
-                                std::uint64_t>>> binary_properties;
-  ucd::read_all_code_points(derived_core_properties_file, binary_properties);
+  {
+    std::map<std::uint32_t, std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>> unicode_data;
+    ucd::read_unicode_data(unicode_data_file, unicode_data);
+    std::set<std::uint32_t> comp_exclusions;
+    ucd::read_raw_code_points(composition_exclusions, comp_exclusions);
 
-  for (const auto& binary_property : ucd::binary_unicode_properties) {
-    if (binary_properties[binary_property].empty()) {
-      exit(1);
+    print_code_points(cc_output, create_ranges(unicode_data), "is_assigned");
+    print_code_points(cc_output, compatibility_set(unicode_data), "is_compatibility_decomposition");
+    print_decomposition(cc_output, unicode_data);
+    print_ccc(cc_output, unicode_data);
+    print_canonical_composition(cc_output, unicode_data, comp_exclusions);
+    // TODO(lmirelmann): Expose the property NFC_QC and NFKC_QC
+  }
+  {
+    std::map<std::string,
+             std::set<std::pair<std::uint32_t,
+                                  std::uint32_t>>> binary_properties;
+    ucd::read_all_code_points(derived_core_properties_file, binary_properties);
+
+    for (const auto& binary_property : ucd::binary_unicode_properties) {
+      if (binary_properties[binary_property].empty()) {
+        exit(1);
+      }
+      std::string name = "is_" + binary_property;
+      print_code_points(cc_output, binary_properties[binary_property],
+                       name);
     }
-    std::string name = "is_" + binary_property;
-    print_code_points(cc_output, binary_properties[binary_property],
-                     name);
   }
 
   FWRITE(CPP_FOOTER, cc_output);
@@ -209,14 +366,18 @@ void write_impl(const char* derived_core_properties_file,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  if (argc == 5) {
+  if (argc == 7) {
     const char* derived_core_properties_file = argv[1];
-    const char* output_cpp_file = argv[2];
-    const char* output_hpp_file = argv[3];
-    const char* include_h = argv[4];
+    const char* unicode_data_file = argv[2];
+    const char* composition_exclusions = argv[3];
+    const char* output_cpp_file = argv[4];
+    const char* output_hpp_file = argv[5];
+    const char* include_h = argv[6];
 
     write_header(output_hpp_file, include_h);
     write_impl(derived_core_properties_file,
+               unicode_data_file,
+               composition_exclusions,
                output_cpp_file,
                include_h);
   }

@@ -8,14 +8,22 @@
 #include <set>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace ucd {
 
 extern std::set<std::string> binary_unicode_properties;
 
+void read_raw_code_points(const char* file,
+                          std::set<std::uint32_t>& set);
+
 void read_all_code_points(const char* file,
     std::map<std::string,
-             std::set<std::pair<std::uint64_t, std::uint64_t>>>& set);
+             std::set<std::pair<std::uint32_t, std::uint32_t>>>& set);
+
+void read_unicode_data(const char* file,
+    std::map<std::uint32_t,
+             std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data);
 
 }  // namespace ucd
 
