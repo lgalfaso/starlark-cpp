@@ -10,10 +10,13 @@
 
 using testing::SizeIs;
 using ucd::is_assigned;
+using unicode::to_nfc;
 using unicode::to_nfc_x;
+using unicode::to_nfd;
 using unicode::to_nfd_x;
 using unicode::to_nfkc;
 using unicode::to_nfkc_x;
+using unicode::to_nfkd;
 using unicode::to_nfkd_x;
 using unicode::utf8_encode_code_point;
 
@@ -92,19 +95,40 @@ TEST(Normalization, Empty) {
   EXPECT_EQ(std::vector<std::uint32_t>{}, to_nfkd_x({}));
 }
 
-TEST(Normalization, NFKC) {
+TEST(Normalization, UTF8) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(2));
   std::string path = argv[1];
   std::vector<test_case> test_cases = read_file(path.c_str());
 
   for (const auto& tc : test_cases) {
-    std::string expected = utf8_encode(tc.NFKC);
-    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.source))) << tc.line;
-    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFC))) << tc.line;
-    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFD))) << tc.line;
-    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFKC))) << tc.line;
-    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFKD))) << tc.line;
+    // NFC
+    EXPECT_EQ(utf8_encode(tc.NFC), to_nfc(utf8_encode(tc.source))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFC), to_nfc(utf8_encode(tc.NFC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFC), to_nfc(utf8_encode(tc.NFD))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKC), to_nfc(utf8_encode(tc.NFKC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKC), to_nfc(utf8_encode(tc.NFKD))) << tc.line;
+
+    // NFD
+    EXPECT_EQ(utf8_encode(tc.NFD), to_nfd(utf8_encode(tc.source))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFD), to_nfd(utf8_encode(tc.NFC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFD), to_nfd(utf8_encode(tc.NFD))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKD), to_nfd(utf8_encode(tc.NFKC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKD), to_nfd(utf8_encode(tc.NFKD))) << tc.line;
+
+    // NFKC
+    EXPECT_EQ(utf8_encode(tc.NFKC), to_nfkc(utf8_encode(tc.source))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKC), to_nfkc(utf8_encode(tc.NFC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKC), to_nfkc(utf8_encode(tc.NFD))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKC), to_nfkc(utf8_encode(tc.NFKC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKC), to_nfkc(utf8_encode(tc.NFKD))) << tc.line;
+
+    // NFKD
+    EXPECT_EQ(utf8_encode(tc.NFKD), to_nfkd(utf8_encode(tc.source))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKD), to_nfkd(utf8_encode(tc.NFC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKD), to_nfkd(utf8_encode(tc.NFD))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKD), to_nfkd(utf8_encode(tc.NFKC))) << tc.line;
+    EXPECT_EQ(utf8_encode(tc.NFKD), to_nfkd(utf8_encode(tc.NFKD))) << tc.line;
   }
 }
 

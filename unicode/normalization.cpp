@@ -150,6 +150,56 @@ void sort_non_starters(std::vector<std::uint32_t>& code_points) {
 
 }
 
+std::string to_nfc(std::string_view input) {
+  std::vector<std::uint32_t> code_points;
+  utf8_reader reader(input);
+  bool qc = true;
+  int last_ccc = 0;
+  while (reader.pending()) {
+    auto cp = reader.peek_code_point();
+    code_points.push_back(cp);
+    reader.skip_code_point();
+    qc &= !ucd::is_NFC_QC_nm(cp);
+    int ccc = ucd::ccc(cp);
+    qc &= ccc == 0 || ccc >= last_ccc;
+    last_ccc = ccc;
+  }
+  if (qc) {
+    return std::string{input};
+  }
+  std::vector<std::uint32_t> result_cp = to_nfc_x(code_points);
+  std::string result;
+  for (auto c : result_cp) {
+    utf8_encode_code_point(c, result);
+  }
+  return result;
+}
+
+std::string to_nfd(std::string_view input) {
+  std::vector<std::uint32_t> code_points;
+  utf8_reader reader(input);
+  bool qc = true;
+  int last_ccc = 0;
+  while (reader.pending()) {
+    auto cp = reader.peek_code_point();
+    code_points.push_back(cp);
+    reader.skip_code_point();
+    qc &= !ucd::is_NFD_QC_nm(cp);
+    int ccc = ucd::ccc(cp);
+    qc &= ccc == 0 || ccc >= last_ccc;
+    last_ccc = ccc;
+  }
+  if (qc) {
+    return std::string{input};
+  }
+  std::vector<std::uint32_t> result_cp = to_nfd_x(code_points);
+  std::string result;
+  for (auto c : result_cp) {
+    utf8_encode_code_point(c, result);
+  }
+  return result;
+}
+
 std::string to_nfkc(std::string_view input) {
   std::vector<std::uint32_t> code_points;
   utf8_reader reader(input);
@@ -168,6 +218,31 @@ std::string to_nfkc(std::string_view input) {
     return std::string{input};
   }
   std::vector<std::uint32_t> result_cp = to_nfkc_x(code_points);
+  std::string result;
+  for (auto c : result_cp) {
+    utf8_encode_code_point(c, result);
+  }
+  return result;
+}
+
+std::string to_nfkd(std::string_view input) {
+  std::vector<std::uint32_t> code_points;
+  utf8_reader reader(input);
+  bool qc = true;
+  int last_ccc = 0;
+  while (reader.pending()) {
+    auto cp = reader.peek_code_point();
+    code_points.push_back(cp);
+    reader.skip_code_point();
+    qc &= !ucd::is_NFKD_QC_nm(cp);
+    int ccc = ucd::ccc(cp);
+    qc &= ccc == 0 || ccc >= last_ccc;
+    last_ccc = ccc;
+  }
+  if (qc) {
+    return std::string{input};
+  }
+  std::vector<std::uint32_t> result_cp = to_nfkd_x(code_points);
   std::string result;
   for (auto c : result_cp) {
     utf8_encode_code_point(c, result);
