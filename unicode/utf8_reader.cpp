@@ -16,7 +16,7 @@ inline bool is_utf8_continue(char input) {
 
 }  // namespace
 
-const std::uint64_t utf8_reader::replacement_character;
+const std::uint32_t utf8_reader::replacement_character;
 
 utf8_reader::utf8_reader(string_view input) : input(input) {
   // If the source code starts with a BOM, then ignore it.

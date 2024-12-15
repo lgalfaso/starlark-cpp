@@ -24,9 +24,9 @@ class utf8_reader {
   bool capture(std::string_view candidate);
 
   // Unicode replacement character.
-  static const std::uint64_t replacement_character = 0xfffdul;
+  static const std::uint32_t replacement_character = 0xfffdu;
   // Unicode byte order mark.
-  static const std::uint64_t bom_character = 0xfefful;
+  static const std::uint32_t bom_character = 0xfeffu;
 
  private:
   const std::string_view input;

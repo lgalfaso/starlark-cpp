@@ -14,7 +14,7 @@ const char* XID_Start = "XID_Start";
 const char* XID_Continue = "XID_Continue";
 
 void read_code_points(const char* file,
-                     std::set<std::uint64_t>& set,
+                     std::set<std::uint32_t>& set,
                      const char* category) {
   FILE* fp = fopen(file, "r");
   char* line = nullptr;
@@ -26,7 +26,7 @@ void read_code_points(const char* file,
   std::string cat = "; ";
   cat += category;
   cat += " ";
-  std::set<std::pair<std::uint64_t, std::uint64_t>> ranges;
+  std::set<std::pair<std::uint32_t, std::uint32_t>> ranges;
   while ((getline(&line, &len, fp)) != -1) {
     if (strstr(line, cat.c_str()) != nullptr) {
       int start, end;
@@ -44,7 +44,7 @@ void read_code_points(const char* file,
   }
 
   for (const auto& cps : ranges) {
-    for (std::uint64_t cp = cps.first; cp <= cps.second; ++cp) {
+    for (std::uint32_t cp = cps.first; cp <= cps.second; ++cp) {
       set.insert(cp);
     }
   }
@@ -57,7 +57,7 @@ TEST(UcdTest, IsXIdStart) {
   ASSERT_THAT(argv, SizeIs(2));
 
   std::string path = argv[1];
-  std::set<std::uint64_t> all_cps;
+  std::set<std::uint32_t> all_cps;
   read_code_points(path.c_str(), all_cps, XID_Start);
 
   for (int i = 0; i <= max_unicode; ++i) {
@@ -70,7 +70,7 @@ TEST(UcdTest, XIsIdContinue) {
   ASSERT_THAT(argv, SizeIs(2));
 
   std::string path = argv[1];
-  std::set<std::uint64_t> all_cps;
+  std::set<std::uint32_t> all_cps;
   read_code_points(path.c_str(), all_cps, XID_Continue);
 
   for (int i = 0; i <= max_unicode; ++i) {
