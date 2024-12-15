@@ -5,6 +5,7 @@ def _extract_ucd_impl(ctx):
     args.add(ctx.file.derived_core_properties)
     args.add(ctx.file.unicode_data)
     args.add(ctx.file.composition_exclusions)
+    args.add(ctx.file.derived_normalization_props)
     args.add(ctx.outputs.output_cc)
     args.add(ctx.outputs.output_h)
     args.add(ctx.outputs.output_h.short_path)
@@ -14,6 +15,7 @@ def _extract_ucd_impl(ctx):
             ctx.file.derived_core_properties,
             ctx.file.unicode_data,
             ctx.file.composition_exclusions,
+            ctx.file.derived_normalization_props,
         ],
         outputs = [ctx.outputs.output_cc, ctx.outputs.output_h],
         arguments = [args],
@@ -26,6 +28,7 @@ extract_ucd = rule(
         "derived_core_properties": attr.label(allow_single_file = True, default = "@ucd//:DerivedCoreProperties.txt"),
         "unicode_data": attr.label(allow_single_file = True, default = "@ucd//:UnicodeData.txt"),
         "composition_exclusions": attr.label(allow_single_file = True, default = "@ucd//:CompositionExclusions.txt"),
+        "derived_normalization_props": attr.label(allow_single_file = True, default = "@ucd//:DerivedNormalizationProps.txt"),
         "output_cc": attr.output(),
         "output_h": attr.output(),
         "gen_tool": attr.label(

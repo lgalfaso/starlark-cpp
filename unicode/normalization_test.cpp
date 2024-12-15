@@ -4,16 +4,18 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include "unicode/encode.hpp"
 #include "unicode/normalization.hpp"
 #include "unicode/ucd_code_points.hpp"
 
+using testing::SizeIs;
+using ucd::is_assigned;
 using unicode::to_nfc_x;
 using unicode::to_nfd_x;
 using unicode::to_nfkc;
 using unicode::to_nfkc_x;
 using unicode::to_nfkd_x;
-using testing::SizeIs;
-using ucd::is_assigned;
+using unicode::utf8_encode_code_point;
 
 namespace {
 
@@ -75,6 +77,14 @@ std::vector<test_case> read_file(const char* file) {
   return result;
 }
 
+std::string utf8_encode(const std::vector<std::uint32_t>& code_points) {
+  std::string result;
+  for (auto c : code_points) {
+    utf8_encode_code_point(c, result);
+  }
+  return result;
+}
+
 TEST(Normalization, Empty) {
   EXPECT_EQ(std::vector<std::uint32_t>{}, to_nfc_x({}));
   EXPECT_EQ(std::vector<std::uint32_t>{}, to_nfd_x({}));
@@ -83,7 +93,19 @@ TEST(Normalization, Empty) {
 }
 
 TEST(Normalization, NFKC) {
-  EXPECT_EQ("\xce\xbc", to_nfkc("\xc2\xb5"));
+  const auto& argv = ::testing::internal::GetArgvs();
+  ASSERT_THAT(argv, SizeIs(2));
+  std::string path = argv[1];
+  std::vector<test_case> test_cases = read_file(path.c_str());
+
+  for (const auto& tc : test_cases) {
+    std::string expected = utf8_encode(tc.NFKC);
+    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.source))) << tc.line;
+    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFC))) << tc.line;
+    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFD))) << tc.line;
+    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFKC))) << tc.line;
+    EXPECT_EQ(expected, to_nfkc(utf8_encode(tc.NFKD))) << tc.line;
+  }
 }
 
 TEST(Normalization, UCD) {

@@ -63,6 +63,14 @@ const char* CPP_FOOTER = R"CPP(}  // namespace ucd
 
 constexpr int CODEPOINTS_PER_LINE = 64;
 
+std::set<std::string> binary_unicode_properties = {
+  "XID_Continue", "XID_Start"
+};
+
+std::set<std::string> normalization_properties = {
+  "NFC_QC", "NFD_QC", "NFKC_QC", "NFKD_QC",
+};
+
 #define FWRITE(STR, OUTPUT) fwrite(STR, sizeof(char), std::strlen(STR), OUTPUT)
 
 void print_in_multiple_lines(const char* characters, int& count, uint32_t to_print, FILE* output) {
@@ -313,7 +321,11 @@ void write_header(const char* output_file,
   FILE* h_output = fopen(output_file, "w");
   fprintf(h_output, HPP_HEADER, header_guard.c_str(), header_guard.c_str());
 
-  for (const auto& binary_property : ucd::binary_unicode_properties) {
+  for (const auto& normalization_property : normalization_properties) {
+    fprintf(h_output, "bool is_%s_nm(std::uint32_t);\n\n",
+            normalization_property.c_str());
+  }
+  for (const auto& binary_property : binary_unicode_properties) {
     fprintf(h_output, "bool is_%s(std::uint32_t);\n\n",
             binary_property.c_str());
   }
@@ -325,6 +337,7 @@ void write_header(const char* output_file,
 void write_impl(const char* derived_core_properties_file,
                 const char* unicode_data_file,
                 const char* composition_exclusions,
+                const char* derived_normalization_props,
                 const char* output_file,
                 const char* include_h) {
   FILE* cc_output = fopen(output_file, "w");
@@ -341,15 +354,28 @@ void write_impl(const char* derived_core_properties_file,
     print_decomposition(cc_output, unicode_data);
     print_ccc(cc_output, unicode_data);
     print_canonical_composition(cc_output, unicode_data, comp_exclusions);
-    // TODO(lmirelmann): Expose the property NFC_QC and NFKC_QC
   }
   {
     std::map<std::string,
              std::set<std::pair<std::uint32_t,
                                   std::uint32_t>>> binary_properties;
-    ucd::read_all_code_points(derived_core_properties_file, binary_properties);
+    ucd::read_all_code_points(derived_normalization_props,
+                              binary_properties,
+                              normalization_properties);
 
-    for (const auto& binary_property : ucd::binary_unicode_properties) {
+    ucd::read_all_code_points(derived_core_properties_file,
+                              binary_properties,
+                              binary_unicode_properties);
+
+    for (const auto& normalization_property : normalization_properties) {
+      if (binary_properties[normalization_property].empty()) {
+        exit(1);
+      }
+      std::string name = "is_" + normalization_property + "_nm";
+      print_code_points(cc_output, binary_properties[normalization_property],
+                       name);
+    }
+    for (const auto& binary_property : binary_unicode_properties) {
       if (binary_properties[binary_property].empty()) {
         exit(1);
       }
@@ -366,18 +392,20 @@ void write_impl(const char* derived_core_properties_file,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  if (argc == 7) {
+  if (argc == 8) {
     const char* derived_core_properties_file = argv[1];
     const char* unicode_data_file = argv[2];
     const char* composition_exclusions = argv[3];
-    const char* output_cpp_file = argv[4];
-    const char* output_hpp_file = argv[5];
-    const char* include_h = argv[6];
+    const char* derived_normalization_props = argv[4];
+    const char* output_cpp_file = argv[5];
+    const char* output_hpp_file = argv[6];
+    const char* include_h = argv[7];
 
     write_header(output_hpp_file, include_h);
     write_impl(derived_core_properties_file,
                unicode_data_file,
                composition_exclusions,
+               derived_normalization_props,
                output_cpp_file,
                include_h);
   }

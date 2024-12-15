@@ -7,10 +7,6 @@
 
 namespace ucd {
 
-std::set<std::string> binary_unicode_properties = {
-  "XID_Continue", "XID_Start"
-};
-
 void read_raw_code_points(const char* file,
                           std::set<std::uint32_t>& set) {
   FILE* fp = fopen(file, "r");
@@ -37,7 +33,8 @@ void read_raw_code_points(const char* file,
 
 void read_all_code_points(const char* file,
     std::map<std::string,
-             std::set<std::pair<std::uint32_t, std::uint32_t>>>& set) {
+             std::set<std::pair<std::uint32_t, std::uint32_t>>>& set,
+    const std::set<std::string>& properties) {
   FILE* fp = fopen(file, "r");
   char* line = nullptr;
   size_t len = 0;
@@ -70,7 +67,7 @@ void read_all_code_points(const char* file,
           std::exit(1);
         }
         sline += count1;
-        if (!binary_unicode_properties.contains(alias)) {
+        if (!properties.contains(alias)) {
           continue;
         }
         if (count == 1) {

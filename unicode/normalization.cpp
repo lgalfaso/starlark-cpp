@@ -3,7 +3,6 @@
 #include "unicode/normalization.hpp"
 
 #include <algorithm>
-#include <iostream>
 
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
@@ -152,14 +151,22 @@ void sort_non_starters(std::vector<std::uint32_t>& code_points) {
 }
 
 std::string to_nfkc(std::string_view input) {
-  // TODO(lmirelmann): Check whether this is already a valid encoding using NFKC_QC
   std::vector<std::uint32_t> code_points;
   utf8_reader reader(input);
+  bool qc = true;
+  int last_ccc = 0;
   while (reader.pending()) {
-    code_points.push_back(reader.peek_code_point());
+    auto cp = reader.peek_code_point();
+    code_points.push_back(cp);
     reader.skip_code_point();
+    qc &= !ucd::is_NFKC_QC_nm(cp);
+    int ccc = ucd::ccc(cp);
+    qc &= ccc == 0 || ccc >= last_ccc;
+    last_ccc = ccc;
   }
-std::cout << "Code point source: " << code_points[0] << "\n";
+  if (qc) {
+    return std::string{input};
+  }
   std::vector<std::uint32_t> result_cp = to_nfkc_x(code_points);
   std::string result;
   for (auto c : result_cp) {
