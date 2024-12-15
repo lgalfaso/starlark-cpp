@@ -37,6 +37,9 @@ cc_fuzz_test(
     corpus = [
         "//grammar/lexer_fuzz_test_corpus:corpus_filegroup",
     ],
+    dicts = [
+        "lexer_fuzz_test_dictionary/lexical_elements.dict",
+    ],
 )
 
 cc_library(
@@ -135,6 +138,9 @@ cc_fuzz_test(
     ],
     corpus = [
         "//grammar/parser_fuzz_test_corpus:corpus_filegroup",
+    ],
+    dicts = [
+        "lexer_fuzz_test_dictionary/lexical_elements.dict",
     ],
 )
 
