@@ -44,7 +44,7 @@ char utf8_reader::peek(std::size_t delta) const {
   return input[input_pos + delta];
 }
 
-std::uint64_t utf8_reader::peek_code_point() const {
+std::uint32_t utf8_reader::peek_code_point() const {
   if (empty()) {
     return replacement_character;
   }
@@ -58,7 +58,7 @@ std::uint64_t utf8_reader::peek_code_point() const {
       return replacement_character;
     }
   }
-  std::uint64_t candidate;
+  std::uint32_t candidate;
   switch (length) {
     case 0:
       candidate = current_char;
@@ -67,8 +67,8 @@ std::uint64_t utf8_reader::peek_code_point() const {
       if (input[input_pos] == '\xc0' || input[input_pos] == '\xc1') {
         return replacement_character;
       }
-      candidate = (static_cast<std::uint64_t>(input[input_pos    ]) & 0x1f) << 6 |
-                  (static_cast<std::uint64_t>(input[input_pos + 1]) & 0x3f);
+      candidate = (static_cast<std::uint32_t>(input[input_pos    ]) & 0x1f) << 6 |
+                  (static_cast<std::uint32_t>(input[input_pos + 1]) & 0x3f);
       break;
     case 3:
       if (input[input_pos] == '\xe0' && ((unsigned char)input[input_pos + 1]) < 0xa0) {
@@ -77,9 +77,9 @@ std::uint64_t utf8_reader::peek_code_point() const {
       if (input[input_pos] == '\xed' && ((unsigned char)input[input_pos + 1]) >= 0xa0) {
         return replacement_character;
       }
-      candidate = (static_cast<std::uint64_t>(input[input_pos    ]) & 0x0f) << 12 |
-                  (static_cast<std::uint64_t>(input[input_pos + 1]) & 0x3f) << 6 |
-                  (static_cast<std::uint64_t>(input[input_pos + 2]) & 0x3f);
+      candidate = (static_cast<std::uint32_t>(input[input_pos    ]) & 0x0f) << 12 |
+                  (static_cast<std::uint32_t>(input[input_pos + 1]) & 0x3f) << 6 |
+                  (static_cast<std::uint32_t>(input[input_pos + 2]) & 0x3f);
       break;
     case 4:
       if (input[input_pos] == '\xf0' && ((unsigned char)input[input_pos + 1]) < 0x90) {
@@ -88,10 +88,10 @@ std::uint64_t utf8_reader::peek_code_point() const {
       if (input[input_pos] == '\xf4' && ((unsigned char)input[input_pos + 1]) >= 0x90) {
         return replacement_character;
       }
-      candidate = (static_cast<std::uint64_t>(input[input_pos    ]) & 0x07) << 18 |
-                  (static_cast<std::uint64_t>(input[input_pos + 1]) & 0x3f) << 12 |
-                  (static_cast<std::uint64_t>(input[input_pos + 2]) & 0x3f) << 6 |
-                  (static_cast<std::uint64_t>(input[input_pos + 3]) & 0x3f);
+      candidate = (static_cast<std::uint32_t>(input[input_pos    ]) & 0x07) << 18 |
+                  (static_cast<std::uint32_t>(input[input_pos + 1]) & 0x3f) << 12 |
+                  (static_cast<std::uint32_t>(input[input_pos + 2]) & 0x3f) << 6 |
+                  (static_cast<std::uint32_t>(input[input_pos + 3]) & 0x3f);
       break;
     default:
       return replacement_character;

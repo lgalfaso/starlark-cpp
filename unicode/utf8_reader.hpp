@@ -17,7 +17,7 @@ class utf8_reader {
   std::size_t pending() const;
   std::size_t pos() const;
   char peek(std::size_t delta = 0) const;
-  std::uint64_t peek_code_point() const;
+  std::uint32_t peek_code_point() const;
   void skip(std::size_t delta = 1);
   void skip_code_point();
   bool next(std::string_view candidate);
