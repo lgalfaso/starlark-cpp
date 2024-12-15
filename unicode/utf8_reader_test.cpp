@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 
 #include <limits>
+#include <random>
 
 #include "unicode/utf8_reader.hpp"
 
@@ -264,6 +265,67 @@ TEST(SourceTest, Capture) {
     utf8_reader s("abc");
     EXPECT_EQ(false, s.capture("abcdef"));
     EXPECT_EQ(0, s.pos());
+  }
+}
+
+void utf8_peek_skip_code_point(const char* data, size_t size) {
+  utf8_reader reader(std::string_view(data, size));
+  while (reader.pending()) {
+    reader.peek_code_point();
+    reader.skip_code_point();
+  }
+}
+
+TEST(SourceTest, ShortStrings) {
+  utf8_peek_skip_code_point("", 0);
+  char source[3];
+  for (int i = 0; i < 256; ++i) {
+    source[0] = i;
+    utf8_peek_skip_code_point(source, 1);
+    for (int j = 0; j < 256; ++j) {
+      source[1] = j;
+      utf8_peek_skip_code_point(source, 2);
+      for (int k = 0; k < 256; ++k) {
+        source[2] = k;
+        utf8_peek_skip_code_point(source, 3);
+      }
+    }
+  }
+}
+
+TEST(SourceTest, Random4) {
+  char source[4];
+  std::mt19937 g(GTEST_FLAG_GET(random_seed));
+
+  for (int i = 0; i < 100000; ++i) {
+    for (int j = 0; j < sizeof(source); ++j) {
+      source[j] = g();
+    }
+    utf8_peek_skip_code_point(source, sizeof(source));
+  }
+}
+
+TEST(SourceTest, Random5) {
+  char source[5];
+  std::mt19937 g(GTEST_FLAG_GET(random_seed));
+
+  for (int i = 0; i < 100000; ++i) {
+    for (int j = 0; j < sizeof(source); ++j) {
+      source[j] = g();
+    }
+    utf8_peek_skip_code_point(source, sizeof(source));
+  }
+}
+
+TEST(SourceTest, Random6) {
+  char source[6];
+  std::mt19937 g(GTEST_FLAG_GET(random_seed));
+
+  for (int i = 0; i < 100000; ++i) {
+    for (int j = 0; j < sizeof(source); ++j) {
+      source[j] = g();
+    }
+    utf8_peek_skip_code_point(source, sizeof(source));
   }
 }
 
