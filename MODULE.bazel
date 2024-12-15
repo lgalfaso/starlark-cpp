@@ -4,6 +4,7 @@ module(name = "starlark", version = "0.0.1")
 
 bazel_dep(name = "abseil-cpp", version = "20240722.0.bcr.2")
 bazel_dep(name = "google_benchmark", version = "1.8.5")
+bazel_dep(name = "re2", version = "2024-07-02.bcr.1")
 bazel_dep(name = "googletest", version = "1.15.2")
 bazel_dep(name = "protobuf", version = "29.1")
 bazel_dep(name = "rules_fuzzing", version = "0.5.2")
