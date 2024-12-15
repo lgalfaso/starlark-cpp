@@ -1,6 +1,7 @@
 # Copyright 2024 Lucas Mirelmann
 
 load("//unicode/extract:extract.bzl", "extract_ucd")
+load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 
 cc_library(
     name = "encode",
@@ -35,6 +36,14 @@ cc_test(
         "@googletest//:gtest_main",
     ],
     size = "small",
+)
+
+cc_fuzz_test(
+    name = "utf8_reader_fuzz_test",
+    srcs = ["utf8_reader_fuzz_test.cpp"],
+    deps = [
+        ":utf8_reader",
+    ],
 )
 
 extract_ucd(
