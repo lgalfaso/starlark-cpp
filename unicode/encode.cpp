@@ -4,7 +4,7 @@
 
 namespace unicode {
 
-void utf8_encode_code_point(std::uint64_t character, std::string& output) {
+void utf8_encode_code_point(std::uint32_t character, std::string& output) {
   // TODO(lmirelmann): Should we check that the code point is assigned?
   if (character <= 0x7f) {
     output += (char)character;
