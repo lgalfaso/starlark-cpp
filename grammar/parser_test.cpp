@@ -15,10 +15,11 @@ using google::protobuf::util::MessageDifferencer;
 using grammar::parser;
 using starlark::File;
 using testing::IsEmpty;
+using testing::SizeIs;
 
 TEST(Parser, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
-  ASSERT_EQ(argv.size(), 3);
+  ASSERT_THAT(argv, SizeIs(3));
 
   File starlark_file;
   {
