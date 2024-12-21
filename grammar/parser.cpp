@@ -10,9 +10,12 @@
 
 using google::protobuf::RepeatedPtrField;
 using starlark::AssignStmt;
+using starlark::DefStmt;
 using starlark::Expression;
 using starlark::File;
+using starlark::ForStmt;
 using starlark::Identifier;
+using starlark::IfStmt;
 using starlark::Parameter;
 using starlark::PrimaryExpr;
 using starlark::Statement;
@@ -261,33 +264,33 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
   if (capture(token_type::def)) {
     nested_loops.push_back(0);
     defer { nested_loops.pop_back(); };
-    Statement* def_statement = statements.Add();
+    DefStmt* def_statement = statements.Add()->mutable_def_statement();
     if (!is_current(token_type::identifier)) {
       add_error("Expected an identifier");
       return;
     }
-    set_identifier(*def_statement->mutable_def_statement()->mutable_function_name(), lex.current_token().string_value());
+    set_identifier(*def_statement->mutable_function_name(), lex.current_token().string_value());
     lex.next_token();
     if (!expect(token_type::lparen)) {
       return;
     }
-    parse_parameters(*def_statement->mutable_def_statement()->mutable_parameter(), true);
+    parse_parameters(*def_statement->mutable_parameter(), true);
     if (!expect(token_type::rparen)) {
       return;
     }
     if (!expect(token_type::colon)) {
       return;
     }
-    parse_suite(*def_statement->mutable_def_statement()->mutable_statement());
+    parse_suite(*def_statement->mutable_statement());
   } else if (capture(token_type::if_)) {
-    Statement* if_statement = statements.Add();
-    *if_statement->mutable_if_statement()->mutable_test() = parse_test();
+    IfStmt* if_statement = statements.Add()->mutable_if_statement();
+    *if_statement->mutable_test() = parse_test();
     if (!expect(token_type::colon)) {
       return;
     }
-    parse_suite(*if_statement->mutable_if_statement()->mutable_statement());
+    parse_suite(*if_statement->mutable_statement());
     while (capture(token_type::elif)) {
-      auto* elif = if_statement->mutable_if_statement()->add_elif();
+      auto* elif = if_statement->add_elif();
       *elif->mutable_test() = parse_test();
       if (!expect(token_type::colon)) {
         return;
@@ -298,15 +301,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       if (!expect(token_type::colon)) {
         return;
       }
-      parse_suite(*if_statement->mutable_if_statement()->mutable_else_statement());
+      parse_suite(*if_statement->mutable_else_statement());
     }
   } else if (capture(token_type::for_)) {
     nested_loops.back()++;
     defer { nested_loops.back()--; };
-    Statement* for_statement = statements.Add();
+    ForStmt* for_statement = statements.Add()->mutable_for_statement();
     do {
-      *for_statement->mutable_for_statement()->add_loop_variable() = parse_primary();
-      if (!is_target(*for_statement->for_statement().loop_variable().rbegin())) {
+      *for_statement->add_loop_variable() = parse_primary();
+      if (!is_target(*for_statement->loop_variable().rbegin())) {
         add_error("Expecting a TARGET");
         return;
       }
@@ -314,11 +317,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
     if (!expect(token_type::in)) {
       return;
     }
-    *for_statement->mutable_for_statement()->mutable_expression() = parse_expression(false);
+    *for_statement->mutable_expression() = parse_expression(false);
     if (!expect(token_type::colon)) {
       return;
     }
-    parse_suite(*for_statement->mutable_for_statement()->mutable_statement());
+    parse_suite(*for_statement->mutable_statement());
   } else {
     parse_simple_statement(statements);
   }
