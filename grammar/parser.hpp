@@ -15,6 +15,9 @@ namespace grammar {
 class parser {
  public:
   parser(std::string_view input);
+  parser() = delete;
+  parser(const parser&) = delete;
+  parser(parser&&) = delete;
   starlark::File parse_file();
   // TODO(lmirelmann): These two errors should be merged.
   const std::vector<std::pair<std::string, std::size_t>>& parser_errors() const;

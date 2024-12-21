@@ -164,8 +164,12 @@ const token& lexer::current_token() const {
 
 void lexer::next_token() {
   bool after_newline = current.type() == token_type::newline;
+  auto start_token = current.type();
+  auto start_pos = source_code.pos();
   tokenize();
+
   assert(current.type() != token_type::bof);
+  assert(start_pos < source_code.pos() || start_token != current.type() || start_token == token_type::outdent);
 
   // Always have a `newline` token before `eof`.
   if (current.type() == token_type::eof && !after_newline) {
@@ -349,8 +353,11 @@ void lexer::read_operator(char first_char) {
   for (const auto& op : operators_by_starting_char.at(first_char)) {
     if (source_code.capture(op.first)) {
       current = token{op.second, start, source_code.pos()};
+      return;
     }
   }
+  current = token{token_type::illegal, start, source_code.pos(), std::string{} + first_char};
+  source_code.skip();
 }
 
 void lexer::read_numeric() {

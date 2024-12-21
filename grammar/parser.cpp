@@ -264,7 +264,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
     Statement* def_statement = statements.Add();
     if (!is_current(token_type::identifier)) {
       add_error("Expected an identifier");
-      nested_loops.pop_back();
       return;
     }
     set_identifier(def_statement->mutable_def_statement()->mutable_function_name(), lex.current_token().string_value());
@@ -330,9 +329,10 @@ void parser::parse_suite(RepeatedPtrField<Statement>& statements) {
     if (!expect(token_type::indent)) {
       return;
     }
-    while (!capture(token_type::outdent)) {
+    while (lex.current_token().type() != token_type::outdent && lex.current_token().type() != token_type::eof) {
       parse_statement(statements);
     }
+    expect(token_type::outdent);
   } else {
     parse_simple_statement(statements);
   }
@@ -347,14 +347,14 @@ void parser::parse_simple_statement(RepeatedPtrField<Statement>& statements) {
     *statements.Add() = parse_small_statement();
   }
   if (recover) {
-    while (lex.current_token().type() != token_type::newline) {
+    while (lex.current_token().type() != token_type::newline && lex.current_token().type() != token_type::eof) {
       lex.next_token();
     }
-    recover = false;
   }
   if (!expect(token_type::newline)) {
     return;
   }
+  recover = false;
 }
 
 Statement parser::parse_small_statement() {
@@ -363,7 +363,6 @@ Statement parser::parse_small_statement() {
     case token_type::return_:
       if (nested_loops.size() == 1) {
         add_error("Unexpected RETURN");
-        return result;
       }
       result.mutable_return_statement();
       lex.next_token();
@@ -408,7 +407,6 @@ Statement parser::parse_small_statement() {
     case token_type::break_:
       if (nested_loops.back() == 0) {
         add_error("Unexpected BREAK");
-        return result;
       }
       result.mutable_break_statement();
       lex.next_token();
@@ -416,7 +414,6 @@ Statement parser::parse_small_statement() {
     case token_type::continue_: {
       if (nested_loops.back() == 0) {
         add_error("Unexpected CONTINUE");
-        return result;
       }
       result.mutable_continue_statement();
       lex.next_token();

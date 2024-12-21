@@ -38,6 +38,7 @@ const std::map<token_type, std::string> mapping = {
   {token_type::dot, "DOT"},
   {token_type::elif, "ELIF"},
   {token_type::else_, "ELSE"},
+  {token_type::bof, "BOF"},
   {token_type::eof, "EOF"},
   {token_type::equals, "EQUALS"},
   {token_type::equals_equals, "EQUALS_EQUALS"},
@@ -423,6 +424,10 @@ TEST(LexerTest, InNotIn) {
 4 not in (1, 2, 3)
 )starlark",
         "INT(4):1:2 NOT:3:6 IN:7:9 LPAREN:10:11 INT(1):11:12 COMMA:12:13 INT(2):14:15 COMMA:15:16 INT(3):17:18 RPAREN:18:19 NEWLINE:19:20 EOF:20:20");
+}
+
+TEST(LexerTest, Errors) {
+  checkErrors("!\364\215\264\253", "ILLEGAL(\"\"):0:0 ILLEGAL(\"\\364\\215\\264\\253\"):1:5 NEWLINE:5:5 EOF:5:5", { "Unexpected character:1" });
 }
 
 }  // namespace
