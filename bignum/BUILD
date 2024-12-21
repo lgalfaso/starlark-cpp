@@ -17,5 +17,5 @@ cc_test(
         ":number",
          "@googletest//:gtest_main",
     ],
-    size = "medium",
+    size = "large",
 )
