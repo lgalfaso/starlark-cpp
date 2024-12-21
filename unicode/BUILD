@@ -7,6 +7,10 @@ cc_library(
     name = "encode",
     srcs = ["encode.cpp"],
     hdrs = ["encode.hpp"],
+    deps = [
+        ":ucd",
+        ":utf8_reader",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -15,6 +19,7 @@ cc_test(
     srcs = ["encode_test.cpp"],
     deps = [
         ":encode",
+        ":ucd",
         ":utf8_reader",
         "@googletest//:gtest_main",
     ],
@@ -54,6 +59,9 @@ cc_library(
     name = "utf8_reader",
     srcs = ["utf8_reader.cpp"],
     hdrs = ["utf8_reader.hpp"],
+    deps = [
+        ":ucd",
+    ],
     visibility = ["//visibility:public"],
 )
 

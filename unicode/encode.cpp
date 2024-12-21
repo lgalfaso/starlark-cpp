@@ -2,10 +2,15 @@
 
 #include "unicode/encode.hpp"
 
+#include "unicode/ucd_code_points.hpp"
+#include "unicode/utf8_reader.hpp"
+
 namespace unicode {
 
 void utf8_encode_code_point(std::uint32_t character, std::string& output) {
-  // TODO(lmirelmann): Should we check that the code point is assigned?
+  if (!ucd::is_assigned(character)) {
+    character = utf8_reader::replacement_character;
+  }
   if (character <= 0x7f) {
     output += (char)character;
   } else if (character <= 0x7ff) {

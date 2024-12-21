@@ -63,7 +63,7 @@ TEST(SourceTest, PeekCodepoint) {
 
   // The largest possible Unicode character is 0x10FFFF.
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf4\x90\x80\x80").peek_code_point());
-  EXPECT_EQ(0x10ffff, utf8_reader("\xf4\x8f\xbf\xbf").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf4\x8f\xbf\xbf").peek_code_point());
 }
 
 TEST(SourceTest, OverlongEncoding) {
@@ -74,7 +74,7 @@ TEST(SourceTest, OverlongEncoding) {
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe0\x9f\xbf").peek_code_point());
   EXPECT_EQ(0x7ff, utf8_reader("\xdf\xbf").peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x8f\xbf\xbf").peek_code_point());
-  EXPECT_EQ(0xffff, utf8_reader("\xef\xbf\xbf").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xef\xbf\xbf").peek_code_point());
 }
 
 TEST(SourceTest, SurrogatesArea) {

@@ -4,6 +4,8 @@
 
 #include <bit>
 
+#include "unicode/ucd_code_points.hpp"
+
 using std::string_view;
 
 namespace unicode {
@@ -96,7 +98,9 @@ std::uint32_t utf8_reader::peek_code_point() const {
     default:
       return replacement_character;
   }
-  // TODO(lmirelmann): Should we check that the candidate is assigned?
+  if (!ucd::is_assigned(candidate)) {
+    return replacement_character;
+  }
   return candidate;
 }
 
