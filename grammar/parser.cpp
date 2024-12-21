@@ -112,9 +112,9 @@ bool is_target(const Expression& expression) {
   }
 }
 
-void set_identifier(Identifier* identifier, std::string_view name) {
-  identifier->set_name(name);
-  identifier->set_nfkc_name(to_nfkc(name));
+void set_identifier(Identifier& identifier, std::string_view name) {
+  identifier.set_name(name);
+  identifier.set_nfkc_name(to_nfkc(name));
 }
 
 }
@@ -266,7 +266,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       add_error("Expected an identifier");
       return;
     }
-    set_identifier(def_statement->mutable_def_statement()->mutable_function_name(), lex.current_token().string_value());
+    set_identifier(*def_statement->mutable_def_statement()->mutable_function_name(), lex.current_token().string_value());
     lex.next_token();
     if (!expect(token_type::lparen)) {
       return;
@@ -387,7 +387,7 @@ Statement parser::parse_small_statement() {
         }
         auto* load_params = result.mutable_load_statement()->add_load_params();
         if (is_current(token_type::identifier)) {
-          set_identifier(load_params->mutable_local_name(), lex.current_token().string_value());
+          set_identifier(*load_params->mutable_local_name(), lex.current_token().string_value());
           lex.next_token();
           if (!expect(token_type::equals)) {
             return result;
@@ -586,7 +586,7 @@ PrimaryExpr parser::parse_primary() {
         add_error("Expecting IDENTIFIER");
         return PrimaryExpr::default_instance();
       }
-      set_identifier(result.mutable_dot_expression()->mutable_identifier(), lex.current_token().string_value());
+      set_identifier(*result.mutable_dot_expression()->mutable_identifier(), lex.current_token().string_value());
       lex.next_token();
     } else if (capture(token_type::lparen)) {
       PrimaryExpr new_result;
@@ -641,7 +641,7 @@ PrimaryExpr::Operand parser::parse_operand() {
     result.set_int_value(lex.current_token().int_value().to_string(10));
     lex.next_token();
   } else if (is_current(token_type::identifier)) {
-    set_identifier(result.mutable_identifier(), lex.current_token().string_value());
+    set_identifier(*result.mutable_identifier(), lex.current_token().string_value());
     lex.next_token();
   } else if (is_current(token_type::float_)) {
     result.set_float_value(lex.current_token().double_value());
@@ -824,7 +824,7 @@ void parser::parse_parameters(google::protobuf::RepeatedPtrField<starlark::Param
   for (;;) {
     if (is_current(token_type::identifier)) {
       Parameter* param = parameters.Add();
-      set_identifier(param->mutable_identifier(), lex.current_token().string_value());
+      set_identifier(*param->mutable_identifier(), lex.current_token().string_value());
       lex.next_token();
       if (capture(token_type::equals)) {
         *param->mutable_initialization() =  parse_test();
@@ -834,7 +834,7 @@ void parser::parse_parameters(google::protobuf::RepeatedPtrField<starlark::Param
       Parameter* param = parameters.Add();
       param->mutable_star();
       if (is_current(token_type::identifier)) {
-        set_identifier(param->mutable_identifier(), lex.current_token().string_value());
+        set_identifier(*param->mutable_identifier(), lex.current_token().string_value());
         lex.next_token();
       }
       found_parameter = true;
@@ -842,7 +842,7 @@ void parser::parse_parameters(google::protobuf::RepeatedPtrField<starlark::Param
       Parameter* param = parameters.Add();
       param->mutable_star_star();
       if (is_current(token_type::identifier)) {
-        set_identifier(param->mutable_identifier(), lex.current_token().string_value());
+        set_identifier(*param->mutable_identifier(), lex.current_token().string_value());
         lex.next_token();
       } else {
         add_error("Expected identifier after STAR_STAR when parsing parameters");
