@@ -125,6 +125,8 @@ parser::parser(std::string_view input) : lex(input) {
 }
 
 File parser::parse_file() {
+  // TODO(lmirelmann): Put the binding on the identifiers
+  // TODO(lmirelmann): Add validation on identifier use
   File result;
   while (lex.current_token().type() != token_type::eof) {
     if (lex.current_token().type() == token_type::newline) {

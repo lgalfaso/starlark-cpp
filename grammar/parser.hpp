@@ -16,11 +16,11 @@ class parser {
  public:
   parser(std::string_view input);
   starlark::File parse_file();
+  // TODO(lmirelmann): These two errors should be merged.
   const std::vector<std::pair<std::string, std::size_t>>& parser_errors() const;
   const std::vector<std::pair<std::string, std::size_t>>& lexer_errors() const;
 
  private:
-  // TODO(lmirelmann): There should be a way to know whether there are any lexer errors.
   lexer lex;
   std::vector<std::pair<std::string, std::size_t>> errors;
   std::vector<int> nested_loops;
