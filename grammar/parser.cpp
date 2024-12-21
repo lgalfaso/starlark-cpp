@@ -521,8 +521,7 @@ Test parser::parse_test(int precedence) {
     *result_ref->mutable_primary_expression() = parse_primary();
     return result;
   }
-  if (is_current(token_type::not_) &&
-      precedence == operator_precedence.at(token_type::not_).first) {
+  if (precedence == operator_precedence.at(token_type::not_).first) {
     Test* result_ref = &result;
     for (;;) {
       if (!capture(token_type::not_)) {
