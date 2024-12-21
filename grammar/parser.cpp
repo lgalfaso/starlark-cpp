@@ -501,8 +501,8 @@ Test parser::parse_test() {
 
 Test parser::parse_test(int precedence) {
   Test result;
-  Test* result_ref = &result;
   if (precedence >= MAX_PRECEDENCE) {
+    Test* result_ref = &result;
     for (;;) {
       if (capture(token_type::plus)) {
         result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::PLUS);
@@ -520,6 +520,7 @@ Test parser::parse_test(int precedence) {
   }
   if (is_current(token_type::not_) &&
       precedence == operator_precedence.at(token_type::not_).first) {
+    Test* result_ref = &result;
     for (;;) {
       if (!capture(token_type::not_)) {
         break;
