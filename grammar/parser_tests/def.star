@@ -1,4 +1,5 @@
 def foo():
+    x = True
     pass
 
 def bar(x): True

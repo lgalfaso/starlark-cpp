@@ -5,6 +5,35 @@ statement {
       nfkc_name: "foo"
     }
     statement {
+      assign_statement {
+        lhs {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+            }
+          }
+        }
+        op: EQUALS
+        rhs {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    statement {
       pass_statement { }
     }
   }
