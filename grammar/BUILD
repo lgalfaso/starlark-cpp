@@ -85,6 +85,17 @@ cc_binary(
     testonly = True,
 )
 
+cc_binary(
+    name = "parser_main",
+    srcs = ["parser_main.cpp"],
+    deps = [
+        ":parser",
+        "@protobuf//:protobuf",
+        "//grammar/proto:starlark_cc_proto",
+        "//third-party:defer",
+    ],
+)
+
 [[
   starlark_proto_encoder(
       name = "parser_test_encoder_" + f.replace("/", "_"),
