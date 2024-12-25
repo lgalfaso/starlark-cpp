@@ -983,11 +983,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (capture(token_type::rparen)) {
             break;
           }
-          frames.push_back(frame{
-            .state = parser_state::parse_primary_call_0,
-            .primary = top.primary,
-            .primary_must_be_target = top.primary_must_be_target,
-          });
+          frames.push_back(top);
           frames.push_back(frame{
             .state = parser_state::parse_argument,
             .argument = top.primary->mutable_call_expression()->add_argument(),
