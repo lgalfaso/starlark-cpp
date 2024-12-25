@@ -12,6 +12,43 @@ statement {
                   }
                 }
               }
+              operator: PLUS
+              rhs {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
+          }
+          operator: PLUS
+          rhs {
+            primary_expression {
+              operand {
+                int_value: "3"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        binary_expression {
+          lhs {
+            binary_expression {
+              lhs {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
               operator: STAR
               rhs {
                 primary_expression {
@@ -43,6 +80,63 @@ statement {
             }
           }
         }
+      }
+    }
+  }
+}
+statement {
+  if_statement {
+    test {
+      binary_expression {
+        lhs {
+          binary_expression {
+            lhs {
+              primary_expression {
+                operand {
+                  string_value: "win32"
+                }
+              }
+            }
+            operator: IN
+            rhs {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "cpu"
+                    nfkc_name: "cpu"
+                  }
+                }
+              }
+            }
+          }
+        }
+        operator: OR
+        rhs {
+          binary_expression {
+            lhs {
+              primary_expression {
+                operand {
+                  string_value: "win64"
+                }
+              }
+            }
+            operator: IN
+            rhs {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "cpu"
+                    nfkc_name: "cpu"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    statement {
+      pass_statement {
       }
     }
   }

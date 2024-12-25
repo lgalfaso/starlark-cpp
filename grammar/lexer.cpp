@@ -321,10 +321,6 @@ void lexer::consume_indentation(bool modify_indents) {
         source_code.skip();
       }
       add_comment(comment_start, source_code.pos());
-      if (source_code.peek() == '\n') {
-        source_code.skip();
-        indentation_length = 0;
-      }
     } else {  // End of indentation.
       break;
     }

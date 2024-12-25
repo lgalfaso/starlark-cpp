@@ -196,7 +196,7 @@ TEST(LexerTest, Comments) {
 foo = "bar"  # One comment.
 man = []  # Another comment.
 )starlark", {" One comment.", " Another comment."});
-  check("a = 1 + # Comment\n 1", "IDENTIFIER(\"a\"):0:1 EQUALS:2:3 INT(1):4:5 PLUS:6:7 INT(1):19:20 NEWLINE:20:20 EOF:20:20");
+  check("a = [1 + # Comment\n 1]", "IDENTIFIER(\"a\"):0:1 EQUALS:2:3 LBRACKET:4:5 INT(1):5:6 PLUS:7:8 INT(1):20:21 RBRACKET:21:22 NEWLINE:22:22 EOF:22:22");
   check("a = 1 + \\\n 1", "IDENTIFIER(\"a\"):0:1 EQUALS:2:3 INT(1):4:5 PLUS:6:7 INT(1):11:12 NEWLINE:12:12 EOF:12:12");
 }
 

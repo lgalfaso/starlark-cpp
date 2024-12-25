@@ -869,11 +869,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .test_p_first = true,
           });
         } else if (auto next_op = operator_precedence.find(lex.current_token().type()); next_op != operator_precedence.end()) {
-          if (!top.test_p_first && top.test_p_precedence == operator_precedence.at(token_type::equals_equals).first) {
-            add_error("Comparison operators are not associative. Use parens.");
-          }
           if (top.test_p_precedence != next_op->second.first) {
             break;
+          }
+          if (!top.test_p_first && top.test_p_precedence == operator_precedence.at(token_type::equals_equals).first) {
+            add_error("Comparison operators are not associative. Use parens.");
           }
           lex.next_token();
           {
