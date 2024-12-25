@@ -34,21 +34,7 @@ class parser {
   bool expect(token_type expected_token);
   void add_error(const std::string& error_message);
   void parse_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
-  void parse_suite(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
-  void parse_simple_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
-  starlark::Statement parse_small_statement();
-  starlark::Expression parse_expression(bool allow_trailing_comma);
-  starlark::Test parse_test();
-  starlark::Test parse_test(int precedence);
-  starlark::PrimaryExpr parse_primary();
-  starlark::PrimaryExpr::Operand parse_operand();
-  starlark::PrimaryExpr::Operand parse_list();
-  starlark::PrimaryExpr::Operand parse_dict();
-  starlark::PrimaryExpr::Operand::Entry parse_entry();
-  starlark::PrimaryExpr::Operand::CompClause parse_comp_clause();
-  starlark::PrimaryExpr::CallExpr::Argument parse_argument();
-  starlark::Test::LambdaExpr parse_lambda();
-  void parse_parameters(google::protobuf::RepeatedPtrField<starlark::Parameter>& parameters, bool allow_trailing_comma);
+  bool set_identifier(starlark::Identifier& id);
 };
 
 }  // namespace grammar

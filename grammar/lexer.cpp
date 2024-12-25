@@ -164,8 +164,8 @@ const token& lexer::current_token() const {
 
 void lexer::next_token() {
   bool after_newline = current.type() == token_type::newline;
-  auto start_token = current.type();
-  auto start_pos = source_code.pos();
+  [[maybe_unused]] auto start_token = current.type();
+  [[maybe_unused]] auto start_pos = source_code.pos();
   tokenize();
 
   assert(current.type() != token_type::bof);

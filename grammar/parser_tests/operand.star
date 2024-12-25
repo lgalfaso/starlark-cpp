@@ -8,6 +8,7 @@ b"these are bytes"
 [1, 2, 3, 4]
 [x for x in foo]
 [x for x in foo if x % 2 == 0]
+[x for x, y in foo if x % 2 == 0]
 {}
 {'a': 1}
 {'a': 1, 'b': 2,}
@@ -18,3 +19,6 @@ b"these are bytes"
 (1,)
 (1, 2)
 (1 + 2) * 3
+[a, b] = [b, a]
+a = 1 if True else 2
+

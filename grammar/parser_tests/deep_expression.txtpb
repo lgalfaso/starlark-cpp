@@ -1,0 +1,26 @@
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            int_value: "1"
+          }
+        }
+      }
+    }
+  }
+}

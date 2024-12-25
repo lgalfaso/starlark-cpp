@@ -4,6 +4,7 @@
 
 #include <map>
 #include <utility>
+#include <vector>
 
 #include "unicode/normalization.hpp"
 #include "third-party/defer.hpp"
@@ -68,6 +69,7 @@ const std::map<token_type, AssignStmt::AssignOperator> assign_ops = {
 constexpr int MAX_PRECEDENCE = 11;
 
 bool is_target(const Expression& expression);
+bool is_target(const Test& test);
 
 bool is_target(const PrimaryExpr& primary_expression) {
   switch (primary_expression.primary_expression_type_case()) {
@@ -76,20 +78,28 @@ bool is_target(const PrimaryExpr& primary_expression) {
       return true;
     case PrimaryExpr::kCallExpression:
     case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
+    default:
       return false;
     case PrimaryExpr::kOperand:
       switch (primary_expression.operand().operand_type_case()) {
         case PrimaryExpr::Operand::kIdentifier:
           return true;
+        case PrimaryExpr::Operand::kListExpression:
+          for (const auto& item : primary_expression.operand().list_expression().element()) {
+            if (!is_target(item)) {
+              return false;
+            }
+          }
+          return true;
         case PrimaryExpr::Operand::kIntValue:
         case PrimaryExpr::Operand::kFloatValue:
         case PrimaryExpr::Operand::kStringValue:
         case PrimaryExpr::Operand::kBytesValue:
-        case PrimaryExpr::Operand::kListExpression:
         case PrimaryExpr::Operand::kListComprehension:
         case PrimaryExpr::Operand::kDictionaryExpression:
         case PrimaryExpr::Operand::kDictionaryComprehension:
         case PrimaryExpr::Operand::OPERAND_TYPE_NOT_SET:
+        default:
           return false;
         case PrimaryExpr::Operand::kExpression:
           return is_target(primary_expression.operand().expression());
@@ -101,13 +111,12 @@ bool is_target(const Expression& expression) {
   switch (expression.expression_type_case()) {
     case Expression::kValue:
     case Expression::EXPRESSION_TYPE_NOT_SET:
-      return expression.value().has_primary_expression() &&
-        is_target(expression.value().primary_expression());
+    default:
+      return is_target(expression.value());
       break;
     case Expression::kTuple:
       for (const auto& element : expression.tuple().value()) {
-        if (!element.has_primary_expression() ||
-            !is_target(element.primary_expression())) {
+        if (!is_target(element)) {
           return false;
         }
       }
@@ -115,12 +124,101 @@ bool is_target(const Expression& expression) {
   }
 }
 
-void set_identifier(Identifier& identifier, std::string_view name) {
-  identifier.set_name(name);
-  identifier.set_nfkc_name(to_nfkc(name));
+bool is_target(const Test& test) {
+  return test.has_primary_expression() &&
+      is_target(test.primary_expression());
 }
 
-}
+enum class parser_state {
+  parse_statement,
+  parse_statement_def_0,
+  parse_statement_def_1,
+  parse_statement_if_0,
+  parse_statement_if_elif,
+  parse_statement_if_else,
+  parse_statement_for_0,
+  parse_statement_for_1,
+  parse_statement_for_2,
+  parse_statement_for_3,
+  parse_statement_expression_0,
+  parse_suite,
+  parse_suite_statement_list,
+  parse_simple_statement,
+  parse_simple_statement_0,
+  parse_simple_statement_1,
+  parse_small_statement,
+  parse_parameters,
+  parse_expression,
+  parse_expression_0,
+  parse_expression_1,
+  parse_test,
+  parse_test_0,
+  parse_test_1,
+  parse_test_p,
+  parse_test_p_0,
+  parse_lambda,
+  parse_lambda_0,
+  parse_primary,
+  parse_primary_0,
+  parse_primary_call_0,
+  parse_primary_index_0,
+  parse_primary_index_1,
+  parse_primary_index_2,
+  parse_primary_index_final,
+  parse_operand,
+  parse_operand_expression_0,
+  parse_list,
+  parse_list_0,
+  parse_list_index_0,
+  parse_list_final,
+  parse_dict,
+  parse_dict_0,
+  parse_dict_index_0,
+  parse_dict_final,
+  parse_entry,
+  parse_entry_0,
+  parse_comp_clauses,
+  parse_comp_clauses_0,
+  parse_argument,
+  parse_argument_0,
+};
+
+struct frame {
+  parser_state state;
+  union {
+    RepeatedPtrField<Statement>* statements;
+    Statement* statement;
+    DefStmt* def_statement;
+    IfStmt* if_statement;
+    ForStmt* for_statement;
+    Test::LambdaExpr* lambda;
+    PrimaryExpr::Operand* operand;
+    PrimaryExpr::CallExpr::Argument* argument;
+    PrimaryExpr::Operand::Entry* entry;
+    RepeatedPtrField<PrimaryExpr::Operand::CompClause>* comp_clauses;
+    PrimaryExpr::Operand::CompClause* comp_clause;
+    struct {
+      RepeatedPtrField<Parameter>* parameters;
+      bool parse_parameters_allow_trailing_comma;
+      bool parse_parameters_first;
+    };
+    struct {
+      Expression* expression;
+      bool expression_allow_trailing_comma;
+    };
+    struct {
+      Test* test;
+      int test_p_precedence;
+      bool test_p_first;
+    };
+    struct {
+      PrimaryExpr* primary = nullptr;
+      bool primary_must_be_target = false;
+    };
+  };
+};
+
+}  // namespace
 
 parser::parser(std::string_view input) : lex(input) {
   lex.next_token();
@@ -261,607 +359,1037 @@ void parser::add_error(const std::string& error_message) {
 }
 
 void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
-  if (capture(token_type::def)) {
-    nested_loops.push_back(0);
-    defer { nested_loops.pop_back(); };
-    DefStmt* def_statement = statements.Add()->mutable_def_statement();
-    if (!is_current(token_type::identifier)) {
-      add_error("Expected an identifier");
-      return;
-    }
-    set_identifier(*def_statement->mutable_function_name(), lex.current_token().string_value());
-    lex.next_token();
-    if (!expect(token_type::lparen)) {
-      return;
-    }
-    parse_parameters(*def_statement->mutable_parameter(), true);
-    if (!expect(token_type::rparen)) {
-      return;
-    }
-    if (!expect(token_type::colon)) {
-      return;
-    }
-    parse_suite(*def_statement->mutable_statement());
-  } else if (capture(token_type::if_)) {
-    IfStmt* if_statement = statements.Add()->mutable_if_statement();
-    *if_statement->mutable_test() = parse_test();
-    if (!expect(token_type::colon)) {
-      return;
-    }
-    parse_suite(*if_statement->mutable_statement());
-    while (capture(token_type::elif)) {
-      auto* elif = if_statement->add_elif();
-      *elif->mutable_test() = parse_test();
-      if (!expect(token_type::colon)) {
-        return;
-      }
-      parse_suite(*elif->mutable_statement());
-    }
-    if (capture(token_type::else_)) {
-      if (!expect(token_type::colon)) {
-        return;
-      }
-      parse_suite(*if_statement->mutable_else_statement());
-    }
-  } else if (capture(token_type::for_)) {
-    nested_loops.back()++;
-    defer { nested_loops.back()--; };
-    ForStmt* for_statement = statements.Add()->mutable_for_statement();
-    do {
-      *for_statement->add_loop_variable() = parse_primary();
-      if (!is_target(*for_statement->loop_variable().rbegin())) {
-        add_error("Expecting a TARGET");
-        return;
-      }
-    } while (capture(token_type::comma));
-    if (!expect(token_type::in)) {
-      return;
-    }
-    *for_statement->mutable_expression() = parse_expression(false);
-    if (!expect(token_type::colon)) {
-      return;
-    }
-    parse_suite(*for_statement->mutable_statement());
-  } else {
-    parse_simple_statement(statements);
-  }
-}
+  std::vector<frame> frames;
+  // TODO(lmirelmann): Delegate to some method the construction of the frames.
+  frames.push_back(frame{
+      .state = parser_state::parse_statement,
+      .statements = &statements,
+  });
 
-void parser::parse_suite(RepeatedPtrField<Statement>& statements) {
-  if (capture(token_type::newline)) {
-    if (!expect(token_type::indent)) {
-      return;
-    }
-    while (lex.current_token().type() != token_type::outdent && lex.current_token().type() != token_type::eof) {
-      parse_statement(statements);
-    }
-    expect(token_type::outdent);
-  } else {
-    parse_simple_statement(statements);
-  }
-}
-
-void parser::parse_simple_statement(RepeatedPtrField<Statement>& statements) {
-  *statements.Add() = parse_small_statement();
-  while (capture(token_type::semi)) {
-    if (is_current(token_type::newline)) {
-      break;
-    }
-    *statements.Add() = parse_small_statement();
-  }
-  if (recover) {
-    while (lex.current_token().type() != token_type::newline && lex.current_token().type() != token_type::eof) {
-      lex.next_token();
-    }
-  }
-  if (!expect(token_type::newline)) {
-    return;
-  }
-  recover = false;
-}
-
-Statement parser::parse_small_statement() {
-  Statement result;
-  switch (lex.current_token().type()) {
-    case token_type::return_:
-      if (nested_loops.size() == 1) {
-        add_error("Unexpected RETURN");
-      }
-      result.mutable_return_statement();
-      lex.next_token();
-      if (!is_current(token_type::newline)) {
-        *result.mutable_return_statement()->mutable_expression() = parse_expression(false);
-      }
-      break;
-    case token_type::load:
-      lex.next_token();
-      if (!expect(token_type::lparen)) {
-        return result;
-      }
-      if (!is_current(token_type::string)) {
-        add_error("Expected STRING");
-        return result;
-      }
-      result.mutable_load_statement()->set_module(lex.current_token().string_value());
-      lex.next_token();
-      while (capture(token_type::comma)) {
-        if (is_current(token_type::rparen)) {
+  do {
+    const frame top = frames.back();
+    frames.pop_back();
+    switch (top.state) {
+      case parser_state::parse_statement:
+        if (capture(token_type::def)) {
+          DefStmt* def_statement = top.statements->Add()->mutable_def_statement();
+          nested_loops.push_back(0);
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_def_1,
+          });
+          if (!set_identifier(*def_statement->mutable_function_name())) {
+            add_error("Expected an identifier");
+            break;
+          }
+          if (!expect(token_type::lparen)) {
+            break;
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_def_0,
+            .def_statement = def_statement,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_parameters,
+            .parameters = def_statement->mutable_parameter(),
+            .parse_parameters_allow_trailing_comma = true,
+            .parse_parameters_first = true,
+          });
+        } else if (capture(token_type::if_)) {
+          IfStmt* if_statement = top.statements->Add()->mutable_if_statement();
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_if_else,
+            .if_statement = if_statement,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_if_elif,
+            .if_statement = if_statement,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_if_0,
+            .statements = if_statement->mutable_statement(),
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = if_statement->mutable_test(),
+          });
+        } else if (capture(token_type::for_)) {
+          ForStmt* for_statement = top.statements->Add()->mutable_for_statement();
+          nested_loops.back()++;
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_for_3,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_for_2,
+            .statements = for_statement->mutable_statement(),
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_for_1,
+            .for_statement = for_statement,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_for_0,
+            .for_statement = for_statement,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_primary,
+            .primary = for_statement->add_loop_variable(),
+            .primary_must_be_target = true,
+          });
+        } else {
+          frames.push_back(frame{
+            .state = parser_state::parse_simple_statement,
+            .statements = top.statements,
+          });
+        }
+        break;
+      case parser_state::parse_statement_def_0:
+        if (!expect(token_type::rparen)) {
           break;
         }
-        auto* load_params = result.mutable_load_statement()->add_load_params();
-        if (is_current(token_type::identifier)) {
-          set_identifier(*load_params->mutable_local_name(), lex.current_token().string_value());
-          lex.next_token();
-          if (!expect(token_type::equals)) {
-            return result;
+        if (!expect(token_type::colon)) {
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_suite,
+          .statements = top.def_statement->mutable_statement(),
+        });
+        break;
+      case parser_state::parse_statement_def_1:
+        nested_loops.pop_back();
+        break;
+      case parser_state::parse_statement_if_0:
+        if (!expect(token_type::colon)) {
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_suite,
+          .statements = top.statements,
+        });
+        break;
+      case parser_state::parse_statement_if_elif:
+        if (capture(token_type::elif)) {
+          auto* elif = top.if_statement->add_elif();
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_if_0,
+            .statements = elif->mutable_statement(),
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = elif->mutable_test(),
+          });
+        }
+        break;
+      case parser_state::parse_statement_if_else:
+        if (capture(token_type::else_)) {
+          frames.push_back(frame{
+            .state = parser_state::parse_statement_if_0,
+            .statements = top.if_statement->mutable_else_statement(),
+          });
+        }
+        break;
+      case parser_state::parse_statement_for_0:
+        if (capture(token_type::comma)) {
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_primary,
+            .primary = top.for_statement->add_loop_variable(),
+            .primary_must_be_target = true,
+          });
+        }
+        break;
+      case parser_state::parse_statement_for_1:
+        if (!expect(token_type::in)) {
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_expression,
+          .expression = top.for_statement->mutable_expression(),
+          .expression_allow_trailing_comma = false,
+        });
+        break;
+      case parser_state::parse_statement_for_2:
+        if (!expect(token_type::colon)) {
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_suite,
+          .statements = top.statements,
+        });
+        break;
+      case parser_state::parse_statement_for_3:
+        nested_loops.back()--;
+        break;
+      case parser_state::parse_suite:
+        if (capture(token_type::newline)) {
+          if (!expect(token_type::indent)) {
+            break;
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_suite_statement_list,
+            .statements = top.statements,
+          });
+        } else {
+          frames.push_back(frame{
+            .state = parser_state::parse_simple_statement,
+            .statements = top.statements,
+          });
+        }
+        break;
+      case parser_state::parse_suite_statement_list:
+        if (lex.current_token().type() != token_type::outdent && lex.current_token().type() != token_type::eof) {
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_statement,
+            .statements = top.statements,
+          });
+          break;
+        }
+        expect(token_type::outdent);
+        break;
+      case parser_state::parse_simple_statement:
+        frames.push_back(frame{
+          .state = parser_state::parse_simple_statement_1,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_simple_statement_0,
+          .statements = top.statements,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_small_statement,
+          .statement = top.statements->Add(),
+        });
+        break;
+      case parser_state::parse_simple_statement_0:
+        if (capture(token_type::semi)) {
+          if (is_current(token_type::newline)) {
+            break;
+          }
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_small_statement,
+             .statement = top.statements->Add(),
+          });
+        }
+        break;
+      case parser_state::parse_simple_statement_1:
+        if (recover) {
+          while (lex.current_token().type() != token_type::newline && lex.current_token().type() != token_type::eof) {
+            lex.next_token();
           }
         }
-        if (!is_current(token_type::string)) {
-          add_error("Expected STRING");
-          return result;
+        if (!expect(token_type::newline)) {
+          break;
         }
-        load_params->set_remote_name(lex.current_token().string_value());
-        lex.next_token();
-      }
-      if (!expect(token_type::rparen)) {
-        return result;
-      }
-      break;
-    case token_type::break_:
-      if (nested_loops.back() == 0) {
-        add_error("Unexpected BREAK");
-      }
-      result.mutable_break_statement();
-      lex.next_token();
-      break;
-    case token_type::continue_: {
-      if (nested_loops.back() == 0) {
-        add_error("Unexpected CONTINUE");
-      }
-      result.mutable_continue_statement();
-      lex.next_token();
-      break;
-    }
-    case token_type::pass: {
-      result.mutable_pass_statement();
-      lex.next_token();
-      break;
-    }
-    default: {
-      Expression expression = parse_expression(false);
-      if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
-        if (!is_target(expression)) {
-          add_error("Exprecting TARGET");
-          return result;
-        }
-        result.mutable_assign_statement()->mutable_lhs()->Swap(&expression);
-        result.mutable_assign_statement()->set_op(op->second);
-        lex.next_token();
-        *result.mutable_assign_statement()->mutable_rhs() = parse_expression(false);
-      } else {
-        *result.mutable_expression_statement()->mutable_expression() = expression;
-      }
-      break;
-    }
-  }
-  return result;
-}
-
-Expression parser::parse_expression(bool allow_trailing_comma) {
-  Expression result;
-  if (is_current(token_type::rparen)) {
-    if (!allow_trailing_comma) {
-      add_error("Unexpected TUPLE");
-      return result;
-    }
-    result.mutable_tuple();
-    return result;
-  }
-
-  auto first_test = parse_test();
-  if (is_current(token_type::comma)) {
-    first_test.Swap(result.mutable_tuple()->add_value());
-    while (capture(token_type::comma)) {
-      if (is_current(token_type::rparen)) {
-        if (!allow_trailing_comma) {
-          add_error("Unexpected COMMA");
-          return result;
-        }
-        return result;
-      }
-      *result.mutable_tuple()->add_value() = parse_test();
-    }
-  } else {
-    if (first_test.primary_expression().operand().has_expression()) {
-      first_test.mutable_primary_expression()->mutable_operand()->mutable_expression()->Swap(&result);
-    } else {
-      first_test.Swap(result.mutable_value());
-    }
-  }
-
-  return result;
-}
-
-Test parser::parse_test() {
-  Test result;
-  if (is_current(token_type::lambda)) {
-    *result.mutable_lambda_expression() = parse_lambda();
-  } else {
-    result = parse_test(0);
-    if (capture(token_type::if_)) {
-      Test new_result;
-      new_result.mutable_if_expression()->mutable_if_value()->Swap(&result);
-      new_result.Swap(&result);
-      *result.mutable_if_expression()->mutable_if_test() = parse_test(0);
-      if (!expect(token_type::else_)) {
-        return result;
-      }
-      *result.mutable_if_expression()->mutable_else_value() = parse_test();
-    }
-  }
-  return result;
-}
-
-Test parser::parse_test(int precedence) {
-  Test result;
-  if (precedence >= MAX_PRECEDENCE) {
-    Test* result_ref = &result;
-    for (;;) {
-      if (capture(token_type::plus)) {
-        result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::PLUS);
-      } else if (capture(token_type::minus)) {
-        result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::MINUS);
-      } else if (capture(token_type::tilde)) {
-        result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::TILDE);
-      } else {
+        recover = false;
         break;
-      }
-      result_ref = result_ref->mutable_unary_expression()->mutable_test();
-    }
-    *result_ref->mutable_primary_expression() = parse_primary();
-    return result;
-  }
-  if (precedence == operator_precedence.at(token_type::not_).first) {
-    Test* result_ref = &result;
-    for (;;) {
-      if (!capture(token_type::not_)) {
+      case parser_state::parse_small_statement:
+        switch (lex.current_token().type()) {
+          case token_type::return_:
+            if (nested_loops.size() == 1) {
+              add_error("Unexpected RETURN");
+            }
+            top.statement->mutable_return_statement();
+            lex.next_token();
+            if (!is_current(token_type::newline)) {
+              frames.push_back(frame{
+                .state = parser_state::parse_expression,
+                .expression = top.statement->mutable_return_statement()->mutable_expression(),
+                .expression_allow_trailing_comma = false,
+              });
+            }
+            break;
+          case token_type::load:
+            lex.next_token();
+            if (!expect(token_type::lparen)) {
+              break;
+            }
+            if (!is_current(token_type::string)) {
+              add_error("Expected STRING");
+              break;
+            }
+            top.statement->mutable_load_statement()->set_module(lex.current_token().string_value());
+            lex.next_token();
+            while (capture(token_type::comma)) {
+              if (is_current(token_type::rparen)) {
+                break;
+              }
+              auto* load_params = top.statement->mutable_load_statement()->add_load_params();
+              if (is_current(token_type::identifier)) {
+                set_identifier(*load_params->mutable_local_name());
+                if (!expect(token_type::equals)) {
+                  break;
+                }
+              }
+              if (!is_current(token_type::string)) {
+                add_error("Expected STRING");
+                break;
+              }
+              load_params->set_remote_name(lex.current_token().string_value());
+              lex.next_token();
+            }
+            expect(token_type::rparen);
+            break;
+          case token_type::break_:
+            if (nested_loops.back() == 0) {
+              add_error("Unexpected BREAK");
+            }
+            top.statement->mutable_break_statement();
+            lex.next_token();
+            break;
+          case token_type::continue_:
+            if (nested_loops.back() == 0) {
+              add_error("Unexpected CONTINUE");
+            }
+            top.statement->mutable_continue_statement();
+            lex.next_token();
+            break;
+          case token_type::pass:
+            top.statement->mutable_pass_statement();
+            lex.next_token();
+            break;
+          default: {
+            auto* statement = top.statement;
+            frames.push_back(frame{
+              .state = parser_state::parse_statement_expression_0,
+              .statement = statement,
+            });
+            frames.push_back(frame{
+              .state = parser_state::parse_expression,
+              .expression = statement->mutable_expression_statement()->mutable_expression(),
+              .expression_allow_trailing_comma = false,
+            });
+            break;
+          }
+        }
         break;
-      }
-      result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::NOT);
-      result_ref = result_ref->mutable_unary_expression()->mutable_test();
-    }
-    *result_ref = parse_test(precedence + 1);
-    return result;
-  }
-  result = parse_test(precedence + 1);
-  for (int loop_count = 0;;++loop_count) {
-    if (is_current(token_type::not_)) {
-      if (precedence != operator_precedence.at(token_type::in).first) {
-        return result;
-      }
-      if (loop_count > 0) {
-        add_error("Comparison operators are not associative. Use parens.");
-        return result;
-      }
-      lex.next_token();
-      if (!expect(token_type::in)) {
-        return result;
-      }
-      Test new_result;
-      new_result.mutable_binary_expression()->mutable_lhs()->Swap(&result);
-      new_result.Swap(&result);
-      result.mutable_binary_expression()->set_operator_(Test::BinaryExpr::NOT_IN);
-      *result.mutable_binary_expression()->mutable_rhs() = parse_test(precedence + 1);
-    } else if (auto next_op = operator_precedence.find(lex.current_token().type()); next_op != operator_precedence.end()) {
-      if (loop_count > 0 && precedence == operator_precedence.at(token_type::equals_equals).first) {
-        add_error("Comparison operators are not associative. Use parens.");
-        return result;
-      }
-      if (precedence != next_op->second.first) {
-        return result;
-      }
-      lex.next_token();
-      Test new_result;
-      new_result.mutable_binary_expression()->mutable_lhs()->Swap(&result);
-      new_result.Swap(&result);
-      result.mutable_binary_expression()->set_operator_(next_op->second.second);
-      *result.mutable_binary_expression()->mutable_rhs() = parse_test(precedence + 1);
-    } else {
-      return result;
-    }
-  }
-}
-
-PrimaryExpr parser::parse_primary() {
-  PrimaryExpr result;
-  *result.mutable_operand() = parse_operand();
-  if (result.operand().expression().value().has_primary_expression()) {
-    PrimaryExpr new_result = result.operand().expression().value().primary_expression();
-    result.Swap(&new_result);
-  }
-  for (;;) {
-    if (capture(token_type::dot)) {
-      PrimaryExpr new_result;
-      new_result.mutable_dot_expression()->mutable_primary_expression()->Swap(&result);
-      new_result.Swap(&result);
-      if (!is_current(token_type::identifier)) {
-        add_error("Expecting IDENTIFIER");
-        return PrimaryExpr::default_instance();
-      }
-      set_identifier(*result.mutable_dot_expression()->mutable_identifier(), lex.current_token().string_value());
-      lex.next_token();
-    } else if (capture(token_type::lparen)) {
-      PrimaryExpr new_result;
-      new_result.mutable_call_expression()->mutable_primary_expression()->Swap(&result);
-      new_result.Swap(&result);
-      if (capture(token_type::rparen)) {
-        continue;
-      }
-      *result.mutable_call_expression()->add_argument() = parse_argument();
-      while (capture(token_type::comma)) {
+      case parser_state::parse_statement_expression_0:
+        if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
+          if (!is_target(top.statement->expression_statement().expression())) {
+            add_error("Exprecting TARGET");
+            break;
+          }
+          {
+            AssignStmt assign_statement;
+            assign_statement.mutable_lhs()->Swap(top.statement->mutable_expression_statement()->mutable_expression());
+            assign_statement.Swap(top.statement->mutable_assign_statement());
+          }
+          top.statement->mutable_assign_statement()->set_op(op->second);
+          lex.next_token();
+          frames.push_back(frame{
+            .state = parser_state::parse_expression,
+            .expression = top.statement->mutable_assign_statement()->mutable_rhs(),
+            .expression_allow_trailing_comma = false,
+          });
+        }
+        break;
+      case parser_state::parse_expression:
         if (is_current(token_type::rparen)) {
+          if (!top.expression_allow_trailing_comma) {
+            add_error("Unexpected TUPLE");
+          }
+          top.expression->mutable_tuple();
           break;
         }
-        *result.mutable_call_expression()->add_argument() = parse_argument();
-      }
-      if (!expect(token_type::rparen)) {
-        return result;
-      }
-    } else if (capture(token_type::lbracket)) {
-      PrimaryExpr new_result;
-      new_result.mutable_slice_expression()->mutable_primary_expression()->Swap(&result);
-      new_result.Swap(&result);
-      Expression expression = parse_expression(true);
-      if (capture(token_type::colon)) {
-        if (!expression.has_value()) {
-          add_error("Unexpected TUPLE");
-          return result;
+
+        frames.push_back(frame{
+          .state = parser_state::parse_expression_0,
+          .expression = top.expression,
+          .expression_allow_trailing_comma = top.expression_allow_trailing_comma,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_test,
+          .test = top.expression->mutable_value(),
+        });
+        break;
+      case parser_state::parse_expression_0:
+        if (is_current(token_type::comma)) {
+          {
+            Test first_test;
+            first_test.Swap(top.expression->mutable_value());
+            first_test.Swap(top.expression->mutable_tuple()->add_value());
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_expression_1,
+            .expression = top.expression,
+            .expression_allow_trailing_comma = top.expression_allow_trailing_comma,
+          });
+        } else {
+          if (top.expression->value().primary_expression().operand().has_expression()) {
+            Test first_test;
+            first_test.Swap(top.expression->mutable_value());
+            first_test.mutable_primary_expression()->mutable_operand()->mutable_expression()->Swap(top.expression);
+          }
         }
-        *result.mutable_slice_expression()->mutable_slice()->mutable_start() = expression.value();
+        break;
+      case parser_state::parse_expression_1:
+        if (capture(token_type::comma)) {
+          if (is_current(token_type::rparen)) {
+            if (!top.expression_allow_trailing_comma) {
+              add_error("Unexpected COMMA");
+            }
+            break;
+          }
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.expression->mutable_tuple()->add_value(),
+          });
+        }
+        break;
+      case parser_state::parse_test:
+        if (is_current(token_type::lambda)) {
+          frames.push_back(frame{
+            .state = parser_state::parse_lambda,
+            .lambda = top.test->mutable_lambda_expression(),
+          });
+        } else {
+          frames.push_back(frame{
+            .state = parser_state::parse_test_0,
+            .test = top.test,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p,
+            .test = top.test,
+            .test_p_precedence = 0,
+            .test_p_first = true,
+          });
+        }
+        break;
+      case parser_state::parse_test_0:
+        if (capture(token_type::if_)) {
+          {
+            Test new_result;
+            new_result.mutable_if_expression()->mutable_if_value()->Swap(top.test);
+            new_result.Swap(top.test);
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_test_1,
+            .test = top.test,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p,
+            .test = top.test->mutable_if_expression()->mutable_if_test(),
+            .test_p_precedence = 0,
+            .test_p_first = true,
+          });
+        }
+        break;
+      case parser_state::parse_test_1:
+        if (!expect(token_type::else_)) {
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_test_p,
+          .test = top.test->mutable_if_expression()->mutable_else_value(),
+          .test_p_precedence = 0,
+          .test_p_first = true,
+        });
+        break;
+      case parser_state::parse_test_p:
+        if (top.test_p_precedence >= MAX_PRECEDENCE) {
+          Test* result_ref = top.test;
+          for (;;) {
+            if (capture(token_type::plus)) {
+              result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::PLUS);
+            } else if (capture(token_type::minus)) {
+              result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::MINUS);
+            } else if (capture(token_type::tilde)) {
+              result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::TILDE);
+            } else {
+              break;
+            }
+            result_ref = result_ref->mutable_unary_expression()->mutable_test();
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_primary,
+            .primary = result_ref->mutable_primary_expression(),
+            .primary_must_be_target = false,
+          });
+          break;
+        }
+        if (top.test_p_precedence == operator_precedence.at(token_type::not_).first) {
+          Test* result_ref = top.test;
+          for (;;) {
+            if (!capture(token_type::not_)) {
+              break;
+            }
+            result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::NOT);
+            result_ref = result_ref->mutable_unary_expression()->mutable_test();
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p,
+            .test = result_ref,
+            .test_p_precedence = top.test_p_precedence + 1,
+            .test_p_first = true,
+          });
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_test_p_0,
+          .test = top.test,
+          .test_p_precedence = top.test_p_precedence,
+          .test_p_first = true,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_test_p,
+          .test = top.test,
+          .test_p_precedence = top.test_p_precedence + 1,
+          .test_p_first = true,
+        });
+        break;
+      case parser_state::parse_test_p_0:
+        if (is_current(token_type::not_)) {
+          if (top.test_p_precedence != operator_precedence.at(token_type::in).first) {
+            break;
+          }
+          if (!top.test_p_first) {
+            add_error("Comparison operators are not associative. Use parens.");
+          }
+          lex.next_token();
+          if (!expect(token_type::in)) {
+            break;
+          }
+          {
+            Test new_result;
+            new_result.mutable_binary_expression()->mutable_lhs()->Swap(top.test);
+            new_result.Swap(top.test);
+          }
+          top.test->mutable_binary_expression()->set_operator_(Test::BinaryExpr::NOT_IN);
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p_0,
+            .test = top.test,
+            .test_p_precedence = top.test_p_precedence,
+            .test_p_first = false,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p,
+            .test = top.test->mutable_binary_expression()->mutable_rhs(),
+            .test_p_precedence = top.test_p_precedence + 1,
+            .test_p_first = true,
+          });
+        } else if (auto next_op = operator_precedence.find(lex.current_token().type()); next_op != operator_precedence.end()) {
+          if (!top.test_p_first && top.test_p_precedence == operator_precedence.at(token_type::equals_equals).first) {
+            add_error("Comparison operators are not associative. Use parens.");
+          }
+          if (top.test_p_precedence != next_op->second.first) {
+            break;
+          }
+          lex.next_token();
+          {
+            Test new_result;
+            new_result.mutable_binary_expression()->mutable_lhs()->Swap(top.test);
+            new_result.Swap(top.test);
+          }
+          top.test->mutable_binary_expression()->set_operator_(next_op->second.second);
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p_0,
+            .test = top.test,
+            .test_p_precedence = top.test_p_precedence,
+            .test_p_first = false,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p,
+            .test = top.test->mutable_binary_expression()->mutable_rhs(),
+            .test_p_precedence = top.test_p_precedence + 1,
+            .test_p_first = true,
+          });
+        }
+        break;
+      case parser_state::parse_primary:
+        frames.push_back(frame{
+          .state = parser_state::parse_primary_0,
+          .primary = top.primary,
+          .primary_must_be_target = top.primary_must_be_target,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_operand,
+          .operand = top.primary->mutable_operand(),
+        });
+        break;
+      case parser_state::parse_primary_0:
+        if (top.primary->operand().expression().value().has_primary_expression()) {
+          PrimaryExpr new_result;
+          new_result.Swap(top.primary->mutable_operand()->mutable_expression()->mutable_value()->mutable_primary_expression());
+          top.primary->Swap(&new_result);
+        }
+        if (capture(token_type::dot)) {
+          {
+            PrimaryExpr new_result;
+            new_result.mutable_dot_expression()->mutable_primary_expression()->Swap(top.primary);
+            new_result.Swap(top.primary);
+          }
+          if (!set_identifier(*top.primary->mutable_dot_expression()->mutable_identifier())) {
+            add_error("Expecting IDENTIFIER");
+            break;
+          }
+          frames.push_back(top);
+        } else if (capture(token_type::lparen)) {
+          {
+            PrimaryExpr new_result;
+            new_result.mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
+            new_result.Swap(top.primary);
+          }
+          frames.push_back(top);
+          if (capture(token_type::rparen)) {
+            break;
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_primary_call_0,
+            .primary = top.primary,
+            .primary_must_be_target = top.primary_must_be_target,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_argument,
+            .argument = top.primary->mutable_call_expression()->add_argument(),
+          });
+        } else if (capture(token_type::lbracket)) {
+          {
+            PrimaryExpr new_result;
+            new_result.mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
+            new_result.Swap(top.primary);
+          }
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_primary_index_final,
+          });
+          if (capture(token_type::colon)) {
+            top.primary->mutable_slice_expression()->mutable_slice();
+            frames.push_back(frame{
+              .state = parser_state::parse_primary_index_1,
+              .primary = top.primary,
+              .primary_must_be_target = top.primary_must_be_target,
+            });
+          } else {
+            frames.push_back(frame{
+              .state = parser_state::parse_primary_index_0,
+              .primary = top.primary,
+              .primary_must_be_target = top.primary_must_be_target,
+            });
+            frames.push_back(frame{
+              .state = parser_state::parse_expression,
+              .expression = top.primary->mutable_slice_expression()->mutable_index(),
+              .expression_allow_trailing_comma = true,
+            });
+          }
+        } else {
+          if (top.primary_must_be_target && !is_target(*top.primary)) {
+            add_error("Expecting a TARGET");
+          }
+        }
+        break;
+      case parser_state::parse_primary_call_0:
+        if (capture(token_type::comma)) {
+          if (capture(token_type::rparen)) {
+            break;
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_primary_call_0,
+            .primary = top.primary,
+            .primary_must_be_target = top.primary_must_be_target,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_argument,
+            .argument = top.primary->mutable_call_expression()->add_argument(),
+          });
+        } else {
+          expect(token_type::rparen);
+        }
+        break;
+      case parser_state::parse_primary_index_0:
+        if (capture(token_type::colon)) {
+          if (!top.primary->slice_expression().index().has_value()) {
+            add_error("Unexpected TUPLE");
+          }
+          {
+            Expression expression;
+            expression.Swap(top.primary->mutable_slice_expression()->mutable_index());
+            top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression.mutable_value());
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_primary_index_1,
+            .primary = top.primary,
+            .primary_must_be_target = top.primary_must_be_target,
+          });
+        }
+        break;
+      case parser_state::parse_primary_index_1:
+        frames.push_back(frame{
+          .state = parser_state::parse_primary_index_2,
+          .primary = top.primary,
+          .primary_must_be_target = top.primary_must_be_target,
+        });
         if (!is_current(token_type::colon) && !is_current(token_type::rbracket)) {
-          *result.mutable_slice_expression()->mutable_slice()->mutable_end() = parse_test();
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.primary->mutable_slice_expression()->mutable_slice()->mutable_end(),
+          });
         }
+        break;
+      case parser_state::parse_primary_index_2:
         if (capture(token_type::colon) && !is_current(token_type::rbracket)) {
-          *result.mutable_slice_expression()->mutable_slice()->mutable_step() = parse_test();
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.primary->mutable_slice_expression()->mutable_slice()->mutable_step(),
+          });
         }
-      } else {
-        *result.mutable_slice_expression()->mutable_index() = expression;
-      }
-      if (!expect(token_type::rbracket)) {
-        return result;
-      }
-    } else {
-      break;
-    }
-  }
-  return result;
-}
-
-PrimaryExpr::Operand parser::parse_operand() {
-  PrimaryExpr::Operand result;
-  if (is_current(token_type::int_)) {
-    result.set_int_value(lex.current_token().int_value().to_string(10));
-    lex.next_token();
-  } else if (is_current(token_type::identifier)) {
-    set_identifier(*result.mutable_identifier(), lex.current_token().string_value());
-    lex.next_token();
-  } else if (is_current(token_type::float_)) {
-    result.set_float_value(lex.current_token().double_value());
-    lex.next_token();
-  } else if (is_current(token_type::string)) {
-    result.set_string_value(lex.current_token().string_value());
-    lex.next_token();
-  } else if (is_current(token_type::bytes)) {
-    result.set_bytes_value(lex.current_token().string_value());
-    lex.next_token();
-  } else if (is_current(token_type::lbracket)) {
-    result = parse_list();
-  } else if (is_current(token_type::lbrace)) {
-    result = parse_dict();
-  } else if (capture(token_type::lparen)) {
-    *result.mutable_expression() = parse_expression(true);
-    if (!expect(token_type::rparen)) {
-      return result;
-    }
-  } else {
-    add_error("Unexpected token");
-    return result;
-  }
-  return result;
-}
-
-PrimaryExpr::Operand parser::parse_list() {
-  PrimaryExpr::Operand result;
-  if (!expect(token_type::lbracket)) {
-    return result;
-  }
-  if (capture(token_type::rbracket)) {
-    result.mutable_list_expression();
-    return result;
-  }
-
-  Test expression = parse_test();
-  switch (lex.current_token().type()) {
-    case token_type::for_:
-      *result.mutable_list_comprehension()->mutable_test() = expression;
-      while (is_current(token_type::for_) || is_current(token_type::if_)) {
-        *result.mutable_list_comprehension()->add_clause() = parse_comp_clause();
-      }
-      break;
-    case token_type::rbracket:
-    case token_type::comma:
-      *result.mutable_list_expression()->add_element() = expression;
-      while (capture(token_type::comma)) {
-        if (is_current(token_type::rbracket)) {
+        break;
+      case parser_state::parse_primary_index_final:
+        expect(token_type::rbracket);
+        break;
+      case parser_state::parse_operand:
+        if (is_current(token_type::int_)) {
+          top.operand->set_int_value(lex.current_token().int_value().to_string(10));
+          lex.next_token();
+        } else if (is_current(token_type::identifier)) {
+          set_identifier(*top.operand->mutable_identifier());
+        } else if (is_current(token_type::float_)) {
+          top.operand->set_float_value(lex.current_token().double_value());
+          lex.next_token();
+        } else if (is_current(token_type::string)) {
+          top.operand->set_string_value(lex.current_token().string_value());
+          lex.next_token();
+        } else if (is_current(token_type::bytes)) {
+          top.operand->set_bytes_value(lex.current_token().string_value());
+          lex.next_token();
+        } else if (is_current(token_type::lbracket)) {
+          frames.push_back(frame{
+            .state = parser_state::parse_list,
+            .operand = top.operand,
+          });
+        } else if (is_current(token_type::lbrace)) {
+          frames.push_back(frame{
+            .state = parser_state::parse_dict,
+            .operand = top.operand,
+          });
+        } else if (capture(token_type::lparen)) {
+          frames.push_back(frame{
+            .state = parser_state::parse_operand_expression_0,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_expression,
+            .expression = top.operand->mutable_expression(),
+            .expression_allow_trailing_comma = true,
+          });
+        } else {
+          add_error("Unexpected token");
+        }
+        break;
+      case parser_state::parse_operand_expression_0:
+        if (!expect(token_type::rparen)) {
           break;
         }
-        *result.mutable_list_expression()->add_element() = parse_test();
-      }
-      break;
-    default:
-      break;
-  }
-  if (!expect(token_type::rbracket)) {
-    return result;
-  }
-  return result;
-}
-
-PrimaryExpr::Operand parser::parse_dict() {
-  PrimaryExpr::Operand result;
-  if (!expect(token_type::lbrace)) {
-    return result;
-  }
-  if (capture(token_type::rbrace)) {
-    result.mutable_dictionary_expression();
-    return result;
-  }
-
-  PrimaryExpr::Operand::Entry entry = parse_entry();
-  switch (lex.current_token().type()) {
-    case token_type::for_:
-      *result.mutable_dictionary_comprehension()->mutable_entry() = entry;
-      while (is_current(token_type::for_) || is_current(token_type::if_)) {
-        *result.mutable_dictionary_comprehension()->add_clause() = parse_comp_clause();
-      }
-      break;
-    case token_type::rbrace:
-    case token_type::comma:
-      *result.mutable_dictionary_expression()->add_entry() = entry;
-      while (capture(token_type::comma)) {
-        if (is_current(token_type::rbrace)) {
+        break;
+      case parser_state::parse_list:
+        if (!expect(token_type::lbracket)) {
           break;
         }
-        *result.mutable_dictionary_expression()->add_entry() = parse_entry();
-      }
-      break;
-    default:
-      break;
-  }
-  if (!expect(token_type::rbrace)) {
-    return result;
-  }
-  return result;
+        if (capture(token_type::rbracket)) {
+          top.operand->mutable_list_expression();
+          break;
+        }
+
+        frames.push_back(frame{
+          .state = parser_state::parse_list_final,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_list_0,
+          .operand = top.operand,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_test,
+          .test = top.operand->mutable_list_expression()->add_element(),
+        });
+        break;
+      case parser_state::parse_list_0:
+        switch (lex.current_token().type()) {
+          case token_type::for_:
+            {
+              Test expression;
+              expression.Swap(&top.operand->mutable_list_expression()->mutable_element()->at(0));
+              expression.Swap(top.operand->mutable_list_comprehension()->mutable_test());
+            }
+            frames.push_back(frame{
+              .state = parser_state::parse_comp_clauses,
+              .comp_clauses = top.operand->mutable_list_comprehension()->mutable_clause(),
+            });
+            break;
+          case token_type::rbracket:
+          case token_type::comma:
+            frames.push_back(frame{
+              .state = parser_state::parse_list_index_0,
+              .operand = top.operand,
+            });
+            break;
+          default:
+            break;
+        }
+        break;
+      case parser_state::parse_list_index_0:
+        if (capture(token_type::comma)) {
+          if (is_current(token_type::rbracket)) {
+            break;
+          }
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.operand->mutable_list_expression()->add_element(),
+          });
+        }
+        break;
+      case parser_state::parse_list_final:
+        if (!expect(token_type::rbracket)) {
+          break;
+        }
+        break;
+      case parser_state::parse_dict:
+        if (!expect(token_type::lbrace)) {
+          break;
+        }
+        if (capture(token_type::rbrace)) {
+          top.operand->mutable_dictionary_expression();
+          break;
+        }
+ 
+        frames.push_back(frame{
+          .state = parser_state::parse_dict_final,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_dict_0,
+          .operand = top.operand,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_entry,
+          .entry = top.operand->mutable_dictionary_expression()->add_entry(),
+        });
+        break;
+      case parser_state::parse_dict_0:
+        switch (lex.current_token().type()) {
+          case token_type::for_:
+            {
+              PrimaryExpr::Operand::Entry entry;
+              entry.Swap(&top.operand->mutable_dictionary_expression()->mutable_entry()->at(0));
+              entry.Swap(top.operand->mutable_dictionary_comprehension()->mutable_entry());
+            }
+            frames.push_back(frame{
+              .state = parser_state::parse_comp_clauses,
+              .comp_clauses = top.operand->mutable_dictionary_comprehension()->mutable_clause(),
+            });
+            break;
+          case token_type::rbrace:
+          case token_type::comma:
+            frames.push_back(frame{
+              .state = parser_state::parse_dict_index_0,
+              .operand = top.operand,
+            });
+            break;
+          default:
+            break;
+        }
+        break;
+      case parser_state::parse_dict_index_0:
+        if (capture(token_type::comma)) {
+          if (is_current(token_type::rbrace)) {
+            break;
+          }
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_entry,
+            .entry = top.operand->mutable_dictionary_expression()->add_entry(),
+          });
+        }
+        break;
+      case parser_state::parse_dict_final:
+        expect(token_type::rbrace);
+        break;
+      case parser_state::parse_entry:
+        frames.push_back(frame{
+          .state = parser_state::parse_entry_0,
+          .entry = top.entry,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_test,
+          .test = top.entry->mutable_key(),
+        });
+        break;
+      case parser_state::parse_entry_0:
+        if (!expect(token_type::colon)) {
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_test,
+          .test = top.entry->mutable_value(),
+        });
+        break;
+      case parser_state::parse_comp_clauses:
+        if (capture(token_type::for_)) {
+          auto* comp_clause = top.comp_clauses->Add();
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_comp_clauses_0,
+            .comp_clause = comp_clause,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_primary,
+            .primary = comp_clause->mutable_for_clause()->add_loop_variable(),
+            .primary_must_be_target = true,
+          });
+        } else if (capture(token_type::if_)) {
+          frames.push_back(top);
+          // Have to avoid parsing this as an `IfExpr`.
+          // This is also not allowing a lambda to be used.
+          // Context: https://github.com/bazelbuild/bazel/issues/24469
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p,
+            .test = top.comp_clauses->Add()->mutable_if_clause(),
+            .test_p_precedence = 0,
+            .test_p_first = true,
+          });
+        }
+        break;
+      case parser_state::parse_comp_clauses_0:
+        if (capture(token_type::comma)) {
+          frames.push_back(top);
+          frames.push_back(frame{
+            .state = parser_state::parse_primary,
+            .primary = top.comp_clause->mutable_for_clause()->add_loop_variable(),
+            .primary_must_be_target = true,
+          });
+        } else {
+          if (!expect(token_type::in)) {
+            break;
+          }
+          // Do not allow `IfExpr` nor lambdas.
+          frames.push_back(frame{
+            .state = parser_state::parse_test_p,
+            .test = top.comp_clause->mutable_for_clause()->mutable_in(),
+            .test_p_precedence = 0,
+            .test_p_first = true,
+          });
+        }
+        break;
+      case parser_state::parse_argument:
+        if (capture(token_type::star)) {
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.argument->mutable_star_argument(),
+          });
+        } else if (capture(token_type::star_star)) {
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.argument->mutable_star_star_argument(),
+          });
+        } else {
+          frames.push_back(frame{
+            .state = parser_state::parse_argument_0,
+            .argument = top.argument,
+          });
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.argument->mutable_value(),
+          });
+        }
+        break;
+      case parser_state::parse_argument_0:
+        if (capture(token_type::equals)) {
+          if (!top.argument->value().primary_expression().operand().has_identifier()) {
+            add_error("Expected identifier for named arguments");
+            break;
+          }
+          {
+            Identifier id;
+            id.Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_operand()->mutable_identifier());
+            id.Swap(top.argument->mutable_named_argument()->mutable_identifier());
+          }
+          frames.push_back(frame{
+            .state = parser_state::parse_test,
+            .test = top.argument->mutable_named_argument()->mutable_value(),
+          });
+        }
+        break;
+      case parser_state::parse_lambda:
+        expect(token_type::lambda);
+        frames.push_back(frame{
+          .state = parser_state::parse_lambda_0,
+          .lambda = top.lambda,
+        });
+        frames.push_back(frame{
+          .state = parser_state::parse_parameters,
+          .parameters = top.lambda->mutable_parameter(),
+          .parse_parameters_allow_trailing_comma = false,
+          .parse_parameters_first = true,
+        });
+        break;
+      case parser_state::parse_lambda_0:
+        if (!expect(token_type::colon)) {
+          break;
+        }
+        frames.push_back(frame{
+          .state = parser_state::parse_test,
+          .test = top.lambda->mutable_test(),
+        });
+        break;
+      case parser_state::parse_parameters:
+        if (top.parse_parameters_first || capture(token_type::comma)) {
+          if (is_current(token_type::identifier)) {
+            frames.push_back(frame{
+              .state = parser_state::parse_parameters,
+              .parameters = top.parameters,
+              .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
+              .parse_parameters_first = false,
+            });
+            Parameter* param = top.parameters->Add();
+            set_identifier(*param->mutable_identifier());
+            if (capture(token_type::equals)) {
+              frames.push_back(frame{
+                .state = parser_state::parse_test,
+                .test = param->mutable_initialization(),
+              });
+            }
+          } else if (capture(token_type::star)) {
+            frames.push_back(frame{
+              .state = parser_state::parse_parameters,
+              .parameters = top.parameters,
+              .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
+              .parse_parameters_first = false,
+            });
+            Parameter* param = top.parameters->Add();
+            param->mutable_star();
+            if (is_current(token_type::identifier)) {
+              set_identifier(*param->mutable_identifier());
+            }
+          } else if (capture(token_type::star_star)) {
+            frames.push_back(frame{
+              .state = parser_state::parse_parameters,
+              .parameters = top.parameters,
+              .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
+              .parse_parameters_first = false,
+            });
+            Parameter* param = top.parameters->Add();
+            param->mutable_star_star();
+            if (!set_identifier(*param->mutable_identifier())) {
+              add_error("Expected identifier after STAR_STAR when parsing parameters");
+            }
+          } else {
+            if (!top.parse_parameters_first && !top.parse_parameters_allow_trailing_comma) {
+              add_error("Unexpected COMMA");
+            }
+          }
+        }
+        break;
+    }
+  } while (!frames.empty());
 }
 
-PrimaryExpr::Operand::Entry parser::parse_entry() {
-  PrimaryExpr::Operand::Entry result;
-  *result.mutable_key() = parse_test();
-  if (!expect(token_type::colon)) {
-    return result;
+bool parser::set_identifier(Identifier& identifier) {
+  if (!is_current(token_type::identifier)) {
+    return false;
   }
-  *result.mutable_value() = parse_test();
-  return result;
-}
-
-PrimaryExpr::Operand::CompClause parser::parse_comp_clause() {
-  PrimaryExpr::Operand::CompClause result;
-  if (capture(token_type::for_)) {
-    do {
-      *result.mutable_for_clause()->add_loop_variable() = parse_primary();
-      if (!is_target(*result.for_clause().loop_variable().rbegin())) {
-        add_error("Expecting TARGET");
-        return result;
-      }
-    } while (capture(token_type::comma));
-    if (!expect(token_type::in)) {
-      return result;
-    }
-    // Do not allow `IfExpr` nor lambdas.
-    *result.mutable_for_clause()->mutable_in() = parse_test(0);
-  } else if (capture(token_type::if_)) {
-    // Have to avoid parsing this as an `IfExpr`.
-    // This is also not allowing a lambda to be used.
-    // Context: https://github.com/bazelbuild/bazel/issues/24469
-    *result.mutable_if_clause() = parse_test(0);
-  } else {
-    add_error("Expected `for` or `if`.");
-    return result;
-  }
-  return result;
-}
-
-PrimaryExpr::CallExpr::Argument parser::parse_argument() {
-  PrimaryExpr::CallExpr::Argument result;
-  if (capture(token_type::star)) {
-    *result.mutable_star_argument() = parse_test();
-  } else if (capture(token_type::star_star)) {
-    *result.mutable_star_star_argument() = parse_test();
-  } else {
-    auto argument = parse_test();
-    if (capture(token_type::equals)) {
-      if (!argument.primary_expression().operand().has_identifier()) {
-        add_error("Expected identifier for named arguments");
-        return result;
-      }
-      *result.mutable_named_argument()->mutable_identifier() = argument.primary_expression().operand().identifier();
-      *result.mutable_named_argument()->mutable_value() = parse_test();
-    } else {
-      argument.Swap(result.mutable_value());
-    }
-  }
-  return result;
-}
-
-Test::LambdaExpr parser::parse_lambda() {
-  Test::LambdaExpr result;
-  Test::LambdaExpr* result_ref = &result;
-  while (capture(token_type::lambda)) {
-    parse_parameters(*result_ref->mutable_parameter(), false);
-    if (!expect(token_type::colon)) {
-      return result;
-    }
-    if (is_current(token_type::lambda)) {
-      result_ref = result_ref->mutable_test()->mutable_lambda_expression();
-    } else {
-      *result_ref->mutable_test() = parse_test();
-    }
-  }
-  return result;
-}
-
-void parser::parse_parameters(google::protobuf::RepeatedPtrField<starlark::Parameter>& parameters,
-                              bool allow_trailing_comma) {
-  bool found_parameter = false;
-  for (;;) {
-    if (is_current(token_type::identifier)) {
-      Parameter* param = parameters.Add();
-      set_identifier(*param->mutable_identifier(), lex.current_token().string_value());
-      lex.next_token();
-      if (capture(token_type::equals)) {
-        *param->mutable_initialization() =  parse_test();
-      }
-      found_parameter = true;
-    } else if (capture(token_type::star)) {
-      Parameter* param = parameters.Add();
-      param->mutable_star();
-      if (is_current(token_type::identifier)) {
-        set_identifier(*param->mutable_identifier(), lex.current_token().string_value());
-        lex.next_token();
-      }
-      found_parameter = true;
-    } else if (capture(token_type::star_star)) {
-      Parameter* param = parameters.Add();
-      param->mutable_star_star();
-      if (is_current(token_type::identifier)) {
-        set_identifier(*param->mutable_identifier(), lex.current_token().string_value());
-        lex.next_token();
-      } else {
-        add_error("Expected identifier after STAR_STAR when parsing parameters");
-        return;
-      }
-      found_parameter = true;
-    } else {
-      if (found_parameter && !allow_trailing_comma) {
-        add_error("Unexpected COMMA");
-        return;
-      }
-      break;
-    }
-    if (!capture(token_type::comma)) {
-      break;
-    }
-  }
+  auto name = lex.current_token().string_value();
+  identifier.set_name(name);
+  identifier.set_nfkc_name(to_nfkc(name));
+  lex.next_token();
+  return true;
 }
 
 }  // namespace grammar

@@ -277,6 +277,96 @@ statement {
       value {
         primary_expression {
           operand {
+            list_comprehension {
+              test {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "x"
+                      nfkc_name: "x"
+                    }
+                  }
+                }
+              }
+              clause {
+                for_clause {
+                  loop_variable {
+                    operand {
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                      }
+                    }
+                  }
+                  loop_variable {
+                    operand {
+                      identifier {
+                        name: "y"
+                        nfkc_name: "y"
+                      }
+                    }
+                  }
+                  in {
+                    primary_expression {
+                      operand {
+                        identifier {
+                          name: "foo"
+                          nfkc_name: "foo"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              clause {
+                if_clause {
+                  binary_expression {
+                    lhs {
+                      binary_expression {
+                        lhs {
+                          primary_expression {
+                            operand {
+                              identifier {
+                                name: "x"
+                                nfkc_name: "x"
+                              }
+                            }
+                          }
+                        }
+                        operator: PERCENT
+                        rhs {
+                          primary_expression {
+                            operand {
+                              int_value: "2"
+                            }
+                          }
+                        }
+                      }
+                    }
+                    operator: EQUALS_EQUALS
+                    rhs {
+                      primary_expression {
+                        operand {
+                          int_value: "0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    expression {
+      value {
+        primary_expression {
+          operand {
             dictionary_expression {
             }
           }
@@ -622,6 +712,118 @@ statement {
             primary_expression {
               operand {
                 int_value: "3"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            list_expression {
+              element {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "a"
+                      nfkc_name: "a"
+                    }
+                  }
+                }
+              }
+              element {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "b"
+                      nfkc_name: "b"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          operand {
+            list_expression {
+              element {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "b"
+                      nfkc_name: "b"
+                    }
+                  }
+                }
+              }
+              element {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "a"
+                      nfkc_name: "a"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        if_expression {
+          if_value {
+            primary_expression {
+              operand {
+                int_value: "1"
+              }
+            }
+          }
+          if_test {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
+                }
+              }
+            }
+          }
+          else_value {
+            primary_expression {
+              operand {
+                int_value: "2"
               }
             }
           }
