@@ -300,13 +300,15 @@ void lexer::tokenize() {
 void lexer::consume_indentation(bool modify_indents) {
   int indentation_length = 0;
   while (!source_code.empty()) {
+    std::size_t start = source_code.pos();
     if (source_code.capture(" ")) {
       indentation_length++;
     } else if (source_code.capture("\r") || source_code.capture("\\\n") || source_code.capture("\\\r\n")) {
       // No-op. The char '\r` is ignored.
     } else if (source_code.capture("\t")) {
       indentation_length++;
-      add_error("Tab characters are not allowed for indentation. Use spaces instead.", source_code.pos());
+      // TODO(lmirelmann): This should be a warning.
+      add_error("Tab characters are not allowed for indentation. Use spaces instead.", start);
     } else if (source_code.peek() == '\n') {
       if (current.type() != token_type::newline &&
           current.type() != token_type::bof &&
