@@ -186,6 +186,7 @@ TEST(LexerTest, Indentation) {
   check("\r\n\r    1\r\r\n", "INDENT:3:7 INT(1):7:8 NEWLINE:10:11 OUTDENT:11:11 NEWLINE:11:11 EOF:11:11");
   check("# some\r\n# comment\r\n", "NEWLINE:19:19 EOF:19:19");
   check("    1", "INDENT:0:4 INT(1):4:5 NEWLINE:5:5 OUTDENT:5:5 NEWLINE:5:5 EOF:5:5");
+  check("    # Comment\n1", "INT(1):14:15 NEWLINE:15:15 EOF:15:15");
 }
 
 TEST(LexerTest, Comments) {
@@ -196,6 +197,7 @@ foo = "bar"  # One comment.
 man = []  # Another comment.
 )starlark", {" One comment.", " Another comment."});
   check("a = 1 + # Comment\n 1", "IDENTIFIER(\"a\"):0:1 EQUALS:2:3 INT(1):4:5 PLUS:6:7 INT(1):19:20 NEWLINE:20:20 EOF:20:20");
+  check("a = 1 + \\\n 1", "IDENTIFIER(\"a\"):0:1 EQUALS:2:3 INT(1):4:5 PLUS:6:7 INT(1):11:12 NEWLINE:12:12 EOF:12:12");
 }
 
 TEST(LexerTest, Integer) {

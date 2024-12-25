@@ -302,7 +302,7 @@ void lexer::consume_indentation(bool modify_indents) {
   while (!source_code.empty()) {
     if (source_code.capture(" ")) {
       indentation_length++;
-    } else if (source_code.capture("\r")) {
+    } else if (source_code.capture("\r") || source_code.capture("\\\n") || source_code.capture("\\\r\n")) {
       // No-op. The char '\r` is ignored.
     } else if (source_code.capture("\t")) {
       indentation_length++;
@@ -323,6 +323,7 @@ void lexer::consume_indentation(bool modify_indents) {
       add_comment(comment_start, source_code.pos());
       if (source_code.peek() == '\n') {
         source_code.skip();
+        indentation_length = 0;
       }
     } else {  // End of indentation.
       break;
