@@ -321,6 +321,9 @@ void lexer::consume_indentation(bool modify_indents) {
         source_code.skip();
       }
       add_comment(comment_start, source_code.pos());
+      if (source_code.peek() == '\n') {
+        source_code.skip();
+      }
     } else {  // End of indentation.
       break;
     }
@@ -454,6 +457,18 @@ void lexer::read_string() {
           break;
         }
         switch (source_code.peek()) {
+          case '\\':
+            result += "\\";
+            source_code.skip();
+            break;
+          case '"':
+            result += "\"";
+            source_code.skip();
+            break;
+          case '\'':
+            result += "'";
+            source_code.skip();
+            break;
           case 'a':
             result += "\a";
             source_code.skip();
@@ -600,7 +615,7 @@ std::string lexer::read_identifier_or_keyword() {
 
   while (!source_code.empty()) {
     auto ch = source_code.peek_code_point();
-    if ((first && ucd::is_XID_Start(ch)) ||
+    if ((first && (ch == '_' || ucd::is_XID_Start(ch))) ||
         (!first && ucd::is_XID_Continue(ch))) {
       utf8_encode_code_point(ch, result);
       source_code.skip_code_point();

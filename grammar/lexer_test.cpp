@@ -195,6 +195,7 @@ TEST(LexerTest, Comments) {
 foo = "bar"  # One comment.
 man = []  # Another comment.
 )starlark", {" One comment.", " Another comment."});
+  check("a = 1 + # Comment\n 1", "IDENTIFIER(\"a\"):0:1 EQUALS:2:3 INT(1):4:5 PLUS:6:7 INT(1):19:20 NEWLINE:20:20 EOF:20:20");
 }
 
 TEST(LexerTest, Integer) {
@@ -221,6 +222,7 @@ TEST(LexerTest, Identifier) {
   check("abc", "IDENTIFIER(\"abc\"):0:3 NEWLINE:3:3 EOF:3:3");
   check("şpěćïåł", "IDENTIFIER(\"\\305\\237p\\304\\233\\304\\207\\303\\257\\303\\245\\305\\202\"):0:13 NEWLINE:13:13 EOF:13:13");
   check("r a b c", "IDENTIFIER(\"r\"):0:1 IDENTIFIER(\"a\"):2:3 IDENTIFIER(\"b\"):4:5 IDENTIFIER(\"c\"):6:7 NEWLINE:7:7 EOF:7:7");
+  check("_r", "IDENTIFIER(\"_r\"):0:2 NEWLINE:2:2 EOF:2:2");
   checkErrors("\xf2\x92\x8d\x{85}", "ILLEGAL(\"\\362\\222\\215\\205\"):0:4 NEWLINE:4:4 EOF:4:4", {"Unexpected character:0"});
 }
 
@@ -244,6 +246,8 @@ def foo(name):
 }
 
 TEST(LexerTest, Strings) {
+  check(R"starlark("\"\'\\")starlark",
+        "STRING(\"\\\"'\\\\\"):0:8 NEWLINE:8:8 EOF:8:8");
   check(R"starlark(
 foo = "bar"
 )starlark",
