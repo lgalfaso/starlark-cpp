@@ -156,7 +156,7 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
 
 }  // namespace
 
-lexer::lexer(std::string_view input) : current(token_type::bof, 0, 0), source_code(input), indent_stack(1) {}
+lexer::lexer(std::string_view input) : source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1) {}
 
 const token& lexer::current_token() const {
   return current;
@@ -165,11 +165,11 @@ const token& lexer::current_token() const {
 void lexer::next_token() {
   bool after_newline = current.type() == token_type::newline;
   [[maybe_unused]] auto start_token = current.type();
-  [[maybe_unused]] auto start_pos = source_code.pos();
+  [[maybe_unused]] auto start_pos = get_position();
   tokenize();
 
   assert(current.type() != token_type::bof);
-  assert(start_pos < source_code.pos() || start_token != current.type() || start_token == token_type::outdent);
+  assert(start_pos.pos < get_position().pos || start_token != current.type() || start_token == token_type::outdent);
 
   // Always have a `newline` token before `eof`.
   if (current.type() == token_type::eof && !after_newline) {
@@ -177,11 +177,11 @@ void lexer::next_token() {
   }
 }
 
-const std::vector<std::pair<std::size_t, std::size_t>>& lexer::comments() const {
+const std::vector<std::pair<position, position>>& lexer::comments() const {
   return comments_found;
 }
 
-const std::vector<std::pair<std::string, std::size_t>>& lexer::errors() const {
+const std::vector<std::pair<std::string, position>>& lexer::errors() const {
   return errors_found;
 }
 
@@ -193,16 +193,17 @@ void lexer::tokenize() {
 
   if (pending_indents < 0) {
     pending_indents++;
-    current = token(token_type::outdent, source_code.pos(), source_code.pos());
+    current = token(token_type::outdent, get_position(), get_position());
     return;
   } else if (pending_indents > 0) {
     pending_indents--;
-    current = token(token_type::indent, source_code.pos() - (indent_stack.back() - indent_stack[indent_stack.size() - 2]), source_code.pos());
+    auto pos = get_position();
+    current = token(token_type::indent, pos - (indent_ignore + indent_stack.back() - indent_stack[indent_stack.size() - 2]), pos);
     return;
   }
 
   if (source_code.empty()) {
-    current = token{token_type::eof, source_code.pos(), source_code.pos()};
+    current = token{token_type::eof, get_position(), get_position()};
     return;
   }
 
@@ -255,16 +256,19 @@ void lexer::tokenize() {
    case ']':
    case ')':
      if (open_brackets == 0) {
-       add_error("Dangling bracket", source_code.pos());
+       add_error("Dangling bracket", get_position());
      } else {
        open_brackets--;
      }
      read_operator(next_char);
      return;
-   case '\n':
-     current = token{token_type::newline, source_code.pos(), source_code.pos() + 1};
+   case '\n': {
+     auto start = get_position();
      source_code.skip();
+     current = token{token_type::newline, start, get_position()};
+     newline();
      return;
+   }
    case '"':
    case '\'':
      read_string();
@@ -275,36 +279,43 @@ void lexer::tokenize() {
          read_string();
          return;
        }
-       std::size_t start = source_code.pos();
+       auto start = get_position();
        auto identifier_name = read_identifier_or_keyword();
        if (identifier_name.empty()) {
          std::string illegal_char;
+         auto start = get_position();
+
          utf8_encode_code_point(source_code.peek_code_point(), illegal_char);
-         auto start = source_code.pos();
          source_code.skip_code_point();
-         current = token{token_type::illegal, start, source_code.pos(), illegal_char};
+
+         auto end_pos = source_code.pos();
+         last_begin_of_line += (end_pos - start.pos - 1);
+         current = token{token_type::illegal, start, get_position(), illegal_char};
          add_error("Unexpected character", start);
          return;
        }
        if (auto element = all_keywords.find(identifier_name); element != all_keywords.end()) {
-         current = token{element->second, start, source_code.pos()};
+         current = token{element->second, start, get_position()};
        } else {
-         current = token{token_type::identifier, start, source_code.pos(), identifier_name};
+         current = token{token_type::identifier, start, get_position(), identifier_name};
        }
        return;
      }
   }
-  current = token{token_type::eof, source_code.pos(), source_code.pos()};
+  current = token{token_type::eof, get_position(), get_position()};
 }
 
 void lexer::consume_indentation(bool modify_indents) {
   int indentation_length = 0;
   while (!source_code.empty()) {
-    std::size_t start = source_code.pos();
+    auto start = get_position();
     if (source_code.capture(" ")) {
       indentation_length++;
-    } else if (source_code.capture("\r") || source_code.capture("\\\n") || source_code.capture("\\\r\n")) {
-      // No-op. The char '\r` is ignored.
+    } else if (source_code.capture("\r")) {
+      // The char '\r` should be ignored and not handled as a whitespace.
+      indent_ignore++;
+    } else if (source_code.capture("\\\n") || source_code.capture("\\\r\n")) {
+      newline();
     } else if (source_code.capture("\t")) {
       indentation_length++;
       // TODO(lmirelmann): This should be a warning.
@@ -316,13 +327,14 @@ void lexer::consume_indentation(bool modify_indents) {
         break;
       }
       source_code.skip();
+      newline();
       indentation_length = 0;
     } else if (source_code.capture("#")) {
-      std::size_t comment_start = source_code.pos();
+      auto comment_start = get_position();
       while (!source_code.empty() && source_code.peek() != '\n') {
         source_code.skip();
       }
-      add_comment(comment_start, source_code.pos());
+      add_comment(comment_start, get_position());
     } else {  // End of indentation.
       break;
     }
@@ -345,30 +357,30 @@ void lexer::consume_indentation(bool modify_indents) {
     }
 
     if (indent_stack.back() < indentation_length) {
-      add_error("Indentation error", source_code.pos() - 1);
+      add_error("Indentation error", get_position() - 1);
     }
   }
 }
 
 void lexer::read_operator(char first_char) {
-  std::size_t start = source_code.pos();
+  auto start = get_position();
   for (const auto& op : operators_by_starting_char.at(first_char)) {
     if (source_code.capture(op.first)) {
-      current = token{op.second, start, source_code.pos()};
+      current = token{op.second, start, get_position()};
       return;
     }
   }
-  current = token{token_type::illegal, start, source_code.pos(), std::string{} + first_char};
+  current = token{token_type::illegal, start, get_position(), std::string{} + first_char};
   source_code.skip();
 }
 
 void lexer::read_numeric() {
-  std::size_t start = source_code.pos();
+  auto start = get_position();
   auto optional_value = read_number(source_code);
   if (!optional_value.has_value()) {
     add_error("Unable to parse numeric value", start);
     // TODO(lmirelmann): Put into the token the illegal representation.
-    current = token{token_type::illegal, start, source_code.pos(), ""};
+    current = token{token_type::illegal, start, get_position(), ""};
     return;
   }
   auto value = optional_value.value();
@@ -378,24 +390,24 @@ void lexer::read_numeric() {
     double double_value = std::strtod(value.c_str(), &end);
     if (double_value == HUGE_VAL || end != &value.back() + 1) {
       add_error("Unable to parse numeric value", start);
-      current = token{token_type::illegal, start, source_code.pos(), value};
+      current = token{token_type::illegal, start, get_position(), value};
       return;
     }
-    current = token{token_type::float_, start, source_code.pos(), double_value};
+    current = token{token_type::float_, start, get_position(), double_value};
   } else {
     const char* end;
     bignum::number int_value = parse_number(value, &end);
     if (end != &value.back() + 1) {
       add_error("Unable to parse numeric value", start);
-      current = token{token_type::illegal, start, source_code.pos(), value};
+      current = token{token_type::illegal, start, get_position(), value};
       return;
     }
-    current = token{token_type::int_, start, source_code.pos(), int_value};
+    current = token{token_type::int_, start, get_position(), int_value};
   }
 }
 
 void lexer::read_string() {
-  auto start = source_code.pos();
+  auto start = get_position();
   std::string result;
   bool is_raw = false;
   bool is_bytes = false;
@@ -405,8 +417,8 @@ void lexer::read_string() {
     } else if (source_code.capture("b")) {
       is_bytes = true;
     } else {
-      add_error("Unterminated string", source_code.pos());
-      current = token{token_type::illegal, start, source_code.pos(), result};
+      add_error("Unterminated string", get_position());
+      current = token{token_type::illegal, start, get_position(), result};
       return;
     }
   }
@@ -423,9 +435,9 @@ void lexer::read_string() {
             ( is_triple &&  is_single_quote && source_code.capture("'''")) ||
             ( is_triple && !is_single_quote && source_code.capture("\"\"\""))) {
           if (found_errors) {
-            current = token{token_type::illegal, start, source_code.pos(), result};
+            current = token{token_type::illegal, start, get_position(), result};
           } else {
-            current = token{is_bytes ? token_type::bytes : token_type::string, start, source_code.pos(), result};
+            current = token{is_bytes ? token_type::bytes : token_type::string, start, get_position(), result};
           }
           return;
         }
@@ -433,7 +445,7 @@ void lexer::read_string() {
         source_code.skip();
         break;
       case '\\': {
-        auto escape_start = source_code.pos();
+        auto escape_start = get_position();
         if (is_raw) {
           // Add the character '\\' and the following one, with these exceptions:
           // "\r\n" => "\n"
@@ -443,7 +455,10 @@ void lexer::read_string() {
           if (source_code.empty()) {
             break;
           }
-          if (source_code.capture("\r\n") || source_code.capture("\r")) {
+          if (source_code.capture("\r\n")) {
+            result += "\n";
+            newline();
+          } else if (source_code.capture("\r")) {
             result += "\n";
           } else {
             result += source_code.peek();
@@ -498,11 +513,14 @@ void lexer::read_string() {
             break;
           case '\n':
             source_code.skip();
+            newline();
             break;
           case '\r':
             source_code.skip();
-            if (!source_code.capture("\n")) {
-              add_error("Invalid line continuation", source_code.pos());
+            if (source_code.capture("\n")) {
+              newline();
+            } else {
+              add_error("Invalid line continuation", get_position());
               found_errors = true;
             }
             break;
@@ -558,23 +576,38 @@ void lexer::read_string() {
         if (is_triple) {
           result += source_code.peek();
           source_code.skip();
+          newline();
           break;
         }
-        add_error("Unterminated string", source_code.pos());
-        current = token{token_type::illegal, start, source_code.pos(), result};
+        add_error("Unterminated string", get_position());
+        current = token{token_type::illegal, start, get_position(), result};
         return;
       case '\r':
         source_code.skip();
         break;
-      default:
-        result += source_code.peek();
-        source_code.skip();
+      default: {
+        // This is a lot of extra work to report the right column.
+        auto ch = source_code.peek_code_point();
+        if (ch == unicode::utf8_reader::replacement_character) {
+          result += source_code.peek();
+          source_code.skip();
+        } else {
+          auto start = get_position();
+          utf8_encode_code_point(ch, result);
+          source_code.skip_code_point();
+
+          auto end_pos = source_code.pos();
+          last_begin_of_line += (end_pos - start.pos - 1);
+          // If the character ccc is not 0, then this is a non-starter, and could be skipped. Given that
+          // it is showing as another character, then will count it.
+        }
         break;
+      }
     }
   }
 
-  add_error("Unterminated string", source_code.pos());
-  current = token{token_type::illegal, start, source_code.pos(), result};
+  add_error("Unterminated string", get_position());
+  current = token{token_type::illegal, start, get_position(), result};
 }
 
 bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_value, int min_size, int max_size, int base) {
@@ -613,6 +646,7 @@ std::string lexer::read_identifier_or_keyword() {
   bool first = true;
 
   while (!source_code.empty()) {
+    auto start = source_code.pos();
     auto ch = source_code.peek_code_point();
     if ((first && (ch == '_' || ucd::is_XID_Start(ch))) ||
         (!first && ucd::is_XID_Continue(ch))) {
@@ -621,17 +655,36 @@ std::string lexer::read_identifier_or_keyword() {
     } else {
       break;
     }
+    auto end = source_code.pos();
+    last_begin_of_line += (end - start - 1);
+    // If the character ccc is not 0, then this is a non-starter, and could be skipped. Given that
+    // it is showing as another character, then will count it.
     first = false;
   }
   return result;
 }
 
-void lexer::add_error(std::string_view message, std::size_t pos) {
+void lexer::add_error(std::string_view message, position pos) {
   errors_found.emplace_back(message, pos);
 }
 
-void lexer::add_comment(std::size_t start, std::size_t end) {
+void lexer::add_comment(position start, position end) {
   comments_found.emplace_back(start, end);
+}
+
+position lexer::get_position() const {
+  // TODO(lmirelmann): This is not taking into consideration multi-byte and continuations characters.
+  return position{
+    .row = current_line + 1,
+    .column = source_code.pos() - last_begin_of_line + 1,
+    .pos = source_code.pos(),
+  };
+}
+
+void lexer::newline() {
+  current_line++;
+  last_begin_of_line = source_code.pos();
+  indent_ignore = 0;
 }
 
 }  // namespace grammar

@@ -20,12 +20,12 @@ class parser {
   parser(parser&&) = delete;
   starlark::File parse_file();
   // TODO(lmirelmann): These two errors should be merged.
-  const std::vector<std::pair<std::string, std::size_t>>& parser_errors() const;
-  const std::vector<std::pair<std::string, std::size_t>>& lexer_errors() const;
+  const std::vector<std::pair<std::string, position>>& parser_errors() const;
+  const std::vector<std::pair<std::string, position>>& lexer_errors() const;
 
  private:
   lexer lex;
-  std::vector<std::pair<std::string, std::size_t>> errors;
+  std::vector<std::pair<std::string, position>> errors;
   std::vector<int> nested_loops;
   bool recover = false;
 

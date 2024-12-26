@@ -40,11 +40,11 @@ int main(int argc, char* argv[]) {
     std::cout << "Unable to parse: " << argv[1] << "\n";
     std::cout << "Lexer errors\n";
     for (const auto& entry : star_parser.lexer_errors()) {
-      std::cout << "  " << entry.first << ":" << entry.second << "   '" << starlark_program[entry.second] << "'\n";
+      std::cout << "  " << entry.first << ":" << entry.second.row << "," << entry.second.column << "   '" << starlark_program[entry.second.pos] << "'\n";
     }
     std::cout << "Grammar errors\n";
     for (const auto& entry : star_parser.parser_errors()) {
-      std::cout << "  " << entry.first << ":" << entry.second << "\n";
+      std::cout << "  " << entry.first << ":" << entry.second.row << "," << entry.second.column << "\n";
     }
   }
 

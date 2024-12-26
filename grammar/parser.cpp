@@ -239,11 +239,11 @@ File parser::parse_file() {
   return result;
 }
 
-const std::vector<std::pair<std::string, std::size_t>>& parser::parser_errors() const {
+const std::vector<std::pair<std::string, position>>& parser::parser_errors() const {
   return errors;
 }
 
-const std::vector<std::pair<std::string, std::size_t>>& parser::lexer_errors() const {
+const std::vector<std::pair<std::string, position>>& parser::lexer_errors() const {
   return lex.errors();
 }
 

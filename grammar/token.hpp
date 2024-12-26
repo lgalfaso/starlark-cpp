@@ -102,24 +102,32 @@ enum class token_type {
   yield,
 };
 
+struct position {
+  std::size_t row;
+  std::size_t column;
+  std::size_t pos;
+
+  position operator-(std::size_t places) const;
+};
+
 class token {
  public:
-  token(token_type type, std::size_t start, std::size_t end);
-  token(token_type type, std::size_t start, std::size_t end, const bignum::number& value);
-  token(token_type type, std::size_t start, std::size_t end, double value);
-  token(token_type type, std::size_t start, std::size_t end, const std::string& value);
+  token(token_type type, position start, position end);
+  token(token_type type, position start, position end, const bignum::number& value);
+  token(token_type type, position start, position end, double value);
+  token(token_type type, position start, position end, const std::string& value);
   token_type type() const;
   void set_type(token_type new_type);
   const bignum::number& int_value() const;
   double double_value() const;
   const std::string& string_value() const;
-  std::size_t start() const;
-  std::size_t end() const;
+  position start() const;
+  position end() const;
 
  private:
   token_type tok_type;
-  std::size_t tok_start;
-  std::size_t tok_end;
+  position tok_start;
+  position tok_end;
   std::variant<double, bignum::number, std::string> value;
 
   static const std::string empty_string;

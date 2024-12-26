@@ -4,13 +4,21 @@
 
 namespace grammar {
 
-token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end) {}
+position position::operator-(std::size_t places) const {
+  return position{
+    .row = row,
+    .column = column - places,
+    .pos = pos - places,
+  };
+}
 
-token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end, const bignum::number& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, position tok_start, position tok_end) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end) {}
 
-token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end, double value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, position tok_start, position tok_end, const bignum::number& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
-token::token(token_type tok_type, std::size_t tok_start, std::size_t tok_end, const std::string& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, position tok_start, position tok_end, double value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+
+token::token(token_type tok_type, position tok_start, position tok_end, const std::string& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
 token_type token::type() const {
   return tok_type;
@@ -41,11 +49,11 @@ const std::string& token::string_value() const {
   return empty_string;
 }
 
-std::size_t token::start() const {
+position token::start() const {
   return tok_start;
 }
 
-std::size_t token::end() const {
+position token::end() const {
   return tok_end;
 }
 

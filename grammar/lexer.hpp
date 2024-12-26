@@ -19,8 +19,8 @@ class lexer {
   lexer(std::string_view input);
   const token& current_token() const;
   void next_token();
-  const std::vector<std::pair<std::size_t, std::size_t>>& comments() const;
-  const std::vector<std::pair<std::string, std::size_t>>& errors() const;
+  const std::vector<std::pair<position, position>>& comments() const;
+  const std::vector<std::pair<std::string, position>>& errors() const;
 
  private:
   void tokenize();
@@ -30,17 +30,22 @@ class lexer {
   void read_string();
   bool read_escaped_char(std::string& result, bool utf8_encode, int max_value, int min_size, int max_size, int base);
   std::string read_identifier_or_keyword();
-  void add_error(std::string_view message, std::size_t pos);
-  void add_comment(std::size_t start, std::size_t end);
+  void add_error(std::string_view message, position pos);
+  void add_comment(position start, position end);
+  void newline();
+  position get_position() const;
 
-  token current;
+  std::size_t current_line = 0;
+  std::size_t last_begin_of_line = 0;
+  std::size_t indent_ignore = 0;
   unicode::utf8_reader source_code;
+  token current;
   int pending_indents = 0;
   std::vector<int> indent_stack;
   int open_brackets = 0;
 
-  std::vector<std::pair<std::string, std::size_t>> errors_found;
-  std::vector<std::pair<std::size_t, std::size_t>> comments_found;
+  std::vector<std::pair<std::string, position>> errors_found;
+  std::vector<std::pair<position, position>> comments_found;
 };
 
 }  // namespace grammar
