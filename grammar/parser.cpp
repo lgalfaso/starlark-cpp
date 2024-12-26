@@ -209,7 +209,7 @@ struct frame {
     struct {
       Test* test;
       int test_p_precedence;
-      bool test_p_first;
+      bool test_p_0_first;
     };
     struct {
       PrimaryExpr* primary = nullptr;
@@ -752,7 +752,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test_p,
             .test = top.test,
             .test_p_precedence = 0,
-            .test_p_first = true,
           });
         }
         break;
@@ -771,7 +770,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test_p,
             .test = top.test->mutable_if_expression()->mutable_if_test(),
             .test_p_precedence = 0,
-            .test_p_first = true,
           });
         }
         break;
@@ -783,7 +781,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           .state = parser_state::parse_test_p,
           .test = top.test->mutable_if_expression()->mutable_else_value(),
           .test_p_precedence = 0,
-          .test_p_first = true,
         });
         break;
       case parser_state::parse_test_p:
@@ -821,7 +818,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test_p,
             .test = result_ref,
             .test_p_precedence = top.test_p_precedence + 1,
-            .test_p_first = true,
           });
           break;
         }
@@ -829,13 +825,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           .state = parser_state::parse_test_p_0,
           .test = top.test,
           .test_p_precedence = top.test_p_precedence,
-          .test_p_first = true,
+          .test_p_0_first = true,
         });
         frames.push_back(frame{
           .state = parser_state::parse_test_p,
           .test = top.test,
           .test_p_precedence = top.test_p_precedence + 1,
-          .test_p_first = true,
         });
         break;
       case parser_state::parse_test_p_0:
@@ -843,7 +838,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (top.test_p_precedence != operator_precedence.at(token_type::in).first) {
             break;
           }
-          if (!top.test_p_first) {
+          if (!top.test_p_0_first) {
             add_error("Comparison operators are not associative. Use parens.");
           }
           lex.next_token();
@@ -860,19 +855,18 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test_p_0,
             .test = top.test,
             .test_p_precedence = top.test_p_precedence,
-            .test_p_first = false,
+            .test_p_0_first = false,
           });
           frames.push_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.test->mutable_binary_expression()->mutable_rhs(),
             .test_p_precedence = top.test_p_precedence + 1,
-            .test_p_first = true,
           });
         } else if (auto next_op = operator_precedence.find(lex.current_token().type()); next_op != operator_precedence.end()) {
           if (top.test_p_precedence != next_op->second.first) {
             break;
           }
-          if (!top.test_p_first && top.test_p_precedence == operator_precedence.at(token_type::equals_equals).first) {
+          if (!top.test_p_0_first && top.test_p_precedence == operator_precedence.at(token_type::equals_equals).first) {
             add_error("Comparison operators are not associative. Use parens.");
           }
           lex.next_token();
@@ -886,13 +880,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test_p_0,
             .test = top.test,
             .test_p_precedence = top.test_p_precedence,
-            .test_p_first = false,
+            .test_p_0_first = false,
           });
           frames.push_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.test->mutable_binary_expression()->mutable_rhs(),
             .test_p_precedence = top.test_p_precedence + 1,
-            .test_p_first = true,
           });
         }
         break;
@@ -1239,7 +1232,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test_p,
             .test = top.comp_clauses->Add()->mutable_if_clause(),
             .test_p_precedence = 0,
-            .test_p_first = true,
           });
         }
         break;
@@ -1260,7 +1252,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test_p,
             .test = top.comp_clause->mutable_for_clause()->mutable_in(),
             .test_p_precedence = 0,
-            .test_p_first = true,
           });
         }
         break;
