@@ -113,13 +113,10 @@ std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
     parts.push_back(mapping.at(current_token.type()));
     if (current_token.type() == token_type::identifier ||
         current_token.type() == token_type::string ||
-        current_token.type() == token_type::bytes) {
+        current_token.type() == token_type::bytes ||
+        current_token.type() == token_type::illegal) {
       parts.back() += "(";
       parts.back() += quoted(current_token.string_value());
-      parts.back() += ")";
-    } else if (current_token.type() == token_type::illegal) {
-      parts.back() += "(";
-      parts.back() += quoted(original.substr(current_token.start().pos, current_token.end().pos - current_token.start().pos));
       parts.back() += ")";
     } else if (current_token.type() == token_type::int_) {
       parts.back() += "(";
@@ -458,7 +455,7 @@ TEST(LexerTest, InNotIn) {
 }
 
 TEST(LexerTest, Errors) {
-  checkErrors("!\364\215\264\253", "ILLEGAL(\"\"):1,1:1,1 ILLEGAL(\"\\364\\215\\264\\253\"):1,2:1,3 NEWLINE:1,3:1,3 EOF:1,3:1,3", { "Unexpected character:1,2" });
+  checkErrors("!\364\215\264\253", "ILLEGAL(\"!\"):1,1:1,2 ILLEGAL(\"\\364\\215\\264\\253\"):1,2:1,3 NEWLINE:1,3:1,3 EOF:1,3:1,3", { "Unexpected character:1,2" });
 }
 
 }  // namespace

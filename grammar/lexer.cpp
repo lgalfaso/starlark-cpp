@@ -156,7 +156,7 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
 
 }  // namespace
 
-lexer::lexer(std::string_view input) : source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1) {}
+lexer::lexer(std::string_view input) : input(input), source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1) {}
 
 const token& lexer::current_token() const {
   return current;
@@ -282,15 +282,12 @@ void lexer::tokenize() {
        auto start = get_position();
        auto identifier_name = read_identifier_or_keyword();
        if (identifier_name.empty()) {
-         std::string illegal_char;
          auto start = get_position();
-
-         utf8_encode_code_point(source_code.peek_code_point(), illegal_char);
          source_code.skip_code_point();
-
          auto end_pos = source_code.pos();
          last_begin_of_line += (end_pos - start.pos - 1);
-         current = token{token_type::illegal, start, get_position(), illegal_char};
+         auto end = get_position();
+         current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
          add_error("Unexpected character", start);
          return;
        }
@@ -370,8 +367,8 @@ void lexer::read_operator(char first_char) {
       return;
     }
   }
-  current = token{token_type::illegal, start, get_position(), std::string{} + first_char};
   source_code.skip();
+  current = token{token_type::illegal, start, get_position(), std::string{} + first_char};
 }
 
 void lexer::read_numeric() {
@@ -379,8 +376,8 @@ void lexer::read_numeric() {
   auto optional_value = read_number(source_code);
   if (!optional_value.has_value()) {
     add_error("Unable to parse numeric value", start);
-    // TODO(lmirelmann): Put into the token the illegal representation.
-    current = token{token_type::illegal, start, get_position(), ""};
+    auto end = get_position();
+    current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
     return;
   }
   auto value = optional_value.value();
@@ -418,7 +415,8 @@ void lexer::read_string() {
       is_bytes = true;
     } else {
       add_error("Unterminated string", get_position());
-      current = token{token_type::illegal, start, get_position(), result};
+      auto end = get_position();
+      current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
       return;
     }
   }
@@ -435,7 +433,8 @@ void lexer::read_string() {
             ( is_triple &&  is_single_quote && source_code.capture("'''")) ||
             ( is_triple && !is_single_quote && source_code.capture("\"\"\""))) {
           if (found_errors) {
-            current = token{token_type::illegal, start, get_position(), result};
+            auto end = get_position();
+            current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
           } else {
             current = token{is_bytes ? token_type::bytes : token_type::string, start, get_position(), result};
           }
@@ -572,7 +571,7 @@ void lexer::read_string() {
         }
         break;
       }
-      case '\n':
+      case '\n': {
         if (is_triple) {
           result += source_code.peek();
           source_code.skip();
@@ -580,8 +579,10 @@ void lexer::read_string() {
           break;
         }
         add_error("Unterminated string", get_position());
-        current = token{token_type::illegal, start, get_position(), result};
+        auto end = get_position();
+        current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
         return;
+      }
       case '\r':
         source_code.skip();
         break;
@@ -607,7 +608,8 @@ void lexer::read_string() {
   }
 
   add_error("Unterminated string", get_position());
-  current = token{token_type::illegal, start, get_position(), result};
+  auto end = get_position();
+  current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
 }
 
 bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_value, int min_size, int max_size, int base) {
@@ -673,7 +675,6 @@ void lexer::add_comment(position start, position end) {
 }
 
 position lexer::get_position() const {
-  // TODO(lmirelmann): This is not taking into consideration multi-byte and continuations characters.
   return position{
     .row = current_line + 1,
     .column = source_code.pos() - last_begin_of_line + 1,

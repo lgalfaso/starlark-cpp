@@ -38,6 +38,7 @@ class lexer {
   std::size_t current_line = 0;
   std::size_t last_begin_of_line = 0;
   std::size_t indent_ignore = 0;
+  std::string_view input;
   unicode::utf8_reader source_code;
   token current;
   int pending_indents = 0;
