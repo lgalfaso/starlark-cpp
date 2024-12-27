@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "grammar/lexer.hpp"
+#include "grammar/options.hpp"
 #include "grammar/proto/starlark.pb.h"
 
 #pragma GCC visibility push(default)
@@ -15,6 +16,7 @@ namespace grammar {
 class parser {
  public:
   parser(std::string_view input);
+  parser(std::string_view input, const grammar_options& options);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
@@ -24,6 +26,7 @@ class parser {
   const std::vector<std::pair<std::string, position>>& lexer_errors() const;
 
  private:
+  grammar_options options;
   lexer lex;
   std::vector<std::pair<std::string, position>> errors;
   std::vector<int> nested_loops;

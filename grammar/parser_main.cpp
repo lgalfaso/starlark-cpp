@@ -6,10 +6,12 @@
 #include <iostream>
 
 #include "third-party/defer.hpp"
+#include "grammar/options.hpp"
 #include "grammar/parser.hpp"
 #include "grammar/proto/starlark.pb.h"
 
 using grammar::parser;
+using grammar::grammar_options;
 using starlark::File;
 
 int main(int argc, char* argv[]) {
@@ -32,7 +34,7 @@ int main(int argc, char* argv[]) {
     read(in_fd, starlark_program.data(), sb.st_size); 
   }
 
-  parser star_parser(starlark_program);
+  parser star_parser(starlark_program, grammar_options{ .escaped_octal_and_hex_char_are_ascii = false, });
   File actual_starlark_file = star_parser.parse_file();
   bool found_errors = !star_parser.lexer_errors().empty() ||
      !star_parser.parser_errors().empty();

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "grammar/token.hpp"
+#include "grammar/options.hpp"
 #include "unicode/utf8_reader.hpp"
 
 #pragma GCC visibility push(default)
@@ -17,6 +18,7 @@ namespace grammar {
 class lexer {
  public:
   lexer(std::string_view input);
+  lexer(std::string_view input, const grammar_options& options);
   const token& current_token() const;
   void next_token();
   const std::vector<std::pair<position, position>>& comments() const;
@@ -35,6 +37,7 @@ class lexer {
   void newline();
   position get_position() const;
 
+  grammar_options options;
   std::size_t current_line = 0;
   std::size_t last_begin_of_line = 0;
   std::size_t indent_ignore = 0;

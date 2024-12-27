@@ -220,7 +220,10 @@ struct frame {
 
 }  // namespace
 
-parser::parser(std::string_view input) : lex(input), nested_loops(1) {
+parser::parser(std::string_view input) : parser(input, grammar_options{}) {
+}
+
+parser::parser(std::string_view input, const grammar_options& options) : options(options), lex(input, options), nested_loops(1) {
   lex.next_token();
 }
 

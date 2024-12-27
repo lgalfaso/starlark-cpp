@@ -9,6 +9,7 @@ cc_library(
     hdrs = ["lexer.hpp"],
     deps = [
         ":numeric_parser",
+        ":options",
         ":token",
         "//unicode:encode",
         "//unicode:ucd",
@@ -68,6 +69,7 @@ cc_library(
     hdrs = ["parser.hpp"],
     deps = [
         ":lexer",
+        ":options",
         "//grammar/proto:starlark_cc_proto",
         "//third-party:defer",
         "//unicode:normalization",
@@ -154,6 +156,11 @@ cc_fuzz_test(
     dicts = [
         "lexer_fuzz_test_dictionary/lexical_elements.dict",
     ],
+)
+
+cc_library(
+    name = "options",
+    hdrs = ["options.hpp"],
 )
 
 cc_library(

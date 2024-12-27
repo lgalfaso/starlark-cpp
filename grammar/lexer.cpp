@@ -156,7 +156,10 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
 
 }  // namespace
 
-lexer::lexer(std::string_view input) : input(input), source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1) {}
+lexer::lexer(std::string_view input) : lexer(input, grammar_options{}) {}
+
+lexer::lexer(std::string_view input, const grammar_options& options) :
+    options(options), input(input), source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1) {}
 
 const token& lexer::current_token() const {
   return current;
@@ -531,14 +534,14 @@ void lexer::read_string() {
           case '5':
           case '6':
           case '7':
-            if (!read_escaped_char(result, !is_bytes, is_bytes ? 255 : 127, 1, 3, 8)) {
+            if (!read_escaped_char(result, !is_bytes && options.escaped_octal_and_hex_char_are_ascii, is_bytes || !options.escaped_octal_and_hex_char_are_ascii ? 255 : 127, 1, 3, 8)) {
               add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             break;
           case 'x':
             source_code.skip();
-            if (!read_escaped_char(result, !is_bytes, is_bytes ? 255 : 127, 2, 2, 16)) {
+            if (!read_escaped_char(result, !is_bytes && options.escaped_octal_and_hex_char_are_ascii, is_bytes || !options.escaped_octal_and_hex_char_are_ascii ? 255 : 127, 2, 2, 16)) {
               add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }

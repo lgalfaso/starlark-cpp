@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "grammar/lexer.hpp"
+#include "grammar/options.hpp"
 #include "grammar/quoted.hpp"
 
 using bignum::number;
@@ -150,10 +151,14 @@ std::string join(const std::vector<std::string>& parts) {
   return result;
 }
 
-void check(std::string_view input, std::string_view expected) {
-  lexer l(input);
+void check(std::string_view input, std::string_view expected, grammar::grammar_options options) {
+  lexer l(input, options);
   EXPECT_EQ(expected, join(read_tokens(l, input)));
   EXPECT_THAT(l.errors(), IsEmpty());
+}
+
+void check(std::string_view input, std::string_view expected) {
+  check(input, expected, grammar::grammar_options{});
 }
 
 void checkComments(std::string_view input, const std::vector<std::string>& expected_comments) {
@@ -405,6 +410,12 @@ foo = "bar\z")starlark",
   check(R"starlark(
 foo = "bar")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"bar\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13");
+  check(R"starlark(
+foo = "\200")starlark",
+      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\200\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13",
+      grammar::grammar_options{
+        .escaped_octal_and_hex_char_are_ascii = false,
+  });
 }
 
 TEST(LexerTest, RawStrings) {
