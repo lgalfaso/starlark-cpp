@@ -1,15 +1,13 @@
 statement {
   expression_statement {
-    expression {
-      value {
-        lambda_expression {
-          test {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+    value {
+      lambda_expression {
+        test {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -20,44 +18,42 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        lambda_expression {
-          parameter {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
+    value {
+      lambda_expression {
+        parameter {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
           }
-          test {
-            if_expression {
-              if_value {
-                primary_expression {
-                  operand {
-                    identifier {
-                      name: "True"
-                      nfkc_name: "True"
-                    }
+        }
+        test {
+          if_expression {
+            if_value {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "True"
+                    nfkc_name: "True"
                   }
                 }
               }
-              if_test {
-                primary_expression {
-                  operand {
-                    identifier {
-                      name: "x"
-                      nfkc_name: "x"
-                    }
+            }
+            if_test {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "x"
+                    nfkc_name: "x"
                   }
                 }
               }
-              else_value {
-                primary_expression {
-                  operand {
-                    identifier {
-                      name: "False"
-                      nfkc_name: "False"
-                    }
+            }
+            else_value {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "False"
+                    nfkc_name: "False"
                   }
                 }
               }
@@ -70,28 +66,26 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        lambda_expression {
-          parameter {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
+    value {
+      lambda_expression {
+        parameter {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
           }
-          parameter {
-            identifier {
-              name: "y"
-              nfkc_name: "y"
-            }
+        }
+        parameter {
+          identifier {
+            name: "y"
+            nfkc_name: "y"
           }
-          test {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+        }
+        test {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -102,20 +96,18 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        lambda_expression {
-          parameter {
-            star {
-            }
+    value {
+      lambda_expression {
+        parameter {
+          star {
           }
-          test {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+        }
+        test {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -126,24 +118,22 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        lambda_expression {
-          parameter {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
-            star {
-            }
+    value {
+      lambda_expression {
+        parameter {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
           }
-          test {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+          star {
+          }
+        }
+        test {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -154,24 +144,22 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        lambda_expression {
-          parameter {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
-            star_star {
-            }
+    value {
+      lambda_expression {
+        parameter {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
           }
-          test {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+          star_star {
+          }
+        }
+        test {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -182,43 +170,41 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        lambda_expression {
-          parameter {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
+    value {
+      lambda_expression {
+        parameter {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
           }
-          test {
-            lambda_expression {
-              parameter {
-                identifier {
-                  name: "y"
-                  nfkc_name: "y"
-                }
+        }
+        test {
+          lambda_expression {
+            parameter {
+              identifier {
+                name: "y"
+                nfkc_name: "y"
               }
-              test {
-                binary_expression {
-                  lhs {
-                    primary_expression {
-                      operand {
-                        identifier {
-                          name: "x"
-                          nfkc_name: "x"
-                        }
+            }
+            test {
+              binary_expression {
+                lhs {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
                       }
                     }
                   }
-                  operator: PLUS
-                  rhs {
-                    primary_expression {
-                      operand {
-                        identifier {
-                          name: "y"
-                          nfkc_name: "y"
-                        }
+                }
+                operator: PLUS
+                rhs {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "y"
+                        nfkc_name: "y"
                       }
                     }
                   }

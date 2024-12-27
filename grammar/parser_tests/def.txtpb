@@ -52,14 +52,12 @@ statement {
     }
     statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+        value {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -92,26 +90,24 @@ statement {
     }
     statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              call_expression {
-                primary_expression {
-                  operand {
-                    identifier {
-                      name: "print"
-                      nfkc_name: "print"
-                    }
+        value {
+          primary_expression {
+            call_expression {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "print"
+                    nfkc_name: "print"
                   }
                 }
-                argument {
-                  value {
-                    primary_expression {
-                      operand {
-                        identifier {
-                          name: "x"
-                          nfkc_name: "x"
-                        }
+              }
+              argument {
+                value {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
                       }
                     }
                   }

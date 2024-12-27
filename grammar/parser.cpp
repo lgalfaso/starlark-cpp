@@ -656,7 +656,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             });
             frames.push_back(frame{
               .state = parser_state::parse_expression,
-              .expression = statement->mutable_expression_statement()->mutable_expression(),
+              .expression = statement->mutable_expression_statement(),
               .expression_allow_trailing_comma = false,
             });
             break;
@@ -665,13 +665,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_statement_expression_0:
         if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
-          if (!is_target(top.statement->expression_statement().expression())) {
+          if (!is_target(top.statement->expression_statement())) {
             add_error("Exprecting TARGET");
             break;
           }
           {
             AssignStmt assign_statement;
-            assign_statement.mutable_lhs()->Swap(top.statement->mutable_expression_statement()->mutable_expression());
+            assign_statement.mutable_lhs()->Swap(top.statement->mutable_expression_statement());
             assign_statement.Swap(top.statement->mutable_assign_statement());
           }
           top.statement->mutable_assign_statement()->set_op(op->second);

@@ -16,7 +16,7 @@ message Statement {
     ContinueStmt continue_statement = 6;
     PassStmt pass_statement = 7;
     AssignStmt assign_statement = 8;
-    ExprStmt expression_statement = 9;
+    Expression expression_statement = 9;
     LoadStmt load_statement = 10;
   }
 }
@@ -92,11 +92,6 @@ message AssignStmt {
     LESS_LESS_EQUALS = 11;
     GREATER_GREATER_EQUALS = 12;
   }
-}
-
-// TODO(lmirelmann): Think whether this message should be removed, and replaced with just `Expression`.
-message ExprStmt {
-  Expression expression = 1;
 }
 
 message LoadStmt {

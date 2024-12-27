@@ -12,14 +12,12 @@ statement {
     }
     statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "False"
-                  nfkc_name: "False"
-                }
+        value {
+          primary_expression {
+            operand {
+              identifier {
+                name: "False"
+                nfkc_name: "False"
               }
             }
           }
@@ -46,14 +44,12 @@ statement {
     }
     else_statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+        value {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -76,12 +72,10 @@ statement {
     }
     statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              operand {
-                int_value: "1"
-              }
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
             }
           }
         }
@@ -100,12 +94,10 @@ statement {
       }
       statement {
         expression_statement {
-          expression {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "2"
-                }
+          value {
+            primary_expression {
+              operand {
+                int_value: "2"
               }
             }
           }
@@ -128,12 +120,10 @@ statement {
     }
     statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              operand {
-                int_value: "1"
-              }
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
             }
           }
         }
@@ -152,12 +142,10 @@ statement {
       }
       statement {
         expression_statement {
-          expression {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "2"
-                }
+          value {
+            primary_expression {
+              operand {
+                int_value: "2"
               }
             }
           }
@@ -166,7 +154,76 @@ statement {
     }
     else_statement {
       expression_statement {
-        expression {
+        value {
+          primary_expression {
+            operand {
+              int_value: "3"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  if_statement {
+    test {
+      primary_expression {
+        operand {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+          }
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
+          }
+        }
+      }
+      statement {
+        expression_statement {
+          value {
+            primary_expression {
+              operand {
+                int_value: "2"
+              }
+            }
+          }
+        }
+      }
+    }
+    elif {
+      test {
+        primary_expression {
+          operand {
+            identifier {
+              name: "c"
+              nfkc_name: "c"
+            }
+          }
+        }
+      }
+      statement {
+        expression_statement {
           value {
             primary_expression {
               operand {
@@ -193,12 +250,10 @@ statement {
     }
     statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              operand {
-                int_value: "1"
-              }
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
             }
           }
         }
@@ -217,12 +272,10 @@ statement {
       }
       statement {
         expression_statement {
-          expression {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "2"
-                }
+          value {
+            primary_expression {
+              operand {
+                int_value: "2"
               }
             }
           }
@@ -242,89 +295,10 @@ statement {
       }
       statement {
         expression_statement {
-          expression {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "3"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  if_statement {
-    test {
-      primary_expression {
-        operand {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
-          }
-        }
-      }
-    }
-    statement {
-      expression_statement {
-        expression {
           value {
             primary_expression {
               operand {
-                int_value: "1"
-              }
-            }
-          }
-        }
-      }
-    }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-            }
-          }
-        }
-      }
-      statement {
-        expression_statement {
-          expression {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "2"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "c"
-              nfkc_name: "c"
-            }
-          }
-        }
-      }
-      statement {
-        expression_statement {
-          expression {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "3"
-                }
+                int_value: "3"
               }
             }
           }
@@ -333,12 +307,10 @@ statement {
     }
     else_statement {
       expression_statement {
-        expression {
-          value {
-            primary_expression {
-              operand {
-                int_value: "4"
-              }
+        value {
+          primary_expression {
+            operand {
+              int_value: "4"
             }
           }
         }

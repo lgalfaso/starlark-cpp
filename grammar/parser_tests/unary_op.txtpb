@@ -1,13 +1,62 @@
 statement {
   expression_statement {
-    expression {
-      value {
-        unary_expression {
-          operator: MINUS
-          test {
-            primary_expression {
-              operand {
-                int_value: "1"
+    value {
+      unary_expression {
+        operator: MINUS
+        test {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    value {
+      unary_expression {
+        operator: PLUS
+        test {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    value {
+      unary_expression {
+        operator: TILDE
+        test {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    value {
+      unary_expression {
+        operator: NOT
+        test {
+          primary_expression {
+            operand {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -18,92 +67,33 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        unary_expression {
-          operator: PLUS
-          test {
-            primary_expression {
-              operand {
-                int_value: "1"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    expression {
-      value {
-        unary_expression {
-          operator: TILDE
-          test {
-            primary_expression {
-              operand {
-                int_value: "1"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    expression {
-      value {
-        unary_expression {
-          operator: NOT
-          test {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    expression {
-      value {
-        unary_expression {
-          operator: NOT
-          test {
-            unary_expression {
-              operator: NOT
-              test {
-                unary_expression {
-                  operator: NOT
-                  test {
-                    unary_expression {
-                      operator: NOT
-                      test {
-                        unary_expression {
-                          operator: NOT
-                          test {
-                            unary_expression {
-                              operator: NOT
-                              test {
-                                unary_expression {
-                                  operator: NOT
-                                  test {
-                                    primary_expression {
-                                      operand {
-                                        identifier {
-                                          name: "True"
-                                          nfkc_name: "True"
-                                        }
+    value {
+      unary_expression {
+        operator: NOT
+        test {
+          unary_expression {
+            operator: NOT
+            test {
+              unary_expression {
+                operator: NOT
+                test {
+                  unary_expression {
+                    operator: NOT
+                    test {
+                      unary_expression {
+                        operator: NOT
+                        test {
+                          unary_expression {
+                            operator: NOT
+                            test {
+                              unary_expression {
+                                operator: NOT
+                                test {
+                                  primary_expression {
+                                    operand {
+                                      identifier {
+                                        name: "True"
+                                        nfkc_name: "True"
                                       }
                                     }
                                   }
@@ -126,27 +116,25 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        unary_expression {
-          operator: PLUS
-          test {
-            unary_expression {
-              operator: PLUS
-              test {
-                unary_expression {
-                  operator: PLUS
-                  test {
-                    unary_expression {
-                      operator: PLUS
-                      test {
-                        unary_expression {
-                          operator: PLUS
-                          test {
-                            primary_expression {
-                              operand {
-                                int_value: "1"
-                              }
+    value {
+      unary_expression {
+        operator: PLUS
+        test {
+          unary_expression {
+            operator: PLUS
+            test {
+              unary_expression {
+                operator: PLUS
+                test {
+                  unary_expression {
+                    operator: PLUS
+                    test {
+                      unary_expression {
+                        operator: PLUS
+                        test {
+                          primary_expression {
+                            operand {
+                              int_value: "1"
                             }
                           }
                         }
@@ -164,21 +152,19 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        unary_expression {
-          operator: PLUS
-          test {
-            unary_expression {
-              operator: MINUS
-              test {
-                unary_expression {
-                  operator: TILDE
-                  test {
-                    primary_expression {
-                      operand {
-                        int_value: "1"
-                      }
+    value {
+      unary_expression {
+        operator: PLUS
+        test {
+          unary_expression {
+            operator: MINUS
+            test {
+              unary_expression {
+                operator: TILDE
+                test {
+                  primary_expression {
+                    operand {
+                      int_value: "1"
                     }
                   }
                 }

@@ -1,21 +1,19 @@
 statement {
   expression_statement {
-    expression {
-      value {
-        primary_expression {
-          dot_expression {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "foo"
-                  nfkc_name: "foo"
-                }
+    value {
+      primary_expression {
+        dot_expression {
+          primary_expression {
+            operand {
+              identifier {
+                name: "foo"
+                nfkc_name: "foo"
               }
             }
-            identifier {
-              name: "bar"
-              nfkc_name: "bar"
-            }
+          }
+          identifier {
+            name: "bar"
+            nfkc_name: "bar"
           }
         }
       }
@@ -24,30 +22,28 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        primary_expression {
-          dot_expression {
-            primary_expression {
-              dot_expression {
-                primary_expression {
-                  operand {
-                    identifier {
-                      name: "foo"
-                      nfkc_name: "foo"
-                    }
+    value {
+      primary_expression {
+        dot_expression {
+          primary_expression {
+            dot_expression {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "foo"
+                    nfkc_name: "foo"
                   }
                 }
-                identifier {
-                  name: "bar"
-                  nfkc_name: "bar"
-                }
+              }
+              identifier {
+                name: "bar"
+                nfkc_name: "bar"
               }
             }
-            identifier {
-              name: "baz"
-              nfkc_name: "baz"
-            }
+          }
+          identifier {
+            name: "baz"
+            nfkc_name: "baz"
           }
         }
       }

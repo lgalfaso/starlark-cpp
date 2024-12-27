@@ -1,26 +1,24 @@
 statement {
   expression_statement {
-    expression {
-      value {
-        binary_expression {
-          lhs {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+    value {
+      binary_expression {
+        lhs {
+          primary_expression {
+            operand {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
           }
-          operator: IN
-          rhs {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "b"
-                  nfkc_name: "b"
-                }
+        }
+        operator: IN
+        rhs {
+          primary_expression {
+            operand {
+              identifier {
+                name: "b"
+                nfkc_name: "b"
               }
             }
           }
@@ -31,27 +29,25 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        binary_expression {
-          lhs {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+    value {
+      binary_expression {
+        lhs {
+          primary_expression {
+            operand {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
           }
-          operator: NOT_IN
-          rhs {
-            primary_expression {
-              operand {
-                identifier {
-                  name: "b"
-                  nfkc_name: "b"
-                }
+        }
+        operator: NOT_IN
+        rhs {
+          primary_expression {
+            operand {
+              identifier {
+                name: "b"
+                nfkc_name: "b"
               }
             }
           }

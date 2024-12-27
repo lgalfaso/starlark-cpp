@@ -1,33 +1,31 @@
 statement {
   expression_statement {
-    expression {
-      value {
-        binary_expression {
-          lhs {
-            binary_expression {
-              lhs {
-                primary_expression {
-                  operand {
-                    int_value: "1"
-                  }
+    value {
+      binary_expression {
+        lhs {
+          binary_expression {
+            lhs {
+              primary_expression {
+                operand {
+                  int_value: "1"
                 }
               }
-              operator: PLUS
-              rhs {
-                primary_expression {
-                  operand {
-                    int_value: "2"
-                  }
+            }
+            operator: PLUS
+            rhs {
+              primary_expression {
+                operand {
+                  int_value: "2"
                 }
               }
             }
           }
-          operator: PLUS
-          rhs {
-            primary_expression {
-              operand {
-                int_value: "3"
-              }
+        }
+        operator: PLUS
+        rhs {
+          primary_expression {
+            operand {
+              int_value: "3"
             }
           }
         }
@@ -37,44 +35,42 @@ statement {
 }
 statement {
   expression_statement {
-    expression {
-      value {
-        binary_expression {
-          lhs {
-            binary_expression {
-              lhs {
-                primary_expression {
-                  operand {
-                    int_value: "1"
-                  }
+    value {
+      binary_expression {
+        lhs {
+          binary_expression {
+            lhs {
+              primary_expression {
+                operand {
+                  int_value: "1"
                 }
               }
-              operator: STAR
-              rhs {
-                primary_expression {
-                  operand {
-                    int_value: "2"
-                  }
+            }
+            operator: STAR
+            rhs {
+              primary_expression {
+                operand {
+                  int_value: "2"
                 }
               }
             }
           }
-          operator: PLUS
-          rhs {
-            binary_expression {
-              lhs {
-                primary_expression {
-                  operand {
-                    int_value: "3"
-                  }
+        }
+        operator: PLUS
+        rhs {
+          binary_expression {
+            lhs {
+              primary_expression {
+                operand {
+                  int_value: "3"
                 }
               }
-              operator: STAR
-              rhs {
-                primary_expression {
-                  operand {
-                    int_value: "4"
-                  }
+            }
+            operator: STAR
+            rhs {
+              primary_expression {
+                operand {
+                  int_value: "4"
                 }
               }
             }
