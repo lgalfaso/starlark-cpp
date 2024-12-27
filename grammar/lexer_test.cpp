@@ -416,6 +416,8 @@ foo = r"bar\\n"
 foo = r"\
 ")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\\\\\n\"):2,7:2,12 NEWLINE:2,12:2,12 EOF:2,12:2,12");
+  check("foo = r\"\\\r\n\"",
+        "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 STRING(\"\\\\\\n\"):1,7:2,2 NEWLINE:2,2:2,2 EOF:2,2:2,2");
 }
 
 TEST(LexerTest, Bytes) {

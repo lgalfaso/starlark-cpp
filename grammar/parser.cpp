@@ -132,14 +132,14 @@ bool is_target(const Test& test) {
 enum class parser_state {
   parse_statement,
   parse_statement_def_0,
-  parse_statement_def_1,
+  parse_statement_def_final,
   parse_statement_if_0,
   parse_statement_if_elif,
   parse_statement_if_else,
   parse_statement_for_0,
   parse_statement_for_1,
   parse_statement_for_2,
-  parse_statement_for_3,
+  parse_statement_for_final,
   parse_statement_expression_0,
   parse_suite,
   parse_suite_statement_list,
@@ -220,9 +220,8 @@ struct frame {
 
 }  // namespace
 
-parser::parser(std::string_view input) : lex(input) {
+parser::parser(std::string_view input) : lex(input), nested_loops(1) {
   lex.next_token();
-  nested_loops.push_back(0);
 }
 
 File parser::parse_file() {
@@ -361,7 +360,7 @@ void parser::add_error(const std::string& error_message) {
 void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
   std::vector<frame> frames;
   // TODO(lmirelmann): Delegate to some method the construction of the frames.
-  frames.push_back(frame{
+  frames.emplace_back(frame{
       .state = parser_state::parse_statement,
       .statements = &statements,
   });
@@ -374,8 +373,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (capture(token_type::def)) {
           DefStmt* def_statement = top.statements->Add()->mutable_def_statement();
           nested_loops.push_back(0);
-          frames.push_back(frame{
-            .state = parser_state::parse_statement_def_1,
+          frames.emplace_back(frame{
+            .state = parser_state::parse_statement_def_final,
           });
           if (!set_identifier(*def_statement->mutable_function_name())) {
             add_error("Expected an identifier");
@@ -384,11 +383,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!expect(token_type::lparen)) {
             break;
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_def_0,
             .def_statement = def_statement,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_parameters,
             .parameters = def_statement->mutable_parameter(),
             .parse_parameters_allow_trailing_comma = true,
@@ -396,47 +395,50 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         } else if (capture(token_type::if_)) {
           IfStmt* if_statement = top.statements->Add()->mutable_if_statement();
-          frames.push_back(frame{
+          // It is unclear whether the attempt to parse the `elif` and `else` blocks should be
+          // defined here or in parse_statement_if_0. This difference is important when there
+          // are errors in the parsing and how should we attempt to recover from these errors.
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_if_else,
             .if_statement = if_statement,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_if_elif,
             .if_statement = if_statement,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_if_0,
             .statements = if_statement->mutable_statement(),
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = if_statement->mutable_test(),
           });
         } else if (capture(token_type::for_)) {
           ForStmt* for_statement = top.statements->Add()->mutable_for_statement();
           nested_loops.back()++;
-          frames.push_back(frame{
-            .state = parser_state::parse_statement_for_3,
+          frames.emplace_back(frame{
+            .state = parser_state::parse_statement_for_final,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_for_2,
             .statements = for_statement->mutable_statement(),
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_for_1,
             .for_statement = for_statement,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_for_0,
             .for_statement = for_statement,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary,
             .primary = for_statement->add_loop_variable(),
             .primary_must_be_target = true,
           });
         } else {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_simple_statement,
             .statements = top.statements,
           });
@@ -449,19 +451,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::colon)) {
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_suite,
           .statements = top.def_statement->mutable_statement(),
         });
         break;
-      case parser_state::parse_statement_def_1:
+      case parser_state::parse_statement_def_final:
         nested_loops.pop_back();
         break;
       case parser_state::parse_statement_if_0:
         if (!expect(token_type::colon)) {
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_suite,
           .statements = top.statements,
         });
@@ -469,12 +471,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_statement_if_elif:
         if (capture(token_type::elif)) {
           auto* elif = top.if_statement->add_elif();
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_if_0,
             .statements = elif->mutable_statement(),
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = elif->mutable_test(),
           });
@@ -482,7 +484,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_statement_if_else:
         if (capture(token_type::else_)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement_if_0,
             .statements = top.if_statement->mutable_else_statement(),
           });
@@ -490,8 +492,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_statement_for_0:
         if (capture(token_type::comma)) {
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary,
             .primary = top.for_statement->add_loop_variable(),
             .primary_must_be_target = true,
@@ -502,7 +504,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::in)) {
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_expression,
           .expression = top.for_statement->mutable_expression(),
           .expression_allow_trailing_comma = false,
@@ -512,12 +514,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::colon)) {
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_suite,
           .statements = top.statements,
         });
         break;
-      case parser_state::parse_statement_for_3:
+      case parser_state::parse_statement_for_final:
         nested_loops.back()--;
         break;
       case parser_state::parse_suite:
@@ -525,12 +527,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!expect(token_type::indent)) {
             break;
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_suite_statement_list,
             .statements = top.statements,
           });
         } else {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_simple_statement,
             .statements = top.statements,
           });
@@ -538,8 +540,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_suite_statement_list:
         if (lex.current_token().type() != token_type::outdent && lex.current_token().type() != token_type::eof) {
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_statement,
             .statements = top.statements,
           });
@@ -548,14 +550,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         expect(token_type::outdent);
         break;
       case parser_state::parse_simple_statement:
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_simple_statement_1,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_simple_statement_0,
           .statements = top.statements,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_small_statement,
           .statement = top.statements->Add(),
         });
@@ -565,8 +567,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (is_current(token_type::newline)) {
             break;
           }
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_small_statement,
              .statement = top.statements->Add(),
           });
@@ -592,7 +594,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             top.statement->mutable_return_statement();
             lex.next_token();
             if (!is_current(token_type::newline)) {
-              frames.push_back(frame{
+              frames.emplace_back(frame{
                 .state = parser_state::parse_expression,
                 .expression = top.statement->mutable_return_statement()->mutable_expression(),
                 .expression_allow_trailing_comma = false,
@@ -650,11 +652,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           default: {
             auto* statement = top.statement;
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_statement_expression_0,
               .statement = statement,
             });
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_expression,
               .expression = statement->mutable_expression_statement(),
               .expression_allow_trailing_comma = false,
@@ -676,7 +678,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
           top.statement->mutable_assign_statement()->set_op(op->second);
           lex.next_token();
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_expression,
             .expression = top.statement->mutable_assign_statement()->mutable_rhs(),
             .expression_allow_trailing_comma = false,
@@ -692,12 +694,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
 
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_expression_0,
           .expression = top.expression,
           .expression_allow_trailing_comma = top.expression_allow_trailing_comma,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test,
           .test = top.expression->mutable_value(),
         });
@@ -709,7 +711,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             first_test.Swap(top.expression->mutable_value());
             first_test.Swap(top.expression->mutable_tuple()->add_value());
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_expression_1,
             .expression = top.expression,
             .expression_allow_trailing_comma = top.expression_allow_trailing_comma,
@@ -730,8 +732,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             break;
           }
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.expression->mutable_tuple()->add_value(),
           });
@@ -739,16 +741,16 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_test:
         if (is_current(token_type::lambda)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_lambda,
             .lambda = top.test->mutable_lambda_expression(),
           });
         } else {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_0,
             .test = top.test,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.test,
             .test_p_precedence = 0,
@@ -762,11 +764,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             new_result.mutable_if_expression()->mutable_if_value()->Swap(top.test);
             new_result.Swap(top.test);
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_1,
             .test = top.test,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.test->mutable_if_expression()->mutable_if_test(),
             .test_p_precedence = 0,
@@ -777,7 +779,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::else_)) {
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test_p,
           .test = top.test->mutable_if_expression()->mutable_else_value(),
           .test_p_precedence = 0,
@@ -798,7 +800,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary,
             .primary = result_ref->mutable_primary_expression(),
             .primary_must_be_target = false,
@@ -814,20 +816,20 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::NOT);
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
             .test = result_ref,
             .test_p_precedence = top.test_p_precedence + 1,
           });
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test_p_0,
           .test = top.test,
           .test_p_precedence = top.test_p_precedence,
           .test_p_0_first = true,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test_p,
           .test = top.test,
           .test_p_precedence = top.test_p_precedence + 1,
@@ -851,13 +853,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             new_result.Swap(top.test);
           }
           top.test->mutable_binary_expression()->set_operator_(Test::BinaryExpr::NOT_IN);
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p_0,
             .test = top.test,
             .test_p_precedence = top.test_p_precedence,
             .test_p_0_first = false,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.test->mutable_binary_expression()->mutable_rhs(),
             .test_p_precedence = top.test_p_precedence + 1,
@@ -876,13 +878,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             new_result.Swap(top.test);
           }
           top.test->mutable_binary_expression()->set_operator_(next_op->second.second);
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p_0,
             .test = top.test,
             .test_p_precedence = top.test_p_precedence,
             .test_p_0_first = false,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.test->mutable_binary_expression()->mutable_rhs(),
             .test_p_precedence = top.test_p_precedence + 1,
@@ -890,12 +892,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_primary:
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_primary_0,
           .primary = top.primary,
           .primary_must_be_target = top.primary_must_be_target,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_operand,
           .operand = top.primary->mutable_operand(),
         });
@@ -916,23 +918,23 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("Expecting IDENTIFIER");
             break;
           }
-          frames.push_back(top);
+          frames.emplace_back(top);
         } else if (capture(token_type::lparen)) {
           {
             PrimaryExpr new_result;
             new_result.mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result.Swap(top.primary);
           }
-          frames.push_back(top);
+          frames.emplace_back(top);
           if (capture(token_type::rparen)) {
             break;
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary_call_0,
             .primary = top.primary,
             .primary_must_be_target = top.primary_must_be_target,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_argument,
             .argument = top.primary->mutable_call_expression()->add_argument(),
           });
@@ -942,24 +944,24 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             new_result.mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result.Swap(top.primary);
           }
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary_index_final,
           });
           if (capture(token_type::colon)) {
             top.primary->mutable_slice_expression()->mutable_slice();
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_primary_index_1,
               .primary = top.primary,
               .primary_must_be_target = top.primary_must_be_target,
             });
           } else {
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_primary_index_0,
               .primary = top.primary,
               .primary_must_be_target = top.primary_must_be_target,
             });
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_expression,
               .expression = top.primary->mutable_slice_expression()->mutable_index(),
               .expression_allow_trailing_comma = true,
@@ -976,8 +978,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (capture(token_type::rparen)) {
             break;
           }
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_argument,
             .argument = top.primary->mutable_call_expression()->add_argument(),
           });
@@ -995,7 +997,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             expression.Swap(top.primary->mutable_slice_expression()->mutable_index());
             top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression.mutable_value());
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary_index_1,
             .primary = top.primary,
             .primary_must_be_target = top.primary_must_be_target,
@@ -1003,13 +1005,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_primary_index_1:
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_primary_index_2,
           .primary = top.primary,
           .primary_must_be_target = top.primary_must_be_target,
         });
         if (!is_current(token_type::colon) && !is_current(token_type::rbracket)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.primary->mutable_slice_expression()->mutable_slice()->mutable_end(),
           });
@@ -1017,7 +1019,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_primary_index_2:
         if (capture(token_type::colon) && !is_current(token_type::rbracket)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.primary->mutable_slice_expression()->mutable_slice()->mutable_step(),
           });
@@ -1042,20 +1044,20 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           top.operand->set_bytes_value(lex.current_token().string_value());
           lex.next_token();
         } else if (is_current(token_type::lbracket)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_list,
             .operand = top.operand,
           });
         } else if (is_current(token_type::lbrace)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_dict,
             .operand = top.operand,
           });
         } else if (capture(token_type::lparen)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_operand_expression_0,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_expression,
             .expression = top.operand->mutable_expression(),
             .expression_allow_trailing_comma = true,
@@ -1078,14 +1080,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
 
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_list_final,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_list_0,
           .operand = top.operand,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test,
           .test = top.operand->mutable_list_expression()->add_element(),
         });
@@ -1098,14 +1100,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               expression.Swap(&top.operand->mutable_list_expression()->mutable_element()->at(0));
               expression.Swap(top.operand->mutable_list_comprehension()->mutable_test());
             }
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
               .comp_clauses = top.operand->mutable_list_comprehension()->mutable_clause(),
             });
             break;
           case token_type::rbracket:
           case token_type::comma:
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_list_index_0,
               .operand = top.operand,
             });
@@ -1119,8 +1121,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (is_current(token_type::rbracket)) {
             break;
           }
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.operand->mutable_list_expression()->add_element(),
           });
@@ -1140,14 +1142,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
  
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_dict_final,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_dict_0,
           .operand = top.operand,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_entry,
           .entry = top.operand->mutable_dictionary_expression()->add_entry(),
         });
@@ -1160,14 +1162,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               entry.Swap(&top.operand->mutable_dictionary_expression()->mutable_entry()->at(0));
               entry.Swap(top.operand->mutable_dictionary_comprehension()->mutable_entry());
             }
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
               .comp_clauses = top.operand->mutable_dictionary_comprehension()->mutable_clause(),
             });
             break;
           case token_type::rbrace:
           case token_type::comma:
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_dict_index_0,
               .operand = top.operand,
             });
@@ -1181,8 +1183,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (is_current(token_type::rbrace)) {
             break;
           }
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_entry,
             .entry = top.operand->mutable_dictionary_expression()->add_entry(),
           });
@@ -1192,11 +1194,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         expect(token_type::rbrace);
         break;
       case parser_state::parse_entry:
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_entry_0,
           .entry = top.entry,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test,
           .test = top.entry->mutable_key(),
         });
@@ -1205,7 +1207,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::colon)) {
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test,
           .test = top.entry->mutable_value(),
         });
@@ -1213,22 +1215,22 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_comp_clauses:
         if (capture(token_type::for_)) {
           auto* comp_clause = top.comp_clauses->Add();
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_comp_clauses_0,
             .comp_clause = comp_clause,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary,
             .primary = comp_clause->mutable_for_clause()->add_loop_variable(),
             .primary_must_be_target = true,
           });
         } else if (capture(token_type::if_)) {
-          frames.push_back(top);
+          frames.emplace_back(top);
           // Have to avoid parsing this as an `IfExpr`.
           // This is also not allowing a lambda to be used.
           // Context: https://github.com/bazelbuild/bazel/issues/24469
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.comp_clauses->Add()->mutable_if_clause(),
             .test_p_precedence = 0,
@@ -1237,8 +1239,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_comp_clauses_0:
         if (capture(token_type::comma)) {
-          frames.push_back(top);
-          frames.push_back(frame{
+          frames.emplace_back(top);
+          frames.emplace_back(frame{
             .state = parser_state::parse_primary,
             .primary = top.comp_clause->mutable_for_clause()->add_loop_variable(),
             .primary_must_be_target = true,
@@ -1248,7 +1250,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           }
           // Do not allow `IfExpr` nor lambdas.
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
             .test = top.comp_clause->mutable_for_clause()->mutable_in(),
             .test_p_precedence = 0,
@@ -1257,21 +1259,21 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_argument:
         if (capture(token_type::star)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_star_argument(),
           });
         } else if (capture(token_type::star_star)) {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_star_star_argument(),
           });
         } else {
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_argument_0,
             .argument = top.argument,
           });
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_value(),
           });
@@ -1288,7 +1290,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             id.Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_operand()->mutable_identifier());
             id.Swap(top.argument->mutable_named_argument()->mutable_identifier());
           }
-          frames.push_back(frame{
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_named_argument()->mutable_value(),
           });
@@ -1296,11 +1298,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_lambda:
         expect(token_type::lambda);
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_lambda_0,
           .lambda = top.lambda,
         });
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_parameters,
           .parameters = top.lambda->mutable_parameter(),
           .parse_parameters_allow_trailing_comma = false,
@@ -1311,7 +1313,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::colon)) {
           break;
         }
-        frames.push_back(frame{
+        frames.emplace_back(frame{
           .state = parser_state::parse_test,
           .test = top.lambda->mutable_test(),
         });
@@ -1319,7 +1321,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_parameters:
         if (top.parse_parameters_first || capture(token_type::comma)) {
           if (is_current(token_type::identifier)) {
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_parameters,
               .parameters = top.parameters,
               .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
@@ -1328,13 +1330,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             Parameter* param = top.parameters->Add();
             set_identifier(*param->mutable_identifier());
             if (capture(token_type::equals)) {
-              frames.push_back(frame{
+              frames.emplace_back(frame{
                 .state = parser_state::parse_test,
                 .test = param->mutable_initialization(),
               });
             }
           } else if (capture(token_type::star)) {
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_parameters,
               .parameters = top.parameters,
               .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
@@ -1346,7 +1348,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               set_identifier(*param->mutable_identifier());
             }
           } else if (capture(token_type::star_star)) {
-            frames.push_back(frame{
+            frames.emplace_back(frame{
               .state = parser_state::parse_parameters,
               .parameters = top.parameters,
               .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
