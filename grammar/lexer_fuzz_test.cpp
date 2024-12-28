@@ -8,7 +8,8 @@ using grammar::lexer;
 using grammar::token_type;
 
 void LexerFuzzing(char* data, size_t size) {
-  lexer l(std::string_view(data, size));
+  std::vector<grammar::log_entry> logging;
+  lexer l(std::string_view(data, size), logging);
   do {
     l.next_token();
   } while (l.current_token().type() != token_type::eof);

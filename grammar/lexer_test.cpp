@@ -152,9 +152,10 @@ std::string join(const std::vector<std::string>& parts) {
 }
 
 void check(std::string_view input, std::string_view expected, grammar::grammar_options options) {
-  lexer l(input, options);
+  std::vector<grammar::log_entry> logging;
+  lexer l(input, options, logging);
   EXPECT_EQ(expected, join(read_tokens(l, input)));
-  EXPECT_THAT(l.errors(), IsEmpty());
+  EXPECT_THAT(logging, IsEmpty());
 }
 
 void check(std::string_view input, std::string_view expected) {
@@ -162,7 +163,8 @@ void check(std::string_view input, std::string_view expected) {
 }
 
 void checkComments(std::string_view input, const std::vector<std::string>& expected_comments) {
-  lexer l(input);
+  std::vector<grammar::log_entry> logging;
+  lexer l(input, logging);
   read_tokens(l, input);
   std::vector<std::string> comments;
   for (const auto& [comment_start, comment_end] : l.comments()) {
@@ -172,16 +174,17 @@ void checkComments(std::string_view input, const std::vector<std::string>& expec
 }
 
 void checkErrors(std::string_view input, std::string_view expected, const std::vector<std::string>& expected_errors) {
-  lexer l(input);
+  std::vector<grammar::log_entry> logging;
+  lexer l(input, logging);
   EXPECT_EQ(expected, join(read_tokens(l, input)));
 
   std::vector<std::string> errors;
-  for (const auto& [error_message, error_pos] : l.errors()) {
-    errors.emplace_back(error_message);
+  for (const auto& log_entry : logging) {
+    errors.emplace_back(log_entry.message);
     errors.back() += ":";
-    errors.back() += std::to_string(error_pos.row);
+    errors.back() += std::to_string(log_entry.pos.row);
     errors.back() += ",";
-    errors.back() += std::to_string(error_pos.column);
+    errors.back() += std::to_string(log_entry.pos.column);
   }
   EXPECT_EQ(expected_errors, errors);
 }

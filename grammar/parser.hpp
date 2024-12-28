@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "grammar/lexer.hpp"
+#include "grammar/logging.hpp"
 #include "grammar/options.hpp"
 #include "grammar/proto/starlark.pb.h"
 
@@ -15,22 +16,21 @@ namespace grammar {
 
 class parser {
  public:
-  parser(std::string_view input);
-  parser(std::string_view input, const grammar_options& options);
+  parser(std::string_view input, std::vector<grammar::log_entry>& logging);
+  parser(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
   starlark::File parse_file();
-  // TODO(lmirelmann): These two errors should be merged.
-  const std::vector<std::pair<std::string, position>>& parser_errors() const;
-  const std::vector<std::pair<std::string, position>>& lexer_errors() const;
+
+  static constexpr std::string module = "Parser";
 
  private:
   grammar_options options;
   lexer lex;
-  std::vector<std::pair<std::string, position>> errors;
   std::vector<int> nested_loops;
   bool recover = false;
+  std::vector<grammar::log_entry>& logging;
 
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;

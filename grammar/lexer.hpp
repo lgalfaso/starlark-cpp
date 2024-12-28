@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "grammar/logging.hpp"
 #include "grammar/token.hpp"
 #include "grammar/options.hpp"
 #include "unicode/utf8_reader.hpp"
@@ -17,12 +18,13 @@ namespace grammar {
 
 class lexer {
  public:
-  lexer(std::string_view input);
-  lexer(std::string_view input, const grammar_options& options);
+  lexer(std::string_view input, std::vector<grammar::log_entry>& logging);
+  lexer(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging);
   const token& current_token() const;
   void next_token();
   const std::vector<std::pair<position, position>>& comments() const;
-  const std::vector<std::pair<std::string, position>>& errors() const;
+
+  static constexpr std::string module = "Lexer";
 
  private:
   void tokenize();
@@ -33,6 +35,7 @@ class lexer {
   bool read_escaped_char(std::string& result, bool utf8_encode, int max_value, int min_size, int max_size, int base);
   std::string read_identifier_or_keyword();
   void add_error(std::string_view message, position pos);
+  void add_warning(std::string_view message, position pos);
   void add_comment(position start, position end);
   void newline();
   position get_position() const;
@@ -48,7 +51,7 @@ class lexer {
   std::vector<int> indent_stack;
   int open_brackets = 0;
 
-  std::vector<std::pair<std::string, position>> errors_found;
+  std::vector<grammar::log_entry>& logging;
   std::vector<std::pair<position, position>> comments_found;
 };
 

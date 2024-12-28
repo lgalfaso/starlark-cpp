@@ -8,6 +8,7 @@ cc_library(
     srcs = ["lexer.cpp"],
     hdrs = ["lexer.hpp"],
     deps = [
+        ":logging",
         ":numeric_parser",
         ":options",
         ":token",
@@ -44,6 +45,16 @@ cc_fuzz_test(
 )
 
 cc_library(
+    name = "logging",
+    srcs = ["logging.cpp"],
+    hdrs = ["logging.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":token",
+    ],
+)
+
+cc_library(
     name = "numeric_parser",
     srcs = ["numeric_parser.cpp"],
     hdrs = ["numeric_parser.hpp"],
@@ -69,6 +80,7 @@ cc_library(
     hdrs = ["parser.hpp"],
     deps = [
         ":lexer",
+        ":logging",
         ":options",
         "//grammar/proto:starlark_cc_proto",
         "//third-party:defer",

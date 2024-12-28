@@ -156,10 +156,10 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
 
 }  // namespace
 
-lexer::lexer(std::string_view input) : lexer(input, grammar_options{}) {}
+lexer::lexer(std::string_view input, std::vector<grammar::log_entry>& logging) : lexer(input, grammar_options{}, logging) {}
 
-lexer::lexer(std::string_view input, const grammar_options& options) :
-    options(options), input(input), source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1) {}
+lexer::lexer(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging) :
+    options(options), input(input), source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1), logging(logging) {}
 
 const token& lexer::current_token() const {
   return current;
@@ -182,10 +182,6 @@ void lexer::next_token() {
 
 const std::vector<std::pair<position, position>>& lexer::comments() const {
   return comments_found;
-}
-
-const std::vector<std::pair<std::string, position>>& lexer::errors() const {
-  return errors_found;
 }
 
 void lexer::tokenize() {
@@ -318,8 +314,7 @@ void lexer::consume_indentation(bool modify_indents) {
       newline();
     } else if (source_code.capture("\t")) {
       indentation_length++;
-      // TODO(lmirelmann): This should be a warning.
-      add_error("Tab characters are not allowed for indentation. Use spaces instead.", start);
+      add_warning("Tab characters are not allowed for indentation. Use spaces instead.", start);
     } else if (source_code.peek() == '\n') {
       if (current.type() != token_type::newline &&
           current.type() != token_type::bof &&
@@ -676,7 +671,11 @@ std::string lexer::read_identifier_or_keyword() {
 }
 
 void lexer::add_error(std::string_view message, position pos) {
-  errors_found.emplace_back(message, pos);
+  logging.emplace_back(log(log_level::ERROR, message, module, pos));
+}
+
+void lexer::add_warning(std::string_view message, position pos) {
+  logging.emplace_back(log(log_level::WARNING, message, module, pos));
 }
 
 void lexer::add_comment(position start, position end) {

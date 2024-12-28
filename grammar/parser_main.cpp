@@ -10,6 +10,7 @@
 #include "grammar/parser.hpp"
 #include "grammar/proto/starlark.pb.h"
 
+using grammar::log_level;
 using grammar::parser;
 using grammar::grammar_options;
 using starlark::File;
@@ -34,20 +35,19 @@ int main(int argc, char* argv[]) {
     read(in_fd, starlark_program.data(), sb.st_size); 
   }
 
-  parser star_parser(starlark_program, grammar_options{ .escaped_octal_and_hex_char_are_ascii = false, });
+  std::vector<grammar::log_entry> logging;
+  parser star_parser(starlark_program, grammar_options{ .escaped_octal_and_hex_char_are_ascii = false, }, logging);
   File actual_starlark_file = star_parser.parse_file();
-  bool found_errors = !star_parser.lexer_errors().empty() ||
-     !star_parser.parser_errors().empty();
-  if (found_errors) {
-    std::cout << "Unable to parse: " << argv[1] << "\n";
-    std::cout << "Lexer errors\n";
-    for (const auto& entry : star_parser.lexer_errors()) {
-      std::cout << "  " << entry.first << ":" << entry.second.row << "," << entry.second.column << "   '" << starlark_program[entry.second.pos] << "'\n";
+  bool print_header = true;
+  for (const auto& entry : logging) {
+    if (entry.level != log_level::ERROR && entry.level != log_level::FATAL) {
+      continue;
     }
-    std::cout << "Grammar errors\n";
-    for (const auto& entry : star_parser.parser_errors()) {
-      std::cout << "  " << entry.first << ":" << entry.second.row << "," << entry.second.column << "\n";
+    if (print_header) {
+      std::cout << "Unable to parse: " << argv[1] << "\n";
+      print_header = false;
     }
+    std::cout << "  " << entry.module << ":" << entry.message << ":" << entry.pos.row << "," << entry.pos.column << "\n";
   }
 
   return 0;

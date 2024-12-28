@@ -32,8 +32,9 @@ TEST(Parser, TestCase) {
     read(starlark_fd, starlark_program.data(), sb.st_size); 
   }
 
-  parser star_parser(starlark_program);
+  std::vector<grammar::log_entry> logging;
+  parser star_parser(starlark_program, logging);
   File actual_starlark_file = star_parser.parse_file();
-  EXPECT_FALSE(star_parser.parser_errors().empty() && star_parser.lexer_errors().empty());
+  EXPECT_THAT(logging, Not(IsEmpty()));
 }
 

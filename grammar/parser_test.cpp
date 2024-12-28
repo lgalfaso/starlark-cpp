@@ -40,12 +40,12 @@ TEST(Parser, TestCase) {
     read(starlark_fd, starlark_program.data(), sb.st_size); 
   }
 
-  parser star_parser(starlark_program);
+  std::vector<grammar::log_entry> logging;
+  parser star_parser(starlark_program, logging);
   File actual_starlark_file = star_parser.parse_file();
   EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_file, starlark_file)) <<
       "Expected: " << starlark_file.DebugString() << "\n" <<
       "Actual:   " << actual_starlark_file.DebugString() << "\n";
-  EXPECT_THAT(star_parser.parser_errors(), IsEmpty());
-  EXPECT_THAT(star_parser.lexer_errors(), IsEmpty());
+  EXPECT_THAT(logging, IsEmpty());
 }
 

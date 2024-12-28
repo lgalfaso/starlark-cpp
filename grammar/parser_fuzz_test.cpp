@@ -9,7 +9,8 @@ using grammar::parser;
 using starlark::File;
 
 void ParserFuzzing(char* data, size_t size) {
-  parser star_parser(std::string_view(data, size));
+  std::vector<grammar::log_entry> logging;
+  parser star_parser(std::string_view(data, size), logging);
   File actual_starlark_file = star_parser.parse_file();
 }
 

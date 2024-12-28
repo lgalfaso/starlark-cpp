@@ -220,10 +220,11 @@ struct frame {
 
 }  // namespace
 
-parser::parser(std::string_view input) : parser(input, grammar_options{}) {
+parser::parser(std::string_view input, std::vector<grammar::log_entry>& logging) : parser(input, grammar_options{}, logging) {
 }
 
-parser::parser(std::string_view input, const grammar_options& options) : options(options), lex(input, options), nested_loops(1) {
+parser::parser(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging)
+    : options(options), lex(input, options, logging), nested_loops(1), logging(logging) {
   lex.next_token();
 }
 
@@ -239,14 +240,6 @@ File parser::parse_file() {
     }
   }
   return result;
-}
-
-const std::vector<std::pair<std::string, position>>& parser::parser_errors() const {
-  return errors;
-}
-
-const std::vector<std::pair<std::string, position>>& parser::lexer_errors() const {
-  return lex.errors();
 }
 
 bool parser::capture(token_type expected_token) {
@@ -356,7 +349,7 @@ bool parser::expect(token_type expected_token) {
 }
 
 void parser::add_error(const std::string& error_message) {
-  errors.emplace_back(error_message, lex.current_token().start());
+  logging.emplace_back(log(log_level::ERROR, error_message, module, lex.current_token().start()));
   recover = true;
 }
 
