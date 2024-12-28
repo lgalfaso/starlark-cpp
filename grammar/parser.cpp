@@ -355,7 +355,6 @@ void parser::add_error(const std::string& error_message) {
 
 void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
   std::vector<frame> frames;
-  // TODO(lmirelmann): Delegate to some method the construction of the frames.
   frames.emplace_back(frame{
       .state = parser_state::parse_statement,
       .statements = &statements,
