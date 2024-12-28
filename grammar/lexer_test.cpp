@@ -404,6 +404,11 @@ foo = "bar\UFFFFFFFF")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\UFFFFFFFF\\\"\"):2,7:2,22 NEWLINE:2,22:2,22 EOF:2,22:2,22",
        { "Invalid escape sequence:2,11" });
   checkErrors(R"starlark(
+print ("\N{LATIN SMALL LETTER CLOSED OMEGA}")
+)starlark",
+        "IDENTIFIER(\"print\"):2,1:2,6 LPAREN:2,7:2,8 ILLEGAL(\"\\\"\\\\N{LATIN SMALL LETTER CLOSED OMEGA}\\\"\"):2,8:2,45 RPAREN:2,45:2,46 NEWLINE:2,46:2,47 EOF:3,1:3,1",
+       { "Invalid escape sequence, the escape sequence \\N is not supported.:2,9" });
+  checkErrors(R"starlark(
 foo = "bar\z")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\z\\\"\"):2,7:2,14 NEWLINE:2,14:2,14 EOF:2,14:2,14",
        { "Invalid escape sequence:2,11" });
@@ -448,12 +453,12 @@ foo = b"bar\x80"
 foo = b"bar\u1234"
 )starlark",
       "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"b\\\"bar\\\\u1234\\\"\"):2,7:2,19 NEWLINE:2,19:2,20 EOF:3,1:3,1",
-      { "Invalid escape sequence:2,12" });
+      { "Invalid escape sequence, the escape sequence \\u cannot be used when encoding `bytes`.:2,12" });
   checkErrors(R"starlark(
 foo = b"bar\U00012345"
 )starlark",
       "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"b\\\"bar\\\\U00012345\\\"\"):2,7:2,23 NEWLINE:2,23:2,24 EOF:3,1:3,1",
-      { "Invalid escape sequence:2,12" });
+      { "Invalid escape sequence, the escape sequence \\U cannot be used when encoding `bytes`.:2,12" });
 }
 
 TEST(LexerTest, InNotIn) {
