@@ -5,10 +5,11 @@
 #include "grammar/lexer.hpp"
 
 using grammar::lexer;
+using grammar::logger;
 using grammar::token_type;
 
 void LexerFuzzing(char* data, size_t size) {
-  std::vector<grammar::log_entry> logging;
+  logger logging;
   lexer l(std::string_view(data, size), logging);
   do {
     l.next_token();

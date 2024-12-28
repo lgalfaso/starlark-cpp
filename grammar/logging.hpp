@@ -4,6 +4,9 @@
 #define GRAMMAR_LOGGING_HPP_
 
 #include <chrono>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "grammar/token.hpp"
 
@@ -11,7 +14,6 @@
 
 namespace grammar {
 
-// TODO(lmirelmann): This is very basic, there should be a class that is used to handle all logging.
 enum class log_level {
   DEBUG,
   INFO,
@@ -28,7 +30,18 @@ struct log_entry {
   std::chrono::time_point<std::chrono::system_clock> timestamp;
 };
 
-log_entry log(log_level level, std::string_view message, std::string_view module, const grammar::position& pos);
+class logger {
+ public:
+  void log(log_level level, std::string_view message, std::string_view module, const grammar::position& pos);
+  std::vector<grammar::log_entry>::const_iterator begin() const;
+  std::vector<grammar::log_entry>::const_iterator end() const;
+  bool empty() const;
+  std::vector<grammar::log_entry>::size_type size() const;
+
+ private:
+  std::vector<grammar::log_entry> entries;
+};
+
 
 }  // namespace grammar
 

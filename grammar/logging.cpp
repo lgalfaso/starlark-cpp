@@ -4,7 +4,9 @@
 
 namespace grammar {
 
-log_entry log(log_level level, std::string_view message, std::string_view module, const grammar::position& pos) {
+namespace {
+
+log_entry create_log(log_level level, std::string_view message, std::string_view module, const grammar::position& pos) {
   return log_entry{
     .level = level,
     .module = std::string{module},
@@ -12,6 +14,28 @@ log_entry log(log_level level, std::string_view message, std::string_view module
     .pos = pos,
     .timestamp = std::chrono::system_clock::now(),
   };
+}
+
+}  // namespace
+
+void logger::log(log_level level, std::string_view message, std::string_view module, const grammar::position& pos) {
+  entries.emplace_back(create_log(level, message, module, pos));
+}
+
+std::vector<grammar::log_entry>::const_iterator logger::begin() const {
+  return entries.begin();
+}
+
+std::vector<grammar::log_entry>::const_iterator logger::end() const {
+  return entries.end();
+}
+
+bool logger::empty() const {
+  return entries.empty();
+}
+
+std::vector<grammar::log_entry>::size_type logger::size() const {
+  return entries.size();
 }
 
 }  // namespace grammar

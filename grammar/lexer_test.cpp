@@ -14,6 +14,7 @@
 
 using bignum::number;
 using grammar::lexer;
+using grammar::logger;
 using grammar::quoted;
 using grammar::token_type;
 using testing::IsEmpty;
@@ -152,7 +153,7 @@ std::string join(const std::vector<std::string>& parts) {
 }
 
 void check(std::string_view input, std::string_view expected, grammar::grammar_options options) {
-  std::vector<grammar::log_entry> logging;
+  logger logging;
   lexer l(input, options, logging);
   EXPECT_EQ(expected, join(read_tokens(l, input)));
   EXPECT_THAT(logging, IsEmpty());
@@ -163,7 +164,7 @@ void check(std::string_view input, std::string_view expected) {
 }
 
 void checkComments(std::string_view input, const std::vector<std::string>& expected_comments) {
-  std::vector<grammar::log_entry> logging;
+  logger logging;
   lexer l(input, logging);
   read_tokens(l, input);
   std::vector<std::string> comments;
@@ -174,7 +175,7 @@ void checkComments(std::string_view input, const std::vector<std::string>& expec
 }
 
 void checkErrors(std::string_view input, std::string_view expected, const std::vector<std::string>& expected_errors) {
-  std::vector<grammar::log_entry> logging;
+  logger logging;
   lexer l(input, logging);
   EXPECT_EQ(expected, join(read_tokens(l, input)));
 

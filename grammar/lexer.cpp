@@ -156,9 +156,9 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
 
 }  // namespace
 
-lexer::lexer(std::string_view input, std::vector<grammar::log_entry>& logging) : lexer(input, grammar_options{}, logging) {}
+lexer::lexer(std::string_view input, logger& logging) : lexer(input, grammar_options{}, logging) {}
 
-lexer::lexer(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging) :
+lexer::lexer(std::string_view input, const grammar_options& options, logger& logging) :
     options(options), input(input), source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1), logging(logging) {}
 
 const token& lexer::current_token() const {
@@ -671,11 +671,11 @@ std::string lexer::read_identifier_or_keyword() {
 }
 
 void lexer::add_error(std::string_view message, position pos) {
-  logging.emplace_back(log(log_level::ERROR, message, module, pos));
+  logging.log(log_level::ERROR, message, module, pos);
 }
 
 void lexer::add_warning(std::string_view message, position pos) {
-  logging.emplace_back(log(log_level::WARNING, message, module, pos));
+  logging.log(log_level::WARNING, message, module, pos);
 }
 
 void lexer::add_comment(position start, position end) {

@@ -16,8 +16,8 @@ namespace grammar {
 
 class parser {
  public:
-  parser(std::string_view input, std::vector<grammar::log_entry>& logging);
-  parser(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging);
+  parser(std::string_view input, logger& logging);
+  parser(std::string_view input, const grammar_options& options, logger& logging);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
@@ -30,7 +30,7 @@ class parser {
   lexer lex;
   std::vector<int> nested_loops;
   bool recover = false;
-  std::vector<grammar::log_entry>& logging;
+  logger& logging;
 
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;

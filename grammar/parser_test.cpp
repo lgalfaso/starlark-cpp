@@ -12,6 +12,7 @@
 #include "third-party/defer.hpp"
 
 using google::protobuf::util::MessageDifferencer;
+using grammar::logger;
 using grammar::parser;
 using starlark::File;
 using testing::IsEmpty;
@@ -40,7 +41,7 @@ TEST(Parser, TestCase) {
     read(starlark_fd, starlark_program.data(), sb.st_size); 
   }
 
-  std::vector<grammar::log_entry> logging;
+  logger logging;
   parser star_parser(starlark_program, logging);
   File actual_starlark_file = star_parser.parse_file();
   EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_file, starlark_file)) <<

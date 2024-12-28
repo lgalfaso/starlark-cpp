@@ -18,8 +18,8 @@ namespace grammar {
 
 class lexer {
  public:
-  lexer(std::string_view input, std::vector<grammar::log_entry>& logging);
-  lexer(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging);
+  lexer(std::string_view input, logger& logging);
+  lexer(std::string_view input, const grammar_options& options, logger& logging);
   const token& current_token() const;
   void next_token();
   const std::vector<std::pair<position, position>>& comments() const;
@@ -51,7 +51,7 @@ class lexer {
   std::vector<int> indent_stack;
   int open_brackets = 0;
 
-  std::vector<grammar::log_entry>& logging;
+  logger& logging;
   std::vector<std::pair<position, position>> comments_found;
 };
 

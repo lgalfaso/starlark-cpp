@@ -220,10 +220,10 @@ struct frame {
 
 }  // namespace
 
-parser::parser(std::string_view input, std::vector<grammar::log_entry>& logging) : parser(input, grammar_options{}, logging) {
+parser::parser(std::string_view input, logger& logging) : parser(input, grammar_options{}, logging) {
 }
 
-parser::parser(std::string_view input, const grammar_options& options, std::vector<grammar::log_entry>& logging)
+parser::parser(std::string_view input, const grammar_options& options, logger& logging)
     : options(options), lex(input, options, logging), nested_loops(1), logging(logging) {
   lex.next_token();
 }
@@ -349,7 +349,7 @@ bool parser::expect(token_type expected_token) {
 }
 
 void parser::add_error(const std::string& error_message) {
-  logging.emplace_back(log(log_level::ERROR, error_message, module, lex.current_token().start()));
+  logging.log(log_level::ERROR, error_message, module, lex.current_token().start());
   recover = true;
 }
 

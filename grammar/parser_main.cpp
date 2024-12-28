@@ -11,6 +11,7 @@
 #include "grammar/proto/starlark.pb.h"
 
 using grammar::log_level;
+using grammar::logger;
 using grammar::parser;
 using grammar::grammar_options;
 using starlark::File;
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
     read(in_fd, starlark_program.data(), sb.st_size); 
   }
 
-  std::vector<grammar::log_entry> logging;
+  logger logging;
   parser star_parser(starlark_program, grammar_options{ .escaped_octal_and_hex_char_are_ascii = false, }, logging);
   File actual_starlark_file = star_parser.parse_file();
   bool print_header = true;
