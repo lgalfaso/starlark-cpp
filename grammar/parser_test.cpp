@@ -7,46 +7,40 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
+#include "grammar/options.hpp"
 #include "grammar/parser.hpp"
 #include "grammar/proto/starlark.pb.h"
-#include "third-party/defer.hpp"
 
-using google::protobuf::util::MessageDifferencer;
+using grammar::log_level;
 using grammar::logger;
 using grammar::parser;
+using grammar::grammar_options;
 using starlark::File;
-using testing::IsEmpty;
 using testing::SizeIs;
 
-TEST(Parser, TestCase) {
-  const auto& argv = ::testing::internal::GetArgvs();
-  ASSERT_THAT(argv, SizeIs(3));
-
-  File starlark_file;
-  {
-    int proto_fd = open(argv[2].c_str(), O_RDONLY);
-    ASSERT_GT(proto_fd, 0);
-    defer { close(proto_fd); };
-    ASSERT_TRUE(starlark_file.ParseFromFileDescriptor(proto_fd));
+bool has_error(const logger& logging) {
+  for (const auto& entry : logging) {
+    if (entry.level == log_level::FATAL || entry.level == log_level::ERROR) {
+      return true;
+    }
   }
+  return false;
+}
 
-  std::string starlark_program;
-  {
-    int starlark_fd = open(argv[1].c_str(), O_RDONLY);
-    ASSERT_GT(starlark_fd, 0);
-    defer { close(starlark_fd); };
-    struct stat sb;
-    ASSERT_GE(fstat(starlark_fd, &sb), 0);
-    starlark_program.resize(sb.st_size);
-    read(starlark_fd, starlark_program.data(), sb.st_size); 
-  }
-
+void checkInvalid(std::string_view program, const grammar_options& opts) {
   logger logging;
-  parser star_parser(starlark_program, logging);
+  parser star_parser(program, opts, logging);
   File actual_starlark_file = star_parser.parse_file();
-  EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_file, starlark_file)) <<
-      "Expected: " << starlark_file.DebugString() << "\n" <<
-      "Actual:   " << actual_starlark_file.DebugString() << "\n";
-  EXPECT_THAT(logging, IsEmpty());
+  EXPECT_TRUE(has_error(logging));
+}
+
+TEST(Parser, NoFunctionDefinition) {
+  checkInvalid(R"starlark(
+def foo():
+  pass
+)starlark", grammar_options{ .allow_function_definitions = false, });
+  checkInvalid(R"starlark(
+foo = lambda: True
+)starlark", grammar_options{ .allow_function_definitions = false, });
 }
 

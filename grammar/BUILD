@@ -118,7 +118,7 @@ cc_binary(
   ),
   cc_test(
       name = "parser_test_" + f.replace("/", "_"),
-      srcs = ["parser_test.cpp"],
+      srcs = ["parser_test_valid.cpp"],
       args = [
           "$(location " + f + ")",
           "$(location :parser_test_encoder_" + f.replace("/", "_") + ")",
@@ -155,6 +155,17 @@ cc_binary(
       ],
   ) for f in glob(["parser_tests_invalid/*.star"])
 ]
+
+cc_test(
+    name = "parser_test",
+    srcs = ["parser_test.cpp"],
+    deps = [
+        ":parser",
+        "@googletest//:gtest_main",
+        "@protobuf//:protobuf",
+        "//grammar/proto:starlark_cc_proto",
+    ],
+)
 
 cc_fuzz_test(
     name = "parser_fuzz_test",
