@@ -24,6 +24,12 @@ struct grammar_options {
   // (1) https://github.com/bazel-contrib/bazel-lib/blob/main/lib/private/strings.bzl
   //
   bool escaped_octal_and_hex_char_are_ascii = true;
+
+  // Whether to allow this module to load private symbols from other modules.
+  bool allow_load_private_symbols = false;
+
+  // Whether to allow function and lambdas to be defined.
+  bool allow_function_definitions = true;
 };
 
 }  // namespace grammar

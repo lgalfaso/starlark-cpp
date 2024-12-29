@@ -1,50 +1,12 @@
 statement {
-  if_statement {
-    test {
-      primary_expression {
-        operand {
-          identifier {
-            name: "True"
-            nfkc_name: "True"
-          }
-        }
-      }
+  def_statement {
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
     }
     statement {
-      expression_statement {
-        value {
-          primary_expression {
-            operand {
-              identifier {
-                name: "False"
-                nfkc_name: "False"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  if_statement {
-    test {
-      primary_expression {
-        operand {
-          identifier {
-            name: "False"
-            nfkc_name: "False"
-          }
-        }
-      }
-    }
-    statement {
-      pass_statement {
-      }
-    }
-    else_statement {
-      expression_statement {
-        value {
+      if_statement {
+        test {
           primary_expression {
             operand {
               identifier {
@@ -54,263 +16,309 @@ statement {
             }
           }
         }
-      }
-    }
-  }
-}
-statement {
-  if_statement {
-    test {
-      primary_expression {
-        operand {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
+        statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "False"
+                    nfkc_name: "False"
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
     statement {
-      expression_statement {
-        value {
+      if_statement {
+        test {
           primary_expression {
             operand {
-              int_value: "1"
-            }
-          }
-        }
-      }
-    }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-            }
-          }
-        }
-      }
-      statement {
-        expression_statement {
-          value {
-            primary_expression {
-              operand {
-                int_value: "2"
+              identifier {
+                name: "False"
+                nfkc_name: "False"
               }
             }
           }
         }
-      }
-    }
-  }
-}
-statement {
-  if_statement {
-    test {
-      primary_expression {
-        operand {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
+        statement {
+          pass_statement {
+          }
+        }
+        else_statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  identifier {
+                    name: "True"
+                    nfkc_name: "True"
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
     statement {
-      expression_statement {
-        value {
+      if_statement {
+        test {
           primary_expression {
             operand {
-              int_value: "1"
-            }
-          }
-        }
-      }
-    }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-            }
-          }
-        }
-      }
-      statement {
-        expression_statement {
-          value {
-            primary_expression {
-              operand {
-                int_value: "2"
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
           }
         }
-      }
-    }
-    else_statement {
-      expression_statement {
-        value {
-          primary_expression {
-            operand {
-              int_value: "3"
+        statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "1"
+                }
+              }
             }
           }
         }
-      }
-    }
-  }
-}
-statement {
-  if_statement {
-    test {
-      primary_expression {
-        operand {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
+        elif {
+          test {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "b"
+                  nfkc_name: "b"
+                }
+              }
+            }
+          }
+          statement {
+            expression_statement {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
     statement {
-      expression_statement {
-        value {
+      if_statement {
+        test {
           primary_expression {
             operand {
-              int_value: "1"
-            }
-          }
-        }
-      }
-    }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-            }
-          }
-        }
-      }
-      statement {
-        expression_statement {
-          value {
-            primary_expression {
-              operand {
-                int_value: "2"
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
           }
         }
-      }
-    }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "c"
-              nfkc_name: "c"
-            }
-          }
-        }
-      }
-      statement {
-        expression_statement {
-          value {
-            primary_expression {
-              operand {
-                int_value: "3"
+        statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "1"
+                }
               }
             }
           }
         }
-      }
-    }
-  }
-}
-statement {
-  if_statement {
-    test {
-      primary_expression {
-        operand {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
+        elif {
+          test {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "b"
+                  nfkc_name: "b"
+                }
+              }
+            }
+          }
+          statement {
+            expression_statement {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
+          }
+        }
+        else_statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "3"
+                }
+              }
+            }
           }
         }
       }
     }
     statement {
-      expression_statement {
-        value {
+      if_statement {
+        test {
           primary_expression {
             operand {
-              int_value: "1"
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+              }
             }
           }
         }
-      }
-    }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
+        statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "1"
+                }
+              }
             }
           }
         }
-      }
-      statement {
-        expression_statement {
-          value {
+        elif {
+          test {
             primary_expression {
               operand {
-                int_value: "2"
+                identifier {
+                  name: "b"
+                  nfkc_name: "b"
+                }
+              }
+            }
+          }
+          statement {
+            expression_statement {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
+          }
+        }
+        elif {
+          test {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "c"
+                  nfkc_name: "c"
+                }
+              }
+            }
+          }
+          statement {
+            expression_statement {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "3"
+                  }
+                }
               }
             }
           }
         }
       }
     }
-    elif {
-      test {
-        primary_expression {
-          operand {
-            identifier {
-              name: "c"
-              nfkc_name: "c"
-            }
-          }
-        }
-      }
-      statement {
-        expression_statement {
-          value {
-            primary_expression {
-              operand {
-                int_value: "3"
+    statement {
+      if_statement {
+        test {
+          primary_expression {
+            operand {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
           }
         }
-      }
-    }
-    else_statement {
-      expression_statement {
-        value {
-          primary_expression {
-            operand {
-              int_value: "4"
+        statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "1"
+                }
+              }
+            }
+          }
+        }
+        elif {
+          test {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "b"
+                  nfkc_name: "b"
+                }
+              }
+            }
+          }
+          statement {
+            expression_statement {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+            }
+          }
+        }
+        elif {
+          test {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "c"
+                  nfkc_name: "c"
+                }
+              }
+            }
+          }
+          statement {
+            expression_statement {
+              value {
+                primary_expression {
+                  operand {
+                    int_value: "3"
+                  }
+                }
+              }
+            }
+          }
+        }
+        else_statement {
+          expression_statement {
+            value {
+              primary_expression {
+                operand {
+                  int_value: "4"
+                }
+              }
             }
           }
         }
@@ -318,4 +326,3 @@ statement {
     }
   }
 }
-

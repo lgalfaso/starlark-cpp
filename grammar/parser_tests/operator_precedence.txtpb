@@ -81,58 +81,66 @@ statement {
   }
 }
 statement {
-  if_statement {
-    test {
-      binary_expression {
-        lhs {
-          binary_expression {
-            lhs {
-              primary_expression {
-                operand {
-                  string_value: "win32"
-                }
-              }
-            }
-            operator: IN
-            rhs {
-              primary_expression {
-                operand {
-                  identifier {
-                    name: "cpu"
-                    nfkc_name: "cpu"
-                  }
-                }
-              }
-            }
-          }
-        }
-        operator: OR
-        rhs {
-          binary_expression {
-            lhs {
-              primary_expression {
-                operand {
-                  string_value: "win64"
-                }
-              }
-            }
-            operator: IN
-            rhs {
-              primary_expression {
-                operand {
-                  identifier {
-                    name: "cpu"
-                    nfkc_name: "cpu"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+  def_statement {
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
     }
     statement {
-      pass_statement {
+      if_statement {
+        test {
+          binary_expression {
+            lhs {
+              binary_expression {
+                lhs {
+                  primary_expression {
+                    operand {
+                      string_value: "win32"
+                    }
+                  }
+                }
+                operator: IN
+                rhs {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "cpu"
+                        nfkc_name: "cpu"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            operator: OR
+            rhs {
+              binary_expression {
+                lhs {
+                  primary_expression {
+                    operand {
+                      string_value: "win64"
+                    }
+                  }
+                }
+                operator: IN
+                rhs {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "cpu"
+                        nfkc_name: "cpu"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        statement {
+          pass_statement {
+          }
+        }
       }
     }
   }

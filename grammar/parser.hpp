@@ -36,6 +36,7 @@ class parser {
   bool is_current(token_type expected_token) const;
   bool expect(token_type expected_token);
   void add_error(const std::string& error_message);
+  void add_warning(const std::string& error_message);
   void parse_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
   bool set_identifier(starlark::Identifier& id);
 };

@@ -145,7 +145,7 @@ enum class parser_state {
   parse_suite_statement_list,
   parse_simple_statement,
   parse_simple_statement_0,
-  parse_simple_statement_1,
+  parse_simple_statement_final,
   parse_small_statement,
   parse_parameters,
   parse_expression,
@@ -348,8 +348,13 @@ bool parser::expect(token_type expected_token) {
   return false;
 }
 
-void parser::add_error(const std::string& error_message) {
-  logging.log(log_level::ERROR, error_message, module, lex.current_token().start());
+void parser::add_error(const std::string& message) {
+  logging.log(log_level::ERROR, message, module, lex.current_token().start());
+  recover = true;
+}
+
+void parser::add_warning(const std::string& message) {
+  logging.log(log_level::WARNING, message, module, lex.current_token().start());
   recover = true;
 }
 
@@ -366,6 +371,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
     switch (top.state) {
       case parser_state::parse_statement:
         if (capture(token_type::def)) {
+          if (!options.allow_function_definitions) {
+            add_error("Function definitions not allowed");
+          }
           DefStmt* def_statement = top.statements->Add()->mutable_def_statement();
           nested_loops.push_back(0);
           frames.emplace_back(frame{
@@ -389,6 +397,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .parse_parameters_first = true,
           });
         } else if (capture(token_type::if_)) {
+          if (nested_loops.size() == 1) {
+            add_error("`if` statements are not allowed at the top level");
+          }
           IfStmt* if_statement = top.statements->Add()->mutable_if_statement();
           // It is unclear whether the attempt to parse the `elif` and `else` blocks should be
           // defined here or in parse_statement_if_0. This difference is important when there
@@ -410,6 +421,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .test = if_statement->mutable_test(),
           });
         } else if (capture(token_type::for_)) {
+          if (nested_loops.size() == 1) {
+            add_error("`for` statements are not allowed at the top level");
+          }
           ForStmt* for_statement = top.statements->Add()->mutable_for_statement();
           nested_loops.back()++;
           frames.emplace_back(frame{
@@ -546,7 +560,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_simple_statement:
         frames.emplace_back(frame{
-          .state = parser_state::parse_simple_statement_1,
+          .state = parser_state::parse_simple_statement_final,
         });
         frames.emplace_back(frame{
           .state = parser_state::parse_simple_statement_0,
@@ -569,7 +583,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         }
         break;
-      case parser_state::parse_simple_statement_1:
+      case parser_state::parse_simple_statement_final:
         if (recover) {
           while (lex.current_token().type() != token_type::newline && lex.current_token().type() != token_type::eof) {
             lex.next_token();
@@ -597,6 +611,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             break;
           case token_type::load:
+            // TODO(lmirelmann): There has to be an option on whether all `load` statements should be before any other statement.
+            if (nested_loops.size() != 1) {
+              add_error("`load` statement not at top level");
+            }
             lex.next_token();
             if (!expect(token_type::lparen)) {
               break;
@@ -607,6 +625,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             top.statement->mutable_load_statement()->set_module(lex.current_token().string_value());
             lex.next_token();
+            if (is_current(token_type::rparen)) {
+              add_warning("Expect to load at least one symbol");
+            }
             while (capture(token_type::comma)) {
               if (is_current(token_type::rparen)) {
                 break;
@@ -621,6 +642,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               if (!is_current(token_type::string)) {
                 add_error("Expected STRING");
                 break;
+              }
+              if (!options.allow_load_private_symbols &&
+                  lex.current_token().string_value().starts_with("_")) {
+                add_error(std::string{"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
               }
               load_params->set_remote_name(lex.current_token().string_value());
               lex.next_token();
@@ -662,8 +687,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_statement_expression_0:
         if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
+          // TODO(lmirelmann): If the LHS is a list, dict, or tuple, then the operator cannot be an augmented operator.
           if (!is_target(top.statement->expression_statement())) {
             add_error("Exprecting TARGET");
+            // TODO(lmirelmann): It is unclear whether we should:
+            // - Continue to parse this as an expression
+            // - Skip this token and break
+            // - Just break
             break;
           }
           {
@@ -1253,6 +1283,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_argument:
+        // TODO(lmirelmann): Check that the order is (not all elements must be present, but the order is strict):
+        // - positional arguments
+        // - keyword arguments
+        // - At most one *args
+        // - At most one **kwargs
         if (capture(token_type::star)) {
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
@@ -1292,6 +1327,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_lambda:
+        if (!options.allow_function_definitions) {
+          add_error("Function definitions not allowed");
+        }
         expect(token_type::lambda);
         frames.emplace_back(frame{
           .state = parser_state::parse_lambda_0,
@@ -1314,6 +1352,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_parameters:
+        // TODO(lmirelmann): There has to be an option on whether to allow star arguments.
+        // TODO(lmirelmann): There has to be an option on whether to allow star star arguments.
         if (top.parse_parameters_first || capture(token_type::comma)) {
           if (is_current(token_type::identifier)) {
             frames.emplace_back(frame{

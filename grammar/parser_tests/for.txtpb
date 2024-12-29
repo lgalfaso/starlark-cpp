@@ -1,164 +1,12 @@
 statement {
-  for_statement {
-    loop_variable {
-      operand {
-        identifier {
-          name: "a"
-          nfkc_name: "a"
-        }
-      }
-    }
-    expression {
-      value {
-        primary_expression {
-          operand {
-            list_expression {
-              element {
-                primary_expression {
-                  operand {
-                    identifier {
-                      name: "x"
-                      nfkc_name: "x"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+  def_statement {
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
     }
     statement {
-      pass_statement {
-      }
-    }
-  }
-}
-statement {
-  for_statement {
-    loop_variable {
-      operand {
-        identifier {
-          name: "a"
-          nfkc_name: "a"
-        }
-      }
-    }
-    loop_variable {
-      operand {
-        identifier {
-          name: "b"
-          nfkc_name: "b"
-        }
-      }
-    }
-    expression {
-      value {
-        primary_expression {
-          operand {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
-          }
-        }
-      }
-    }
-    statement {
-      pass_statement {
-      }
-    }
-  }
-}
-statement {
-  for_statement {
-    loop_variable {
-      operand {
-        identifier {
-          name: "a"
-          nfkc_name: "a"
-        }
-      }
-    }
-    expression {
-      value {
-        primary_expression {
-          operand {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
-          }
-        }
-      }
-    }
-    statement {
-      break_statement {
-      }
-    }
-  }
-}
-statement {
-  for_statement {
-    loop_variable {
-      operand {
-        identifier {
-          name: "a"
-          nfkc_name: "a"
-        }
-      }
-    }
-    expression {
-      value {
-        primary_expression {
-          operand {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
-          }
-        }
-      }
-    }
-    statement {
-      continue_statement {
-      }
-    }
-  }
-}
-statement {
-  for_statement {
-    loop_variable {
-      operand {
-        identifier {
-          name: "a"
-          nfkc_name: "a"
-        }
-      }
-    }
-    expression {
-      value {
-        primary_expression {
-          operand {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
-          }
-        }
-      }
-    }
-    statement {
-      continue_statement {
-      }
-    }
-  }
-}
-statement {
-  for_statement {
-    loop_variable {
-      dot_expression {
-        primary_expression {
+      for_statement {
+        loop_variable {
           operand {
             identifier {
               name: "a"
@@ -166,109 +14,268 @@ statement {
             }
           }
         }
-        identifier {
-          name: "b"
-          nfkc_name: "b"
-        }
-      }
-    }
-    expression {
-      value {
-        primary_expression {
-          operand {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
-          }
-        }
-      }
-    }
-    statement {
-      continue_statement {
-      }
-    }
-  }
-}
-statement {
-  for_statement {
-    loop_variable {
-      operand {
         expression {
-          tuple {
-            value {
-              primary_expression {
-                operand {
-                  identifier {
-                    name: "a"
-                    nfkc_name: "a"
-                  }
-                }
-              }
-            }
-            value {
-              primary_expression {
-                operand {
-                  identifier {
-                    name: "b"
-                    nfkc_name: "b"
+          value {
+            primary_expression {
+              operand {
+                list_expression {
+                  element {
+                    primary_expression {
+                      operand {
+                        identifier {
+                          name: "x"
+                          nfkc_name: "x"
+                        }
+                      }
+                    }
                   }
                 }
               }
             }
           }
         }
+        statement {
+          pass_statement {
+          }
+        }
       }
     }
-    expression {
-      value {
-        primary_expression {
+    statement {
+      for_statement {
+        loop_variable {
           operand {
             identifier {
-              name: "x"
-              nfkc_name: "x"
+              name: "a"
+              nfkc_name: "a"
             }
+          }
+        }
+        loop_variable {
+          operand {
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          pass_statement {
           }
         }
       }
     }
     statement {
-      continue_statement {
-      }
-    }
-  }
-}
-statement {
-  for_statement {
-    loop_variable {
-      operand {
-        identifier {
-          name: "a"
-          nfkc_name: "a"
+      for_statement {
+        loop_variable {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          break_statement {
+          }
         }
       }
     }
-    expression {
-      value {
-        primary_expression {
+    statement {
+      for_statement {
+        loop_variable {
           operand {
-            list_expression {
-              element {
-                primary_expression {
-                  operand {
-                    int_value: "1"
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          continue_statement {
+          }
+        }
+      }
+    }
+    statement {
+      for_statement {
+        loop_variable {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          continue_statement {
+          }
+        }
+      }
+    }
+    statement {
+      for_statement {
+        loop_variable {
+          dot_expression {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "a"
+                  nfkc_name: "a"
+                }
+              }
+            }
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          continue_statement {
+          }
+        }
+      }
+    }
+    statement {
+      for_statement {
+        loop_variable {
+          operand {
+            expression {
+              tuple {
+                value {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "a"
+                        nfkc_name: "a"
+                      }
+                    }
+                  }
+                }
+                value {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "b"
+                        nfkc_name: "b"
+                      }
+                    }
                   }
                 }
               }
             }
           }
         }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          continue_statement {
+          }
+        }
       }
     }
     statement {
-      continue_statement {
+      for_statement {
+        loop_variable {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                list_expression {
+                  element {
+                    primary_expression {
+                      operand {
+                        int_value: "1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        statement {
+          continue_statement {
+          }
+        }
       }
     }
   }
 }
-
