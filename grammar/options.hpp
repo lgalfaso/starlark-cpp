@@ -31,6 +31,9 @@ struct grammar_options {
   // Whether to allow function and lambdas to be defined.
   bool allow_function_definitions = true;
 
+  // Whether to allow `if`s and `for`s at the top level.
+  bool allow_top_level_if_and_for = false;
+
   // Whether all `load` statements must be before other statements.
   bool require_load_statements_first = true;
 };
