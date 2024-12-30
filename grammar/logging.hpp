@@ -32,6 +32,7 @@ struct log_entry {
 
 class logger {
  public:
+  void set_level(log_level level);
   void log(log_level level, std::string_view message, std::string_view module, const grammar::position& pos);
   std::vector<grammar::log_entry>::const_iterator begin() const;
   std::vector<grammar::log_entry>::const_iterator end() const;
@@ -40,6 +41,7 @@ class logger {
 
  private:
   std::vector<grammar::log_entry> entries;
+  log_level level = log_level::WARNING;
 };
 
 

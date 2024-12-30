@@ -18,7 +18,14 @@ log_entry create_log(log_level level, std::string_view message, std::string_view
 
 }  // namespace
 
+void logger::set_level(log_level level) {
+  this->level = level;
+}
+
 void logger::log(log_level level, std::string_view message, std::string_view module, const grammar::position& pos) {
+  if (level < this->level) {
+    return;
+  }
   entries.emplace_back(create_log(level, message, module, pos));
 }
 
