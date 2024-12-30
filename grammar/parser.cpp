@@ -697,10 +697,17 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_statement_expression_0:
         if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
           found_non_load = true;
-          // TODO(lmirelmann): If the LHS is a list, dict, or tuple, then the operator cannot be an augmented operator.
           if (!is_target(top.statement->expression_statement())) {
             // Report the error and continue to parse this as an expression
             add_error("Exprecting TARGET");
+          }
+          if (op->first != token_type::equals && (
+              top.statement->expression_statement().has_tuple() ||
+              top.statement->expression_statement().value().primary_expression().operand().has_list_expression() ||
+              top.statement->expression_statement().value().primary_expression().operand().has_list_comprehension() ||
+              top.statement->expression_statement().value().primary_expression().operand().has_dictionary_expression() ||
+              top.statement->expression_statement().value().primary_expression().operand().has_dictionary_comprehension())) {
+            add_error("target is an illegal expression for augmented assignment");
           }
           {
             AssignStmt assign_statement;
