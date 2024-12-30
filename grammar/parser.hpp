@@ -31,6 +31,7 @@ class parser {
   std::vector<int> nested_loops;
   bool recover = false;
   logger& logging;
+  bool found_non_load = false;
 
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;

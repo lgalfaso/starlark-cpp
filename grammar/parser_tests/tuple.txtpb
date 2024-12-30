@@ -1,0 +1,158 @@
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      tuple {
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      tuple {
+        value {
+          primary_expression {
+            operand {
+              int_value: "1"
+            }
+          }
+        }
+        value {
+          primary_expression {
+            operand {
+              int_value: "2"
+            }
+          }
+        }
+        value {
+          primary_expression {
+            operand {
+              int_value: "3"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
+    }
+    statement {
+      for_statement {
+        loop_variable {
+          operand {
+            expression {
+              tuple {
+                value {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "a"
+                        nfkc_name: "a"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              operand {
+                list_expression {
+                  element {
+                    primary_expression {
+                      operand {
+                        expression {
+                          tuple {
+                            value {
+                              primary_expression {
+                                operand {
+                                  int_value: "1"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        statement {
+          expression_statement {
+            value {
+              primary_expression {
+                call_expression {
+                  primary_expression {
+                    operand {
+                      identifier {
+                        name: "print"
+                        nfkc_name: "print"
+                      }
+                    }
+                  }
+                  argument {
+                    value {
+                      primary_expression {
+                        operand {
+                          identifier {
+                            name: "a"
+                            nfkc_name: "a"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

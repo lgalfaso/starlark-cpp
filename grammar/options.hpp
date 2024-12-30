@@ -30,6 +30,9 @@ struct grammar_options {
 
   // Whether to allow function and lambdas to be defined.
   bool allow_function_definitions = true;
+
+  // Whether all `load` statements must be before other statements.
+  bool require_load_statements_first = true;
 };
 
 }  // namespace grammar

@@ -1,0 +1,11 @@
+statement {
+  def_statement {
+    function_name {
+       name: "foo"
+       nfkc_name: "foo"
+    }
+    statement {
+      pass_statement { }
+    }
+  }
+}

@@ -217,4 +217,126 @@ statement {
     }
   }
 }
-
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        lambda_expression {
+          test {
+            if_expression {
+              if_value {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "True"
+                      nfkc_name: "True"
+                    }
+                  }
+                }
+              }
+              if_test {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "x"
+                      nfkc_name: "x"
+                    }
+                  }
+                }
+              }
+              else_value {
+                primary_expression {
+                  operand {
+                    identifier {
+                      name: "False"
+                      nfkc_name: "False"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          operand {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        lambda_expression {
+          test {
+            if_expression {
+              if_value {
+                primary_expression {
+                  operand {
+                    int_value: "1"
+                  }
+                }
+              }
+              if_test {
+                primary_expression {
+                  operand {
+                    int_value: "2"
+                  }
+                }
+              }
+              else_value {
+                if_expression {
+                  if_value {
+                    primary_expression {
+                      operand {
+                        int_value: "3"
+                      }
+                    }
+                  }
+                  if_test {
+                    primary_expression {
+                      operand {
+                        int_value: "4"
+                      }
+                    }
+                  }
+                  else_value {
+                    primary_expression {
+                      operand {
+                        int_value: "5"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

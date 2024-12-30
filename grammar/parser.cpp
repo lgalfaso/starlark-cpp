@@ -371,6 +371,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
     switch (top.state) {
       case parser_state::parse_statement:
         if (capture(token_type::def)) {
+          found_non_load = true;
           if (!options.allow_function_definitions) {
             add_error("Function definitions not allowed");
           }
@@ -397,6 +398,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .parse_parameters_first = true,
           });
         } else if (capture(token_type::if_)) {
+          found_non_load = true;
           if (nested_loops.size() == 1) {
             add_error("`if` statements are not allowed at the top level");
           }
@@ -421,6 +423,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .test = if_statement->mutable_test(),
           });
         } else if (capture(token_type::for_)) {
+          found_non_load = true;
           if (nested_loops.size() == 1) {
             add_error("`for` statements are not allowed at the top level");
           }
@@ -597,6 +600,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_small_statement:
         switch (lex.current_token().type()) {
           case token_type::return_:
+            found_non_load = true;
             if (nested_loops.size() == 1) {
               add_error("Unexpected RETURN");
             }
@@ -611,7 +615,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             break;
           case token_type::load:
-            // TODO(lmirelmann): There has to be an option on whether all `load` statements should be before any other statement.
+            if (found_non_load && options.require_load_statements_first) {
+              add_error("`load` statements must appear before other statements");
+            }
             if (nested_loops.size() != 1) {
               add_error("`load` statement not at top level");
             }
@@ -653,6 +659,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             expect(token_type::rparen);
             break;
           case token_type::break_:
+            found_non_load = true;
             if (nested_loops.back() == 0) {
               add_error("Unexpected BREAK");
             }
@@ -660,6 +667,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             lex.next_token();
             break;
           case token_type::continue_:
+            found_non_load = true;
             if (nested_loops.back() == 0) {
               add_error("Unexpected CONTINUE");
             }
@@ -667,6 +675,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             lex.next_token();
             break;
           case token_type::pass:
+            found_non_load = true;
             top.statement->mutable_pass_statement();
             lex.next_token();
             break;
@@ -687,14 +696,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_statement_expression_0:
         if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
+          found_non_load = true;
           // TODO(lmirelmann): If the LHS is a list, dict, or tuple, then the operator cannot be an augmented operator.
           if (!is_target(top.statement->expression_statement())) {
+            // Report the error and continue to parse this as an expression
             add_error("Exprecting TARGET");
-            // TODO(lmirelmann): It is unclear whether we should:
-            // - Continue to parse this as an expression
-            // - Skip this token and break
-            // - Just break
-            break;
           }
           {
             AssignStmt assign_statement;
@@ -711,14 +717,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_expression:
-        if (is_current(token_type::rparen)) {
-          if (!top.expression_allow_trailing_comma) {
-            add_error("Unexpected TUPLE");
-          }
-          top.expression->mutable_tuple();
-          break;
-        }
-
         frames.emplace_back(frame{
           .state = parser_state::parse_expression_0,
           .expression = top.expression,
@@ -731,6 +729,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_expression_0:
         if (is_current(token_type::comma)) {
+          found_non_load = true;
           {
             Test first_test;
             first_test.Swap(top.expression->mutable_value());
@@ -751,7 +750,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_expression_1:
         if (capture(token_type::comma)) {
-          if (is_current(token_type::rparen)) {
+          if (is_current(token_type::newline) ||
+              is_current(token_type::equals) ||
+              is_current(token_type::rbrace) ||
+              is_current(token_type::rbracket) ||
+              is_current(token_type::rparen) ||
+              is_current(token_type::semi)) {
             if (!top.expression_allow_trailing_comma) {
               add_error("Unexpected COMMA");
             }
@@ -766,6 +770,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_test:
         if (is_current(token_type::lambda)) {
+          found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_lambda,
             .lambda = top.test->mutable_lambda_expression(),
@@ -784,6 +789,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_test_0:
         if (capture(token_type::if_)) {
+          found_non_load = true;
           {
             Test new_result;
             new_result.mutable_if_expression()->mutable_if_value()->Swap(top.test);
@@ -805,9 +811,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
         frames.emplace_back(frame{
-          .state = parser_state::parse_test_p,
+          .state = parser_state::parse_test,
           .test = top.test->mutable_if_expression()->mutable_else_value(),
-          .test_p_precedence = 0,
         });
         break;
       case parser_state::parse_test_p:
@@ -823,6 +828,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             } else {
               break;
             }
+            found_non_load = true;
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
           frames.emplace_back(frame{
@@ -838,6 +844,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (!capture(token_type::not_)) {
               break;
             }
+            found_non_load = true;
             result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::NOT);
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
@@ -868,6 +875,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!top.test_p_0_first) {
             add_error("Comparison operators are not associative. Use parens.");
           }
+          found_non_load = true;
           lex.next_token();
           if (!expect(token_type::in)) {
             break;
@@ -896,6 +904,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!top.test_p_0_first && top.test_p_precedence == operator_precedence.at(token_type::equals_equals).first) {
             add_error("Comparison operators are not associative. Use parens.");
           }
+          found_non_load = true;
           lex.next_token();
           {
             Test new_result;
@@ -934,6 +943,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           top.primary->Swap(&new_result);
         }
         if (capture(token_type::dot)) {
+          found_non_load = true;
           {
             PrimaryExpr new_result;
             new_result.mutable_dot_expression()->mutable_primary_expression()->Swap(top.primary);
@@ -945,6 +955,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
           frames.emplace_back(top);
         } else if (capture(token_type::lparen)) {
+          found_non_load = true;
           {
             PrimaryExpr new_result;
             new_result.mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
@@ -964,6 +975,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .argument = top.primary->mutable_call_expression()->add_argument(),
           });
         } else if (capture(token_type::lbracket)) {
+          found_non_load = true;
           {
             PrimaryExpr new_result;
             new_result.mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
@@ -1055,38 +1067,49 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_operand:
         if (is_current(token_type::int_)) {
+          found_non_load = true;
           top.operand->set_int_value(lex.current_token().int_value().to_string(10));
           lex.next_token();
         } else if (is_current(token_type::identifier)) {
+          found_non_load = true;
           set_identifier(*top.operand->mutable_identifier());
         } else if (is_current(token_type::float_)) {
+          found_non_load = true;
           top.operand->set_float_value(lex.current_token().double_value());
           lex.next_token();
         } else if (is_current(token_type::string)) {
           top.operand->set_string_value(lex.current_token().string_value());
           lex.next_token();
         } else if (is_current(token_type::bytes)) {
+          found_non_load = true;
           top.operand->set_bytes_value(lex.current_token().string_value());
           lex.next_token();
         } else if (is_current(token_type::lbracket)) {
+          found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_list,
             .operand = top.operand,
           });
         } else if (is_current(token_type::lbrace)) {
+          found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_dict,
             .operand = top.operand,
           });
         } else if (capture(token_type::lparen)) {
-          frames.emplace_back(frame{
-            .state = parser_state::parse_operand_expression_0,
-          });
-          frames.emplace_back(frame{
-            .state = parser_state::parse_expression,
-            .expression = top.operand->mutable_expression(),
-            .expression_allow_trailing_comma = true,
-          });
+          if (capture(token_type::rparen)) {
+            found_non_load = true;
+            top.operand->mutable_expression()->mutable_tuple();
+          } else {
+            frames.emplace_back(frame{
+              .state = parser_state::parse_operand_expression_0,
+            });
+            frames.emplace_back(frame{
+              .state = parser_state::parse_expression,
+              .expression = top.operand->mutable_expression(),
+              .expression_allow_trailing_comma = true,
+            });
+          }
         } else {
           add_error("Unexpected token");
         }

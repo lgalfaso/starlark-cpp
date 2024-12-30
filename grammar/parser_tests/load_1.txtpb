@@ -1,0 +1,19 @@
+statement {
+  expression_statement {
+    value {
+      primary_expression {
+        operand {
+          string_value: "Some comment"
+        }
+      }
+    }
+  }
+}
+statement {
+  load_statement {
+    module: "module"
+    load_params {
+      remote_name: "fn"
+    }
+  }
+}

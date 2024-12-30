@@ -33,8 +33,17 @@ int main(int argc, char* argv[]) {
       read(in_fd, starlark_program.data(), sb.st_size);
     }
 
+    std::string arg{argv[i]};
     logger logging;
-    parser star_parser(starlark_program, grammar_options{ .escaped_octal_and_hex_char_are_ascii = false, }, logging);
+    parser star_parser(starlark_program,
+                       grammar_options{
+                           .escaped_octal_and_hex_char_are_ascii = false,
+                           .require_load_statements_first = !(arg.ends_with("WORKSPACE") ||
+                                                              arg.ends_with("WORKSPACE.bazel") ||
+                                                              arg.ends_with("BUILD") ||
+                                                              arg.ends_with("BUILD.bazel")),
+                       },
+                       logging);
     File actual_starlark_file = star_parser.parse_file();
     bool print_header = true;
     for (const auto& entry : logging) {

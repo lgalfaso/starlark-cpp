@@ -12,15 +12,24 @@
 #include "third-party/defer.hpp"
 
 using google::protobuf::util::MessageDifferencer;
+using grammar::log_level;
 using grammar::logger;
 using grammar::parser;
 using starlark::File;
-using testing::IsEmpty;
-using testing::Not;
+using testing::SizeIs;
+
+bool has_error(const logger& logging) {
+  for (const auto& entry : logging) {
+    if (entry.level == log_level::FATAL || entry.level == log_level::ERROR) {
+      return true;
+    }
+  }
+  return false;
+}
 
 TEST(Parser, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
-  ASSERT_EQ(argv.size(), 2);
+  ASSERT_THAT(argv, SizeIs(2));
 
   std::string starlark_program;
   {
@@ -36,6 +45,6 @@ TEST(Parser, TestCase) {
   logger logging;
   parser star_parser(starlark_program, logging);
   File actual_starlark_file = star_parser.parse_file();
-  EXPECT_THAT(logging, Not(IsEmpty()));
+  EXPECT_TRUE(has_error(logging));
 }
 

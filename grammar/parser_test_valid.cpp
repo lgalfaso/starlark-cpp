@@ -11,6 +11,7 @@
 #include "grammar/proto/starlark.pb.h"
 #include "third-party/defer.hpp"
 
+using google::protobuf::Message;
 using google::protobuf::util::MessageDifferencer;
 using grammar::log_level;
 using grammar::logger;
@@ -25,6 +26,26 @@ bool has_error(const logger& logging) {
     }
   }
   return false;
+}
+
+std::string describe_diff(const Message& actual, const Message& expected) {
+  MessageDifferencer differencer;
+  std::string diff;
+
+  differencer.ReportDifferencesToString(&diff);
+  differencer.Compare(expected, actual);
+  return "with the difference:\n" + diff;
+}
+
+std::string show_errors(const logger& logging) {
+  std::string result;
+
+  for (const auto& entry : logging) {
+    if (entry.level == log_level::FATAL || entry.level == log_level::ERROR) {
+      result += "[" + std::to_string(entry.pos.row) + "," + std::to_string(entry.pos.column) + "] " + entry.module + ":" + entry.message + "\n";
+    }
+  }
+  return result;
 }
 
 TEST(Parser, TestCase) {
@@ -53,9 +74,9 @@ TEST(Parser, TestCase) {
   logger logging;
   parser star_parser(starlark_program, logging);
   File actual_starlark_file = star_parser.parse_file();
+
   EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_file, starlark_file)) <<
-      "Expected: " << starlark_file.DebugString() << "\n" <<
-      "Actual:   " << actual_starlark_file.DebugString() << "\n";
-  EXPECT_FALSE(has_error(logging));
+      describe_diff(actual_starlark_file, starlark_file);
+  EXPECT_FALSE(has_error(logging)) << show_errors(logging);
 }
 
