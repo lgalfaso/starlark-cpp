@@ -1319,11 +1319,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         // - At most one *args
         // - At most one **kwargs
         if (capture(token_type::star)) {
+          if (!options.allow_varadic_arguments) {
+            // Report the error, but keep on parsing.
+            add_error("Varadic arguments are not allowed");
+          }
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_star_argument(),
           });
         } else if (capture(token_type::star_star)) {
+          if (!options.allow_varadic_arguments) {
+            // Report the error, but keep on parsing.
+            add_error("Varadic arguments are not allowed");
+          }
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_star_star_argument(),
@@ -1382,8 +1390,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_parameters:
-        // TODO(lmirelmann): There has to be an option on whether to allow star arguments.
-        // TODO(lmirelmann): There has to be an option on whether to allow star star arguments.
         if (top.parse_parameters_first || capture(token_type::comma)) {
           if (is_current(token_type::identifier)) {
             frames.emplace_back(frame{

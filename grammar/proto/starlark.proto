@@ -177,6 +177,7 @@ message PrimaryExpr {
     SliceExpr slice_expression = 4;
   }
 
+  // TODO(lmirelmann): Merge the entries in `Operand` into `PrimaryExpr`.
   message Operand {
     oneof operand_type {
       Identifier identifier = 1;

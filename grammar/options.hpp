@@ -36,6 +36,9 @@ struct grammar_options {
 
   // Whether all `load` statements must be before other statements.
   bool require_load_statements_first = true;
+
+  // Whether to allow variadic arguments `*args` and `**kwargs` is calls.
+  bool allow_varadic_arguments = true;
 };
 
 }  // namespace grammar

@@ -35,13 +35,16 @@ int main(int argc, char* argv[]) {
 
     std::string arg{argv[i]};
     logger logging;
+    bool is_build_or_workspace =
+        arg.ends_with("WORKSPACE") ||
+        arg.ends_with("WORKSPACE.bazel") ||
+        arg.ends_with("BUILD") ||
+        arg.ends_with("BUILD.bazel");
     parser star_parser(starlark_program,
                        grammar_options{
                            .escaped_octal_and_hex_char_are_ascii = false,
-                           .require_load_statements_first = !(arg.ends_with("WORKSPACE") ||
-                                                              arg.ends_with("WORKSPACE.bazel") ||
-                                                              arg.ends_with("BUILD") ||
-                                                              arg.ends_with("BUILD.bazel")),
+                           .require_load_statements_first = !is_build_or_workspace,
+                           .allow_varadic_arguments = !is_build_or_workspace,
                        },
                        logging);
     File actual_starlark_file = star_parser.parse_file();
