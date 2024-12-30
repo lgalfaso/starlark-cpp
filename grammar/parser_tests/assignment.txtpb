@@ -3,11 +3,9 @@ statement {
     lhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-            }
+          identifier {
+            name: "foo"
+            nfkc_name: "foo"
           }
         }
       }
@@ -16,9 +14,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "1"
-          }
+          int_value: "1"
         }
       }
     }
@@ -30,21 +26,17 @@ statement {
       tuple {
         value {
           primary_expression {
-            operand {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-              }
+            identifier {
+              name: "a"
+              nfkc_name: "a"
             }
           }
         }
         value {
           primary_expression {
-            operand {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-              }
+            identifier {
+              name: "b"
+              nfkc_name: "b"
             }
           }
         }
@@ -55,21 +47,17 @@ statement {
       tuple {
         value {
           primary_expression {
-            operand {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-              }
+            identifier {
+              name: "b"
+              nfkc_name: "b"
             }
           }
         }
         value {
           primary_expression {
-            operand {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-              }
+            identifier {
+              name: "a"
+              nfkc_name: "a"
             }
           }
         }

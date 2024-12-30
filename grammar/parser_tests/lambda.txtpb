@@ -4,11 +4,9 @@ statement {
       lambda_expression {
         test {
           primary_expression {
-            operand {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
             }
           }
         }
@@ -30,31 +28,25 @@ statement {
           if_expression {
             if_value {
               primary_expression {
-                operand {
-                  identifier {
-                    name: "True"
-                    nfkc_name: "True"
-                  }
+                identifier {
+                  name: "True"
+                  nfkc_name: "True"
                 }
               }
             }
             if_test {
               primary_expression {
-                operand {
-                  identifier {
-                    name: "x"
-                    nfkc_name: "x"
-                  }
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
                 }
               }
             }
             else_value {
               primary_expression {
-                operand {
-                  identifier {
-                    name: "False"
-                    nfkc_name: "False"
-                  }
+                identifier {
+                  name: "False"
+                  nfkc_name: "False"
                 }
               }
             }
@@ -82,11 +74,9 @@ statement {
         }
         test {
           primary_expression {
-            operand {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
             }
           }
         }
@@ -104,11 +94,9 @@ statement {
         }
         test {
           primary_expression {
-            operand {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
             }
           }
         }
@@ -130,11 +118,9 @@ statement {
         }
         test {
           primary_expression {
-            operand {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
             }
           }
         }
@@ -156,11 +142,9 @@ statement {
         }
         test {
           primary_expression {
-            operand {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
             }
           }
         }
@@ -190,79 +174,18 @@ statement {
               binary_expression {
                 lhs {
                   primary_expression {
-                    operand {
-                      identifier {
-                        name: "x"
-                        nfkc_name: "x"
-                      }
-                    }
-                  }
-                }
-                operator: PLUS
-                rhs {
-                  primary_expression {
-                    operand {
-                      identifier {
-                        name: "y"
-                        nfkc_name: "y"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          operand {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        lambda_expression {
-          test {
-            if_expression {
-              if_value {
-                primary_expression {
-                  operand {
-                    identifier {
-                      name: "True"
-                      nfkc_name: "True"
-                    }
-                  }
-                }
-              }
-              if_test {
-                primary_expression {
-                  operand {
                     identifier {
                       name: "x"
                       nfkc_name: "x"
                     }
                   }
                 }
-              }
-              else_value {
-                primary_expression {
-                  operand {
+                operator: PLUS
+                rhs {
+                  primary_expression {
                     identifier {
-                      name: "False"
-                      nfkc_name: "False"
+                      name: "y"
+                      nfkc_name: "y"
                     }
                   }
                 }
@@ -279,11 +202,9 @@ statement {
     lhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
           }
         }
       }
@@ -296,39 +217,78 @@ statement {
             if_expression {
               if_value {
                 primary_expression {
-                  operand {
-                    int_value: "1"
+                  identifier {
+                    name: "True"
+                    nfkc_name: "True"
                   }
                 }
               }
               if_test {
                 primary_expression {
-                  operand {
-                    int_value: "2"
+                  identifier {
+                    name: "x"
+                    nfkc_name: "x"
                   }
+                }
+              }
+              else_value {
+                primary_expression {
+                  identifier {
+                    name: "False"
+                    nfkc_name: "False"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        lambda_expression {
+          test {
+            if_expression {
+              if_value {
+                primary_expression {
+                  int_value: "1"
+                }
+              }
+              if_test {
+                primary_expression {
+                  int_value: "2"
                 }
               }
               else_value {
                 if_expression {
                   if_value {
                     primary_expression {
-                      operand {
-                        int_value: "3"
-                      }
+                      int_value: "3"
                     }
                   }
                   if_test {
                     primary_expression {
-                      operand {
-                        int_value: "4"
-                      }
+                      int_value: "4"
                     }
                   }
                   else_value {
                     primary_expression {
-                      operand {
-                        int_value: "5"
-                      }
+                      int_value: "5"
                     }
                   }
                 }

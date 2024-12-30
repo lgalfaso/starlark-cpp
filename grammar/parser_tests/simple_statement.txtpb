@@ -3,11 +3,9 @@
     lhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
           }
         }
       }
@@ -16,11 +14,9 @@
     rhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
           }
         }
       }
@@ -32,11 +28,9 @@ statement {
     lhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-            }
+          identifier {
+            name: "b"
+            nfkc_name: "b"
           }
         }
       }
@@ -45,11 +39,9 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "y"
-              nfkc_name: "y"
-            }
+          identifier {
+            name: "y"
+            nfkc_name: "y"
           }
         }
       }
@@ -61,11 +53,9 @@ statement {
     lhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "c"
-              nfkc_name: "c"
-            }
+          identifier {
+            name: "c"
+            nfkc_name: "c"
           }
         }
       }
@@ -74,11 +64,9 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "w"
-              nfkc_name: "w"
-            }
+          identifier {
+            name: "w"
+            nfkc_name: "w"
           }
         }
       }

@@ -2,9 +2,7 @@ statement {
   expression_statement {
     value {
       primary_expression {
-        operand {
-          string_value: "Some comment"
-        }
+        string_value: "Some comment"
       }
     }
   }

@@ -21,9 +21,7 @@ statement {
         expression {
           value {
             primary_expression {
-              operand {
-                int_value: "1"
-              }
+              int_value: "1"
             }
           }
         }

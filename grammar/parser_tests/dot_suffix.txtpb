@@ -4,11 +4,9 @@ statement {
       primary_expression {
         dot_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
-              }
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
             }
           }
           identifier {
@@ -28,11 +26,9 @@ statement {
           primary_expression {
             dot_expression {
               primary_expression {
-                operand {
-                  identifier {
-                    name: "foo"
-                    nfkc_name: "foo"
-                  }
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
                 }
               }
               identifier {

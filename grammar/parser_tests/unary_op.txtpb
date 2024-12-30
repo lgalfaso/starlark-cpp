@@ -5,9 +5,7 @@ statement {
         operator: MINUS
         test {
           primary_expression {
-            operand {
-              int_value: "1"
-            }
+            int_value: "1"
           }
         }
       }
@@ -21,9 +19,7 @@ statement {
         operator: PLUS
         test {
           primary_expression {
-            operand {
-              int_value: "1"
-            }
+            int_value: "1"
           }
         }
       }
@@ -37,9 +33,7 @@ statement {
         operator: TILDE
         test {
           primary_expression {
-            operand {
-              int_value: "1"
-            }
+            int_value: "1"
           }
         }
       }
@@ -53,11 +47,9 @@ statement {
         operator: NOT
         test {
           primary_expression {
-            operand {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
             }
           }
         }
@@ -90,11 +82,9 @@ statement {
                                 operator: NOT
                                 test {
                                   primary_expression {
-                                    operand {
-                                      identifier {
-                                        name: "True"
-                                        nfkc_name: "True"
-                                      }
+                                    identifier {
+                                      name: "True"
+                                      nfkc_name: "True"
                                     }
                                   }
                                 }
@@ -133,9 +123,7 @@ statement {
                         operator: PLUS
                         test {
                           primary_expression {
-                            operand {
-                              int_value: "1"
-                            }
+                            int_value: "1"
                           }
                         }
                       }
@@ -163,9 +151,7 @@ statement {
                 operator: TILDE
                 test {
                   primary_expression {
-                    operand {
-                      int_value: "1"
-                    }
+                    int_value: "1"
                   }
                 }
               }

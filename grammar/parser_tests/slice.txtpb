@@ -5,19 +5,15 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             index {
               value {
                 primary_expression {
-                  operand {
-                    int_value: "1"
-                  }
+                  int_value: "1"
                 }
               }
             }
@@ -29,9 +25,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "2"
-          }
+          int_value: "2"
         }
       }
     }
@@ -44,11 +38,9 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
@@ -61,9 +53,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "3"
-          }
+          int_value: "3"
         }
       }
     }
@@ -76,19 +66,15 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               start {
                 primary_expression {
-                  operand {
-                    int_value: "4"
-                  }
+                  int_value: "4"
                 }
               }
             }
@@ -100,9 +86,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "5"
-          }
+          int_value: "5"
         }
       }
     }
@@ -115,19 +99,15 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               end {
                 primary_expression {
-                  operand {
-                    int_value: "6"
-                  }
+                  int_value: "6"
                 }
               }
             }
@@ -139,9 +119,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "7"
-          }
+          int_value: "7"
         }
       }
     }
@@ -154,26 +132,20 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               start {
                 primary_expression {
-                  operand {
-                    int_value: "8"
-                  }
+                  int_value: "8"
                 }
               }
               end {
                 primary_expression {
-                  operand {
-                    int_value: "9"
-                  }
+                  int_value: "9"
                 }
               }
             }
@@ -185,9 +157,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "10"
-          }
+          int_value: "10"
         }
       }
     }
@@ -200,11 +170,9 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
@@ -217,9 +185,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "11"
-          }
+          int_value: "11"
         }
       }
     }
@@ -232,19 +198,15 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               start {
                 primary_expression {
-                  operand {
-                    int_value: "12"
-                  }
+                  int_value: "12"
                 }
               }
             }
@@ -256,9 +218,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "13"
-          }
+          int_value: "13"
         }
       }
     }
@@ -271,19 +231,15 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               end {
                 primary_expression {
-                  operand {
-                    int_value: "14"
-                  }
+                  int_value: "14"
                 }
               }
             }
@@ -295,9 +251,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "15"
-          }
+          int_value: "15"
         }
       }
     }
@@ -310,26 +264,20 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               start {
                 primary_expression {
-                  operand {
-                    int_value: "16"
-                  }
+                  int_value: "16"
                 }
               }
               end {
                 primary_expression {
-                  operand {
-                    int_value: "17"
-                  }
+                  int_value: "17"
                 }
               }
             }
@@ -341,9 +289,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "18"
-          }
+          int_value: "18"
         }
       }
     }
@@ -356,19 +302,15 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               step {
                 primary_expression {
-                  operand {
-                    int_value: "19"
-                  }
+                  int_value: "19"
                 }
               }
             }
@@ -380,9 +322,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "20"
-          }
+          int_value: "20"
         }
       }
     }
@@ -395,26 +335,20 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               start {
                 primary_expression {
-                  operand {
-                    int_value: "21"
-                  }
+                  int_value: "21"
                 }
               }
               step {
                 primary_expression {
-                  operand {
-                    int_value: "22"
-                  }
+                  int_value: "22"
                 }
               }
             }
@@ -426,9 +360,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "23"
-          }
+          int_value: "23"
         }
       }
     }
@@ -441,26 +373,20 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               end {
                 primary_expression {
-                  operand {
-                    int_value: "24"
-                  }
+                  int_value: "24"
                 }
               }
               step {
                 primary_expression {
-                  operand {
-                    int_value: "25"
-                  }
+                  int_value: "25"
                 }
               }
             }
@@ -472,9 +398,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "26"
-          }
+          int_value: "26"
         }
       }
     }
@@ -487,33 +411,25 @@ statement {
         primary_expression {
           slice_expression {
             primary_expression {
-              operand {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                }
+              identifier {
+                name: "a"
+                nfkc_name: "a"
               }
             }
             slice {
               start {
                 primary_expression {
-                  operand {
-                    int_value: "27"
-                  }
+                  int_value: "27"
                 }
               }
               end {
                 primary_expression {
-                  operand {
-                    int_value: "28"
-                  }
+                  int_value: "28"
                 }
               }
               step {
                 primary_expression {
-                  operand {
-                    int_value: "29"
-                  }
+                  int_value: "29"
                 }
               }
             }
@@ -525,9 +441,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "30"
-          }
+          int_value: "30"
         }
       }
     }
@@ -542,19 +456,15 @@ statement {
             primary_expression {
               slice_expression {
                 primary_expression {
-                  operand {
-                    identifier {
-                      name: "a"
-                      nfkc_name: "a"
-                    }
+                  identifier {
+                    name: "a"
+                    nfkc_name: "a"
                   }
                 }
                 index {
                   value {
                     primary_expression {
-                      operand {
-                        int_value: "31"
-                      }
+                      int_value: "31"
                     }
                   }
                 }
@@ -563,9 +473,7 @@ statement {
             index {
               value {
                 primary_expression {
-                  operand {
-                    int_value: "32"
-                  }
+                  int_value: "32"
                 }
               }
             }
@@ -577,9 +485,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "33"
-          }
+          int_value: "33"
         }
       }
     }

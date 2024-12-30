@@ -75,35 +75,28 @@ bool is_target(const PrimaryExpr& primary_expression) {
   switch (primary_expression.primary_expression_type_case()) {
     case PrimaryExpr::kDotExpression:
     case PrimaryExpr::kSliceExpression:
+    case PrimaryExpr::kIdentifier:
       return true;
     case PrimaryExpr::kCallExpression:
+    case PrimaryExpr::kIntValue:
+    case PrimaryExpr::kFloatValue:
+    case PrimaryExpr::kStringValue:
+    case PrimaryExpr::kBytesValue:
+    case PrimaryExpr::kListComprehension:
+    case PrimaryExpr::kDictionaryExpression:
+    case PrimaryExpr::kDictionaryComprehension:
     case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
     default:
       return false;
-    case PrimaryExpr::kOperand:
-      switch (primary_expression.operand().operand_type_case()) {
-        case PrimaryExpr::Operand::kIdentifier:
-          return true;
-        case PrimaryExpr::Operand::kListExpression:
-          for (const auto& item : primary_expression.operand().list_expression().element()) {
-            if (!is_target(item)) {
-              return false;
-            }
-          }
-          return true;
-        case PrimaryExpr::Operand::kIntValue:
-        case PrimaryExpr::Operand::kFloatValue:
-        case PrimaryExpr::Operand::kStringValue:
-        case PrimaryExpr::Operand::kBytesValue:
-        case PrimaryExpr::Operand::kListComprehension:
-        case PrimaryExpr::Operand::kDictionaryExpression:
-        case PrimaryExpr::Operand::kDictionaryComprehension:
-        case PrimaryExpr::Operand::OPERAND_TYPE_NOT_SET:
-        default:
+    case PrimaryExpr::kListExpression:
+      for (const auto& item : primary_expression.list_expression().element()) {
+        if (!is_target(item)) {
           return false;
-        case PrimaryExpr::Operand::kExpression:
-          return is_target(primary_expression.operand().expression());
+        }
       }
+      return true;
+    case PrimaryExpr::kExpression:
+      return is_target(primary_expression.expression());
   }
 }
 
@@ -192,11 +185,10 @@ struct frame {
     IfStmt* if_statement;
     ForStmt* for_statement;
     Test::LambdaExpr* lambda;
-    PrimaryExpr::Operand* operand;
     PrimaryExpr::CallExpr::Argument* argument;
-    PrimaryExpr::Operand::Entry* entry;
-    RepeatedPtrField<PrimaryExpr::Operand::CompClause>* comp_clauses;
-    PrimaryExpr::Operand::CompClause* comp_clause;
+    PrimaryExpr::Entry* entry;
+    RepeatedPtrField<PrimaryExpr::CompClause>* comp_clauses;
+    PrimaryExpr::CompClause* comp_clause;
     struct {
       RepeatedPtrField<Parameter>* parameters;
       bool parse_parameters_allow_trailing_comma;
@@ -703,10 +695,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
           if (op->first != token_type::equals && (
               top.statement->expression_statement().has_tuple() ||
-              top.statement->expression_statement().value().primary_expression().operand().has_list_expression() ||
-              top.statement->expression_statement().value().primary_expression().operand().has_list_comprehension() ||
-              top.statement->expression_statement().value().primary_expression().operand().has_dictionary_expression() ||
-              top.statement->expression_statement().value().primary_expression().operand().has_dictionary_comprehension())) {
+              top.statement->expression_statement().value().primary_expression().has_list_expression() ||
+              top.statement->expression_statement().value().primary_expression().has_list_comprehension() ||
+              top.statement->expression_statement().value().primary_expression().has_dictionary_expression() ||
+              top.statement->expression_statement().value().primary_expression().has_dictionary_comprehension())) {
             add_error("target is an illegal expression for augmented assignment");
           }
           {
@@ -748,10 +740,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .expression_allow_trailing_comma = top.expression_allow_trailing_comma,
           });
         } else {
-          if (top.expression->value().primary_expression().operand().has_expression()) {
+          if (top.expression->value().primary_expression().has_expression()) {
             Test first_test;
             first_test.Swap(top.expression->mutable_value());
-            first_test.mutable_primary_expression()->mutable_operand()->mutable_expression()->Swap(top.expression);
+            first_test.mutable_primary_expression()->mutable_expression()->Swap(top.expression);
           }
         }
         break;
@@ -940,13 +932,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         frames.emplace_back(frame{
           .state = parser_state::parse_operand,
-          .operand = top.primary->mutable_operand(),
+          .primary = top.primary,
         });
         break;
       case parser_state::parse_primary_0:
-        if (top.primary->operand().expression().value().has_primary_expression()) {
+        if (top.primary->expression().value().has_primary_expression()) {
           PrimaryExpr new_result;
-          new_result.Swap(top.primary->mutable_operand()->mutable_expression()->mutable_value()->mutable_primary_expression());
+          new_result.Swap(top.primary->mutable_expression()->mutable_value()->mutable_primary_expression());
           top.primary->Swap(&new_result);
         }
         if (capture(token_type::dot)) {
@@ -1075,45 +1067,45 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_operand:
         if (is_current(token_type::int_)) {
           found_non_load = true;
-          top.operand->set_int_value(lex.current_token().int_value().to_string(10));
+          top.primary->set_int_value(lex.current_token().int_value().to_string(10));
           lex.next_token();
         } else if (is_current(token_type::identifier)) {
           found_non_load = true;
-          set_identifier(*top.operand->mutable_identifier());
+          set_identifier(*top.primary->mutable_identifier());
         } else if (is_current(token_type::float_)) {
           found_non_load = true;
-          top.operand->set_float_value(lex.current_token().double_value());
+          top.primary->set_float_value(lex.current_token().double_value());
           lex.next_token();
         } else if (is_current(token_type::string)) {
-          top.operand->set_string_value(lex.current_token().string_value());
+          top.primary->set_string_value(lex.current_token().string_value());
           lex.next_token();
         } else if (is_current(token_type::bytes)) {
           found_non_load = true;
-          top.operand->set_bytes_value(lex.current_token().string_value());
+          top.primary->set_bytes_value(lex.current_token().string_value());
           lex.next_token();
         } else if (is_current(token_type::lbracket)) {
           found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_list,
-            .operand = top.operand,
+            .primary = top.primary,
           });
         } else if (is_current(token_type::lbrace)) {
           found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_dict,
-            .operand = top.operand,
+            .primary = top.primary,
           });
         } else if (capture(token_type::lparen)) {
           if (capture(token_type::rparen)) {
             found_non_load = true;
-            top.operand->mutable_expression()->mutable_tuple();
+            top.primary->mutable_expression()->mutable_tuple();
           } else {
             frames.emplace_back(frame{
               .state = parser_state::parse_operand_expression_0,
             });
             frames.emplace_back(frame{
               .state = parser_state::parse_expression,
-              .expression = top.operand->mutable_expression(),
+              .expression = top.primary->mutable_expression(),
               .expression_allow_trailing_comma = true,
             });
           }
@@ -1131,7 +1123,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
         if (capture(token_type::rbracket)) {
-          top.operand->mutable_list_expression();
+          top.primary->mutable_list_expression();
           break;
         }
 
@@ -1140,11 +1132,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         frames.emplace_back(frame{
           .state = parser_state::parse_list_0,
-          .operand = top.operand,
+          .primary = top.primary,
         });
         frames.emplace_back(frame{
           .state = parser_state::parse_test,
-          .test = top.operand->mutable_list_expression()->add_element(),
+          .test = top.primary->mutable_list_expression()->add_element(),
         });
         break;
       case parser_state::parse_list_0:
@@ -1152,19 +1144,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::for_:
             {
               Test expression;
-              expression.Swap(&top.operand->mutable_list_expression()->mutable_element()->at(0));
-              expression.Swap(top.operand->mutable_list_comprehension()->mutable_test());
+              expression.Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
+              expression.Swap(top.primary->mutable_list_comprehension()->mutable_test());
             }
             frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
-              .comp_clauses = top.operand->mutable_list_comprehension()->mutable_clause(),
+              .comp_clauses = top.primary->mutable_list_comprehension()->mutable_clause(),
             });
             break;
           case token_type::rbracket:
           case token_type::comma:
             frames.emplace_back(frame{
               .state = parser_state::parse_list_index_0,
-              .operand = top.operand,
+              .primary = top.primary,
             });
             break;
           default:
@@ -1179,7 +1171,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           frames.emplace_back(top);
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
-            .test = top.operand->mutable_list_expression()->add_element(),
+            .test = top.primary->mutable_list_expression()->add_element(),
           });
         }
         break;
@@ -1193,7 +1185,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
         if (capture(token_type::rbrace)) {
-          top.operand->mutable_dictionary_expression();
+          top.primary->mutable_dictionary_expression();
           break;
         }
  
@@ -1202,31 +1194,31 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         frames.emplace_back(frame{
           .state = parser_state::parse_dict_0,
-          .operand = top.operand,
+          .primary = top.primary,
         });
         frames.emplace_back(frame{
           .state = parser_state::parse_entry,
-          .entry = top.operand->mutable_dictionary_expression()->add_entry(),
+          .entry = top.primary->mutable_dictionary_expression()->add_entry(),
         });
         break;
       case parser_state::parse_dict_0:
         switch (lex.current_token().type()) {
           case token_type::for_:
             {
-              PrimaryExpr::Operand::Entry entry;
-              entry.Swap(&top.operand->mutable_dictionary_expression()->mutable_entry()->at(0));
-              entry.Swap(top.operand->mutable_dictionary_comprehension()->mutable_entry());
+              PrimaryExpr::Entry entry;
+              entry.Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
+              entry.Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
             }
             frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
-              .comp_clauses = top.operand->mutable_dictionary_comprehension()->mutable_clause(),
+              .comp_clauses = top.primary->mutable_dictionary_comprehension()->mutable_clause(),
             });
             break;
           case token_type::rbrace:
           case token_type::comma:
             frames.emplace_back(frame{
               .state = parser_state::parse_dict_index_0,
-              .operand = top.operand,
+              .primary = top.primary,
             });
             break;
           default:
@@ -1241,7 +1233,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           frames.emplace_back(top);
           frames.emplace_back(frame{
             .state = parser_state::parse_entry,
-            .entry = top.operand->mutable_dictionary_expression()->add_entry(),
+            .entry = top.primary->mutable_dictionary_expression()->add_entry(),
           });
         }
         break;
@@ -1349,13 +1341,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_argument_0:
         if (capture(token_type::equals)) {
-          if (!top.argument->value().primary_expression().operand().has_identifier()) {
+          if (!top.argument->value().primary_expression().has_identifier()) {
             add_error("Expected identifier for named arguments");
             break;
           }
           {
             Identifier id;
-            id.Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_operand()->mutable_identifier());
+            id.Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_identifier());
             id.Swap(top.argument->mutable_named_argument()->mutable_identifier());
           }
           frames.emplace_back(frame{

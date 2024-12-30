@@ -3,11 +3,9 @@ statement {
     lhs {
       value {
         primary_expression {
-          operand {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
           }
         }
       }
@@ -16,9 +14,7 @@ statement {
     rhs {
       value {
         primary_expression {
-          operand {
-            int_value: "1"
-          }
+          int_value: "1"
         }
       }
     }

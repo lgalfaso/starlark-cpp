@@ -4,10 +4,31 @@ statement {
       primary_expression {
         call_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    value {
+      primary_expression {
+        call_expression {
+          primary_expression {
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+            }
+          }
+          argument {
+            value {
+              primary_expression {
+                int_value: "1"
               }
             }
           }
@@ -22,19 +43,29 @@ statement {
       primary_expression {
         call_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+            }
+          }
+          argument {
+            value {
+              primary_expression {
+                int_value: "1"
               }
             }
           }
           argument {
             value {
               primary_expression {
-                operand {
-                  int_value: "1"
-                }
+                int_value: "2"
+              }
+            }
+          }
+          argument {
+            value {
+              primary_expression {
+                int_value: "3"
               }
             }
           }
@@ -49,37 +80,15 @@ statement {
       primary_expression {
         call_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
-              }
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
             }
           }
           argument {
             value {
               primary_expression {
-                operand {
-                  int_value: "1"
-                }
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "2"
-                }
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "3"
-                }
+                int_value: "1"
               }
             }
           }
@@ -94,64 +103,29 @@ statement {
       primary_expression {
         call_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+            }
+          }
+          argument {
+            value {
+              primary_expression {
+                int_value: "1"
               }
             }
           }
           argument {
             value {
               primary_expression {
-                operand {
-                  int_value: "1"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        call_expression {
-          primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
+                int_value: "2"
               }
             }
           }
           argument {
             value {
               primary_expression {
-                operand {
-                  int_value: "1"
-                }
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "2"
-                }
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                operand {
-                  int_value: "3"
-                }
+                int_value: "3"
               }
             }
           }
@@ -170,19 +144,15 @@ statement {
               primary_expression {
                 call_expression {
                   primary_expression {
-                    operand {
-                      identifier {
-                        name: "foo"
-                        nfkc_name: "foo"
-                      }
+                    identifier {
+                      name: "foo"
+                      nfkc_name: "foo"
                     }
                   }
                   argument {
                     value {
                       primary_expression {
-                        operand {
-                          int_value: "1"
-                        }
+                        int_value: "1"
                       }
                     }
                   }
@@ -191,9 +161,7 @@ statement {
               argument {
                 value {
                   primary_expression {
-                    operand {
-                      int_value: "2"
-                    }
+                    int_value: "2"
                   }
                 }
               }
@@ -202,9 +170,7 @@ statement {
           argument {
             value {
               primary_expression {
-                operand {
-                  int_value: "3"
-                }
+                int_value: "3"
               }
             }
           }
@@ -219,11 +185,9 @@ statement {
       primary_expression {
         call_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
-              }
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
             }
           }
           argument {
@@ -234,9 +198,7 @@ statement {
               }
               value {
                 primary_expression {
-                  operand {
-                    int_value: "1"
-                  }
+                  int_value: "1"
                 }
               }
             }
@@ -252,21 +214,17 @@ statement {
       primary_expression {
         call_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
-              }
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
             }
           }
           argument {
             star_argument {
               primary_expression {
-                operand {
-                  identifier {
-                    name: "bar"
-                    nfkc_name: "bar"
-                  }
+                identifier {
+                  name: "bar"
+                  nfkc_name: "bar"
                 }
               }
             }
@@ -282,21 +240,17 @@ statement {
       primary_expression {
         call_expression {
           primary_expression {
-            operand {
-              identifier {
-                name: "foo"
-                nfkc_name: "foo"
-              }
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
             }
           }
           argument {
             star_star_argument {
               primary_expression {
-                operand {
-                  identifier {
-                    name: "bar"
-                    nfkc_name: "bar"
-                  }
+                identifier {
+                  name: "bar"
+                  nfkc_name: "bar"
                 }
               }
             }

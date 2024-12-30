@@ -6,17 +6,13 @@ statement {
           binary_expression {
             lhs {
               primary_expression {
-                operand {
-                  int_value: "1"
-                }
+                int_value: "1"
               }
             }
             operator: PLUS
             rhs {
               primary_expression {
-                operand {
-                  int_value: "2"
-                }
+                int_value: "2"
               }
             }
           }
@@ -24,9 +20,7 @@ statement {
         operator: PLUS
         rhs {
           primary_expression {
-            operand {
-              int_value: "3"
-            }
+            int_value: "3"
           }
         }
       }
@@ -41,17 +35,13 @@ statement {
           binary_expression {
             lhs {
               primary_expression {
-                operand {
-                  int_value: "1"
-                }
+                int_value: "1"
               }
             }
             operator: STAR
             rhs {
               primary_expression {
-                operand {
-                  int_value: "2"
-                }
+                int_value: "2"
               }
             }
           }
@@ -61,17 +51,13 @@ statement {
           binary_expression {
             lhs {
               primary_expression {
-                operand {
-                  int_value: "3"
-                }
+                int_value: "3"
               }
             }
             operator: STAR
             rhs {
               primary_expression {
-                operand {
-                  int_value: "4"
-                }
+                int_value: "4"
               }
             }
           }
@@ -94,19 +80,15 @@ statement {
               binary_expression {
                 lhs {
                   primary_expression {
-                    operand {
-                      string_value: "win32"
-                    }
+                    string_value: "win32"
                   }
                 }
                 operator: IN
                 rhs {
                   primary_expression {
-                    operand {
-                      identifier {
-                        name: "cpu"
-                        nfkc_name: "cpu"
-                      }
+                    identifier {
+                      name: "cpu"
+                      nfkc_name: "cpu"
                     }
                   }
                 }
@@ -117,19 +99,15 @@ statement {
               binary_expression {
                 lhs {
                   primary_expression {
-                    operand {
                       string_value: "win64"
-                    }
                   }
                 }
                 operator: IN
                 rhs {
                   primary_expression {
-                    operand {
-                      identifier {
-                        name: "cpu"
-                        nfkc_name: "cpu"
-                      }
+                    identifier {
+                      name: "cpu"
+                      nfkc_name: "cpu"
                     }
                   }
                 }

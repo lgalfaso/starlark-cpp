@@ -171,57 +171,50 @@ message Test {
 
 message PrimaryExpr {
   oneof primary_expression_type {
-    Operand operand = 1;
-    DotExpr dot_expression = 2;
-    CallExpr call_expression = 3;
-    SliceExpr slice_expression = 4;
+    DotExpr dot_expression = 1;
+    CallExpr call_expression = 2;
+    SliceExpr slice_expression = 3;
+    Identifier identifier = 4;
+    string int_value = 5;
+    double float_value = 6;
+    string string_value = 7;
+    string bytes_value = 8;
+    ListExpr list_expression = 9;
+    ListComp list_comprehension = 10;
+    DictExpr dictionary_expression = 11;
+    DictComp dictionary_comprehension = 12;
+    Expression expression = 13;
   }
 
-  // TODO(lmirelmann): Merge the entries in `Operand` into `PrimaryExpr`.
-  message Operand {
-    oneof operand_type {
-      Identifier identifier = 1;
-      string int_value = 2;
-      double float_value = 3;
-      string string_value = 4;
-      string bytes_value = 5;
-      ListExpr list_expression = 6;
-      ListComp list_comprehension = 7;
-      DictExpr dictionary_expression = 8;
-      DictComp dictionary_comprehension = 9;
-      Expression expression = 10;
+  message ListExpr {
+    repeated Test element = 1;
+  }
+  message ListComp {
+    Test test = 1;
+    repeated CompClause clause = 2;
+  }
+  message DictExpr {
+    repeated Entry entry = 1;
+  }
+  message DictComp {
+    Entry entry = 1;
+    repeated CompClause clause = 2;
+  }
+  message CompClause {
+    oneof comp_clause_type {
+      ForClause for_clause = 1;
+      Test if_clause = 2;
     }
 
-    message ListExpr {
-      repeated Test element = 1;
+    message ForClause {
+      repeated PrimaryExpr loop_variable = 1;
+      Test in = 2;
     }
-    message ListComp {
-      Test test = 1;
-      repeated CompClause clause = 2;
-    }
-    message DictExpr {
-      repeated Entry entry = 1;
-    }
-    message DictComp {
-      Entry entry = 1;
-      repeated CompClause clause = 2;
-    }
-    message CompClause {
-      oneof comp_clause_type {
-        ForClause for_clause = 1;
-        Test if_clause = 2;
-      }
+  }
 
-      message ForClause {
-        repeated PrimaryExpr loop_variable = 1;
-        Test in = 2;
-      }
-    }
-
-    message Entry {
-      Test key = 1;
-      Test value = 2;
-    }
+  message Entry {
+    Test key = 1;
+    Test value = 2;
   }
 
   message DotExpr {

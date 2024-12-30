@@ -9,11 +9,9 @@ statement {
         lhs {
           value {
             primary_expression {
-              operand {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                }
+              identifier {
+                name: "x"
+                nfkc_name: "x"
               }
             }
           }
@@ -22,11 +20,9 @@ statement {
         rhs {
           value {
             primary_expression {
-              operand {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                }
+              identifier {
+                name: "True"
+                nfkc_name: "True"
               }
             }
           }
@@ -54,11 +50,9 @@ statement {
       expression_statement {
         value {
           primary_expression {
-            operand {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
             }
           }
         }
@@ -79,11 +73,9 @@ statement {
       }
       initialization {
         primary_expression {
-          operand {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-            }
+          identifier {
+            name: "True"
+            nfkc_name: "True"
           }
         }
       }
@@ -94,21 +86,17 @@ statement {
           primary_expression {
             call_expression {
               primary_expression {
-                operand {
-                  identifier {
-                    name: "print"
-                    nfkc_name: "print"
-                  }
+                identifier {
+                  name: "print"
+                  nfkc_name: "print"
                 }
               }
               argument {
                 value {
                   primary_expression {
-                    operand {
-                      identifier {
-                        name: "x"
-                        nfkc_name: "x"
-                      }
+                    identifier {
+                      name: "x"
+                      nfkc_name: "x"
                     }
                   }
                 }
