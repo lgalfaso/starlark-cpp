@@ -208,95 +208,95 @@ void lexer::tokenize() {
 
   char next_char = source_code.peek();
   switch (next_char) {
-   case '&':
-   case '^':
-   case ':':
-   case ',':
-   case '=':
-   case '>':
-   case '<':
-   case '-':
-   case '!':
-   case '%':
-   case '|':
-   case '+':
-   case ';':
-   case '/':
-   case '*':
-   case '~':
-     read_operator(next_char);
-     return;
-   case '0':
-   case '1':
-   case '2':
-   case '3':
-   case '4':
-   case '5':
-   case '6':
-   case '7':
-   case '8':
-   case '9':
-     read_numeric();
-     return;
-   case '.':
-     if (isdigit(source_code.peek(1))) {
-       read_numeric();
-       return;
-     }
-     read_operator(next_char);
-     return;
-   case '{':
-   case '[':
-   case '(':
-     open_brackets++;
-     read_operator(next_char);
-     return;
-   case '}':
-   case ']':
-   case ')':
-     if (open_brackets == 0) {
-       add_error("Dangling bracket", get_position());
-     } else {
-       open_brackets--;
-     }
-     read_operator(next_char);
-     return;
-   case '\n': {
-     auto start = get_position();
-     source_code.skip();
-     current = token{token_type::newline, start, get_position()};
-     newline();
-     return;
-   }
-   case '"':
-   case '\'':
-     read_string();
-     return;
-   default: {
-       if ((next_char == 'r' && (source_code.next("r\"") || source_code.next("r'") || source_code.next("rb\"") || source_code.next("rb'"))) ||
-           (next_char == 'b' && (source_code.next("b\"") || source_code.next("b'") || source_code.next("br\"") || source_code.next("br'")))) {
-         read_string();
-         return;
-       }
-       auto start = get_position();
-       auto identifier_name = read_identifier_or_keyword();
-       if (identifier_name.empty()) {
-         auto start = get_position();
-         source_code.skip_code_point();
-         auto end_pos = source_code.pos();
-         last_begin_of_line += (end_pos - start.pos - 1);
-         auto end = get_position();
-         current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
-         add_error("Unexpected character", start);
-         return;
-       }
-       if (auto element = all_keywords.find(identifier_name); element != all_keywords.end()) {
-         current = token{element->second, start, get_position()};
-       } else {
-         current = token{token_type::identifier, start, get_position(), identifier_name};
-       }
-       return;
-     }
+    case '&':
+    case '^':
+    case ':':
+    case ',':
+    case '=':
+    case '>':
+    case '<':
+    case '-':
+    case '!':
+    case '%':
+    case '|':
+    case '+':
+    case ';':
+    case '/':
+    case '*':
+    case '~':
+      read_operator(next_char);
+      return;
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      read_numeric();
+      return;
+    case '.':
+      if (isdigit(source_code.peek(1))) {
+        read_numeric();
+        return;
+      }
+      read_operator(next_char);
+      return;
+    case '{':
+    case '[':
+    case '(':
+      open_brackets++;
+      read_operator(next_char);
+      return;
+    case '}':
+    case ']':
+    case ')':
+      if (open_brackets == 0) {
+        add_error("Dangling bracket", get_position());
+      } else {
+        open_brackets--;
+      }
+      read_operator(next_char);
+      return;
+    case '\n': {
+      auto start = get_position();
+      source_code.skip();
+      current = token{token_type::newline, start, get_position()};
+      newline();
+      return;
+    }
+    case '"':
+    case '\'':
+      read_string();
+      return;
+    default: {
+        if ((next_char == 'r' && (source_code.next("r\"") || source_code.next("r'") || source_code.next("rb\"") || source_code.next("rb'"))) ||
+            (next_char == 'b' && (source_code.next("b\"") || source_code.next("b'") || source_code.next("br\"") || source_code.next("br'")))) {
+          read_string();
+          return;
+        }
+        auto start = get_position();
+        auto identifier_name = read_identifier_or_keyword();
+        if (identifier_name.empty()) {
+          auto start = get_position();
+          source_code.skip_code_point();
+          auto end_pos = source_code.pos();
+          last_begin_of_line += (end_pos - start.pos - 1);
+          auto end = get_position();
+          current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+          add_error("Unexpected character", start);
+          return;
+        }
+        if (auto element = all_keywords.find(identifier_name); element != all_keywords.end()) {
+          current = token{element->second, start, get_position()};
+        } else {
+          current = token{token_type::identifier, start, get_position(), identifier_name};
+        }
+        return;
+      }
   }
   current = token{token_type::eof, get_position(), get_position()};
 }
