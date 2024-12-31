@@ -215,7 +215,10 @@ struct frame {
     IfStmt* if_statement;
     ForStmt* for_statement;
     Test::LambdaExpr* lambda;
-    PrimaryExpr::CallExpr::Argument* argument;
+    struct {
+      PrimaryExpr::CallExpr::Argument* argument;
+      PrimaryExpr::CallExpr::Argument* previous_argument;
+    };
     PrimaryExpr::Entry* entry;
     RepeatedPtrField<PrimaryExpr::CompClause>* comp_clauses;
     PrimaryExpr::CompClause* comp_clause;
@@ -235,6 +238,7 @@ struct frame {
     };
     struct {
       PrimaryExpr* primary = nullptr;
+      PrimaryExpr::CallExpr::Argument* previous_call_argument = nullptr;
       bool primary_must_be_target = false;
     };
   };
@@ -994,14 +998,17 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (capture(token_type::rparen)) {
             break;
           }
+          auto* new_argument = top.primary->mutable_call_expression()->add_argument();
           frames.emplace_back(frame{
             .state = parser_state::parse_primary_call_0,
             .primary = top.primary,
             .primary_must_be_target = top.primary_must_be_target,
+            .previous_call_argument = new_argument,
           });
           frames.emplace_back(frame{
             .state = parser_state::parse_argument,
-            .argument = top.primary->mutable_call_expression()->add_argument(),
+            .argument = new_argument,
+            .previous_argument = nullptr,
           });
         } else if (capture(token_type::lbracket)) {
           found_non_load = true;
@@ -1044,10 +1051,17 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (capture(token_type::rparen)) {
             break;
           }
-          frames.emplace_back(top);
+          auto* new_argument = top.primary->mutable_call_expression()->add_argument();
+          frames.emplace_back(frame{
+            .state = parser_state::parse_primary_call_0,
+            .primary = top.primary,
+            .primary_must_be_target = top.primary_must_be_target,
+            .previous_call_argument = new_argument,
+          });
           frames.emplace_back(frame{
             .state = parser_state::parse_argument,
-            .argument = top.primary->mutable_call_expression()->add_argument(),
+            .argument = new_argument,
+            .previous_argument = top.previous_call_argument,
           });
         } else {
           expect(token_type::rparen);
@@ -1335,7 +1349,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_argument:
-        // TODO(lmirelmann): Check that the order is (not all elements must be present, but the order is strict):
+        // Check that the order is (not all elements must be present, but the order is strict):
         // - positional arguments
         // - keyword arguments
         // - At most one *args
@@ -1344,6 +1358,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!options.allow_varadic_arguments) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
+          }
+          if (top.previous_argument != nullptr &&
+              top.previous_argument->has_star_argument()) {
+            add_error("Duplicate *args");
+          }
+          if (top.previous_argument != nullptr &&
+              top.previous_argument->has_star_star_argument()) {
+            add_error("**kwargs must be the last argument");
           }
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
@@ -1354,14 +1376,24 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
           }
+          if (top.previous_argument != nullptr &&
+              top.previous_argument->has_star_star_argument()) {
+            add_error("Duplicate **kwargs");
+          }
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_star_star_argument(),
           });
         } else {
+          if (top.previous_argument != nullptr &&
+              (top.previous_argument->has_star_argument() ||
+               top.previous_argument->has_star_star_argument())) {
+            add_error("Non-varadic arguments must be before varadic arguments");
+          }
           frames.emplace_back(frame{
             .state = parser_state::parse_argument_0,
             .argument = top.argument,
+            .previous_argument = top.previous_argument,
           });
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
@@ -1384,6 +1416,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::parse_test,
             .test = top.argument->mutable_named_argument()->mutable_value(),
           });
+        } else {
+          if (top.previous_argument != nullptr &&
+              top.previous_argument->has_named_argument()) {
+            add_error("Positional arguments must come before named arguments");
+          }
         }
         break;
       case parser_state::parse_lambda:
