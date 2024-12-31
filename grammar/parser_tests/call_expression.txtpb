@@ -260,3 +260,79 @@ statement {
     }
   }
 }
+statement {
+  expression_statement {
+    value {
+      primary_expression {
+        call_expression {
+          primary_expression {
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+            }
+          }
+          argument {
+            value {
+              primary_expression {
+                int_value: "1"
+              }
+            }
+          }
+          argument {
+            value {
+              primary_expression {
+                int_value: "2"
+              }
+            }
+          }
+          argument {
+            named_argument {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+              }
+              value {
+                primary_expression {
+                  int_value: "3"
+                }
+              }
+            }
+          }
+          argument {
+            named_argument {
+              identifier {
+                name: "b"
+                nfkc_name: "b"
+              }
+              value {
+                primary_expression {
+                  int_value: "4"
+                }
+              }
+            }
+          }
+          argument {
+            star_argument {
+              primary_expression {
+                identifier {
+                  name: "args"
+                  nfkc_name: "args"
+                }
+              }
+            }
+          }
+          argument {
+            star_star_argument {
+              primary_expression {
+                identifier {
+                  name: "kwargs"
+                  nfkc_name: "kwargs"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
