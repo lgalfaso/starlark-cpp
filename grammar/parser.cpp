@@ -68,58 +68,88 @@ const std::map<token_type, AssignStmt::AssignOperator> assign_ops = {
 
 constexpr int MAX_PRECEDENCE = 11;
 
-bool is_target(const Expression& expression);
-bool is_target(const Test& test);
+struct is_target_frame {
+  const Expression* expression = nullptr;
+  const PrimaryExpr* primary_expression = nullptr;
+  const Test* test = nullptr;
+};
+
+bool is_target(const is_target_frame& frame) {
+  std::vector<is_target_frame> frames{frame};
+  do {
+    auto top = frames.back();
+    frames.pop_back();
+    if (top.primary_expression != nullptr) {
+      switch (top.primary_expression->primary_expression_type_case()) {
+        case PrimaryExpr::kDotExpression:
+        case PrimaryExpr::kSliceExpression:
+        case PrimaryExpr::kIdentifier:
+          break;
+        case PrimaryExpr::kCallExpression:
+        case PrimaryExpr::kIntValue:
+        case PrimaryExpr::kFloatValue:
+        case PrimaryExpr::kStringValue:
+        case PrimaryExpr::kBytesValue:
+        case PrimaryExpr::kListComprehension:
+        case PrimaryExpr::kDictionaryExpression:
+        case PrimaryExpr::kDictionaryComprehension:
+        case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
+        default:
+          return false;
+        case PrimaryExpr::kListExpression:
+          for (const auto& item : top.primary_expression->list_expression().element()) {
+            frames.push_back(is_target_frame{
+              .test = &item,
+            });
+          }
+          break;
+        case PrimaryExpr::kExpression:
+          frames.push_back(is_target_frame{
+            .expression = &top.primary_expression->expression(),
+          });
+          break;
+      }
+    }
+    if (top.expression != nullptr) {
+      switch (top.expression->expression_type_case()) {
+        case Expression::kValue:
+        case Expression::EXPRESSION_TYPE_NOT_SET:
+        default:
+          frames.push_back(is_target_frame{
+            .test = &top.expression->value(),
+          });
+          break;
+        case Expression::kTuple:
+          for (const auto& element : top.expression->tuple().value()) {
+            frames.push_back(is_target_frame{
+              .test = &element,
+            });
+          }
+          break;
+      }
+    }
+    if (top.test != nullptr) {
+      if (!top.test->has_primary_expression()) {
+        return false;
+      }
+      frames.push_back(is_target_frame{
+        .primary_expression = &top.test->primary_expression(),
+      });
+    }
+  } while (!frames.empty());
+  return true;
+}
 
 bool is_target(const PrimaryExpr& primary_expression) {
-  switch (primary_expression.primary_expression_type_case()) {
-    case PrimaryExpr::kDotExpression:
-    case PrimaryExpr::kSliceExpression:
-    case PrimaryExpr::kIdentifier:
-      return true;
-    case PrimaryExpr::kCallExpression:
-    case PrimaryExpr::kIntValue:
-    case PrimaryExpr::kFloatValue:
-    case PrimaryExpr::kStringValue:
-    case PrimaryExpr::kBytesValue:
-    case PrimaryExpr::kListComprehension:
-    case PrimaryExpr::kDictionaryExpression:
-    case PrimaryExpr::kDictionaryComprehension:
-    case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
-    default:
-      return false;
-    case PrimaryExpr::kListExpression:
-      for (const auto& item : primary_expression.list_expression().element()) {
-        if (!is_target(item)) {
-          return false;
-        }
-      }
-      return true;
-    case PrimaryExpr::kExpression:
-      return is_target(primary_expression.expression());
-  }
+  return is_target(is_target_frame{
+    .primary_expression = &primary_expression,
+  });
 }
 
 bool is_target(const Expression& expression) {
-  switch (expression.expression_type_case()) {
-    case Expression::kValue:
-    case Expression::EXPRESSION_TYPE_NOT_SET:
-    default:
-      return is_target(expression.value());
-      break;
-    case Expression::kTuple:
-      for (const auto& element : expression.tuple().value()) {
-        if (!is_target(element)) {
-          return false;
-        }
-      }
-      return true;
-  }
-}
-
-bool is_target(const Test& test) {
-  return test.has_primary_expression() &&
-      is_target(test.primary_expression());
+  return is_target(is_target_frame{
+    .expression = &expression,
+  });
 }
 
 enum class parser_state {
@@ -220,15 +250,15 @@ parser::parser(std::string_view input, const grammar_options& options, logger& l
   lex.next_token();
 }
 
-File parser::parse_file() {
+File* parser::parse_file(google::protobuf::Arena& arena) {
   // TODO(lmirelmann): Put the binding on the identifiers
   // TODO(lmirelmann): Add validation on identifier use
-  File result;
+  File* result = google::protobuf::Arena::Create<File>(&arena);
   while (lex.current_token().type() != token_type::eof) {
     if (lex.current_token().type() == token_type::newline) {
       lex.next_token();
     } else {
-      parse_statement(*result.mutable_statement());
+      parse_statement(*result->mutable_statement());
     }
   }
   return result;
@@ -702,9 +732,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("target is an illegal expression for augmented assignment");
           }
           {
-            AssignStmt assign_statement;
-            assign_statement.mutable_lhs()->Swap(top.statement->mutable_expression_statement());
-            assign_statement.Swap(top.statement->mutable_assign_statement());
+            AssignStmt* assign_statement = google::protobuf::Arena::Create<AssignStmt>(top.statement->GetArena());
+            assign_statement->mutable_lhs()->Swap(top.statement->mutable_expression_statement());
+            assign_statement->Swap(top.statement->mutable_assign_statement());
           }
           top.statement->mutable_assign_statement()->set_op(op->second);
           lex.next_token();
@@ -730,9 +760,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (is_current(token_type::comma)) {
           found_non_load = true;
           {
-            Test first_test;
-            first_test.Swap(top.expression->mutable_value());
-            first_test.Swap(top.expression->mutable_tuple()->add_value());
+            Test* first_test = google::protobuf::Arena::Create<Test>(top.expression->GetArena());
+            first_test->Swap(top.expression->mutable_value());
+            first_test->Swap(top.expression->mutable_tuple()->add_value());
           }
           frames.emplace_back(frame{
             .state = parser_state::parse_expression_1,
@@ -790,9 +820,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (capture(token_type::if_)) {
           found_non_load = true;
           {
-            Test new_result;
-            new_result.mutable_if_expression()->mutable_if_value()->Swap(top.test);
-            new_result.Swap(top.test);
+            Test* new_result = google::protobuf::Arena::Create<Test>(top.test->GetArena());
+            new_result->mutable_if_expression()->mutable_if_value()->Swap(top.test);
+            new_result->Swap(top.test);
           }
           frames.emplace_back(frame{
             .state = parser_state::parse_test_1,
@@ -880,9 +910,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           }
           {
-            Test new_result;
-            new_result.mutable_binary_expression()->mutable_lhs()->Swap(top.test);
-            new_result.Swap(top.test);
+            Test* new_result = google::protobuf::Arena::Create<Test>(top.test->GetArena());
+            new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
+            new_result->Swap(top.test);
           }
           top.test->mutable_binary_expression()->set_operator_(Test::BinaryExpr::NOT_IN);
           frames.emplace_back(frame{
@@ -906,9 +936,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           found_non_load = true;
           lex.next_token();
           {
-            Test new_result;
-            new_result.mutable_binary_expression()->mutable_lhs()->Swap(top.test);
-            new_result.Swap(top.test);
+            Test* new_result = google::protobuf::Arena::Create<Test>(top.test->GetArena());
+            new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
+            new_result->Swap(top.test);
           }
           top.test->mutable_binary_expression()->set_operator_(next_op->second.second);
           frames.emplace_back(frame{
@@ -944,9 +974,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (capture(token_type::dot)) {
           found_non_load = true;
           {
-            PrimaryExpr new_result;
-            new_result.mutable_dot_expression()->mutable_primary_expression()->Swap(top.primary);
-            new_result.Swap(top.primary);
+            PrimaryExpr* new_result = google::protobuf::Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            new_result->mutable_dot_expression()->mutable_primary_expression()->Swap(top.primary);
+            new_result->Swap(top.primary);
           }
           if (!set_identifier(*top.primary->mutable_dot_expression()->mutable_identifier())) {
             add_error("Expecting IDENTIFIER");
@@ -956,9 +986,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (capture(token_type::lparen)) {
           found_non_load = true;
           {
-            PrimaryExpr new_result;
-            new_result.mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
-            new_result.Swap(top.primary);
+            PrimaryExpr* new_result = google::protobuf::Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            new_result->mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
+            new_result->Swap(top.primary);
           }
           frames.emplace_back(top);
           if (capture(token_type::rparen)) {
@@ -976,9 +1006,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (capture(token_type::lbracket)) {
           found_non_load = true;
           {
-            PrimaryExpr new_result;
-            new_result.mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
-            new_result.Swap(top.primary);
+            PrimaryExpr* new_result = google::protobuf::Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            new_result->mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
+            new_result->Swap(top.primary);
           }
           frames.emplace_back(top);
           frames.emplace_back(frame{
@@ -1029,9 +1059,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("Unexpected TUPLE");
           }
           {
-            Expression expression;
-            expression.Swap(top.primary->mutable_slice_expression()->mutable_index());
-            top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression.mutable_value());
+            Expression* expression = google::protobuf::Arena::Create<Expression>(top.primary->GetArena());
+            expression->Swap(top.primary->mutable_slice_expression()->mutable_index());
+            top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression->mutable_value());
           }
           frames.emplace_back(frame{
             .state = parser_state::parse_primary_index_1,
@@ -1143,9 +1173,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         switch (lex.current_token().type()) {
           case token_type::for_:
             {
-              Test expression;
-              expression.Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
-              expression.Swap(top.primary->mutable_list_comprehension()->mutable_test());
+              Test* expression = google::protobuf::Arena::Create<Test>(top.primary->GetArena());
+              expression->Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
+              expression->Swap(top.primary->mutable_list_comprehension()->mutable_test());
             }
             frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
@@ -1205,9 +1235,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         switch (lex.current_token().type()) {
           case token_type::for_:
             {
-              PrimaryExpr::Entry entry;
-              entry.Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
-              entry.Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
+              PrimaryExpr::Entry* entry = google::protobuf::Arena::Create<PrimaryExpr::Entry>(top.primary->GetArena());
+              entry->Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
+              entry->Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
             }
             frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
@@ -1346,9 +1376,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           }
           {
-            Identifier id;
-            id.Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_identifier());
-            id.Swap(top.argument->mutable_named_argument()->mutable_identifier());
+            Identifier* id = google::protobuf::Arena::Create<Identifier>(top.argument->GetArena());
+            id->Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_identifier());
+            id->Swap(top.argument->mutable_named_argument()->mutable_identifier());
           }
           frames.emplace_back(frame{
             .state = parser_state::parse_test,

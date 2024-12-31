@@ -21,7 +21,7 @@ class parser {
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
-  starlark::File parse_file();
+  starlark::File* parse_file(google::protobuf::Arena& arena);
 
   static constexpr std::string module = "Parser";
 

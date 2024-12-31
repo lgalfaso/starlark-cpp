@@ -12,7 +12,8 @@ using starlark::File;
 void ParserFuzzing(char* data, size_t size) {
   logger logging;
   parser star_parser(std::string_view(data, size), logging);
-  File actual_starlark_file = star_parser.parse_file();
+  google::protobuf::Arena arena;
+  [[maybe_unused]] File* actual_starlark_file = star_parser.parse_file(arena);
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {

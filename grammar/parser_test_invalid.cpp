@@ -44,7 +44,8 @@ TEST(Parser, TestCase) {
 
   logger logging;
   parser star_parser(starlark_program, logging);
-  File actual_starlark_file = star_parser.parse_file();
+  google::protobuf::Arena arena;
+  [[maybe_unused]] File* actual_starlark_file = star_parser.parse_file(arena);
   EXPECT_TRUE(has_error(logging));
 }
 

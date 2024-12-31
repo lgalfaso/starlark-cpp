@@ -11,7 +11,6 @@
 #include "grammar/proto/starlark.pb.h"
 #include "third-party/defer.hpp"
 
-using google::protobuf::Arena;
 using google::protobuf::Message;
 using google::protobuf::util::MessageDifferencer;
 using grammar::log_level;
@@ -51,7 +50,15 @@ std::string show_errors(const logger& logging) {
 
 TEST(Parser, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
-  ASSERT_THAT(argv, SizeIs(2));
+  ASSERT_THAT(argv, SizeIs(3));
+
+  File starlark_file;
+  {
+    int proto_fd = open(argv[2].c_str(), O_RDONLY);
+    ASSERT_GT(proto_fd, 0);
+    defer { close(proto_fd); };
+    ASSERT_TRUE(starlark_file.ParseFromFileDescriptor(proto_fd));
+  }
 
   std::string starlark_program;
   {
@@ -66,8 +73,11 @@ TEST(Parser, TestCase) {
 
   logger logging;
   parser star_parser(starlark_program, logging);
-  Arena arena;
-  [[maybe_unused]] File* starlark_file = star_parser.parse_file(arena);
+  google::protobuf::Arena arena;
+  File* actual_starlark_file = star_parser.parse_file(arena);
+
+  EXPECT_TRUE(MessageDifferencer::Equals(*actual_starlark_file, starlark_file)) <<
+      describe_diff(*actual_starlark_file, starlark_file);
   EXPECT_FALSE(has_error(logging)) << show_errors(logging);
 }
 

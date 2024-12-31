@@ -30,7 +30,8 @@ bool has_error(const logger& logging) {
 void checkInvalid(std::string_view program, const grammar_options& opts) {
   logger logging;
   parser star_parser(program, opts, logging);
-  File actual_starlark_file = star_parser.parse_file();
+  google::protobuf::Arena arena;
+  [[maybe_unused]] File* actual_starlark_file = star_parser.parse_file(arena);
   EXPECT_TRUE(has_error(logging));
 }
 

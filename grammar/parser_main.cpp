@@ -47,7 +47,8 @@ int main(int argc, char* argv[]) {
                            .allow_varadic_arguments = !is_build_or_workspace,
                        },
                        logging);
-    File actual_starlark_file = star_parser.parse_file();
+    google::protobuf::Arena arena;
+    File* actual_starlark_file = star_parser.parse_file(arena);
     bool print_header = true;
     for (const auto& entry : logging) {
       if (entry.level != log_level::ERROR && entry.level != log_level::FATAL) {
