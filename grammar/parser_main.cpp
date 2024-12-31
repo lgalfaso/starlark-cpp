@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
                        },
                        logging);
     google::protobuf::Arena arena;
-    File* actual_starlark_file = star_parser.parse_file(arena);
+    [[maybe_unused]] File* actual_starlark_file = star_parser.parse_file(arena);
     bool print_header = true;
     for (const auto& entry : logging) {
       if (entry.level != log_level::ERROR && entry.level != log_level::FATAL) {
