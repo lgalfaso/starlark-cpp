@@ -12,6 +12,10 @@ statement {
   load_statement {
     module: "foo"
     load_params {
+      local_name {
+        name: "bar"
+        nfkc_name: "bar"
+      }
       remote_name: "bar"
     }
   }
@@ -20,6 +24,10 @@ statement {
   load_statement {
     module: "foo"
     load_params {
+      local_name {
+        name: "bar"
+        nfkc_name: "bar"
+      }
       remote_name: "bar"
     }
   }

@@ -11,6 +11,10 @@ statement {
   load_statement {
     module: "module"
     load_params {
+      local_name {
+        name: "fn"
+        nfkc_name: "fn"
+      }
       remote_name: "fn"
     }
   }

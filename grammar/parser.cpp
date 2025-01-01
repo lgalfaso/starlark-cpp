@@ -641,8 +641,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               });
             }
             break;
-          case token_type::load:
-            // TODO(lmirelmann): Check that one `load` statement does not define the same symbol more than once.
+          case token_type::load: {
+            std::set<std::string> symbols;
             if (found_non_load && options.require_load_statements_first) {
               add_error("`load` statements must appear before other statements");
             }
@@ -682,10 +682,18 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 add_error(std::string{"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
               }
               load_params->set_remote_name(lex.current_token().string_value());
+              if (!load_params->has_local_name()) {
+                load_params->mutable_local_name()->set_name(load_params->remote_name());
+                load_params->mutable_local_name()->set_nfkc_name(to_nfkc(load_params->remote_name()));
+              }
+              if (!symbols.insert(load_params->local_name().nfkc_name()).second) {
+                add_error("`load` statement defines '" + load_params->local_name().name() + "' more than once");
+              }
               lex.next_token();
             }
             expect(token_type::rparen);
             break;
+          }
           case token_type::break_:
             found_non_load = true;
             if (nested_loops.back() == 0) {

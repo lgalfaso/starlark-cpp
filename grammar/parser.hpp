@@ -3,7 +3,9 @@
 #ifndef GRAMMAR_PARSER_HPP_
 #define GRAMMAR_PARSER_HPP_
 
+#include <string>
 #include <string_view>
+#include <vector>
 
 #include "grammar/lexer.hpp"
 #include "grammar/logging.hpp"
