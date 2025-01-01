@@ -18,16 +18,8 @@ using grammar::log_level;
 using grammar::logger;
 using grammar::parser;
 using starlark::File;
+using testing::IsEmpty;
 using testing::SizeIs;
-
-bool has_error(const logger& logging) {
-  for (const auto& entry : logging) {
-    if (entry.level == log_level::FATAL || entry.level == log_level::ERROR) {
-      return true;
-    }
-  }
-  return false;
-}
 
 std::string describe_diff(const Message& actual, const Message& expected) {
   MessageDifferencer differencer;
@@ -65,9 +57,10 @@ TEST(Parser, TestCase) {
   }
 
   logger logging;
+  logging.set_level(log_level::ERROR);
   parser star_parser(starlark_program, logging);
   Arena arena;
-  [[maybe_unused]] File* starlark_file = star_parser.parse_file(arena);
-  EXPECT_FALSE(has_error(logging)) << show_errors(logging);
+  star_parser.parse_file(arena);
+  EXPECT_THAT(logging, IsEmpty()) << show_errors(logging);
 }
 

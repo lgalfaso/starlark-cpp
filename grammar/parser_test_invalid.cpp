@@ -16,16 +16,9 @@ using grammar::log_level;
 using grammar::logger;
 using grammar::parser;
 using starlark::File;
+using testing::IsEmpty;
+using testing::Not;
 using testing::SizeIs;
-
-bool has_error(const logger& logging) {
-  for (const auto& entry : logging) {
-    if (entry.level == log_level::FATAL || entry.level == log_level::ERROR) {
-      return true;
-    }
-  }
-  return false;
-}
 
 TEST(Parser, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
@@ -43,9 +36,10 @@ TEST(Parser, TestCase) {
   }
 
   logger logging;
+  logging.set_level(log_level::ERROR);
   parser star_parser(starlark_program, logging);
   google::protobuf::Arena arena;
-  [[maybe_unused]] File* actual_starlark_file = star_parser.parse_file(arena);
-  EXPECT_TRUE(has_error(logging));
+  star_parser.parse_file(arena);
+  EXPECT_THAT(logging, Not(IsEmpty()));
 }
 
