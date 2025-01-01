@@ -9,6 +9,7 @@
 #include "unicode/normalization.hpp"
 #include "third-party/defer.hpp"
 
+using google::protobuf::Arena;
 using google::protobuf::RepeatedPtrField;
 using starlark::AssignStmt;
 using starlark::DefStmt;
@@ -254,10 +255,10 @@ parser::parser(std::string_view input, const grammar_options& options, logger& l
   lex.next_token();
 }
 
-File* parser::parse_file(google::protobuf::Arena& arena) {
+File* parser::parse_file(Arena& arena) {
   // TODO(lmirelmann): Put the binding on the identifiers
   // TODO(lmirelmann): Add validation on identifier use
-  File* result = google::protobuf::Arena::Create<File>(&arena);
+  File* result = Arena::Create<File>(&arena);
   while (lex.current_token().type() != token_type::eof) {
     if (lex.current_token().type() == token_type::newline) {
       lex.next_token();
@@ -641,6 +642,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             break;
           case token_type::load:
+            // TODO(lmirelmann): Check that one `load` statement does not define the same symbol more than once.
             if (found_non_load && options.require_load_statements_first) {
               add_error("`load` statements must appear before other statements");
             }
@@ -736,7 +738,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("target is an illegal expression for augmented assignment");
           }
           {
-            AssignStmt* assign_statement = google::protobuf::Arena::Create<AssignStmt>(top.statement->GetArena());
+            AssignStmt* assign_statement = Arena::Create<AssignStmt>(top.statement->GetArena());
             assign_statement->mutable_lhs()->Swap(top.statement->mutable_expression_statement());
             assign_statement->Swap(top.statement->mutable_assign_statement());
           }
@@ -764,7 +766,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (is_current(token_type::comma)) {
           found_non_load = true;
           {
-            Test* first_test = google::protobuf::Arena::Create<Test>(top.expression->GetArena());
+            Test* first_test = Arena::Create<Test>(top.expression->GetArena());
             first_test->Swap(top.expression->mutable_value());
             first_test->Swap(top.expression->mutable_tuple()->add_value());
           }
@@ -775,9 +777,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         } else {
           if (top.expression->value().primary_expression().has_expression()) {
-            Test first_test;
-            first_test.Swap(top.expression->mutable_value());
-            first_test.mutable_primary_expression()->mutable_expression()->Swap(top.expression);
+            Test* first_test = Arena::Create<Test>(top.expression->GetArena());
+            first_test->Swap(top.expression->mutable_value());
+            first_test->mutable_primary_expression()->mutable_expression()->Swap(top.expression);
           }
         }
         break;
@@ -824,7 +826,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (capture(token_type::if_)) {
           found_non_load = true;
           {
-            Test* new_result = google::protobuf::Arena::Create<Test>(top.test->GetArena());
+            Test* new_result = Arena::Create<Test>(top.test->GetArena());
             new_result->mutable_if_expression()->mutable_if_value()->Swap(top.test);
             new_result->Swap(top.test);
           }
@@ -914,7 +916,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           }
           {
-            Test* new_result = google::protobuf::Arena::Create<Test>(top.test->GetArena());
+            Test* new_result = Arena::Create<Test>(top.test->GetArena());
             new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
             new_result->Swap(top.test);
           }
@@ -940,7 +942,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           found_non_load = true;
           lex.next_token();
           {
-            Test* new_result = google::protobuf::Arena::Create<Test>(top.test->GetArena());
+            Test* new_result = Arena::Create<Test>(top.test->GetArena());
             new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
             new_result->Swap(top.test);
           }
@@ -971,14 +973,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_primary_0:
         if (top.primary->expression().value().has_primary_expression()) {
-          PrimaryExpr new_result;
-          new_result.Swap(top.primary->mutable_expression()->mutable_value()->mutable_primary_expression());
-          top.primary->Swap(&new_result);
+          PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
+          new_result->Swap(top.primary->mutable_expression()->mutable_value()->mutable_primary_expression());
+          top.primary->Swap(new_result);
         }
         if (capture(token_type::dot)) {
           found_non_load = true;
           {
-            PrimaryExpr* new_result = google::protobuf::Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
             new_result->mutable_dot_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
           }
@@ -990,7 +992,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (capture(token_type::lparen)) {
           found_non_load = true;
           {
-            PrimaryExpr* new_result = google::protobuf::Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
             new_result->mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
           }
@@ -1013,7 +1015,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (capture(token_type::lbracket)) {
           found_non_load = true;
           {
-            PrimaryExpr* new_result = google::protobuf::Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
             new_result->mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
           }
@@ -1073,7 +1075,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("Unexpected TUPLE");
           }
           {
-            Expression* expression = google::protobuf::Arena::Create<Expression>(top.primary->GetArena());
+            Expression* expression = Arena::Create<Expression>(top.primary->GetArena());
             expression->Swap(top.primary->mutable_slice_expression()->mutable_index());
             top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression->mutable_value());
           }
@@ -1187,7 +1189,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         switch (lex.current_token().type()) {
           case token_type::for_:
             {
-              Test* expression = google::protobuf::Arena::Create<Test>(top.primary->GetArena());
+              Test* expression = Arena::Create<Test>(top.primary->GetArena());
               expression->Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
               expression->Swap(top.primary->mutable_list_comprehension()->mutable_test());
             }
@@ -1249,7 +1251,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         switch (lex.current_token().type()) {
           case token_type::for_:
             {
-              PrimaryExpr::Entry* entry = google::protobuf::Arena::Create<PrimaryExpr::Entry>(top.primary->GetArena());
+              PrimaryExpr::Entry* entry = Arena::Create<PrimaryExpr::Entry>(top.primary->GetArena());
               entry->Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
               entry->Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
             }
@@ -1408,7 +1410,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           }
           {
-            Identifier* id = google::protobuf::Arena::Create<Identifier>(top.argument->GetArena());
+            Identifier* id = Arena::Create<Identifier>(top.argument->GetArena());
             id->Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_identifier());
             id->Swap(top.argument->mutable_named_argument()->mutable_identifier());
           }
