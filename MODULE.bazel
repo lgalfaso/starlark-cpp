@@ -14,6 +14,7 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 http_archive(
     name = "ucd",
     url = "https://unicode.org/Public/16.0.0/ucd/UCD.zip",
+    integrity = "sha256-yG3YHysUpDsMwGSqX4mqckE4aAHjXFnHmE5XmDJjTrI=",
     build_file_content = """
 exports_files(
     glob(["**/*"]),
