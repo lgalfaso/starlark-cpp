@@ -92,6 +92,12 @@ statement {
           star {
           }
         }
+        parameter {
+          identifier {
+            name: "y"
+            nfkc_name: "y"
+          }
+        }
         test {
           primary_expression {
             identifier {

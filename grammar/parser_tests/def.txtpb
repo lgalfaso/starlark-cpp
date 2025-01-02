@@ -108,3 +108,23 @@ statement {
     }
   }
 }
+statement {
+  def_statement {
+    function_name {
+      name: "baz"
+      nfkc_name: "baz"
+    }
+    parameter {
+      star { }
+    }
+    parameter {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+      }
+    }
+    statement {
+      pass_statement { }
+    }
+  }
+}

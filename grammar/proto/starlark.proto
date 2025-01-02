@@ -96,7 +96,7 @@ message AssignStmt {
 
 message LoadStmt {
   string module = 1;
-  repeated LoadParams load_params = 2;
+  repeated LoadParams load_param = 2;
 
   message LoadParams {
     Identifier local_name = 1;

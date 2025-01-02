@@ -10,7 +10,7 @@ statement {
 statement {
   load_statement {
     module: "module"
-    load_params {
+    load_param {
       local_name {
         name: "fn"
         nfkc_name: "fn"

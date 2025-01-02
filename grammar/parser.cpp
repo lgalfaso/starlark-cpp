@@ -227,6 +227,9 @@ struct frame {
       RepeatedPtrField<Parameter>* parameters;
       bool parse_parameters_allow_trailing_comma;
       bool parse_parameters_first;
+      bool found_star_parameter;
+      bool found_star_star_parameter;
+      bool previous_parameter_was_bare_star;
     };
     struct {
       Expression* expression;
@@ -423,6 +426,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .parameters = def_statement->mutable_parameter(),
             .parse_parameters_allow_trailing_comma = true,
             .parse_parameters_first = true,
+            .found_star_parameter = false,
+            .found_star_star_parameter = false,
+            .previous_parameter_was_bare_star = false,
           });
         } else if (capture(token_type::if_)) {
           found_non_load = true;
@@ -666,9 +672,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               if (is_current(token_type::rparen)) {
                 break;
               }
-              auto* load_params = top.statement->mutable_load_statement()->add_load_params();
+              auto* load_param = top.statement->mutable_load_statement()->add_load_param();
               if (is_current(token_type::identifier)) {
-                set_identifier(*load_params->mutable_local_name());
+                set_identifier(*load_param->mutable_local_name());
                 if (!expect(token_type::equals)) {
                   break;
                 }
@@ -681,13 +687,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                   lex.current_token().string_value().starts_with("_")) {
                 add_error(std::string{"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
               }
-              load_params->set_remote_name(lex.current_token().string_value());
-              if (!load_params->has_local_name()) {
-                load_params->mutable_local_name()->set_name(load_params->remote_name());
-                load_params->mutable_local_name()->set_nfkc_name(to_nfkc(load_params->remote_name()));
+              load_param->set_remote_name(lex.current_token().string_value());
+              if (!load_param->has_local_name()) {
+                load_param->mutable_local_name()->set_name(load_param->remote_name());
+                load_param->mutable_local_name()->set_nfkc_name(to_nfkc(load_param->remote_name()));
               }
-              if (!symbols.insert(load_params->local_name().nfkc_name()).second) {
-                add_error("`load` statement defines '" + load_params->local_name().name() + "' more than once");
+              if (!symbols.insert(load_param->local_name().nfkc_name()).second) {
+                add_error("`load` statement defines '" + load_param->local_name().name() + "' more than once");
               }
               lex.next_token();
             }
@@ -1447,6 +1453,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           .parameters = top.lambda->mutable_parameter(),
           .parse_parameters_allow_trailing_comma = false,
           .parse_parameters_first = true,
+          .found_star_parameter = false,
+          .found_star_star_parameter = false,
+          .previous_parameter_was_bare_star = false,
         });
         break;
       case parser_state::parse_lambda_0:
@@ -1459,13 +1468,20 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_parameters:
+        // TODO(lmirelmann): Check for duplicate argument names.
         if (top.parse_parameters_first || capture(token_type::comma)) {
           if (is_current(token_type::identifier)) {
+            if (top.found_star_star_parameter) {
+              add_error("arguments cannot follow var-keyword argument");
+            }
             frames.emplace_back(frame{
               .state = parser_state::parse_parameters,
               .parameters = top.parameters,
               .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
               .parse_parameters_first = false,
+              .found_star_parameter = top.found_star_parameter,
+              .found_star_star_parameter = top.found_star_star_parameter,
+              .previous_parameter_was_bare_star = false,
             });
             Parameter* param = top.parameters->Add();
             set_identifier(*param->mutable_identifier());
@@ -1476,11 +1492,20 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               });
             }
           } else if (capture(token_type::star)) {
+            if (top.found_star_parameter) {
+              add_error("* argument may appear only once");
+            }
+            if (top.found_star_star_parameter) {
+              add_error("arguments cannot follow var-keyword argument");
+            }
             frames.emplace_back(frame{
               .state = parser_state::parse_parameters,
               .parameters = top.parameters,
               .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
               .parse_parameters_first = false,
+              .found_star_parameter = true,
+              .found_star_star_parameter = top.found_star_star_parameter,
+              .previous_parameter_was_bare_star = !is_current(token_type::identifier),
             });
             Parameter* param = top.parameters->Add();
             param->mutable_star();
@@ -1488,11 +1513,20 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               set_identifier(*param->mutable_identifier());
             }
           } else if (capture(token_type::star_star)) {
+            if (top.previous_parameter_was_bare_star) {
+              add_error("named arguments must follow bare *");
+            }
+            if (top.found_star_star_parameter) {
+              add_error("arguments cannot follow var-keyword argument");
+            }
             frames.emplace_back(frame{
               .state = parser_state::parse_parameters,
               .parameters = top.parameters,
               .parse_parameters_allow_trailing_comma = top.parse_parameters_allow_trailing_comma,
               .parse_parameters_first = false,
+              .found_star_parameter = top.found_star_parameter,
+              .found_star_star_parameter = true,
+              .previous_parameter_was_bare_star = false,
             });
             Parameter* param = top.parameters->Add();
             param->mutable_star_star();
@@ -1500,9 +1534,16 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               add_error("Expected identifier after STAR_STAR when parsing parameters");
             }
           } else {
+            if (top.previous_parameter_was_bare_star) {
+              add_error("named arguments must follow bare *");
+            }
             if (!top.parse_parameters_first && !top.parse_parameters_allow_trailing_comma) {
               add_error("Unexpected COMMA");
             }
+          }
+        } else {
+          if (top.previous_parameter_was_bare_star) {
+            add_error("named arguments must follow bare *");
           }
         }
         break;

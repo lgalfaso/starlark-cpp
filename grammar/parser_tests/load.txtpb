@@ -11,7 +11,7 @@ statement {
 statement {
   load_statement {
     module: "foo"
-    load_params {
+    load_param {
       local_name {
         name: "bar"
         nfkc_name: "bar"
@@ -23,7 +23,7 @@ statement {
 statement {
   load_statement {
     module: "foo"
-    load_params {
+    load_param {
       local_name {
         name: "bar"
         nfkc_name: "bar"
@@ -35,7 +35,7 @@ statement {
 statement {
   load_statement {
     module: "foo"
-    load_params {
+    load_param {
       local_name {
         name: "man"
         nfkc_name: "man"
@@ -47,14 +47,14 @@ statement {
 statement {
   load_statement {
     module: "foo"
-    load_params {
+    load_param {
       local_name {
         name: "man"
         nfkc_name: "man"
       }
       remote_name: "bar"
     }
-    load_params {
+    load_param {
       local_name {
         name: "x"
         nfkc_name: "x"
@@ -66,14 +66,14 @@ statement {
 statement {
   load_statement {
     module: "foo"
-    load_params {
+    load_param {
       local_name {
         name: "man"
         nfkc_name: "man"
       }
       remote_name: "bar"
     }
-    load_params {
+    load_param {
       local_name {
         name: "x"
         nfkc_name: "x"
