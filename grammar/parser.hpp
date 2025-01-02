@@ -3,6 +3,7 @@
 #ifndef GRAMMAR_PARSER_HPP_
 #define GRAMMAR_PARSER_HPP_
 
+#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -34,6 +35,7 @@ class parser {
   bool recover = false;
   logger& logging;
   bool found_non_load = false;
+  std::vector<std::set<std::string>> parse_parameter_identifiers;
 
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;

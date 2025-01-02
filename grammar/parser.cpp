@@ -269,6 +269,7 @@ File* parser::parse_file(Arena& arena) {
       parse_statement(*result->mutable_statement());
     }
   }
+  assert(parse_parameter_identifiers.empty());
   return result;
 }
 
@@ -1468,8 +1469,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_parameters:
-        // TODO(lmirelmann): Check for duplicate argument names.
         if (top.parse_parameters_first || capture(token_type::comma)) {
+          if (top.parse_parameters_first) {
+            parse_parameter_identifiers.emplace_back(std::set<std::string>{});
+          }
           if (is_current(token_type::identifier)) {
             if (top.found_star_star_parameter) {
               add_error("arguments cannot follow var-keyword argument");
@@ -1491,6 +1494,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 .test = param->mutable_initialization(),
               });
             }
+            if (!parse_parameter_identifiers.back().insert(param->identifier().nfkc_name()).second) {
+              add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
+            }
           } else if (capture(token_type::star)) {
             if (top.found_star_parameter) {
               add_error("* argument may appear only once");
@@ -1511,6 +1517,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             param->mutable_star();
             if (is_current(token_type::identifier)) {
               set_identifier(*param->mutable_identifier());
+              if (!parse_parameter_identifiers.back().insert(param->identifier().nfkc_name()).second) {
+                add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
+              }
             }
           } else if (capture(token_type::star_star)) {
             if (top.previous_parameter_was_bare_star) {
@@ -1532,6 +1541,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             param->mutable_star_star();
             if (!set_identifier(*param->mutable_identifier())) {
               add_error("Expected identifier after STAR_STAR when parsing parameters");
+            } else {
+              if (!parse_parameter_identifiers.back().insert(param->identifier().nfkc_name()).second) {
+                add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
+              }
             }
           } else {
             if (top.previous_parameter_was_bare_star) {
@@ -1540,11 +1553,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (!top.parse_parameters_first && !top.parse_parameters_allow_trailing_comma) {
               add_error("Unexpected COMMA");
             }
+            parse_parameter_identifiers.pop_back();
           }
         } else {
           if (top.previous_parameter_was_bare_star) {
             add_error("named arguments must follow bare *");
           }
+          parse_parameter_identifiers.pop_back();
         }
         break;
     }

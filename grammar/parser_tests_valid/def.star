@@ -12,3 +12,6 @@ def foo_12(*a, **b):
   pass
 def foo_17(a, *, b):
   pass
+def bar_01(bar_01 = lambda bar_01: True):
+  pass
+
