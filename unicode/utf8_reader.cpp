@@ -98,6 +98,8 @@ std::uint32_t utf8_reader::peek_code_point() const {
     default:
       return replacement_character;
   }
+  // TODO(lmirelmann): This constraint might be too hard, and we should only check
+  // that this is not a surrogate, and it is within the Unicode range.
   if (!ucd::is_assigned(candidate)) {
     return replacement_character;
   }

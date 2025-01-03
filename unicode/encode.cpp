@@ -8,6 +8,8 @@
 namespace unicode {
 
 void utf8_encode_code_point(std::uint32_t character, std::string& output) {
+  // TODO(lmirelmann): This constraint might be too hard, and we should only check
+  // that this is not a surrogate, and it is within the Unicode range.
   if (!ucd::is_assigned(character)) {
     character = utf8_reader::replacement_character;
   }
