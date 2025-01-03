@@ -639,12 +639,46 @@ bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_val
   if (int_value > max_value) {
     return false;
   }
+  bool error = false;
   if (utf8_encode) {
+    // It is an error if the code point is not assigned.
+    // The spec is not clear, as it reads:
+    //
+    //   Strings
+    //
+    //   (...)
+    //   An implementation may permit strings to hold arbitrary values of the
+    //   element type, including sequences that do not denote encode valid
+    //   Unicode text; or, it may disallow invalid sequences, and operations
+    //   that would form them.
+    //
+    //
+    // In other parts of the spec, it states
+    //
+    //   "\ud83d"                # error: invalid Unicode code point U+D83D
+    //
+    //
+    // And at no point in time, it tries to define what is an "invalid sequence".
+    //
+    // Unicode talks about "invalid sequences" when talking about encoding. Given
+    // that literals do not define the encoding of the characters, then this
+    // leaves it open to interpretation.
+    //
+    // The interpretation that we are using is that this must be a character
+    // that can be present on its own in a valid sequence, even when the character
+    // were not assigned or were in the Do Not Emit list. This is, the literal
+    // consisting of just this code point is not "ill-formed" using the
+    // definition from Unicode for ill-formed.
+    // With this definition, the character must be within the Unicode range,
+    // and not a surrogate.
+    if ((0xD800 <= int_value) && (int_value <= 0xDFFF)) {
+      error = true;
+    }
     utf8_encode_code_point(int_value, result);
   } else {
     result += (char)(int_value & 0xff);
   }
-  return true;
+  return !error;
 }
 
 std::string lexer::read_identifier_or_keyword() {

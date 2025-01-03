@@ -425,6 +425,10 @@ foo = "\200")starlark",
       grammar::grammar_options{
         .escaped_octal_and_hex_char_are_ascii = false,
   });
+  checkErrors(R"starlark(
+foo = "bar\ud83d")starlark",
+        "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\ud83d\\\"\"):2,7:2,18 NEWLINE:2,18:2,18 EOF:2,18:2,18",
+       { "Invalid escape sequence:2,11" });
 }
 
 TEST(LexerTest, RawStrings) {
