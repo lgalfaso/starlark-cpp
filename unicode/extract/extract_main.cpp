@@ -24,6 +24,8 @@ const char* HPP_HEADER = R"CPP(// Copyright 2024 Lucas Mirelmann
 #include <optional>
 #include <vector>
 
+#include "containers/flat_map.hpp"
+
 namespace ucd {
 
 bool is_assigned(std::uint32_t code_point);
@@ -185,7 +187,7 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t,
                std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
   FWRITE("const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point) {\n", output);
   FWRITE("  static const std::vector<std::uint32_t> default_value;\n", output);
-  FWRITE("  static const std::map<std::uint32_t, std::vector<std::uint32_t>> all_dc = {", output);
+  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_dc = {", output);
   int pos = 0;
   for (const auto& entry : unicode_data) {
     const auto& dc = std::get<2>(entry.second);
@@ -212,7 +214,7 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t,
 void print_ccc(FILE* output, const std::map<std::uint32_t,
                std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
   FWRITE("int ccc(std::uint32_t code_point) {\n", output);
-  FWRITE("  static const std::map<std::uint32_t, int> all_ccc = {", output);
+  FWRITE("  static const cnt::flat_map<std::uint32_t, int> all_ccc = {", output);
   int pos = 0;
   for (const auto& entry : unicode_data) {
     if (std::get<0>(entry.second) != 0) {
@@ -235,8 +237,7 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t,
                std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data,
                const std::set<std::uint32_t>& comp_exclusions) {
   FWRITE("std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs) {\n", output);
-  FWRITE("  static const std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> all_cc = {", output);
-  int pos = 0;
+  std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> entries;
   for (const auto& entry : unicode_data) {
     if (std::get<0>(entry.second) == 0 && std::get<1>(entry.second) && !comp_exclusions.contains(entry.first)) {
       auto& cc = std::get<2>(entry.second);
@@ -250,12 +251,17 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t,
       if (std::get<0>(unicode_data.at(cc[0])) != 0) {
         continue;
       }
-      if (pos % 6 == 0) {
-        FWRITE("\n   ", output);
-      }
-      fprintf(output, " {{0x%05X, 0x%05X}, 0x%05X},", cc[0], cc[1], entry.first);
-      ++pos;
+      entries[std::make_pair(cc[0], cc[1])] = entry.first;
     }
+  }
+  FWRITE("  static const cnt::flat_map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> all_cc = {", output);
+  int pos = 0;
+  for (const auto& entry : entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {{0x%05X, 0x%05X}, 0x%05X},", entry.first.first, entry.first.second, entry.second);
+    ++pos;
   }
   FWRITE("\n  };\n\n", output);
   FWRITE("  if (auto cc_candidate = all_cc.find(std::make_pair(lhs, rhs)); cc_candidate != all_cc.end()) {\n", output);

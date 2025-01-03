@@ -94,6 +94,9 @@ cc_library(
     srcs = ["ucd_code_points.cpp"],
     hdrs = ["ucd_code_points.hpp"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//containers:flat_map",
+    ],
 )
 
 cc_test(

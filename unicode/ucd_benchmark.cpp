@@ -28,6 +28,17 @@ static void BM_CheckForXidc(benchmark::State& state) {
 // Register the function as a benchmark
 BENCHMARK(BM_CheckForXidc);
 
+// NOLINTNEXTLINE(runtime/references)
+static void BM_CCC(benchmark::State& state) {
+  for (auto _ : state) {
+    for (int i = 0; i <= 0xFFFFF; ++i) {
+      ucd::ccc(i);
+    }
+  }
+}
+// Register the function as a benchmark
+BENCHMARK(BM_CCC);
+
 }  // namespace ucd_benchmark
 
 BENCHMARK_MAIN();
