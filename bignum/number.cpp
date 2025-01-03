@@ -1,4 +1,4 @@
-// Copyright 2024 Lucas Mirelmann
+// Copyright 2024-2025 Lucas Mirelmann
 
 #include "bignum/number.hpp"
 
@@ -418,7 +418,7 @@ void number::long_mult(
 
 
 number& number::operator*=(const number& other) {
-  static const values_size_type karatsuba_threshold = 60;
+  static const values_size_type karatsuba_threshold = 128;
   return karatsuba(other, karatsuba_threshold);
 }
 
