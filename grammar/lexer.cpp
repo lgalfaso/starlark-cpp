@@ -273,30 +273,30 @@ void lexer::tokenize() {
       read_string();
       return;
     default: {
-        if ((next_char == 'r' && (source_code.next("r\"") || source_code.next("r'") || source_code.next("rb\"") || source_code.next("rb'"))) ||
-            (next_char == 'b' && (source_code.next("b\"") || source_code.next("b'") || source_code.next("br\"") || source_code.next("br'")))) {
-          read_string();
-          return;
-        }
-        auto start = get_position();
-        auto identifier_name = read_identifier_or_keyword();
-        if (identifier_name.empty()) {
-          auto start = get_position();
-          source_code.skip_code_point();
-          auto end_pos = source_code.pos();
-          last_begin_of_line += (end_pos - start.pos - 1);
-          auto end = get_position();
-          current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
-          add_error("Unexpected character", start);
-          return;
-        }
-        if (auto element = all_keywords.find(identifier_name); element != all_keywords.end()) {
-          current = token{element->second, start, get_position()};
-        } else {
-          current = token{token_type::identifier, start, get_position(), identifier_name};
-        }
+      if ((next_char == 'r' && (source_code.next("r\"") || source_code.next("r'") || source_code.next("rb\"") || source_code.next("rb'"))) ||
+          (next_char == 'b' && (source_code.next("b\"") || source_code.next("b'") || source_code.next("br\"") || source_code.next("br'")))) {
+        read_string();
         return;
       }
+      auto start = get_position();
+      auto identifier_name = read_identifier_or_keyword();
+      if (identifier_name.empty()) {
+        auto start = get_position();
+        source_code.skip_code_point();
+        auto end_pos = source_code.pos();
+        last_begin_of_line += (end_pos - start.pos - 1);
+        auto end = get_position();
+        current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+        add_error("Unexpected character", start);
+        return;
+      }
+      if (auto element = all_keywords.find(identifier_name); element != all_keywords.end()) {
+        current = token{element->second, start, get_position()};
+      } else {
+        current = token{token_type::identifier, start, get_position(), identifier_name};
+      }
+      return;
+    }
   }
   current = token{token_type::eof, get_position(), get_position()};
 }
