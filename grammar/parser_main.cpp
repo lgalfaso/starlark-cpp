@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 
     std::string arg{argv[i]};
     logger logging;
+    logging.set_level(log_level::ERROR);
     bool is_build_or_workspace =
         arg.ends_with("WORKSPACE") ||
         arg.ends_with("WORKSPACE.bazel") ||
@@ -49,15 +50,10 @@ int main(int argc, char* argv[]) {
                        logging);
     google::protobuf::Arena arena;
     [[maybe_unused]] File* actual_starlark_file = star_parser.parse_file(arena);
-    bool print_header = true;
+    if (!logging.empty()) {
+      std::cout << "Unable to parse: " << argv[i] << "\n";
+    }
     for (const auto& entry : logging) {
-      if (entry.level != log_level::ERROR && entry.level != log_level::FATAL) {
-        continue;
-      }
-      if (print_header) {
-        std::cout << "Unable to parse: " << argv[i] << "\n";
-        print_header = false;
-      }
       std::cout << "  " << entry.module << ":" << entry.message << ":" << entry.pos.row << "," << entry.pos.column << "\n";
     }
   }
