@@ -187,21 +187,25 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t,
                std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
   FWRITE("const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point) {\n", output);
   FWRITE("  static const std::vector<std::uint32_t> default_value;\n", output);
-  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_dc = {", output);
-  int pos = 0;
+  std::map<std::uint32_t, std::vector<std::uint32_t>> entries;
   for (const auto& entry : unicode_data) {
     const auto& dc = std::get<2>(entry.second);
     if (dc.size() != 0) {
-      if (pos % 6 == 0) {
-        FWRITE("\n   ", output);
-      }
-      fprintf(output, " {0x%05X, {", entry.first);
-      for (auto c : dc) {
-        fprintf(output, " 0x%05X,", c);
-      }
-      FWRITE("}},", output);
-      ++pos;
+      entries[entry.first] = dc;
     }
+  }
+  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_dc = {", output);
+  int pos = 0;
+  for (const auto& entry : entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {0x%05X, {", entry.first);
+    for (auto c : entry.second) {
+      fprintf(output, " 0x%05X,", c);
+    }
+    FWRITE("}},", output);
+    ++pos;
   }
   FWRITE("\n  };\n\n", output);
   FWRITE("  if (auto dc_candidate = all_dc.find(code_point); dc_candidate != all_dc.end()) {\n", output);
@@ -214,16 +218,20 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t,
 void print_ccc(FILE* output, const std::map<std::uint32_t,
                std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
   FWRITE("int ccc(std::uint32_t code_point) {\n", output);
-  FWRITE("  static const cnt::flat_map<std::uint32_t, int> all_ccc = {", output);
-  int pos = 0;
+  std::map<std::uint32_t, int> entries;
   for (const auto& entry : unicode_data) {
     if (std::get<0>(entry.second) != 0) {
-      if (pos % 6 == 0) {
-        FWRITE("\n   ", output);
-      }
-      fprintf(output, " {0x%05X, %3d},", entry.first, std::get<0>(entry.second));
-      ++pos;
+      entries[entry.first] = std::get<0>(entry.second);
     }
+  }
+  FWRITE("  static const cnt::flat_map<std::uint32_t, int> all_ccc = {", output);
+  int pos = 0;
+  for (const auto& entry : entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {0x%05X, %3d},", entry.first, entry.second);
+    ++pos;
   }
   FWRITE("\n  };\n\n", output);
   FWRITE("  if (auto ccc_candidate = all_ccc.find(code_point); ccc_candidate != all_ccc.end()) {\n", output);
