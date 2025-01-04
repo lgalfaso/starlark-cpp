@@ -18,7 +18,7 @@ class flat_map {
         [](const std::pair<K, V>& kv, const K& k) {
             return kv.first < k;
         });
-    if (candidate->first == key) {
+    if (candidate != end() && candidate->first == key) {
       return candidate;
     }
     return end();
