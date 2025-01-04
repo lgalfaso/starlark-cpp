@@ -1,3 +1,4 @@
+module_binding: "foo"
 statement {
   expression_statement {
     value {

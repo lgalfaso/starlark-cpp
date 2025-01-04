@@ -1,3 +1,6 @@
+module_binding: "a"
+module_binding: "b"
+module_binding: "foo"
 statement {
   assign_statement {
     lhs {

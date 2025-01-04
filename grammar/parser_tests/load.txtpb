@@ -1,3 +1,6 @@
+file_binding: "bar"
+file_binding: "man"
+file_binding: "x"
 statement {
   load_statement {
     module: "foo"

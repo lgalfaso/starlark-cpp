@@ -1,4 +1,7 @@
- statement {
+module_binding: "a"
+module_binding: "b"
+module_binding: "c"
+statement {
   assign_statement {
     lhs {
       value {

@@ -1,3 +1,4 @@
+module_binding: "foo"
 statement {
   def_statement {
     function_name {

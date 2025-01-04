@@ -1,9 +1,12 @@
+module_binding: "foo"
 statement {
   def_statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
     }
+    function_binding: "a"
+    function_binding: "b"
     statement {
       for_statement {
         loop_variable {

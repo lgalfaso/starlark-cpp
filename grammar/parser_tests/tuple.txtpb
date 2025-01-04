@@ -1,3 +1,5 @@
+module_binding: "a"
+module_binding: "foo"
 statement {
   assign_statement {
     lhs {
@@ -62,6 +64,7 @@ statement {
       name: "foo"
       nfkc_name: "foo"
     }
+    function_binding: "a"
     statement {
       for_statement {
         loop_variable {

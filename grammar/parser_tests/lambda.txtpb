@@ -1,3 +1,4 @@
+module_binding: "a"
 statement {
   expression_statement {
     value {
@@ -24,6 +25,7 @@ statement {
             nfkc_name: "x"
           }
         }
+        function_binding: "x"
         test {
           if_expression {
             if_value {
@@ -72,6 +74,8 @@ statement {
             nfkc_name: "y"
           }
         }
+        function_binding: "x"
+        function_binding: "y"
         test {
           primary_expression {
             identifier {
@@ -98,6 +102,7 @@ statement {
             nfkc_name: "y"
           }
         }
+        function_binding: "y"
         test {
           primary_expression {
             identifier {
@@ -122,6 +127,7 @@ statement {
           star {
           }
         }
+        function_binding: "x"
         test {
           primary_expression {
             identifier {
@@ -146,6 +152,7 @@ statement {
           star_star {
           }
         }
+        function_binding: "x"
         test {
           primary_expression {
             identifier {
@@ -168,6 +175,7 @@ statement {
             nfkc_name: "x"
           }
         }
+        function_binding: "x"
         test {
           lambda_expression {
             parameter {
@@ -176,6 +184,7 @@ statement {
                 nfkc_name: "y"
               }
             }
+            function_binding: "y"
             test {
               binary_expression {
                 lhs {

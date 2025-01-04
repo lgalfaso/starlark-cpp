@@ -1,3 +1,5 @@
+module_binding: "bar"
+module_binding: "foo"
 statement {
   def_statement {
     function_name {

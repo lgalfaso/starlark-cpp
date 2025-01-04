@@ -8,5 +8,5 @@ def man(x = True):
   print(x)
 
 def baz(*, a):
-  pass
+  b = 1
 

@@ -37,7 +37,10 @@ TEST(Parser, TestCase) {
 
   logger logging;
   logging.set_level(log_level::ERROR);
-  parser star_parser(starlark_program, logging);
+  grammar::grammar_options options = {
+    .allow_top_level_if_and_for = starlark_program.contains("options.allow_top_level_if_and_for"),
+  };
+  parser star_parser(starlark_program, options, logging);
   google::protobuf::Arena arena;
   star_parser.parse_file(arena);
   EXPECT_THAT(logging, Not(IsEmpty()));

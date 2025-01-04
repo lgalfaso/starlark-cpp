@@ -1,3 +1,4 @@
+file_binding: "fn"
 statement {
   expression_statement {
     value {

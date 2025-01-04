@@ -17,6 +17,12 @@
 
 namespace grammar {
 
+struct expression_frame {
+  const starlark::Expression* expression = nullptr;
+  const starlark::PrimaryExpr* primary_expression = nullptr;
+  const starlark::Test* test = nullptr;
+};
+
 class parser {
  public:
   parser(std::string_view input, logger& logging);
@@ -29,21 +35,27 @@ class parser {
   static constexpr std::string module = "Parser";
 
  private:
-  grammar_options options;
-  lexer lex;
-  std::vector<int> nested_loops;
-  bool recover = false;
-  logger& logging;
-  bool found_non_load = false;
-  std::vector<std::set<std::string>> parse_parameter_identifiers;
-
+  void parse_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
+  void bind(const starlark::PrimaryExpr* primary_expression);
+  void bind(const starlark::Expression* expression);
+  void bind(expression_frame frame);
+  bool set_identifier(starlark::Identifier& id);
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;
   bool expect(token_type expected_token);
   void add_error(const std::string& error_message);
   void add_warning(const std::string& error_message);
-  void parse_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
-  bool set_identifier(starlark::Identifier& id);
+
+  grammar_options options;
+  lexer lex;
+  logger& logging;
+
+  // TODO(lmirelmann): Move outside the class the fields that are only needed when creating the AST.
+  std::vector<int> nested_loops;
+  bool recover = false;
+  bool found_non_load = false;
+  std::vector<std::set<std::string>> parse_parameter_identifiers;
+  std::vector<std::pair<google::protobuf::Message*, std::set<std::string>>> parser_blocks;
 };
 
 }  // namespace grammar

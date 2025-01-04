@@ -1,9 +1,14 @@
+module_binding: "bar"
+module_binding: "baz"
+module_binding: "foo"
+module_binding: "man"
 statement {
   def_statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
     }
+    function_binding: "x"
     statement {
       assign_statement {
         lhs {
@@ -46,6 +51,7 @@ statement {
         nfkc_name: "x"
       }
     }
+    function_binding: "x"
     statement {
       expression_statement {
         value {
@@ -80,6 +86,7 @@ statement {
         }
       }
     }
+    function_binding: "x"
     statement {
       expression_statement {
         value {
@@ -123,8 +130,29 @@ statement {
         nfkc_name: "a"
       }
     }
+    function_binding: "a"
+    function_binding: "b"
     statement {
-      pass_statement { }
+      assign_statement: {
+        lhs {
+          value {
+            primary_expression {
+              identifier {
+                name: "b"
+                nfkc_name: "b"
+              }
+            }
+          }
+        }
+        op: EQUALS
+        rhs {
+          value {
+            primary_expression {
+              int_value: "1"
+            }
+          }
+        }
+      }
     }
   }
 }

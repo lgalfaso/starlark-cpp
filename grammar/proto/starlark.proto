@@ -2,8 +2,12 @@ syntax = "proto3";
 
 package starlark;
 
+// TODO(lmirelmann): Maybe remove all the inner messages and make all messages to be top-level.
+
 message File {
   repeated Statement statement = 1;
+  repeated string module_binding = 2;
+  repeated string file_binding = 3;
 }
 
 message Statement {
@@ -25,6 +29,7 @@ message DefStmt {
   Identifier function_name = 1;
   repeated Parameter parameter = 2;
   repeated Statement statement = 3;
+  repeated string function_binding = 4;
 }
 
 message Parameter {
@@ -104,6 +109,7 @@ message LoadStmt {
   }
 }
 
+// TODO(lmirelmann): Maybe merge `Test` and `PrimaryExpr` into a single message?
 message Test {
   oneof test_type {
     IfExpr if_expression = 1;
@@ -166,6 +172,7 @@ message Test {
   message LambdaExpr {
     repeated Parameter parameter = 1;
     Test test = 2;
+    repeated string function_binding = 3;
   }
 }
 
@@ -209,6 +216,7 @@ message PrimaryExpr {
     message ForClause {
       repeated PrimaryExpr loop_variable = 1;
       Test in = 2;
+      repeated string comprehension_binding = 3;
     }
   }
 
