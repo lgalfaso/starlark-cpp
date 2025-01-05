@@ -1,5 +1,6 @@
 module_binding: "a"
 module_binding: "b"
+module_binding: "foo"
 statement {
   expression_statement {
     value {
@@ -645,6 +646,36 @@ statement {
           else_value {
             primary_expression {
               int_value: "2"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
+    }
+    statement {
+      assign_statement {
+        lhs {
+          value {
+            primary_expression {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+              }
+            }
+          }
+        }
+        op: PLUS_EQUALS
+        rhs {
+          value {
+            primary_expression {
+              int_value: "1"
             }
           }
         }

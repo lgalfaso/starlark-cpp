@@ -800,7 +800,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             // Report the error and continue to parse this as an expression
             add_error("Exprecting TARGET");
           }
-          bind(&top.statement->expression_statement());
+          if (op->first == token_type::equals) {
+            bind(&top.statement->expression_statement());
+          }
           if (op->first != token_type::equals && (
               top.statement->expression_statement().has_tuple() ||
               top.statement->expression_statement().value().primary_expression().has_list_expression() ||
