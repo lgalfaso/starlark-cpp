@@ -45,6 +45,8 @@ class parser {
   bool expect(token_type expected_token);
   void add_error(const std::string& error_message);
   void add_warning(const std::string& error_message);
+  void create_block(const std::set<std::string>& symbols, google::protobuf::RepeatedPtrField<std::string>* binding);
+  void drop_block();
 
   grammar_options options;
   lexer lex;
@@ -55,7 +57,7 @@ class parser {
   bool recover = false;
   bool found_non_load = false;
   std::vector<std::set<std::string>> parse_parameter_identifiers;
-  std::vector<std::pair<google::protobuf::Message*, std::set<std::string>>> parser_blocks;
+  std::vector<std::pair<std::set<std::string>, google::protobuf::RepeatedPtrField<std::string>*>> parser_blocks;
 };
 
 }  // namespace grammar

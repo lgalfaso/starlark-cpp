@@ -272,16 +272,16 @@ File* parser::parse_file(Arena& arena) {
   // TODO(lmirelmann): Put the binding on the identifiers
   // TODO(lmirelmann): Add validation on identifier use
   // Predeclared block.
-  parser_blocks.emplace_back(std::make_pair(nullptr, predeclared_symbols));
+  create_block(predeclared_symbols, nullptr);
   File* result = Arena::Create<File>(&arena);
   // The "file block" and "module block" are defined the other way around
   // than the spec. Given that there is no overlap between these two, this should
   // not have any side-effects.
   // Context: https://github.com/bazelbuild/starlark/issues/293
   // File block.
-  parser_blocks.emplace_back(std::make_pair(result, std::set<std::string>{}));
+  create_block({}, result->mutable_file_binding());
   // Module block.
-  parser_blocks.emplace_back(std::make_pair(result, std::set<std::string>{}));
+  create_block({}, result->mutable_module_binding());
   while (lex.current_token().type() != token_type::eof) {
     if (lex.current_token().type() == token_type::newline) {
       lex.next_token();
@@ -291,12 +291,9 @@ File* parser::parse_file(Arena& arena) {
   }
   assert(parse_parameter_identifiers.empty());
   assert(parser_blocks.size() == 3);
-  for (const auto& binding : parser_blocks[1].second) {
-    result->add_file_binding(binding);
-  }
-  for (const auto& binding : parser_blocks[2].second) {
-    result->add_module_binding(binding);
-  }
+  // Drop the module block and file block
+  drop_block();
+  drop_block();
   return result;
 }
 
@@ -442,11 +439,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           // If this is a top-level function definition, then check whether this is causing a redefinition
           // with a previous `load` statement.
           if (parser_blocks.size() == 3) {
-            if (parser_blocks[1].second.contains(def_statement->function_name().nfkc_name())) {
+            if (parser_blocks[1].first.contains(def_statement->function_name().nfkc_name())) {
               add_error("`def` statement redefines previously defined `load` symbol '" + def_statement->function_name().name() + "'");
             }
           }
-          parser_blocks.back().second.insert(def_statement->function_name().nfkc_name());
+          parser_blocks.back().first.insert(def_statement->function_name().nfkc_name());
 
           if (!expect(token_type::lparen)) {
             break;
@@ -531,7 +528,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_statement_def_0:
-        parser_blocks.push_back(std::make_pair(top.def_statement, parse_parameter_identifiers.back()));
+        create_block(parse_parameter_identifiers.back(), top.def_statement->mutable_function_binding());
         parse_parameter_identifiers.pop_back();
         if (!expect(token_type::rparen)) {
           break;
@@ -545,10 +542,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_statement_def_final:
-        for (const auto& binding : parser_blocks.back().second) {
-          top.def_statement->add_function_binding(binding);
-        }
-        parser_blocks.pop_back();
+        drop_block();
         nested_loops.pop_back();
         break;
       case parser_state::parse_statement_if_0:
@@ -748,10 +742,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               if (!symbols.insert(load_param->local_name().nfkc_name()).second) {
                 add_error("`load` statement defines '" + load_param->local_name().name() + "' more than once");
               }
-              if (parser_blocks.back().second.contains(load_param->local_name().nfkc_name())) {
+              if (parser_blocks.back().first.contains(load_param->local_name().nfkc_name())) {
                 add_error("`load` statement redefines previously defined value '" + load_param->local_name().name() + "'");
               }
-              parser_blocks[1].second.insert(load_param->local_name().nfkc_name());
+              parser_blocks[1].first.insert(load_param->local_name().nfkc_name());
               lex.next_token();
             }
             expect(token_type::rparen);
@@ -1382,7 +1376,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_comp_clauses:
         if (capture(token_type::for_)) {
           auto* comp_clause = top.comp_clauses->Add();
-          parser_blocks.emplace_back(comp_clause, std::set<std::string>{});
+          create_block({}, comp_clause->mutable_for_clause()->mutable_comprehension_binding());
           auto* comp_clause_primary = comp_clause->mutable_for_clause()->add_loop_variable();
           frames.emplace_back(top);
           frames.emplace_back(frame{
@@ -1422,10 +1416,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .primary_must_be_target = true,
           });
         } else {
-          for (const auto& entry : parser_blocks.back().second) {
-            top.comp_clause->mutable_for_clause()->add_comprehension_binding(entry);
-          }
-          parser_blocks.pop_back();
+          drop_block();
           if (!expect(token_type::in)) {
             break;
           }
@@ -1532,7 +1523,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_lambda_0:
-        parser_blocks.push_back(std::make_pair(top.lambda, parse_parameter_identifiers.back()));
+        create_block(parse_parameter_identifiers.back(), top.lambda->mutable_function_binding());
         parse_parameter_identifiers.pop_back();
         frames.emplace_back(frame{
           .state = parser_state::parse_lambda_final,
@@ -1547,10 +1538,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_lambda_final:
-        for (const auto& binding : parser_blocks.back().second) {
-          top.lambda->add_function_binding(binding);
-        }
-        parser_blocks.pop_back();
+        drop_block();
         break;
       case parser_state::parse_parameters:
         if (top.parse_parameters_first || capture(token_type::comma)) {
@@ -1672,10 +1660,10 @@ void parser::bind(expression_frame frame) {
           break;
         case PrimaryExpr::kIdentifier:
           if (parser_blocks.size() == 3 &&
-              parser_blocks[1].second.contains(top.primary_expression->identifier().nfkc_name())) {
+              parser_blocks[1].first.contains(top.primary_expression->identifier().nfkc_name())) {
             add_error("Variable '" + top.primary_expression->identifier().name() + "' redefines symbol previously defined by a load statement");
           }
-          parser_blocks.back().second.insert(top.primary_expression->identifier().nfkc_name());
+          parser_blocks.back().first.insert(top.primary_expression->identifier().nfkc_name());
           break;
         case PrimaryExpr::kCallExpression:
         case PrimaryExpr::kIntValue:
@@ -1744,6 +1732,20 @@ bool parser::set_identifier(Identifier& identifier) {
   identifier.set_nfkc_name(to_nfkc(name));
   lex.next_token();
   return true;
+}
+
+void parser::create_block(const std::set<std::string>& symbols, google::protobuf::RepeatedPtrField<std::string>* binding) {
+  // TODO(lmirelmann): Create the structure for pending bindings to resolve.
+  parser_blocks.emplace_back(symbols, binding);
+}
+
+void parser::drop_block() {
+  // TODO(lmirelmann): Resolve any pending binding to resolve.
+  // TODO(lmirelmann): Move any pending binding to resolve to the parent block.
+  for (const auto& binding : parser_blocks.back().first) {
+    *parser_blocks.back().second->Add() = binding;
+  }
+  parser_blocks.pop_back();
 }
 
 }  // namespace grammar
