@@ -735,7 +735,7 @@ number& number::pow_mod(const number& power, const number& modulus) {
   if (j > 0) {
     x_2 = one;
     number w1(*this);
-    w1.mod_pow2(j); 
+    w1.mod_pow2(j);
     number w2(power);
     w2.mod_pow2(j - 1);
     for (int i = w2.bit_size(); i >= 0; --i) {
