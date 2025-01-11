@@ -1,0 +1,84 @@
+statement {
+  expression_statement {
+    value {
+      primary_expression {
+        list_comprehension {
+          test {
+            primary_expression {
+              dictionary_comprehension {
+                entry {
+                  key {
+                    primary_expression {
+                      identifier {
+                        name: "y"
+                        nfkc_name: "y"
+                        frame: 0
+                        pos_in_frame: 0
+                      }
+                    }
+                  }
+                  value {
+                    primary_expression {
+                      string_value: "a"
+                    }
+                  }
+                }
+                clause {
+                  for_clause {
+                    loop_variable {
+                      identifier {
+                        name: "y"
+                        nfkc_name: "y"
+                      }
+                    }
+                    in {
+                      primary_expression {
+                        identifier {
+                          name: "x"
+                          nfkc_name: "x"
+                          frame: 1
+                          pos_in_frame: 0
+                        }
+                      }
+                    }
+                  }
+                }
+                clause {
+                  if_clause {
+                    primary_expression {
+                      identifier {
+                        name: "x"
+                        nfkc_name: "x"
+                        frame: 1
+                        pos_in_frame: 0
+                      }
+                    }
+                  }
+                }
+                comprehension_binding: "y"
+              }
+            }
+          }
+          clause {
+            for_clause {
+              loop_variable {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                }
+              }
+              in {
+                primary_expression {
+                  list_expression {
+                  }
+                }
+              }
+            }
+          }
+          comprehension_binding: "x"
+        }
+      }
+    }
+  }
+}
+

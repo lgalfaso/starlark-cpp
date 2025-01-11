@@ -24,7 +24,7 @@ using testing::SizeIs;
 void checkInvalid(std::string_view program, const grammar_options& opts) {
   logger logging;
   logging.set_level(log_level::ERROR);
-  parser star_parser(program, opts, logging);
+  parser star_parser(program, opts, {}, logging);
   Arena arena;
   star_parser.parse_file(arena);
   EXPECT_THAT(logging, Not(IsEmpty()));

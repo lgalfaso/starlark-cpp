@@ -32,7 +32,7 @@ struct parsing_block {
 class parser {
  public:
   parser(std::string_view input, logger& logging);
-  parser(std::string_view input, const grammar_options& options, logger& logging);
+  parser(std::string_view input, const grammar_options& options, const std::set<std::string>& bindings, logger& logging);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
@@ -66,6 +66,7 @@ class parser {
   grammar_options options;
   lexer lex;
   logger& logging;
+  std::set<std::string> base_bindings;
 
   std::vector<int> nested_loops;
   bool recover = false;

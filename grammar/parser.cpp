@@ -277,20 +277,20 @@ const std::set<std::string> predeclared_symbols = {
 
 }  // namespace
 
-parser::parser(std::string_view input, logger& logging) : parser(input, grammar_options{}, logging) {
+parser::parser(std::string_view input, logger& logging) : parser(input, grammar_options{}, {}, logging) {
 }
 
-parser::parser(std::string_view input, const grammar_options& options, logger& logging)
-    : options(options), lex(input, options, logging), logging(logging), nested_loops(1) {
+parser::parser(std::string_view input, const grammar_options& options, const std::set<std::string>& bindings, logger& logging)
+    : options(options), lex(input, options, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
+  base_bindings.insert(predeclared_symbols.begin(), predeclared_symbols.end());
   lex.next_token();
 }
 
 File* parser::parse_file(Arena& arena) {
-  // TODO(lmirelmann): Allow a mechanism to define custom bindings.
   File* result = Arena::Create<File>(&arena);
 
   // Predeclared block.
-  create_block(predeclared_symbols, {}, nullptr);
+  create_block(base_bindings, {}, nullptr);
   // The "file block" and "module block" are defined the other way around
   // than the spec. Given that there is no overlap between these two, this should
   // not have any side-effects.
@@ -1296,6 +1296,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
 
+        create_block({}, {}, nullptr);
         frames.emplace_back(frame{
           .state = parser_state::parse_list_final,
         });
@@ -1316,7 +1317,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               expression->Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
               expression->Swap(top.primary->mutable_list_comprehension()->mutable_test());
             }
-            create_block({}, {}, top.primary->mutable_list_comprehension()->mutable_comprehension_binding());
+            parser_blocks.back().id_store = top.primary->mutable_list_comprehension()->mutable_comprehension_binding();
             frames.emplace_back(frame{
               .state = parser_state::parse_list_comprehension_final,
               .primary = top.primary,
@@ -1350,9 +1351,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_list_comprehension_final:
-        drop_block();
+        resolve(top.primary->mutable_list_comprehension()->mutable_test());
         break;
       case parser_state::parse_list_final:
+        drop_block();
         if (!expect(token_type::rbracket)) {
           break;
         }
@@ -1366,6 +1368,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           break;
         }
 
+        create_block({}, {}, nullptr);
         frames.emplace_back(frame{
           .state = parser_state::parse_dict_final,
         });
@@ -1386,7 +1389,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               entry->Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
               entry->Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
             }
-            create_block({}, {}, top.primary->mutable_dictionary_comprehension()->mutable_comprehension_binding());
+            parser_blocks.back().id_store = top.primary->mutable_dictionary_comprehension()->mutable_comprehension_binding();
             frames.emplace_back(frame{
               .state = parser_state::parse_dict_comprehension_final,
               .primary = top.primary,
@@ -1420,9 +1423,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_dict_comprehension_final:
-        drop_block();
+        resolve(top.primary->mutable_dictionary_comprehension()->mutable_entry()->mutable_key());
+        resolve(top.primary->mutable_dictionary_comprehension()->mutable_entry()->mutable_value());
         break;
       case parser_state::parse_dict_final:
+        drop_block();
         expect(token_type::rbrace);
         break;
       case parser_state::parse_entry:
@@ -1864,6 +1869,8 @@ void parser::drop_block() {
     if (pos == parser_blocks.back().identifiers.end()) {
       if (parser_blocks.size() == 1) {
         add_error("name '" + entry.first->name() + "' is not defined", identifier_positions[entry.first]);
+        entry.first->set_frame(-1);
+        entry.first->set_pos_in_frame(-1);
       } else {
         parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry.first, entry.second + 1);
       }
