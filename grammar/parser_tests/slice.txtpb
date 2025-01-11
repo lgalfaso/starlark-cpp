@@ -1,3 +1,53 @@
+module_binding: "a"
+module_binding: "b"
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          list_expression { }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 0
+            pos_in_frame: 1
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          list_expression { }
+        }
+      }
+    }
+  }
+}
 statement {
   assign_statement {
     lhs {
@@ -8,6 +58,8 @@ statement {
               identifier {
                 name: "a"
                 nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
             index {
@@ -41,6 +93,8 @@ statement {
               identifier {
                 name: "a"
                 nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
             slice {
@@ -69,6 +123,8 @@ statement {
               identifier {
                 name: "a"
                 nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
             slice {
@@ -102,6 +158,8 @@ statement {
               identifier {
                 name: "a"
                 nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
             slice {
@@ -135,6 +193,8 @@ statement {
               identifier {
                 name: "a"
                 nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
             slice {
@@ -171,8 +231,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -199,8 +261,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -232,8 +296,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -265,8 +331,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -303,8 +371,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -336,8 +406,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -374,8 +446,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -412,8 +486,10 @@ statement {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
             slice {
@@ -457,8 +533,10 @@ statement {
               slice_expression {
                 primary_expression {
                   identifier {
-                    name: "a"
-                    nfkc_name: "a"
+                    name: "b"
+                    nfkc_name: "b"
+                    frame: 0
+                    pos_in_frame: 1
                   }
                 }
                 index {

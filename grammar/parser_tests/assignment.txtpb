@@ -9,6 +9,8 @@ statement {
           identifier {
             name: "foo"
             nfkc_name: "foo"
+            frame: 0
+            pos_in_frame: 2
           }
         }
       }
@@ -32,6 +34,8 @@ statement {
             identifier {
               name: "a"
               nfkc_name: "a"
+              frame: 0
+              pos_in_frame: 0
             }
           }
         }
@@ -40,6 +44,8 @@ statement {
             identifier {
               name: "b"
               nfkc_name: "b"
+              frame: 0
+              pos_in_frame: 1
             }
           }
         }
@@ -53,6 +59,8 @@ statement {
             identifier {
               name: "b"
               nfkc_name: "b"
+              frame: 0
+              pos_in_frame: 1
             }
           }
         }
@@ -61,6 +69,8 @@ statement {
             identifier {
               name: "a"
               nfkc_name: "a"
+              frame: 0
+              pos_in_frame: 0
             }
           }
         }

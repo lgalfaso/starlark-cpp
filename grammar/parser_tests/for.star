@@ -1,4 +1,5 @@
 def foo():
+  x = 1
   for a in [x]:
     pass
   for a, b in x:

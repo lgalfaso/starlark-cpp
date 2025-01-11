@@ -1,3 +1,5 @@
+words = []
+identifier = 1
 identifier
 1234
 3.14
@@ -20,7 +22,7 @@ b"these are bytes"
 (1, 2)
 (1 + 2) * 3
 [a, b] = [b, a]
-a = 1 if True else 2
+c = 1 if True else 2
 def foo():
   a += 1
 

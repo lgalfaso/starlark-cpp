@@ -69,8 +69,14 @@ const std::map<token_type, AssignStmt::AssignOperator> assign_ops = {
   {token_type::greater_greater_equals, AssignStmt::GREATER_GREATER_EQUALS},
 };
 
-bool is_target(const expression_frame& frame) {
-  std::vector<expression_frame> frames{frame};
+struct target_frame {
+  const starlark::Expression* expression = nullptr;
+  const starlark::PrimaryExpr* primary_expression = nullptr;
+  const starlark::Test* test = nullptr;
+};
+
+bool is_target(const target_frame& frame) {
+  std::vector<target_frame> frames{frame};
   do {
     auto top = frames.back();
     frames.pop_back();
@@ -93,13 +99,13 @@ bool is_target(const expression_frame& frame) {
           return false;
         case PrimaryExpr::kListExpression:
           for (const auto& item : top.primary_expression->list_expression().element()) {
-            frames.push_back(expression_frame{
+            frames.push_back(target_frame{
               .test = &item,
             });
           }
           break;
         case PrimaryExpr::kExpression:
-          frames.push_back(expression_frame{
+          frames.push_back(target_frame{
             .expression = &top.primary_expression->expression(),
           });
           break;
@@ -110,13 +116,13 @@ bool is_target(const expression_frame& frame) {
         case Expression::kValue:
         case Expression::EXPRESSION_TYPE_NOT_SET:
         default:
-          frames.push_back(expression_frame{
+          frames.push_back(target_frame{
             .test = &top.expression->value(),
           });
           break;
         case Expression::kTuple:
           for (const auto& element : top.expression->tuple().value()) {
-            frames.push_back(expression_frame{
+            frames.push_back(target_frame{
               .test = &element,
             });
           }
@@ -127,7 +133,7 @@ bool is_target(const expression_frame& frame) {
       if (!top.test->has_primary_expression()) {
         return false;
       }
-      frames.push_back(expression_frame{
+      frames.push_back(target_frame{
         .primary_expression = &top.test->primary_expression(),
       });
     }
@@ -136,13 +142,13 @@ bool is_target(const expression_frame& frame) {
 }
 
 bool is_target(const PrimaryExpr& primary_expression) {
-  return is_target(expression_frame{
+  return is_target(target_frame{
     .primary_expression = &primary_expression,
   });
 }
 
 bool is_target(const Expression& expression) {
-  return is_target(expression_frame{
+  return is_target(target_frame{
     .expression = &expression,
   });
 }
@@ -189,10 +195,12 @@ enum class parser_state {
   parse_list,
   parse_list_0,
   parse_list_index_0,
+  parse_list_comprehension_final,
   parse_list_final,
   parse_dict,
   parse_dict_0,
   parse_dict_index_0,
+  parse_dict_comprehension_final,
   parse_dict_final,
   parse_entry,
   parse_entry_0,
@@ -200,6 +208,8 @@ enum class parser_state {
   parse_comp_clauses_0,
   parse_argument,
   parse_argument_0,
+  parse_resolve_test,
+  parse_resolve_expression,
 };
 
 struct frame {
@@ -269,19 +279,20 @@ parser::parser(std::string_view input, const grammar_options& options, logger& l
 }
 
 File* parser::parse_file(Arena& arena) {
-  // TODO(lmirelmann): Put the binding on the identifiers
-  // TODO(lmirelmann): Add validation on identifier use
-  // Predeclared block.
-  create_block(predeclared_symbols, nullptr);
+  // TODO(lmirelmann): Allow a mechanism to define custom bindings.
   File* result = Arena::Create<File>(&arena);
+
+  // Predeclared block.
+  create_block(predeclared_symbols, {}, nullptr);
   // The "file block" and "module block" are defined the other way around
   // than the spec. Given that there is no overlap between these two, this should
   // not have any side-effects.
   // Context: https://github.com/bazelbuild/starlark/issues/293
   // File block.
-  create_block({}, result->mutable_file_binding());
+  create_block({}, {}, result->mutable_file_binding());
   // Module block.
-  create_block({}, result->mutable_module_binding());
+  create_block({}, {}, result->mutable_module_binding());
+
   while (lex.current_token().type() != token_type::eof) {
     if (lex.current_token().type() == token_type::newline) {
       lex.next_token();
@@ -290,10 +301,14 @@ File* parser::parse_file(Arena& arena) {
     }
   }
   assert(parse_parameter_identifiers.empty());
-  assert(parser_blocks.size() == 3);
-  // Drop the module block and file block
-  drop_block();
-  drop_block();
+  assert(nested_loops.empty());
+  assert(is_top_level_block());
+
+  // Force the resolution of the predefined, module and file blocks.
+  while (!parser_blocks.empty()) {
+    drop_block();
+  }
+  identifier_positions.clear();
   return result;
 }
 
@@ -404,7 +419,11 @@ bool parser::expect(token_type expected_token) {
 }
 
 void parser::add_error(const std::string& message) {
-  logging.log(log_level::ERROR, message, module, lex.current_token().start());
+  add_error(message, lex.current_token().start());
+}
+
+void parser::add_error(const std::string& message, position pos) {
+  logging.log(log_level::ERROR, message, module, pos);
   recover = true;
 }
 
@@ -438,12 +457,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
 
           // If this is a top-level function definition, then check whether this is causing a redefinition
           // with a previous `load` statement.
-          if (parser_blocks.size() == 3) {
-            if (parser_blocks[1].first.contains(def_statement->function_name().nfkc_name())) {
+          if (is_top_level_block()) {
+            if (parser_blocks[1].identifiers.contains(def_statement->function_name().nfkc_name())) {
               add_error("`def` statement redefines previously defined `load` symbol '" + def_statement->function_name().name() + "'");
             }
           }
-          parser_blocks.back().first.insert(def_statement->function_name().nfkc_name());
+          bind(def_statement->function_name());
+          resolve(def_statement->mutable_function_name());
 
           if (!expect(token_type::lparen)) {
             break;
@@ -488,6 +508,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .statements = if_statement->mutable_statement(),
           });
           frames.emplace_back(frame{
+            .state = parser_state::parse_resolve_test,
+            .test = if_statement->mutable_test(),
+          });
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = if_statement->mutable_test(),
           });
@@ -528,7 +552,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_statement_def_0:
-        create_block(parse_parameter_identifiers.back(), top.def_statement->mutable_function_binding());
+        create_block(parse_parameter_identifiers.back().first, parse_parameter_identifiers.back().second, top.def_statement->mutable_function_binding());
         parse_parameter_identifiers.pop_back();
         if (!expect(token_type::rparen)) {
           break;
@@ -563,6 +587,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .statements = elif->mutable_statement(),
           });
           frames.emplace_back(frame{
+            .state = parser_state::parse_resolve_test,
+            .test = elif->mutable_test(),
+          });
+          frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = elif->mutable_test(),
           });
@@ -577,7 +605,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_statement_for_0:
-        bind(top.for_loop_variable);
+        bind_and_resolve(top.for_loop_variable);
         if (capture(token_type::comma)) {
           PrimaryExpr* loop_variable = top.for_statement->add_loop_variable();
           frames.emplace_back(frame{
@@ -596,6 +624,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::in)) {
           break;
         }
+        frames.emplace_back(frame{
+          .state = parser_state::parse_resolve_expression,
+          .expression = top.for_statement->mutable_expression(),
+        });
         frames.emplace_back(frame{
           .state = parser_state::parse_expression,
           .expression = top.for_statement->mutable_expression(),
@@ -688,6 +720,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             lex.next_token();
             if (!is_current(token_type::newline)) {
               frames.emplace_back(frame{
+                .state = parser_state::parse_resolve_expression,
+                .expression = top.statement->mutable_return_statement()->mutable_expression(),
+              });
+              frames.emplace_back(frame{
                 .state = parser_state::parse_expression,
                 .expression = top.statement->mutable_return_statement()->mutable_expression(),
                 .expression_allow_trailing_comma = false,
@@ -712,13 +748,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             top.statement->mutable_load_statement()->set_module(lex.current_token().string_value());
             lex.next_token();
-            if (is_current(token_type::rparen)) {
-              add_warning("Expect to load at least one symbol");
-            }
+            bool loaded_symbol = false;
             while (capture(token_type::comma)) {
               if (is_current(token_type::rparen)) {
                 break;
               }
+              loaded_symbol = true;
               auto* load_param = top.statement->mutable_load_statement()->add_load_param();
               if (is_current(token_type::identifier)) {
                 set_identifier(*load_param->mutable_local_name());
@@ -739,14 +774,22 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 load_param->mutable_local_name()->set_name(load_param->remote_name());
                 load_param->mutable_local_name()->set_nfkc_name(to_nfkc(load_param->remote_name()));
               }
+              resolve(load_param->mutable_local_name());
               if (!symbols.insert(load_param->local_name().nfkc_name()).second) {
                 add_error("`load` statement defines '" + load_param->local_name().name() + "' more than once");
               }
-              if (parser_blocks.back().first.contains(load_param->local_name().nfkc_name())) {
+              if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name())) {
                 add_error("`load` statement redefines previously defined value '" + load_param->local_name().name() + "'");
               }
-              parser_blocks[1].first.insert(load_param->local_name().nfkc_name());
+              // The spec does not specify whether it is an error to bind to the file block multiple times.
+              // We are taking the possition that if `allow_top_level_rebinding` is `false`, then this is not allowed.
+              if (!parser_blocks[1].identifiers.insert(load_param->local_name().nfkc_name()).second && !options.allow_top_level_rebinding) {
+                add_error("Multiple bindings for the top-level load symbol '" + load_param->local_name().name() + "'");
+              }
               lex.next_token();
+            }
+            if (!loaded_symbol) {
+              add_error("Expect to load at least one symbol");
             }
             expect(token_type::rparen);
             break;
@@ -794,9 +837,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             // Report the error and continue to parse this as an expression
             add_error("Exprecting TARGET");
           }
-          if (op->first == token_type::equals) {
-            bind(&top.statement->expression_statement());
-          }
           if (op->first != token_type::equals && (
               top.statement->expression_statement().has_tuple() ||
               top.statement->expression_statement().value().primary_expression().has_list_expression() ||
@@ -810,13 +850,21 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             assign_statement->mutable_lhs()->Swap(top.statement->mutable_expression_statement());
             assign_statement->Swap(top.statement->mutable_assign_statement());
           }
+          // Assignements and augmented assignment are considered a binding.
+          bind_and_resolve(top.statement->mutable_assign_statement()->mutable_lhs());
           top.statement->mutable_assign_statement()->set_op(op->second);
           lex.next_token();
+          frames.emplace_back(frame{
+            .state = parser_state::parse_resolve_expression,
+            .expression = top.statement->mutable_assign_statement()->mutable_rhs(),
+          });
           frames.emplace_back(frame{
             .state = parser_state::parse_expression,
             .expression = top.statement->mutable_assign_statement()->mutable_rhs(),
             .expression_allow_trailing_comma = false,
           });
+        } else {
+          resolve(top.statement->mutable_expression_statement());
         }
         break;
       case parser_state::parse_expression:
@@ -1261,6 +1309,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               expression->Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
               expression->Swap(top.primary->mutable_list_comprehension()->mutable_test());
             }
+            create_block({}, {}, top.primary->mutable_list_comprehension()->mutable_comprehension_binding());
+            frames.emplace_back(frame{
+              .state = parser_state::parse_list_comprehension_final,
+              .primary = top.primary,
+            });
             frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
               .comp_clauses = top.primary->mutable_list_comprehension()->mutable_clause(),
@@ -1288,6 +1341,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .test = top.primary->mutable_list_expression()->add_element(),
           });
         }
+        break;
+      case parser_state::parse_list_comprehension_final:
+        drop_block();
         break;
       case parser_state::parse_list_final:
         if (!expect(token_type::rbracket)) {
@@ -1323,6 +1379,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               entry->Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
               entry->Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
             }
+            create_block({}, {}, top.primary->mutable_dictionary_comprehension()->mutable_comprehension_binding());
+            frames.emplace_back(frame{
+              .state = parser_state::parse_dict_comprehension_final,
+              .primary = top.primary,
+            });
             frames.emplace_back(frame{
               .state = parser_state::parse_comp_clauses,
               .comp_clauses = top.primary->mutable_dictionary_comprehension()->mutable_clause(),
@@ -1351,6 +1412,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         }
         break;
+      case parser_state::parse_dict_comprehension_final:
+        drop_block();
+        break;
       case parser_state::parse_dict_final:
         expect(token_type::rbrace);
         break;
@@ -1376,7 +1440,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_comp_clauses:
         if (capture(token_type::for_)) {
           auto* comp_clause = top.comp_clauses->Add();
-          create_block({}, comp_clause->mutable_for_clause()->mutable_comprehension_binding());
           auto* comp_clause_primary = comp_clause->mutable_for_clause()->add_loop_variable();
           frames.emplace_back(top);
           frames.emplace_back(frame{
@@ -1390,19 +1453,24 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .primary_must_be_target = true,
           });
         } else if (capture(token_type::if_)) {
+          auto* comp_clause = top.comp_clauses->Add();
           frames.emplace_back(top);
+          frames.emplace_back(frame{
+            .state = parser_state::parse_resolve_test,
+            .test = comp_clause->mutable_if_clause(),
+          });
           // Have to avoid parsing this as an `IfExpr`.
           // This is also not allowing a lambda to be used.
           // Context: https://github.com/bazelbuild/bazel/issues/24469
           frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
-            .test = top.comp_clauses->Add()->mutable_if_clause(),
+            .test = comp_clause->mutable_if_clause(),
             .test_p_precedence = 0,
           });
         }
         break;
       case parser_state::parse_comp_clauses_0:
-        bind(top.comp_clause_primary);
+        bind_and_resolve(top.comp_clause_primary);
         if (capture(token_type::comma)) {
           auto* comp_clause_primary = top.comp_clause->mutable_for_clause()->add_loop_variable();
           frames.emplace_back(frame{
@@ -1416,10 +1484,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .primary_must_be_target = true,
           });
         } else {
-          drop_block();
           if (!expect(token_type::in)) {
             break;
           }
+          frames.emplace_back(frame{
+            .state = parser_state::parse_resolve_test,
+            .test = top.comp_clause->mutable_for_clause()->mutable_in(),
+          });
           // Do not allow `IfExpr` nor lambdas.
           frames.emplace_back(frame{
             .state = parser_state::parse_test_p,
@@ -1523,7 +1594,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_lambda_0:
-        create_block(parse_parameter_identifiers.back(), top.lambda->mutable_function_binding());
+        create_block(parse_parameter_identifiers.back().first,
+                     parse_parameter_identifiers.back().second,
+                     top.lambda->mutable_function_binding());
         parse_parameter_identifiers.pop_back();
         frames.emplace_back(frame{
           .state = parser_state::parse_lambda_final,
@@ -1532,6 +1605,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (!expect(token_type::colon)) {
           break;
         }
+        frames.emplace_back(frame{
+          .state = parser_state::parse_resolve_test,
+          .test = top.lambda->mutable_test(),
+        });
         frames.emplace_back(frame{
           .state = parser_state::parse_test,
           .test = top.lambda->mutable_test(),
@@ -1543,7 +1620,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_parameters:
         if (top.parse_parameters_first || capture(token_type::comma)) {
           if (top.parse_parameters_first) {
-            parse_parameter_identifiers.emplace_back(std::set<std::string>{});
+            parse_parameter_identifiers.emplace_back(std::set<std::string>{}, std::set<Identifier*>{});
           }
           if (is_current(token_type::identifier)) {
             if (top.found_star_star_parameter) {
@@ -1562,13 +1639,20 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             set_identifier(*param->mutable_identifier());
             if (capture(token_type::equals)) {
               frames.emplace_back(frame{
+                .state = parser_state::parse_resolve_test,
+                .test = param->mutable_initialization(),
+              });
+              frames.emplace_back(frame{
                 .state = parser_state::parse_test,
                 .test = param->mutable_initialization(),
               });
             }
-            if (!parse_parameter_identifiers.back().insert(param->identifier().nfkc_name()).second) {
+            if (!parse_parameter_identifiers.back().first.insert(param->identifier().nfkc_name()).second) {
               add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
             }
+            // The parameters need to be resolved. The issue is that the block does not yet exists so there
+            // is a need to store the Identifiers and resolve them later.
+            parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
           } else if (capture(token_type::star)) {
             if (top.found_star_parameter) {
               add_error("* argument may appear only once");
@@ -1589,9 +1673,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             param->mutable_star();
             if (is_current(token_type::identifier)) {
               set_identifier(*param->mutable_identifier());
-              if (!parse_parameter_identifiers.back().insert(param->identifier().nfkc_name()).second) {
+              if (!parse_parameter_identifiers.back().first.insert(param->identifier().nfkc_name()).second) {
                 add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
               }
+              parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
           } else if (capture(token_type::star_star)) {
             if (top.previous_parameter_was_bare_star) {
@@ -1614,9 +1699,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (!set_identifier(*param->mutable_identifier())) {
               add_error("Expected identifier after STAR_STAR when parsing parameters");
             } else {
-              if (!parse_parameter_identifiers.back().insert(param->identifier().nfkc_name()).second) {
+              if (!parse_parameter_identifiers.back().first.insert(param->identifier().nfkc_name()).second) {
                 add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
               }
+              parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
           } else {
             if (top.previous_parameter_was_bare_star) {
@@ -1632,23 +1718,30 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
         }
         break;
+      case parser_state::parse_resolve_test:
+        resolve(top.test);
+        break;
+      case parser_state::parse_resolve_expression:
+        resolve(top.expression);
+        break;
     }
   } while (!frames.empty());
 }
 
-void parser::bind(const starlark::PrimaryExpr* primary_expression) {
-  bind(expression_frame{
+void parser::bind_and_resolve(starlark::PrimaryExpr* primary_expression) {
+  bind_and_resolve(expression_frame{
     .primary_expression = primary_expression,
   });
 }
 
-void parser::bind(const starlark::Expression* expression) {
-  bind(expression_frame{
+void parser::bind_and_resolve(starlark::Expression* expression) {
+  bind_and_resolve(expression_frame{
     .expression = expression,
   });
 }
 
-void parser::bind(expression_frame frame) {
+void parser::bind_and_resolve(expression_frame frame) {
+  resolve(frame);
   std::vector<expression_frame> frames{frame};
   do {
     auto top = frames.back();
@@ -1659,11 +1752,11 @@ void parser::bind(expression_frame frame) {
         case PrimaryExpr::kSliceExpression:
           break;
         case PrimaryExpr::kIdentifier:
-          if (parser_blocks.size() == 3 &&
-              parser_blocks[1].first.contains(top.primary_expression->identifier().nfkc_name())) {
+          if (is_top_level_block() &&
+              parser_blocks[1].identifiers.contains(top.primary_expression->identifier().nfkc_name())) {
             add_error("Variable '" + top.primary_expression->identifier().name() + "' redefines symbol previously defined by a load statement");
           }
-          parser_blocks.back().first.insert(top.primary_expression->identifier().nfkc_name());
+          bind(top.primary_expression->identifier());
           break;
         case PrimaryExpr::kCallExpression:
         case PrimaryExpr::kIntValue:
@@ -1678,7 +1771,7 @@ void parser::bind(expression_frame frame) {
           add_warning("Unexpected expression to bind");
           break;
         case PrimaryExpr::kListExpression:
-          for (const auto& item : top.primary_expression->list_expression().element()) {
+          for (auto& item : *top.primary_expression->mutable_list_expression()->mutable_element()) {
             frames.push_back(expression_frame{
               .test = &item,
             });
@@ -1686,7 +1779,7 @@ void parser::bind(expression_frame frame) {
           break;
         case PrimaryExpr::kExpression:
           frames.push_back(expression_frame{
-            .expression = &top.primary_expression->expression(),
+            .expression = top.primary_expression->mutable_expression(),
           });
           break;
       }
@@ -1695,7 +1788,7 @@ void parser::bind(expression_frame frame) {
       switch (top.expression->expression_type_case()) {
         case Expression::kValue:
           frames.push_back(expression_frame{
-            .test = &top.expression->value(),
+            .test = top.expression->mutable_value(),
           });
           break;
         case Expression::EXPRESSION_TYPE_NOT_SET:
@@ -1703,7 +1796,7 @@ void parser::bind(expression_frame frame) {
           add_warning("Unexpected expression to bind");
           break;
         case Expression::kTuple:
-          for (const auto& element : top.expression->tuple().value()) {
+          for (auto& element : *top.expression->mutable_tuple()->mutable_value()) {
             frames.push_back(expression_frame{
               .test = &element,
             });
@@ -1717,10 +1810,19 @@ void parser::bind(expression_frame frame) {
         continue;
       }
       frames.push_back(expression_frame{
-        .primary_expression = &top.test->primary_expression(),
+        .primary_expression = top.test->mutable_primary_expression(),
       });
     }
   } while (!frames.empty());
+}
+
+void parser::bind(const starlark::Identifier& identifier) {
+  // The spec states "It is a static error to bind a global variable already explicitly bound in the file"
+  // This leaves to interpretation whether a `def` can be rebound. The rule followed is that `def` and variables should
+  // be consistent, follow the same rules, and be handled equally.
+  if (!parser_blocks.back().identifiers.insert(identifier.nfkc_name()).second && is_top_level_block() && !options.allow_top_level_rebinding) {
+    add_error("Multiple bindings for the top-level symbol '" + identifier.name() + "'");
+  }
 }
 
 bool parser::set_identifier(Identifier& identifier) {
@@ -1730,22 +1832,220 @@ bool parser::set_identifier(Identifier& identifier) {
   auto name = lex.current_token().string_value();
   identifier.set_name(name);
   identifier.set_nfkc_name(to_nfkc(name));
+  identifier_positions[&identifier] = lex.current_token().start();
   lex.next_token();
   return true;
 }
 
-void parser::create_block(const std::set<std::string>& symbols, google::protobuf::RepeatedPtrField<std::string>* binding) {
-  // TODO(lmirelmann): Create the structure for pending bindings to resolve.
+void parser::create_block(const std::set<std::string>& symbols,
+                    const std::set<starlark::Identifier*>& identifiers,
+                    google::protobuf::RepeatedPtrField<std::string>* binding) {
   parser_blocks.emplace_back(symbols, binding);
+  for (auto* id : identifiers) {
+    resolve(id);
+  }
 }
 
 void parser::drop_block() {
-  // TODO(lmirelmann): Resolve any pending binding to resolve.
-  // TODO(lmirelmann): Move any pending binding to resolve to the parent block.
-  for (const auto& binding : parser_blocks.back().first) {
-    *parser_blocks.back().second->Add() = binding;
+  if (parser_blocks.back().id_store != nullptr) {
+    for (const auto& binding : parser_blocks.back().identifiers) {
+      *parser_blocks.back().id_store->Add() = binding;
+    }
+  }
+  for (auto& entry : parser_blocks.back().to_resolve) {
+    auto pos = parser_blocks.back().identifiers.find(entry.first->nfkc_name());
+    if (pos == parser_blocks.back().identifiers.end()) {
+      if (parser_blocks.size() == 1) {
+        add_error("name '" + entry.first->name() + "' is not defined", identifier_positions[entry.first]);
+      } else {
+        parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry.first, entry.second + 1);
+      }
+    } else {
+      entry.first->set_frame(entry.second);
+      entry.first->set_pos_in_frame(std::distance(parser_blocks.back().identifiers.begin(), pos));
+    }
   }
   parser_blocks.pop_back();
+}
+
+void parser::resolve(starlark::Identifier* identifier) {
+  parser_blocks.back().to_resolve.emplace_back(identifier, 0);
+}
+
+void parser::resolve(starlark::Test* test) {
+  resolve(expression_frame{
+    .test = test,
+  });
+}
+
+void parser::resolve(starlark::Expression* expression) {
+  resolve(expression_frame{
+    .expression = expression,
+  });
+}
+
+void parser::resolve(expression_frame frame) {
+  std::vector<expression_frame> frames{frame};
+  do {
+    auto top = frames.back();
+    frames.pop_back();
+    if (top.primary_expression != nullptr) {
+      switch (top.primary_expression->primary_expression_type_case()) {
+        case PrimaryExpr::kDotExpression:
+          frames.push_back(expression_frame{
+            .primary_expression = top.primary_expression->mutable_dot_expression()->mutable_primary_expression(),
+          });
+          break;
+        case PrimaryExpr::kSliceExpression:
+          frames.push_back(expression_frame{
+            .primary_expression = top.primary_expression->mutable_slice_expression()->mutable_primary_expression(),
+          });
+          if (top.primary_expression->slice_expression().has_index()) {
+            frames.push_back(expression_frame{
+              .expression = top.primary_expression->mutable_slice_expression()->mutable_index(),
+            });
+          }
+          if (top.primary_expression->slice_expression().slice().has_start()) {
+            frames.push_back(expression_frame{
+              .test = top.primary_expression->mutable_slice_expression()->mutable_slice()->mutable_start(),
+            });
+          }
+          if (top.primary_expression->slice_expression().slice().has_end()) {
+            frames.push_back(expression_frame{
+              .test = top.primary_expression->mutable_slice_expression()->mutable_slice()->mutable_end(),
+            });
+          }
+          if (top.primary_expression->slice_expression().slice().has_step()) {
+            frames.push_back(expression_frame{
+              .test = top.primary_expression->mutable_slice_expression()->mutable_slice()->mutable_step(),
+            });
+          }
+          break;
+        case PrimaryExpr::kIdentifier:
+          resolve(top.primary_expression->mutable_identifier());
+          break;
+        case PrimaryExpr::kCallExpression:
+          frames.push_back(expression_frame{
+            .primary_expression = top.primary_expression->mutable_call_expression()->mutable_primary_expression(),
+          });
+          for (auto& arg : *top.primary_expression->mutable_call_expression()->mutable_argument()) {
+            if (arg.has_value()) {
+              frames.push_back(expression_frame{
+                .test = arg.mutable_value(),
+              });
+            }
+            if (arg.has_named_argument()) {
+              frames.push_back(expression_frame{
+                .test = arg.mutable_named_argument()->mutable_value(),
+              });
+            }
+            if (arg.has_star_argument()) {
+              frames.push_back(expression_frame{
+                .test = arg.mutable_star_argument(),
+
+              });
+            }
+            if (arg.has_star_star_argument()) {
+              frames.push_back(expression_frame{
+                .test = arg.mutable_star_star_argument(),
+              });
+            }
+          }
+          break;
+        case PrimaryExpr::kIntValue:
+        case PrimaryExpr::kFloatValue:
+        case PrimaryExpr::kStringValue:
+        case PrimaryExpr::kBytesValue:
+        case PrimaryExpr::kListComprehension:
+        case PrimaryExpr::kDictionaryComprehension:
+        case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
+        default:
+          break;
+        case PrimaryExpr::kDictionaryExpression:
+          for (auto& item : *top.primary_expression->mutable_dictionary_expression()->mutable_entry()) {
+            frames.push_back(expression_frame{
+              .test = item.mutable_key(),
+            });
+            frames.push_back(expression_frame{
+              .test = item.mutable_value(),
+            });
+          }
+          break;
+        case PrimaryExpr::kListExpression:
+          for (auto& item : *top.primary_expression->mutable_list_expression()->mutable_element()) {
+            frames.push_back(expression_frame{
+              .test = &item,
+            });
+          }
+          break;
+        case PrimaryExpr::kExpression:
+          frames.push_back(expression_frame{
+            .expression = top.primary_expression->mutable_expression(),
+          });
+          break;
+      }
+    }
+    if (top.expression != nullptr) {
+      switch (top.expression->expression_type_case()) {
+        case Expression::kValue:
+          frames.push_back(expression_frame{
+            .test = top.expression->mutable_value(),
+          });
+          break;
+        case Expression::EXPRESSION_TYPE_NOT_SET:
+        default:
+          add_warning("Unexpected expression to resolve");
+          break;
+        case Expression::kTuple:
+          for (auto& element : *top.expression->mutable_tuple()->mutable_value()) {
+            frames.push_back(expression_frame{
+              .test = &element,
+            });
+          }
+          break;
+      }
+    }
+    if (top.test != nullptr) {
+      switch (top.test->test_type_case()) {
+        case Test::kIfExpression:
+          frames.push_back(expression_frame{
+            .test = top.test->mutable_if_expression()->mutable_if_value(),
+          });
+          frames.push_back(expression_frame{
+            .test = top.test->mutable_if_expression()->mutable_if_test(),
+          });
+          frames.push_back(expression_frame{
+            .test = top.test->mutable_if_expression()->mutable_else_value(),
+          });
+          break;
+        case Test::kPrimaryExpression:
+          frames.push_back(expression_frame{
+            .primary_expression = top.test->mutable_primary_expression(),
+          });
+          break;
+        case Test::kUnaryExpression:
+          frames.push_back(expression_frame{
+            .test = top.test->mutable_unary_expression()->mutable_test(),
+          });
+          break;
+        case Test::kBinaryExpression:
+          frames.push_back(expression_frame{
+            .test = top.test->mutable_binary_expression()->mutable_lhs(),
+          });
+          frames.push_back(expression_frame{
+            .test = top.test->mutable_binary_expression()->mutable_rhs(),
+          });
+          break;
+        case Test::kLambdaExpression:
+        case Test::TEST_TYPE_NOT_SET:
+          break;
+      }
+    }
+  } while (!frames.empty());
+}
+
+bool parser::is_top_level_block() const {
+  return parser_blocks.size() == 3;
 }
 
 }  // namespace grammar

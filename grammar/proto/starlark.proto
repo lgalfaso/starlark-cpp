@@ -109,7 +109,6 @@ message LoadStmt {
   }
 }
 
-// TODO(lmirelmann): Maybe merge `Test` and `PrimaryExpr` into a single message?
 message Test {
   oneof test_type {
     IfExpr if_expression = 1;
@@ -199,6 +198,7 @@ message PrimaryExpr {
   message ListComp {
     Test test = 1;
     repeated CompClause clause = 2;
+    repeated string comprehension_binding = 3;
   }
   message DictExpr {
     repeated Entry entry = 1;
@@ -206,6 +206,7 @@ message PrimaryExpr {
   message DictComp {
     Entry entry = 1;
     repeated CompClause clause = 2;
+    repeated string comprehension_binding = 3;
   }
   message CompClause {
     oneof comp_clause_type {
@@ -216,7 +217,6 @@ message PrimaryExpr {
     message ForClause {
       repeated PrimaryExpr loop_variable = 1;
       Test in = 2;
-      repeated string comprehension_binding = 3;
     }
   }
 
@@ -281,5 +281,7 @@ message Expression {
 message Identifier {
   string name = 1;
   string nfkc_name = 2;
+  int64 frame = 3;
+  int64 pos_in_frame = 4;
 }
 

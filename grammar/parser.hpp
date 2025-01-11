@@ -18,9 +18,15 @@
 namespace grammar {
 
 struct expression_frame {
-  const starlark::Expression* expression = nullptr;
-  const starlark::PrimaryExpr* primary_expression = nullptr;
-  const starlark::Test* test = nullptr;
+  starlark::Expression* expression = nullptr;
+  starlark::PrimaryExpr* primary_expression = nullptr;
+  starlark::Test* test = nullptr;
+};
+
+struct parsing_block {
+  std::set<std::string> identifiers;
+  google::protobuf::RepeatedPtrField<std::string>* id_store;
+  std::vector<std::pair<starlark::Identifier*, int>> to_resolve;
 };
 
 class parser {
@@ -36,28 +42,37 @@ class parser {
 
  private:
   void parse_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
-  void bind(const starlark::PrimaryExpr* primary_expression);
-  void bind(const starlark::Expression* expression);
-  void bind(expression_frame frame);
+  void bind_and_resolve(starlark::PrimaryExpr* primary_expression);
+  void bind_and_resolve(starlark::Expression* expression);
+  void bind_and_resolve(expression_frame frame);
+  void bind(const starlark::Identifier& identifier);
   bool set_identifier(starlark::Identifier& id);
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;
   bool expect(token_type expected_token);
   void add_error(const std::string& error_message);
+  void add_error(const std::string& error_message, position);
   void add_warning(const std::string& error_message);
-  void create_block(const std::set<std::string>& symbols, google::protobuf::RepeatedPtrField<std::string>* binding);
+  void create_block(const std::set<std::string>& symbols,
+                    const std::set<starlark::Identifier*>& identifiers,
+                    google::protobuf::RepeatedPtrField<std::string>* binding);
   void drop_block();
+  void resolve(starlark::Identifier* identifier);
+  void resolve(starlark::Test* test);
+  void resolve(starlark::Expression* test);
+  void resolve(expression_frame frame);
+  bool is_top_level_block() const;
 
   grammar_options options;
   lexer lex;
   logger& logging;
 
-  // TODO(lmirelmann): Move outside the class the fields that are only needed when creating the AST.
   std::vector<int> nested_loops;
   bool recover = false;
   bool found_non_load = false;
-  std::vector<std::set<std::string>> parse_parameter_identifiers;
-  std::vector<std::pair<std::set<std::string>, google::protobuf::RepeatedPtrField<std::string>*>> parser_blocks;
+  std::vector<std::pair<std::set<std::string>, std::set<starlark::Identifier*>>> parse_parameter_identifiers;
+  std::vector<parsing_block> parser_blocks;
+  std::map<starlark::Identifier*, position> identifier_positions;
 };
 
 }  // namespace grammar

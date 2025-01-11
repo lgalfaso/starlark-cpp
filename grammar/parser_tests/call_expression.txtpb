@@ -1,3 +1,7 @@
+module_binding: "args"
+module_binding: "bar"
+module_binding: "foo"
+module_binding: "kwargs"
 statement {
   expression_statement {
     value {
@@ -7,6 +11,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
         }
@@ -23,6 +29,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -46,6 +54,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -83,6 +93,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -106,6 +118,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -147,6 +161,8 @@ statement {
                     identifier {
                       name: "foo"
                       nfkc_name: "foo"
+                      frame: 0
+                      pos_in_frame: 2
                     }
                   }
                   argument {
@@ -188,6 +204,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -217,6 +235,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -225,6 +245,8 @@ statement {
                 identifier {
                   name: "bar"
                   nfkc_name: "bar"
+                  frame: 0
+                  pos_in_frame: 1
                 }
               }
             }
@@ -243,6 +265,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -251,6 +275,8 @@ statement {
                 identifier {
                   name: "bar"
                   nfkc_name: "bar"
+                  frame: 0
+                  pos_in_frame: 1
                 }
               }
             }
@@ -269,6 +295,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 2
             }
           }
           argument {
@@ -317,6 +345,8 @@ statement {
                 identifier {
                   name: "args"
                   nfkc_name: "args"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
             }
@@ -327,10 +357,97 @@ statement {
                 identifier {
                   name: "kwargs"
                   nfkc_name: "kwargs"
+                  frame: 0
+                  pos_in_frame: 3
                 }
               }
             }
           }
+        }
+      }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
+      frame: 0
+      pos_in_frame: 2
+    }
+    statement {
+      pass_statement { }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "bar"
+            nfkc_name: "bar"
+            frame: 0
+            pos_in_frame: 1
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          int_value: "1"
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "args"
+            nfkc_name: "args"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          list_expression { }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "kwargs"
+            nfkc_name: "kwargs"
+            frame: 0
+            pos_in_frame: 3
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          dictionary_expression { }
         }
       }
     }

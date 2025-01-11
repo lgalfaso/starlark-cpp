@@ -13,9 +13,9 @@ struct grammar_options {
   // allowed). Enabling this option has the undesirable side-effect that
   // octal and hex escaped sequences will be added literally to the string
   // and not as UTF-8 encoding of the character.
-  // This is one of the options that would have been best not to 
+  // This is one of the options that would have been best not to
   // have but there are libraries(1) that make use of these sequences even
-  // when the spec states: 
+  // when the spec states:
   //
   //     It is an error if the value of an octal or hexadecimal escape is
   //     greater than decimal 127.
@@ -39,6 +39,9 @@ struct grammar_options {
 
   // Whether to allow variadic arguments `*args` and `**kwargs` is calls.
   bool allow_varadic_arguments = true;
+
+  // Whether to allow a top-level rebindings.
+  bool allow_top_level_rebinding = false;
 };
 
 }  // namespace grammar

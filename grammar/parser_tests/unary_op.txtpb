@@ -50,6 +50,8 @@ statement {
             identifier {
               name: "True"
               nfkc_name: "True"
+              frame: 2
+              pos_in_frame: 2
             }
           }
         }
@@ -85,6 +87,8 @@ statement {
                                     identifier {
                                       name: "True"
                                       nfkc_name: "True"
+                                      frame: 2
+                                      pos_in_frame: 2
                                     }
                                   }
                                 }

@@ -2,11 +2,14 @@ module_binding: "bar"
 module_binding: "baz"
 module_binding: "foo"
 module_binding: "man"
+module_binding: "shell"
 statement {
   def_statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
+      frame: 0
+      pos_in_frame: 2
     }
     function_binding: "x"
     statement {
@@ -17,6 +20,8 @@ statement {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }
@@ -28,6 +33,8 @@ statement {
               identifier {
                 name: "True"
                 nfkc_name: "True"
+                frame: 3
+                pos_in_frame: 2
               }
             }
           }
@@ -44,11 +51,15 @@ statement {
     function_name {
       name: "bar"
       nfkc_name: "bar"
+      frame: 0
+      pos_in_frame: 0
     }
     parameter {
       identifier {
         name: "x"
         nfkc_name: "x"
+        frame: 0
+        pos_in_frame: 0
       }
     }
     function_binding: "x"
@@ -59,6 +70,8 @@ statement {
             identifier {
               name: "True"
               nfkc_name: "True"
+              frame: 3
+              pos_in_frame: 2
             }
           }
         }
@@ -71,17 +84,23 @@ statement {
     function_name {
       name: "man"
       nfkc_name: "man"
+      frame: 0
+      pos_in_frame: 3
     }
     parameter {
       identifier {
         name: "x"
         nfkc_name: "x"
+        frame: 0
+        pos_in_frame: 0
       }
       initialization {
         primary_expression {
           identifier {
             name: "True"
             nfkc_name: "True"
+            frame: 2
+            pos_in_frame: 2
           }
         }
       }
@@ -96,6 +115,8 @@ statement {
                 identifier {
                   name: "print"
                   nfkc_name: "print"
+                  frame: 3
+                  pos_in_frame: 21
                 }
               }
               argument {
@@ -104,6 +125,8 @@ statement {
                     identifier {
                       name: "x"
                       nfkc_name: "x"
+                      frame: 0
+                      pos_in_frame: 0
                     }
                   }
                 }
@@ -120,6 +143,8 @@ statement {
     function_name {
       name: "baz"
       nfkc_name: "baz"
+      frame: 0
+      pos_in_frame: 1
     }
     parameter {
       star { }
@@ -128,6 +153,16 @@ statement {
       identifier {
         name: "a"
         nfkc_name: "a"
+        frame: 0
+        pos_in_frame: 0
+      }
+    }
+    parameter {
+      identifier {
+        name: "b"
+        nfkc_name: "b"
+        frame: 0
+        pos_in_frame: 1
       }
     }
     function_binding: "a"
@@ -140,6 +175,8 @@ statement {
               identifier {
                 name: "b"
                 nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
               }
             }
           }
@@ -154,5 +191,88 @@ statement {
         }
       }
     }
+    statement {
+      assign_statement: {
+        lhs {
+          value {
+            primary_expression {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
+              }
+            }
+          }
+        }
+        op: EQUALS
+        rhs {
+          value {
+            primary_expression {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name {
+      name: "shell"
+      nfkc_name: "shell"
+      frame: 0
+      pos_in_frame: 4
+    }
+    parameter {
+      identifier {
+        name: "x"
+        nfkc_name: "x"
+        frame: 0
+        pos_in_frame: 0
+      }
+      initialization {
+        primary_expression {
+          identifier {
+            name: "man"
+            nfkc_name: "man"
+            frame: 0
+            pos_in_frame: 3
+          }
+        }
+      }
+    }
+    statement {
+      expression_statement {
+        value {
+          primary_expression {
+            call_expression {
+              primary_expression {
+                identifier {
+                  name: "print"
+                  nfkc_name: "print"
+                  frame: 3
+                  pos_in_frame: 21
+                }
+              }
+              argument {
+                value {
+                  primary_expression {
+                    identifier {
+                       name: "x"
+                       nfkc_name: "x"
+                       frame: 0
+                       pos_in_frame: 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    function_binding: "x"
   }
 }

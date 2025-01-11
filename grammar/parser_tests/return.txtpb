@@ -5,6 +5,8 @@ statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
+      frame: 0
+      pos_in_frame: 1
     }
     statement {
       return_statement {
@@ -17,6 +19,8 @@ statement {
     function_name {
       name: "bar"
       nfkc_name: "bar"
+      frame: 0
+      pos_in_frame: 0
     }
     statement {
       return_statement {

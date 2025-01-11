@@ -1,3 +1,6 @@
+a = True
+b = True
+c = True
 def foo():
   if True: False
 

@@ -1,6 +1,57 @@
 module_binding: "a"
 module_binding: "b"
+module_binding: "c"
 module_binding: "foo"
+module_binding: "identifier"
+module_binding: "words"
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "words"
+            nfkc_name: "words"
+            frame: 0
+            pos_in_frame: 5
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          list_expression { }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "identifier"
+            nfkc_name: "identifier"
+            frame: 0
+            pos_in_frame: 4
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          int_value: "1"
+        }
+      }
+    }
+  }
+}
 statement {
   expression_statement {
     value {
@@ -8,6 +59,8 @@ statement {
         identifier {
           name: "identifier"
           nfkc_name: "identifier"
+          frame: 0
+          pos_in_frame: 4
         }
       }
     }
@@ -109,21 +162,25 @@ statement {
     value {
       primary_expression {
         list_comprehension {
+          comprehension_binding: "x"
           test {
             primary_expression {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }
           clause {
             for_clause {
-              comprehension_binding: "x"
               loop_variable {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
               in {
@@ -131,6 +188,8 @@ statement {
                   identifier {
                     name: "foo"
                     nfkc_name: "foo"
+                    frame: 1
+                    pos_in_frame: 3
                   }
                 }
               }
@@ -146,21 +205,25 @@ statement {
     value {
       primary_expression {
         list_comprehension {
+          comprehension_binding: "x"
           test {
             primary_expression {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }
           clause {
             for_clause {
-              comprehension_binding: "x"
               loop_variable {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
               in {
@@ -168,6 +231,8 @@ statement {
                   identifier {
                     name: "foo"
                     nfkc_name: "foo"
+                    frame: 1
+                    pos_in_frame: 3
                   }
                 }
               }
@@ -183,6 +248,8 @@ statement {
                         identifier {
                           name: "x"
                           nfkc_name: "x"
+                          frame: 0
+                          pos_in_frame: 0
                         }
                       }
                     }
@@ -213,28 +280,34 @@ statement {
     value {
       primary_expression {
         list_comprehension {
+          comprehension_binding: "x"
+          comprehension_binding: "y"
           test {
             primary_expression {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }
           clause {
             for_clause {
-              comprehension_binding: "x"
-              comprehension_binding: "y"
               loop_variable {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
               loop_variable {
                 identifier {
                   name: "y"
                   nfkc_name: "y"
+                  frame: 0
+                  pos_in_frame: 1
                 }
               }
               in {
@@ -242,6 +315,8 @@ statement {
                   identifier {
                     name: "foo"
                     nfkc_name: "foo"
+                    frame: 1
+                    pos_in_frame: 3
                   }
                 }
               }
@@ -257,6 +332,8 @@ statement {
                         identifier {
                           name: "x"
                           nfkc_name: "x"
+                          frame: 0
+                          pos_in_frame: 0
                         }
                       }
                     }
@@ -353,12 +430,15 @@ statement {
     value {
       primary_expression {
         dictionary_comprehension {
+          comprehension_binding: "x"
           entry {
             key {
               primary_expression {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
             }
@@ -367,17 +447,20 @@ statement {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
             }
           }
           clause {
             for_clause {
-              comprehension_binding: "x"
               loop_variable {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
               in {
@@ -385,6 +468,8 @@ statement {
                   identifier {
                     name: "words"
                     nfkc_name: "words"
+                    frame: 1
+                    pos_in_frame: 5
                   }
                 }
               }
@@ -400,12 +485,15 @@ statement {
     value {
       primary_expression {
         dictionary_comprehension {
+          comprehension_binding: "x"
           entry {
             key {
               primary_expression {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
             }
@@ -416,6 +504,8 @@ statement {
                     identifier {
                       name: "x"
                       nfkc_name: "x"
+                      frame: 0
+                      pos_in_frame: 0
                     }
                   }
                 }
@@ -425,6 +515,8 @@ statement {
                     identifier {
                       name: "x"
                       nfkc_name: "x"
+                      frame: 0
+                      pos_in_frame: 0
                     }
                   }
                 }
@@ -433,11 +525,12 @@ statement {
           }
           clause {
             for_clause {
-              comprehension_binding: "x"
               loop_variable {
                 identifier {
                   name: "x"
                   nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
               in {
@@ -445,6 +538,8 @@ statement {
                   identifier {
                     name: "words"
                     nfkc_name: "words"
+                    frame: 1
+                    pos_in_frame: 5
                   }
                 }
               }
@@ -460,6 +555,8 @@ statement {
                         identifier {
                           name: "x"
                           nfkc_name: "x"
+                          frame: 0
+                          pos_in_frame: 0
                         }
                       }
                     }
@@ -572,6 +669,8 @@ statement {
                 identifier {
                   name: "a"
                   nfkc_name: "a"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
             }
@@ -580,6 +679,8 @@ statement {
                 identifier {
                   name: "b"
                   nfkc_name: "b"
+                  frame: 0
+                  pos_in_frame: 1
                 }
               }
             }
@@ -597,6 +698,8 @@ statement {
                 identifier {
                   name: "b"
                   nfkc_name: "b"
+                  frame: 0
+                  pos_in_frame: 1
                 }
               }
             }
@@ -605,6 +708,8 @@ statement {
                 identifier {
                   name: "a"
                   nfkc_name: "a"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
             }
@@ -620,8 +725,10 @@ statement {
       value {
         primary_expression {
           identifier {
-            name: "a"
-            nfkc_name: "a"
+            name: "c"
+            nfkc_name: "c"
+            frame: 0
+            pos_in_frame: 2
           }
         }
       }
@@ -640,6 +747,8 @@ statement {
               identifier {
                 name: "True"
                 nfkc_name: "True"
+                frame: 2
+                pos_in_frame: 2
               }
             }
           }
@@ -658,7 +767,10 @@ statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
+      frame: 0
+      pos_in_frame: 3
     }
+    function_binding: "a"
     statement {
       assign_statement {
         lhs {
@@ -667,6 +779,8 @@ statement {
               identifier {
                 name: "a"
                 nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }

@@ -8,3 +8,8 @@ foo(bar = 1)
 foo(*bar)
 foo(**bar)
 foo(1,2,a=3,b=4,*args,**kwargs)
+def foo():
+  pass
+bar = 1
+args = []
+kwargs = {}

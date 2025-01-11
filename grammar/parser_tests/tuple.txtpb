@@ -1,4 +1,5 @@
 module_binding: "a"
+module_binding: "b"
 module_binding: "foo"
 statement {
   assign_statement {
@@ -8,6 +9,8 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
       }
@@ -30,8 +33,10 @@ statement {
       value {
         primary_expression {
           identifier {
-            name: "a"
-            nfkc_name: "a"
+            name: "b"
+            nfkc_name: "b"
+            frame: 0
+            pos_in_frame: 1
           }
         }
       }
@@ -63,6 +68,8 @@ statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
+      frame: 0
+      pos_in_frame: 2
     }
     function_binding: "a"
     statement {
@@ -75,6 +82,8 @@ statement {
                   identifier {
                     name: "a"
                     nfkc_name: "a"
+                    frame: 0
+                    pos_in_frame: 0
                   }
                 }
               }
@@ -111,6 +120,8 @@ statement {
                     identifier {
                       name: "print"
                       nfkc_name: "print"
+                      frame: 3
+                      pos_in_frame: 21
                     }
                   }
                   argument {
@@ -119,6 +130,8 @@ statement {
                         identifier {
                           name: "a"
                           nfkc_name: "a"
+                          frame: 0
+                          pos_in_frame: 0
                         }
                       }
                     }

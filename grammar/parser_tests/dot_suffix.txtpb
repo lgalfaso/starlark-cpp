@@ -1,3 +1,28 @@
+module_binding: "foo"
+statement {
+  assign_statement: {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "foo"
+            nfkc_name: "foo"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          list_expression { }
+        }
+      }
+    }
+  }
+}
 statement {
   expression_statement {
     value {
@@ -7,6 +32,8 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
+              frame: 0
+              pos_in_frame: 0
             }
           }
           identifier {
@@ -29,6 +56,8 @@ statement {
                 identifier {
                   name: "foo"
                   nfkc_name: "foo"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
               identifier {

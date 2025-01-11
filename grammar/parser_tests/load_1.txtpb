@@ -15,6 +15,8 @@ statement {
       local_name {
         name: "fn"
         nfkc_name: "fn"
+        frame: 1
+        pos_in_frame: 0
       }
       remote_name: "fn"
     }

@@ -1,14 +1,22 @@
-file_binding: "bar"
-file_binding: "man"
-file_binding: "x"
+file_binding: "bar_1"
+file_binding: "bar_2"
+file_binding: "man_1"
+file_binding: "man_2"
+file_binding: "man_3"
+file_binding: "x_1"
+file_binding: "x_2"
 statement {
   load_statement {
     module: "foo"
-  }
-}
-statement {
-  load_statement {
-    module: "foo"
+    load_param {
+      local_name {
+        name: "bar_1"
+        nfkc_name: "bar_1"
+        frame: 1
+        pos_in_frame: 0
+      }
+      remote_name: "bar_1"
+    }
   }
 }
 statement {
@@ -16,8 +24,24 @@ statement {
     module: "foo"
     load_param {
       local_name {
-        name: "bar"
-        nfkc_name: "bar"
+        name: "bar_2"
+        nfkc_name: "bar_2"
+        frame: 1
+        pos_in_frame: 1
+      }
+      remote_name: "bar_2"
+    }
+  }
+}
+statement {
+  load_statement {
+    module: "foo"
+    load_param {
+      local_name {
+        name: "man_1"
+        nfkc_name: "man_1"
+        frame: 1
+        pos_in_frame: 2
       }
       remote_name: "bar"
     }
@@ -28,39 +52,19 @@ statement {
     module: "foo"
     load_param {
       local_name {
-        name: "bar"
-        nfkc_name: "bar"
-      }
-      remote_name: "bar"
-    }
-  }
-}
-statement {
-  load_statement {
-    module: "foo"
-    load_param {
-      local_name {
-        name: "man"
-        nfkc_name: "man"
-      }
-      remote_name: "bar"
-    }
-  }
-}
-statement {
-  load_statement {
-    module: "foo"
-    load_param {
-      local_name {
-        name: "man"
-        nfkc_name: "man"
+        name: "man_2"
+        nfkc_name: "man_2"
+        frame: 1
+        pos_in_frame: 3
       }
       remote_name: "bar"
     }
     load_param {
       local_name {
-        name: "x"
-        nfkc_name: "x"
+        name: "x_1"
+        nfkc_name: "x_1"
+        frame: 1
+        pos_in_frame: 5
       }
       remote_name: "y"
     }
@@ -71,15 +75,19 @@ statement {
     module: "foo"
     load_param {
       local_name {
-        name: "man"
-        nfkc_name: "man"
+        name: "man_3"
+        nfkc_name: "man_3"
+        frame: 1
+        pos_in_frame: 4
       }
       remote_name: "bar"
     }
     load_param {
       local_name {
-        name: "x"
-        nfkc_name: "x"
+        name: "x_2"
+        nfkc_name: "x_2"
+        frame: 1
+        pos_in_frame: 6
       }
       remote_name: "y"
     }

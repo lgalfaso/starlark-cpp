@@ -4,15 +4,44 @@ statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
+      frame: 0
+      pos_in_frame: 0
     }
     function_binding: "a"
     function_binding: "b"
+    function_binding: "x"
+    statement {
+      assign_statement {
+        lhs {
+          value {
+            primary_expression {
+              identifier {
+                name: "x"
+                nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 2
+              }
+            }
+          }
+        }
+        op: EQUALS
+        rhs {
+          value {
+            primary_expression {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
     statement {
       for_statement {
         loop_variable {
           identifier {
             name: "a"
             nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         expression {
@@ -24,6 +53,8 @@ statement {
                     identifier {
                       name: "x"
                       nfkc_name: "x"
+                      frame: 0
+                      pos_in_frame: 2
                     }
                   }
                 }
@@ -43,12 +74,16 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         loop_variable {
           identifier {
             name: "b"
             nfkc_name: "b"
+            frame: 0
+            pos_in_frame: 1
           }
         }
         expression {
@@ -57,6 +92,8 @@ statement {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 2
               }
             }
           }
@@ -73,6 +110,8 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         expression {
@@ -81,6 +120,8 @@ statement {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 2
               }
             }
           }
@@ -97,6 +138,8 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         expression {
@@ -105,6 +148,8 @@ statement {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 2
               }
             }
           }
@@ -121,6 +166,8 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         expression {
@@ -129,6 +176,8 @@ statement {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 2
               }
             }
           }
@@ -147,6 +196,8 @@ statement {
               identifier {
                 name: "a"
                 nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
             identifier {
@@ -161,6 +212,8 @@ statement {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 2
               }
             }
           }
@@ -181,6 +234,8 @@ statement {
                     identifier {
                       name: "a"
                       nfkc_name: "a"
+                      frame: 0
+                      pos_in_frame: 0
                     }
                   }
                 }
@@ -189,6 +244,8 @@ statement {
                     identifier {
                       name: "b"
                       nfkc_name: "b"
+                      frame: 0
+                      pos_in_frame: 1
                     }
                   }
                 }
@@ -201,6 +258,8 @@ statement {
               identifier {
                 name: "x"
                 nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 2
               }
             }
           }
@@ -217,6 +276,8 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         expression {

@@ -14,4 +14,5 @@ def foo_17(a, *, b):
   pass
 def bar_01(bar_01 = lambda bar_01: True):
   pass
-
+def g(a, *args, b=2, c):
+  print(a, b, c, args)

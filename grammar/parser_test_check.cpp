@@ -60,7 +60,7 @@ TEST(Parser, TestCase) {
     struct stat sb;
     ASSERT_GE(fstat(starlark_fd, &sb), 0);
     starlark_program.resize(sb.st_size);
-    read(starlark_fd, starlark_program.data(), sb.st_size); 
+    read(starlark_fd, starlark_program.data(), sb.st_size);
   }
 
   logger logging;
