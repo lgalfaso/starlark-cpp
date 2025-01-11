@@ -542,10 +542,6 @@ void lexer::read_string() {
             }
             break;
           case 'u':
-            if (is_bytes) {
-              add_error("Invalid escape sequence, the escape sequence \\u cannot be used when encoding `bytes`.", escape_start);
-              found_errors = true;
-            }
             source_code.skip();
             if (!read_escaped_char(result, true, 0x10ffff, 4, 4, 16)) {
               add_error("Invalid escape sequence", escape_start);
@@ -553,10 +549,6 @@ void lexer::read_string() {
             }
             break;
           case 'U':
-            if (is_bytes) {
-              add_error("Invalid escape sequence, the escape sequence \\U cannot be used when encoding `bytes`.", escape_start);
-              found_errors = true;
-            }
             source_code.skip();
             if (!read_escaped_char(result, true, 0x10ffff, 8, 8, 16)) {
               add_error("Invalid escape sequence", escape_start);

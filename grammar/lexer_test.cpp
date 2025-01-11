@@ -457,16 +457,14 @@ foo = b"bar\x7f"
 foo = b"bar\x80"
 )starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 BYTES(\"bar\\200\"):2,7:2,17 NEWLINE:2,17:2,18 EOF:3,1:3,1");
-  checkErrors(R"starlark(
+  check(R"starlark(
 foo = b"bar\u1234"
 )starlark",
-      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"b\\\"bar\\\\u1234\\\"\"):2,7:2,19 NEWLINE:2,19:2,20 EOF:3,1:3,1",
-      { "Invalid escape sequence, the escape sequence \\u cannot be used when encoding `bytes`.:2,12" });
-  checkErrors(R"starlark(
+      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 BYTES(\"bar\\341\\210\\264\"):2,7:2,19 NEWLINE:2,19:2,20 EOF:3,1:3,1");
+  check(R"starlark(
 foo = b"bar\U00012345"
 )starlark",
-      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"b\\\"bar\\\\U00012345\\\"\"):2,7:2,23 NEWLINE:2,23:2,24 EOF:3,1:3,1",
-      { "Invalid escape sequence, the escape sequence \\U cannot be used when encoding `bytes`.:2,12" });
+      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 BYTES(\"bar\\360\\222\\215\\205\"):2,7:2,23 NEWLINE:2,23:2,24 EOF:3,1:3,1");
 }
 
 TEST(LexerTest, InNotIn) {
