@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package starlark;
 
-// TODO(lmirelmann): Maybe remove all the inner messages and make all messages to be top-level.
-
 message File {
   repeated Statement statement = 1;
   repeated string module_binding = 2;
@@ -39,22 +37,22 @@ message Parameter {
     Star star = 3;
     StarStar star_star = 4;
   }
-
-  message Star {}
-
-  message StarStar {}
 }
+
+message Star {}
+
+message StarStar {}
 
 message IfStmt {
   Test test = 1;
   repeated Statement statement = 2;
   repeated ElseIf elif = 3;
   repeated Statement else_statement = 4;
+}
 
-  message ElseIf {
-    Test test = 1;
-    repeated Statement statement = 2;
-  }
+message ElseIf {
+  Test test = 1;
+  repeated Statement statement = 2;
 }
 
 message ForStmt {
@@ -102,11 +100,11 @@ message AssignStmt {
 message LoadStmt {
   string module = 1;
   repeated LoadParams load_param = 2;
+}
 
-  message LoadParams {
-    Identifier local_name = 1;
-    string remote_name = 2;
-  }
+message LoadParams {
+  Identifier local_name = 1;
+  string remote_name = 2;
 }
 
 message Test {
@@ -117,64 +115,63 @@ message Test {
     BinaryExpr binary_expression = 4;
     LambdaExpr lambda_expression  = 5;
   }
+}
 
-  message IfExpr {
-    Test if_value = 1;
-    Test if_test = 2;
-    Test else_value = 3;
-  }
+message IfExpr {
+  Test if_value = 1;
+  Test if_test = 2;
+  Test else_value = 3;
+}
 
-  message UnaryExpr {
-    UnaryOperator operator = 1;
-    Test test = 2;
+message UnaryExpr {
+  UnaryOperator operator = 1;
+  Test test = 2;
 
-    enum UnaryOperator {
-      UNNKNOWN = 0;
-      PLUS = 1;
-      MINUS = 2;
-      TILDE = 3;
-      NOT = 4;
-    }
-  }
-
-  message BinaryExpr {
-    Test lhs = 1;
-    BinaryOperator operator = 2;
-    Test rhs = 3;
-
-    enum BinaryOperator {
-      UNKNOWN = 0;
-      OR = 1;
-      AND = 2;
-      EQUALS_EQUALS = 3;
-      BANG_EQUALS = 4;
-      LESS_THAN = 5;
-      GREATER_THAN = 6;
-      LESS_THAN_EQUALS = 7;
-      GREATER_THAN_EQUALS = 8;
-      IN = 9;
-      NOT_IN = 10;
-      PIPE = 11;
-      HAT = 12;
-      AMPERSAND = 13;
-      LESS_THAN_LESS_THAN = 14;
-      GREATER_THAN_GREATER_THAN = 15;
-      MINUS = 16;
-      PLUS = 17;
-      STAR = 18;
-      PERCENT = 19;
-      SLASH = 20;
-      SLASH_SLASH = 21;
-    }
-  }
-
-  message LambdaExpr {
-    repeated Parameter parameter = 1;
-    Test test = 2;
-    repeated string function_binding = 3;
+  enum UnaryOperator {
+    UNNKNOWN = 0;
+    PLUS = 1;
+    MINUS = 2;
+    TILDE = 3;
+    NOT = 4;
   }
 }
 
+message BinaryExpr {
+  Test lhs = 1;
+  BinaryOperator operator = 2;
+  Test rhs = 3;
+
+  enum BinaryOperator {
+    UNKNOWN = 0;
+    OR = 1;
+    AND = 2;
+    EQUALS_EQUALS = 3;
+    BANG_EQUALS = 4;
+    LESS_THAN = 5;
+    GREATER_THAN = 6;
+    LESS_THAN_EQUALS = 7;
+    GREATER_THAN_EQUALS = 8;
+    IN = 9;
+    NOT_IN = 10;
+    PIPE = 11;
+    HAT = 12;
+    AMPERSAND = 13;
+    LESS_THAN_LESS_THAN = 14;
+    GREATER_THAN_GREATER_THAN = 15;
+    MINUS = 16;
+    PLUS = 17;
+    STAR = 18;
+    PERCENT = 19;
+    SLASH = 20;
+    SLASH_SLASH = 21;
+  }
+}
+
+message LambdaExpr {
+  repeated Parameter parameter = 1;
+  Test test = 2;
+  repeated string function_binding = 3;
+}
 message PrimaryExpr {
   oneof primary_expression_type {
     DotExpr dot_expression = 1;
@@ -191,80 +188,84 @@ message PrimaryExpr {
     DictComp dictionary_comprehension = 12;
     Expression expression = 13;
   }
+}
 
-  message ListExpr {
-    repeated Test element = 1;
-  }
-  message ListComp {
-    Test test = 1;
-    repeated CompClause clause = 2;
-    repeated string comprehension_binding = 3;
-  }
-  message DictExpr {
-    repeated Entry entry = 1;
-  }
-  message DictComp {
-    Entry entry = 1;
-    repeated CompClause clause = 2;
-    repeated string comprehension_binding = 3;
-  }
-  message CompClause {
-    oneof comp_clause_type {
-      ForClause for_clause = 1;
-      Test if_clause = 2;
-    }
+message ListExpr {
+  repeated Test element = 1;
+}
 
-    message ForClause {
-      repeated PrimaryExpr loop_variable = 1;
-      Test in = 2;
-    }
+message ListComp {
+  Test test = 1;
+  repeated CompClause clause = 2;
+  repeated string comprehension_binding = 3;
+}
+
+message DictExpr {
+  repeated Entry entry = 1;
+}
+
+message DictComp {
+  Entry entry = 1;
+  repeated CompClause clause = 2;
+  repeated string comprehension_binding = 3;
+}
+
+message CompClause {
+  oneof comp_clause_type {
+    ForClause for_clause = 1;
+    Test if_clause = 2;
   }
+}
 
-  message Entry {
-    Test key = 1;
-    Test value = 2;
+message ForClause {
+  repeated PrimaryExpr loop_variable = 1;
+  Test in = 2;
+}
+
+message Entry {
+  Test key = 1;
+  Test value = 2;
+}
+
+message DotExpr {
+  PrimaryExpr primary_expression = 1;
+  Identifier identifier = 2;
+}
+
+message CallExpr {
+  PrimaryExpr primary_expression = 1;
+  repeated Argument argument = 2;
+}
+
+message Argument {
+  oneof argument_type {
+    Test value = 1;
+    NamedArgument named_argument = 2;
+    Test star_argument = 3;
+    Test star_star_argument = 4;
   }
+}
 
-  message DotExpr {
-    PrimaryExpr primary_expression = 1;
-    Identifier identifier = 2;
+message NamedArgument {
+  Identifier identifier = 1;
+  Test value = 2;
+}
+
+message SliceExpr {
+  PrimaryExpr primary_expression = 1;
+  oneof slice_type {
+    Expression index = 2;
+    Slice slice = 3;
   }
+}
 
-  message CallExpr {
-    PrimaryExpr primary_expression = 1;
-    repeated Argument argument = 2;
-
-    message Argument {
-      oneof argument_type {
-        Test value = 1;
-        NamedArgument named_argument = 2;
-        Test star_argument = 3;
-        Test star_star_argument = 4;
-      }
-
-      message NamedArgument {
-        Identifier identifier = 1;
-        Test value = 2;
-      }
-    }
-  }
-
-  message SliceExpr {
-    PrimaryExpr primary_expression = 1;
-    oneof slice_type {
-      Expression index = 2;
-      Slice slice = 3;
-    }
-
-    // The spec states that it is possible to have a slice that `start` is
-    // of type `Expression`, but it is unclear how that would work.
-    // https://github.com/bazelbuild/starlark/issues/291
-    message Slice {
-      Test start = 1;
-      Test end = 2;
-      Test step = 3;
-    }
-  }
+// The spec states that it is possible to have a slice that `start` is
+// of type `Expression`, but it is unclear how that would work.
+// https://github.com/bazelbuild/starlark/issues/291
+message Slice {
+  Test start = 1;
+  Test end = 2;
+  Test step = 3;
 }
 
 message Expression {
@@ -272,10 +273,10 @@ message Expression {
     Test value = 1;
     Tuple tuple = 2;
   }
+}
 
-  message Tuple {
-    repeated Test value = 1;
-  }
+message Tuple {
+  repeated Test value = 1;
 }
 
 message Identifier {

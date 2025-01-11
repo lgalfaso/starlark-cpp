@@ -11,45 +11,52 @@
 
 using google::protobuf::Arena;
 using google::protobuf::RepeatedPtrField;
+using starlark::Argument;
 using starlark::AssignStmt;
+using starlark::BinaryExpr;
+using starlark::BinaryExpr;
+using starlark::CompClause;
 using starlark::DefStmt;
+using starlark::Entry;
 using starlark::Expression;
 using starlark::File;
 using starlark::ForStmt;
 using starlark::Identifier;
 using starlark::IfStmt;
+using starlark::LambdaExpr;
 using starlark::Parameter;
 using starlark::PrimaryExpr;
 using starlark::Statement;
 using starlark::Test;
+using starlark::UnaryExpr;
 using unicode::to_nfkc;
 
 namespace grammar {
 
 namespace {
 
-const std::map<token_type, std::pair<int, Test::BinaryExpr::BinaryOperator>> operator_precedence = {
-  {token_type::or_, {1, Test::BinaryExpr::OR}},
-  {token_type::and_, {2, Test::BinaryExpr::AND}},
-  {token_type::not_, {3, Test::BinaryExpr::UNKNOWN}},  // As a prefix.
-  {token_type::equals_equals, {4, Test::BinaryExpr::EQUALS_EQUALS}},
-  {token_type::not_equals, {4, Test::BinaryExpr::BANG_EQUALS}},
-  {token_type::less, {4, Test::BinaryExpr::LESS_THAN}},
-  {token_type::greater, {4, Test::BinaryExpr::GREATER_THAN}},
-  {token_type::less_equals, {4, Test::BinaryExpr::LESS_THAN_EQUALS}},
-  {token_type::greater_equals, {4, Test::BinaryExpr::GREATER_THAN_EQUALS}},
-  {token_type::in, {4, Test::BinaryExpr::IN}},
-  {token_type::pipe, {5, Test::BinaryExpr::PIPE}},
-  {token_type::caret, {6, Test::BinaryExpr::HAT}},
-  {token_type::ampersand, {7, Test::BinaryExpr::AMPERSAND}},
-  {token_type::less_less, {8, Test::BinaryExpr::LESS_THAN_LESS_THAN}},
-  {token_type::greater_greater, {8, Test::BinaryExpr::GREATER_THAN_GREATER_THAN}},
-  {token_type::minus, {9, Test::BinaryExpr::MINUS}},
-  {token_type::plus, {9, Test::BinaryExpr::PLUS}},
-  {token_type::star, {10, Test::BinaryExpr::STAR}},
-  {token_type::percent, {10, Test::BinaryExpr::PERCENT}},
-  {token_type::slash, {10, Test::BinaryExpr::SLASH}},
-  {token_type::slash_slash, {10, Test::BinaryExpr::SLASH_SLASH}},
+const std::map<token_type, std::pair<int, BinaryExpr::BinaryOperator>> operator_precedence = {
+  {token_type::or_, {1, BinaryExpr::OR}},
+  {token_type::and_, {2, BinaryExpr::AND}},
+  {token_type::not_, {3, BinaryExpr::UNKNOWN}},  // As a prefix.
+  {token_type::equals_equals, {4, BinaryExpr::EQUALS_EQUALS}},
+  {token_type::not_equals, {4, BinaryExpr::BANG_EQUALS}},
+  {token_type::less, {4, BinaryExpr::LESS_THAN}},
+  {token_type::greater, {4, BinaryExpr::GREATER_THAN}},
+  {token_type::less_equals, {4, BinaryExpr::LESS_THAN_EQUALS}},
+  {token_type::greater_equals, {4, BinaryExpr::GREATER_THAN_EQUALS}},
+  {token_type::in, {4, BinaryExpr::IN}},
+  {token_type::pipe, {5, BinaryExpr::PIPE}},
+  {token_type::caret, {6, BinaryExpr::HAT}},
+  {token_type::ampersand, {7, BinaryExpr::AMPERSAND}},
+  {token_type::less_less, {8, BinaryExpr::LESS_THAN_LESS_THAN}},
+  {token_type::greater_greater, {8, BinaryExpr::GREATER_THAN_GREATER_THAN}},
+  {token_type::minus, {9, BinaryExpr::MINUS}},
+  {token_type::plus, {9, BinaryExpr::PLUS}},
+  {token_type::star, {10, BinaryExpr::STAR}},
+  {token_type::percent, {10, BinaryExpr::PERCENT}},
+  {token_type::slash, {10, BinaryExpr::SLASH}},
+  {token_type::slash_slash, {10, BinaryExpr::SLASH_SLASH}},
 };
 
 constexpr int MAX_PRECEDENCE = 11;
@@ -223,15 +230,15 @@ struct frame {
       ForStmt* for_statement;
       PrimaryExpr* for_loop_variable;
     };
-    Test::LambdaExpr* lambda;
+    LambdaExpr* lambda;
     struct {
-      PrimaryExpr::CallExpr::Argument* argument;
-      PrimaryExpr::CallExpr::Argument* previous_argument;
+      Argument* argument;
+      Argument* previous_argument;
     };
-    PrimaryExpr::Entry* entry;
-    RepeatedPtrField<PrimaryExpr::CompClause>* comp_clauses;
+    Entry* entry;
+    RepeatedPtrField<CompClause>* comp_clauses;
     struct {
-      PrimaryExpr::CompClause* comp_clause;
+      CompClause* comp_clause;
       PrimaryExpr* comp_clause_primary;
     };
     struct {
@@ -253,7 +260,7 @@ struct frame {
     };
     struct {
       PrimaryExpr* primary = nullptr;
-      PrimaryExpr::CallExpr::Argument* previous_call_argument = nullptr;
+      Argument* previous_call_argument = nullptr;
       bool primary_must_be_target = false;
     };
   };
@@ -971,11 +978,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           Test* result_ref = top.test;
           for (;;) {
             if (capture(token_type::plus)) {
-              result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::PLUS);
+              result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::PLUS);
             } else if (capture(token_type::minus)) {
-              result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::MINUS);
+              result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::MINUS);
             } else if (capture(token_type::tilde)) {
-              result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::TILDE);
+              result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::TILDE);
             } else {
               break;
             }
@@ -996,7 +1003,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               break;
             }
             found_non_load = true;
-            result_ref->mutable_unary_expression()->set_operator_(Test::UnaryExpr::NOT);
+            result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::NOT);
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
           frames.emplace_back(frame{
@@ -1036,7 +1043,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
             new_result->Swap(top.test);
           }
-          top.test->mutable_binary_expression()->set_operator_(Test::BinaryExpr::NOT_IN);
+          top.test->mutable_binary_expression()->set_operator_(BinaryExpr::NOT_IN);
           frames.emplace_back(frame{
             .state = parser_state::parse_test_p_0,
             .test = top.test,
@@ -1375,7 +1382,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         switch (lex.current_token().type()) {
           case token_type::for_:
             {
-              PrimaryExpr::Entry* entry = Arena::Create<PrimaryExpr::Entry>(top.primary->GetArena());
+              Entry* entry = Arena::Create<Entry>(top.primary->GetArena());
               entry->Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
               entry->Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
             }
