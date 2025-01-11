@@ -8,7 +8,7 @@
 
 namespace unicode {
 
-void utf8_encode_code_point(std::uint32_t character, std::string& output);
+void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict);
 
 }  // namespace unicode
 

@@ -12,7 +12,7 @@ using unicode::utf8_reader;
 namespace {
 
 void check(std::string_view input, std::optional<std::string> expected, int expected_pos) {
-  utf8_reader s(input);
+  utf8_reader s(input, true);
   EXPECT_EQ(read_number(s), expected);
   EXPECT_EQ(s.pos(), expected_pos);
 }

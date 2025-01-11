@@ -152,7 +152,8 @@ void sort_non_starters(std::vector<std::uint32_t>& code_points) {
 
 std::string to_nfc(std::string_view input) {
   std::vector<std::uint32_t> code_points;
-  utf8_reader reader(input);
+  // This needs to be strict as we only have the tables for this version of Unicode.
+  utf8_reader reader(input, true);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
@@ -170,14 +171,14 @@ std::string to_nfc(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfc_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result);
+    utf8_encode_code_point(c, result, true);
   }
   return result;
 }
 
 std::string to_nfd(std::string_view input) {
   std::vector<std::uint32_t> code_points;
-  utf8_reader reader(input);
+  utf8_reader reader(input, true);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
@@ -195,14 +196,14 @@ std::string to_nfd(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfd_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result);
+    utf8_encode_code_point(c, result, true);
   }
   return result;
 }
 
 std::string to_nfkc(std::string_view input) {
   std::vector<std::uint32_t> code_points;
-  utf8_reader reader(input);
+  utf8_reader reader(input, true);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
@@ -220,14 +221,14 @@ std::string to_nfkc(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfkc_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result);
+    utf8_encode_code_point(c, result, true);
   }
   return result;
 }
 
 std::string to_nfkd(std::string_view input) {
   std::vector<std::uint32_t> code_points;
-  utf8_reader reader(input);
+  utf8_reader reader(input, true);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
@@ -245,7 +246,7 @@ std::string to_nfkd(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfkd_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result);
+    utf8_encode_code_point(c, result, true);
   }
   return result;
 }

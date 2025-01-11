@@ -18,9 +18,13 @@ inline bool is_utf8_continue(char input) {
 
 }  // namespace
 
+bool is_surrogate(std::uint32_t code_point) {
+  return (0xD800 <= code_point) && (code_point <= 0xDFFF);
+}
+
 const std::uint32_t utf8_reader::replacement_character;
 
-utf8_reader::utf8_reader(string_view input) : input(input) {
+utf8_reader::utf8_reader(string_view input, bool strict) : input(input), strict(strict) {
   // If the source code starts with a BOM, then ignore it.
   if (peek_code_point() == bom_character) {
     skip_code_point();
@@ -96,12 +100,11 @@ std::uint32_t utf8_reader::peek_code_point() const {
                   (static_cast<std::uint32_t>(input[input_pos + 3]) & 0x3f);
       break;
     default:
-      return replacement_character;
+      candidate = replacement_character;
+      break;
   }
-  // TODO(lmirelmann): This constraint might be too hard, and we should only check
-  // that this is not a surrogate, and it is within the Unicode range.
-  if (!ucd::is_assigned(candidate)) {
-    return replacement_character;
+  if ((strict && !ucd::is_assigned(candidate)) || is_surrogate(candidate) || candidate >= 0x11'0000) {
+    candidate = replacement_character;
   }
   return candidate;
 }

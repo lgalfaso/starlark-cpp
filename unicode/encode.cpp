@@ -7,10 +7,8 @@
 
 namespace unicode {
 
-void utf8_encode_code_point(std::uint32_t character, std::string& output) {
-  // TODO(lmirelmann): This constraint might be too hard, and we should only check
-  // that this is not a surrogate, and it is within the Unicode range.
-  if (!ucd::is_assigned(character)) {
+void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict) {
+  if ((strict && !ucd::is_assigned(character)) || character >= 0x11'0000) {
     character = utf8_reader::replacement_character;
   }
   if (character <= 0x7f) {
@@ -18,7 +16,7 @@ void utf8_encode_code_point(std::uint32_t character, std::string& output) {
   } else if (character <= 0x7ff) {
     output += ('\xc0' | (char)(character >> 6));
     output += ('\x80' | (char)(character & 0x3f));
-  } else if (0xd800 <= character && character <= 0xdfff) {
+  } else if (is_surrogate(character)) {
     // No-op. Characters in this block will not be encoded.
   } else if (character <= 0xffff) {
     output += ('\xe0' | (char)(character >> 12));

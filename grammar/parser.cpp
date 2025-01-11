@@ -308,7 +308,7 @@ File* parser::parse_file(Arena& arena) {
     }
   }
   assert(parse_parameter_identifiers.empty());
-  assert(nested_loops.empty());
+  assert(nested_loops.size() == 1 && nested_loops[0] == 0);
   assert(is_top_level_block());
 
   // Force the resolution of the predefined, module and file blocks.

@@ -12,6 +12,7 @@
 #include "grammar/numeric_parser.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
+#include "unicode/utf8_reader.hpp"
 
 using unicode::utf8_encode_code_point;
 
@@ -159,7 +160,7 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
 lexer::lexer(std::string_view input, logger& logging) : lexer(input, grammar_options{}, logging) {}
 
 lexer::lexer(std::string_view input, const grammar_options& options, logger& logging) :
-    options(options), input(input), source_code(input), current(token_type::bof, get_position(), get_position()), indent_stack(1), logging(logging) {}
+    options(options), input(input), source_code(input, false), current(token_type::bof, get_position(), get_position()), indent_stack(1), logging(logging) {}
 
 const token& lexer::current_token() const {
   return current;
@@ -590,7 +591,7 @@ void lexer::read_string() {
           source_code.skip();
         } else {
           auto start = get_position();
-          utf8_encode_code_point(ch, result);
+          utf8_encode_code_point(ch, result, false);
           source_code.skip_code_point();
 
           auto end_pos = source_code.pos();
@@ -663,10 +664,10 @@ bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_val
     // definition from Unicode for ill-formed.
     // With this definition, the character must be within the Unicode range,
     // and not a surrogate.
-    if ((0xD800 <= int_value) && (int_value <= 0xDFFF)) {
+    if (unicode::is_surrogate(int_value)) {
       error = true;
     }
-    utf8_encode_code_point(int_value, result);
+    utf8_encode_code_point(int_value, result, false);
   } else {
     result += (char)(int_value & 0xff);
   }
@@ -682,7 +683,7 @@ std::string lexer::read_identifier_or_keyword() {
     auto ch = source_code.peek_code_point();
     if ((first && (ch == '_' || ucd::is_XID_Start(ch))) ||
         (!first && ucd::is_XID_Continue(ch))) {
-      utf8_encode_code_point(ch, result);
+      utf8_encode_code_point(ch, result, false);
       source_code.skip_code_point();
     } else {
       break;

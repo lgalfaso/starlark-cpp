@@ -14,12 +14,12 @@ using unicode::utf8_reader;
 namespace {
 
 TEST(SourceTest, BOM) {
-  EXPECT_EQ('a', utf8_reader("a").peek_code_point());
-  EXPECT_EQ('a', utf8_reader("\xef\xbb\x{bf}a").peek_code_point());
+  EXPECT_EQ('a', utf8_reader("a", true).peek_code_point());
+  EXPECT_EQ('a', utf8_reader("\xef\xbb\x{bf}a", true).peek_code_point());
 }
 
 TEST(SourceTest, Peek) {
-  utf8_reader s("abc");
+  utf8_reader s("abc", true);
   EXPECT_EQ('a', s.peek());
   EXPECT_EQ('b', s.peek(1));
   EXPECT_EQ('c', s.peek(2));
@@ -29,124 +29,124 @@ TEST(SourceTest, Peek) {
 }
 
 TEST(SourceTest, PeekCodepoint) {
-  EXPECT_EQ('a', utf8_reader("a").peek_code_point());
-  EXPECT_EQ(0x234, utf8_reader("\xc8\xb4").peek_code_point());
-  EXPECT_EQ(0x1234, utf8_reader("\xe1\x88\xb4").peek_code_point());
-  EXPECT_EQ(0x12345, utf8_reader("\xf0\x92\x8d\x85").peek_code_point());
+  EXPECT_EQ('a', utf8_reader("a", true).peek_code_point());
+  EXPECT_EQ(0x234, utf8_reader("\xc8\xb4", true).peek_code_point());
+  EXPECT_EQ(0x1234, utf8_reader("\xe1\x88\xb4", true).peek_code_point());
+  EXPECT_EQ(0x12345, utf8_reader("\xf0\x92\x8d\x85", true).peek_code_point());
 
   // Too short
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x88").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x8d").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x88", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x8d", true).peek_code_point());
 
   // Invalid first byte
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf8\xbf\xbf\xbf\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xfc\xbf\xbf\xbf\xbf\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xfe\xbf\xbf\xbf\xbf\xbf\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xff\xbf\xbf\xbf\xbf\xbf\xbf\xbf").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf8\xbf\xbf\xbf\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xfc\xbf\xbf\xbf\xbf\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xfe\xbf\xbf\xbf\xbf\xbf\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xff\xbf\xbf\xbf\xbf\xbf\xbf\xbf", true).peek_code_point());
 
   // Invalid follow-up byte
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8\x34").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8\xf4").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x08\xb4").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\xc8\xb4").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x88\x34").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x88\xf4").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x12\x8d\x85").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\xd2\x8d\x85").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x0d\x85").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\xcd\x85").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x8d\x05").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x8d\xc5").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8\x34", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc8\xf4", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x08\xb4", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\xc8\xb4", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x88\x34", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe1\x88\xf4", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x12\x8d\x85", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\xd2\x8d\x85", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x0d\x85", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\xcd\x85", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x8d\x05", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x92\x8d\xc5", true).peek_code_point());
 
   // The largest possible Unicode character is 0x10FFFF.
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf4\x90\x80\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf4\x8f\xbf\xbf").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf4\x90\x80\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf4\x8f\xbf\xbf", true).peek_code_point());
 }
 
 TEST(SourceTest, OverlongEncoding) {
   // Overlong encoding.
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc0\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc1\xbf").peek_code_point());
-  EXPECT_EQ(0x7f, utf8_reader("\x7f").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe0\x9f\xbf").peek_code_point());
-  EXPECT_EQ(0x7ff, utf8_reader("\xdf\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x8f\xbf\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xef\xbf\xbf").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc0\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xc1\xbf", true).peek_code_point());
+  EXPECT_EQ(0x7f, utf8_reader("\x7f", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xe0\x9f\xbf", true).peek_code_point());
+  EXPECT_EQ(0x7ff, utf8_reader("\xdf\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xf0\x8f\xbf\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xef\xbf\xbf", true).peek_code_point());
 }
 
 TEST(SourceTest, SurrogatesArea) {
   // The range 0xD800-0xDFFF is invalid.
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa0\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa0\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa1\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa1\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa2\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa2\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa3\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa3\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa4\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa4\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa5\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa5\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa6\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa6\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa7\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa7\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa8\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa8\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa9\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa9\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaa\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaa\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xab\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xab\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xac\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xac\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xad\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xad\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xae\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xae\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaf\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaf\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb0\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb0\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb1\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb1\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb2\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb2\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb3\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb3\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb4\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb4\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb5\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb5\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb6\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb6\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb7\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb7\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb8\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb8\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb9\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb9\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xba\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xba\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbb\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbb\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbc\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbc\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbd\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbd\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbe\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbe\xbf").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbf\x80").peek_code_point());
-  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbf\xbf").peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa0\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa0\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa1\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa1\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa2\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa2\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa3\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa3\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa4\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa4\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa5\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa5\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa6\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa6\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa7\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa7\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa8\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa8\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa9\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa9\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaa\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaa\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xab\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xab\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xac\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xac\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xad\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xad\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xae\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xae\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaf\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xaf\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb0\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb0\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb1\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb1\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb2\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb2\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb3\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb3\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb4\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb4\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb5\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb5\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb6\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb6\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb7\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb7\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb8\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb8\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb9\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xb9\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xba\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xba\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbb\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbb\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbc\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbc\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbd\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbd\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbe\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbe\xbf", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbf\x80", true).peek_code_point());
+  EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbf\xbf", true).peek_code_point());
 }
 
 TEST(SourceTest, Skip) {
-  utf8_reader s("abc");
+  utf8_reader s("abc", true);
   s.skip(0);
   EXPECT_EQ(0, s.pos());
   s.skip();
@@ -162,7 +162,7 @@ TEST(SourceTest, Skip) {
 
 void checkSkipCodepoint(const char* input, std::size_t input_length, std::size_t expected_pos) {
   std::string_view utf8_reader_code(input, input_length);
-  utf8_reader s(utf8_reader_code);
+  utf8_reader s(utf8_reader_code, true);
   EXPECT_EQ(0, s.pos());
   s.skip_code_point();
   EXPECT_EQ(expected_pos, s.pos());
@@ -197,14 +197,14 @@ TEST(SourceTest, SkipCodepoint) {
 
 TEST(SourceTest, Next) {
   {
-    utf8_reader s("");
+    utf8_reader s("", true);
     EXPECT_EQ(true, s.next(""));
     EXPECT_EQ(0, s.pos());
     EXPECT_EQ(false, s.next("a"));
     EXPECT_EQ(0, s.pos());
   }
   {
-    utf8_reader s("abc");
+    utf8_reader s("abc", true);
     EXPECT_EQ(true, s.next(""));
     EXPECT_EQ(0, s.pos());
     EXPECT_EQ(true, s.next("a"));
@@ -218,7 +218,7 @@ TEST(SourceTest, Next) {
 
 TEST(SourceTest, Capture) {
   {
-    utf8_reader s("");
+    utf8_reader s("", true);
     EXPECT_EQ(0, s.pos());
     EXPECT_EQ(true, s.empty());
     EXPECT_EQ(0, s.pending());
@@ -232,7 +232,7 @@ TEST(SourceTest, Capture) {
     EXPECT_EQ(0, s.pending());
   }
   {
-    utf8_reader s("abc");
+    utf8_reader s("abc", true);
     EXPECT_EQ(false, s.empty());
     EXPECT_EQ(3, s.pending());
 
@@ -262,14 +262,14 @@ TEST(SourceTest, Capture) {
     EXPECT_EQ(0, s.pending());
   }
   {
-    utf8_reader s("abc");
+    utf8_reader s("abc", true);
     EXPECT_EQ(false, s.capture("abcdef"));
     EXPECT_EQ(0, s.pos());
   }
 }
 
 void utf8_peek_skip_code_point(const char* data, size_t size) {
-  utf8_reader reader(std::string_view(data, size));
+  utf8_reader reader(std::string_view(data, size), true);
   while (reader.pending()) {
     reader.peek_code_point();
     reader.skip_code_point();

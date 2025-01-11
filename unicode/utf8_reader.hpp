@@ -10,9 +10,11 @@
 
 namespace unicode {
 
+bool is_surrogate(std::uint32_t code_point);
+
 class utf8_reader {
  public:
-  explicit utf8_reader(std::string_view input);
+  explicit utf8_reader(std::string_view input, bool strict);
   bool empty() const;
   std::size_t pending() const;
   std::size_t pos() const;
@@ -31,6 +33,7 @@ class utf8_reader {
  private:
   const std::string_view input;
   std::size_t input_pos = 0;
+  bool strict;
 };
 
 }  // namespace unicode
