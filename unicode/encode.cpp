@@ -8,7 +8,7 @@
 namespace unicode {
 
 void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict) {
-  if ((strict && !ucd::is_assigned(character)) || character >= 0x11'0000) {
+  if ((strict && !ucd::is_assigned(character)) || !is_in_range(character)) {
     character = utf8_reader::replacement_character;
   }
   if (character <= 0x7f) {

@@ -18,11 +18,17 @@ inline bool is_utf8_continue(char input) {
 
 }  // namespace
 
+bool is_in_range(std::uint32_t code_point) {
+  return code_point <= utf8_reader::max_code_point;
+}
+
 bool is_surrogate(std::uint32_t code_point) {
   return (0xD800 <= code_point) && (code_point <= 0xDFFF);
 }
 
 const std::uint32_t utf8_reader::replacement_character;
+const std::uint32_t utf8_reader::bom_character;
+const std::uint32_t utf8_reader::max_code_point;
 
 utf8_reader::utf8_reader(string_view input, bool strict) : input(input), strict(strict) {
   // If the source code starts with a BOM, then ignore it.
@@ -103,7 +109,7 @@ std::uint32_t utf8_reader::peek_code_point() const {
       candidate = replacement_character;
       break;
   }
-  if ((strict && !ucd::is_assigned(candidate)) || is_surrogate(candidate) || candidate >= 0x11'0000) {
+  if ((strict && !ucd::is_assigned(candidate)) || is_surrogate(candidate) || !is_in_range(candidate)) {
     candidate = replacement_character;
   }
   return candidate;

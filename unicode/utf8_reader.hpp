@@ -10,6 +10,9 @@
 
 namespace unicode {
 
+// Whether the code point is within the Unicode range.
+bool is_in_range(std::uint32_t code_point);
+
 bool is_surrogate(std::uint32_t code_point);
 
 class utf8_reader {
@@ -26,9 +29,11 @@ class utf8_reader {
   bool capture(std::string_view candidate);
 
   // Unicode replacement character.
-  static const std::uint32_t replacement_character = 0xfffdu;
+  static constexpr std::uint32_t replacement_character = 0xfffdu;
   // Unicode byte order mark.
-  static const std::uint32_t bom_character = 0xfeffu;
+  static constexpr std::uint32_t bom_character = 0xfeffu;
+  // Unicode maximum Unicode code point.
+  static constexpr std::uint32_t max_code_point = 0x10'ffffu;
 
  private:
   const std::string_view input;

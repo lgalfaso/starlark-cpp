@@ -544,14 +544,14 @@ void lexer::read_string() {
             break;
           case 'u':
             source_code.skip();
-            if (!read_escaped_char(result, true, 0x10ffff, 4, 4, 16)) {
+            if (!read_escaped_char(result, true, unicode::utf8_reader::max_code_point, 4, 4, 16)) {
               add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             break;
           case 'U':
             source_code.skip();
-            if (!read_escaped_char(result, true, 0x10ffff, 8, 8, 16)) {
+            if (!read_escaped_char(result, true, unicode::utf8_reader::max_code_point, 8, 8, 16)) {
               add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
@@ -664,7 +664,7 @@ bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_val
     // definition from Unicode for ill-formed.
     // With this definition, the character must be within the Unicode range,
     // and not a surrogate.
-    if (unicode::is_surrogate(int_value)) {
+    if (unicode::is_surrogate(int_value) || !unicode::is_in_range(int_value)) {
       error = true;
     }
     utf8_encode_code_point(int_value, result, false);
