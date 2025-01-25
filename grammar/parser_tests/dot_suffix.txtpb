@@ -1,4 +1,29 @@
+module_binding: "bar"
 module_binding: "foo"
+statement {
+  assign_statement: {
+    lhs {
+      value {
+        primary_expression {
+          identifier {
+            name: "bar"
+            nfkc_name: "bar"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      value {
+        primary_expression {
+          list_expression { }
+        }
+      }
+    }
+  }
+}
 statement {
   assign_statement: {
     lhs {
@@ -8,7 +33,7 @@ statement {
             name: "foo"
             nfkc_name: "foo"
             frame: 0
-            pos_in_frame: 0
+            pos_in_frame: 1
           }
         }
       }
@@ -33,7 +58,7 @@ statement {
               name: "foo"
               nfkc_name: "foo"
               frame: 0
-              pos_in_frame: 0
+              pos_in_frame: 1
             }
           }
           identifier {
@@ -57,7 +82,7 @@ statement {
                   name: "foo"
                   nfkc_name: "foo"
                   frame: 0
-                  pos_in_frame: 0
+                  pos_in_frame: 1
                 }
               }
               identifier {
