@@ -8,7 +8,7 @@ statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
-      frame: 0
+      frame: 1
       pos_in_frame: 2
     }
     function_binding: "x"
@@ -51,7 +51,7 @@ statement {
     function_name {
       name: "bar"
       nfkc_name: "bar"
-      frame: 0
+      frame: 1
       pos_in_frame: 0
     }
     parameter {
@@ -84,7 +84,7 @@ statement {
     function_name {
       name: "man"
       nfkc_name: "man"
-      frame: 0
+      frame: 1
       pos_in_frame: 3
     }
     parameter {
@@ -143,7 +143,7 @@ statement {
     function_name {
       name: "baz"
       nfkc_name: "baz"
-      frame: 0
+      frame: 1
       pos_in_frame: 1
     }
     parameter {
@@ -222,7 +222,7 @@ statement {
     function_name {
       name: "shell"
       nfkc_name: "shell"
-      frame: 0
+      frame: 1
       pos_in_frame: 4
     }
     parameter {
@@ -237,7 +237,7 @@ statement {
           identifier {
             name: "man"
             nfkc_name: "man"
-            frame: 0
+            frame: 1
             pos_in_frame: 3
           }
         }

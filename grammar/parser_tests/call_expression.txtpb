@@ -11,7 +11,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -29,7 +29,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -54,7 +54,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -93,7 +93,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -118,7 +118,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -161,7 +161,7 @@ statement {
                     identifier {
                       name: "foo"
                       nfkc_name: "foo"
-                      frame: 0
+                      frame: 1
                       pos_in_frame: 2
                     }
                   }
@@ -204,7 +204,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -235,7 +235,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -245,7 +245,7 @@ statement {
                 identifier {
                   name: "bar"
                   nfkc_name: "bar"
-                  frame: 0
+                  frame: 1
                   pos_in_frame: 1
                 }
               }
@@ -265,7 +265,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -275,7 +275,7 @@ statement {
                 identifier {
                   name: "bar"
                   nfkc_name: "bar"
-                  frame: 0
+                  frame: 1
                   pos_in_frame: 1
                 }
               }
@@ -295,7 +295,7 @@ statement {
             identifier {
               name: "foo"
               nfkc_name: "foo"
-              frame: 0
+              frame: 1
               pos_in_frame: 2
             }
           }
@@ -345,7 +345,7 @@ statement {
                 identifier {
                   name: "args"
                   nfkc_name: "args"
-                  frame: 0
+                  frame: 1
                   pos_in_frame: 0
                 }
               }
@@ -357,7 +357,7 @@ statement {
                 identifier {
                   name: "kwargs"
                   nfkc_name: "kwargs"
-                  frame: 0
+                  frame: 1
                   pos_in_frame: 3
                 }
               }
@@ -373,7 +373,7 @@ statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
-      frame: 0
+      frame: 1
       pos_in_frame: 2
     }
     statement {
@@ -389,7 +389,7 @@ statement {
           identifier {
             name: "bar"
             nfkc_name: "bar"
-            frame: 0
+            frame: 1
             pos_in_frame: 1
           }
         }
@@ -413,7 +413,7 @@ statement {
           identifier {
             name: "args"
             nfkc_name: "args"
-            frame: 0
+            frame: 1
             pos_in_frame: 0
           }
         }
@@ -437,7 +437,7 @@ statement {
           identifier {
             name: "kwargs"
             nfkc_name: "kwargs"
-            frame: 0
+            frame: 1
             pos_in_frame: 3
           }
         }

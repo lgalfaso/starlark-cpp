@@ -7,7 +7,7 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
-            frame: 0
+            frame: 1
             pos_in_frame: 0
           }
         }

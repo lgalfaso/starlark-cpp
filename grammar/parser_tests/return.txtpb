@@ -5,7 +5,7 @@ statement {
     function_name {
       name: "foo"
       nfkc_name: "foo"
-      frame: 0
+      frame: 1
       pos_in_frame: 1
     }
     statement {
@@ -19,7 +19,7 @@ statement {
     function_name {
       name: "bar"
       nfkc_name: "bar"
-      frame: 0
+      frame: 1
       pos_in_frame: 0
     }
     statement {

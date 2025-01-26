@@ -4,6 +4,8 @@ statement {
     function_name {
        name: "foo"
        nfkc_name: "foo"
+       frame: 1
+       pos_in_frame: 0
     }
     statement {
       pass_statement { }

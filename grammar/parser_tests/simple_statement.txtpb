@@ -9,7 +9,7 @@ statement {
           identifier {
             name: "a"
             nfkc_name: "a"
-            frame: 0
+            frame: 1
             pos_in_frame: 0
           }
         }
@@ -33,7 +33,7 @@ statement {
           identifier {
             name: "b"
             nfkc_name: "b"
-            frame: 0
+            frame: 1
             pos_in_frame: 1
           }
         }
@@ -57,7 +57,7 @@ statement {
           identifier {
             name: "c"
             nfkc_name: "c"
-            frame: 0
+            frame: 1
             pos_in_frame: 2
           }
         }

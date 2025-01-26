@@ -291,14 +291,10 @@ File* parser::parse_file(Arena& arena) {
 
   // Predeclared block.
   create_block(base_bindings, {}, nullptr);
-  // The "file block" and "module block" are defined the other way around
-  // than the spec. Given that there is no overlap between these two, this should
-  // not have any side-effects.
-  // Context: https://github.com/bazelbuild/starlark/issues/293
-  // File block.
-  create_block({}, {}, result->mutable_file_binding());
   // Module block.
   create_block({}, {}, result->mutable_module_binding());
+  // File block.
+  create_block({}, {}, result->mutable_file_binding());
 
   while (lex.current_token().type() != token_type::eof) {
     if (lex.current_token().type() == token_type::newline) {
@@ -465,7 +461,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           // If this is a top-level function definition, then check whether this is causing a redefinition
           // with a previous `load` statement.
           if (is_top_level_block()) {
-            if (parser_blocks[1].identifiers.contains(def_statement->function_name().nfkc_name())) {
+            if (parser_blocks.back().identifiers.contains(def_statement->function_name().nfkc_name())) {
               add_error("`def` statement redefines previously defined `load` symbol '" + def_statement->function_name().name() + "'");
             }
           }
@@ -790,7 +786,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               // The spec does not specify whether it is an error to bind to the file block multiple times.
               // We are taking the possition that if `allow_top_level_rebinding` is `false`, then this is not allowed.
-              if (!parser_blocks[1].identifiers.insert(load_param->local_name().nfkc_name()).second && !options.allow_top_level_rebinding) {
+              if (!parser_blocks.back().identifiers.insert(load_param->local_name().nfkc_name()).second && !options.allow_top_level_rebinding) {
                 add_error("Multiple bindings for the top-level load symbol '" + load_param->local_name().name() + "'");
               }
               lex.next_token();
@@ -1765,7 +1761,7 @@ void parser::bind_and_resolve(expression_frame frame) {
           break;
         case PrimaryExpr::kIdentifier:
           if (is_top_level_block() &&
-              parser_blocks[1].identifiers.contains(top.primary_expression->identifier().nfkc_name())) {
+              parser_blocks.back().identifiers.contains(top.primary_expression->identifier().nfkc_name())) {
             add_error("Variable '" + top.primary_expression->identifier().name() + "' redefines symbol previously defined by a load statement");
           }
           bind(top.primary_expression->identifier());
@@ -1832,8 +1828,12 @@ void parser::bind(const starlark::Identifier& identifier) {
   // The spec states "It is a static error to bind a global variable already explicitly bound in the file"
   // This leaves to interpretation whether a `def` can be rebound. The rule followed is that `def` and variables should
   // be consistent, follow the same rules, and be handled equally.
-  if (!parser_blocks.back().identifiers.insert(identifier.nfkc_name()).second && is_top_level_block() && !options.allow_top_level_rebinding) {
-    add_error("Multiple bindings for the top-level symbol '" + identifier.name() + "'");
+  if (is_top_level_block()) {
+    if (!parser_blocks[parser_blocks.size() - 2].identifiers.insert(identifier.nfkc_name()).second && !options.allow_top_level_rebinding) {
+      add_error("Multiple bindings for the top-level symbol '" + identifier.name() + "'");
+    }
+  } else {
+    parser_blocks.back().identifiers.insert(identifier.nfkc_name());
   }
 }
 
