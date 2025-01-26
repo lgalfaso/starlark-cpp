@@ -299,5 +299,49 @@ statement {
         }
       }
     }
+    statement {
+      for_statement {
+        loop_variable {
+          expression {
+            tuple {
+              value {
+                primary_expression {
+                  identifier {
+                    name: "a"
+                    nfkc_name: "a"
+                    frame: 0
+                    pos_in_frame: 0
+                  }
+                }
+              }
+            }
+          }
+        }
+        expression {
+          value {
+            primary_expression {
+              list_expression {
+                element {
+                  primary_expression {
+                    expression {
+                      tuple {
+                        value {
+                          primary_expression {
+                            int_value: "1"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        statement {
+          continue_statement { }
+        }
+      }
+    }
   }
 }
