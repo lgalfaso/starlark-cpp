@@ -3,7 +3,6 @@
 #include <fcntl.h>
 
 #include <gmock/gmock.h>
-#include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
