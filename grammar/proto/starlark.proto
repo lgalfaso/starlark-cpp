@@ -60,6 +60,8 @@ message ForStmt {
   // Python handles this as a tuple deconstruction. Given that Starlark does not allow
   // for dangling commas, then if there is one `loop_variable` it is a single target
   // and if there are multiple, it is a tuple deconstruction.
+  // TODO(lmirelmann): Replace `loop_variable` with a single `Expression`. This would be best if done
+  // after the merge of `Test`, `Expression` and `PrimaryExpr`.
   repeated PrimaryExpr loop_variable = 1;
   Expression expression = 2;
   repeated Statement statement = 3;
