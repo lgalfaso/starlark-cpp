@@ -3,6 +3,7 @@
 #ifndef GRAMMAR_LEXER_HPP_
 #define GRAMMAR_LEXER_HPP_
 
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>

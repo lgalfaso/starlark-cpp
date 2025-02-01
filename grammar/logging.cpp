@@ -2,6 +2,9 @@
 
 #include "grammar/logging.hpp"
 
+#include <string>
+#include <vector>
+
 namespace grammar {
 
 namespace {

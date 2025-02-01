@@ -7,6 +7,8 @@
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/text_format.h>
 
+#include <memory>
+
 #include "grammar/proto/starlark.pb.h"
 #include "third-party/defer.hpp"
 

@@ -1,5 +1,7 @@
 // Copyright 2025 Lucas Mirelmann
 
+#include <string>
+
 #include "benchmark/benchmark.h"
 
 #include "bignum/number.hpp"

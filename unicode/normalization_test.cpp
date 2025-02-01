@@ -4,6 +4,10 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <cstdio>
+#include <string>
+#include <vector>
+
 #include "unicode/encode.hpp"
 #include "unicode/normalization.hpp"
 #include "unicode/ucd_code_points.hpp"

@@ -6,6 +6,8 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
 #include "grammar/proto/starlark.pb.h"

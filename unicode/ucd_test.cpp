@@ -4,6 +4,11 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <cstdio>
+#include <set>
+#include <string>
+#include <utility>
+
 #include "unicode/ucd_code_points.hpp"
 
 using testing::SizeIs;

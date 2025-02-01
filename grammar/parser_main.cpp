@@ -4,6 +4,8 @@
 #include <fcntl.h>
 
 #include <iostream>
+#include <set>
+#include <string>
 
 #include "third-party/defer.hpp"
 #include "grammar/options.hpp"

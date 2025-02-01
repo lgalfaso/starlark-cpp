@@ -2,6 +2,8 @@
 
 #include "unicode/encode.hpp"
 
+#include <string>
+
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 

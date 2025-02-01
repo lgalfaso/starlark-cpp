@@ -1,10 +1,13 @@
-
-#include "bignum/number.hpp"
 // Copyright 2024-2025 Lucas Mirelmann
 
 #include <gtest/gtest.h>
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
+
+#include <string>
+#include <vector>
+
+#include "bignum/number.hpp"
 
 using bignum::number;
 using bignum::operator""_number;

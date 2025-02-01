@@ -4,6 +4,8 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <string>
+
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"

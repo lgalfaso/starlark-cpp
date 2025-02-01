@@ -2,6 +2,8 @@
 
 #include "grammar/numeric_parser.hpp"
 
+#include <string>
+
 using unicode::utf8_reader;
 
 namespace grammar {

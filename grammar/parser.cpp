@@ -3,6 +3,8 @@
 #include "grammar/parser.hpp"
 
 #include <map>
+#include <set>
+#include <string>
 #include <utility>
 #include <vector>
 

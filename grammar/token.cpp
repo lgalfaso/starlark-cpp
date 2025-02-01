@@ -2,6 +2,8 @@
 
 #include "grammar/token.hpp"
 
+#include <string>
+
 namespace grammar {
 
 position position::operator-(std::size_t places) const {

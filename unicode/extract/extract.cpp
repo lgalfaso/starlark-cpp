@@ -1,7 +1,14 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
+#include <set>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "unicode/extract/extract.hpp"
 

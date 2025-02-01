@@ -5,9 +5,11 @@
 #include <cassert>
 #include <cmath>
 
+#include <functional>
 #include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "grammar/numeric_parser.hpp"
 #include "unicode/encode.hpp"

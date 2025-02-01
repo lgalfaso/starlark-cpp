@@ -3,6 +3,7 @@
 #include "grammar/quoted.hpp"
 
 #include <format>
+#include <string>
 
 namespace grammar {
 

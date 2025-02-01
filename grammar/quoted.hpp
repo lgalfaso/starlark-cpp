@@ -3,6 +3,7 @@
 #ifndef GRAMMAR_QUOTED_HPP_
 #define GRAMMAR_QUOTED_HPP_
 
+#include <string>
 #include <string_view>
 
 #pragma GCC visibility push(default)

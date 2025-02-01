@@ -4,6 +4,8 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <string>
+
 #include "grammar/numeric_parser.hpp"
 
 using grammar::read_number;

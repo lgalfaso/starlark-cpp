@@ -3,6 +3,8 @@
 #include "unicode/normalization.hpp"
 
 #include <algorithm>
+#include <string>
+#include <vector>
 
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
