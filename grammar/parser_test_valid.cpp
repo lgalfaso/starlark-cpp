@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "grammar/parser.hpp"
+#include "grammar/parsing_options.hpp"
 #include "grammar/proto/starlark.pb.h"
 #include "third-party/defer.hpp"
 
@@ -58,9 +59,7 @@ TEST(Parser, TestCase) {
 
   logger logging;
   logging.set_level(log_level::ERROR);
-  grammar::grammar_options options = {
-    .allow_top_level_if_and_for = starlark_program.contains("options.allow_top_level_if_and_for"),
-  };
+  grammar::grammar_options options = grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, options, {}, logging);
   Arena arena;
   star_parser.parse_file(arena);

@@ -125,6 +125,7 @@ cc_binary(
       ],
       deps = [
           ":parser",
+          ":parsing_options",
           "@googletest//:gtest_main",
           "@protobuf//:protobuf",
           "//grammar/proto:starlark_cc_proto",
@@ -145,6 +146,7 @@ cc_binary(
       ],
       deps = [
           ":parser",
+          ":parsing_options",
           "@googletest//:gtest_main",
           "@protobuf//:protobuf",
           "//grammar/proto:starlark_cc_proto",
@@ -165,6 +167,7 @@ cc_binary(
       ],
       deps = [
           ":parser",
+          ":parsing_options",
           "@googletest//:gtest_main",
           "@protobuf//:protobuf",
           "//grammar/proto:starlark_cc_proto",
@@ -204,6 +207,16 @@ cc_fuzz_test(
 cc_library(
     name = "options",
     hdrs = ["options.hpp"],
+)
+
+cc_library(
+    name = "parsing_options",
+    srcs = ["parsing_options.cpp"],
+    hdrs = ["parsing_options.hpp"],
+    deps = [
+        ":options",
+    ],
+    testonly = True,
 )
 
 cc_library(
