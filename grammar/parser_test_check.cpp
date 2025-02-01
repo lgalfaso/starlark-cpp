@@ -36,9 +36,7 @@ std::string show_errors(const logger& logging) {
   std::string result;
 
   for (const auto& entry : logging) {
-    if (entry.level == log_level::FATAL || entry.level == log_level::ERROR) {
-      result += "[" + std::to_string(entry.pos.row) + "," + std::to_string(entry.pos.column) + "] " + entry.module + ":" + entry.message + "\n";
-    }
+    result += "[" + std::to_string(entry.pos.row) + "," + std::to_string(entry.pos.column) + "] " + entry.module + ":" + entry.message + "\n";
   }
   return result;
 }
