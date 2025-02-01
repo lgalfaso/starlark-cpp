@@ -3,9 +3,12 @@
 //
 // https://opensource.org/licenses/MIT
 
-#define CONCAT_HELPER( a, b ) a##b
-#define CONCAT( a, b ) CONCAT_HELPER( a, b )
-#define COUNTER_NAME( x ) CONCAT( x, __COUNTER__ )
+#ifndef THIRD_PARTY_DEFER_HPP_
+#define THIRD_PARTY_DEFER_HPP_
+
+#define CONCAT_HELPER(a, b) a##b
+#define CONCAT(a, b) CONCAT_HELPER(a, b)
+#define COUNTER_NAME(x) CONCAT(x, __COUNTER__)
 
 template<typename F>
 struct ScopeExit {
@@ -20,4 +23,6 @@ struct DeferHelper {
 };
 
 #define defer [[maybe_unused]] const auto & COUNTER_NAME(DEFER_) = DeferHelper() + [&]()
+
+#endif  // THIRD_PARTY_DEFER_HPP_
 
