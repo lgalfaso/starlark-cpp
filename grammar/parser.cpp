@@ -1958,7 +1958,6 @@ void parser::resolve(expression_frame frame) {
             if (arg.has_star_argument()) {
               frames.push_back(expression_frame{
                 .test = arg.mutable_star_argument(),
-
               });
             }
             if (arg.has_star_star_argument()) {

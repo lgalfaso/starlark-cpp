@@ -107,6 +107,7 @@ message LoadParams {
   string remote_name = 2;
 }
 
+// TODO(lmirelmann): Merge `Test`, `Expression` and `PrimaryExpr`.
 message Test {
   oneof test_type {
     IfExpr if_expression = 1;
@@ -172,6 +173,7 @@ message LambdaExpr {
   Test test = 2;
   repeated string function_binding = 3;
 }
+
 message PrimaryExpr {
   oneof primary_expression_type {
     DotExpr dot_expression = 1;
