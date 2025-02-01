@@ -6,7 +6,7 @@
 
 using unicode::utf8_reader;
 
-void Utf8ReaderFuzzing(char* data, size_t size) {
+void Utf8ReaderFuzzing(const char* data, size_t size) {
   utf8_reader reader(std::string_view(data, size), true);
   while (reader.pending()) {
     reader.peek_code_point();
@@ -15,7 +15,7 @@ void Utf8ReaderFuzzing(char* data, size_t size) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
-  Utf8ReaderFuzzing((char*)data, size);
+  Utf8ReaderFuzzing(reinterpret_cast<const char*>(data), size);
   return 0;
 }
 

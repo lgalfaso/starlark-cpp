@@ -18,7 +18,7 @@ using grammar::parser;
 using grammar::grammar_options;
 using starlark::File;
 
-const static std::set<std::string> BUILD_symbols = {
+static const std::set<std::string> BUILD_symbols = {
     "depset",          "existing_rule", "existing_rules", "exports_files", "glob",                   "module_name",
     "module_version",  "package",       "package_group",  "package_name",  "package_relative_label", "repo_name",
     "repository_name", "select",        "subpackages",
@@ -60,7 +60,7 @@ const static std::set<std::string> BUILD_symbols = {
     "json",
 };
 
-const static std::set<std::string> WORKSPACE_symbols = {
+static const std::set<std::string> WORKSPACE_symbols = {
     "bind", "register_execution_platforms", "register_toolchains", "workspace",
 
     // These should not be needed, but there are repositories that expect them to be predefined.
@@ -70,13 +70,13 @@ const static std::set<std::string> WORKSPACE_symbols = {
     "android_sdk_repository",
 };
 
-const static std::set<std::string> MODULE_symbols = {
+static const std::set<std::string> MODULE_symbols = {
     "archive_override", "bazel_dep",                 "git_override",  "include",                      "inject_repo",         "local_path_override",
     "module",           "multiple_version_override", "override_repo", "register_execution_platforms", "register_toolchains", "single_version_override",
     "use_extension",    "use_repo",                  "use_repo_rule",
 };
 
-const static std::set<std::string> bzl_symbols = {
+static const std::set<std::string> bzl_symbols = {
     "analysis_test_transition", "aspect",           "configuration_field", "depset", "exec_group", "exec_transition",
     "macro",                    "module_extension", "provider",            "repository_rule", "rule", "select",
     "subrule",                  "tag_class",        "visibility",

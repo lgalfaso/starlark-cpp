@@ -108,7 +108,7 @@ bool decompose_korean(std::vector<std::uint32_t>& output, std::uint32_t c) {
 }
 
 void do_nfd(std::vector<std::uint32_t>& output, std::uint32_t c) {
-  if (decompose_korean(output,c )) {
+  if (decompose_korean(output, c)) {
     return;
   }
   if (ucd::is_compatibility_decomposition(c)) {
@@ -126,7 +126,7 @@ void do_nfd(std::vector<std::uint32_t>& output, std::uint32_t c) {
 }
 
 void do_nfkd(std::vector<std::uint32_t>& output, std::uint32_t c) {
-  if (decompose_korean(output,c )) {
+  if (decompose_korean(output, c)) {
     return;
   }
   auto& decomp = ucd::decomposition(c);
@@ -150,7 +150,7 @@ void sort_non_starters(std::vector<std::uint32_t>& code_points) {
   std::stable_sort(begin, code_points.end(), [](auto a, auto b) { return ucd::ccc(a) < ucd::ccc(b); });
 }
 
-}
+}  // namespace
 
 std::string to_nfc(std::string_view input) {
   std::vector<std::uint32_t> code_points;

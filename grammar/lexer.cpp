@@ -671,7 +671,7 @@ bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_val
     }
     utf8_encode_code_point(int_value, result, false);
   } else {
-    result += (char)(int_value & 0xff);
+    result += static_cast<char>(int_value & 0xff);
   }
   return !error;
 }

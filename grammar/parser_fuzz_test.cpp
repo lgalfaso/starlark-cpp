@@ -9,7 +9,7 @@ using grammar::logger;
 using grammar::parser;
 using starlark::File;
 
-void ParserFuzzing(char* data, size_t size) {
+void ParserFuzzing(const char* data, size_t size) {
   logger logging;
   parser star_parser(std::string_view(data, size), logging);
   google::protobuf::Arena arena;
@@ -17,7 +17,7 @@ void ParserFuzzing(char* data, size_t size) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
-  ParserFuzzing((char*)data, size);
+  ParserFuzzing(reinterpret_cast<const char*>(data), size);
   return 0;
 }
 

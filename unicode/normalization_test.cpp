@@ -157,7 +157,7 @@ TEST(Normalization, UCD) {
     EXPECT_EQ(tc.NFD, to_nfd_x(tc.NFD)) << tc.line;
     EXPECT_EQ(tc.NFKD, to_nfd_x(tc.NFKC)) << tc.line;
     EXPECT_EQ(tc.NFKD, to_nfd_x(tc.NFKD)) << tc.line;
-    
+
     // NFKC
     EXPECT_EQ(tc.NFKC, to_nfkc_x(tc.source)) << tc.line;
     EXPECT_EQ(tc.NFKC, to_nfkc_x(tc.NFC)) << tc.line;
