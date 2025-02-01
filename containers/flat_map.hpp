@@ -1,7 +1,7 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
-#ifndef CONTAINER_FLAT_MAP_HPP_
-#define CONTAINER_FLAT_MAP_HPP_
+#ifndef CONTAINERS_FLAT_MAP_HPP_
+#define CONTAINERS_FLAT_MAP_HPP_
 
 #include <vector>
 
@@ -36,4 +36,4 @@ class flat_map {
 
 }  // namespace cnt
 
-#endif  // CONTAINER_FLAT_MAP_HPP_
+#endif  // CONTAINERS_FLAT_MAP_HPP_
