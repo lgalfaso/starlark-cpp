@@ -1,4 +1,4 @@
-# Copyright 2024 Lucas Mirelmann
+# Copyright 2024-2025 Lucas Mirelmann
 
 proto_library(
     name = "starlark_proto",

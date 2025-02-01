@@ -1,18 +1,21 @@
-// Copyright 2024 Lucas Mirelmann
+// Copyright 2024-2025 Lucas Mirelmann
 
 #include <cstring>
 
 #include <algorithm>
+#include <cstdio>
 #include <map>
 #include <set>
 #include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include "unicode/extract/extract.hpp"
 
 namespace {
 
-const char* HPP_HEADER = R"CPP(// Copyright 2024 Lucas Mirelmann
+const char* HPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
 
 // Generated file, do not edit.
 
@@ -46,7 +49,7 @@ const char* HPP_FOOTER = R"CPP(}  // namespace ucd
 
 )CPP";
 
-const char* CPP_HEADER = R"CPP(// Copyright 2024 Lucas Mirelmann
+const char* CPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
 
 // Generated file, do not edit.
 

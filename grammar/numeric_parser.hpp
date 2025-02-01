@@ -1,4 +1,4 @@
-// Copyright 2024 Lucas Mirelmann
+// Copyright 2024-2025 Lucas Mirelmann
 
 #ifndef GRAMMAR_NUMERIC_PARSER_HPP_
 #define GRAMMAR_NUMERIC_PARSER_HPP_

@@ -1,4 +1,4 @@
-# Copyright 2024 Lucas Mirelmann
+# Copyright 2024-2025 Lucas Mirelmann
 
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 load("//grammar:starlark_proto_encoder.bzl", "starlark_proto_encoder")

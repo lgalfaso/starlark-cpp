@@ -1,5 +1,4 @@
-# Copyright 2024 Lucas Mirelmann
-
+# Copyright 2024-2025 Lucas Mirelmann
 
 def _output_name(f, prefix):
   return f.short_path.removeprefix(prefix).removeprefix("/").removesuffix(".txtpb") + ".binpb"

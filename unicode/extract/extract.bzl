@@ -1,4 +1,4 @@
-# Copyright 2024 Lucas Mirelmann
+# Copyright 2024-2025 Lucas Mirelmann
 
 def _extract_ucd_impl(ctx):
     args = ctx.actions.args()

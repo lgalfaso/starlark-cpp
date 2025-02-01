@@ -1,4 +1,4 @@
-// Copyright 2024 Lucas Mirelmann
+// Copyright 2024-2025 Lucas Mirelmann
 
 #ifndef UNICODE_EXTRACT_EXTRACT_HPP_
 #define UNICODE_EXTRACT_EXTRACT_HPP_

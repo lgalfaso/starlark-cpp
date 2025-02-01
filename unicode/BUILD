@@ -1,4 +1,4 @@
-# Copyright 2024 Lucas Mirelmann
+# Copyright 2024-2025 Lucas Mirelmann
 
 load("//unicode/extract:extract.bzl", "extract_ucd")
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")

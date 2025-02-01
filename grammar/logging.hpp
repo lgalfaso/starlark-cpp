@@ -1,4 +1,4 @@
-// Copyright 2024 Lucas Mirelmann
+// Copyright 2024-2025 Lucas Mirelmann
 
 #ifndef GRAMMAR_LOGGING_HPP_
 #define GRAMMAR_LOGGING_HPP_

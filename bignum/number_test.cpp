@@ -1,6 +1,6 @@
-// Copyright 2024 Lucas Mirelmann
 
 #include "bignum/number.hpp"
+// Copyright 2024-2025 Lucas Mirelmann
 
 #include <gtest/gtest.h>
 #include <gtest/gtest-matchers.h>
