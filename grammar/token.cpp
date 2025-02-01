@@ -45,6 +45,8 @@ double token::double_value() const {
 }
 
 const std::string& token::string_value() const {
+  static const std::string empty_string;
+
   if (std::holds_alternative<std::string>(value)) {
     return std::get<std::string>(value);
   }
@@ -58,7 +60,5 @@ position token::start() const {
 position token::end() const {
   return tok_end;
 }
-
-const std::string token::empty_string;
 
 }  // namespace grammar

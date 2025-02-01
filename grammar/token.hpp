@@ -129,8 +129,6 @@ class token {
   position tok_start;
   position tok_end;
   std::variant<double, bignum::number, std::string> value;
-
-  static const std::string empty_string;
 };
 
 }  // namespace grammar
