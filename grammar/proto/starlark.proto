@@ -255,6 +255,8 @@ message NamedArgument {
   Test value = 2;
 }
 
+// TODO(lmirelmann): Maybe it is better to have two different messages, one for slice and another for
+// subscript (?)
 message SliceExpr {
   PrimaryExpr primary_expression = 1;
   oneof slice_type {
