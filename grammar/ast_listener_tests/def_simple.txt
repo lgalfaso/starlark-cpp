@@ -1,0 +1,10 @@
+ENTER File
+ENTER Statement
+ENTER Def("foo")
+ENTER Statement
+ENTER Pass
+EXIT Pass
+EXIT Statement
+EXIT Def
+EXIT Statement
+EXIT File

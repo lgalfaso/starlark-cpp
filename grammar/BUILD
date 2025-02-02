@@ -4,6 +4,40 @@ load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 load("//grammar:starlark_proto_encoder.bzl", "starlark_proto_encoder")
 
 cc_library(
+    name = "ast_listener",
+    srcs = ["ast_listener.cpp"],
+    hdrs = ["ast_listener.hpp"],
+    deps = [
+        "//grammar/proto:starlark_cc_proto",
+    ],
+)
+
+[
+  cc_test(
+      name = "ast_listener_test_" + f.replace("/", "_"),
+      srcs = ["ast_listener_test.cpp"],
+      args = [
+          "$(location " + f + ")",
+          "$(location " + f.replace(".star", ".txt") + ")",
+      ],
+      deps = [
+          ":ast_listener",
+          ":parser",
+          ":parsing_options",
+          ":quoted",
+          "@googletest//:gtest_main",
+          "@protobuf//:protobuf",
+          "//grammar/proto:starlark_cc_proto",
+          "//third-party:defer",
+      ],
+      data = [
+          f,
+          f.replace(".star", ".txt"),
+      ],
+  ) for f in glob(["ast_listener_tests/*.star"])
+]
+
+cc_library(
     name = "lexer",
     srcs = ["lexer.cpp"],
     hdrs = ["lexer.hpp"],
