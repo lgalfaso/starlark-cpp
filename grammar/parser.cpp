@@ -450,7 +450,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         } else if (capture(token_type::if_)) {
           found_non_load = true;
-          if (!options.allow_top_level_if_and_for && nested_loops.size() == 1) {
+          if (nested_loops.size() == 1) {
             add_error("`if` statements are not allowed at the top level");
           }
           IfStmt* if_statement = top.statements->Add()->mutable_if_statement();
@@ -479,7 +479,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         } else if (capture(token_type::for_)) {
           found_non_load = true;
-          if (!options.allow_top_level_if_and_for && nested_loops.size() == 1) {
+          if (nested_loops.size() == 1) {
             add_error("`for` statements are not allowed at the top level");
           }
           ForStmt* for_statement = top.statements->Add()->mutable_for_statement();
