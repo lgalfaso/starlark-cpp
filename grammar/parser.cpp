@@ -747,7 +747,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               if (!symbols.insert(load_param->local_name().nfkc_name()).second) {
                 add_error("`load` statement defines '" + load_param->local_name().name() + "' more than once");
               }
-              if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name())) {
+              if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name()) && !options.allow_top_level_rebinding) {
                 add_error("`load` statement redefines previously defined value '" + load_param->local_name().name() + "'");
               }
               // The spec does not specify whether it is an error to bind to the file block multiple times.
