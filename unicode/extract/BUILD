@@ -1,7 +1,7 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
 package(
-    default_visibility = ["//visibility:public"]
+    default_visibility = ["//visibility:public"],
 )
 
 cc_library(

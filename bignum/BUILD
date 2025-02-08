@@ -1,7 +1,7 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
 package(
-    default_visibility = ["//visibility:public"]
+    default_visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -12,20 +12,20 @@ cc_library(
 
 cc_test(
     name = "number_test",
+    size = "large",
     srcs = ["number_test.cpp"],
     deps = [
         ":number",
-         "@googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
-    size = "large",
 )
 
 cc_binary(
     name = "number_benchmark",
+    testonly = True,
     srcs = ["number_benchmark.cpp"],
     deps = [
         ":number",
         "@google_benchmark//:benchmark",
     ],
-    testonly = True,
 )

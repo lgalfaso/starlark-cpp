@@ -5,4 +5,3 @@ filegroup(
     srcs = glob(["*.bzl"]),
     visibility = ["//visibility:public"],
 )
-

@@ -1,21 +1,22 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
-load("//unicode/extract:extract.bzl", "extract_ucd")
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
+load("//unicode/extract:extract.bzl", "extract_ucd")
 
 cc_library(
     name = "encode",
     srcs = ["encode.cpp"],
     hdrs = ["encode.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":ucd",
         ":utf8_reader",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_test(
     name = "encode_test",
+    size = "small",
     srcs = ["encode_test.cpp"],
     deps = [
         ":encode",
@@ -23,56 +24,55 @@ cc_test(
         ":utf8_reader",
         "@googletest//:gtest_main",
     ],
-    size = "small",
 )
 
 cc_library(
     name = "normalization",
     srcs = ["normalization.cpp"],
     hdrs = ["normalization.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":encode",
         ":ucd",
         ":utf8_reader",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_test(
     name = "normalization_test",
+    size = "small",
     srcs = ["normalization_test.cpp"],
-    deps = [
-        ":normalization",
-        ":ucd",
-        "@googletest//:gtest_main",
-    ],
     args = [
         "$(location @ucd//:NormalizationTest.txt)",
     ],
     data = [
         "@ucd//:NormalizationTest.txt",
     ],
-    size = "small",
+    deps = [
+        ":normalization",
+        ":ucd",
+        "@googletest//:gtest_main",
+    ],
 )
 
 cc_library(
     name = "utf8_reader",
     srcs = ["utf8_reader.cpp"],
     hdrs = ["utf8_reader.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":ucd",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_test(
     name = "utf8_reader_test",
+    size = "small",
     srcs = ["utf8_reader_test.cpp"],
     deps = [
         ":utf8_reader",
         "@googletest//:gtest_main",
     ],
-    size = "small",
 )
 
 cc_fuzz_test(
@@ -101,27 +101,26 @@ cc_library(
 
 cc_test(
     name = "ucd_test",
+    size = "small",
     srcs = ["ucd_test.cpp"],
-    deps = [
-        ":ucd",
-        "@googletest//:gtest_main",
-    ],
     args = [
         "$(location @ucd//:DerivedCoreProperties.txt)",
     ],
     data = [
         "@ucd//:DerivedCoreProperties.txt",
     ],
-    size = "small",
+    deps = [
+        ":ucd",
+        "@googletest//:gtest_main",
+    ],
 )
 
 cc_binary(
     name = "ucd_benchmark",
+    testonly = True,
     srcs = ["ucd_benchmark.cpp"],
     deps = [
         ":ucd",
         "@google_benchmark//:benchmark",
     ],
-    testonly = True,
 )
-

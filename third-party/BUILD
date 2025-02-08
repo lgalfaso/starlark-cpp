@@ -5,4 +5,3 @@ cc_library(
     hdrs = ["defer.hpp"],
     visibility = ["//visibility:public"],
 )
-

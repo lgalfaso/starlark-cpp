@@ -1,7 +1,7 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
 def _output_name(f, prefix):
-  return f.short_path.removeprefix(prefix).removeprefix("/").removesuffix(".txtpb") + ".binpb"
+    return f.short_path.removeprefix(prefix).removeprefix("/").removesuffix(".txtpb") + ".binpb"
 
 def _starlark_proto_encoder_rule_impl(ctx):
     outputs = []
@@ -20,7 +20,6 @@ def _starlark_proto_encoder_rule_impl(ctx):
             )
             outputs.append(output_file)
     return DefaultInfo(files = depset(outputs))
-
 
 _starlark_proto_encoder_rule = rule(
     implementation = _starlark_proto_encoder_rule_impl,
@@ -43,5 +42,5 @@ def starlark_proto_encoder(**kwargs):
         fail("Cannot have the argument `strip_prefix`")
     _starlark_proto_encoder_rule(
         strip_prefix = native.package_name(),
-        **kwargs,
+        **kwargs
     )

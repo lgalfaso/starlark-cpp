@@ -1,10 +1,14 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
-module(name = "starlark", version = "0.0.1")
+module(
+    name = "starlark",
+    version = "0.0.1",
+)
 
 # This is not used directly, but bumping to a new version that does not produce as many warnings.
 bazel_dep(name = "abseil-cpp", version = "20240722.1")
 bazel_dep(name = "google_benchmark", version = "1.9.1")
+
 # Used by `googletest`, bumping to a newer version that makes `bazel mod graph` work.
 bazel_dep(name = "re2", version = "2024-07-02.bcr.1")
 bazel_dep(name = "googletest", version = "1.15.2")
@@ -15,13 +19,12 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 
 http_archive(
     name = "ucd",
-    url = "https://unicode.org/Public/16.0.0/ucd/UCD.zip",
-    integrity = "sha256-yG3YHysUpDsMwGSqX4mqckE4aAHjXFnHmE5XmDJjTrI=",
     build_file_content = """
 exports_files(
     glob(["**/*"]),
     visibility = ["//visibility:public"],
 )
 """,
+    integrity = "sha256-yG3YHysUpDsMwGSqX4mqckE4aAHjXFnHmE5XmDJjTrI=",
+    url = "https://unicode.org/Public/16.0.0/ucd/UCD.zip",
 )
-

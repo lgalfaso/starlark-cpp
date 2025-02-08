@@ -3,15 +3,14 @@
 proto_library(
     name = "starlark_proto",
     srcs = ["starlark.proto"],
+    visibility = ["//visibility:public"],
     deps = [
         "@protobuf//:any_proto",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_proto_library(
     name = "starlark_cc_proto",
-    deps = [":starlark_proto"],
     visibility = ["//visibility:public"],
+    deps = [":starlark_proto"],
 )
-
