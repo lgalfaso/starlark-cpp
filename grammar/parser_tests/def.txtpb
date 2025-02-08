@@ -15,28 +15,20 @@ statement {
     statement {
       assign_statement {
         lhs {
-          value {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 0
-              }
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         op: EQUALS
         rhs {
-          value {
-            primary_expression {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-                frame: 3
-                pos_in_frame: 2
-              }
-            }
+          identifier {
+            name: "True"
+            nfkc_name: "True"
+            frame: 3
+            pos_in_frame: 2
           }
         }
       }
@@ -65,15 +57,11 @@ statement {
     function_binding: "x"
     statement {
       expression_statement {
-        value {
-          primary_expression {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-              frame: 3
-              pos_in_frame: 2
-            }
-          }
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 3
+          pos_in_frame: 2
         }
       }
     }
@@ -95,41 +83,33 @@ statement {
         pos_in_frame: 0
       }
       initialization {
-        primary_expression {
-          identifier {
-            name: "True"
-            nfkc_name: "True"
-            frame: 2
-            pos_in_frame: 2
-          }
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 2
+          pos_in_frame: 2
         }
       }
     }
     function_binding: "x"
     statement {
       expression_statement {
-        value {
+        call_expression {
           primary_expression {
-            call_expression {
-              primary_expression {
-                identifier {
-                  name: "print"
-                  nfkc_name: "print"
-                  frame: 3
-                  pos_in_frame: 21
-                }
-              }
-              argument {
-                value {
-                  primary_expression {
-                    identifier {
-                      name: "x"
-                      nfkc_name: "x"
-                      frame: 0
-                      pos_in_frame: 0
-                    }
-                  }
-                }
+            identifier {
+              name: "print"
+              nfkc_name: "print"
+              frame: 3
+              pos_in_frame: 21
+            }
+          }
+          argument {
+            value {
+              identifier {
+                name: "x"
+                nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }
@@ -170,48 +150,32 @@ statement {
     statement {
       assign_statement: {
         lhs {
-          value {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 0
-                pos_in_frame: 1
-              }
-            }
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 0
+            pos_in_frame: 1
           }
         }
         op: EQUALS
         rhs {
-          value {
-            primary_expression {
-              int_value: "1"
-            }
-          }
+          int_value: "1"
         }
       }
     }
     statement {
       assign_statement: {
         lhs {
-          value {
-            primary_expression {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-                frame: 0
-                pos_in_frame: 0
-              }
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         op: EQUALS
         rhs {
-          value {
-            primary_expression {
-              int_value: "1"
-            }
-          }
+          int_value: "1"
         }
       }
     }
@@ -233,40 +197,32 @@ statement {
         pos_in_frame: 0
       }
       initialization {
-        primary_expression {
-          identifier {
-            name: "man"
-            nfkc_name: "man"
-            frame: 1
-            pos_in_frame: 3
-          }
+        identifier {
+          name: "man"
+          nfkc_name: "man"
+          frame: 1
+          pos_in_frame: 3
         }
       }
     }
     statement {
       expression_statement {
-        value {
+        call_expression {
           primary_expression {
-            call_expression {
-              primary_expression {
-                identifier {
-                  name: "print"
-                  nfkc_name: "print"
-                  frame: 3
-                  pos_in_frame: 21
-                }
-              }
-              argument {
-                value {
-                  primary_expression {
-                    identifier {
-                       name: "x"
-                       nfkc_name: "x"
-                       frame: 0
-                       pos_in_frame: 0
-                    }
-                  }
-                }
+            identifier {
+              name: "print"
+              nfkc_name: "print"
+              frame: 3
+              pos_in_frame: 21
+            }
+          }
+          argument {
+            value {
+              identifier {
+                name: "x"
+                nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }

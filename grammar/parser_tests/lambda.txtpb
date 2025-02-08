@@ -3,15 +3,54 @@ module_binding: "b"
 module_binding: "c"
 statement {
   expression_statement {
-    value {
-      lambda_expression {
-        test {
-          primary_expression {
+    lambda_expression {
+      test {
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 3
+          pos_in_frame: 2
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    lambda_expression {
+      parameter {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      function_binding: "x"
+      test {
+        if_expression {
+          if_value {
             identifier {
               name: "True"
               nfkc_name: "True"
               frame: 3
               pos_in_frame: 2
+            }
+          }
+          if_test {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          else_value {
+            identifier {
+              name: "False"
+              nfkc_name: "False"
+              frame: 3
+              pos_in_frame: 0
             }
           }
         }
@@ -21,394 +60,195 @@ statement {
 }
 statement {
   expression_statement {
-    value {
+    lambda_expression {
+      parameter {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      parameter {
+        identifier {
+          name: "y"
+          nfkc_name: "y"
+          frame: 0
+          pos_in_frame: 1
+        }
+      }
+      function_binding: "x"
+      function_binding: "y"
+      test {
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 3
+          pos_in_frame: 2
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    lambda_expression {
+      parameter {
+        star {
+        }
+      }
+      parameter {
+        identifier {
+          name: "y"
+          nfkc_name: "y"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      function_binding: "y"
+      test {
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 3
+          pos_in_frame: 2
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    lambda_expression {
+      parameter {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+        star {
+        }
+      }
+      function_binding: "x"
+      test {
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 3
+          pos_in_frame: 2
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    lambda_expression {
+      parameter {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+        star_star {
+        }
+      }
+      function_binding: "x"
+      test {
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 3
+          pos_in_frame: 2
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    lambda_expression {
+      parameter {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      function_binding: "x"
+      test {
+        lambda_expression {
+          parameter {
+            identifier {
+              name: "y"
+              nfkc_name: "y"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          function_binding: "y"
+          test {
+            binary_expression {
+              lhs {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                  frame: 1
+                  pos_in_frame: 0
+                }
+              }
+              operator: PLUS
+              rhs {
+                identifier {
+                  name: "y"
+                  nfkc_name: "y"
+                  frame: 0
+                  pos_in_frame: 0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
       lambda_expression {
         parameter {
           identifier {
             name: "x"
             nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         function_binding: "x"
         test {
           if_expression {
             if_value {
-              primary_expression {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                  frame: 3
-                  pos_in_frame: 2
-                }
+              identifier {
+                name: "True"
+                nfkc_name: "True"
+                frame: 3
+                pos_in_frame: 2
               }
             }
             if_test {
-              primary_expression {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-            }
-            else_value {
-              primary_expression {
-                identifier {
-                  name: "False"
-                  nfkc_name: "False"
-                  frame: 3
-                  pos_in_frame: 0
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      lambda_expression {
-        parameter {
-          identifier {
-            name: "x"
-            nfkc_name: "x"
-            frame: 0
-            pos_in_frame: 0
-          }
-        }
-        parameter {
-          identifier {
-            name: "y"
-            nfkc_name: "y"
-            frame: 0
-            pos_in_frame: 1
-          }
-        }
-        function_binding: "x"
-        function_binding: "y"
-        test {
-          primary_expression {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-              frame: 3
-              pos_in_frame: 2
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      lambda_expression {
-        parameter {
-          star {
-          }
-        }
-        parameter {
-          identifier {
-            name: "y"
-            nfkc_name: "y"
-            frame: 0
-            pos_in_frame: 0
-          }
-        }
-        function_binding: "y"
-        test {
-          primary_expression {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-              frame: 3
-              pos_in_frame: 2
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      lambda_expression {
-        parameter {
-          identifier {
-            name: "x"
-            nfkc_name: "x"
-            frame: 0
-            pos_in_frame: 0
-          }
-          star {
-          }
-        }
-        function_binding: "x"
-        test {
-          primary_expression {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-              frame: 3
-              pos_in_frame: 2
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      lambda_expression {
-        parameter {
-          identifier {
-            name: "x"
-            nfkc_name: "x"
-            frame: 0
-            pos_in_frame: 0
-          }
-          star_star {
-          }
-        }
-        function_binding: "x"
-        test {
-          primary_expression {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-              frame: 3
-              pos_in_frame: 2
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      lambda_expression {
-        parameter {
-          identifier {
-            name: "x"
-            nfkc_name: "x"
-            frame: 0
-            pos_in_frame: 0
-          }
-        }
-        function_binding: "x"
-        test {
-          lambda_expression {
-            parameter {
-              identifier {
-                name: "y"
-                nfkc_name: "y"
-                frame: 0
-                pos_in_frame: 0
-              }
-            }
-            function_binding: "y"
-            test {
-              binary_expression {
-                lhs {
-                  primary_expression {
-                    identifier {
-                      name: "x"
-                      nfkc_name: "x"
-                      frame: 1
-                      pos_in_frame: 0
-                    }
-                  }
-                }
-                operator: PLUS
-                rhs {
-                  primary_expression {
-                    identifier {
-                      name: "y"
-                      nfkc_name: "y"
-                      frame: 0
-                      pos_in_frame: 0
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
-            frame: 1
-            pos_in_frame: 0
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        lambda_expression {
-          parameter {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-              frame: 0
-              pos_in_frame: 0
-            }
-          }
-          function_binding: "x"
-          test {
-            if_expression {
-              if_value {
-                primary_expression {
-                  identifier {
-                    name: "True"
-                    nfkc_name: "True"
-                    frame: 3
-                    pos_in_frame: 2
-                  }
-                }
-              }
-              if_test {
-                primary_expression {
-                  identifier {
-                    name: "x"
-                    nfkc_name: "x"
-                    frame: 0
-                    pos_in_frame: 0
-                  }
-                }
-              }
-              else_value {
-                primary_expression {
-                  identifier {
-                    name: "False"
-                    nfkc_name: "False"
-                    frame: 3
-                    pos_in_frame: 0
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "b"
-            nfkc_name: "b"
-            frame: 1
-            pos_in_frame: 1
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        lambda_expression {
-          test {
-            if_expression {
-              if_value {
-                primary_expression {
-                  int_value: "1"
-                }
-              }
-              if_test {
-                primary_expression {
-                  int_value: "2"
-                }
-              }
-              else_value {
-                if_expression {
-                  if_value {
-                    primary_expression {
-                      int_value: "3"
-                    }
-                  }
-                  if_test {
-                    primary_expression {
-                      int_value: "4"
-                    }
-                  }
-                  else_value {
-                    primary_expression {
-                      int_value: "5"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "c"
-            nfkc_name: "c"
-            frame: 1
-            pos_in_frame: 2
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        lambda_expression {
-          parameter {
-            identifier {
-              name: "x"
-              nfkc_name: "x"
-              frame: 0
-              pos_in_frame: 0
-            }
-            initialization {
-              primary_expression {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                  frame: 2
-                  pos_in_frame: 2
-                }
-              }
-            }
-          }
-          function_binding: "x"
-          test {
-            primary_expression {
               identifier {
                 name: "x"
                 nfkc_name: "x"
@@ -416,6 +256,96 @@ statement {
                 pos_in_frame: 0
               }
             }
+            else_value {
+              identifier {
+                name: "False"
+                nfkc_name: "False"
+                frame: 3
+                pos_in_frame: 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "b"
+        nfkc_name: "b"
+        frame: 1
+        pos_in_frame: 1
+      }
+    }
+    op: EQUALS
+    rhs {
+      lambda_expression {
+        test {
+          if_expression {
+            if_value {
+              int_value: "1"
+            }
+            if_test {
+              int_value: "2"
+            }
+            else_value {
+              if_expression {
+                if_value {
+                  int_value: "3"
+                }
+                if_test {
+                  int_value: "4"
+                }
+                else_value {
+                  int_value: "5"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "c"
+        nfkc_name: "c"
+        frame: 1
+        pos_in_frame: 2
+      }
+    }
+    op: EQUALS
+    rhs {
+      lambda_expression {
+        parameter {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
+          }
+          initialization {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
+                frame: 2
+                pos_in_frame: 2
+              }
+          }
+        }
+        function_binding: "x"
+        test {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
           }
         }
       }

@@ -2,24 +2,16 @@ module_binding: "a"
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
-            frame: 1
-            pos_in_frame: 0
-          }
-        }
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          string_value: "foo\\\n"
-        }
-      }
+      string_value: "foo\\\n"
     }
   }
 }

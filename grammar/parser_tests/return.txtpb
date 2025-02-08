@@ -1,5 +1,6 @@
 module_binding: "bar"
 module_binding: "foo"
+module_binding: "man"
 statement {
   def_statement {
     function_name {
@@ -25,9 +26,44 @@ statement {
     statement {
       return_statement {
         expression {
-          value {
-            primary_expression {
-              int_value: "1"
+          identifier {
+            name: "True"
+            nfkc_name: "True"
+            frame: 3
+            pos_in_frame: 2
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name {
+      name: "man"
+      nfkc_name: "man"
+      frame: 1
+      pos_in_frame: 2
+    }
+    statement {
+      return_statement {
+        expression {
+          tuple {
+            value {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
+                frame: 3
+                pos_in_frame: 2
+              }
+            }
+            value {
+              identifier {
+                name: "True"
+                nfkc_name: "True"
+                frame: 3
+                pos_in_frame: 2
+              }
             }
           }
         }

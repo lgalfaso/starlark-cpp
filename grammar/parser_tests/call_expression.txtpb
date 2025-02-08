@@ -4,17 +4,13 @@ module_binding: "foo"
 module_binding: "kwargs"
 statement {
   expression_statement {
-    value {
+    call_expression {
       primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
         }
       }
     }
@@ -22,24 +18,18 @@ statement {
 }
 statement {
   expression_statement {
-    value {
+    call_expression {
       primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-          }
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        value {
+          int_value: "1"
         }
       }
     }
@@ -47,38 +37,28 @@ statement {
 }
 statement {
   expression_statement {
-    value {
+    call_expression {
       primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "2"
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "3"
-              }
-            }
-          }
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        value {
+          int_value: "1"
+        }
+      }
+      argument {
+        value {
+          int_value: "2"
+        }
+      }
+      argument {
+        value {
+          int_value: "3"
         }
       }
     }
@@ -86,24 +66,18 @@ statement {
 }
 statement {
   expression_statement {
-    value {
+    call_expression {
       primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-          }
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        value {
+          int_value: "1"
         }
       }
     }
@@ -111,38 +85,28 @@ statement {
 }
 statement {
   expression_statement {
-    value {
+    call_expression {
       primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "2"
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "3"
-              }
-            }
-          }
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        value {
+          int_value: "1"
+        }
+      }
+      argument {
+        value {
+          int_value: "2"
+        }
+      }
+      argument {
+        value {
+          int_value: "3"
         }
       }
     }
@@ -150,218 +114,174 @@ statement {
 }
 statement {
   expression_statement {
-    value {
+    call_expression {
       primary_expression {
         call_expression {
           primary_expression {
             call_expression {
               primary_expression {
-                call_expression {
-                  primary_expression {
-                    identifier {
-                      name: "foo"
-                      nfkc_name: "foo"
-                      frame: 1
-                      pos_in_frame: 2
-                    }
-                  }
-                  argument {
-                    value {
-                      primary_expression {
-                        int_value: "1"
-                      }
-                    }
-                  }
+                identifier {
+                  name: "foo"
+                  nfkc_name: "foo"
+                  frame: 1
+                  pos_in_frame: 2
                 }
               }
               argument {
                 value {
-                  primary_expression {
-                    int_value: "2"
-                  }
-                }
-              }
-            }
-          }
-          argument {
-            value {
-              primary_expression {
-                int_value: "3"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
-          argument {
-            named_argument {
-              identifier {
-                name: "bar"
-                nfkc_name: "bar"
-              }
-              value {
-                primary_expression {
                   int_value: "1"
                 }
               }
             }
           }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
-          argument {
-            star_argument {
-              primary_expression {
-                identifier {
-                  name: "bar"
-                  nfkc_name: "bar"
-                  frame: 1
-                  pos_in_frame: 1
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
-          argument {
-            star_star_argument {
-              primary_expression {
-                identifier {
-                  name: "bar"
-                  nfkc_name: "bar"
-                  frame: 1
-                  pos_in_frame: 1
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        call_expression {
-          primary_expression {
-            identifier {
-              name: "foo"
-              nfkc_name: "foo"
-              frame: 1
-              pos_in_frame: 2
-            }
-          }
           argument {
             value {
-              primary_expression {
-                int_value: "1"
-              }
+              int_value: "2"
             }
           }
-          argument {
-            value {
-              primary_expression {
-                int_value: "2"
-              }
-            }
+        }
+      }
+      argument {
+        value {
+          int_value: "3"
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    call_expression {
+      primary_expression {
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        named_argument {
+          identifier {
+            name: "bar"
+            nfkc_name: "bar"
           }
-          argument {
-            named_argument {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-              }
-              value {
-                primary_expression {
-                  int_value: "3"
-                }
-              }
-            }
+          value {
+            int_value: "1"
           }
-          argument {
-            named_argument {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-              }
-              value {
-                primary_expression {
-                  int_value: "4"
-                }
-              }
-            }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    call_expression {
+      primary_expression {
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        star_argument {
+          identifier {
+            name: "bar"
+            nfkc_name: "bar"
+            frame: 1
+            pos_in_frame: 1
           }
-          argument {
-            star_argument {
-              primary_expression {
-                identifier {
-                  name: "args"
-                  nfkc_name: "args"
-                  frame: 1
-                  pos_in_frame: 0
-                }
-              }
-            }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    call_expression {
+      primary_expression {
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        star_star_argument {
+          identifier {
+            name: "bar"
+            nfkc_name: "bar"
+            frame: 1
+            pos_in_frame: 1
           }
-          argument {
-            star_star_argument {
-              primary_expression {
-                identifier {
-                  name: "kwargs"
-                  nfkc_name: "kwargs"
-                  frame: 1
-                  pos_in_frame: 3
-                }
-              }
-            }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    call_expression {
+      primary_expression {
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 2
+        }
+      }
+      argument {
+        value {
+          int_value: "1"
+        }
+      }
+      argument {
+        value {
+          int_value: "2"
+        }
+      }
+      argument {
+        named_argument {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+          }
+          value {
+            int_value: "3"
+          }
+        }
+      }
+      argument {
+        named_argument {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+          }
+          value {
+            int_value: "4"
+          }
+        }
+      }
+      argument {
+        star_argument {
+          identifier {
+            name: "args"
+            nfkc_name: "args"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+      }
+      argument {
+        star_star_argument {
+          identifier {
+            name: "kwargs"
+            nfkc_name: "kwargs"
+            frame: 1
+            pos_in_frame: 3
           }
         }
       }
@@ -384,72 +304,48 @@ statement {
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "bar"
-            nfkc_name: "bar"
-            frame: 1
-            pos_in_frame: 1
-          }
-        }
+      identifier {
+        name: "bar"
+        nfkc_name: "bar"
+        frame: 1
+        pos_in_frame: 1
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          int_value: "1"
-        }
-      }
+      int_value: "1"
     }
   }
 }
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "args"
-            nfkc_name: "args"
-            frame: 1
-            pos_in_frame: 0
-          }
-        }
+      identifier {
+        name: "args"
+        nfkc_name: "args"
+        frame: 1
+        pos_in_frame: 0
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression { }
-        }
-      }
+      list_expression { }
     }
   }
 }
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "kwargs"
-            nfkc_name: "kwargs"
-            frame: 1
-            pos_in_frame: 3
-          }
-        }
+      identifier {
+        name: "kwargs"
+        nfkc_name: "kwargs"
+        frame: 1
+        pos_in_frame: 3
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          dictionary_expression { }
-        }
-      }
+      dictionary_expression { }
     }
   }
 }

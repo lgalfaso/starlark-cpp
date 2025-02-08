@@ -5,12 +5,10 @@ ENTER Parameter("a")
 EXIT Parameter
 ENTER Statement
 ENTER IfStatement
-ENTER Test
-ENTER PrimaryExpression
+ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
-EXIT PrimaryExpression
-EXIT Test
+EXIT Expression
 ENTER Then
 ENTER Statement
 ENTER ReturnStatement None
@@ -22,16 +20,12 @@ EXIT Statement
 ENTER Statement
 ENTER ReturnStatement expression
 ENTER Expression
-ENTER Test
 ENTER UnaryExpression
-ENTER Test
-ENTER PrimaryExpression
+ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
-EXIT PrimaryExpression
-EXIT Test
+EXIT Expression
 EXIT UnaryExpression
-EXIT Test
 EXIT Expression
 EXIT ReturnStatement
 EXIT Statement
@@ -40,12 +34,10 @@ EXIT Statement
 ENTER Statement
 ENTER Def("bar")
 ENTER Parameter("a")
-ENTER Test
-ENTER PrimaryExpression
+ENTER Expression
 ENTER Identifier("True")
 EXIT Identifier
-EXIT PrimaryExpression
-EXIT Test
+EXIT Expression
 EXIT Parameter
 ENTER Statement
 ENTER Pass

@@ -7,45 +7,282 @@ module_binding: "words"
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "words"
-            nfkc_name: "words"
-            frame: 1
-            pos_in_frame: 5
-          }
-        }
+      identifier {
+        name: "words"
+        nfkc_name: "words"
+        frame: 1
+        pos_in_frame: 5
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression { }
-        }
-      }
+      list_expression { }
     }
   }
 }
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "identifier"
-            nfkc_name: "identifier"
-            frame: 1
-            pos_in_frame: 4
-          }
-        }
+      identifier {
+        name: "identifier"
+        nfkc_name: "identifier"
+        frame: 1
+        pos_in_frame: 4
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
+      int_value: "1"
+    }
+  }
+}
+statement {
+  expression_statement {
+    identifier {
+      name: "identifier"
+      nfkc_name: "identifier"
+      frame: 1
+      pos_in_frame: 4
+    }
+  }
+}
+statement {
+  expression_statement {
+    int_value: "1234"
+  }
+}
+statement {
+  expression_statement {
+    float_value: 3.14
+  }
+}
+statement {
+  expression_statement {
+    string_value: "this is a string"
+  }
+}
+statement {
+  expression_statement {
+    bytes_value: "these are bytes"
+  }
+}
+statement {
+  expression_statement {
+    list_expression {
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_expression {
+      element {
+        int_value: "1"
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_expression {
+      element {
+        int_value: "1"
+      }
+      element {
+        int_value: "2"
+      }
+      element {
+        int_value: "3"
+      }
+      element {
+        int_value: "4"
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_comprehension {
+      comprehension_binding: "x"
+      test {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          in {
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+              frame: 2
+              pos_in_frame: 3
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_comprehension {
+      comprehension_binding: "x"
+      test {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          in {
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+              frame: 2
+              pos_in_frame: 3
+            }
+          }
+        }
+      }
+      clause {
+        if_clause {
+          binary_expression {
+            lhs {
+              binary_expression {
+                lhs {
+                  identifier {
+                    name: "x"
+                    nfkc_name: "x"
+                    frame: 0
+                    pos_in_frame: 0
+                  }
+                }
+                operator: PERCENT
+                rhs {
+                  int_value: "2"
+                }
+              }
+            }
+            operator: EQUALS_EQUALS
+            rhs {
+              int_value: "0"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_comprehension {
+      comprehension_binding: "x"
+      comprehension_binding: "y"
+      test {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            tuple {
+              value {
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                  frame: 0
+                  pos_in_frame: 0
+                }
+              }
+              value {
+                identifier {
+                  name: "y"
+                  nfkc_name: "y"
+                  frame: 0
+                  pos_in_frame: 1
+                }
+              }
+            }
+          }
+          in {
+            identifier {
+              name: "foo"
+              nfkc_name: "foo"
+              frame: 2
+              pos_in_frame: 3
+            }
+          }
+        }
+      }
+      clause {
+        if_clause {
+          binary_expression {
+            lhs {
+              binary_expression {
+                lhs {
+                  identifier {
+                    name: "x"
+                    nfkc_name: "x"
+                    frame: 0
+                    pos_in_frame: 0
+                  }
+                }
+                operator: PERCENT
+                rhs {
+                  int_value: "2"
+                }
+              }
+            }
+            operator: EQUALS_EQUALS
+            rhs {
+              int_value: "0"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    dictionary_expression {
+    }
+  }
+}
+statement {
+  expression_statement {
+    dictionary_expression {
+      entry {
+        key {
+          string_value: "a"
+        }
+        value {
           int_value: "1"
         }
       }
@@ -54,13 +291,21 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      primary_expression {
-        identifier {
-          name: "identifier"
-          nfkc_name: "identifier"
-          frame: 1
-          pos_in_frame: 4
+    dictionary_expression {
+      entry {
+        key {
+          string_value: "a"
+        }
+        value {
+          int_value: "1"
+        }
+      }
+      entry {
+        key {
+          string_value: "b"
+        }
+        value {
+          int_value: "2"
         }
       }
     }
@@ -68,58 +313,42 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      primary_expression {
-        int_value: "1234"
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        float_value: 3.14
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        string_value: "this is a string"
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        bytes_value: "these are bytes"
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        list_expression {
+    dictionary_comprehension {
+      comprehension_binding: "x"
+      entry {
+        key {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+        value {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
+          }
         }
       }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        list_expression {
-          element {
-            primary_expression {
-              int_value: "1"
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          in {
+            identifier {
+              name: "words"
+              nfkc_name: "words"
+              frame: 2
+              pos_in_frame: 5
             }
           }
         }
@@ -129,42 +358,29 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      primary_expression {
-        list_expression {
-          element {
-            primary_expression {
-              int_value: "1"
-            }
-          }
-          element {
-            primary_expression {
-              int_value: "2"
-            }
-          }
-          element {
-            primary_expression {
-              int_value: "3"
-            }
-          }
-          element {
-            primary_expression {
-              int_value: "4"
-            }
+    dictionary_comprehension {
+      comprehension_binding: "x"
+      entry {
+        key {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
           }
         }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        list_comprehension {
-          comprehension_binding: "x"
-          test {
-            primary_expression {
+        value {
+          binary_expression {
+            lhs {
+              identifier {
+                name: "x"
+                nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 0
+              }
+            }
+            operator: PLUS
+            rhs {
               identifier {
                 name: "x"
                 nfkc_name: "x"
@@ -173,408 +389,50 @@ statement {
               }
             }
           }
-          clause {
-            for_clause {
-              loop_variable {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-              in {
-                primary_expression {
-                  identifier {
-                    name: "foo"
-                    nfkc_name: "foo"
-                    frame: 2
-                    pos_in_frame: 3
-                  }
-                }
-              }
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          in {
+            identifier {
+              name: "words"
+              nfkc_name: "words"
+              frame: 2
+              pos_in_frame: 5
             }
           }
         }
       }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        list_comprehension {
-          comprehension_binding: "x"
-          test {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 0
-              }
-            }
-          }
-          clause {
-            for_clause {
-              loop_variable {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-              in {
-                primary_expression {
-                  identifier {
-                    name: "foo"
-                    nfkc_name: "foo"
-                    frame: 2
-                    pos_in_frame: 3
-                  }
-                }
-              }
-            }
-          }
-          clause {
-            if_clause {
+      clause {
+        if_clause {
+          binary_expression {
+            lhs {
               binary_expression {
                 lhs {
-                  binary_expression {
-                    lhs {
-                      primary_expression {
-                        identifier {
-                          name: "x"
-                          nfkc_name: "x"
-                          frame: 0
-                          pos_in_frame: 0
-                        }
-                      }
-                    }
-                    operator: PERCENT
-                    rhs {
-                      primary_expression {
-                        int_value: "2"
-                      }
-                    }
-                  }
-                }
-                operator: EQUALS_EQUALS
-                rhs {
-                  primary_expression {
-                    int_value: "0"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        list_comprehension {
-          comprehension_binding: "x"
-          comprehension_binding: "y"
-          test {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 0
-              }
-            }
-          }
-          clause {
-            for_clause {
-              loop_variable {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-              loop_variable {
-                identifier {
-                  name: "y"
-                  nfkc_name: "y"
-                  frame: 0
-                  pos_in_frame: 1
-                }
-              }
-              in {
-                primary_expression {
                   identifier {
-                    name: "foo"
-                    nfkc_name: "foo"
-                    frame: 2
-                    pos_in_frame: 3
+                    name: "x"
+                    nfkc_name: "x"
+                    frame: 0
+                    pos_in_frame: 0
                   }
                 }
-              }
-            }
-          }
-          clause {
-            if_clause {
-              binary_expression {
-                lhs {
-                  binary_expression {
-                    lhs {
-                      primary_expression {
-                        identifier {
-                          name: "x"
-                          nfkc_name: "x"
-                          frame: 0
-                          pos_in_frame: 0
-                        }
-                      }
-                    }
-                    operator: PERCENT
-                    rhs {
-                      primary_expression {
-                        int_value: "2"
-                      }
-                    }
-                  }
-                }
-                operator: EQUALS_EQUALS
+                operator: PERCENT
                 rhs {
-                  primary_expression {
-                    int_value: "0"
-                  }
+                  int_value: "2"
                 }
               }
             }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        dictionary_expression {
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        dictionary_expression {
-          entry {
-            key {
-              primary_expression {
-                string_value: "a"
-              }
-            }
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        dictionary_expression {
-          entry {
-            key {
-              primary_expression {
-                string_value: "a"
-              }
-            }
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-          }
-          entry {
-            key {
-              primary_expression {
-                string_value: "b"
-              }
-            }
-            value {
-              primary_expression {
-                int_value: "2"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        dictionary_comprehension {
-          comprehension_binding: "x"
-          entry {
-            key {
-              primary_expression {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-            }
-            value {
-              primary_expression {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-            }
-          }
-          clause {
-            for_clause {
-              loop_variable {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-              in {
-                primary_expression {
-                  identifier {
-                    name: "words"
-                    nfkc_name: "words"
-                    frame: 2
-                    pos_in_frame: 5
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        dictionary_comprehension {
-          comprehension_binding: "x"
-          entry {
-            key {
-              primary_expression {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-            }
-            value {
-              binary_expression {
-                lhs {
-                  primary_expression {
-                    identifier {
-                      name: "x"
-                      nfkc_name: "x"
-                      frame: 0
-                      pos_in_frame: 0
-                    }
-                  }
-                }
-                operator: PLUS
-                rhs {
-                  primary_expression {
-                    identifier {
-                      name: "x"
-                      nfkc_name: "x"
-                      frame: 0
-                      pos_in_frame: 0
-                    }
-                  }
-                }
-              }
-            }
-          }
-          clause {
-            for_clause {
-              loop_variable {
-                identifier {
-                  name: "x"
-                  nfkc_name: "x"
-                  frame: 0
-                  pos_in_frame: 0
-                }
-              }
-              in {
-                primary_expression {
-                  identifier {
-                    name: "words"
-                    nfkc_name: "words"
-                    frame: 2
-                    pos_in_frame: 5
-                  }
-                }
-              }
-            }
-          }
-          clause {
-            if_clause {
-              binary_expression {
-                lhs {
-                  binary_expression {
-                    lhs {
-                      primary_expression {
-                        identifier {
-                          name: "x"
-                          nfkc_name: "x"
-                          frame: 0
-                          pos_in_frame: 0
-                        }
-                      }
-                    }
-                    operator: PERCENT
-                    rhs {
-                      primary_expression {
-                        int_value: "2"
-                      }
-                    }
-                  }
-                }
-                operator: EQUALS_EQUALS
-                rhs {
-                  primary_expression {
-                    int_value: "0"
-                  }
-                }
-              }
+            operator: EQUALS_EQUALS
+            rhs {
+              int_value: "0"
             }
           }
         }
@@ -589,8 +447,13 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      primary_expression {
+    int_value: "1"
+  }
+}
+statement {
+  expression_statement {
+    tuple {
+      value {
         int_value: "1"
       }
     }
@@ -600,60 +463,31 @@ statement {
   expression_statement {
     tuple {
       value {
-        primary_expression {
-          int_value: "1"
-        }
+        int_value: "1"
+      }
+      value {
+        int_value: "2"
       }
     }
   }
 }
 statement {
   expression_statement {
-    tuple {
-      value {
-        primary_expression {
-          int_value: "1"
-        }
-      }
-      value {
-        primary_expression {
-          int_value: "2"
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      binary_expression {
-        lhs {
-          primary_expression {
-            expression {
-              value {
-                binary_expression {
-                  lhs {
-                    primary_expression {
-                      int_value: "1"
-                    }
-                  }
-                  operator: PLUS
-                  rhs {
-                    primary_expression {
-                      int_value: "2"
-                    }
-                  }
-                }
-              }
-            }
+    binary_expression {
+      lhs {
+        binary_expression {
+          lhs {
+            int_value: "1"
+          }
+          operator: PLUS
+          rhs {
+            int_value: "2"
           }
         }
-        operator: STAR
-        rhs {
-          primary_expression {
-            int_value: "3"
-          }
-        }
+      }
+      operator: STAR
+      rhs {
+        int_value: "3"
       }
     }
   }
@@ -661,58 +495,42 @@ statement {
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          list_expression {
-            element {
-              primary_expression {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                  frame: 1
-                  pos_in_frame: 0
-                }
-              }
-            }
-            element {
-              primary_expression {
-                identifier {
-                  name: "b"
-                  nfkc_name: "b"
-                  frame: 1
-                  pos_in_frame: 1
-                }
-              }
-            }
+      list_expression {
+        element {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+        element {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
           }
         }
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression {
-            element {
-              primary_expression {
-                identifier {
-                  name: "b"
-                  nfkc_name: "b"
-                  frame: 1
-                  pos_in_frame: 1
-                }
-              }
-            }
-            element {
-              primary_expression {
-                identifier {
-                  name: "a"
-                  nfkc_name: "a"
-                  frame: 1
-                  pos_in_frame: 0
-                }
-              }
-            }
+      list_expression {
+        element {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        element {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
           }
         }
       }
@@ -722,41 +540,29 @@ statement {
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
+      identifier {
+        name: "c"
+        nfkc_name: "c"
+        frame: 1
+        pos_in_frame: 2
+      }
+    }
+    op: EQUALS
+    rhs {
+      if_expression {
+        if_value {
+          int_value: "1"
+        }
+        if_test {
           identifier {
-            name: "c"
-            nfkc_name: "c"
-            frame: 1
+            name: "True"
+            nfkc_name: "True"
+            frame: 2
             pos_in_frame: 2
           }
         }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        if_expression {
-          if_value {
-            primary_expression {
-              int_value: "1"
-            }
-          }
-          if_test {
-            primary_expression {
-              identifier {
-                name: "True"
-                nfkc_name: "True"
-                frame: 2
-                pos_in_frame: 2
-              }
-            }
-          }
-          else_value {
-            primary_expression {
-              int_value: "2"
-            }
-          }
+        else_value {
+          int_value: "2"
         }
       }
     }
@@ -774,24 +580,16 @@ statement {
     statement {
       assign_statement {
         lhs {
-          value {
-            primary_expression {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-                frame: 0
-                pos_in_frame: 0
-              }
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
           }
         }
         op: PLUS_EQUALS
         rhs {
-          value {
-            primary_expression {
-              int_value: "1"
-            }
-          }
+          int_value: "1"
         }
       }
     }

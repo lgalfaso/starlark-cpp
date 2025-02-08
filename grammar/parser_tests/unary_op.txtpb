@@ -1,12 +1,43 @@
 statement {
   expression_statement {
-    value {
-      unary_expression {
-        operator: MINUS
-        test {
-          primary_expression {
-            int_value: "1"
-          }
+    unary_expression {
+      operator: MINUS
+      test {
+        int_value: "1"
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    unary_expression {
+      operator: PLUS
+      test {
+        int_value: "1"
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    unary_expression {
+      operator: TILDE
+      test {
+        int_value: "1"
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    unary_expression {
+      operator: NOT
+      test {
+        identifier {
+          name: "True"
+          nfkc_name: "True"
+          frame: 2
+          pos_in_frame: 2
         }
       }
     }
@@ -14,83 +45,32 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      unary_expression {
-        operator: PLUS
-        test {
-          primary_expression {
-            int_value: "1"
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      unary_expression {
-        operator: TILDE
-        test {
-          primary_expression {
-            int_value: "1"
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      unary_expression {
-        operator: NOT
-        test {
-          primary_expression {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-              frame: 2
-              pos_in_frame: 2
-            }
-          }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      unary_expression {
-        operator: NOT
-        test {
-          unary_expression {
-            operator: NOT
-            test {
-              unary_expression {
-                operator: NOT
-                test {
-                  unary_expression {
-                    operator: NOT
-                    test {
-                      unary_expression {
-                        operator: NOT
-                        test {
-                          unary_expression {
-                            operator: NOT
-                            test {
-                              unary_expression {
-                                operator: NOT
-                                test {
-                                  primary_expression {
-                                    identifier {
-                                      name: "True"
-                                      nfkc_name: "True"
-                                      frame: 2
-                                      pos_in_frame: 2
-                                    }
-                                  }
+    unary_expression {
+      operator: NOT
+      test {
+        unary_expression {
+          operator: NOT
+          test {
+            unary_expression {
+              operator: NOT
+              test {
+                unary_expression {
+                  operator: NOT
+                  test {
+                    unary_expression {
+                      operator: NOT
+                      test {
+                        unary_expression {
+                          operator: NOT
+                          test {
+                            unary_expression {
+                              operator: NOT
+                              test {
+                                identifier {
+                                  name: "True"
+                                  nfkc_name: "True"
+                                  frame: 2
+                                  pos_in_frame: 2
                                 }
                               }
                             }
@@ -110,26 +90,22 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      unary_expression {
-        operator: PLUS
-        test {
-          unary_expression {
-            operator: PLUS
-            test {
-              unary_expression {
-                operator: PLUS
-                test {
-                  unary_expression {
-                    operator: PLUS
-                    test {
-                      unary_expression {
-                        operator: PLUS
-                        test {
-                          primary_expression {
-                            int_value: "1"
-                          }
-                        }
+    unary_expression {
+      operator: PLUS
+      test {
+        unary_expression {
+          operator: PLUS
+          test {
+            unary_expression {
+              operator: PLUS
+              test {
+                unary_expression {
+                  operator: PLUS
+                  test {
+                    unary_expression {
+                      operator: PLUS
+                      test {
+                        int_value: "1"
                       }
                     }
                   }
@@ -144,20 +120,16 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      unary_expression {
-        operator: PLUS
-        test {
-          unary_expression {
-            operator: MINUS
-            test {
-              unary_expression {
-                operator: TILDE
-                test {
-                  primary_expression {
-                    int_value: "1"
-                  }
-                }
+    unary_expression {
+      operator: PLUS
+      test {
+        unary_expression {
+          operator: MINUS
+          test {
+            unary_expression {
+              operator: TILDE
+              test {
+                int_value: "1"
               }
             }
           }

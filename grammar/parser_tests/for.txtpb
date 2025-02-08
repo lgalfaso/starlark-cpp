@@ -9,34 +9,27 @@ statement {
     }
     function_binding: "a"
     function_binding: "b"
+    function_binding: "c"
     function_binding: "x"
     statement {
       assign_statement {
         lhs {
-          value {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 2
-              }
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 3
           }
         }
         op: EQUALS
         rhs {
-          value {
-            primary_expression {
-              int_value: "1"
-            }
-          }
+          int_value: "1"
         }
       }
     }
     statement {
       for_statement {
-        loop_variable {
+        loop_variables {
           identifier {
             name: "a"
             nfkc_name: "a"
@@ -45,19 +38,13 @@ statement {
           }
         }
         expression {
-          value {
-            primary_expression {
-              list_expression {
-                element {
-                  primary_expression {
-                    identifier {
-                      name: "x"
-                      nfkc_name: "x"
-                      frame: 0
-                      pos_in_frame: 2
-                    }
-                  }
-                }
+          list_expression {
+            element {
+              identifier {
+                name: "x"
+                nfkc_name: "x"
+                frame: 0
+                pos_in_frame: 3
               }
             }
           }
@@ -70,33 +57,33 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
-            frame: 0
-            pos_in_frame: 0
-          }
-        }
-        loop_variable {
-          identifier {
-            name: "b"
-            nfkc_name: "b"
-            frame: 0
-            pos_in_frame: 1
+        loop_variables {
+          tuple {
+            value {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
+              }
+            }
+            value {
+              identifier {
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
+              }
+            }
           }
         }
         expression {
-          value {
-            primary_expression {
               identifier {
                 name: "x"
                 nfkc_name: "x"
                 frame: 0
-                pos_in_frame: 2
+                pos_in_frame: 3
               }
-            }
-          }
         }
         statement {
           pass_statement {
@@ -106,7 +93,7 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
+        loop_variables {
           identifier {
             name: "a"
             nfkc_name: "a"
@@ -115,15 +102,11 @@ statement {
           }
         }
         expression {
-          value {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 2
-              }
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 3
           }
         }
         statement {
@@ -134,7 +117,7 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
+        loop_variables {
           identifier {
             name: "a"
             nfkc_name: "a"
@@ -143,15 +126,11 @@ statement {
           }
         }
         expression {
-          value {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 2
-              }
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 3
           }
         }
         statement {
@@ -162,7 +141,7 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
+        loop_variables {
           identifier {
             name: "a"
             nfkc_name: "a"
@@ -171,15 +150,11 @@ statement {
           }
         }
         expression {
-          value {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 2
-              }
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 3
           }
         }
         statement {
@@ -190,7 +165,7 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
+        loop_variables {
           dot_expression {
             primary_expression {
               identifier {
@@ -207,15 +182,11 @@ statement {
           }
         }
         expression {
-          value {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 2
-              }
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 3
           }
         }
         statement {
@@ -226,42 +197,32 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
-            expression {
-              tuple {
-                value {
-                  primary_expression {
-                    identifier {
-                      name: "a"
-                      nfkc_name: "a"
-                      frame: 0
-                      pos_in_frame: 0
-                    }
-                  }
-                }
-                value {
-                  primary_expression {
-                    identifier {
-                      name: "b"
-                      nfkc_name: "b"
-                      frame: 0
-                      pos_in_frame: 1
-                    }
-                  }
-                }
+        loop_variables {
+          tuple {
+            value {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
+            value {
+              identifier {
+                name: "b"
+                nfkc_name: "b"
+                frame: 0
+                pos_in_frame: 1
+              }
+            }
+          }
         }
         expression {
-          value {
-            primary_expression {
-              identifier {
-                name: "x"
-                nfkc_name: "x"
-                frame: 0
-                pos_in_frame: 2
-              }
-            }
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 3
           }
         }
         statement {
@@ -272,7 +233,7 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
+        loop_variables {
           identifier {
             name: "a"
             nfkc_name: "a"
@@ -281,15 +242,9 @@ statement {
           }
         }
         expression {
-          value {
-            primary_expression {
-              list_expression {
-                element {
-                  primary_expression {
-                    int_value: "1"
-                  }
-                }
-              }
+          list_expression {
+            element {
+              int_value: "1"
             }
           }
         }
@@ -301,11 +256,41 @@ statement {
     }
     statement {
       for_statement {
-        loop_variable {
-          expression {
-            tuple {
-              value {
-                primary_expression {
+        loop_variables {
+          tuple {
+            value {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
+              }
+            }
+          }
+        }
+        expression {
+          list_expression {
+            element {
+              tuple {
+                value {
+                  int_value: "1"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          continue_statement { }
+        }
+      }
+    }
+    statement {
+      for_statement {
+        loop_variables {
+          tuple {
+            value {
+              tuple {
+                value {
                   identifier {
                     name: "a"
                     nfkc_name: "a"
@@ -313,30 +298,28 @@ statement {
                     pos_in_frame: 0
                   }
                 }
+                value {
+                  identifier {
+                    name: "b"
+                    nfkc_name: "b"
+                    frame: 0
+                    pos_in_frame: 1
+                  }
+                }
+              }
+            }
+            value {
+              identifier {
+                name: "c"
+                nfkc_name: "c"
+                frame: 0
+                pos_in_frame: 2
               }
             }
           }
         }
         expression {
-          value {
-            primary_expression {
-              list_expression {
-                element {
-                  primary_expression {
-                    expression {
-                      tuple {
-                        value {
-                          primary_expression {
-                            int_value: "1"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          list_expression { }
         }
         statement {
           continue_statement { }

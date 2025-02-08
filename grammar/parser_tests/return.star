@@ -1,5 +1,7 @@
 def foo():
   return
 def bar():
-  return 1
+  return True
+def man():
+  return True, True
 

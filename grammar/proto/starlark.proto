@@ -33,7 +33,7 @@ message DefStmt {
 message Parameter {
   Identifier identifier = 1;
   oneof parameter_type {
-    Test initialization = 2;
+    Expression initialization = 2;
     Star star = 3;
     StarStar star_star = 4;
   }
@@ -44,25 +44,19 @@ message Star {}
 message StarStar {}
 
 message IfStmt {
-  Test test = 1;
+  Expression test = 1;
   repeated Statement statement = 2;
   repeated ElseIf elif = 3;
   repeated Statement else_statement = 4;
 }
 
 message ElseIf {
-  Test test = 1;
+  Expression test = 1;
   repeated Statement statement = 2;
 }
 
 message ForStmt {
-  // In Python, it is possible for a `target_list` to have a dangling comma. In this case
-  // Python handles this as a tuple deconstruction. Given that Starlark does not allow
-  // for dangling commas, then if there is one `loop_variable` it is a single target
-  // and if there are multiple, it is a tuple deconstruction.
-  // TODO(lmirelmann): Replace `loop_variable` with a single `Expression`. This would be best if done
-  // after the merge of `Test`, `Expression` and `PrimaryExpr`.
-  repeated PrimaryExpr loop_variable = 1;
+  Expression loop_variables = 1;
   Expression expression = 2;
   repeated Statement statement = 3;
 }
@@ -109,26 +103,15 @@ message LoadParams {
   string remote_name = 2;
 }
 
-// TODO(lmirelmann): Merge `Test`, `Expression` and `PrimaryExpr`.
-message Test {
-  oneof test_type {
-    IfExpr if_expression = 1;
-    PrimaryExpr primary_expression = 2;
-    UnaryExpr unary_expression = 3;
-    BinaryExpr binary_expression = 4;
-    LambdaExpr lambda_expression  = 5;
-  }
-}
-
 message IfExpr {
-  Test if_value = 1;
-  Test if_test = 2;
-  Test else_value = 3;
+  Expression if_value = 1;
+  Expression if_test = 2;
+  Expression else_value = 3;
 }
 
 message UnaryExpr {
   UnaryOperator operator = 1;
-  Test test = 2;
+  Expression test = 2;
 
   enum UnaryOperator {
     UNNKNOWN = 0;
@@ -140,9 +123,9 @@ message UnaryExpr {
 }
 
 message BinaryExpr {
-  Test lhs = 1;
+  Expression lhs = 1;
   BinaryOperator operator = 2;
-  Test rhs = 3;
+  Expression rhs = 3;
 
   enum BinaryOperator {
     UNKNOWN = 0;
@@ -172,12 +155,12 @@ message BinaryExpr {
 
 message LambdaExpr {
   repeated Parameter parameter = 1;
-  Test test = 2;
+  Expression test = 2;
   repeated string function_binding = 3;
 }
 
-message PrimaryExpr {
-  oneof primary_expression_type {
+message Expression {
+  oneof expression_type {
     DotExpr dot_expression = 1;
     CallExpr call_expression = 2;
     SliceExpr slice_expression = 3;
@@ -190,16 +173,20 @@ message PrimaryExpr {
     ListComp list_comprehension = 10;
     DictExpr dictionary_expression = 11;
     DictComp dictionary_comprehension = 12;
-    Expression expression = 13;
+    IfExpr if_expression = 13;
+    UnaryExpr unary_expression = 14;
+    BinaryExpr binary_expression = 15;
+    LambdaExpr lambda_expression  = 16;
+    Tuple tuple = 17;
   }
 }
 
 message ListExpr {
-  repeated Test element = 1;
+  repeated Expression element = 1;
 }
 
 message ListComp {
-  Test test = 1;
+  Expression test = 1;
   repeated CompClause clause = 2;
   repeated string comprehension_binding = 3;
 }
@@ -217,48 +204,46 @@ message DictComp {
 message CompClause {
   oneof comp_clause_type {
     ForClause for_clause = 1;
-    Test if_clause = 2;
+    Expression if_clause = 2;
   }
 }
 
 message ForClause {
-  repeated PrimaryExpr loop_variable = 1;
-  Test in = 2;
+  Expression loop_variables = 1;
+  Expression in = 2;
 }
 
 message Entry {
-  Test key = 1;
-  Test value = 2;
+  Expression key = 1;
+  Expression value = 2;
 }
 
 message DotExpr {
-  PrimaryExpr primary_expression = 1;
+  Expression primary_expression = 1;
   Identifier identifier = 2;
 }
 
 message CallExpr {
-  PrimaryExpr primary_expression = 1;
+  Expression primary_expression = 1;
   repeated Argument argument = 2;
 }
 
 message Argument {
   oneof argument_type {
-    Test value = 1;
+    Expression value = 1;
     NamedArgument named_argument = 2;
-    Test star_argument = 3;
-    Test star_star_argument = 4;
+    Expression star_argument = 3;
+    Expression star_star_argument = 4;
   }
 }
 
 message NamedArgument {
   Identifier identifier = 1;
-  Test value = 2;
+  Expression value = 2;
 }
 
-// TODO(lmirelmann): Maybe it is better to have two different messages, one for slice and another for
-// subscript (?)
 message SliceExpr {
-  PrimaryExpr primary_expression = 1;
+  Expression primary_expression = 1;
   oneof slice_type {
     Expression index = 2;
     Slice slice = 3;
@@ -269,20 +254,13 @@ message SliceExpr {
 // of type `Expression`, but it is unclear how that would work.
 // https://github.com/bazelbuild/starlark/issues/291
 message Slice {
-  Test start = 1;
-  Test end = 2;
-  Test step = 3;
-}
-
-message Expression {
-  oneof expression_type {
-    Test value = 1;
-    Tuple tuple = 2;
-  }
+  Expression start = 1;
+  Expression end = 2;
+  Expression step = 3;
 }
 
 message Tuple {
-  repeated Test value = 1;
+  repeated Expression value = 1;
 }
 
 message Identifier {

@@ -27,9 +27,7 @@ using starlark::Identifier;
 using starlark::IfStmt;
 using starlark::LambdaExpr;
 using starlark::Parameter;
-using starlark::PrimaryExpr;
 using starlark::Statement;
-using starlark::Test;
 using starlark::UnaryExpr;
 using unicode::to_nfkc;
 
@@ -78,88 +76,45 @@ const std::map<token_type, AssignStmt::AssignOperator> assign_ops = {
   {token_type::greater_greater_equals, AssignStmt::GREATER_GREATER_EQUALS},
 };
 
-struct target_frame {
-  const starlark::Expression* expression = nullptr;
-  const starlark::PrimaryExpr* primary_expression = nullptr;
-  const starlark::Test* test = nullptr;
-};
-
-bool is_target(const target_frame& frame) {
-  std::vector<target_frame> frames{frame};
+bool is_target(const Expression* base) {
+  std::vector<const Expression*> frames{base};
   do {
     auto top = frames.back();
     frames.pop_back();
-    if (top.primary_expression != nullptr) {
-      switch (top.primary_expression->primary_expression_type_case()) {
-        case PrimaryExpr::kDotExpression:
-        case PrimaryExpr::kSliceExpression:
-        case PrimaryExpr::kIdentifier:
+    if (top != nullptr) {
+      switch (top->expression_type_case()) {
+        case Expression::kDotExpression:
+        case Expression::kSliceExpression:
+        case Expression::kIdentifier:
           break;
-        case PrimaryExpr::kCallExpression:
-        case PrimaryExpr::kIntValue:
-        case PrimaryExpr::kFloatValue:
-        case PrimaryExpr::kStringValue:
-        case PrimaryExpr::kBytesValue:
-        case PrimaryExpr::kListComprehension:
-        case PrimaryExpr::kDictionaryExpression:
-        case PrimaryExpr::kDictionaryComprehension:
-        case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
-        default:
-          return false;
-        case PrimaryExpr::kListExpression:
-          for (const auto& item : top.primary_expression->list_expression().element()) {
-            frames.push_back(target_frame{
-              .test = &item,
-            });
-          }
-          break;
-        case PrimaryExpr::kExpression:
-          frames.push_back(target_frame{
-            .expression = &top.primary_expression->expression(),
-          });
-          break;
-      }
-    }
-    if (top.expression != nullptr) {
-      switch (top.expression->expression_type_case()) {
-        case Expression::kValue:
+        case Expression::kCallExpression:
+        case Expression::kIntValue:
+        case Expression::kFloatValue:
+        case Expression::kStringValue:
+        case Expression::kBytesValue:
+        case Expression::kListComprehension:
+        case Expression::kDictionaryExpression:
+        case Expression::kDictionaryComprehension:
+        case Expression::kIfExpression:
+        case Expression::kUnaryExpression:
+        case Expression::kBinaryExpression:
+        case Expression::kLambdaExpression:
         case Expression::EXPRESSION_TYPE_NOT_SET:
-        default:
-          frames.push_back(target_frame{
-            .test = &top.expression->value(),
-          });
+          return false;
+        case Expression::kListExpression:
+          for (const auto& item : top->list_expression().element()) {
+            frames.push_back(&item);
+          }
           break;
         case Expression::kTuple:
-          for (const auto& element : top.expression->tuple().value()) {
-            frames.push_back(target_frame{
-              .test = &element,
-            });
+          for (const auto& element : top->tuple().value()) {
+            frames.push_back(&element);
           }
           break;
       }
-    }
-    if (top.test != nullptr) {
-      if (!top.test->has_primary_expression()) {
-        return false;
-      }
-      frames.push_back(target_frame{
-        .primary_expression = &top.test->primary_expression(),
-      });
     }
   } while (!frames.empty());
   return true;
-}
-
-bool is_target(const PrimaryExpr& primary_expression) {
-  return is_target(target_frame{
-    .primary_expression = &primary_expression,
-  });
-}
-
-bool is_target(const Expression& expression) {
-  return is_target(target_frame{
-    .expression = &expression,
-  });
 }
 
 enum class parser_state {
@@ -228,9 +183,10 @@ struct frame {
     Statement* statement;
     DefStmt* def_statement;
     IfStmt* if_statement;
+    ForStmt* for_statement;
     struct {
-      ForStmt* for_statement;
-      PrimaryExpr* for_loop_variable;
+      Expression* for_loop_variables;
+      bool for_loop_variables_first;
     };
     LambdaExpr* lambda;
     struct {
@@ -241,7 +197,8 @@ struct frame {
     RepeatedPtrField<CompClause>* comp_clauses;
     struct {
       CompClause* comp_clause;
-      PrimaryExpr* comp_clause_primary;
+      Expression* comp_clause_primary;
+      bool comp_clause_primary_first;
     };
     struct {
       RepeatedPtrField<Parameter>* parameters;
@@ -256,12 +213,12 @@ struct frame {
       bool expression_allow_trailing_comma;
     };
     struct {
-      Test* test;
+      Expression* test;
       int test_p_precedence;
       bool test_p_0_first;
     };
     struct {
-      PrimaryExpr* primary = nullptr;
+      Expression* primary = nullptr;
       Argument* previous_call_argument = nullptr;
       bool primary_must_be_target = false;
     };
@@ -526,7 +483,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("`for` statements are not allowed at the top level");
           }
           ForStmt* for_statement = top.statements->Add()->mutable_for_statement();
-          PrimaryExpr* loop_variable = for_statement->add_loop_variable();
+          Expression* loop_variables = for_statement->mutable_loop_variables();
           nested_loops.back()++;
           frames.emplace_back(frame{
             .state = parser_state::parse_statement_for_final,
@@ -541,12 +498,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
           frames.emplace_back(frame{
             .state = parser_state::parse_statement_for_0,
-            .for_statement = for_statement,
-            .for_loop_variable = loop_variable,
+            .for_loop_variables = loop_variables,
+            .for_loop_variables_first = true,
           });
           frames.emplace_back(frame{
             .state = parser_state::parse_primary,
-            .primary = loop_variable,
+            .primary = loop_variables,
             .primary_must_be_target = true,
           });
         } else {
@@ -610,19 +567,26 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_statement_for_0:
-        bind_and_resolve(top.for_loop_variable);
         if (capture(token_type::comma)) {
-          PrimaryExpr* loop_variable = top.for_statement->add_loop_variable();
+          // If there are multiple loop variables, transform it into a tuple.
+          if (top.for_loop_variables_first) {
+            Expression* first_test = Arena::Create<Expression>(top.for_loop_variables->GetArena());
+            first_test->Swap(top.for_loop_variables);
+            first_test->Swap(top.for_loop_variables->mutable_tuple()->add_value());
+          }
+          Expression* loop_variable = top.for_loop_variables->mutable_tuple()->add_value();
           frames.emplace_back(frame{
             .state = parser_state::parse_statement_for_0,
-            .for_statement = top.for_statement,
-            .for_loop_variable = loop_variable,
+            .for_loop_variables = top.for_loop_variables,
+            .for_loop_variables_first = false,
           });
           frames.emplace_back(frame{
             .state = parser_state::parse_primary,
             .primary = loop_variable,
             .primary_must_be_target = true,
           });
+        } else {
+          bind_and_resolve(top.for_loop_variables);
         }
         break;
       case parser_state::parse_statement_for_1:
@@ -821,14 +785,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             lex.next_token();
             break;
           default: {
-            auto* statement = top.statement;
+            found_non_load |= lex.current_token().type() != token_type::string;
             frames.emplace_back(frame{
               .state = parser_state::parse_statement_expression_0,
-              .statement = statement,
+              .statement = top.statement,
             });
             frames.emplace_back(frame{
               .state = parser_state::parse_expression,
-              .expression = statement->mutable_expression_statement(),
+              .expression = top.statement->mutable_expression_statement(),
               .expression_allow_trailing_comma = false,
             });
             break;
@@ -836,18 +800,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_statement_expression_0:
+        found_non_load |= !top.statement->expression_statement().has_string_value();
         if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
           found_non_load = true;
-          if (!is_target(top.statement->expression_statement())) {
+          if (!is_target(&top.statement->expression_statement())) {
             // Report the error and continue to parse this as an expression
             add_error("Exprecting TARGET");
           }
           if (op->first != token_type::equals && (
               top.statement->expression_statement().has_tuple() ||
-              top.statement->expression_statement().value().primary_expression().has_list_expression() ||
-              top.statement->expression_statement().value().primary_expression().has_list_comprehension() ||
-              top.statement->expression_statement().value().primary_expression().has_dictionary_expression() ||
-              top.statement->expression_statement().value().primary_expression().has_dictionary_comprehension())) {
+              top.statement->expression_statement().has_list_expression() ||
+              top.statement->expression_statement().has_list_comprehension() ||
+              top.statement->expression_statement().has_dictionary_expression() ||
+              top.statement->expression_statement().has_dictionary_comprehension())) {
             add_error("target is an illegal expression for augmented assignment");
           }
           {
@@ -880,15 +845,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         frames.emplace_back(frame{
           .state = parser_state::parse_test,
-          .test = top.expression->mutable_value(),
+          .test = top.expression,
         });
         break;
       case parser_state::parse_expression_0:
         if (is_current(token_type::comma)) {
-          found_non_load = true;
           {
-            Test* first_test = Arena::Create<Test>(top.expression->GetArena());
-            first_test->Swap(top.expression->mutable_value());
+            Expression* first_test = Arena::Create<Expression>(top.expression->GetArena());
+            first_test->Swap(top.expression);
             first_test->Swap(top.expression->mutable_tuple()->add_value());
           }
           frames.emplace_back(frame{
@@ -896,12 +860,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .expression = top.expression,
             .expression_allow_trailing_comma = top.expression_allow_trailing_comma,
           });
-        } else {
-          if (top.expression->value().primary_expression().has_expression()) {
-            Test* first_test = Arena::Create<Test>(top.expression->GetArena());
-            first_test->Swap(top.expression->mutable_value());
-            first_test->mutable_primary_expression()->mutable_expression()->Swap(top.expression);
-          }
         }
         break;
       case parser_state::parse_expression_1:
@@ -926,7 +884,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_test:
         if (is_current(token_type::lambda)) {
-          found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_lambda,
             .lambda = top.test->mutable_lambda_expression(),
@@ -945,9 +902,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_test_0:
         if (capture(token_type::if_)) {
-          found_non_load = true;
           {
-            Test* new_result = Arena::Create<Test>(top.test->GetArena());
+            Expression* new_result = Arena::Create<Expression>(top.test->GetArena());
             new_result->mutable_if_expression()->mutable_if_value()->Swap(top.test);
             new_result->Swap(top.test);
           }
@@ -973,7 +929,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_test_p:
         if (top.test_p_precedence >= MAX_PRECEDENCE) {
-          Test* result_ref = top.test;
+          Expression* result_ref = top.test;
           for (;;) {
             if (capture(token_type::plus)) {
               result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::PLUS);
@@ -984,23 +940,21 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             } else {
               break;
             }
-            found_non_load = true;
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
           frames.emplace_back(frame{
             .state = parser_state::parse_primary,
-            .primary = result_ref->mutable_primary_expression(),
+            .primary = result_ref,
             .primary_must_be_target = false,
           });
           break;
         }
         if (top.test_p_precedence == operator_precedence.at(token_type::not_).first) {
-          Test* result_ref = top.test;
+          Expression* result_ref = top.test;
           for (;;) {
             if (!capture(token_type::not_)) {
               break;
             }
-            found_non_load = true;
             result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::NOT);
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
@@ -1031,13 +985,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!top.test_p_0_first) {
             add_error("Comparison operators are not associative. Use parens.");
           }
-          found_non_load = true;
           lex.next_token();
           if (!expect(token_type::in)) {
             break;
           }
           {
-            Test* new_result = Arena::Create<Test>(top.test->GetArena());
+            Expression* new_result = Arena::Create<Expression>(top.test->GetArena());
             new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
             new_result->Swap(top.test);
           }
@@ -1060,10 +1013,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!top.test_p_0_first && top.test_p_precedence == operator_precedence.at(token_type::equals_equals).first) {
             add_error("Comparison operators are not associative. Use parens.");
           }
-          found_non_load = true;
           lex.next_token();
           {
-            Test* new_result = Arena::Create<Test>(top.test->GetArena());
+            Expression* new_result = Arena::Create<Expression>(top.test->GetArena());
             new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
             new_result->Swap(top.test);
           }
@@ -1093,15 +1045,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::parse_primary_0:
-        if (top.primary->expression().value().has_primary_expression()) {
-          PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
-          new_result->Swap(top.primary->mutable_expression()->mutable_value()->mutable_primary_expression());
-          top.primary->Swap(new_result);
-        }
         if (capture(token_type::dot)) {
-          found_non_load = true;
           {
-            PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            Expression* new_result = Arena::Create<Expression>(top.primary->GetArena());
             new_result->mutable_dot_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
           }
@@ -1111,9 +1057,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
           frames.emplace_back(top);
         } else if (capture(token_type::lparen)) {
-          found_non_load = true;
           {
-            PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            Expression* new_result = Arena::Create<Expression>(top.primary->GetArena());
             new_result->mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
           }
@@ -1134,9 +1079,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .previous_argument = nullptr,
           });
         } else if (capture(token_type::lbracket)) {
-          found_non_load = true;
           {
-            PrimaryExpr* new_result = Arena::Create<PrimaryExpr>(top.primary->GetArena());
+            Expression* new_result = Arena::Create<Expression>(top.primary->GetArena());
             new_result->mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
           }
@@ -1157,6 +1101,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .primary = top.primary,
               .primary_must_be_target = top.primary_must_be_target,
             });
+            // TODO(lmirelmann): Change this once https://github.com/bazelbuild/starlark/issues/291
+            // is resolved. The current implementation follows the grammar from Starlark, but this
+            // is not the same as the grammar from Python.
             frames.emplace_back(frame{
               .state = parser_state::parse_expression,
               .expression = top.primary->mutable_slice_expression()->mutable_index(),
@@ -1164,7 +1111,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             });
           }
         } else {
-          if (top.primary_must_be_target && !is_target(*top.primary)) {
+          if (top.primary_must_be_target && !is_target(top.primary)) {
             add_error("Expecting a TARGET");
           }
         }
@@ -1192,13 +1139,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_primary_index_0:
         if (capture(token_type::colon)) {
-          if (!top.primary->slice_expression().index().has_value()) {
-            add_error("Unexpected TUPLE");
-          }
+          // TODO(lmirelmann): Solve this issue once https://github.com/bazelbuild/starlark/issues/291
+          // is resolved.
+          // if (!top.primary->slice_expression().index().has_value()) {
+          //   add_error("Unexpected TUPLE");
+          // }
           {
             Expression* expression = Arena::Create<Expression>(top.primary->GetArena());
             expression->Swap(top.primary->mutable_slice_expression()->mutable_index());
-            top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression->mutable_value());
+            top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression);
           }
           frames.emplace_back(frame{
             .state = parser_state::parse_primary_index_1,
@@ -1233,46 +1182,39 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_operand:
         if (is_current(token_type::int_)) {
-          found_non_load = true;
           top.primary->set_int_value(lex.current_token().int_value().to_string(10));
           lex.next_token();
         } else if (is_current(token_type::identifier)) {
-          found_non_load = true;
           set_identifier(*top.primary->mutable_identifier());
         } else if (is_current(token_type::float_)) {
-          found_non_load = true;
           top.primary->set_float_value(lex.current_token().double_value());
           lex.next_token();
         } else if (is_current(token_type::string)) {
           top.primary->set_string_value(lex.current_token().string_value());
           lex.next_token();
         } else if (is_current(token_type::bytes)) {
-          found_non_load = true;
           top.primary->set_bytes_value(lex.current_token().string_value());
           lex.next_token();
         } else if (is_current(token_type::lbracket)) {
-          found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_list,
             .primary = top.primary,
           });
         } else if (is_current(token_type::lbrace)) {
-          found_non_load = true;
           frames.emplace_back(frame{
             .state = parser_state::parse_dict,
             .primary = top.primary,
           });
         } else if (capture(token_type::lparen)) {
           if (capture(token_type::rparen)) {
-            found_non_load = true;
-            top.primary->mutable_expression()->mutable_tuple();
+            top.primary->mutable_tuple();
           } else {
             frames.emplace_back(frame{
               .state = parser_state::parse_operand_expression_0,
             });
             frames.emplace_back(frame{
               .state = parser_state::parse_expression,
-              .expression = top.primary->mutable_expression(),
+              .expression = top.primary,
               .expression_allow_trailing_comma = true,
             });
           }
@@ -1311,7 +1253,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         switch (lex.current_token().type()) {
           case token_type::for_:
             {
-              Test* expression = Arena::Create<Test>(top.primary->GetArena());
+              Expression* expression = Arena::Create<Expression>(top.primary->GetArena());
               expression->Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
               expression->Swap(top.primary->mutable_list_comprehension()->mutable_test());
             }
@@ -1365,7 +1307,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           top.primary->mutable_dictionary_expression();
           break;
         }
-
         create_block({}, {}, nullptr);
         frames.emplace_back(frame{
           .state = parser_state::parse_dict_final,
@@ -1450,12 +1391,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_comp_clauses:
         if (capture(token_type::for_)) {
           auto* comp_clause = top.comp_clauses->Add();
-          auto* comp_clause_primary = comp_clause->mutable_for_clause()->add_loop_variable();
+          auto* comp_clause_primary = comp_clause->mutable_for_clause()->mutable_loop_variables();
           frames.emplace_back(top);
           frames.emplace_back(frame{
             .state = parser_state::parse_comp_clauses_0,
             .comp_clause = comp_clause,
             .comp_clause_primary = comp_clause_primary,
+            .comp_clause_primary_first = true,
           });
           frames.emplace_back(frame{
             .state = parser_state::parse_primary,
@@ -1480,13 +1422,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_comp_clauses_0:
-        bind_and_resolve(top.comp_clause_primary);
         if (capture(token_type::comma)) {
-          auto* comp_clause_primary = top.comp_clause->mutable_for_clause()->add_loop_variable();
+          // If there are multiple loop varaibles, transform into a tuple.
+          if (top.comp_clause_primary_first) {
+            Expression* first_primary = Arena::Create<Expression>(top.comp_clause_primary->GetArena());
+            first_primary->Swap(top.comp_clause_primary);
+            first_primary->Swap(top.comp_clause_primary->mutable_tuple()->add_value());
+          }
+          auto* comp_clause_primary = top.comp_clause_primary->mutable_tuple()->add_value();
           frames.emplace_back(frame{
             .state = parser_state::parse_comp_clauses_0,
             .comp_clause = top.comp_clause,
-            .comp_clause_primary = comp_clause_primary,
+            .comp_clause_primary = top.comp_clause_primary,
+            .comp_clause_primary_first = false,
           });
           frames.emplace_back(frame{
             .state = parser_state::parse_primary,
@@ -1494,6 +1442,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .primary_must_be_target = true,
           });
         } else {
+          bind_and_resolve(top.comp_clause_primary);
           if (!expect(token_type::in)) {
             break;
           }
@@ -1551,11 +1500,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                top.previous_argument->has_star_star_argument())) {
             add_error("Non-varadic arguments must be before varadic arguments");
           }
-          frames.emplace_back(frame{
-            .state = parser_state::parse_argument_0,
-            .argument = top.argument,
-            .previous_argument = top.previous_argument,
-          });
+          if (lex.current_token().type() == token_type::identifier) {
+            frames.emplace_back(frame{
+              .state = parser_state::parse_argument_0,
+              .argument = top.argument,
+              .previous_argument = top.previous_argument,
+            });
+          }
           frames.emplace_back(frame{
             .state = parser_state::parse_test,
             .test = top.argument->mutable_value(),
@@ -1564,13 +1515,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::parse_argument_0:
         if (capture(token_type::equals)) {
-          if (!top.argument->value().primary_expression().has_identifier()) {
+          // The reason this is able to detect that this is not an identifier between brackets is
+          // because this rule is only called when the argument value started with an identifier.
+          if (!top.argument->value().has_identifier()) {
             add_error("Expected identifier for named arguments");
             break;
           }
           {
             Identifier* id = Arena::Create<Identifier>(top.argument->GetArena());
-            id->Swap(top.argument->mutable_value()->mutable_primary_expression()->mutable_identifier());
+            id->Swap(top.argument->mutable_value()->mutable_identifier());
             id->Swap(top.argument->mutable_named_argument()->mutable_identifier());
           }
           frames.emplace_back(frame{
@@ -1738,90 +1691,50 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
   } while (!frames.empty());
 }
 
-void parser::bind_and_resolve(starlark::PrimaryExpr* primary_expression) {
-  bind_and_resolve(expression_frame{
-    .primary_expression = primary_expression,
-  });
-}
-
-void parser::bind_and_resolve(starlark::Expression* expression) {
-  bind_and_resolve(expression_frame{
-    .expression = expression,
-  });
-}
-
-void parser::bind_and_resolve(expression_frame frame) {
-  resolve(frame);
-  std::vector<expression_frame> frames{frame};
+void parser::bind_and_resolve(starlark::Expression* base) {
+  resolve(base);
+  std::vector<Expression*> frames{base};
   do {
     auto top = frames.back();
     frames.pop_back();
-    if (top.primary_expression != nullptr) {
-      switch (top.primary_expression->primary_expression_type_case()) {
-        case PrimaryExpr::kDotExpression:
-        case PrimaryExpr::kSliceExpression:
+    if (top != nullptr) {
+      switch (top->expression_type_case()) {
+        case Expression::kDotExpression:
+        case Expression::kSliceExpression:
           break;
-        case PrimaryExpr::kIdentifier:
+        case Expression::kIdentifier:
           if (is_top_level_block() &&
-              parser_blocks.back().identifiers.contains(top.primary_expression->identifier().nfkc_name())) {
-            add_error("Variable '" + top.primary_expression->identifier().name() + "' redefines symbol previously defined by a load statement");
-          }
-          bind(top.primary_expression->identifier());
+              parser_blocks.back().identifiers.contains(top->identifier().nfkc_name())) {
+            add_error("Variable '" + top->identifier().name() + "' redefines symbol previously defined by a load statement");
+          } 
+          bind(top->identifier());
           break;
-        case PrimaryExpr::kCallExpression:
-        case PrimaryExpr::kIntValue:
-        case PrimaryExpr::kFloatValue:
-        case PrimaryExpr::kStringValue:
-        case PrimaryExpr::kBytesValue:
-        case PrimaryExpr::kListComprehension:
-        case PrimaryExpr::kDictionaryExpression:
-        case PrimaryExpr::kDictionaryComprehension:
-        case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
-        default:
-          add_warning("Unexpected expression to bind");
-          break;
-        case PrimaryExpr::kListExpression:
-          for (auto& item : *top.primary_expression->mutable_list_expression()->mutable_element()) {
-            frames.push_back(expression_frame{
-              .test = &item,
-            });
+        case Expression::kListExpression:
+          for (auto& item : *top->mutable_list_expression()->mutable_element()) {
+            frames.push_back(&item);
           }
           break;
-        case PrimaryExpr::kExpression:
-          frames.push_back(expression_frame{
-            .expression = top.primary_expression->mutable_expression(),
-          });
-          break;
-      }
-    }
-    if (top.expression != nullptr) {
-      switch (top.expression->expression_type_case()) {
-        case Expression::kValue:
-          frames.push_back(expression_frame{
-            .test = top.expression->mutable_value(),
-          });
-          break;
+        case Expression::kCallExpression:
+        case Expression::kIntValue:
+        case Expression::kFloatValue:
+        case Expression::kStringValue:
+        case Expression::kBytesValue:
+        case Expression::kListComprehension:
+        case Expression::kDictionaryExpression:
+        case Expression::kDictionaryComprehension:
+        case Expression::kIfExpression:
+        case Expression::kUnaryExpression:
+        case Expression::kBinaryExpression:
+        case Expression::kLambdaExpression:
         case Expression::EXPRESSION_TYPE_NOT_SET:
-        default:
           add_warning("Unexpected expression to bind");
           break;
         case Expression::kTuple:
-          for (auto& element : *top.expression->mutable_tuple()->mutable_value()) {
-            frames.push_back(expression_frame{
-              .test = &element,
-            });
+          for (auto& element : *top->mutable_tuple()->mutable_value()) {
+            frames.push_back(&element);
           }
           break;
       }
-    }
-    if (top.test != nullptr) {
-      if (!top.test->has_primary_expression()) {
-        add_warning("Unexpected expression to bind");
-        continue;
-      }
-      frames.push_back(expression_frame{
-        .primary_expression = top.test->mutable_primary_expression(),
-      });
     }
   } while (!frames.empty());
 }
@@ -1888,171 +1801,91 @@ void parser::resolve(starlark::Identifier* identifier) {
   parser_blocks.back().to_resolve.emplace_back(identifier, 0);
 }
 
-void parser::resolve(starlark::Test* test) {
-  resolve(expression_frame{
-    .test = test,
-  });
-}
-
-void parser::resolve(starlark::Expression* expression) {
-  resolve(expression_frame{
-    .expression = expression,
-  });
-}
-
-void parser::resolve(expression_frame frame) {
-  std::vector<expression_frame> frames{frame};
+void parser::resolve(Expression* base) {
+  std::vector<Expression*> frames{base};
   do {
     auto top = frames.back();
     frames.pop_back();
-    if (top.primary_expression != nullptr) {
-      switch (top.primary_expression->primary_expression_type_case()) {
-        case PrimaryExpr::kDotExpression:
-          frames.push_back(expression_frame{
-            .primary_expression = top.primary_expression->mutable_dot_expression()->mutable_primary_expression(),
-          });
+    if (top != nullptr) {
+      switch (top->expression_type_case()) {
+        case Expression::kDotExpression:
+          frames.push_back(top->mutable_dot_expression()->mutable_primary_expression());
           break;
-        case PrimaryExpr::kSliceExpression:
-          frames.push_back(expression_frame{
-            .primary_expression = top.primary_expression->mutable_slice_expression()->mutable_primary_expression(),
-          });
-          if (top.primary_expression->slice_expression().has_index()) {
-            frames.push_back(expression_frame{
-              .expression = top.primary_expression->mutable_slice_expression()->mutable_index(),
-            });
+        case Expression::kSliceExpression:
+          frames.push_back(top->mutable_slice_expression()->mutable_primary_expression());
+          if (top->slice_expression().has_index()) {
+            frames.push_back(top->mutable_slice_expression()->mutable_index());
           }
-          if (top.primary_expression->slice_expression().slice().has_start()) {
-            frames.push_back(expression_frame{
-              .test = top.primary_expression->mutable_slice_expression()->mutable_slice()->mutable_start(),
-            });
+          if (top->slice_expression().slice().has_start()) {
+            frames.push_back(top->mutable_slice_expression()->mutable_slice()->mutable_start());
           }
-          if (top.primary_expression->slice_expression().slice().has_end()) {
-            frames.push_back(expression_frame{
-              .test = top.primary_expression->mutable_slice_expression()->mutable_slice()->mutable_end(),
-            });
+          if (top->slice_expression().slice().has_end()) {
+            frames.push_back(top->mutable_slice_expression()->mutable_slice()->mutable_end());
           }
-          if (top.primary_expression->slice_expression().slice().has_step()) {
-            frames.push_back(expression_frame{
-              .test = top.primary_expression->mutable_slice_expression()->mutable_slice()->mutable_step(),
-            });
+          if (top->slice_expression().slice().has_step()) {
+            frames.push_back(top->mutable_slice_expression()->mutable_slice()->mutable_step());
           }
           break;
-        case PrimaryExpr::kIdentifier:
-          resolve(top.primary_expression->mutable_identifier());
+        case Expression::kIdentifier:
+          resolve(top->mutable_identifier());
           break;
-        case PrimaryExpr::kCallExpression:
-          frames.push_back(expression_frame{
-            .primary_expression = top.primary_expression->mutable_call_expression()->mutable_primary_expression(),
-          });
-          for (auto& arg : *top.primary_expression->mutable_call_expression()->mutable_argument()) {
+        case Expression::kCallExpression:
+          frames.push_back(top->mutable_call_expression()->mutable_primary_expression());
+          for (auto& arg : *top->mutable_call_expression()->mutable_argument()) {
             if (arg.has_value()) {
-              frames.push_back(expression_frame{
-                .test = arg.mutable_value(),
-              });
+              frames.push_back(arg.mutable_value());
             }
             if (arg.has_named_argument()) {
-              frames.push_back(expression_frame{
-                .test = arg.mutable_named_argument()->mutable_value(),
-              });
+              frames.push_back(arg.mutable_named_argument()->mutable_value());
             }
             if (arg.has_star_argument()) {
-              frames.push_back(expression_frame{
-                .test = arg.mutable_star_argument(),
-              });
+              frames.push_back(arg.mutable_star_argument());
             }
             if (arg.has_star_star_argument()) {
-              frames.push_back(expression_frame{
-                .test = arg.mutable_star_star_argument(),
-              });
+              frames.push_back(arg.mutable_star_star_argument());
             }
           }
           break;
-        case PrimaryExpr::kIntValue:
-        case PrimaryExpr::kFloatValue:
-        case PrimaryExpr::kStringValue:
-        case PrimaryExpr::kBytesValue:
-        case PrimaryExpr::kListComprehension:
-        case PrimaryExpr::kDictionaryComprehension:
-        case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
+        case Expression::kIntValue:
+        case Expression::kFloatValue:
+        case Expression::kStringValue:
+        case Expression::kBytesValue:
+        case Expression::kListComprehension:
+        case Expression::kDictionaryComprehension:
         default:
           break;
-        case PrimaryExpr::kDictionaryExpression:
-          for (auto& item : *top.primary_expression->mutable_dictionary_expression()->mutable_entry()) {
-            frames.push_back(expression_frame{
-              .test = item.mutable_key(),
-            });
-            frames.push_back(expression_frame{
-              .test = item.mutable_value(),
-            });
+        case Expression::kDictionaryExpression:
+          for (auto& item : *top->mutable_dictionary_expression()->mutable_entry()) {
+            frames.push_back(item.mutable_key());
+            frames.push_back(item.mutable_value());
           }
           break;
-        case PrimaryExpr::kListExpression:
-          for (auto& item : *top.primary_expression->mutable_list_expression()->mutable_element()) {
-            frames.push_back(expression_frame{
-              .test = &item,
-            });
+        case Expression::kListExpression:
+          for (auto& item : *top->mutable_list_expression()->mutable_element()) {
+            frames.push_back(&item);
           }
-          break;
-        case PrimaryExpr::kExpression:
-          frames.push_back(expression_frame{
-            .expression = top.primary_expression->mutable_expression(),
-          });
-          break;
-      }
-    }
-    if (top.expression != nullptr) {
-      switch (top.expression->expression_type_case()) {
-        case Expression::kValue:
-          frames.push_back(expression_frame{
-            .test = top.expression->mutable_value(),
-          });
           break;
         case Expression::EXPRESSION_TYPE_NOT_SET:
-        default:
           add_warning("Unexpected expression to resolve");
           break;
         case Expression::kTuple:
-          for (auto& element : *top.expression->mutable_tuple()->mutable_value()) {
-            frames.push_back(expression_frame{
-              .test = &element,
-            });
+          for (auto& element : *top->mutable_tuple()->mutable_value()) {
+            frames.push_back(&element);
           }
           break;
-      }
-    }
-    if (top.test != nullptr) {
-      switch (top.test->test_type_case()) {
-        case Test::kIfExpression:
-          frames.push_back(expression_frame{
-            .test = top.test->mutable_if_expression()->mutable_if_value(),
-          });
-          frames.push_back(expression_frame{
-            .test = top.test->mutable_if_expression()->mutable_if_test(),
-          });
-          frames.push_back(expression_frame{
-            .test = top.test->mutable_if_expression()->mutable_else_value(),
-          });
+        case Expression::kIfExpression:
+          frames.push_back(top->mutable_if_expression()->mutable_if_value());
+          frames.push_back(top->mutable_if_expression()->mutable_if_test());
+          frames.push_back(top->mutable_if_expression()->mutable_else_value());
           break;
-        case Test::kPrimaryExpression:
-          frames.push_back(expression_frame{
-            .primary_expression = top.test->mutable_primary_expression(),
-          });
+        case Expression::kUnaryExpression:
+          frames.push_back(top->mutable_unary_expression()->mutable_test());
           break;
-        case Test::kUnaryExpression:
-          frames.push_back(expression_frame{
-            .test = top.test->mutable_unary_expression()->mutable_test(),
-          });
+        case Expression::kBinaryExpression:
+          frames.push_back(top->mutable_binary_expression()->mutable_lhs());
+          frames.push_back(top->mutable_binary_expression()->mutable_rhs());
           break;
-        case Test::kBinaryExpression:
-          frames.push_back(expression_frame{
-            .test = top.test->mutable_binary_expression()->mutable_lhs(),
-          });
-          frames.push_back(expression_frame{
-            .test = top.test->mutable_binary_expression()->mutable_rhs(),
-          });
-          break;
-        case Test::kLambdaExpression:
-        case Test::TEST_TYPE_NOT_SET:
+        case Expression::kLambdaExpression:
           break;
       }
     }

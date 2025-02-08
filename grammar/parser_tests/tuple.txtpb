@@ -4,24 +4,18 @@ module_binding: "foo"
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
-            frame: 1
-            pos_in_frame: 0
-          }
-        }
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
       }
     }
     op: EQUALS
     rhs {
       tuple {
         value {
-          primary_expression {
-            int_value: "1"
-          }
+          int_value: "1"
         }
       }
     }
@@ -30,34 +24,24 @@ statement {
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "b"
-            nfkc_name: "b"
-            frame: 1
-            pos_in_frame: 1
-          }
-        }
+      identifier {
+        name: "b"
+        nfkc_name: "b"
+        frame: 1
+        pos_in_frame: 1
       }
     }
     op: EQUALS
     rhs {
       tuple {
         value {
-          primary_expression {
-            int_value: "1"
-          }
+          int_value: "1"
         }
         value {
-          primary_expression {
-            int_value: "2"
-          }
+          int_value: "2"
         }
         value {
-          primary_expression {
-            int_value: "3"
-          }
+          int_value: "3"
         }
       }
     }
@@ -74,38 +58,24 @@ statement {
     function_binding: "a"
     statement {
       for_statement {
-        loop_variable {
-          expression {
-            tuple {
-              value {
-                primary_expression {
-                  identifier {
-                    name: "a"
-                    nfkc_name: "a"
-                    frame: 0
-                    pos_in_frame: 0
-                  }
-                }
+        loop_variables {
+          tuple {
+            value {
+              identifier {
+                name: "a"
+                nfkc_name: "a"
+                frame: 0
+                pos_in_frame: 0
               }
             }
           }
         }
         expression {
-          value {
-            primary_expression {
-              list_expression {
-                element {
-                  primary_expression {
-                    expression {
-                      tuple {
-                        value {
-                          primary_expression {
-                            int_value: "1"
-                          }
-                        }
-                      }
-                    }
-                  }
+          list_expression {
+            element {
+              tuple {
+                value {
+                  int_value: "1"
                 }
               }
             }
@@ -113,28 +83,22 @@ statement {
         }
         statement {
           expression_statement {
-            value {
+            call_expression {
               primary_expression {
-                call_expression {
-                  primary_expression {
-                    identifier {
-                      name: "print"
-                      nfkc_name: "print"
-                      frame: 3
-                      pos_in_frame: 21
-                    }
-                  }
-                  argument {
-                    value {
-                      primary_expression {
-                        identifier {
-                          name: "a"
-                          nfkc_name: "a"
-                          frame: 0
-                          pos_in_frame: 0
-                        }
-                      }
-                    }
+                identifier {
+                  name: "print"
+                  nfkc_name: "print"
+                  frame: 3
+                  pos_in_frame: 21
+                }
+              }
+              argument {
+                value {
+                  identifier {
+                    name: "a"
+                    nfkc_name: "a"
+                    frame: 0
+                    pos_in_frame: 0
                   }
                 }
               }

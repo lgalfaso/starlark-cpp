@@ -1,83 +1,66 @@
 statement {
   expression_statement {
-    value {
-      primary_expression {
-        list_comprehension {
-          test {
-            primary_expression {
-              dictionary_comprehension {
-                entry {
-                  key {
-                    primary_expression {
-                      identifier {
-                        name: "y"
-                        nfkc_name: "y"
-                        frame: 0
-                        pos_in_frame: 0
-                      }
-                    }
-                  }
-                  value {
-                    primary_expression {
-                      string_value: "a"
-                    }
-                  }
-                }
-                clause {
-                  for_clause {
-                    loop_variable {
-                      identifier {
-                        name: "y"
-                        nfkc_name: "y"
-                      }
-                    }
-                    in {
-                      primary_expression {
-                        identifier {
-                          name: "x"
-                          nfkc_name: "x"
-                          frame: 1
-                          pos_in_frame: 0
-                        }
-                      }
-                    }
-                  }
-                }
-                clause {
-                  if_clause {
-                    primary_expression {
-                      identifier {
-                        name: "x"
-                        nfkc_name: "x"
-                        frame: 1
-                        pos_in_frame: 0
-                      }
-                    }
-                  }
-                }
-                comprehension_binding: "y"
+    list_comprehension {
+      test {
+        dictionary_comprehension {
+          entry {
+            key {
+              identifier {
+                name: "y"
+                nfkc_name: "y"
+                frame: 0
+                pos_in_frame: 0
               }
+            }
+            value {
+              string_value: "a"
             }
           }
           clause {
             for_clause {
-              loop_variable {
+              loop_variables {
                 identifier {
-                  name: "x"
-                  nfkc_name: "x"
+                  name: "y"
+                  nfkc_name: "y"
                 }
               }
               in {
-                primary_expression {
-                  list_expression {
-                  }
+                identifier {
+                  name: "x"
+                  nfkc_name: "x"
+                  frame: 1
+                  pos_in_frame: 0
                 }
               }
             }
           }
-          comprehension_binding: "x"
+          clause {
+            if_clause {
+              identifier {
+                name: "x"
+                nfkc_name: "x"
+                frame: 1
+                pos_in_frame: 0
+              }
+            }
+          }
+          comprehension_binding: "y"
         }
       }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+            }
+          }
+          in {
+            list_expression { }
+          }
+        }
+      }
+      comprehension_binding: "x"
     }
   }
 }

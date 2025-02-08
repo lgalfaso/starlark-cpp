@@ -5,28 +5,20 @@ module_binding: "foo"
 statement {
   assign_statement: {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
-            frame: 1
-            pos_in_frame: 0
-          }
-        }
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "True"
-            nfkc_name: "True"
-            frame: 2
-            pos_in_frame: 2
-          }
-        }
+      identifier {
+        name: "True"
+        nfkc_name: "True"
+        frame: 2
+        pos_in_frame: 2
       }
     }
   }
@@ -34,28 +26,20 @@ statement {
 statement {
   assign_statement: {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "b"
-            nfkc_name: "b"
-            frame: 1
-            pos_in_frame: 1
-          }
-        }
+      identifier {
+        name: "b"
+        nfkc_name: "b"
+        frame: 1
+        pos_in_frame: 1
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "True"
-            nfkc_name: "True"
-            frame: 2
-            pos_in_frame: 2
-          }
-        }
+      identifier {
+        name: "True"
+        nfkc_name: "True"
+        frame: 2
+        pos_in_frame: 2
       }
     }
   }
@@ -63,28 +47,20 @@ statement {
 statement {
   assign_statement: {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "c"
-            nfkc_name: "c"
-            frame: 1
-            pos_in_frame: 2
-          }
-        }
+      identifier {
+        name: "c"
+        nfkc_name: "c"
+        frame: 1
+        pos_in_frame: 2
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "True"
-            nfkc_name: "True"
-            frame: 2
-            pos_in_frame: 2
-          }
-        }
+      identifier {
+        name: "True"
+        nfkc_name: "True"
+        frame: 2
+        pos_in_frame: 2
       }
     }
   }
@@ -100,35 +76,15 @@ statement {
     statement {
       if_statement {
         test {
-          primary_expression {
-            identifier {
-              name: "True"
-              nfkc_name: "True"
-              frame: 3
-              pos_in_frame: 2
-            }
+          identifier {
+            name: "True"
+            nfkc_name: "True"
+            frame: 3
+            pos_in_frame: 2
           }
         }
         statement {
           expression_statement {
-            value {
-              primary_expression {
-                identifier {
-                  name: "False"
-                  nfkc_name: "False"
-                  frame: 3
-                  pos_in_frame: 0
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    statement {
-      if_statement {
-        test {
-          primary_expression {
             identifier {
               name: "False"
               nfkc_name: "False"
@@ -137,21 +93,29 @@ statement {
             }
           }
         }
+      }
+    }
+    statement {
+      if_statement {
+        test {
+          identifier {
+            name: "False"
+            nfkc_name: "False"
+            frame: 3
+            pos_in_frame: 0
+          }
+        }
         statement {
           pass_statement {
           }
         }
         else_statement {
           expression_statement {
-            value {
-              primary_expression {
-                identifier {
-                  name: "True"
-                  nfkc_name: "True"
-                  frame: 3
-                  pos_in_frame: 2
-                }
-              }
+            identifier {
+              name: "True"
+              nfkc_name: "True"
+              frame: 3
+              pos_in_frame: 2
             }
           }
         }
@@ -160,42 +124,30 @@ statement {
     statement {
       if_statement {
         test {
-          primary_expression {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-              frame: 2
-              pos_in_frame: 0
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 2
+            pos_in_frame: 0
           }
         }
         statement {
           expression_statement {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
+            int_value: "1"
           }
         }
         elif {
           test {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 2
-                pos_in_frame: 1
-              }
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+              frame: 2
+              pos_in_frame: 1
             }
           }
           statement {
             expression_statement {
-              value {
-                primary_expression {
-                  int_value: "2"
-                }
-              }
+              int_value: "2"
             }
           }
         }
@@ -204,51 +156,82 @@ statement {
     statement {
       if_statement {
         test {
-          primary_expression {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-              frame: 2
-              pos_in_frame: 0
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 2
+            pos_in_frame: 0
           }
         }
         statement {
           expression_statement {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
+            int_value: "1"
           }
         }
         elif {
           test {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 2
-                pos_in_frame: 1
-              }
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+              frame: 2
+              pos_in_frame: 1
             }
           }
           statement {
             expression_statement {
-              value {
-                primary_expression {
-                  int_value: "2"
-                }
-              }
+              int_value: "2"
             }
           }
         }
         else_statement {
           expression_statement {
-            value {
-              primary_expression {
-                int_value: "3"
-              }
+            int_value: "3"
+          }
+        }
+      }
+    }
+    statement {
+      if_statement {
+        test {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 2
+            pos_in_frame: 0
+          }
+        }
+        statement {
+          expression_statement {
+            int_value: "1"
+          }
+        }
+        elif {
+          test {
+            identifier {
+              name: "b"
+              nfkc_name: "b"
+              frame: 2
+              pos_in_frame: 1
+            }
+          }
+          statement {
+            expression_statement {
+              int_value: "2"
+            }
+          }
+        }
+        elif {
+          test {
+            identifier {
+              name: "c"
+              nfkc_name: "c"
+              frame: 2
+              pos_in_frame: 2
+            }
+          }
+          statement {
+            expression_statement {
+              int_value: "3"
             }
           }
         }
@@ -257,138 +240,51 @@ statement {
     statement {
       if_statement {
         test {
-          primary_expression {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-              frame: 2
-              pos_in_frame: 0
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 2
+            pos_in_frame: 0
           }
         }
         statement {
           expression_statement {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
-            }
+            int_value: "1"
           }
         }
         elif {
           test {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 2
-                pos_in_frame: 1
-              }
-            }
-          }
-          statement {
-            expression_statement {
-              value {
-                primary_expression {
-                  int_value: "2"
-                }
-              }
-            }
-          }
-        }
-        elif {
-          test {
-            primary_expression {
-              identifier {
-                name: "c"
-                nfkc_name: "c"
-                frame: 2
-                pos_in_frame: 2
-              }
-            }
-          }
-          statement {
-            expression_statement {
-              value {
-                primary_expression {
-                  int_value: "3"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    statement {
-      if_statement {
-        test {
-          primary_expression {
             identifier {
-              name: "a"
-              nfkc_name: "a"
+              name: "b"
+              nfkc_name: "b"
               frame: 2
-              pos_in_frame: 0
+              pos_in_frame: 1
             }
           }
-        }
-        statement {
-          expression_statement {
-            value {
-              primary_expression {
-                int_value: "1"
-              }
+          statement {
+            expression_statement {
+              int_value: "2"
             }
           }
         }
         elif {
           test {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 2
-                pos_in_frame: 1
-              }
+            identifier {
+              name: "c"
+              nfkc_name: "c"
+              frame: 2
+              pos_in_frame: 2
             }
           }
           statement {
             expression_statement {
-              value {
-                primary_expression {
-                  int_value: "2"
-                }
-              }
-            }
-          }
-        }
-        elif {
-          test {
-            primary_expression {
-              identifier {
-                name: "c"
-                nfkc_name: "c"
-                frame: 2
-                pos_in_frame: 2
-              }
-            }
-          }
-          statement {
-            expression_statement {
-              value {
-                primary_expression {
-                  int_value: "3"
-                }
-              }
+              int_value: "3"
             }
           }
         }
         else_statement {
           expression_statement {
-            value {
-              primary_expression {
-                int_value: "4"
-              }
-            }
+            int_value: "4"
           }
         }
       }

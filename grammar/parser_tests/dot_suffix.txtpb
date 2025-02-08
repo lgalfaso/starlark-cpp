@@ -3,54 +3,56 @@ module_binding: "foo"
 statement {
   assign_statement: {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "bar"
-            nfkc_name: "bar"
-            frame: 1
-            pos_in_frame: 0
-          }
-        }
+      identifier {
+        name: "bar"
+        nfkc_name: "bar"
+        frame: 1
+        pos_in_frame: 0
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression { }
-        }
-      }
+      list_expression { }
     }
   }
 }
 statement {
   assign_statement: {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "foo"
-            nfkc_name: "foo"
-            frame: 1
-            pos_in_frame: 1
-          }
-        }
+      identifier {
+        name: "foo"
+        nfkc_name: "foo"
+        frame: 1
+        pos_in_frame: 1
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression { }
+      list_expression { }
+    }
+  }
+}
+statement {
+  expression_statement {
+    dot_expression {
+      primary_expression {
+        identifier {
+          name: "foo"
+          nfkc_name: "foo"
+          frame: 1
+          pos_in_frame: 1
         }
+      }
+      identifier {
+        name: "bar"
+        nfkc_name: "bar"
       }
     }
   }
 }
 statement {
   expression_statement {
-    value {
+    dot_expression {
       primary_expression {
         dot_expression {
           primary_expression {
@@ -67,35 +69,9 @@ statement {
           }
         }
       }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      primary_expression {
-        dot_expression {
-          primary_expression {
-            dot_expression {
-              primary_expression {
-                identifier {
-                  name: "foo"
-                  nfkc_name: "foo"
-                  frame: 1
-                  pos_in_frame: 1
-                }
-              }
-              identifier {
-                name: "bar"
-                nfkc_name: "bar"
-              }
-            }
-          }
-          identifier {
-            name: "baz"
-            nfkc_name: "baz"
-          }
-        }
+      identifier {
+        name: "baz"
+        nfkc_name: "baz"
       }
     }
   }

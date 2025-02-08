@@ -3,46 +3,53 @@ module_binding: "b"
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "a"
-            nfkc_name: "a"
-            frame: 1
-            pos_in_frame: 0
-          }
-        }
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          int_value: "1"
-        }
-      }
+      int_value: "1"
     }
   }
 }
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "b"
-            nfkc_name: "b"
-            frame: 1
-            pos_in_frame: 1
-          }
-        }
+      identifier {
+        name: "b"
+        nfkc_name: "b"
+        frame: 1
+        pos_in_frame: 1
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression { }
+      list_expression { }
+    }
+  }
+}
+statement {
+  expression_statement {
+    binary_expression {
+      lhs {
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+          frame: 1
+          pos_in_frame: 0
+        }
+      }
+      operator: IN
+      rhs {
+        identifier {
+          name: "b"
+          nfkc_name: "b"
+          frame: 1
+          pos_in_frame: 1
         }
       }
     }
@@ -50,57 +57,22 @@ statement {
 }
 statement {
   expression_statement {
-    value {
-      binary_expression {
-        lhs {
-          primary_expression {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-              frame: 1
-              pos_in_frame: 0
-            }
-          }
-        }
-        operator: IN
-        rhs {
-          primary_expression {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-              frame: 1
-              pos_in_frame: 1
-            }
-          }
+    binary_expression {
+      lhs {
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+          frame: 1
+          pos_in_frame: 0
         }
       }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      binary_expression {
-        lhs {
-          primary_expression {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-              frame: 1
-              pos_in_frame: 0
-            }
-          }
-        }
-        operator: NOT_IN
-        rhs {
-          primary_expression {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-              frame: 1
-              pos_in_frame: 1
-            }
-          }
+      operator: NOT_IN
+      rhs {
+        identifier {
+          name: "b"
+          nfkc_name: "b"
+          frame: 1
+          pos_in_frame: 1
         }
       }
     }

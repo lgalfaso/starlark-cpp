@@ -3,7 +3,39 @@ module_binding: "b"
 statement {
   assign_statement {
     lhs {
-      value {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      list_expression { }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "b"
+        nfkc_name: "b"
+        frame: 1
+        pos_in_frame: 1
+      }
+    }
+    op: EQUALS
+    rhs {
+      list_expression { }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
         primary_expression {
           identifier {
             name: "a"
@@ -12,22 +44,121 @@ statement {
             pos_in_frame: 0
           }
         }
+        index {
+          int_value: "1"
+        }
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression { }
-        }
-      }
+      int_value: "2"
     }
   }
 }
 statement {
   assign_statement {
     lhs {
-      value {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+        slice {
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "3"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+        slice {
+          start {
+            int_value: "4"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "5"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+        slice {
+          end {
+            int_value: "6"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "7"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+        slice {
+          start {
+            int_value: "8"
+          }
+          end {
+            int_value: "9"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "10"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
         primary_expression {
           identifier {
             name: "b"
@@ -36,536 +167,233 @@ statement {
             pos_in_frame: 1
           }
         }
+        slice {
+        }
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          list_expression { }
-        }
-      }
+      int_value: "11"
     }
   }
 }
 statement {
   assign_statement {
     lhs {
-      value {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        slice {
+          start {
+            int_value: "12"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "13"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        slice {
+          end {
+            int_value: "14"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "15"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        slice {
+          start {
+            int_value: "16"
+          }
+          end {
+            int_value: "17"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "18"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        slice {
+          step {
+            int_value: "19"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "20"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        slice {
+          start {
+            int_value: "21"
+          }
+          step {
+            int_value: "22"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "23"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        slice {
+          end {
+            int_value: "24"
+          }
+          step {
+            int_value: "25"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "26"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
+          }
+        }
+        slice {
+          start {
+            int_value: "27"
+          }
+          end {
+            int_value: "28"
+          }
+          step {
+            int_value: "29"
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "30"
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
         primary_expression {
           slice_expression {
             primary_expression {
               identifier {
-                name: "a"
-                nfkc_name: "a"
+                name: "b"
+                nfkc_name: "b"
                 frame: 1
-                pos_in_frame: 0
+                pos_in_frame: 1
               }
             }
             index {
-              value {
-                primary_expression {
-                  int_value: "1"
-                }
-              }
+              int_value: "31"
             }
           }
+        }
+        index {
+          int_value: "32"
         }
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          int_value: "2"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-                frame: 1
-                pos_in_frame: 0
-              }
-            }
-            slice {
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "3"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-                frame: 1
-                pos_in_frame: 0
-              }
-            }
-            slice {
-              start {
-                primary_expression {
-                  int_value: "4"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "5"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-                frame: 1
-                pos_in_frame: 0
-              }
-            }
-            slice {
-              end {
-                primary_expression {
-                  int_value: "6"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "7"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "a"
-                nfkc_name: "a"
-                frame: 1
-                pos_in_frame: 0
-              }
-            }
-            slice {
-              start {
-                primary_expression {
-                  int_value: "8"
-                }
-              }
-              end {
-                primary_expression {
-                  int_value: "9"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "10"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "11"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-              start {
-                primary_expression {
-                  int_value: "12"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "13"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-              end {
-                primary_expression {
-                  int_value: "14"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "15"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-              start {
-                primary_expression {
-                  int_value: "16"
-                }
-              }
-              end {
-                primary_expression {
-                  int_value: "17"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "18"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-              step {
-                primary_expression {
-                  int_value: "19"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "20"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-              start {
-                primary_expression {
-                  int_value: "21"
-                }
-              }
-              step {
-                primary_expression {
-                  int_value: "22"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "23"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-              end {
-                primary_expression {
-                  int_value: "24"
-                }
-              }
-              step {
-                primary_expression {
-                  int_value: "25"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "26"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              identifier {
-                name: "b"
-                nfkc_name: "b"
-                frame: 1
-                pos_in_frame: 1
-              }
-            }
-            slice {
-              start {
-                primary_expression {
-                  int_value: "27"
-                }
-              }
-              end {
-                primary_expression {
-                  int_value: "28"
-                }
-              }
-              step {
-                primary_expression {
-                  int_value: "29"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "30"
-        }
-      }
-    }
-  }
-}
-statement {
-  assign_statement {
-    lhs {
-      value {
-        primary_expression {
-          slice_expression {
-            primary_expression {
-              slice_expression {
-                primary_expression {
-                  identifier {
-                    name: "b"
-                    nfkc_name: "b"
-                    frame: 1
-                    pos_in_frame: 1
-                  }
-                }
-                index {
-                  value {
-                    primary_expression {
-                      int_value: "31"
-                    }
-                  }
-                }
-              }
-            }
-            index {
-              value {
-                primary_expression {
-                  int_value: "32"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    op: EQUALS
-    rhs {
-      value {
-        primary_expression {
-          int_value: "33"
-        }
-      }
+      int_value: "33"
     }
   }
 }

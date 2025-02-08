@@ -18,3 +18,5 @@ def foo():
     continue
   for (a,) in [(1,)]:
     continue
+  for (a,b),c in []:
+    continue

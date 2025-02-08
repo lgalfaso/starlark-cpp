@@ -18,12 +18,6 @@
 
 namespace grammar {
 
-struct expression_frame {
-  starlark::Expression* expression = nullptr;
-  starlark::PrimaryExpr* primary_expression = nullptr;
-  starlark::Test* test = nullptr;
-};
-
 struct parsing_block {
   std::set<std::string> identifiers;
   google::protobuf::RepeatedPtrField<std::string>* id_store;
@@ -43,9 +37,7 @@ class parser {
 
  private:
   void parse_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
-  void bind_and_resolve(starlark::PrimaryExpr* primary_expression);
   void bind_and_resolve(starlark::Expression* expression);
-  void bind_and_resolve(expression_frame frame);
   void bind(const starlark::Identifier& identifier);
   bool set_identifier(starlark::Identifier& id);
   bool capture(token_type expected_token);
@@ -59,9 +51,7 @@ class parser {
                     google::protobuf::RepeatedPtrField<std::string>* binding);
   void drop_block();
   void resolve(starlark::Identifier* identifier);
-  void resolve(starlark::Test* test);
   void resolve(starlark::Expression* test);
-  void resolve(expression_frame frame);
   bool is_top_level_block() const;
 
   grammar_options options;

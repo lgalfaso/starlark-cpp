@@ -184,14 +184,6 @@ class ast_listener_logger : public grammar::ast_listener {
     output += "EXIT Expression\n";
   }
 
-  void enter_test(const starlark::Test* test) override {
-    output += "ENTER Test\n";
-  }
-
-  void exit_test(const starlark::Test* test) override {
-    output += "EXIT Test\n";
-  }
-
   void enter_tuple(const starlark::Tuple* tuple) override {
     output += "ENTER Tuple\n";
   }
@@ -206,14 +198,6 @@ class ast_listener_logger : public grammar::ast_listener {
 
   void exit_if_expression(const starlark::IfExpr* if_expression) override {
     output += "EXIT IfExpression\n";
-  }
-
-  void enter_primary_expression(const starlark::PrimaryExpr* primary_expression) override {
-    output += "ENTER PrimaryExpression\n";
-  }
-
-  void exit_primary_expression(const starlark::PrimaryExpr* primary_expression) override {
-    output += "EXIT PrimaryExpression\n";
   }
 
   void enter_unary_expression(const starlark::UnaryExpr* unary_expression) override {
@@ -240,20 +224,12 @@ class ast_listener_logger : public grammar::ast_listener {
     output += "EXIT LambdaExpression\n";
   }
 
-  void enter_for_loop_variables(const google::protobuf::RepeatedPtrField<starlark::PrimaryExpr>* loop_variables) override {
+  void enter_for_loop_variables(const starlark::Expression* loop_variables) override {
     output += "ENTER LoopVariables\n";
   }
 
-  void exit_for_loop_variables(const google::protobuf::RepeatedPtrField<starlark::PrimaryExpr>* loop_variables) override {
+  void exit_for_loop_variables(const starlark::Expression* loop_variables) override {
     output += "EXIT LoopVariables\n";
-  }
-
-  void enter_for_loop_variable(const starlark::PrimaryExpr* loop_variable) override {
-    output += "ENTER LoopVariable\n";
-  }
-
-  void exit_for_loop_variable(const starlark::PrimaryExpr* loop_variable) override {
-    output += "EXIT LoopVariable\n";
   }
 
   void enter_for_in_expression(const starlark::Expression* expression) override {
@@ -262,14 +238,6 @@ class ast_listener_logger : public grammar::ast_listener {
 
   void exit_for_in_expression(const starlark::Expression* expression) override {
     output += "EXIT ForInExpression\n";
-  }
-
-  void enter_for_in_test(const starlark::Test* test) override {
-    output += "ENTER ForInTest\n";
-  }
-
-  void exit_for_in_test(const starlark::Test* test) override {
-    output += "EXIT ForInTest\n";
   }
 
   void enter_dot_expression(const starlark::DotExpr* dot_expression) override {
@@ -384,11 +352,11 @@ class ast_listener_logger : public grammar::ast_listener {
     output += "EXIT ForClause\n";
   }
 
-  void enter_if_clause(const starlark::Test* if_clause) override {
+  void enter_if_clause(const starlark::Expression* if_clause) override {
     output += "ENTER IfClause\n";
   }
 
-  void exit_if_clause(const starlark::Test* if_clause) override {
+  void exit_if_clause(const starlark::Expression* if_clause) override {
     output += "EXIT IfClause\n";
   }
 

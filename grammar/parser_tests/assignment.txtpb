@@ -4,24 +4,16 @@ module_binding: "foo"
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
-          identifier {
-            name: "foo"
-            nfkc_name: "foo"
-            frame: 1
-            pos_in_frame: 2
-          }
-        }
+      identifier {
+        name: "foo"
+        nfkc_name: "foo"
+        frame: 1
+        pos_in_frame: 2
       }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
-          int_value: "1"
-        }
-      }
+      int_value: "1"
     }
   }
 }
@@ -30,23 +22,19 @@ statement {
     lhs {
       tuple {
         value {
-          primary_expression {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-              frame: 1
-              pos_in_frame: 0
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
           }
         }
         value {
-          primary_expression {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-              frame: 1
-              pos_in_frame: 1
-            }
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
           }
         }
       }
@@ -55,23 +43,19 @@ statement {
     rhs {
       tuple {
         value {
-          primary_expression {
-            identifier {
-              name: "b"
-              nfkc_name: "b"
-              frame: 1
-              pos_in_frame: 1
-            }
+          identifier {
+            name: "b"
+            nfkc_name: "b"
+            frame: 1
+            pos_in_frame: 1
           }
         }
         value {
-          primary_expression {
-            identifier {
-              name: "a"
-              nfkc_name: "a"
-              frame: 1
-              pos_in_frame: 0
-            }
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
           }
         }
       }

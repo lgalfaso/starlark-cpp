@@ -1,11 +1,7 @@
 file_binding: "fn"
 statement {
   expression_statement {
-    value {
-      primary_expression {
-        string_value: "Some comment"
-      }
-    }
+    string_value: "Some comment"
   }
 }
 statement {

@@ -31,11 +31,9 @@ using starlark::ListExpr;
 using starlark::LoadStmt;
 using starlark::Parameter;
 using starlark::PassStmt;
-using starlark::PrimaryExpr;
 using starlark::ReturnStmt;
 using starlark::SliceExpr;
 using starlark::Statement;
-using starlark::Test;
 using starlark::Tuple;
 using starlark::UnaryExpr;
 
@@ -57,10 +55,8 @@ enum class message_type {
   PARAMETER,
   ARGUMENT,
   EXPRESSION,
-  TEST,
   TUPLE,
   IF_EXPRESSION,
-  PRIMARY_EXPRESSION,
   UNARY_EXPRESSION,
   BINARY_EXPRESSION,
   LAMBDA_EXPRESSION,
@@ -68,7 +64,6 @@ enum class message_type {
   ELIF,
   ELSE,
   FOR_LOOP_VARIABLES,
-  FOR_LOOP_VARIABLE,
   FOR_IN_EXPRESSION,
   DOT_EXPRESSION,
   CALL_EXPRESSION,
@@ -84,7 +79,6 @@ enum class message_type {
   DICTIONARY_COMPREHENSION,
   COMP_CLAUSE,
   FOR_CLAUSE,
-  FOR_IN_TEST,
   IF_CLAUSE,
   MAP_ENTRY,
 };
@@ -106,18 +100,15 @@ struct message {
     const Parameter* parameter;
     const Argument* argument;
     const Expression* expression;
-    const Test* test;
     const Tuple* tuple;
     const IfExpr* if_expression;
-    const PrimaryExpr* primary_expression;
     const UnaryExpr* unary_expression;
     const BinaryExpr* binary_expression;
     const LambdaExpr* lambda_expression;
     const RepeatedPtrField<Statement>* then;
     const RepeatedPtrField<Statement>* else_;
     const ElseIf* elif;
-    const RepeatedPtrField<PrimaryExpr>* for_loop_variables;
-    const PrimaryExpr* for_loop_variable;
+    const Expression* for_loop_variables;
     const Expression* for_in_expression;
     const DotExpr* dot_expression;
     const CallExpr* call_expression;
@@ -133,8 +124,7 @@ struct message {
     const DictComp* dictionary_comprehension;
     const CompClause* comp_clause;
     const ForClause* for_clause;
-    const Test* for_in_test;
-    const Test* if_clause;
+    const Expression* if_clause;
     const Entry* map_entry;
   };
   message_type type;
@@ -177,28 +167,20 @@ void ast_listener_base::enter_else(const RepeatedPtrField<Statement>* else_) {}
 void ast_listener_base::exit_else(const RepeatedPtrField<Statement>* else_) {}
 void ast_listener_base::enter_expression(const Expression* expression) {}
 void ast_listener_base::exit_expression(const Expression* expresion) {}
-void ast_listener_base::enter_test(const Test* test) {}
-void ast_listener_base::exit_test(const Test* test) {}
 void ast_listener_base::enter_tuple(const Tuple* tuple) {}
 void ast_listener_base::exit_tuple(const Tuple* tuple) {}
 void ast_listener_base::enter_if_expression(const starlark::IfExpr* if_expression) {}
 void ast_listener_base::exit_if_expression(const starlark::IfExpr* if_expression) {}
-void ast_listener_base::enter_primary_expression(const starlark::PrimaryExpr* primary_expression) {}
-void ast_listener_base::exit_primary_expression(const starlark::PrimaryExpr* primary_expression) {}
 void ast_listener_base::enter_unary_expression(const starlark::UnaryExpr* unary_expression) {}
 void ast_listener_base::exit_unary_expression(const starlark::UnaryExpr* unary_expression) {}
 void ast_listener_base::enter_binary_expression(const starlark::BinaryExpr* binary_expression) {}
 void ast_listener_base::exit_binary_expression(const starlark::BinaryExpr* binary_expression) {}
 void ast_listener_base::enter_lambda_expression(const starlark::LambdaExpr* lambda_expression) {}
 void ast_listener_base::exit_lambda_expression(const starlark::LambdaExpr* lambda_expression) {}
-void ast_listener_base::enter_for_loop_variables(const google::protobuf::RepeatedPtrField<starlark::PrimaryExpr>* loop_variables) {}
-void ast_listener_base::exit_for_loop_variables(const google::protobuf::RepeatedPtrField<starlark::PrimaryExpr>* loop_variables) {}
-void ast_listener_base::enter_for_loop_variable(const starlark::PrimaryExpr* loop_variable) {}
-void ast_listener_base::exit_for_loop_variable(const starlark::PrimaryExpr* loop_variable) {}
+void ast_listener_base::enter_for_loop_variables(const starlark::Expression* loop_variables) {}
+void ast_listener_base::exit_for_loop_variables(const starlark::Expression* loop_variables) {}
 void ast_listener_base::enter_for_in_expression(const starlark::Expression* expression) {}
 void ast_listener_base::exit_for_in_expression(const starlark::Expression* expression) {}
-void ast_listener_base::enter_for_in_test(const starlark::Test* test) {}
-void ast_listener_base::exit_for_in_test(const starlark::Test* test) {}
 void ast_listener_base::enter_dot_expression(const starlark::DotExpr* dot_expression) {}
 void ast_listener_base::exit_dot_expression(const starlark::DotExpr* dot_expression) {}
 void ast_listener_base::enter_call_expression(const starlark::CallExpr* call_expression) {}
@@ -227,8 +209,8 @@ void ast_listener_base::enter_comp_clause(const starlark::CompClause* comp_claus
 void ast_listener_base::exit_comp_clause(const starlark::CompClause* comp_clause) {}
 void ast_listener_base::enter_for_clause(const starlark::ForClause* for_clause) {}
 void ast_listener_base::exit_for_clause(const starlark::ForClause* for_clause) {}
-void ast_listener_base::enter_if_clause(const starlark::Test* if_clause) {}
-void ast_listener_base::exit_if_clause(const starlark::Test* if_clause) {}
+void ast_listener_base::enter_if_clause(const starlark::Expression* if_clause) {}
+void ast_listener_base::exit_if_clause(const starlark::Expression* if_clause) {}
 void ast_listener_base::enter_map_entry(const starlark::Entry* map_entry) {}
 void ast_listener_base::exit_map_entry(const starlark::Entry* map_entry) {}
 
@@ -372,8 +354,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
             .enter = true,
           });
           to_process.push_back(message{
-            .test = &top.if_statement->test(),
-            .type = message_type::TEST,
+            .expression = &top.if_statement->test(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
@@ -389,8 +371,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
             .enter = true,
           });
           to_process.push_back(message{
-            .test = &top.elif->test(),
-            .type = message_type::TEST,
+            .expression = &top.elif->test(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
@@ -407,7 +389,7 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
             .enter = true,
           });
           to_process.push_back(message{
-            .for_loop_variables = &top.for_statement->loop_variable(),
+            .for_loop_variables = &top.for_statement->loop_variables(),
             .type = message_type::FOR_LOOP_VARIABLES,
             .enter = true,
           });
@@ -424,19 +406,9 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
           break;
         case message_type::FOR_LOOP_VARIABLES:
           listener.enter_for_loop_variables(top.for_loop_variables);
-          for (auto it = top.for_loop_variables->rbegin(); it != top.for_loop_variables->rend(); ++it) {
-            to_process.push_back(message{
-              .for_loop_variable = &*it,
-              .type = message_type::FOR_LOOP_VARIABLE,
-              .enter = true,
-            });
-          }
-          break;
-        case message_type::FOR_LOOP_VARIABLE:
-          listener.enter_for_loop_variable(top.for_loop_variable);
           to_process.push_back(message{
-            .primary_expression = top.for_loop_variable,
-            .type = message_type::PRIMARY_EXPRESSION,
+            .expression = top.for_loop_variables,
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
@@ -445,14 +417,6 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
           to_process.push_back(message{
             .expression = top.for_in_expression,
             .type = message_type::EXPRESSION,
-            .enter = true,
-          });
-          break;
-        case message_type::FOR_IN_TEST:
-          listener.enter_for_in_test(top.for_in_test);
-          to_process.push_back(message{
-            .test = top.for_in_test,
-            .type = message_type::TEST,
             .enter = true,
           });
           break;
@@ -493,8 +457,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
           listener.enter_parameter(top.parameter);
           if (top.parameter->has_initialization()) {
             to_process.push_back(message{
-              .test = &top.parameter->initialization(),
-              .type = message_type::TEST,
+              .expression = &top.parameter->initialization(),
+              .type = message_type::EXPRESSION,
               .enter = true,
             });
           }
@@ -504,29 +468,29 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
           switch (top.argument->argument_type_case()) {
             case Argument::kValue:
               to_process.push_back(message{
-                .test = &top.argument->value(),
-                .type = message_type::TEST,
+                .expression = &top.argument->value(),
+                .type = message_type::EXPRESSION,
                 .enter = true,
               });
               break;
             case Argument::kNamedArgument:
               to_process.push_back(message{
-                .test = &top.argument->named_argument().value(),
-                .type = message_type::TEST,
+                .expression = &top.argument->named_argument().value(),
+                .type = message_type::EXPRESSION,
                 .enter = true,
               });
               break;
             case Argument::kStarArgument:
               to_process.push_back(message{
-                .test = &top.argument->star_argument(),
-                .type = message_type::TEST,
+                .expression = &top.argument->star_argument(),
+                .type = message_type::EXPRESSION,
                 .enter = true,
               });
               break;
             case Argument::kStarStarArgument:
               to_process.push_back(message{
-                .test = &top.argument->star_star_argument(),
-                .type = message_type::TEST,
+                .expression = &top.argument->star_star_argument(),
+                .type = message_type::EXPRESSION,
                 .enter = true,
               });
               break;
@@ -537,63 +501,126 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
         case message_type::EXPRESSION:
           listener.enter_expression(top.expression);
           switch (top.expression->expression_type_case()) {
-            case Expression::kValue:
-            to_process.push_back(message{
-              .test = &top.expression->value(),
-              .type = message_type::TEST,
-              .enter = true,
-            });
-            break;
             case Expression::kTuple:
-            to_process.push_back(message{
-              .tuple = &top.expression->tuple(),
-              .type = message_type::TUPLE,
-              .enter = true,
-            });
-            break;
-            case Expression::EXPRESSION_TYPE_NOT_SET:
-            break;
-          }
-          break;
-        case message_type::TEST:
-          listener.enter_test(top.test);
-          switch (top.test->test_type_case()) {
-            case Test::kIfExpression:
               to_process.push_back(message{
-                .if_expression = &top.test->if_expression(),
+                .tuple = &top.expression->tuple(),
+                .type = message_type::TUPLE,
+                .enter = true,
+              });
+              break;
+            case Expression::kIfExpression:
+              to_process.push_back(message{
+                .if_expression = &top.expression->if_expression(),
                 .type = message_type::IF_EXPRESSION,
                 .enter = true,
               });
               break;
-            case Test::kPrimaryExpression:
+            case Expression::kUnaryExpression:
               to_process.push_back(message{
-                .primary_expression = &top.test->primary_expression(),
-                .type = message_type::PRIMARY_EXPRESSION,
-                .enter = true,
-              });
-              break;
-            case Test::kUnaryExpression:
-              to_process.push_back(message{
-                .unary_expression = &top.test->unary_expression(),
+                .unary_expression = &top.expression->unary_expression(),
                 .type = message_type::UNARY_EXPRESSION,
                 .enter = true,
               });
               break;
-            case Test::kBinaryExpression:
+            case Expression::kBinaryExpression:
               to_process.push_back(message{
-                .binary_expression = &top.test->binary_expression(),
+                .binary_expression = &top.expression->binary_expression(),
                 .type = message_type::BINARY_EXPRESSION,
                 .enter = true,
               });
               break;
-            case Test::kLambdaExpression:
+            case Expression::kLambdaExpression:
               to_process.push_back(message{
-                .lambda_expression = &top.test->lambda_expression(),
+                .lambda_expression = &top.expression->lambda_expression(),
                 .type = message_type::LAMBDA_EXPRESSION,
                 .enter = true,
               });
               break;
-            case Test::TEST_TYPE_NOT_SET:
+            case Expression::kDotExpression:
+              to_process.push_back(message{
+                .dot_expression = &top.expression->dot_expression(),
+                .type = message_type::DOT_EXPRESSION,
+                .enter = true,
+              });
+              break;
+            case Expression::kCallExpression:
+              to_process.push_back(message{
+                .call_expression = &top.expression->call_expression(),
+                .type = message_type::CALL_EXPRESSION,
+                .enter = true,
+              });
+              break;
+            case Expression::kSliceExpression:
+              to_process.push_back(message{
+                .slice_expression = &top.expression->slice_expression(),
+                .type = message_type::SLICE_EXPRESSION,
+                .enter = true,
+              });
+              break;
+            case Expression::kIdentifier:
+              to_process.push_back(message{
+                .identifier = &top.expression->identifier(),
+                .type = message_type::IDENTIFIER,
+                .enter = true,
+              });
+              break;
+            case Expression::kIntValue:
+              to_process.push_back(message{
+                .int_value = &top.expression->int_value(),
+                .type = message_type::INT_VALUE,
+                .enter = true,
+              });
+              break;
+            case Expression::kFloatValue:
+              to_process.push_back(message{
+                .float_value = top.expression->float_value(),
+                .type = message_type::FLOAT_VALUE,
+                .enter = true,
+              });
+              break;
+            case Expression::kStringValue:
+              to_process.push_back(message{
+                .string_value = &top.expression->string_value(),
+                .type = message_type::STRING_VALUE,
+                .enter = true,
+              });
+              break;
+            case Expression::kBytesValue:
+              to_process.push_back(message{
+                .bytes_value = &top.expression->bytes_value(),
+                .type = message_type::BYTES_VALUE,
+                .enter = true,
+              });
+              break;
+            case Expression::kListExpression:
+              to_process.push_back(message{
+                .list_expression = &top.expression->list_expression(),
+                .type = message_type::LIST_EXPRESSION,
+                .enter = true,
+              });
+              break;
+            case Expression::kListComprehension:
+              to_process.push_back(message{
+                .list_comprehension = &top.expression->list_comprehension(),
+                .type = message_type::LIST_COMPREHENSION,
+                .enter = true,
+              });
+              break;
+            case Expression::kDictionaryExpression:
+              to_process.push_back(message{
+                .dictionary_expression = &top.expression->dictionary_expression(),
+                .type = message_type::DICTIONARY_EXPRESSION,
+                .enter = true,
+              });
+              break;
+            case Expression::kDictionaryComprehension:
+              to_process.push_back(message{
+                .dictionary_comprehension = &top.expression->dictionary_comprehension(),
+                .type = message_type::DICTIONARY_COMPREHENSION,
+                .enter = true,
+              });
+              break;
+            case Expression::EXPRESSION_TYPE_NOT_SET:
               break;
           }
           break;
@@ -601,8 +628,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
           listener.enter_tuple(top.tuple);
           for (auto it = top.tuple->value().rbegin(); it != top.tuple->value().rend(); ++it) {
             to_process.push_back(message{
-              .test = &*it,
-              .type = message_type::TEST,
+              .expression = &*it,
+              .type = message_type::EXPRESSION,
               .enter = true,
             });
           }
@@ -611,145 +638,47 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
           listener.enter_if_expression(top.if_expression);
           // The events follow an `if-else` and not the order that things show up in the grammar.
           to_process.push_back(message{
-            .test = &top.if_expression->else_value(),
-            .type = message_type::TEST,
+            .expression = &top.if_expression->else_value(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           to_process.push_back(message{
-            .test = &top.if_expression->if_value(),
-            .type = message_type::TEST,
+            .expression = &top.if_expression->if_value(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           to_process.push_back(message{
-            .test = &top.if_expression->if_test(),
-            .type = message_type::TEST,
+            .expression = &top.if_expression->if_test(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
-          break;
-        case message_type::PRIMARY_EXPRESSION:
-          listener.enter_primary_expression(top.primary_expression);
-          switch (top.primary_expression->primary_expression_type_case()) {
-            case PrimaryExpr::kDotExpression:
-              to_process.push_back(message{
-                .dot_expression = &top.primary_expression->dot_expression(),
-                .type = message_type::DOT_EXPRESSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kCallExpression:
-              to_process.push_back(message{
-                .call_expression = &top.primary_expression->call_expression(),
-                .type = message_type::CALL_EXPRESSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kSliceExpression:
-              to_process.push_back(message{
-                .slice_expression = &top.primary_expression->slice_expression(),
-                .type = message_type::SLICE_EXPRESSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kIdentifier:
-              to_process.push_back(message{
-                .identifier = &top.primary_expression->identifier(),
-                .type = message_type::IDENTIFIER,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kIntValue:
-              to_process.push_back(message{
-                .int_value = &top.primary_expression->int_value(),
-                .type = message_type::INT_VALUE,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kFloatValue:
-              to_process.push_back(message{
-                .float_value = top.primary_expression->float_value(),
-                .type = message_type::FLOAT_VALUE,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kStringValue:
-              to_process.push_back(message{
-                .string_value = &top.primary_expression->string_value(),
-                .type = message_type::STRING_VALUE,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kBytesValue:
-              to_process.push_back(message{
-                .bytes_value = &top.primary_expression->bytes_value(),
-                .type = message_type::BYTES_VALUE,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kListExpression:
-              to_process.push_back(message{
-                .list_expression = &top.primary_expression->list_expression(),
-                .type = message_type::LIST_EXPRESSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kListComprehension:
-              to_process.push_back(message{
-                .list_comprehension = &top.primary_expression->list_comprehension(),
-                .type = message_type::LIST_COMPREHENSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kDictionaryExpression:
-              to_process.push_back(message{
-                .dictionary_expression = &top.primary_expression->dictionary_expression(),
-                .type = message_type::DICTIONARY_EXPRESSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kDictionaryComprehension:
-              to_process.push_back(message{
-                .dictionary_comprehension = &top.primary_expression->dictionary_comprehension(),
-                .type = message_type::DICTIONARY_COMPREHENSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::kExpression:
-              to_process.push_back(message{
-                .expression = &top.primary_expression->expression(),
-                .type = message_type::EXPRESSION,
-                .enter = true,
-              });
-              break;
-            case PrimaryExpr::PRIMARY_EXPRESSION_TYPE_NOT_SET:
-              break;
-          }
           break;
         case message_type::UNARY_EXPRESSION:
           listener.enter_unary_expression(top.unary_expression);
           to_process.push_back(message{
-            .test = &top.unary_expression->test(),
-            .type = message_type::TEST,
+            .expression = &top.unary_expression->test(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
         case message_type::BINARY_EXPRESSION:
           listener.enter_binary_expression(top.binary_expression);
           to_process.push_back(message{
-            .test = &top.binary_expression->rhs(),
-            .type = message_type::TEST,
+            .expression = &top.binary_expression->rhs(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           to_process.push_back(message{
-            .test = &top.binary_expression->lhs(),
-            .type = message_type::TEST,
+            .expression = &top.binary_expression->lhs(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
         case message_type::LAMBDA_EXPRESSION:
           listener.enter_lambda_expression(top.lambda_expression);
           to_process.push_back(message{
-            .test = &top.lambda_expression->test(),
-            .type = message_type::TEST,
+            .expression = &top.lambda_expression->test(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           for (auto it = top.lambda_expression->parameter().rbegin(); it != top.lambda_expression->parameter().rend(); ++it) {
@@ -763,8 +692,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
         case message_type::DOT_EXPRESSION:
           listener.enter_dot_expression(top.dot_expression);
           to_process.push_back(message{
-            .primary_expression = &top.dot_expression->primary_expression(),
-            .type = message_type::PRIMARY_EXPRESSION,
+            .expression = &top.dot_expression->primary_expression(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
@@ -778,8 +707,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
             });
           }
           to_process.push_back(message{
-            .primary_expression = &top.call_expression->primary_expression(),
-            .type = message_type::PRIMARY_EXPRESSION,
+            .expression = &top.call_expression->primary_expression(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
@@ -796,22 +725,22 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
             case SliceExpr::kSlice:
               if (top.slice_expression->slice().has_step()) {
                 to_process.push_back(message{
-                  .test = &top.slice_expression->slice().step(),
-                  .type = message_type::TEST,
+                  .expression = &top.slice_expression->slice().step(),
+                  .type = message_type::EXPRESSION,
                   .enter = true,
                 });
               }
               if (top.slice_expression->slice().has_end()) {
                 to_process.push_back(message{
-                  .test = &top.slice_expression->slice().end(),
-                  .type = message_type::TEST,
+                  .expression = &top.slice_expression->slice().end(),
+                  .type = message_type::EXPRESSION,
                   .enter = true,
                 });
               }
               if (top.slice_expression->slice().has_start()) {
                 to_process.push_back(message{
-                  .test = &top.slice_expression->slice().start(),
-                  .type = message_type::TEST,
+                  .expression = &top.slice_expression->slice().start(),
+                  .type = message_type::EXPRESSION,
                   .enter = true,
                 });
               }
@@ -820,8 +749,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
               break;
           }
           to_process.push_back(message{
-            .primary_expression = &top.slice_expression->primary_expression(),
-            .type = message_type::PRIMARY_EXPRESSION,
+            .expression = &top.slice_expression->primary_expression(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
@@ -844,8 +773,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
           listener.enter_list_expression(top.list_expression);
           for (auto it = top.list_expression->element().rbegin(); it != top.list_expression->element().rend(); ++it) {
             to_process.push_back(message{
-              .test = &*it,
-              .type = message_type::TEST,
+              .expression = &*it,
+              .type = message_type::EXPRESSION,
               .enter = true,
             });
           }
@@ -853,8 +782,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
         case message_type::LIST_COMPREHENSION:
           listener.enter_list_comprehension(top.list_comprehension);
           to_process.push_back(message{
-            .test = &top.list_comprehension->test(),
-            .type = message_type::TEST,
+            .expression = &top.list_comprehension->test(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           for (auto it = top.list_comprehension->clause().rbegin(); it != top.list_comprehension->clause().rend(); ++it) {
@@ -914,12 +843,12 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
         case message_type::FOR_CLAUSE:
           listener.enter_for_clause(top.for_clause);
           to_process.push_back(message{
-            .for_in_test = &top.for_clause->in(),
-            .type = message_type::FOR_IN_TEST,
+            .for_in_expression = &top.for_clause->in(),
+            .type = message_type::FOR_IN_EXPRESSION,
             .enter = true,
           });
           to_process.push_back(message{
-            .for_loop_variables = &top.for_clause->loop_variable(),
+            .for_loop_variables = &top.for_clause->loop_variables(),
             .type = message_type::FOR_LOOP_VARIABLES,
             .enter = true,
           });
@@ -927,21 +856,21 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
         case message_type::IF_CLAUSE:
           listener.enter_if_clause(top.if_clause);
           to_process.push_back(message{
-            .test = top.if_clause,
-            .type = message_type::TEST,
+            .expression = top.if_clause,
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
         case message_type::MAP_ENTRY:
           listener.enter_map_entry(top.map_entry);
           to_process.push_back(message{
-            .test = &top.map_entry->value(),
-            .type = message_type::TEST,
+            .expression = &top.map_entry->value(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           to_process.push_back(message{
-            .test = &top.map_entry->key(),
-            .type = message_type::TEST,
+            .expression = &top.map_entry->key(),
+            .type = message_type::EXPRESSION,
             .enter = true,
           });
           break;
@@ -975,14 +904,8 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
         case message_type::FOR_LOOP_VARIABLES:
           listener.exit_for_loop_variables(top.for_loop_variables);
           break;
-        case message_type::FOR_LOOP_VARIABLE:
-          listener.exit_for_loop_variable(top.for_loop_variable);
-          break;
         case message_type::FOR_IN_EXPRESSION:
           listener.exit_for_in_expression(top.for_in_expression);
-          break;
-        case message_type::FOR_IN_TEST:
-          listener.exit_for_in_test(top.for_in_test);
           break;
         case message_type::RETURN_STATEMENT:
           listener.exit_return_statement(top.return_statement);
@@ -1014,17 +937,11 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
         case message_type::EXPRESSION:
           listener.exit_expression(top.expression);
           break;
-        case message_type::TEST:
-          listener.exit_test(top.test);
-          break;
         case message_type::TUPLE:
           listener.exit_tuple(top.tuple);
           break;
         case message_type::IF_EXPRESSION:
           listener.exit_if_expression(top.if_expression);
-          break;
-        case message_type::PRIMARY_EXPRESSION:
-          listener.exit_primary_expression(top.primary_expression);
           break;
         case message_type::UNARY_EXPRESSION:
           listener.exit_unary_expression(top.unary_expression);

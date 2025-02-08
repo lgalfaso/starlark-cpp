@@ -3,89 +3,63 @@ module_binding: "foo"
 statement {
   assign_statement {
     lhs {
-      value {
-        primary_expression {
           identifier {
             name: "cpu"
             nfkc_name: "cpu"
             frame: 1
             pos_in_frame: 0
           }
-        }
-      }
     }
     op: EQUALS
     rhs {
-      value {
-        primary_expression {
           string_value: "win32"
+    }
+  }
+}
+statement {
+  expression_statement {
+    binary_expression {
+      lhs {
+        binary_expression {
+          lhs {
+            int_value: "1"
+          }
+          operator: PLUS
+          rhs {
+            int_value: "2"
+          }
         }
+      }
+      operator: PLUS
+      rhs {
+        int_value: "3"
       }
     }
   }
 }
 statement {
   expression_statement {
-    value {
-      binary_expression {
-        lhs {
-          binary_expression {
-            lhs {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-            operator: PLUS
-            rhs {
-              primary_expression {
-                int_value: "2"
-              }
-            }
+    binary_expression {
+      lhs {
+        binary_expression {
+          lhs {
+            int_value: "1"
+          }
+          operator: STAR
+          rhs {
+            int_value: "2"
           }
         }
-        operator: PLUS
-        rhs {
-          primary_expression {
+      }
+      operator: PLUS
+      rhs {
+        binary_expression {
+          lhs {
             int_value: "3"
           }
-        }
-      }
-    }
-  }
-}
-statement {
-  expression_statement {
-    value {
-      binary_expression {
-        lhs {
-          binary_expression {
-            lhs {
-              primary_expression {
-                int_value: "1"
-              }
-            }
-            operator: STAR
-            rhs {
-              primary_expression {
-                int_value: "2"
-              }
-            }
-          }
-        }
-        operator: PLUS
-        rhs {
-          binary_expression {
-            lhs {
-              primary_expression {
-                int_value: "3"
-              }
-            }
-            operator: STAR
-            rhs {
-              primary_expression {
-                int_value: "4"
-              }
-            }
+          operator: STAR
+          rhs {
+            int_value: "4"
           }
         }
       }
@@ -107,19 +81,15 @@ statement {
             lhs {
               binary_expression {
                 lhs {
-                  primary_expression {
-                    string_value: "win32"
-                  }
+                  string_value: "win32"
                 }
                 operator: IN
                 rhs {
-                  primary_expression {
-                    identifier {
-                      name: "cpu"
-                      nfkc_name: "cpu"
-                      frame: 2
-                      pos_in_frame: 0
-                    }
+                  identifier {
+                    name: "cpu"
+                    nfkc_name: "cpu"
+                    frame: 2
+                    pos_in_frame: 0
                   }
                 }
               }
@@ -128,19 +98,15 @@ statement {
             rhs {
               binary_expression {
                 lhs {
-                  primary_expression {
-                      string_value: "win64"
-                  }
+                  string_value: "win64"
                 }
                 operator: IN
                 rhs {
-                  primary_expression {
-                    identifier {
-                      name: "cpu"
-                      nfkc_name: "cpu"
-                      frame: 2
-                      pos_in_frame: 0
-                    }
+                  identifier {
+                    name: "cpu"
+                    nfkc_name: "cpu"
+                    frame: 2
+                    pos_in_frame: 0
                   }
                 }
               }
