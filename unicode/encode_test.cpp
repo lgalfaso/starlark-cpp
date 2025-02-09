@@ -10,8 +10,8 @@
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
-using unicode::utf8_reader;
-using unicode::utf8_encode_code_point;
+using starlark::unicode::utf8_reader;
+using starlark::unicode::utf8_encode_code_point;
 
 namespace {
 
@@ -19,7 +19,7 @@ TEST(EncodeTest, AllCharacter) {
   for (int i = 0; i <= 0x10'ffff; ++i) {
     std::string encoded;
     utf8_encode_code_point(i, encoded, true);
-    if (!ucd::is_assigned(i)) {
+    if (!starlark::ucd::is_assigned(i)) {
       EXPECT_EQ("\xef\xbf\xbd", encoded);
     } else if (0xd800 <= i && i <= 0xdfff) {  // Surrogates area
       EXPECT_EQ("", encoded);

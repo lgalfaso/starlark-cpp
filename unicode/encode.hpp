@@ -6,11 +6,13 @@
 #include <cstdint>
 #include <string>
 
+namespace starlark {
 namespace unicode {
 
 void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict);
 
 }  // namespace unicode
+}  // namespace starlark
 
 #endif  // UNICODE_ENCODE_HPP_
 

@@ -8,6 +8,7 @@
 
 using std::string_view;
 
+namespace starlark {
 namespace unicode {
 
 namespace {
@@ -165,4 +166,5 @@ bool utf8_reader::capture(string_view candidate) {
 }
 
 }  // namespace unicode
+}  // namespace starlark
 

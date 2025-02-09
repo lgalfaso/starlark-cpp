@@ -8,11 +8,13 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace grammar {
 
 std::string quoted(std::string_view input);
 
 }  // namespace grammar
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

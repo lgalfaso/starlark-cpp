@@ -13,24 +13,25 @@
 
 using google::protobuf::Arena;
 using google::protobuf::RepeatedPtrField;
-using starlark::Argument;
-using starlark::AssignStmt;
-using starlark::BinaryExpr;
-using starlark::BinaryExpr;
-using starlark::CompClause;
-using starlark::DefStmt;
-using starlark::Entry;
-using starlark::Expression;
-using starlark::File;
-using starlark::ForStmt;
-using starlark::Identifier;
-using starlark::IfStmt;
-using starlark::LambdaExpr;
-using starlark::Parameter;
-using starlark::Statement;
-using starlark::UnaryExpr;
-using unicode::to_nfkc;
+using starlark::ast::Argument;
+using starlark::ast::AssignStmt;
+using starlark::ast::BinaryExpr;
+using starlark::ast::BinaryExpr;
+using starlark::ast::CompClause;
+using starlark::ast::DefStmt;
+using starlark::ast::Entry;
+using starlark::ast::Expression;
+using starlark::ast::File;
+using starlark::ast::ForStmt;
+using starlark::ast::Identifier;
+using starlark::ast::IfStmt;
+using starlark::ast::LambdaExpr;
+using starlark::ast::Parameter;
+using starlark::ast::Statement;
+using starlark::ast::UnaryExpr;
+using starlark::unicode::to_nfkc;
 
+namespace starlark {
 namespace grammar {
 
 namespace {
@@ -1691,7 +1692,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
   } while (!frames.empty());
 }
 
-void parser::bind_and_resolve(starlark::Expression* base) {
+void parser::bind_and_resolve(Expression* base) {
   resolve(base);
   std::vector<Expression*> frames{base};
   do {
@@ -1739,7 +1740,7 @@ void parser::bind_and_resolve(starlark::Expression* base) {
   } while (!frames.empty());
 }
 
-void parser::bind(const starlark::Identifier& identifier) {
+void parser::bind(const Identifier& identifier) {
   // The spec states "It is a static error to bind a global variable already explicitly bound in the file"
   // This leaves to interpretation whether a `def` can be rebound. The rule followed is that `def` and variables should
   // be consistent, follow the same rules, and be handled equally.
@@ -1765,7 +1766,7 @@ bool parser::set_identifier(Identifier& identifier) {
 }
 
 void parser::create_block(const std::set<std::string>& symbols,
-                    const std::set<starlark::Identifier*>& identifiers,
+                    const std::set<Identifier*>& identifiers,
                     google::protobuf::RepeatedPtrField<std::string>* binding) {
   parser_blocks.emplace_back(symbols, binding);
   for (auto* id : identifiers) {
@@ -1797,7 +1798,7 @@ void parser::drop_block() {
   parser_blocks.pop_back();
 }
 
-void parser::resolve(starlark::Identifier* identifier) {
+void parser::resolve(Identifier* identifier) {
   parser_blocks.back().to_resolve.emplace_back(identifier, 0);
 }
 
@@ -1897,4 +1898,5 @@ bool parser::is_top_level_block() const {
 }
 
 }  // namespace grammar
+}  // namespace starlark
 

@@ -2,6 +2,7 @@
 
 #include "grammar/parsing_options.hpp"
 
+namespace starlark {
 namespace grammar {
 
 grammar_options get_parsing_options(std::string_view starlark_program) {
@@ -12,4 +13,5 @@ grammar_options get_parsing_options(std::string_view starlark_program) {
 }
 
 }  // namespace grammar
+}  // namespace starlark
 

@@ -10,11 +10,13 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace grammar {
 
 std::optional<std::string> read_number(unicode::utf8_reader& input);
 
 }  // namespace grammar
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

@@ -16,8 +16,9 @@
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
-using unicode::utf8_encode_code_point;
+using starlark::unicode::utf8_encode_code_point;
 
+namespace starlark {
 namespace grammar {
 
 namespace {
@@ -726,4 +727,5 @@ void lexer::newline() {
 }
 
 }  // namespace grammar
+}  // namespace starlark
 

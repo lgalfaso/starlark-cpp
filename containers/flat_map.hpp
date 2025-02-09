@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+namespace starlark {
 namespace cnt {
 
 // A helper class for sorted elements.
@@ -36,5 +37,6 @@ class flat_map {
 };
 
 }  // namespace cnt
+}  // namespace starlark
 
 #endif  // CONTAINERS_FLAT_MAP_HPP_

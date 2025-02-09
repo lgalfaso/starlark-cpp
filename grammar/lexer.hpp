@@ -15,6 +15,7 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace grammar {
 
 class lexer {
@@ -57,6 +58,7 @@ class lexer {
 };
 
 }  // namespace grammar
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

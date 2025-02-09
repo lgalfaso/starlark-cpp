@@ -7,6 +7,7 @@
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
+namespace starlark {
 namespace unicode {
 
 void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict) {
@@ -34,5 +35,6 @@ void utf8_encode_code_point(std::uint32_t character, std::string& output, bool s
 }
 
 }  // namespace unicode
+}  // namespace starlark
 
 

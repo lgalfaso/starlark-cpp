@@ -6,9 +6,9 @@
 
 #include "grammar/token.hpp"
 
-using bignum::number;
-using grammar::token;
-using grammar::token_type;
+using starlark::bignum::number;
+using starlark::grammar::token;
+using starlark::grammar::token_type;
 
 namespace {
 

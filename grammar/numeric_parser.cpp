@@ -4,8 +4,9 @@
 
 #include <string>
 
-using unicode::utf8_reader;
+using starlark::unicode::utf8_reader;
 
+namespace starlark {
 namespace grammar {
 
 namespace {
@@ -120,4 +121,5 @@ std::optional<std::string> read_number(utf8_reader& input) {
 }
 
 }  // namespace grammar
+}  // namespace starlark
 

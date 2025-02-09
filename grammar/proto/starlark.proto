@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package starlark;
+package starlark.ast;
 
 message File {
   repeated Statement statement = 1;

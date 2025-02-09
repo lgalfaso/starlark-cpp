@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+namespace starlark {
 namespace bignum {
 
 namespace {
@@ -808,6 +809,6 @@ number& number::pow_mod(const number& power, const number& modulus) {
   return *this;
 }
 
-
-
 }  // namespace bignum
+}  // namespace starlark
+

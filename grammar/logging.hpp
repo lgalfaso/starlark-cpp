@@ -12,6 +12,7 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace grammar {
 
 enum class log_level {
@@ -46,6 +47,7 @@ class logger {
 
 
 }  // namespace grammar
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

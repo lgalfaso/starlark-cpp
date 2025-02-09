@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 
+namespace starlark {
 namespace bignum {
 
 class number {
@@ -153,6 +154,7 @@ inline number operator""_number(const char* input, std::size_t size) {
 }
 
 }  // namespace bignum
+}  // namespace starlark
 
 #endif  // BIGNUM_NUMBER_HPP_
 

@@ -5,6 +5,7 @@
 #include <format>
 #include <string>
 
+namespace starlark {
 namespace grammar {
 
 std::string quoted(std::string_view input) {
@@ -39,4 +40,5 @@ std::string quoted(std::string_view input) {
 }
 
 }  // namespace grammar
+}  // namespace starlark
 

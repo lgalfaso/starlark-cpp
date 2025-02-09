@@ -8,6 +8,7 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace unicode {
 
 // Whether the code point is within the Unicode range.
@@ -42,6 +43,7 @@ class utf8_reader {
 };
 
 }  // namespace unicode
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

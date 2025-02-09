@@ -16,12 +16,13 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace grammar {
 
 struct parsing_block {
   std::set<std::string> identifiers;
   google::protobuf::RepeatedPtrField<std::string>* id_store;
-  std::vector<std::pair<starlark::Identifier*, int>> to_resolve;
+  std::vector<std::pair<starlark::ast::Identifier*, int>> to_resolve;
 };
 
 class parser {
@@ -31,15 +32,15 @@ class parser {
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
-  starlark::File* parse_file(google::protobuf::Arena& arena);
+  starlark::ast::File* parse_file(google::protobuf::Arena& arena);
 
   static constexpr std::string module = "Parser";
 
  private:
-  void parse_statement(google::protobuf::RepeatedPtrField<starlark::Statement>& statements);
-  void bind_and_resolve(starlark::Expression* expression);
-  void bind(const starlark::Identifier& identifier);
-  bool set_identifier(starlark::Identifier& id);
+  void parse_statement(google::protobuf::RepeatedPtrField<starlark::ast::Statement>& statements);
+  void bind_and_resolve(starlark::ast::Expression* expression);
+  void bind(const starlark::ast::Identifier& identifier);
+  bool set_identifier(starlark::ast::Identifier& id);
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;
   bool expect(token_type expected_token);
@@ -47,11 +48,11 @@ class parser {
   void add_error(const std::string& error_message, position);
   void add_warning(const std::string& error_message);
   void create_block(const std::set<std::string>& symbols,
-                    const std::set<starlark::Identifier*>& identifiers,
+                    const std::set<starlark::ast::Identifier*>& identifiers,
                     google::protobuf::RepeatedPtrField<std::string>* binding);
   void drop_block();
-  void resolve(starlark::Identifier* identifier);
-  void resolve(starlark::Expression* test);
+  void resolve(starlark::ast::Identifier* identifier);
+  void resolve(starlark::ast::Expression* test);
   bool is_top_level_block() const;
 
   grammar_options options;
@@ -62,12 +63,13 @@ class parser {
   std::vector<int> nested_loops;
   bool recover = false;
   bool found_non_load = false;
-  std::vector<std::pair<std::set<std::string>, std::set<starlark::Identifier*>>> parse_parameter_identifiers;
+  std::vector<std::pair<std::set<std::string>, std::set<starlark::ast::Identifier*>>> parse_parameter_identifiers;
   std::vector<parsing_block> parser_blocks;
-  std::map<starlark::Identifier*, position> identifier_positions;
+  std::map<starlark::ast::Identifier*, position> identifier_positions;
 };
 
 }  // namespace grammar
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

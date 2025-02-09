@@ -9,7 +9,7 @@
 
 #include "unicode/utf8_reader.hpp"
 
-using unicode::utf8_reader;
+using starlark::unicode::utf8_reader;
 
 namespace {
 

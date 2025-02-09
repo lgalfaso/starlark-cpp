@@ -29,6 +29,7 @@ const char* HPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
 
 #include "containers/flat_map.hpp"
 
+namespace starlark {
 namespace ucd {
 
 bool is_assigned(std::uint32_t code_point);
@@ -44,6 +45,7 @@ std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint3
 )CPP";
 
 const char* HPP_FOOTER = R"CPP(}  // namespace ucd
+}  // namespace starlark
 
 #endif  // %s
 
@@ -58,11 +60,13 @@ const char* CPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
 
 #include "%s"
 
+namespace starlark {
 namespace ucd {
 
 )CPP";
 
 const char* CPP_FOOTER = R"CPP(}  // namespace ucd
+}  // namespace starlark
 
 )CPP";
 

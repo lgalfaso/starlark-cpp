@@ -5,9 +5,11 @@
 #include "grammar/parser.hpp"
 #include "grammar/proto/starlark.pb.h"
 
-using grammar::logger;
-using grammar::parser;
-using starlark::File;
+using starlark::ast::File;
+using starlark::grammar::logger;
+using starlark::grammar::parser;
+
+namespace {
 
 void ParserFuzzing(const char* data, size_t size) {
   logger logging;
@@ -15,6 +17,8 @@ void ParserFuzzing(const char* data, size_t size) {
   google::protobuf::Arena arena;
   star_parser.parse_file(arena);
 }
+
+}  // namespace
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   ParserFuzzing(reinterpret_cast<const char*>(data), size);

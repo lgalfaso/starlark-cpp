@@ -16,12 +16,14 @@
 
 using google::protobuf::Message;
 using google::protobuf::util::MessageDifferencer;
-using grammar::log_level;
-using grammar::logger;
-using grammar::parser;
-using starlark::File;
+using starlark::grammar::log_level;
+using starlark::grammar::logger;
+using starlark::grammar::parser;
+using starlark::ast::File;
 using testing::IsEmpty;
 using testing::SizeIs;
+
+namespace {
 
 std::string describe_diff(const Message& actual, const Message& expected) {
   MessageDifferencer differencer;
@@ -66,7 +68,7 @@ TEST(Parser, TestCase) {
 
   logger logging;
   logging.set_level(log_level::ERROR);
-  grammar::grammar_options options = grammar::get_parsing_options(starlark_program);
+  starlark::grammar::grammar_options options = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, options, {}, logging);
   google::protobuf::Arena arena;
   File* actual_starlark_file = star_parser.parse_file(arena);
@@ -76,3 +78,4 @@ TEST(Parser, TestCase) {
   EXPECT_THAT(logging, IsEmpty()) << show_errors(logging);
 }
 
+}  // namespace

@@ -11,6 +11,7 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace grammar {
 
 enum class token_type {
@@ -132,6 +133,7 @@ class token {
 };
 
 }  // namespace grammar
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

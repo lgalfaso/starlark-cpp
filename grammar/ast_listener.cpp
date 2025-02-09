@@ -5,38 +5,39 @@
 #include <vector>
 
 using google::protobuf::RepeatedPtrField;
-using starlark::Argument;
-using starlark::AssignStmt;
-using starlark::BinaryExpr;
-using starlark::BreakStmt;
-using starlark::CallExpr;
-using starlark::CompClause;
-using starlark::ContinueStmt;
-using starlark::DefStmt;
-using starlark::DictComp;
-using starlark::DictExpr;
-using starlark::DotExpr;
-using starlark::ElseIf;
-using starlark::Entry;
-using starlark::Expression;
-using starlark::File;
-using starlark::ForClause;
-using starlark::ForStmt;
-using starlark::Identifier;
-using starlark::IfExpr;
-using starlark::IfStmt;
-using starlark::LambdaExpr;
-using starlark::ListComp;
-using starlark::ListExpr;
-using starlark::LoadStmt;
-using starlark::Parameter;
-using starlark::PassStmt;
-using starlark::ReturnStmt;
-using starlark::SliceExpr;
-using starlark::Statement;
-using starlark::Tuple;
-using starlark::UnaryExpr;
+using starlark::ast::Argument;
+using starlark::ast::AssignStmt;
+using starlark::ast::BinaryExpr;
+using starlark::ast::BreakStmt;
+using starlark::ast::CallExpr;
+using starlark::ast::CompClause;
+using starlark::ast::ContinueStmt;
+using starlark::ast::DefStmt;
+using starlark::ast::DictComp;
+using starlark::ast::DictExpr;
+using starlark::ast::DotExpr;
+using starlark::ast::ElseIf;
+using starlark::ast::Entry;
+using starlark::ast::Expression;
+using starlark::ast::File;
+using starlark::ast::ForClause;
+using starlark::ast::ForStmt;
+using starlark::ast::Identifier;
+using starlark::ast::IfExpr;
+using starlark::ast::IfStmt;
+using starlark::ast::LambdaExpr;
+using starlark::ast::ListComp;
+using starlark::ast::ListExpr;
+using starlark::ast::LoadStmt;
+using starlark::ast::Parameter;
+using starlark::ast::PassStmt;
+using starlark::ast::ReturnStmt;
+using starlark::ast::SliceExpr;
+using starlark::ast::Statement;
+using starlark::ast::Tuple;
+using starlark::ast::UnaryExpr;
 
+namespace starlark {
 namespace grammar {
 
 enum class message_type {
@@ -157,8 +158,8 @@ void ast_listener_base::enter_load_statement(const LoadStmt* load_statement) {}
 void ast_listener_base::exit_load_statement(const LoadStmt* load_statement) {}
 void ast_listener_base::enter_parameter(const Parameter* parameter) {}
 void ast_listener_base::exit_parameter(const Parameter* parameter) {}
-void ast_listener_base::enter_argument(const starlark::Argument* argument) {}
-void ast_listener_base::exit_argument(const starlark::Argument* argument) {}
+void ast_listener_base::enter_argument(const Argument* argument) {}
+void ast_listener_base::exit_argument(const Argument* argument) {}
 void ast_listener_base::enter_then(const RepeatedPtrField<Statement>* then) {}
 void ast_listener_base::exit_then(const RepeatedPtrField<Statement>* then) {}
 void ast_listener_base::enter_elif(const ElseIf* elif) {}
@@ -169,26 +170,26 @@ void ast_listener_base::enter_expression(const Expression* expression) {}
 void ast_listener_base::exit_expression(const Expression* expresion) {}
 void ast_listener_base::enter_tuple(const Tuple* tuple) {}
 void ast_listener_base::exit_tuple(const Tuple* tuple) {}
-void ast_listener_base::enter_if_expression(const starlark::IfExpr* if_expression) {}
-void ast_listener_base::exit_if_expression(const starlark::IfExpr* if_expression) {}
-void ast_listener_base::enter_unary_expression(const starlark::UnaryExpr* unary_expression) {}
-void ast_listener_base::exit_unary_expression(const starlark::UnaryExpr* unary_expression) {}
-void ast_listener_base::enter_binary_expression(const starlark::BinaryExpr* binary_expression) {}
-void ast_listener_base::exit_binary_expression(const starlark::BinaryExpr* binary_expression) {}
-void ast_listener_base::enter_lambda_expression(const starlark::LambdaExpr* lambda_expression) {}
-void ast_listener_base::exit_lambda_expression(const starlark::LambdaExpr* lambda_expression) {}
-void ast_listener_base::enter_for_loop_variables(const starlark::Expression* loop_variables) {}
-void ast_listener_base::exit_for_loop_variables(const starlark::Expression* loop_variables) {}
-void ast_listener_base::enter_for_in_expression(const starlark::Expression* expression) {}
-void ast_listener_base::exit_for_in_expression(const starlark::Expression* expression) {}
-void ast_listener_base::enter_dot_expression(const starlark::DotExpr* dot_expression) {}
-void ast_listener_base::exit_dot_expression(const starlark::DotExpr* dot_expression) {}
-void ast_listener_base::enter_call_expression(const starlark::CallExpr* call_expression) {}
-void ast_listener_base::exit_call_expression(const starlark::CallExpr* call_expression) {}
-void ast_listener_base::enter_slice_expression(const starlark::SliceExpr* slice_expression) {}
-void ast_listener_base::exit_slice_expression(const starlark::SliceExpr* slice_expression) {}
-void ast_listener_base::enter_identifier(const starlark::Identifier* identifier) {}
-void ast_listener_base::exit_identifier(const starlark::Identifier* identifier) {}
+void ast_listener_base::enter_if_expression(const IfExpr* if_expression) {}
+void ast_listener_base::exit_if_expression(const IfExpr* if_expression) {}
+void ast_listener_base::enter_unary_expression(const UnaryExpr* unary_expression) {}
+void ast_listener_base::exit_unary_expression(const UnaryExpr* unary_expression) {}
+void ast_listener_base::enter_binary_expression(const BinaryExpr* binary_expression) {}
+void ast_listener_base::exit_binary_expression(const BinaryExpr* binary_expression) {}
+void ast_listener_base::enter_lambda_expression(const LambdaExpr* lambda_expression) {}
+void ast_listener_base::exit_lambda_expression(const LambdaExpr* lambda_expression) {}
+void ast_listener_base::enter_for_loop_variables(const Expression* loop_variables) {}
+void ast_listener_base::exit_for_loop_variables(const Expression* loop_variables) {}
+void ast_listener_base::enter_for_in_expression(const Expression* expression) {}
+void ast_listener_base::exit_for_in_expression(const Expression* expression) {}
+void ast_listener_base::enter_dot_expression(const DotExpr* dot_expression) {}
+void ast_listener_base::exit_dot_expression(const DotExpr* dot_expression) {}
+void ast_listener_base::enter_call_expression(const CallExpr* call_expression) {}
+void ast_listener_base::exit_call_expression(const CallExpr* call_expression) {}
+void ast_listener_base::enter_slice_expression(const SliceExpr* slice_expression) {}
+void ast_listener_base::exit_slice_expression(const SliceExpr* slice_expression) {}
+void ast_listener_base::enter_identifier(const Identifier* identifier) {}
+void ast_listener_base::exit_identifier(const Identifier* identifier) {}
 void ast_listener_base::enter_int_value(const std::string* int_value) {}
 void ast_listener_base::exit_int_value(const std::string* int_value) {}
 void ast_listener_base::enter_float_value(double float_value) {}
@@ -197,24 +198,24 @@ void ast_listener_base::enter_string_value(const std::string* string_value) {}
 void ast_listener_base::exit_string_value(const std::string* string_value) {}
 void ast_listener_base::enter_bytes_value(const std::string* bytes_value) {}
 void ast_listener_base::exit_bytes_value(const std::string* bytes_value) {}
-void ast_listener_base::enter_list_expression(const starlark::ListExpr* list_expression) {}
-void ast_listener_base::exit_list_expression(const starlark::ListExpr* list_expression) {}
-void ast_listener_base::enter_list_comprehension(const starlark::ListComp* list_comprehension) {}
-void ast_listener_base::exit_list_comprehension(const starlark::ListComp* list_comprehension) {}
-void ast_listener_base::enter_dictionary_expression(const starlark::DictExpr* dictionary_expression) {}
-void ast_listener_base::exit_dictionary_expression(const starlark::DictExpr* dictionary_expression) {}
-void ast_listener_base::enter_dictionary_comprehension(const starlark::DictComp* dictionary_comprehension) {}
-void ast_listener_base::exit_dictionary_comprehension(const starlark::DictComp* dictionary_comprehension) {}
-void ast_listener_base::enter_comp_clause(const starlark::CompClause* comp_clause) {}
-void ast_listener_base::exit_comp_clause(const starlark::CompClause* comp_clause) {}
-void ast_listener_base::enter_for_clause(const starlark::ForClause* for_clause) {}
-void ast_listener_base::exit_for_clause(const starlark::ForClause* for_clause) {}
-void ast_listener_base::enter_if_clause(const starlark::Expression* if_clause) {}
-void ast_listener_base::exit_if_clause(const starlark::Expression* if_clause) {}
-void ast_listener_base::enter_map_entry(const starlark::Entry* map_entry) {}
-void ast_listener_base::exit_map_entry(const starlark::Entry* map_entry) {}
+void ast_listener_base::enter_list_expression(const ListExpr* list_expression) {}
+void ast_listener_base::exit_list_expression(const ListExpr* list_expression) {}
+void ast_listener_base::enter_list_comprehension(const ListComp* list_comprehension) {}
+void ast_listener_base::exit_list_comprehension(const ListComp* list_comprehension) {}
+void ast_listener_base::enter_dictionary_expression(const DictExpr* dictionary_expression) {}
+void ast_listener_base::exit_dictionary_expression(const DictExpr* dictionary_expression) {}
+void ast_listener_base::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {}
+void ast_listener_base::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {}
+void ast_listener_base::enter_comp_clause(const CompClause* comp_clause) {}
+void ast_listener_base::exit_comp_clause(const CompClause* comp_clause) {}
+void ast_listener_base::enter_for_clause(const ForClause* for_clause) {}
+void ast_listener_base::exit_for_clause(const ForClause* for_clause) {}
+void ast_listener_base::enter_if_clause(const Expression* if_clause) {}
+void ast_listener_base::exit_if_clause(const Expression* if_clause) {}
+void ast_listener_base::enter_map_entry(const Entry* map_entry) {}
+void ast_listener_base::exit_map_entry(const Entry* map_entry) {}
 
-void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listener) {
+void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
   std::vector<message> to_process;
 
   auto add_statements = [&to_process](const RepeatedPtrField<Statement>& statements) {
@@ -1006,4 +1007,5 @@ void ast_walker::walk(const starlark::File* starlark_file, ast_listener& listene
 }
 
 }  // namespace grammar
+}  // namespace starlark
 

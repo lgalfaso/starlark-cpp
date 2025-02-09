@@ -66,7 +66,7 @@ TEST(UcdTest, IsXIdStart) {
   read_code_points(path.c_str(), all_cps, XID_Start);
 
   for (int i = 0; i <= max_unicode; ++i) {
-    EXPECT_EQ(all_cps.contains(i), ucd::is_XID_Start(i));
+    EXPECT_EQ(all_cps.contains(i), starlark::ucd::is_XID_Start(i));
   }
 }
 
@@ -79,7 +79,7 @@ TEST(UcdTest, XIsIdContinue) {
   read_code_points(path.c_str(), all_cps, XID_Continue);
 
   for (int i = 0; i <= max_unicode; ++i) {
-    EXPECT_EQ(all_cps.contains(i), ucd::is_XID_Continue(i));
+    EXPECT_EQ(all_cps.contains(i), starlark::ucd::is_XID_Continue(i));
   }
 }
 

@@ -13,14 +13,16 @@
 #include "grammar/proto/starlark.pb.h"
 
 using google::protobuf::Arena;
-using grammar::log_level;
-using grammar::logger;
-using grammar::parser;
-using grammar::grammar_options;
-using starlark::File;
+using starlark::grammar::log_level;
+using starlark::grammar::logger;
+using starlark::grammar::parser;
+using starlark::grammar::grammar_options;
+using starlark::ast::File;
 using testing::IsEmpty;
 using testing::Not;
 using testing::SizeIs;
+
+namespace {
 
 void checkInvalid(std::string_view program, const grammar_options& opts) {
   logger logging;
@@ -49,4 +51,6 @@ foo(*[1,2,3])
 foo(**{'a': 1, 'b': 2, 'c': 3})
 )starlark", grammar_options{ .allow_varadic_arguments = false, });
 }
+
+}  // namespace
 

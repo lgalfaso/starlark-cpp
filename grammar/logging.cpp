@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+namespace starlark {
 namespace grammar {
 
 namespace {
@@ -49,3 +50,4 @@ std::vector<grammar::log_entry>::size_type logger::size() const {
 }
 
 }  // namespace grammar
+}  // namespace starlark

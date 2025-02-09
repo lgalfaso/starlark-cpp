@@ -10,6 +10,7 @@
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
+namespace starlark {
 namespace unicode {
 
 namespace {
@@ -280,4 +281,5 @@ std::vector<std::uint32_t> to_nfkd_x(const std::vector<std::uint32_t>& input) {
 }
 
 }  // namespace unicode
+}  // namespace starlark
 

@@ -15,12 +15,14 @@
 #include "grammar/quoted.hpp"
 #include "third-party/defer.hpp"
 
-using grammar::log_level;
-using grammar::logger;
-using grammar::parser;
-using starlark::File;
+using starlark::grammar::log_level;
+using starlark::grammar::logger;
+using starlark::grammar::parser;
+using starlark::ast::File;
 using testing::IsEmpty;
 using testing::SizeIs;
+
+namespace {
 
 std::string show_errors(const logger& logging) {
   std::string result;
@@ -31,51 +33,51 @@ std::string show_errors(const logger& logging) {
   return result;
 }
 
-class ast_listener_logger : public grammar::ast_listener {
+class ast_listener_logger : public starlark::grammar::ast_listener {
  public:
   explicit ast_listener_logger(std::string& output) : output(output) {}
 
-  void enter_file(const starlark::File* starlark_file) override {
+  void enter_file(const starlark::ast::File* starlark_file) override {
     output += "ENTER File\n";
   }
 
-  void exit_file(const starlark::File* starlark_file) override {
+  void exit_file(const starlark::ast::File* starlark_file) override {
     output += "EXIT File\n";
   }
 
-  void enter_statement(const starlark::Statement* statement) override {
+  void enter_statement(const starlark::ast::Statement* statement) override {
     output += "ENTER Statement\n";
   }
 
-  void exit_statement(const starlark::Statement* statement) override {
+  void exit_statement(const starlark::ast::Statement* statement) override {
     output += "EXIT Statement\n";
   }
 
-  void enter_def_statement(const starlark::DefStmt* def_statement) override {
-    output += "ENTER Def(" + grammar::quoted(def_statement->function_name().name()) + ")\n";
+  void enter_def_statement(const starlark::ast::DefStmt* def_statement) override {
+    output += "ENTER Def(" + starlark::grammar::quoted(def_statement->function_name().name()) + ")\n";
   }
 
-  void exit_def_statement(const starlark::DefStmt* def_statement) override {
+  void exit_def_statement(const starlark::ast::DefStmt* def_statement) override {
     output += "EXIT Def\n";
   }
 
-  void enter_if_statement(const starlark::IfStmt* if_statement) override {
+  void enter_if_statement(const starlark::ast::IfStmt* if_statement) override {
     output += "ENTER IfStatement\n";
   }
 
-  void exit_if_statement(const starlark::IfStmt* if_statement) override {
+  void exit_if_statement(const starlark::ast::IfStmt* if_statement) override {
     output += "EXIT IfStatement\n";
   }
 
-  void enter_for_statement(const starlark::ForStmt* for_statement) override {
+  void enter_for_statement(const starlark::ast::ForStmt* for_statement) override {
     output += "ENTER ForStatement\n";
   }
 
-  void exit_for_statement(const starlark::ForStmt* for_statement) override {
+  void exit_for_statement(const starlark::ast::ForStmt* for_statement) override {
     output += "EXIT ForStatement\n";
   }
 
-  void enter_return_statement(const starlark::ReturnStmt* return_statement) override {
+  void enter_return_statement(const starlark::ast::ReturnStmt* return_statement) override {
     output += "ENTER ReturnStatement";
     if (return_statement->has_expression()) {
       output += " expression\n";
@@ -84,196 +86,196 @@ class ast_listener_logger : public grammar::ast_listener {
     }
   }
 
-  void exit_return_statement(const starlark::ReturnStmt* return_statement) override {
+  void exit_return_statement(const starlark::ast::ReturnStmt* return_statement) override {
     output += "EXIT ReturnStatement\n";
   }
 
-  void enter_break_statement(const starlark::BreakStmt* break_statement) override {
+  void enter_break_statement(const starlark::ast::BreakStmt* break_statement) override {
     output += "ENTER BreakStatement\n";
   }
 
-  void exit_break_statement(const starlark::BreakStmt* break_statement) override {
+  void exit_break_statement(const starlark::ast::BreakStmt* break_statement) override {
     output += "EXIT BreakStatement\n";
   }
 
-  void enter_continue_statement(const starlark::ContinueStmt* continue_statement) override {
+  void enter_continue_statement(const starlark::ast::ContinueStmt* continue_statement) override {
     output += "ENTER ContinueStatement\n";
   }
 
-  void exit_continue_statement(const starlark::ContinueStmt* continue_statement) override {
+  void exit_continue_statement(const starlark::ast::ContinueStmt* continue_statement) override {
     output += "EXIT ContinueStatement\n";
   }
 
-  void enter_pass_statement(const starlark::PassStmt* pass_statement) override {
+  void enter_pass_statement(const starlark::ast::PassStmt* pass_statement) override {
     output += "ENTER Pass\n";
   }
 
-  void exit_pass_statement(const starlark::PassStmt* pass_statement) override {
+  void exit_pass_statement(const starlark::ast::PassStmt* pass_statement) override {
     output += "EXIT Pass\n";
   }
 
-  void enter_assign_statement(const starlark::AssignStmt* assign_statement) override {
+  void enter_assign_statement(const starlark::ast::AssignStmt* assign_statement) override {
     output += "ENTER AssignStatement\n";
   }
 
-  void exit_assign_statement(const starlark::AssignStmt* assign_statement) override {
+  void exit_assign_statement(const starlark::ast::AssignStmt* assign_statement) override {
     output += "EXIT AssignStatement\n";
   }
 
-  void enter_expression_statement(const starlark::Expression* expression_statement) override {
+  void enter_expression_statement(const starlark::ast::Expression* expression_statement) override {
     output += "ENTER ExpressionStatement\n";
   }
 
-  void exit_expression_statement(const starlark::Expression* expresion_statement) override {
+  void exit_expression_statement(const starlark::ast::Expression* expresion_statement) override {
     output += "EXIT ExpressionStatement\n";
   }
 
-  void enter_load_statement(const starlark::LoadStmt* load_statement) override {
+  void enter_load_statement(const starlark::ast::LoadStmt* load_statement) override {
     output += "ENTER LoadStatement\n";
   }
 
-  void exit_load_statement(const starlark::LoadStmt* load_statement) override {
+  void exit_load_statement(const starlark::ast::LoadStmt* load_statement) override {
     output += "EXIT LoadStatement\n";
   }
 
-  void enter_parameter(const starlark::Parameter* parameter) override {
-    output += "ENTER Parameter(" + grammar::quoted(parameter->identifier().name()) + ")\n";
+  void enter_parameter(const starlark::ast::Parameter* parameter) override {
+    output += "ENTER Parameter(" + starlark::grammar::quoted(parameter->identifier().name()) + ")\n";
   }
 
-  void exit_parameter(const starlark::Parameter* parameter) override {
+  void exit_parameter(const starlark::ast::Parameter* parameter) override {
     output += "EXIT Parameter\n";
   }
 
-  void enter_argument(const starlark::Argument* argument) override {
+  void enter_argument(const starlark::ast::Argument* argument) override {
     output += "ENTER Argument\n";
   }
 
-  void exit_argument(const starlark::Argument* argument) override {
+  void exit_argument(const starlark::ast::Argument* argument) override {
     output += "EXIT Argument\n";
   }
 
-  void enter_then(const google::protobuf::RepeatedPtrField<starlark::Statement>* then) override {
+  void enter_then(const google::protobuf::RepeatedPtrField<starlark::ast::Statement>* then) override {
     output += "ENTER Then\n";
   }
 
-  void exit_then(const google::protobuf::RepeatedPtrField<starlark::Statement>* then) override {
+  void exit_then(const google::protobuf::RepeatedPtrField<starlark::ast::Statement>* then) override {
     output += "EXIT Then\n";
   }
 
-  void enter_elif(const starlark::ElseIf* elif) override {
+  void enter_elif(const starlark::ast::ElseIf* elif) override {
     output += "ENTER Elif\n";
   }
 
-  void exit_elif(const starlark::ElseIf* elif) override {
+  void exit_elif(const starlark::ast::ElseIf* elif) override {
     output += "EXIT Elif\n";
   }
 
-  void enter_else(const google::protobuf::RepeatedPtrField<starlark::Statement>* else_) override {
+  void enter_else(const google::protobuf::RepeatedPtrField<starlark::ast::Statement>* else_) override {
     output += "ENTER Else\n";
   }
 
-  void exit_else(const google::protobuf::RepeatedPtrField<starlark::Statement>* else_) override {
+  void exit_else(const google::protobuf::RepeatedPtrField<starlark::ast::Statement>* else_) override {
     output += "EXIT Else\n";
   }
 
-  void enter_expression(const starlark::Expression* expression) override {
+  void enter_expression(const starlark::ast::Expression* expression) override {
     output += "ENTER Expression\n";
   }
 
-  void exit_expression(const starlark::Expression* expression) override {
+  void exit_expression(const starlark::ast::Expression* expression) override {
     output += "EXIT Expression\n";
   }
 
-  void enter_tuple(const starlark::Tuple* tuple) override {
+  void enter_tuple(const starlark::ast::Tuple* tuple) override {
     output += "ENTER Tuple\n";
   }
 
-  void exit_tuple(const starlark::Tuple* tuple) override {
+  void exit_tuple(const starlark::ast::Tuple* tuple) override {
     output += "EXIT Tuple\n";
   }
 
-  void enter_if_expression(const starlark::IfExpr* if_expression) override {
+  void enter_if_expression(const starlark::ast::IfExpr* if_expression) override {
     output += "ENTER IfExpression\n";
   }
 
-  void exit_if_expression(const starlark::IfExpr* if_expression) override {
+  void exit_if_expression(const starlark::ast::IfExpr* if_expression) override {
     output += "EXIT IfExpression\n";
   }
 
-  void enter_unary_expression(const starlark::UnaryExpr* unary_expression) override {
+  void enter_unary_expression(const starlark::ast::UnaryExpr* unary_expression) override {
     output += "ENTER UnaryExpression\n";
   }
 
-  void exit_unary_expression(const starlark::UnaryExpr* unary_expression) override {
+  void exit_unary_expression(const starlark::ast::UnaryExpr* unary_expression) override {
     output += "EXIT UnaryExpression\n";
   }
 
-  void enter_binary_expression(const starlark::BinaryExpr* binary_expression) override {
+  void enter_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override {
     output += "ENTER BinaryExpression\n";
   }
 
-  void exit_binary_expression(const starlark::BinaryExpr* binary_expression) override {
+  void exit_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override {
     output += "EXIT BinaryExpression\n";
   }
 
-  void enter_lambda_expression(const starlark::LambdaExpr* lambda_expression) override {
+  void enter_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override {
     output += "ENTER LambdaExpression\n";
   }
 
-  void exit_lambda_expression(const starlark::LambdaExpr* lambda_expression) override {
+  void exit_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override {
     output += "EXIT LambdaExpression\n";
   }
 
-  void enter_for_loop_variables(const starlark::Expression* loop_variables) override {
+  void enter_for_loop_variables(const starlark::ast::Expression* loop_variables) override {
     output += "ENTER LoopVariables\n";
   }
 
-  void exit_for_loop_variables(const starlark::Expression* loop_variables) override {
+  void exit_for_loop_variables(const starlark::ast::Expression* loop_variables) override {
     output += "EXIT LoopVariables\n";
   }
 
-  void enter_for_in_expression(const starlark::Expression* expression) override {
+  void enter_for_in_expression(const starlark::ast::Expression* expression) override {
     output += "ENTER ForInExpression\n";
   }
 
-  void exit_for_in_expression(const starlark::Expression* expression) override {
+  void exit_for_in_expression(const starlark::ast::Expression* expression) override {
     output += "EXIT ForInExpression\n";
   }
 
-  void enter_dot_expression(const starlark::DotExpr* dot_expression) override {
+  void enter_dot_expression(const starlark::ast::DotExpr* dot_expression) override {
     output += "ENTER DotExpression\n";
   }
 
-  void exit_dot_expression(const starlark::DotExpr* dot_expression) override {
+  void exit_dot_expression(const starlark::ast::DotExpr* dot_expression) override {
     output += "EXIT DotExpression\n";
   }
 
-  void enter_call_expression(const starlark::CallExpr* call_expression) override {
+  void enter_call_expression(const starlark::ast::CallExpr* call_expression) override {
     output += "ENTER CallExpression\n";
   }
 
-  void exit_call_expression(const starlark::CallExpr* call_expression) override {
+  void exit_call_expression(const starlark::ast::CallExpr* call_expression) override {
     output += "EXIT CallExpression\n";
   }
 
-  void enter_slice_expression(const starlark::SliceExpr* slice_expression) override {
+  void enter_slice_expression(const starlark::ast::SliceExpr* slice_expression) override {
     output += "ENTER SliceExpression\n";
   }
 
-  void exit_slice_expression(const starlark::SliceExpr* slice_expression) override {
+  void exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) override {
     output += "EXIT SliceExpression\n";
   }
 
-  void enter_identifier(const starlark::Identifier* identifier) override {
-    output += "ENTER Identifier(" + grammar::quoted(identifier->name()) + ")\n";
+  void enter_identifier(const starlark::ast::Identifier* identifier) override {
+    output += "ENTER Identifier(" + starlark::grammar::quoted(identifier->name()) + ")\n";
   }
 
-  void exit_identifier(const starlark::Identifier* identifier) override {
+  void exit_identifier(const starlark::ast::Identifier* identifier) override {
     output += "EXIT Identifier\n";
   }
 
   void enter_int_value(const std::string* int_value) override {
-    output += "ENTER IntValue(" + grammar::quoted(*int_value) + ")\n";
+    output += "ENTER IntValue(" + starlark::grammar::quoted(*int_value) + ")\n";
   }
 
   void exit_int_value(const std::string* int_value) override {
@@ -289,7 +291,7 @@ class ast_listener_logger : public grammar::ast_listener {
   }
 
   void enter_string_value(const std::string* string_value) override {
-    output += "ENTER StringValue(" + grammar::quoted(*string_value) + ")\n";
+    output += "ENTER StringValue(" + starlark::grammar::quoted(*string_value) + ")\n";
   }
 
   void exit_string_value(const std::string* string_value) override {
@@ -297,74 +299,74 @@ class ast_listener_logger : public grammar::ast_listener {
   }
 
   void enter_bytes_value(const std::string* bytes_value) override {
-    output += "ENTER BytesValue(" + grammar::quoted(*bytes_value) + ")\n";
+    output += "ENTER BytesValue(" + starlark::grammar::quoted(*bytes_value) + ")\n";
   }
 
   void exit_bytes_value(const std::string* bytes_value) override {
     output += "EXIT BytesValue\n";
   }
 
-  void enter_list_expression(const starlark::ListExpr* list_expression) override {
+  void enter_list_expression(const starlark::ast::ListExpr* list_expression) override {
     output += "ENTER ListExpression\n";
   }
 
-  void exit_list_expression(const starlark::ListExpr* list_expression) override {
+  void exit_list_expression(const starlark::ast::ListExpr* list_expression) override {
     output += "EXIT ListExpression\n";
   }
 
-  void enter_list_comprehension(const starlark::ListComp* list_comprehension) override {
+  void enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) override {
     output += "ENTER ListComprehension\n";
   }
 
-  void exit_list_comprehension(const starlark::ListComp* list_comprehension) override {
+  void exit_list_comprehension(const starlark::ast::ListComp* list_comprehension) override {
     output += "EXIT ListComprehension\n";
   }
 
-  void enter_dictionary_expression(const starlark::DictExpr* dictionary_expression) override {
+  void enter_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {
     output += "ENTER DictionaryExpression\n";
   }
 
-  void exit_dictionary_expression(const starlark::DictExpr* dictionary_expression) override {
+  void exit_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {
     output += "EXIT DictionaryExpression\n";
   }
 
-  void enter_dictionary_comprehension(const starlark::DictComp* dictionary_comprehension) override {
+  void enter_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override {
     output += "ENTER DictionaryComprehension\n";
   }
 
-  void exit_dictionary_comprehension(const starlark::DictComp* dictionary_comprehension) override {
+  void exit_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override {
     output += "EXIT DictionaryComprehension\n";
   }
 
-  void enter_comp_clause(const starlark::CompClause* comp_clause) override {
+  void enter_comp_clause(const starlark::ast::CompClause* comp_clause) override {
     output += "ENTER CompClause\n";
   }
 
-  void exit_comp_clause(const starlark::CompClause* comp_clause) override {
+  void exit_comp_clause(const starlark::ast::CompClause* comp_clause) override {
     output += "EXIT CompClause\n";
   }
 
-  void enter_for_clause(const starlark::ForClause* for_clause) override {
+  void enter_for_clause(const starlark::ast::ForClause* for_clause) override {
     output += "ENTER ForClause\n";
   }
 
-  void exit_for_clause(const starlark::ForClause* for_clause) override {
+  void exit_for_clause(const starlark::ast::ForClause* for_clause) override {
     output += "EXIT ForClause\n";
   }
 
-  void enter_if_clause(const starlark::Expression* if_clause) override {
+  void enter_if_clause(const starlark::ast::Expression* if_clause) override {
     output += "ENTER IfClause\n";
   }
 
-  void exit_if_clause(const starlark::Expression* if_clause) override {
+  void exit_if_clause(const starlark::ast::Expression* if_clause) override {
     output += "EXIT IfClause\n";
   }
 
-  void enter_map_entry(const starlark::Entry* map_entry) override {
+  void enter_map_entry(const starlark::ast::Entry* map_entry) override {
     output += "ENTER MapEntry\n";
   }
 
-  void exit_map_entry(const starlark::Entry* map_entry) override {
+  void exit_map_entry(const starlark::ast::Entry* map_entry) override {
     output += "EXIT MapEntry\n";
   }
 
@@ -400,7 +402,7 @@ TEST(Parser, TestCase) {
 
   logger logging;
   logging.set_level(log_level::ERROR);
-  grammar::grammar_options options = grammar::get_parsing_options(starlark_program);
+  starlark::grammar::grammar_options options = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, options, {}, logging);
   google::protobuf::Arena arena;
   File* starlark_file = star_parser.parse_file(arena);
@@ -408,11 +410,13 @@ TEST(Parser, TestCase) {
 
   std::string ast_walk_output;
   ast_listener_logger listener(ast_walk_output);
-  grammar::ast_walker walker;
+  starlark::grammar::ast_walker walker;
   walker.walk(starlark_file, listener);
   EXPECT_EQ(ast_walk_output, expeted_ast_walking_output) << starlark_file->DebugString();
 
-  grammar::ast_listener_base base;
+  starlark::grammar::ast_listener_base base;
   walker.walk(starlark_file, base);
 }
+
+}  // namespace
 

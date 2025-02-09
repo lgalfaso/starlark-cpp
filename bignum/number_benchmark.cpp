@@ -6,8 +6,9 @@
 
 #include "bignum/number.hpp"
 
-using bignum::number;
+using starlark::bignum::number;
 
+namespace starlark {
 namespace number_benchmark {
 
 // NOLINTNEXTLINE(runtime/references)
@@ -30,6 +31,7 @@ static void BM_Karatsuba(benchmark::State& state) {
 BENCHMARK(BM_Karatsuba)->DenseRange(0, 64, 1)->DenseRange(64, 1024, 16)->DenseRange(1024, 8192, 64);
 
 }  // namespace number_benchmark
+}  // namespace starlark
 
 BENCHMARK_MAIN();
 

@@ -5,6 +5,7 @@
 
 #pragma GCC visibility push(default)
 
+namespace starlark {
 namespace grammar {
 
 struct grammar_options {
@@ -42,6 +43,7 @@ struct grammar_options {
 };
 
 }  // namespace grammar
+}  // namespace starlark
 
 #pragma GCC visibility pop
 

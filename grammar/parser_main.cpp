@@ -12,11 +12,13 @@
 #include "grammar/parser.hpp"
 #include "grammar/proto/starlark.pb.h"
 
-using grammar::log_level;
-using grammar::logger;
-using grammar::parser;
-using grammar::grammar_options;
-using starlark::File;
+using starlark::grammar::log_level;
+using starlark::grammar::logger;
+using starlark::grammar::parser;
+using starlark::grammar::grammar_options;
+using starlark::ast::File;
+
+namespace {
 
 static const std::set<std::string> BUILD_symbols = {
     "depset",          "existing_rule", "existing_rules", "exports_files", "glob",                   "module_name",
@@ -117,6 +119,8 @@ static const std::set<std::string> bzl_symbols = {
     // Random
     "json",
 };
+
+}  // namespace
 
 int main(int argc, char* argv[]) {
   for (int i = 1; i < argc; ++i) {

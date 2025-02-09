@@ -9,8 +9,8 @@
 
 #include "bignum/number.hpp"
 
-using bignum::number;
-using bignum::operator""_number;
+using starlark::bignum::number;
+using starlark::bignum::operator""_number;
 
 namespace {
 
@@ -717,3 +717,4 @@ TEST(Number, ModPow) {
 }
 
 }  // namespace
+

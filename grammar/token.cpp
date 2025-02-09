@@ -4,6 +4,7 @@
 
 #include <string>
 
+namespace starlark {
 namespace grammar {
 
 position position::operator-(std::size_t places) const {
@@ -62,3 +63,4 @@ position token::end() const {
 }
 
 }  // namespace grammar
+}  // namespace starlark

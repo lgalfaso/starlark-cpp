@@ -14,7 +14,7 @@
 
 using google::protobuf::TextFormat;
 using google::protobuf::io::FileInputStream;
-using starlark::File;
+using starlark::ast::File;
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {

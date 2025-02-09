@@ -4,6 +4,7 @@
 
 #include "unicode/ucd_code_points.hpp"
 
+namespace starlark {
 namespace ucd_benchmark {
 
 // NOLINTNEXTLINE(runtime/references)
@@ -40,5 +41,6 @@ static void BM_CCC(benchmark::State& state) {
 BENCHMARK(BM_CCC);
 
 }  // namespace ucd_benchmark
+}  // namespace starlark
 
 BENCHMARK_MAIN();
