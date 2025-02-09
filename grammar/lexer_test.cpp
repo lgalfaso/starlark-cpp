@@ -13,6 +13,7 @@
 #include "grammar/quoted.hpp"
 
 using starlark::bignum::number;
+using starlark::grammar::options;
 using starlark::grammar::lexer;
 using starlark::grammar::logger;
 using starlark::grammar::quoted;
@@ -152,7 +153,7 @@ std::string join(const std::vector<std::string>& parts) {
   return result;
 }
 
-void check(std::string_view input, std::string_view expected, starlark::grammar::grammar_options options) {
+void check(std::string_view input, std::string_view expected, options options) {
   logger logging;
   lexer l(input, options, logging);
   EXPECT_EQ(expected, join(read_tokens(l, input)));
@@ -160,7 +161,7 @@ void check(std::string_view input, std::string_view expected, starlark::grammar:
 }
 
 void check(std::string_view input, std::string_view expected) {
-  check(input, expected, starlark::grammar::grammar_options{});
+  check(input, expected, options{});
 }
 
 void checkComments(std::string_view input, const std::vector<std::string>& expected_comments) {
@@ -422,7 +423,7 @@ foo = "bar")starlark",
   check(R"starlark(
 foo = "\200")starlark",
       "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\200\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13",
-      starlark::grammar::grammar_options{
+      options{
         .escaped_octal_and_hex_char_are_ascii = false,
   });
   checkErrors(R"starlark(

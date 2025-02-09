@@ -237,11 +237,11 @@ const std::set<std::string> predeclared_symbols = {
 
 }  // namespace
 
-parser::parser(std::string_view input, logger& logging) : parser(input, grammar_options{}, {}, logging) {
+parser::parser(std::string_view input, logger& logging) : parser(input, options{}, {}, logging) {
 }
 
-parser::parser(std::string_view input, const grammar_options& options, const std::set<std::string>& bindings, logger& logging)
-    : options(options), lex(input, options, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
+parser::parser(std::string_view input, const options& opts, const std::set<std::string>& bindings, logger& logging)
+    : opts(opts), lex(input, opts, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
   base_bindings.insert(predeclared_symbols.begin(), predeclared_symbols.end());
   lex.next_token();
 }
@@ -409,7 +409,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::parse_statement:
         if (capture(token_type::def)) {
           found_non_load = true;
-          if (!options.allow_function_definitions) {
+          if (!opts.allow_function_definitions) {
             add_error("Function definitions not allowed");
           }
           DefStmt* def_statement = top.statements->Add()->mutable_def_statement();
@@ -702,7 +702,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           case token_type::load: {
             std::set<std::string> symbols;
-            if (found_non_load && options.require_load_statements_first) {
+            if (found_non_load && opts.require_load_statements_first) {
               add_error("`load` statements must appear before other statements");
             }
             if (nested_loops.size() != 1) {
@@ -735,7 +735,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 add_error("Expected STRING");
                 break;
               }
-              if (!options.allow_load_private_symbols &&
+              if (!opts.allow_load_private_symbols &&
                   lex.current_token().string_value().starts_with("_")) {
                 add_error(std::string{"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
               }
@@ -748,12 +748,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               if (!symbols.insert(load_param->local_name().nfkc_name()).second) {
                 add_error("`load` statement defines '" + load_param->local_name().name() + "' more than once");
               }
-              if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name()) && !options.allow_top_level_rebinding) {
+              if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name()) && !opts.allow_top_level_rebinding) {
                 add_error("`load` statement redefines previously defined value '" + load_param->local_name().name() + "'");
               }
               // The spec does not specify whether it is an error to bind to the file block multiple times.
               // We are taking the possition that if `allow_top_level_rebinding` is `false`, then this is not allowed.
-              if (!parser_blocks.back().identifiers.insert(load_param->local_name().nfkc_name()).second && !options.allow_top_level_rebinding) {
+              if (!parser_blocks.back().identifiers.insert(load_param->local_name().nfkc_name()).second && !opts.allow_top_level_rebinding) {
                 add_error("Multiple bindings for the top-level load symbol '" + load_param->local_name().name() + "'");
               }
               lex.next_token();
@@ -1466,7 +1466,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         // - At most one *args
         // - At most one **kwargs
         if (capture(token_type::star)) {
-          if (!options.allow_varadic_arguments) {
+          if (!opts.allow_varadic_arguments) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
           }
@@ -1483,7 +1483,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .test = top.argument->mutable_star_argument(),
           });
         } else if (capture(token_type::star_star)) {
-          if (!options.allow_varadic_arguments) {
+          if (!opts.allow_varadic_arguments) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
           }
@@ -1539,7 +1539,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::parse_lambda:
-        if (!options.allow_function_definitions) {
+        if (!opts.allow_function_definitions) {
           add_error("Function definitions not allowed");
         }
         expect(token_type::lambda);
@@ -1745,7 +1745,7 @@ void parser::bind(const Identifier& identifier) {
   // This leaves to interpretation whether a `def` can be rebound. The rule followed is that `def` and variables should
   // be consistent, follow the same rules, and be handled equally.
   if (is_top_level_block()) {
-    if (!parser_blocks[parser_blocks.size() - 2].identifiers.insert(identifier.nfkc_name()).second && !options.allow_top_level_rebinding) {
+    if (!parser_blocks[parser_blocks.size() - 2].identifiers.insert(identifier.nfkc_name()).second && !opts.allow_top_level_rebinding) {
       add_error("Multiple bindings for the top-level symbol '" + identifier.name() + "'");
     }
   } else {

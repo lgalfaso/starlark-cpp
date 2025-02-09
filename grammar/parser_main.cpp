@@ -15,7 +15,7 @@
 using starlark::grammar::log_level;
 using starlark::grammar::logger;
 using starlark::grammar::parser;
-using starlark::grammar::grammar_options;
+using starlark::grammar::options;
 using starlark::ast::File;
 
 namespace {
@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
       extra_symbols = bzl_symbols;
     }
     parser star_parser(starlark_program,
-                       grammar_options{
+                       options{
                            .escaped_octal_and_hex_char_are_ascii = false,
                            .require_load_statements_first = !is_build_or_workspace,
                            .allow_varadic_arguments = !is_build_or_workspace,

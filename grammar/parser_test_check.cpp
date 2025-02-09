@@ -68,7 +68,7 @@ TEST(Parser, TestCase) {
 
   logger logging;
   logging.set_level(log_level::ERROR);
-  starlark::grammar::grammar_options options = starlark::grammar::get_parsing_options(starlark_program);
+  starlark::grammar::options options = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, options, {}, logging);
   google::protobuf::Arena arena;
   File* actual_starlark_file = star_parser.parse_file(arena);
