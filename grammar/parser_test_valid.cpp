@@ -26,15 +26,6 @@ using testing::SizeIs;
 
 namespace {
 
-std::string describe_diff(const Message& actual, const Message& expected) {
-  MessageDifferencer differencer;
-  std::string diff;
-
-  differencer.ReportDifferencesToString(&diff);
-  differencer.Compare(expected, actual);
-  return "with the difference:\n" + diff;
-}
-
 std::string show_errors(const logger& logging) {
   std::string result;
 
