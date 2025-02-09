@@ -809,6 +809,42 @@ number& number::pow_mod(const number& power, const number& modulus) {
   return *this;
 }
 
+bignum::number parse_number(std::string_view input, const char** end_ptr) {
+  int base;
+  std::size_t pos = 0;
+  if (input.starts_with("0x")) {
+    pos += 2;
+    base = 16;
+  } else if (input.starts_with("0")) {
+    pos += 1;
+    base = 8;
+  } else {
+    base = 10;
+  }
+  bignum::number result;
+  for (; pos < input.length(); ++pos) {
+    int c = input[pos];
+    if ('0' <= c && c <= '9') {
+      c -= '0';
+    } else if ('a' <= c && c <= 'z') {
+      c -= 'a' - 10;
+    } else if ('A' <= c && c <= 'Z') {
+      c -= 'A' - 10;
+    } else {
+      break;
+    }
+    if (c >= base) {
+      break;
+    }
+    result *= bignum::number(base);
+    result += bignum::number(c);
+  }
+  if (end_ptr != nullptr) {
+    *end_ptr = &input[pos];
+  }
+  return result;
+}
+
 }  // namespace bignum
 }  // namespace starlark
 

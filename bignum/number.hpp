@@ -153,6 +153,8 @@ inline number operator""_number(const char* input, std::size_t size) {
   return number::parse_hex(std::string_view(input, size));
 }
 
+bignum::number parse_number(std::string_view input, const char** end_ptr);
+
 }  // namespace bignum
 }  // namespace starlark
 
