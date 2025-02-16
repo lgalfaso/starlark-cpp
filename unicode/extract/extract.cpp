@@ -12,6 +12,7 @@
 
 #include "unicode/extract/extract.hpp"
 
+namespace starlark {
 namespace ucd {
 
 void read_raw_code_points(const char* file,
@@ -92,9 +93,7 @@ void read_all_code_points(const char* file,
   }
 }
 
-void read_unicode_data(const char* file,
-    std::map<std::uint32_t,
-             std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_record>& unicode_data) {
   FILE* fp = fopen(file, "r");
   char* line = nullptr;
   size_t len = 0;
@@ -104,31 +103,50 @@ void read_unicode_data(const char* file,
   }
 
   int previous_code = 0;
+  char general_category[100];
   while ((getline(&line, &len, fp)) != -1) {
     if (len > 0) {
       char* sline = line;
       int code, length;
-      int count = std::sscanf(sline, "%x%n", &code, &length);
+
+      // Read the code point.
+      int count = std::sscanf(sline, "%x;%n", &code, &length);
       if (count != 1) {
         exit(1);
       }
       sline += length;
-      for (int i = 0; i < 3; sline++) {
+
+      // Skip over the Character name
+      for (int i = 0; i < 1; sline++) {
         if (sline[0] == ';') {
           ++i;
         }
       }
+
+      // Read the general category.
+      count = std::sscanf(sline, "%99[0-9a-zA-Z_];%n", general_category, &length);
+      if (count != 1) {
+        exit(1);
+      }
+      std::string gc(general_category, length - 1);
+      sline += length;
+
+      // Canonical combining classes
       std::uint32_t ccc;
-      count = std::sscanf(sline, "%d%n", &ccc, &length);
+      count = std::sscanf(sline, "%d;%n", &ccc, &length);
       if (count != 1) {
         exit(1);
       }
       sline += length;
-      for (int i = 0; i < 2; sline++) {
+
+      // Skip over Bidirectional category
+      for (int i = 0; i < 1; sline++) {
         if (sline[0] == ';') {
           ++i;
         }
       }
+
+      // Read Character decomposition mapping.
       bool canonical = true;
       if (sline[0] == '<') {
         canonical = false;
@@ -146,15 +164,29 @@ void read_unicode_data(const char* file,
         decomposition.push_back(decomposition_code);
         sline += length;
       }
+
+      // Ignore the rest of the fields.
+
+
       if (std::strstr(line, "Last>") != nullptr) {
         if (decomposition.size() > 0) {
           exit(1);
         }
         for (int i = previous_code + 1; i < code; ++i) {
-          unicode_data.emplace(i, std::make_tuple(ccc, canonical, std::move(decomposition)));
+          unicode_data.emplace(i, unicode_data_record{
+                  .canonical_combining_class = ccc,
+                  .canonical_character_decomposition_mapping = canonical,
+                  .character_decomposition_mapping = decomposition,
+                  .general_category = gc,
+              });
         }
       }
-      unicode_data.emplace(code, std::make_tuple(ccc, canonical, std::move(decomposition)));
+      unicode_data.emplace(code, unicode_data_record{
+              .canonical_combining_class = ccc,
+              .canonical_character_decomposition_mapping = canonical,
+              .character_decomposition_mapping = decomposition,
+              .general_category = gc,
+          });
       previous_code = code;
     }
   }
@@ -166,3 +198,4 @@ void read_unicode_data(const char* file,
 }
 
 }  // namespace ucd
+}  // namespace starlark

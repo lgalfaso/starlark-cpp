@@ -34,6 +34,8 @@ namespace ucd {
 
 bool is_assigned(std::uint32_t code_point);
 
+bool is_printable(std::uint32_t code_point);
+
 bool is_compatibility_decomposition(std::uint32_t code_point);
 
 const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point);
@@ -190,13 +192,12 @@ void print_code_points(
   }
 }
 
-void print_decomposition(FILE* output, const std::map<std::uint32_t,
-               std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+void print_decomposition(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
   FWRITE("const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point) {\n", output);
   FWRITE("  static const std::vector<std::uint32_t> default_value;\n", output);
   std::map<std::uint32_t, std::vector<std::uint32_t>> entries;
   for (const auto& entry : unicode_data) {
-    const auto& dc = std::get<2>(entry.second);
+    const auto& dc = entry.second.character_decomposition_mapping;
     if (dc.size() != 0) {
       entries[entry.first] = dc;
     }
@@ -222,13 +223,12 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t,
   FWRITE("}\n\n", output);
 }
 
-void print_ccc(FILE* output, const std::map<std::uint32_t,
-               std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+void print_ccc(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
   FWRITE("int ccc(std::uint32_t code_point) {\n", output);
   std::map<std::uint32_t, int> entries;
   for (const auto& entry : unicode_data) {
-    if (std::get<0>(entry.second) != 0) {
-      entries[entry.first] = std::get<0>(entry.second);
+    if (entry.second.canonical_combining_class != 0) {
+      entries[entry.first] = entry.second.canonical_combining_class;
     }
   }
   FWRITE("  static const cnt::flat_map<std::uint32_t, int> all_ccc = {", output);
@@ -248,14 +248,13 @@ void print_ccc(FILE* output, const std::map<std::uint32_t,
   FWRITE("}\n\n", output);
 }
 
-void print_canonical_composition(FILE* output, const std::map<std::uint32_t,
-               std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data,
+void print_canonical_composition(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
                const std::set<std::uint32_t>& comp_exclusions) {
   FWRITE("std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs) {\n", output);
   std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> entries;
   for (const auto& entry : unicode_data) {
-    if (std::get<0>(entry.second) == 0 && std::get<1>(entry.second) && !comp_exclusions.contains(entry.first)) {
-      auto& cc = std::get<2>(entry.second);
+    if (entry.second.canonical_combining_class == 0 && entry.second.canonical_character_decomposition_mapping && !comp_exclusions.contains(entry.first)) {
+      auto& cc = entry.second.character_decomposition_mapping;
       if (cc.size() == 0 || cc.size() == 1) {
         continue;
       }
@@ -263,7 +262,7 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t,
         exit(1);
       }
       // If the decomposition begins with a non-starter, then this is not a candidate for composition.
-      if (std::get<0>(unicode_data.at(cc[0])) != 0) {
+      if (unicode_data.at(cc[0]).canonical_combining_class != 0) {
         continue;
       }
       entries[std::make_pair(cc[0], cc[1])] = entry.first;
@@ -318,13 +317,25 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::map<s
 }
 
 std::set<std::pair<std::uint32_t, std::uint32_t>> compatibility_set(
-    const std::map<std::uint32_t, std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data) {
+    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
   std::set<std::uint32_t> keys;
   for (const auto& entry : unicode_data) {
-    if (!std::get<1>(entry.second)) {
+    if (!entry.second.canonical_character_decomposition_mapping) {
       keys.insert(entry.first);
     }
   }
+  return create_ranges(keys);
+}
+
+std::set<std::pair<std::uint32_t, std::uint32_t>> printable_set(
+    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<std::uint32_t> keys;
+  for (const auto& entry : unicode_data) {
+    if (entry.second.general_category[0] != 'C' && entry.second.general_category[0] != 'Z') {
+      keys.insert(entry.first);
+    }
+  }
+  keys.insert(0x20);  // The space character is considered a printable character.
   return create_ranges(keys);
 }
 
@@ -365,13 +376,14 @@ void write_impl(const char* derived_core_properties_file,
   fprintf(cc_output, CPP_HEADER, include_h);
 
   {
-    std::map<std::uint32_t, std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>> unicode_data;
-    ucd::read_unicode_data(unicode_data_file, unicode_data);
+    std::map<std::uint32_t, starlark::ucd::unicode_data_record> unicode_data;
+    starlark::ucd::read_unicode_data(unicode_data_file, unicode_data);
     std::set<std::uint32_t> comp_exclusions;
-    ucd::read_raw_code_points(composition_exclusions, comp_exclusions);
+    starlark::ucd::read_raw_code_points(composition_exclusions, comp_exclusions);
 
     print_code_points(cc_output, create_ranges(unicode_data), "is_assigned");
     print_code_points(cc_output, compatibility_set(unicode_data), "is_compatibility_decomposition");
+    print_code_points(cc_output, printable_set(unicode_data), "is_printable");
     print_decomposition(cc_output, unicode_data);
     print_ccc(cc_output, unicode_data);
     print_canonical_composition(cc_output, unicode_data, comp_exclusions);
@@ -380,11 +392,11 @@ void write_impl(const char* derived_core_properties_file,
     std::map<std::string,
              std::set<std::pair<std::uint32_t,
                                   std::uint32_t>>> binary_properties;
-    ucd::read_all_code_points(derived_normalization_props,
+    starlark::ucd::read_all_code_points(derived_normalization_props,
                               binary_properties,
                               normalization_properties);
 
-    ucd::read_all_code_points(derived_core_properties_file,
+    starlark::ucd::read_all_code_points(derived_core_properties_file,
                               binary_properties,
                               binary_unicode_properties);
 
