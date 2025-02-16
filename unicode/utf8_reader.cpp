@@ -87,9 +87,6 @@ std::uint32_t utf8_reader::peek_code_point() const {
       if (input[input_pos] == '\xe0' && ((unsigned char)input[input_pos + 1]) < 0xa0) {
         return replacement_character;
       }
-      if (input[input_pos] == '\xed' && ((unsigned char)input[input_pos + 1]) >= 0xa0) {
-        return replacement_character;
-      }
       candidate = (static_cast<std::uint32_t>(input[input_pos    ]) & 0x0f) << 12 |
                   (static_cast<std::uint32_t>(input[input_pos + 1]) & 0x3f) << 6 |
                   (static_cast<std::uint32_t>(input[input_pos + 2]) & 0x3f);
@@ -110,7 +107,7 @@ std::uint32_t utf8_reader::peek_code_point() const {
       candidate = replacement_character;
       break;
   }
-  if ((strict && !ucd::is_assigned(candidate)) || is_surrogate(candidate) || !is_in_range(candidate)) {
+  if ((strict && (!ucd::is_assigned(candidate) || is_surrogate(candidate))) || !is_in_range(candidate)) {
     candidate = replacement_character;
   }
   return candidate;

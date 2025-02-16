@@ -78,8 +78,8 @@ TEST(SourceTest, OverlongEncoding) {
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xef\xbf\xbf", true).peek_code_point());
 }
 
-TEST(SourceTest, SurrogatesArea) {
-  // The range 0xD800-0xDFFF is invalid.
+TEST(SourceTest, SurrogatesAreaStrict) {
+  // The range 0xD800-0xDFFF is invalid in strict mode and valid otherwise.
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa0\x80", true).peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa0\xbf", true).peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xa1\x80", true).peek_code_point());
@@ -144,6 +144,73 @@ TEST(SourceTest, SurrogatesArea) {
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbe\xbf", true).peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbf\x80", true).peek_code_point());
   EXPECT_EQ(utf8_reader::replacement_character, utf8_reader("\xed\xbf\xbf", true).peek_code_point());
+}
+
+TEST(SourceTest, SurrogatesAreaNonStrict) {
+  EXPECT_EQ(0xD800, utf8_reader("\xed\xa0\x80", false).peek_code_point());
+  EXPECT_EQ(0xD83F, utf8_reader("\xed\xa0\xbf", false).peek_code_point());
+  EXPECT_EQ(0xD840, utf8_reader("\xed\xa1\x80", false).peek_code_point());
+  EXPECT_EQ(0xD87F, utf8_reader("\xed\xa1\xbf", false).peek_code_point());
+  EXPECT_EQ(0xD880, utf8_reader("\xed\xa2\x80", false).peek_code_point());
+  EXPECT_EQ(0xD8BF, utf8_reader("\xed\xa2\xbf", false).peek_code_point());
+  EXPECT_EQ(0xD8C0, utf8_reader("\xed\xa3\x80", false).peek_code_point());
+  EXPECT_EQ(0xD8FF, utf8_reader("\xed\xa3\xbf", false).peek_code_point());
+  EXPECT_EQ(0xD900, utf8_reader("\xed\xa4\x80", false).peek_code_point());
+  EXPECT_EQ(0xD93F, utf8_reader("\xed\xa4\xbf", false).peek_code_point());
+  EXPECT_EQ(0xD940, utf8_reader("\xed\xa5\x80", false).peek_code_point());
+  EXPECT_EQ(0xD97F, utf8_reader("\xed\xa5\xbf", false).peek_code_point());
+  EXPECT_EQ(0xD980, utf8_reader("\xed\xa6\x80", false).peek_code_point());
+  EXPECT_EQ(0xD9BF, utf8_reader("\xed\xa6\xbf", false).peek_code_point());
+  EXPECT_EQ(0xD9C0, utf8_reader("\xed\xa7\x80", false).peek_code_point());
+  EXPECT_EQ(0xD9FF, utf8_reader("\xed\xa7\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDA00, utf8_reader("\xed\xa8\x80", false).peek_code_point());
+  EXPECT_EQ(0xDA3F, utf8_reader("\xed\xa8\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDA40, utf8_reader("\xed\xa9\x80", false).peek_code_point());
+  EXPECT_EQ(0xDA7F, utf8_reader("\xed\xa9\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDA80, utf8_reader("\xed\xaa\x80", false).peek_code_point());
+  EXPECT_EQ(0xDABF, utf8_reader("\xed\xaa\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDAC0, utf8_reader("\xed\xab\x80", false).peek_code_point());
+  EXPECT_EQ(0xDAFF, utf8_reader("\xed\xab\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDB00, utf8_reader("\xed\xac\x80", false).peek_code_point());
+  EXPECT_EQ(0xDB3F, utf8_reader("\xed\xac\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDB40, utf8_reader("\xed\xad\x80", false).peek_code_point());
+  EXPECT_EQ(0xDB7F, utf8_reader("\xed\xad\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDB80, utf8_reader("\xed\xae\x80", false).peek_code_point());
+  EXPECT_EQ(0xDBBF, utf8_reader("\xed\xae\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDBC0, utf8_reader("\xed\xaf\x80", false).peek_code_point());
+  EXPECT_EQ(0xDBFF, utf8_reader("\xed\xaf\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDC00, utf8_reader("\xed\xb0\x80", false).peek_code_point());
+  EXPECT_EQ(0xDC3F, utf8_reader("\xed\xb0\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDC40, utf8_reader("\xed\xb1\x80", false).peek_code_point());
+  EXPECT_EQ(0xDC7F, utf8_reader("\xed\xb1\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDC80, utf8_reader("\xed\xb2\x80", false).peek_code_point());
+  EXPECT_EQ(0xDCBF, utf8_reader("\xed\xb2\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDCC0, utf8_reader("\xed\xb3\x80", false).peek_code_point());
+  EXPECT_EQ(0xDCFF, utf8_reader("\xed\xb3\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDD00, utf8_reader("\xed\xb4\x80", false).peek_code_point());
+  EXPECT_EQ(0xDD3F, utf8_reader("\xed\xb4\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDD40, utf8_reader("\xed\xb5\x80", false).peek_code_point());
+  EXPECT_EQ(0xDD7F, utf8_reader("\xed\xb5\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDD80, utf8_reader("\xed\xb6\x80", false).peek_code_point());
+  EXPECT_EQ(0xDDBF, utf8_reader("\xed\xb6\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDDC0, utf8_reader("\xed\xb7\x80", false).peek_code_point());
+  EXPECT_EQ(0xDDFF, utf8_reader("\xed\xb7\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDE00, utf8_reader("\xed\xb8\x80", false).peek_code_point());
+  EXPECT_EQ(0xDE3F, utf8_reader("\xed\xb8\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDE40, utf8_reader("\xed\xb9\x80", false).peek_code_point());
+  EXPECT_EQ(0xDE7F, utf8_reader("\xed\xb9\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDE80, utf8_reader("\xed\xba\x80", false).peek_code_point());
+  EXPECT_EQ(0xDEBF, utf8_reader("\xed\xba\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDEC0, utf8_reader("\xed\xbb\x80", false).peek_code_point());
+  EXPECT_EQ(0xDEFF, utf8_reader("\xed\xbb\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDF00, utf8_reader("\xed\xbc\x80", false).peek_code_point());
+  EXPECT_EQ(0xDF3F, utf8_reader("\xed\xbc\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDF40, utf8_reader("\xed\xbd\x80", false).peek_code_point());
+  EXPECT_EQ(0xDF7F, utf8_reader("\xed\xbd\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDF80, utf8_reader("\xed\xbe\x80", false).peek_code_point());
+  EXPECT_EQ(0xDFBF, utf8_reader("\xed\xbe\xbf", false).peek_code_point());
+  EXPECT_EQ(0xDFC0, utf8_reader("\xed\xbf\x80", false).peek_code_point());
+  EXPECT_EQ(0xDFFF, utf8_reader("\xed\xbf\xbf", false).peek_code_point());
 }
 
 TEST(SourceTest, Skip) {
