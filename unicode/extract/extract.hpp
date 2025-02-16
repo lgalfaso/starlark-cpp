@@ -7,7 +7,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -30,17 +29,13 @@ struct unicode_data_record {
 };
 
 /*
- * The output parameter `unicode_data` maps the unicode code point to a tuple with the following information:
+ * The output parameter `unicode_data` maps the unicode code point to a struct with the following information:
  * - The Canonical combining class
  * - Whether the Character decomposition mapping is canonical
  * - The Character decomposition mapping
  * - The 
  */
 void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_record>& unicode_data);
-
-void read_unicode_data(const char* file,
-    std::map<std::uint32_t, 
-             std::tuple<std::uint32_t, bool, std::vector<std::uint32_t>>>& unicode_data);
 
 }  // namespace ucd
 }  // namespace starlark
