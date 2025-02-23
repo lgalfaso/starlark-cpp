@@ -5,6 +5,8 @@ module(
     version = "0.0.1",
 )
 
+bazel_dep(name = "rules_cc", version = "0.1.1")
+
 # This is not used directly, but bumping to a new version that does not produce as many warnings.
 bazel_dep(name = "abseil-cpp", version = "20240722.1")
 bazel_dep(name = "google_benchmark", version = "1.9.1")

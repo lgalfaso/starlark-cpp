@@ -2,11 +2,13 @@
 
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 load("//grammar:starlark_proto_encoder.bzl", "starlark_proto_encoder")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test", "cc_binary")
 
 cc_library(
     name = "ast_listener",
     srcs = ["ast_listener.cpp"],
     hdrs = ["ast_listener.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//grammar/proto:starlark_cc_proto",
     ],
@@ -113,6 +115,7 @@ cc_library(
     name = "parser",
     srcs = ["parser.cpp"],
     hdrs = ["parser.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":lexer",
         ":logging",
@@ -245,6 +248,7 @@ cc_fuzz_test(
 cc_library(
     name = "options",
     hdrs = ["options.hpp"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(

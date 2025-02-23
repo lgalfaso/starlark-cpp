@@ -2,6 +2,7 @@
 
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 load("//unicode/extract:extract.bzl", "extract_ucd")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test", "cc_binary")
 
 cc_library(
     name = "encode",
