@@ -65,3 +65,13 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "starlark_numeric",
+    srcs = ["starlark_numeric.cpp"],
+    hdrs = ["starlark_numeric.hpp"],
+    deps = [
+        ":starlark_object",
+        "//bignum:number",
+    ],
+)
+
