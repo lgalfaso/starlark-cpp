@@ -3,11 +3,25 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
+    name = "siphash",
+    srcs = ["siphash.cpp"],
+    hdrs = ["siphash.hpp"],
+)
+
+cc_test(
+    name = "siphash_test",
+    size = "small",
+    srcs = ["siphash_test.cpp"],
+    deps = [
+        ":siphash",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "starlark_object",
     srcs = ["starlark_object.cpp"],
     hdrs = ["starlark_object.hpp"],
-    deps = [
-    ],
 )
 
 cc_library(
