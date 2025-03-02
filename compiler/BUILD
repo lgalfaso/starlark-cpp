@@ -11,6 +11,27 @@ cc_library(
 )
 
 cc_library(
+    name = "starlark_bool",
+    srcs = ["starlark_bool.cpp"],
+    hdrs = ["starlark_bool.hpp"],
+    deps = [
+        ":starlark_object",
+    ],
+)
+
+cc_test(
+    name = "starlark_bool_test",
+    size = "small",
+    srcs = ["starlark_bool_test.cpp"],
+    deps = [
+        ":starlark_bool",
+        ":starlark_none",
+        ":objects",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "starlark_none",
     srcs = ["starlark_none.cpp"],
     hdrs = ["starlark_none.hpp"],
@@ -24,6 +45,7 @@ cc_test(
     size = "small",
     srcs = ["starlark_none_test.cpp"],
     deps = [
+        ":starlark_bool",
         ":starlark_none",
         "@googletest//:gtest_main",
     ],
