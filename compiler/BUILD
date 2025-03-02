@@ -3,6 +3,11 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
+    name = "hash",
+    hdrs = ["hash.hpp"],
+)
+
+cc_library(
     name = "siphash",
     srcs = ["siphash.cpp"],
     hdrs = ["siphash.hpp"],
@@ -39,8 +44,8 @@ cc_test(
     srcs = ["starlark_bool_test.cpp"],
     deps = [
         ":starlark_bool",
+        ":starlark_integer",
         ":starlark_none",
-        ":objects",
         "@googletest//:gtest_main",
     ],
 )
@@ -60,6 +65,7 @@ cc_test(
     srcs = ["starlark_none_test.cpp"],
     deps = [
         ":starlark_bool",
+        ":starlark_integer",
         ":starlark_none",
         "@googletest//:gtest_main",
     ],
@@ -72,6 +78,31 @@ cc_library(
     deps = [
         ":starlark_object",
         "//bignum:number",
+    ],
+)
+
+cc_library(
+    name = "starlark_integer",
+    srcs = ["starlark_integer.cpp"],
+    hdrs = ["starlark_integer.hpp"],
+    deps = [
+        ":hash",
+        ":starlark_numeric",
+        ":starlark_object",
+        "//bignum:number",
+    ],
+)
+
+cc_test(
+    name = "starlark_integer_test",
+    size = "small",
+    srcs = ["starlark_integer_test.cpp"],
+    deps = [
+        ":objects",
+        ":starlark_bool",
+        ":starlark_integer",
+        ":starlark_none",
+        "@googletest//:gtest_main",
     ],
 )
 

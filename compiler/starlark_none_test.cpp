@@ -7,9 +7,11 @@
 #include <string>
 
 #include "compiler/starlark_bool.hpp"
+#include "compiler/starlark_integer.hpp"
 #include "compiler/starlark_none.hpp"
 
 using starlark::compiler::starlark_bool;
+using starlark::compiler::starlark_integer;
 using starlark::compiler::starlark_none;
 
 namespace {
@@ -29,6 +31,7 @@ TEST(StarlarkNone, Truthy) {
 TEST(StarlarkNone, Equals) {
   EXPECT_TRUE(starlark_none().equals(starlark_none()));
   EXPECT_FALSE(starlark_none().equals(starlark_bool(false)));
+  EXPECT_FALSE(starlark_none().equals(starlark_integer(0)));
 }
 
 TEST(StarlarkNone, Hash) {
