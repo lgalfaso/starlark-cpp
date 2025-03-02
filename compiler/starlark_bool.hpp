@@ -1,3 +1,5 @@
+// Copyright 2025 Lucas Mirelmann
+
 #ifndef COMPILER_STARLARK_BOOL_HPP_
 #define COMPILER_STARLARK_BOOL_HPP_
 
