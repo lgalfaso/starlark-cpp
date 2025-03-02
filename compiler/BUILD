@@ -10,3 +10,22 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "starlark_none",
+    srcs = ["starlark_none.cpp"],
+    hdrs = ["starlark_none.hpp"],
+    deps = [
+        ":object",
+    ],
+)
+
+cc_test(
+    name = "starlark_none_test",
+    size = "small",
+    srcs = ["starlark_none_test.cpp"],
+    deps = [
+        ":starlark_none",
+        "@googletest//:gtest_main",
+    ],
+)
+
