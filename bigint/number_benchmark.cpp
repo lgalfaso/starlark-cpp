@@ -4,9 +4,9 @@
 
 #include "benchmark/benchmark.h"
 
-#include "bignum/number.hpp"
+#include "bigint/number.hpp"
 
-using starlark::bignum::number;
+using starlark::bigint::number;
 
 namespace starlark {
 namespace number_benchmark {

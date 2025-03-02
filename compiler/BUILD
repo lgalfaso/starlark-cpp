@@ -77,7 +77,7 @@ cc_library(
     hdrs = ["starlark_numeric.hpp"],
     deps = [
         ":starlark_object",
-        "//bignum:number",
+        "//bigint:number",
     ],
 )
 
@@ -89,7 +89,7 @@ cc_library(
         ":hash",
         ":starlark_numeric",
         ":starlark_object",
-        "//bignum:number",
+        "//bigint:number",
     ],
 )
 

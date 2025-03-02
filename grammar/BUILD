@@ -283,7 +283,7 @@ cc_library(
     hdrs = ["token.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        "//bignum:number",
+        "//bigint:number",
     ],
 )
 

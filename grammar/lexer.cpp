@@ -17,7 +17,7 @@
 #include "unicode/utf8_reader.hpp"
 
 using starlark::unicode::utf8_encode_code_point;
-using starlark::bignum::parse_number;
+using starlark::bigint::parse_number;
 
 namespace starlark {
 namespace grammar {
@@ -360,7 +360,7 @@ void lexer::read_numeric() {
     current = token{token_type::float_, start, get_position(), double_value};
   } else {
     const char* end;
-    bignum::number int_value = parse_number(value, &end);
+    starlark::bigint::number int_value = parse_number(value, &end);
     if (end != &value.back() + 1) {
       add_error("Unable to parse numeric value", start);
       current = token{token_type::illegal, start, get_position(), value};

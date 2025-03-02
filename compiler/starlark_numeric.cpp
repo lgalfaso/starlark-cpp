@@ -12,11 +12,11 @@ namespace compiler {
 
 namespace {
 
-bool equals_fb(double lhs, const starlark::bignum::number& rhs) {
+bool equals_fb(double lhs, const starlark::bigint::number& rhs) {
   if (!std::isfinite(lhs)) {
     return false;
   }
-  if (rhs == starlark::bignum::number::zero) {
+  if (rhs == starlark::bigint::number::zero) {
     return lhs == 0;
   }
   if (lhs == 0) {
@@ -48,8 +48,8 @@ bool equals_fb(double lhs, const starlark::bignum::number& rhs) {
   return mantissa == rhs.bits(e, 64);
 }
 
-bool equals_ib(int64_t lhs, const starlark::bignum::number& rhs) {
-  if (rhs == starlark::bignum::number::zero) {
+bool equals_ib(int64_t lhs, const starlark::bigint::number& rhs) {
+  if (rhs == starlark::bigint::number::zero) {
     return lhs == 0;
   }
   if (lhs == 0) {
@@ -71,10 +71,10 @@ bool equals_ib(int64_t lhs, const starlark::bignum::number& rhs) {
 
 }  // namespace
 
-starlark::bignum::number from_int64(int64_t value) {
-  starlark::bignum::number result(value);
+starlark::bigint::number from_int64(int64_t value) {
+  starlark::bigint::number result(value);
   if (value < 0) {
-    result -= starlark::bignum::number::one << 64;
+    result -= starlark::bigint::number::one << 64;
   }
   return result;
 }
@@ -118,8 +118,8 @@ int64_t starlark_numeric::as_int64() const {
   return 0;
 }
 
-const starlark::bignum::number& starlark_numeric::as_bigint() const {
-  return starlark::bignum::number::zero;
+const starlark::bigint::number& starlark_numeric::as_bigint() const {
+  return starlark::bigint::number::zero;
 }
 
 double starlark_numeric::as_float() const {

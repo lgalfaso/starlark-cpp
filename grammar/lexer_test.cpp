@@ -12,7 +12,7 @@
 #include "grammar/options.hpp"
 #include "grammar/quoted.hpp"
 
-using starlark::bignum::number;
+using starlark::bigint::number;
 using starlark::grammar::options;
 using starlark::grammar::lexer;
 using starlark::grammar::logger;

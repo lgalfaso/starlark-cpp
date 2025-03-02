@@ -17,7 +17,7 @@ position position::operator-(std::size_t places) const {
 
 token::token(token_type tok_type, position tok_start, position tok_end) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end) {}
 
-token::token(token_type tok_type, position tok_start, position tok_end, const bignum::number& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, position tok_start, position tok_end, const bigint::number& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
 token::token(token_type tok_type, position tok_start, position tok_end, double value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
@@ -31,11 +31,11 @@ void token::set_type(token_type new_type) {
   tok_type = new_type;
 }
 
-const bignum::number& token::int_value() const {
-  if (std::holds_alternative<bignum::number>(value)) {
-    return std::get<bignum::number>(value);
+const bigint::number& token::int_value() const {
+  if (std::holds_alternative<bigint::number>(value)) {
+    return std::get<bigint::number>(value);
   }
-  return bignum::number::zero;
+  return bigint::number::zero;
 }
 
 double token::double_value() const {

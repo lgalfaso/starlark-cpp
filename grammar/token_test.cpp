@@ -6,7 +6,7 @@
 
 #include "grammar/token.hpp"
 
-using starlark::bignum::number;
+using starlark::bigint::number;
 using starlark::grammar::token;
 using starlark::grammar::token_type;
 

@@ -7,7 +7,7 @@
 #include <string_view>
 #include <variant>
 
-#include "bignum/number.hpp"
+#include "bigint/number.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -114,12 +114,12 @@ struct position {
 class token {
  public:
   token(token_type type, position start, position end);
-  token(token_type type, position start, position end, const bignum::number& value);
+  token(token_type type, position start, position end, const bigint::number& value);
   token(token_type type, position start, position end, double value);
   token(token_type type, position start, position end, const std::string& value);
   token_type type() const;
   void set_type(token_type new_type);
-  const bignum::number& int_value() const;
+  const bigint::number& int_value() const;
   double double_value() const;
   const std::string& string_value() const;
   position start() const;
@@ -129,7 +129,7 @@ class token {
   token_type tok_type;
   position tok_start;
   position tok_end;
-  std::variant<double, bignum::number, std::string> value;
+  std::variant<double, bigint::number, std::string> value;
 };
 
 }  // namespace grammar

@@ -1,6 +1,6 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
-#include "bignum/number.hpp"
+#include "bigint/number.hpp"
 
 #include <cassert>
 
@@ -15,7 +15,7 @@
 #include <vector>
 
 namespace starlark {
-namespace bignum {
+namespace bigint {
 
 namespace {
 
@@ -809,7 +809,7 @@ number& number::pow_mod(const number& power, const number& modulus) {
   return *this;
 }
 
-bignum::number parse_number(std::string_view input, const char** end_ptr) {
+number parse_number(std::string_view input, const char** end_ptr) {
   int base;
   std::size_t pos = 0;
   if (input.starts_with("0x")) {
@@ -821,7 +821,7 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
   } else {
     base = 10;
   }
-  bignum::number result;
+  number result;
   for (; pos < input.length(); ++pos) {
     int c = input[pos];
     if ('0' <= c && c <= '9') {
@@ -836,8 +836,8 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
     if (c >= base) {
       break;
     }
-    result *= bignum::number(base);
-    result += bignum::number(c);
+    result *= number(base);
+    result += number(c);
   }
   if (end_ptr != nullptr) {
     *end_ptr = &input[pos];
@@ -845,6 +845,6 @@ bignum::number parse_number(std::string_view input, const char** end_ptr) {
   return result;
 }
 
-}  // namespace bignum
+}  // namespace bigint
 }  // namespace starlark
 

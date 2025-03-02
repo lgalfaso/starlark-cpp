@@ -4,8 +4,8 @@
 //  A class to handle arbitrary large integers.
 //
 
-#ifndef BIGNUM_NUMBER_HPP_
-#define BIGNUM_NUMBER_HPP_
+#ifndef BIGINT_NUMBER_HPP_
+#define BIGINT_NUMBER_HPP_
 
 #include <cstdint>
 
@@ -18,7 +18,7 @@
 #include <vector>
 
 namespace starlark {
-namespace bignum {
+namespace bigint {
 
 class number {
  public:
@@ -153,10 +153,10 @@ inline number operator""_number(const char* input, std::size_t size) {
   return number::parse_hex(std::string_view(input, size));
 }
 
-bignum::number parse_number(std::string_view input, const char** end_ptr);
+starlark::bigint::number parse_number(std::string_view input, const char** end_ptr);
 
-}  // namespace bignum
+}  // namespace bigint
 }  // namespace starlark
 
-#endif  // BIGNUM_NUMBER_HPP_
+#endif  // BIGINT_NUMBER_HPP_
 

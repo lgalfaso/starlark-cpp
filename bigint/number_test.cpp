@@ -7,10 +7,10 @@
 #include <string>
 #include <vector>
 
-#include "bignum/number.hpp"
+#include "bigint/number.hpp"
 
-using starlark::bignum::number;
-using starlark::bignum::operator""_number;
+using starlark::bigint::number;
+using starlark::bigint::operator""_number;
 
 namespace {
 
