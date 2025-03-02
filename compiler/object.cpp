@@ -9,6 +9,10 @@ namespace compiler {
 
 starlark_obj::~starlark_obj() {}
 
+std::string starlark_obj::str() const {
+  return repr();
+}
+
 size_t starlark_hash::operator()(const starlark_obj* value) const {
   return value->hash();
 }
