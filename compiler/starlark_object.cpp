@@ -1,6 +1,6 @@
 // Copyright 2025 Lucas Mirelmann
 
-#include "compiler/object.hpp"
+#include "compiler/starlark_object.hpp"
 
 #include <string>
 

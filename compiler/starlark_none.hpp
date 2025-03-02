@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "compiler/object.hpp"
+#include "compiler/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
 

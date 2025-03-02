@@ -1,5 +1,5 @@
-#ifndef COMPILER_OBJECT_HPP_
-#define COMPILER_OBJECT_HPP_
+#ifndef COMPILER_STARLARK_OBJECT_HPP_
+#define COMPILER_STARLARK_OBJECT_HPP_
 
 #include <string>
 
@@ -32,5 +32,5 @@ struct starlark_equals_to {
 
 #pragma GCC visibility pop
 
-#endif  // COMPILER_OBJECT_HPP_
+#endif  // COMPILER_STARLARK_OBJECT_HPP_
 

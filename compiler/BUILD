@@ -3,9 +3,9 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
-    name = "object",
-    srcs = ["object.cpp"],
-    hdrs = ["object.hpp"],
+    name = "starlark_object",
+    srcs = ["starlark_object.cpp"],
+    hdrs = ["starlark_object.hpp"],
     deps = [
     ],
 )
@@ -15,7 +15,7 @@ cc_library(
     srcs = ["starlark_none.cpp"],
     hdrs = ["starlark_none.hpp"],
     deps = [
-        ":object",
+        ":starlark_object",
     ],
 )
 
