@@ -1,9 +1,10 @@
 // Copyright 2025 Lucas Mirelmann
 
-#ifndef COMPILER_STARLARK_BOOL_HPP_
-#define COMPILER_STARLARK_BOOL_HPP_
+#ifndef COMPILER_STARLARK_LIST_HPP_
+#define COMPILER_STARLARK_LIST_HPP_
 
 #include <string>
+#include <vector>
 
 #include "compiler/starlark_object.hpp"
 
@@ -12,10 +13,10 @@
 namespace starlark {
 namespace compiler {
 
-class starlark_bool : public starlark_obj {
+class starlark_list : public starlark_obj {
  public:
-  starlark_bool(bool value);
   const std::string& type() const override;
+  starlark_list& add(starlark_obj* element);
   bool truthy() const override;
   bool equals(const starlark_obj& other) const override;
   int64_t hash() const override;
@@ -24,7 +25,7 @@ class starlark_bool : public starlark_obj {
   bool inner_repr(printer& print, uint64_t pos) const override;
 
  private:
-  bool value;
+  std::vector<starlark_obj*> value;
   static const std::string type_value;
 };
 
@@ -33,5 +34,5 @@ class starlark_bool : public starlark_obj {
 
 #pragma GCC visibility pop
 
-#endif  // COMPILER_STARLARK_BOOL_HPP_
+#endif  // COMPILER_STARLARK_LIST_HPP_
 

@@ -13,8 +13,9 @@ const std::string& starlark_none::type() const {
   return type_value;
 }
 
-std::string starlark_none::repr() const {
-  return "None";
+bool starlark_none::inner_repr(printer& print, uint64_t pos) const {
+  print.append("None");
+  return false;
 }
 
 bool starlark_none::truthy() const {

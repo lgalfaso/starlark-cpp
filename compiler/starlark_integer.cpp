@@ -20,8 +20,9 @@ const std::string& starlark_integer::type() const {
   return type_value;
 }
 
-std::string starlark_integer::repr() const {
-  return std::to_string(value);
+bool starlark_integer::inner_repr(printer& print, uint64_t pos) const {
+  print.append(std::to_string(value));
+  return false;
 }
 
 bool starlark_integer::truthy() const {

@@ -12,15 +12,15 @@
 namespace starlark {
 namespace compiler {
 
-// TODO(lmirelmann): Split between the different starlark objects.
-
 class starlark_none : public starlark_obj {
  public:
   const std::string& type() const override;
-  std::string repr() const override;
   bool truthy() const override;
   bool equals(const starlark_obj& other) const override;
   int64_t hash() const override;
+
+ protected:
+  bool inner_repr(printer& print, uint64_t pos) const override;
 
  private:
   static const std::string type_value;

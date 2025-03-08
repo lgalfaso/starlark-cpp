@@ -15,8 +15,13 @@ const std::string& starlark_bool::type() const {
   return type_value;
 }
 
-std::string starlark_bool::repr() const {
-  return value ? "True" : "False";
+bool starlark_bool::inner_repr(printer& print, uint64_t pos) const {
+  if (value) {
+    print.append("True");
+  } else {
+    print.append("False");
+  }
+  return false;
 }
 
 bool starlark_bool::truthy() const {

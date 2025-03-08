@@ -3,6 +3,15 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
+    name = "bytecode",
+    srcs = ["bytecode.cpp"],
+    hdrs = ["bytecode.hpp"],
+    deps = [
+        "//bigint:number",
+    ],
+)
+
+cc_library(
     name = "hash",
     hdrs = ["hash.hpp"],
 )
@@ -45,8 +54,18 @@ cc_test(
     deps = [
         ":starlark_bigint",
         ":starlark_bool",
+        ":starlark_bytes",
+        ":starlark_dictionary",
+        ":starlark_float",
+        ":starlark_function",
         ":starlark_integer",
+        ":starlark_list",
         ":starlark_none",
+        ":starlark_range",
+        ":starlark_set",
+        ":starlark_string",
+        ":starlark_struct",
+        ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
 )
@@ -67,8 +86,18 @@ cc_test(
     deps = [
         ":starlark_bigint",
         ":starlark_bool",
+        ":starlark_bytes",
+        ":starlark_dictionary",
+        ":starlark_float",
+        ":starlark_function",
         ":starlark_integer",
+        ":starlark_list",
         ":starlark_none",
+        ":starlark_range",
+        ":starlark_set",
+        ":starlark_string",
+        ":starlark_struct",
+        ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
 )
@@ -102,8 +131,18 @@ cc_test(
     deps = [
         ":starlark_bigint",
         ":starlark_bool",
+        ":starlark_bytes",
+        ":starlark_dictionary",
+        ":starlark_float",
+        ":starlark_function",
         ":starlark_integer",
+        ":starlark_list",
         ":starlark_none",
+        ":starlark_range",
+        ":starlark_set",
+        ":starlark_string",
+        ":starlark_struct",
+        ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
 )
@@ -126,7 +165,38 @@ cc_test(
         ":starlark_bigint",
         ":starlark_bool",
         ":starlark_bytes",
+        ":starlark_dictionary",
         ":starlark_float",
+        ":starlark_function",
+        ":starlark_integer",
+        ":starlark_list",
+        ":starlark_none",
+        ":starlark_range",
+        ":starlark_set",
+        ":starlark_string",
+        ":starlark_struct",
+        ":starlark_tuple",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "starlark_dictionary",
+    srcs = ["starlark_dictionary.cpp"],
+    hdrs = ["starlark_dictionary.hpp"],
+    deps = [
+        ":starlark_object",
+        "//containers:linked_hash_map",
+    ],
+)
+
+cc_test(
+    name = "starlark_dictionary_test",
+    size = "small",
+    srcs = ["starlark_dictionary_test.cpp"],
+    deps = [
+        ":starlark_bool",
+        ":starlark_dictionary",
         ":starlark_integer",
         ":starlark_none",
         ":starlark_string",
@@ -153,8 +223,18 @@ cc_test(
     deps = [
         ":starlark_bigint",
         ":starlark_bool",
+        ":starlark_bytes",
+        ":starlark_dictionary",
+        ":starlark_float",
+        ":starlark_function",
         ":starlark_integer",
+        ":starlark_list",
         ":starlark_none",
+        ":starlark_range",
+        ":starlark_set",
+        ":starlark_string",
+        ":starlark_struct",
+        ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
 )
@@ -194,6 +274,70 @@ cc_test(
 )
 
 cc_library(
+    name = "starlark_list",
+    srcs = ["starlark_list.cpp"],
+    hdrs = ["starlark_list.hpp"],
+    deps = [
+        ":starlark_object",
+    ],
+)
+
+cc_test(
+    name = "starlark_list_test",
+    size = "small",
+    srcs = ["starlark_list_test.cpp"],
+    deps = [
+        ":starlark_bool",
+        ":starlark_integer",
+        ":starlark_list",
+        ":starlark_none",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "starlark_range",
+    srcs = ["starlark_range.cpp"],
+    hdrs = ["starlark_range.hpp"],
+    deps = [
+        ":starlark_object",
+    ],
+)
+
+cc_test(
+    name = "starlark_range_test",
+    size = "small",
+    srcs = ["starlark_range_test.cpp"],
+    deps = [
+        ":starlark_range",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "starlark_set",
+    srcs = ["starlark_set.cpp"],
+    hdrs = ["starlark_set.hpp"],
+    deps = [
+        ":starlark_object",
+        "//containers:linked_hash_set",
+    ],
+)
+
+cc_test(
+    name = "starlark_set_test",
+    size = "small",
+    srcs = ["starlark_set_test.cpp"],
+    deps = [
+        ":starlark_bool",
+        ":starlark_integer",
+        ":starlark_none",
+        ":starlark_set",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "starlark_string",
     srcs = ["starlark_string.cpp"],
     hdrs = ["starlark_string.hpp"],
@@ -213,10 +357,77 @@ cc_test(
         ":starlark_bigint",
         ":starlark_bool",
         ":starlark_bytes",
+        ":starlark_dictionary",
         ":starlark_float",
+        ":starlark_function",
+        ":starlark_integer",
+        ":starlark_list",
+        ":starlark_none",
+        ":starlark_range",
+        ":starlark_set",
+        ":starlark_string",
+        ":starlark_struct",
+        ":starlark_tuple",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "starlark_struct",
+    srcs = ["starlark_struct.cpp"],
+    hdrs = ["starlark_struct.hpp"],
+    deps = [
+        ":starlark_object",
+    ],
+)
+
+cc_test(
+    name = "starlark_struct_test",
+    size = "small",
+    srcs = ["starlark_struct_test.cpp"],
+    deps = [
+        ":starlark_struct",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "starlark_tuple",
+    srcs = ["starlark_tuple.cpp"],
+    hdrs = ["starlark_tuple.hpp"],
+    deps = [
+        ":starlark_object",
+    ],
+)
+
+cc_test(
+    name = "starlark_tuple_test",
+    size = "small",
+    srcs = ["starlark_tuple_test.cpp"],
+    deps = [
+        ":starlark_bool",
         ":starlark_integer",
         ":starlark_none",
-        ":starlark_string",
+        ":starlark_tuple",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "starlark_function",
+    srcs = ["starlark_function.cpp"],
+    hdrs = ["starlark_function.hpp"],
+    deps = [
+        ":starlark_object",
+    ],
+)
+
+cc_test(
+    name = "starlark_function_test",
+    size = "small",
+    srcs = ["starlark_function_test.cpp"],
+    deps = [
+        ":starlark_function",
         "@googletest//:gtest_main",
     ],
 )
@@ -231,3 +442,16 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "compiler",
+    srcs = ["compiler.cpp"],
+    hdrs = ["compiler.hpp"],
+    deps = [
+        ":bytecode",
+        "//grammar:ast_listener",
+        "//grammar:logging",
+        "//grammar:options",
+        "//grammar:parser",
+        "//grammar/proto:starlark_cc_proto",
+    ],
+)

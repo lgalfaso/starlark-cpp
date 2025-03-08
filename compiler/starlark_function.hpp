@@ -1,7 +1,7 @@
 // Copyright 2025 Lucas Mirelmann
 
-#ifndef COMPILER_STARLARK_BOOL_HPP_
-#define COMPILER_STARLARK_BOOL_HPP_
+#ifndef COMPILER_STARLARK_FUNCTION_HPP_
+#define COMPILER_STARLARK_FUNCTION_HPP_
 
 #include <string>
 
@@ -12,9 +12,8 @@
 namespace starlark {
 namespace compiler {
 
-class starlark_bool : public starlark_obj {
+class starlark_function : public starlark_obj {
  public:
-  starlark_bool(bool value);
   const std::string& type() const override;
   bool truthy() const override;
   bool equals(const starlark_obj& other) const override;
@@ -24,7 +23,20 @@ class starlark_bool : public starlark_obj {
   bool inner_repr(printer& print, uint64_t pos) const override;
 
  private:
-  bool value;
+  static const std::string type_value;
+};
+
+class starlark_built_in_function : public starlark_obj {
+ public:
+  const std::string& type() const override;
+  bool truthy() const override;
+  bool equals(const starlark_obj& other) const override;
+  int64_t hash() const override;
+
+ protected:
+  bool inner_repr(printer& print, uint64_t pos) const override;
+
+ private:
   static const std::string type_value;
 };
 
@@ -33,5 +45,5 @@ class starlark_bool : public starlark_obj {
 
 #pragma GCC visibility pop
 
-#endif  // COMPILER_STARLARK_BOOL_HPP_
+#endif  // COMPILER_STARLARK_FUNCTION_HPP_
 
