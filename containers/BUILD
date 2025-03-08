@@ -21,3 +21,18 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "linked_hash_set",
+    hdrs = ["linked_hash_set.hpp"],
+)
+
+cc_test(
+    name = "linked_hash_set_test",
+    size = "small",
+    srcs = ["linked_hash_set_test.cpp"],
+    deps = [
+        ":linked_hash_set",
+        "@googletest//:gtest_main",
+    ],
+)
+
