@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <google/protobuf/io/zero_copy_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 
 #include <memory>
