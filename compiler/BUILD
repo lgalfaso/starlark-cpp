@@ -43,6 +43,7 @@ cc_test(
     size = "small",
     srcs = ["starlark_bool_test.cpp"],
     deps = [
+        ":starlark_bigint",
         ":starlark_bool",
         ":starlark_integer",
         ":starlark_none",
@@ -64,6 +65,7 @@ cc_test(
     size = "small",
     srcs = ["starlark_none_test.cpp"],
     deps = [
+        ":starlark_bigint",
         ":starlark_bool",
         ":starlark_integer",
         ":starlark_none",
@@ -78,6 +80,31 @@ cc_library(
     deps = [
         ":starlark_object",
         "//bigint:number",
+    ],
+)
+
+cc_library(
+    name = "starlark_bigint",
+    srcs = ["starlark_bigint.cpp"],
+    hdrs = ["starlark_bigint.hpp"],
+    deps = [
+        ":hash",
+        ":starlark_numeric",
+        ":starlark_object",
+        "//bigint:number",
+    ],
+)
+
+cc_test(
+    name = "starlark_bigint_test",
+    size = "small",
+    srcs = ["starlark_bigint_test.cpp"],
+    deps = [
+        ":starlark_bigint",
+        ":starlark_bool",
+        ":starlark_integer",
+        ":starlark_none",
+        "@googletest//:gtest_main",
     ],
 )
 
@@ -98,7 +125,7 @@ cc_test(
     size = "small",
     srcs = ["starlark_integer_test.cpp"],
     deps = [
-        ":objects",
+        ":starlark_bigint",
         ":starlark_bool",
         ":starlark_integer",
         ":starlark_none",
