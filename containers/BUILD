@@ -36,3 +36,18 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "linked_hash_map",
+    hdrs = ["linked_hash_map.hpp"],
+)
+
+cc_test(
+    name = "linked_hash_map_test",
+    size = "small",
+    srcs = ["linked_hash_map_test.cpp"],
+    deps = [
+        ":linked_hash_map",
+        "@googletest//:gtest_main",
+    ],
+)
+
