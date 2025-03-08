@@ -17,11 +17,11 @@ namespace compiler {
 
 #define ROTL(x, b) std::rotl(x, b)
 
-#define U8TO64_LE(p)                                                           \
-    (((uint64_t)((p)[0])) | ((uint64_t)((p)[1]) << 8) |                        \
-     ((uint64_t)((p)[2]) << 16) | ((uint64_t)((p)[3]) << 24) |                 \
-     ((uint64_t)((p)[4]) << 32) | ((uint64_t)((p)[5]) << 40) |                 \
-     ((uint64_t)((p)[6]) << 48) | ((uint64_t)((p)[7]) << 56))
+#define U8TO64_LE(p)                                                                    \
+    ((static_cast<uint64_t>((p)[0])) | (static_cast<uint64_t>((p)[1]) << 8) |           \
+     (static_cast<uint64_t>((p)[2]) << 16) | (static_cast<uint64_t>((p)[3]) << 24) |    \
+     (static_cast<uint64_t>((p)[4]) << 32) | (static_cast<uint64_t>((p)[5]) << 40) |    \
+     (static_cast<uint64_t>((p)[6]) << 48) | (static_cast<uint64_t>((p)[7]) << 56))
 
 #define SIPROUND                                                               \
     {                                                                          \
@@ -51,7 +51,7 @@ uint64_t siphash(const char *in, const size_t inlen, uint64_t k0, uint64_t k1) {
   int i;
   const unsigned char *end = input + inlen - (inlen % sizeof(uint64_t));
   const int left = inlen & 7;
-  uint64_t b = ((uint64_t)inlen) << 56;
+  uint64_t b = static_cast<uint64_t>(inlen) << 56;
 
   v3 ^= k1;
   v2 ^= k0;
@@ -71,25 +71,25 @@ uint64_t siphash(const char *in, const size_t inlen, uint64_t k0, uint64_t k1) {
 
   switch (left) {
     case 7:
-      b |= ((uint64_t)input[6]) << 48;
+      b |= static_cast<uint64_t>(input[6]) << 48;
       /* FALLTHRU */
     case 6:
-      b |= ((uint64_t)input[5]) << 40;
+      b |= static_cast<uint64_t>(input[5]) << 40;
       /* FALLTHRU */
     case 5:
-      b |= ((uint64_t)input[4]) << 32;
+      b |= static_cast<uint64_t>(input[4]) << 32;
       /* FALLTHRU */
     case 4:
-      b |= ((uint64_t)input[3]) << 24;
+      b |= static_cast<uint64_t>(input[3]) << 24;
       /* FALLTHRU */
     case 3:
-      b |= ((uint64_t)input[2]) << 16;
+      b |= static_cast<uint64_t>(input[2]) << 16;
       /* FALLTHRU */
     case 2:
-      b |= ((uint64_t)input[1]) << 8;
+      b |= static_cast<uint64_t>(input[1]) << 8;
       /* FALLTHRU */
     case 1:
-      b |= ((uint64_t)input[0]);
+      b |= static_cast<uint64_t>(input[0]);
       break;
     case 0:
       break;

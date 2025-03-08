@@ -7,13 +7,11 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_built_in_function::type_value = "builtin_function_or_method";
-
-const std::string& starlark_built_in_function::type() const {
-  return type_value;
+std::string_view starlark_built_in_function::type() const {
+  return "builtin_function_or_method";
 }
 
-bool starlark_built_in_function::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_built_in_function::inner_repr(printer& print, printer_action action) const {
   // TODO(lmirelmann): Replace `FUNCTION_NAME` with the right name.
   print.append("<built-in function $FUNCTION_NAME>");
   return false;
@@ -33,13 +31,11 @@ int64_t starlark_built_in_function::hash() const {
   return 0;
 }
 
-const std::string starlark_function::type_value = "function";
-
-const std::string& starlark_function::type() const {
-  return type_value;
+std::string_view starlark_function::type() const {
+  return "function";
 }
 
-bool starlark_function::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_function::inner_repr(printer& print, printer_action action) const {
   // TODO(lmirelmann): Replace `FUNCTION_NAME` and `MODULE` with the correct values. Eg:
   //     <function cc_fuzz_test from @@rules_fuzzing+//fuzzing/private:fuzz_test.bzl>
   //     <function _starlark_proto_encoder_rule_impl from //grammar:starlark_proto_encoder.bzl>

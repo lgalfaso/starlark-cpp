@@ -116,6 +116,7 @@ class number {
 
   nbase at(values_size_type pos) const;
   int countr_zero() const;
+
  private:
   static void normalize(values_type* a);
   static bool cmp_values(const values_type& a, const values_type& b);

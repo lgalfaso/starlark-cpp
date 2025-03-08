@@ -2,6 +2,7 @@
 
 #include "grammar/ast_listener.hpp"
 
+#include <string>
 #include <vector>
 
 using google::protobuf::RepeatedPtrField;

@@ -335,7 +335,7 @@ void lexer::read_operator(char first_char) {
     }
   }
   source_code.skip();
-  current = token{token_type::illegal, start, get_position(), std::string{} + first_char};
+  current = token{token_type::illegal, start, get_position(), std::string {} + first_char};
 }
 
 void lexer::read_numeric() {
@@ -397,8 +397,8 @@ void lexer::read_string() {
       case '"':
         if ((!is_triple &&  is_single_quote && source_code.capture("'")) ||
             (!is_triple && !is_single_quote && source_code.capture("\"")) ||
-            ( is_triple &&  is_single_quote && source_code.capture("'''")) ||
-            ( is_triple && !is_single_quote && source_code.capture("\"\"\""))) {
+            (is_triple &&  is_single_quote && source_code.capture("'''")) ||
+            (is_triple && !is_single_quote && source_code.capture("\"\"\""))) {
           if (found_errors) {
             auto end = get_position();
             current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};

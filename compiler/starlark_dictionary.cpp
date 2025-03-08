@@ -7,51 +7,54 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_dictionary::type_value = "dict";
-
-const std::string& starlark_dictionary::type() const {
-  return type_value;
+std::string_view starlark_dictionary::type() const {
+  return "dict";
 }
 
-bool starlark_dictionary::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_dictionary::inner_repr(printer& print, printer_action action) const {
   if (values.size() == 0) {
     print.append("{}");
     return false;
   }
-  if (pos == 0) {
-    // There is no cheap way to go to a specific element, so we add
-    // all the entries in one go.
-    print.append("{");
-    uint64_t element_pos = values.size();
-    for (auto it = values.rbegin(); it != values.rend(); ++it) {
-      print.add_task(printer::pending_task{
-        .obj = this, 
-        .pos = element_pos,
-      });
-      print.add_task(printer::pending_task{
-        .obj = it->second,
-        .pos = 0,
-      });
-      print.add_task(printer::pending_task{
-        .obj = this, 
-        .pos = values.size() + 1,
-      });
-      print.add_task(printer::pending_task{
-        .obj = it->first,
-        .pos = 0,
-      });
-      element_pos--;
+
+  switch (action) {
+    case printer_action::print_top: {
+      print.append("{");
+      printer_action new_action = printer_action::print_final;
+      for (auto it = values.rbegin(); it != values.rend(); ++it) {
+        print.add_task(printer::pending_task{
+          .obj = this,
+          .action = new_action,
+        });
+        print.add_task(printer::pending_task{
+          .obj = it->second,
+          .action = printer_action::print_top,
+        });
+        print.add_task(printer::pending_task{
+          .obj = this,
+          .action = printer_action::print_in_element_separator,
+        });
+        print.add_task(printer::pending_task{
+          .obj = it->first,
+          .action = printer_action::print_top,
+        });
+        new_action = printer_action::print_element_separator;
+      }
+      return true;
     }
-    return true;
-  } else if (pos == values.size()) {
-    print.append("}");
-    return false;
-  } else if (pos == values.size() + 1) {  // TODO(lmirelmann): In theory, this can be an overflow.
-    print.append(": ");
-    return false;
-  } else {
-    print.append(", ");
-    return true;
+    case printer_action::print_element_separator:
+      print.append(", ");
+      return true;
+    case printer_action::print_in_element_separator:
+      print.append(": ");
+      return true;
+    case printer_action::print_final:
+    case printer_action::print_single_element_final:
+      print.append("}");
+      return false;
+    case printer_action::print_recursion:
+      print.append("{...}");
+      return false;
   }
 }
 

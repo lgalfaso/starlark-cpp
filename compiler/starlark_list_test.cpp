@@ -32,11 +32,10 @@ TEST(StarlarkList, Str) {
 
 TEST(StarlarkList, StrRecursion) {
   // Bazel prints `[1, [1, ..., 1], 1]`, Python prints `[1, [...], 1]`.
-  // TODO(lmirelmann): Define whether we should follow Python or Bazel logic.
   starlark_list list;
   starlark_integer one(1);
   list.add(&one).add(&list).add(&one);
-  EXPECT_EQ("[1, ..., 1]", list.str());
+  EXPECT_EQ("[1, [...], 1]", list.str());
 }
 
 TEST(StarlarkList, Truthy) {

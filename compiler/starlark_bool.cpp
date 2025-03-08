@@ -2,20 +2,21 @@
 
 #include "compiler/starlark_bool.hpp"
 
+#include <cassert>
+
 #include <string>
 
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_bool::type_value = "bool";
-
 starlark_bool::starlark_bool(bool value) : value(value) {}
 
-const std::string& starlark_bool::type() const {
-  return type_value;
+std::string_view starlark_bool::type() const {
+  return "bool";
 }
 
-bool starlark_bool::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_bool::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::print_top);
   if (value) {
     print.append("True");
   } else {
@@ -29,7 +30,7 @@ bool starlark_bool::truthy() const {
 }
 
 bool starlark_bool::equals(const starlark_obj& other) const {
-  return &type() == &other.type() &&
+  return type() == other.type() &&
     value == other.truthy();
 }
 

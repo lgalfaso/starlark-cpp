@@ -14,30 +14,24 @@ namespace compiler {
 
 class starlark_function : public starlark_obj {
  public:
-  const std::string& type() const override;
+  std::string_view type() const override;
   bool truthy() const override;
   bool equals(const starlark_obj& other) const override;
   int64_t hash() const override;
 
  protected:
-  bool inner_repr(printer& print, uint64_t pos) const override;
-
- private:
-  static const std::string type_value;
+  bool inner_repr(printer& print, printer_action action) const override;
 };
 
 class starlark_built_in_function : public starlark_obj {
  public:
-  const std::string& type() const override;
+  std::string_view type() const override;
   bool truthy() const override;
   bool equals(const starlark_obj& other) const override;
   int64_t hash() const override;
 
  protected:
-  bool inner_repr(printer& print, uint64_t pos) const override;
-
- private:
-  static const std::string type_value;
+  bool inner_repr(printer& print, printer_action action) const override;
 };
 
 }  // namespace compiler

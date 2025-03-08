@@ -2,6 +2,8 @@
 
 #include "compiler/starlark_integer.hpp"
 
+#include <cassert>
+
 #include <bit>
 #include <format>
 #include <string>
@@ -12,15 +14,14 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_integer::type_value = "int";
-
 starlark_integer::starlark_integer(int64_t value) : value(value) {}
 
-const std::string& starlark_integer::type() const {
-  return type_value;
+std::string_view starlark_integer::type() const {
+  return "int";
 }
 
-bool starlark_integer::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_integer::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::top);
   print.append(std::to_string(value));
   return false;
 }

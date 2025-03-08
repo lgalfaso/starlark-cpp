@@ -9,7 +9,7 @@ namespace starlark {
 namespace compiler {
 
 constexpr int hash_size = 61;
-constexpr int64_t hash_mask = (((int64_t)1) << hash_size) - 1;
+constexpr int64_t hash_mask = ((static_cast<int64_t>(1)) << hash_size) - 1;
 
 }  // namespace compiler
 }  // namespace starlark

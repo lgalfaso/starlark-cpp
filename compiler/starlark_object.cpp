@@ -3,6 +3,7 @@
 #include "compiler/starlark_object.hpp"
 
 #include <string>
+#include <utility>
 
 namespace starlark {
 namespace compiler {
@@ -23,11 +24,11 @@ void printer::run() {
   while (!tasks.empty()) {
     auto top = tasks.back();
     tasks.pop_back();
-    if (top.pos == 0 && !stack.insert(top.obj).second) {
-      append("...");
+    if (top.action == printer_action::print_top && !stack.insert(top.obj).second) {
+      top.obj->inner_repr(*this, printer_action::print_recursion);
       continue;
     }
-    if (!top.obj->inner_repr(*this, top.pos)) {
+    if (!top.obj->inner_repr(*this, top.action)) {
       stack.erase(top.obj);
     }
   }
@@ -43,7 +44,7 @@ std::string starlark_obj::repr() const {
   printer print;
   print.add_task(printer::pending_task{
     .obj = this,
-    .pos = 0,
+    .action = printer_action::print_top,
   });
   print.run();
   return print.value();

@@ -2,6 +2,8 @@
 
 #include "compiler/starlark_bigint.hpp"
 
+#include <cassert>
+
 #include <string>
 
 #include "compiler/hash.hpp"
@@ -10,17 +12,16 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_bigint::type_value = "int";
-
 starlark_bigint::starlark_bigint(int64_t value) : value(from_int64(value)) {}
 
 starlark_bigint::starlark_bigint(const starlark::bigint::number& value) : value(value) {}
 
-const std::string& starlark_bigint::type() const {
-  return type_value;
+std::string_view starlark_bigint::type() const {
+  return "int";
 }
 
-bool starlark_bigint::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_bigint::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::print_top);
   print.append(value.to_string(10));
   return false;
 }

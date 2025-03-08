@@ -1,3 +1,5 @@
+// Copyright 2025 Lucas Mirelmann
+
 #ifndef COMPILER_STARLARK_OBJECT_HPP_
 #define COMPILER_STARLARK_OBJECT_HPP_
 
@@ -13,11 +15,20 @@ namespace compiler {
 
 class starlark_obj;
 
+enum class printer_action {
+  print_top,
+  print_element_separator,
+  print_in_element_separator,
+  print_final,
+  print_single_element_final,
+  print_recursion,
+};
+
 class printer {
  public:
   struct pending_task {
     const starlark_obj* obj = nullptr;
-    uint64_t pos;
+    printer_action action;
   };
 
   void append(std::string_view str);
@@ -34,7 +45,7 @@ class printer {
 class starlark_obj {
  public:
   virtual ~starlark_obj();
-  virtual const std::string& type() const = 0;
+  virtual std::string_view type() const = 0;
   virtual std::string str() const;
   std::string repr() const;
   virtual bool truthy() const = 0;
@@ -42,11 +53,7 @@ class starlark_obj {
   virtual int64_t hash() const = 0;
 
  protected:
-  // TODO(lmirelmann): It should be possible to remove the second argument by:
-  // - Making all containers insert all the elements in one go
-  // - Adding a mechanism to insert the separators
-  // - Defining an alternative mechanism to know when a container contains itself
-  virtual bool inner_repr(printer& print, uint64_t pos) const = 0;
+  virtual bool inner_repr(printer& print, printer_action action) const = 0;
 
   friend class printer;
 };

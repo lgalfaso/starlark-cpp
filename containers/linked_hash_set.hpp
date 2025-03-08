@@ -90,7 +90,7 @@ class linked_hash_set {
   }
 
  private:
-  // TODO(lmirelmann): This is designed for `Key` to be a pointer. 
+  // TODO(lmirelmann): This is designed for `Key` to be a pointer.
   //   Either make this work without `Key` being a pointer, or as a contraint to the type
   // to only accept pointer types.
   std::list<Key> order;
@@ -100,5 +100,5 @@ class linked_hash_set {
 }  // namespace cnt
 }  // namespace starlark
 
-#endif  // CONTAINERS_FLAT_MAP_HPP_
+#endif  // CONTAINERS_LINKED_HASH_SET_HPP_
 

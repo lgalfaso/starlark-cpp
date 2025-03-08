@@ -2,8 +2,11 @@
 
 #include "compiler/starlark_float.hpp"
 
+#include <cassert>
+
 #include <bit>
 #include <format>
+#include <limits>
 #include <string>
 
 #include "compiler/hash.hpp"
@@ -12,15 +15,14 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_float::type_value = "float";
-
 starlark_float::starlark_float(double value) : value(value) {}
 
-const std::string& starlark_float::type() const {
-  return type_value;
+std::string_view starlark_float::type() const {
+  return "float";
 }
 
-bool starlark_float::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_float::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::print_top);
   // This tries to follow the same format as Python.
   auto result = std::format("{:.17g}", value);
   if (std::isfinite(value)) {
@@ -52,7 +54,7 @@ bool starlark_float::inner_repr(printer& print, uint64_t pos) const {
         result += ".0";
       }
     }
-  } 
+  }
   print.append(result);
   return false;
 }
@@ -76,7 +78,7 @@ int64_t starlark_float::hash() const {
   double norm = std::frexp(inner_value, &e);
   double integral = std::ldexp(norm, std::numeric_limits<double>::digits);
   e -= std::numeric_limits<double>::digits;
-  int64_t mantissa = (int64_t)integral;
+  int64_t mantissa = static_cast<int64_t>(integral);
   {
      int countr = std::countr_zero<uint64_t>(mantissa);
      mantissa >>= countr;

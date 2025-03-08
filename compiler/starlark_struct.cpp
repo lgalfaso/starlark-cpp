@@ -7,10 +7,8 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_struct::type_value = "struct";
-
-const std::string& starlark_struct::type() const {
-  return type_value;
+std::string_view starlark_struct::type() const {
+  return "struct";
 }
 
 bool starlark_struct::truthy() const {
@@ -27,7 +25,7 @@ int64_t starlark_struct::hash() const {
   return -1;
 }
 
-bool starlark_struct::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_struct::inner_repr(printer& print, printer_action action) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

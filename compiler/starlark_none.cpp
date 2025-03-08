@@ -2,18 +2,19 @@
 
 #include "compiler/starlark_none.hpp"
 
+#include <cassert>
+
 #include <string>
 
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_none::type_value = "NoneType";
-
-const std::string& starlark_none::type() const {
-  return type_value;
+std::string_view starlark_none::type() const {
+  return "NoneType";
 }
 
-bool starlark_none::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_none::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::print_top);
   print.append("None");
   return false;
 }
@@ -23,8 +24,7 @@ bool starlark_none::truthy() const {
 }
 
 bool starlark_none::equals(const starlark_obj& other) const {
-  // Comparing pointers should be faster than comparing the string value.
-  return &type() == &other.type();
+  return type() == other.type();
 }
 
 int64_t starlark_none::hash() const {

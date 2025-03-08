@@ -737,7 +737,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               if (!opts.allow_load_private_symbols &&
                   lex.current_token().string_value().starts_with("_")) {
-                add_error(std::string{"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
+                add_error(std::string {"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
               }
               load_param->set_remote_name(lex.current_token().string_value());
               if (!load_param->has_local_name()) {
@@ -1707,7 +1707,7 @@ void parser::bind_and_resolve(Expression* base) {
           if (is_top_level_block() &&
               parser_blocks.back().identifiers.contains(top->identifier().nfkc_name())) {
             add_error("Variable '" + top->identifier().name() + "' redefines symbol previously defined by a load statement");
-          } 
+          }
           bind(top->identifier());
           break;
         case Expression::kListExpression:

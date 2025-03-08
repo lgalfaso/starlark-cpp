@@ -7,41 +7,52 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_tuple::type_value = "tuple";
-
-const std::string& starlark_tuple::type() const {
-  return type_value;
+std::string_view starlark_tuple::type() const {
+  return "tuple";
 }
 
-bool starlark_tuple::inner_repr(printer& print, uint64_t pos) const {
-  if (value.size() == 0) {
+bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
+  if (values.size() == 0) {
     print.append("()");
     return false;
   }
-  if (pos == 0) {
-    print.append("(");
-  } else if (pos == 1 && pos == value.size()) {
-    print.append(",)");
-    return false;
-  } else if (pos == value.size()) {
-    print.append(")");
-    return false;
-  } else {
-    print.append(", ");
+  switch (action) {
+    case printer_action::print_top: {
+      print.append("(");
+      printer_action new_action = values.size() == 1 ? printer_action::print_single_element_final : printer_action::print_final;
+      for (auto it = values.rbegin(); it != values.rend(); ++it) {
+        print.add_task(printer::pending_task{
+          .obj = this,
+          .action = new_action,
+        });
+        print.add_task(printer::pending_task{
+          .obj = *it,
+          .action = printer_action::print_top,
+        });
+        new_action = printer_action::print_element_separator;
+      }
+      return true;
+    }
+    case printer_action::print_element_separator:
+      print.append(", ");
+      return true;
+    case printer_action::print_in_element_separator:
+      print.append(": ");
+      return true;
+    case printer_action::print_final:
+      print.append(")");
+      return false;
+    case printer_action::print_single_element_final:
+      print.append(",)");
+      return false;
+    case printer_action::print_recursion:
+      print.append("(...)");
+      return false;
   }
-  print.add_task(printer::pending_task{
-    .obj = this,
-    .pos = pos + 1,
-  });
-  print.add_task(printer::pending_task{
-    .obj = value[pos],
-    .pos = 0,
-  });
-  return true;
 }
 
 bool starlark_tuple::truthy() const {
-  return !value.empty();
+  return !values.empty();
 }
 
 bool starlark_tuple::equals(const starlark_obj& other) const {
@@ -55,7 +66,7 @@ int64_t starlark_tuple::hash() const {
 }
 
 starlark_tuple& starlark_tuple::add(starlark_obj* element) {
-  value.push_back(element);
+  values.push_back(element);
   return *this;
 }
 

@@ -7,13 +7,11 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_range::type_value = "range";
-
-const std::string& starlark_range::type() const {
-  return type_value;
+std::string_view starlark_range::type() const {
+  return "range";
 }
 
-bool starlark_range::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_range::inner_repr(printer& print, printer_action action) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

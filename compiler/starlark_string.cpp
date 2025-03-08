@@ -2,6 +2,8 @@
 
 #include "compiler/starlark_string.hpp"
 
+#include <cassert>
+
 #include <string>
 
 #include "compiler/siphash.hpp"
@@ -22,19 +24,18 @@ static const char hex[] = "0123456789abcdef";
 
 }  // namespace
 
-const std::string starlark_string::type_value = "string";
-
 starlark_string::starlark_string(const std::string& value) : value(value) {}
 
-const std::string& starlark_string::type() const {
-  return type_value;
+std::string_view starlark_string::type() const {
+  return "string";
 }
 
 std::string starlark_string::str() const {
   return value;
 }
 
-bool starlark_string::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_string::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::print_top);
   // TODO(lmirelmann): Append directly to the printer.
   // TODO(lmirelmann): If this function were to be executed a lot and were to become
   // a performance issue, then there are a few things that can be optimized:
@@ -104,7 +105,7 @@ bool starlark_string::truthy() const {
 }
 
 bool starlark_string::equals(const starlark_obj& other) const {
-  return &type() == &other.type() &&
+  return type() == other.type() &&
          value == other.str();
 }
 

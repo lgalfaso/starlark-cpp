@@ -2,6 +2,8 @@
 
 #include "compiler/starlark_bytes.hpp"
 
+#include <cassert>
+
 #include <string>
 
 #include "compiler/siphash.hpp"
@@ -16,15 +18,14 @@ static const char hex[] = "0123456789abcdef";
 
 }  // namespace
 
-const std::string starlark_bytes::type_value = "bytes";
-
 starlark_bytes::starlark_bytes(const std::string& value) : value(value) {}
 
-const std::string& starlark_bytes::type() const {
-  return type_value;
+std::string_view starlark_bytes::type() const {
+  return "bytes";
 }
 
-bool starlark_bytes::inner_repr(printer& print, uint64_t pos) const {
+bool starlark_bytes::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::print_top);
   // TODO(lmirelmann): Append directly to the printer.
   std::string result = "b";
   bool use_single_quote = !value.contains('\'') || value.contains('"');
@@ -73,7 +74,7 @@ bool starlark_bytes::truthy() const {
 }
 
 bool starlark_bytes::equals(const starlark_obj& other) const {
-  return &type() == &other.type() &&
+  return type() == other.type() &&
       value == (static_cast<const starlark_bytes*>(&other))->value;
 }
 

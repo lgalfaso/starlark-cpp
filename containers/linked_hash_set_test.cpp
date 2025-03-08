@@ -59,9 +59,9 @@ TEST(LinkedHashSet, InsertWillNotChangeElement) {
 
 TEST(LinkedHashSet, IterateElementsInInserOrder) {
   linked_hash_set<int, int_hash, int_equals_to> set;
-  set.insert(2); 
-  set.insert(1); 
-  set.insert(3); 
+  set.insert(2);
+  set.insert(1);
+  set.insert(3);
   EXPECT_THAT(set, ElementsAre(2, 1, 3));
 }
 

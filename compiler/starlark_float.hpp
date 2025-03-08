@@ -14,19 +14,18 @@ namespace compiler {
 
 class starlark_float : public starlark_numeric {
  public:
-  starlark_float(double value);
-  const std::string& type() const override;
+  explicit starlark_float(double value);
+  std::string_view type() const override;
   bool truthy() const override;
   int64_t hash() const override;
 
  protected:
-  bool inner_repr(printer& print, uint64_t pos) const override;
+  bool inner_repr(printer& print, printer_action action) const override;
   int numeric_type() const override;
   double as_float() const override;
 
  private:
   double value;
-  static const std::string type_value;
 };
 
 }  // namespace compiler

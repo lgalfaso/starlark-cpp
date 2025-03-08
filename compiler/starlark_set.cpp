@@ -8,45 +8,49 @@
 namespace starlark {
 namespace compiler {
 
-const std::string starlark_set::type_value = "set";
-
-const std::string& starlark_set::type() const {
-  return type_value;
+std::string_view starlark_set::type() const {
+  return "set";
 }
 
-bool starlark_set::inner_repr(printer& print, uint64_t pos) const {
-  if (value.size() == 0) {
+bool starlark_set::inner_repr(printer& print, printer_action action) const {
+  if (values.size() == 0) {
     print.append("set()");
     return false;
   }
-  if (pos == 0) {
-    // There is no cheap way to go to a specific element, so we add
-    // all the entries in one go.
-    print.append("set([");
-    uint64_t element_pos = value.size();
-    for (auto it = value.rbegin(); it != value.rend(); ++it) {
-      print.add_task(printer::pending_task{
-        .obj = this, 
-        .pos = element_pos,
-      });
-      print.add_task(printer::pending_task{
-        .obj = *it,
-        .pos = 0,
-      });
-      element_pos--;
+  switch (action) {
+    case printer_action::print_top: {
+      print.append("set([");
+      printer_action new_action = printer_action::print_final;
+      for (auto it = values.rbegin(); it != values.rend(); ++it) {
+        print.add_task(printer::pending_task{
+          .obj = this,
+          .action = new_action,
+        });
+        print.add_task(printer::pending_task{
+          .obj = *it,
+          .action = printer_action::print_top,
+        });
+        new_action = printer_action::print_element_separator;
+      }
+      return true;
     }
-    return true;
-  } else if (pos == value.size()) {
-    print.append("])");
-    return false;
-  } else {
-    print.append(", ");
-    return true;
+    case printer_action::print_element_separator:
+      print.append(", ");
+      return true;
+    case printer_action::print_in_element_separator:
+      return true;
+    case printer_action::print_final:
+    case printer_action::print_single_element_final:
+      print.append("])");
+      return false;
+    case printer_action::print_recursion:
+      print.append("set([...])");
+      return false;
   }
 }
 
 bool starlark_set::truthy() const {
-  return !value.empty();
+  return !values.empty();
 }
 
 bool starlark_set::equals(const starlark_obj& other) const {
@@ -64,7 +68,7 @@ starlark_set& starlark_set::add(starlark_obj* element) {
     // TODO(lmirelmann): Handle this case.
     return *this;
   }
-  value.insert(element);
+  values.insert(element);
   return *this;
 }
 

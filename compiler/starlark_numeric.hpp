@@ -33,5 +33,5 @@ starlark::bigint::number from_int64(int64_t value);
 
 #pragma GCC visibility pop
 
-#endif  // COMPILER_OBJECTS_HPP_
+#endif  // COMPILER_STARLARK_NUMERIC_HPP_
 

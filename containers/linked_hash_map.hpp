@@ -90,7 +90,7 @@ class linked_hash_map {
   }
 
  private:
-  // TODO(lmirelmann): This is designed for `Key` and `Value` to be pointers. 
+  // TODO(lmirelmann): This is designed for `Key` and `Value` to be pointers.
   //   Either make this work without `Key` and `Value` being pointers, or as a contraint to the type
   // to only accept pointer types.
   // One simple way to do this is to make the unordered container to use pointers as the values.
@@ -101,5 +101,5 @@ class linked_hash_map {
 }  // namespace cnt
 }  // namespace starlark
 
-#endif  // CONTAINERS_FLAT_MAP_HPP_
+#endif  // CONTAINERS_LINKED_HASH_MAP_HPP_
 

@@ -14,7 +14,7 @@ namespace compiler {
 
 class compiler {
  public:
-  compiler(std::string_view starlark_program);
+  explicit compiler(std::string_view starlark_program);
   program compile();
 
  private:

@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include <bit>
+#include <limits>
 #include <string>
 
 namespace starlark {
@@ -32,7 +33,7 @@ bool equals_fb(double lhs, const starlark::bigint::number& rhs) {
   double norm = std::frexp(lhs, &e);
   double integral = std::ldexp(norm, std::numeric_limits<double>::digits);
   e -= std::numeric_limits<double>::digits;
-  int64_t mantissa = (int64_t)integral;
+  int64_t mantissa = static_cast<int64_t>(integral);
   {
      int countr = std::countr_zero<uint64_t>(mantissa);
      mantissa >>= countr;

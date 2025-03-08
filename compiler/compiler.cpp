@@ -1,6 +1,10 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
 #include "compiler/compiler.hpp"
+
+#include <set>
+#include <string>
+
 #include "grammar/ast_listener.hpp"
 #include "grammar/parser.hpp"
 #include "grammar/logging.hpp"
@@ -25,7 +29,6 @@ class bytecode_generator : public ast_listener_base {
 
  private:
   program& output;
-
 };
 
 }  // namespace
