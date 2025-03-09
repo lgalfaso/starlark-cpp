@@ -3,6 +3,7 @@
 #ifndef CONTAINERS_LINKED_HASH_SET_HPP_
 #define CONTAINERS_LINKED_HASH_SET_HPP_
 
+#include <functional>
 #include <list>
 #include <unordered_map>
 #include <utility>
@@ -75,7 +76,7 @@ class linked_hash_set {
       return std::make_pair(result->second, false);
     }
     auto order_result = order.insert(order.end(), value);
-    values[value] = order_result;
+    values[std::cref(*order_result)] = order_result;
     return std::make_pair(order_result, true);
   }
 
@@ -90,11 +91,8 @@ class linked_hash_set {
   }
 
  private:
-  // TODO(lmirelmann): This is designed for `Key` to be a pointer.
-  //   Either make this work without `Key` being a pointer, or as a contraint to the type
-  // to only accept pointer types.
   std::list<Key> order;
-  std::unordered_map<Key, typename std::list<Key>::iterator, Hash, KeyEqual> values;
+  std::unordered_map<std::reference_wrapper<const Key>, typename std::list<Key>::iterator, Hash, KeyEqual> values;
 };
 
 }  // namespace cnt
