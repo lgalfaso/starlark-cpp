@@ -20,7 +20,6 @@ enum class printer_action {
   print_element_separator,
   print_in_element_separator,
   print_final,
-  print_single_element_final,
   print_recursion,
 };
 

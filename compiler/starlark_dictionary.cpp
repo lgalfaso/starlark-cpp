@@ -12,13 +12,12 @@ std::string_view starlark_dictionary::type() const {
 }
 
 bool starlark_dictionary::inner_repr(printer& print, printer_action action) const {
-  if (values.size() == 0) {
-    print.append("{}");
-    return false;
-  }
-
   switch (action) {
     case printer_action::print_top: {
+      if (values.size() == 0) {
+        print.append("{}");
+        return false;
+      }
       print.append("{");
       printer_action new_action = printer_action::print_final;
       for (auto it = values.rbegin(); it != values.rend(); ++it) {
@@ -49,7 +48,6 @@ bool starlark_dictionary::inner_repr(printer& print, printer_action action) cons
       print.append(": ");
       return true;
     case printer_action::print_final:
-    case printer_action::print_single_element_final:
       print.append("}");
       return false;
     case printer_action::print_recursion:

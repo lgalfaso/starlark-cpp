@@ -12,14 +12,14 @@ std::string_view starlark_tuple::type() const {
 }
 
 bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
-  if (values.size() == 0) {
-    print.append("()");
-    return false;
-  }
   switch (action) {
     case printer_action::print_top: {
+      if (values.size() == 0) {
+        print.append("()");
+        return false;
+      }
       print.append("(");
-      printer_action new_action = values.size() == 1 ? printer_action::print_single_element_final : printer_action::print_final;
+      printer_action new_action = printer_action::print_final;
       for (auto it = values.rbegin(); it != values.rend(); ++it) {
         print.add_task(printer::pending_task{
           .obj = this,
@@ -40,10 +40,11 @@ bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
       print.append(": ");
       return true;
     case printer_action::print_final:
-      print.append(")");
-      return false;
-    case printer_action::print_single_element_final:
-      print.append(",)");
+      if (values.size() == 1) {
+        print.append(",)");
+      } else {
+        print.append(")");
+      }
       return false;
     case printer_action::print_recursion:
       print.append("(...)");
