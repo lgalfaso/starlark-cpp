@@ -36,4 +36,40 @@ TEST(StarlarkTuple, Truthy) {
   EXPECT_TRUE(starlark_tuple().add(&none).truthy());
 }
 
+TEST(StarlarkTuple, Equals) {
+  starlark_none none;
+  starlark_integer one(1);
+  EXPECT_TRUE(starlark_tuple().equals(starlark_tuple()));
+  EXPECT_FALSE(starlark_tuple().add(&none).equals(starlark_tuple()));
+  EXPECT_FALSE(starlark_tuple().add(&one).equals(starlark_tuple()));
+  EXPECT_FALSE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple()));
+  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple()));
+
+  EXPECT_FALSE(starlark_tuple().equals(starlark_tuple().add(&none)));
+  EXPECT_TRUE(starlark_tuple().add(&none).equals(starlark_tuple().add(&none)));
+  EXPECT_FALSE(starlark_tuple().add(&one).equals(starlark_tuple().add(&none)));
+  EXPECT_FALSE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple().add(&none)));
+  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple().add(&none)));
+
+  EXPECT_FALSE(starlark_tuple().equals(starlark_tuple().add(&one)));
+  EXPECT_FALSE(starlark_tuple().add(&none).equals(starlark_tuple().add(&one)));
+  EXPECT_TRUE(starlark_tuple().add(&one).equals(starlark_tuple().add(&one)));
+  EXPECT_FALSE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple().add(&one)));
+  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple().add(&one)));
+
+  EXPECT_FALSE(starlark_tuple().equals(starlark_tuple().add(&none).add(&one)));
+  EXPECT_FALSE(starlark_tuple().add(&none).equals(starlark_tuple().add(&none).add(&one)));
+  EXPECT_FALSE(starlark_tuple().add(&one).equals(starlark_tuple().add(&none).add(&one)));
+  EXPECT_TRUE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple().add(&none).add(&one)));
+  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple().add(&none).add(&one)));
+}
+
+TEST(StarlarkTuple, EqualsRecursion) {
+  starlark_tuple tuple_a;
+  starlark_tuple tuple_b;
+  tuple_a.add(&tuple_b);
+  tuple_b.add(&tuple_a);
+  EXPECT_TRUE(tuple_a.equals(tuple_b));
+}
+
 }  // namespace

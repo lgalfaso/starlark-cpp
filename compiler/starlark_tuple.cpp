@@ -52,13 +52,25 @@ bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
   }
 }
 
-bool starlark_tuple::truthy() const {
-  return !values.empty();
+bool starlark_tuple::inner_equals(comparator& comp, const starlark_obj* other) const {
+  if (type() != other->type()) {
+    return false;
+  }
+  const starlark_tuple* n_other = reinterpret_cast<const starlark_tuple*>(other);
+  if (values.size() != n_other->values.size()) {
+    return false;
+  }
+  for (int i = 0; i < values.size(); ++i) {
+    comp.add_task(comparator::pending_task{
+      .lhs = values[i],
+      .rhs = n_other->values[i],
+    });
+  }
+  return true;
 }
 
-bool starlark_tuple::inner_equals(comparator& comp, const starlark_obj* other) const {
-  // TODO(lmirelmann): Implement.
-  return false;
+bool starlark_tuple::truthy() const {
+  return !values.empty();
 }
 
 int64_t starlark_tuple::hash() const {
