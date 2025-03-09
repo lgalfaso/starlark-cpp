@@ -52,7 +52,7 @@ bool starlark_set::truthy() const {
   return !values.empty();
 }
 
-bool starlark_set::equals(const starlark_obj& other) const {
+bool starlark_set::inner_equals(comparator& comp, const starlark_obj* other) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

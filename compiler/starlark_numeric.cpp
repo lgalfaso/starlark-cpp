@@ -80,11 +80,11 @@ starlark::bigint::number from_int64(int64_t value) {
   return result;
 }
 
-bool starlark_numeric::equals(const starlark_obj& other) const {
-  if (other.type() != "float" && other.type() != "int") {
+bool starlark_numeric::inner_equals(comparator& comp, const starlark_obj* other) const {
+  if (other->type() != "float" && other->type() != "int") {
     return false;
   }
-  const starlark_numeric& n_other = *static_cast<const starlark_numeric*>(&other);
+  const starlark_numeric& n_other = *static_cast<const starlark_numeric*>(other);
   if (numeric_type() == type_float) {
     if (n_other.numeric_type() == type_float) {
       if (std::isnan(as_float()) && std::isnan(n_other.as_float())) {

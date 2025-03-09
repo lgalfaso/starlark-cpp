@@ -34,6 +34,27 @@ void printer::run() {
   }
 }
 
+void comparator::add_task(pending_task&& task) {
+  tasks.emplace_back(std::move(task));
+}
+
+bool comparator::run() {
+  while (!tasks.empty()) {
+    auto top = tasks.back();
+    tasks.pop_back();
+    if (executed_tasks.insert(top).second) {
+      if (!top.lhs->inner_equals(*this, top.rhs)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+size_t comparator::pending_task_hash::operator()(const pending_task task) const {
+  return hash_fn(task.lhs) ^ hash_fn(task.rhs);
+}
+
 starlark_obj::~starlark_obj() {}
 
 std::string starlark_obj::str() const {
@@ -48,6 +69,15 @@ std::string starlark_obj::repr() const {
   });
   print.run();
   return print.value();
+}
+
+bool starlark_obj::equals(const starlark_obj& other) const {
+  comparator cmp;
+  cmp.add_task(comparator::pending_task{
+    .lhs = this,
+    .rhs = &other,
+  });
+  return cmp.run();
 }
 
 size_t starlark_hash::operator()(const starlark_obj* value) const {

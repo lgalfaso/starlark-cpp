@@ -18,11 +18,11 @@ class starlark_list : public starlark_obj {
   std::string_view type() const override;
   starlark_list& add(starlark_obj* element);
   bool truthy() const override;
-  bool equals(const starlark_obj& other) const override;
   int64_t hash() const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
+  bool inner_equals(comparator& comp, const starlark_obj* other) const override;
 
  private:
   std::vector<starlark_obj*> values;

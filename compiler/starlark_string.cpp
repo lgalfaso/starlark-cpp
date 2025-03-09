@@ -104,9 +104,9 @@ bool starlark_string::truthy() const {
   return !value.empty();
 }
 
-bool starlark_string::equals(const starlark_obj& other) const {
-  return type() == other.type() &&
-         value == other.str();
+bool starlark_string::inner_equals(comparator& comp, const starlark_obj* other) const {
+  return type() == other->type() &&
+         value == other->str();
 }
 
 int64_t starlark_string::hash() const {

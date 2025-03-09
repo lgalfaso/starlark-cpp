@@ -56,7 +56,7 @@ bool starlark_tuple::truthy() const {
   return !values.empty();
 }
 
-bool starlark_tuple::equals(const starlark_obj& other) const {
+bool starlark_tuple::inner_equals(comparator& comp, const starlark_obj* other) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

@@ -15,7 +15,7 @@ bool starlark_struct::truthy() const {
   return true;
 }
 
-bool starlark_struct::equals(const starlark_obj& other) const {
+bool starlark_struct::inner_equals(comparator& comp, const starlark_obj* other) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

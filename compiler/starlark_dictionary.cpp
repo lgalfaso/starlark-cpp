@@ -60,7 +60,7 @@ bool starlark_dictionary::truthy() const {
   return !values.empty();
 }
 
-bool starlark_dictionary::equals(const starlark_obj& other) const {
+bool starlark_dictionary::inner_equals(comparator& comp, const starlark_obj* other) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

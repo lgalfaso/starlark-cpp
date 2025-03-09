@@ -44,4 +44,40 @@ TEST(StarlarkList, Truthy) {
   EXPECT_TRUE(starlark_list().add(&none).truthy());
 }
 
+TEST(StarlarkList, Equals) {
+  starlark_none none;
+  starlark_integer one(1);
+  EXPECT_TRUE(starlark_list().equals(starlark_list()));
+  EXPECT_FALSE(starlark_list().add(&none).equals(starlark_list()));
+  EXPECT_FALSE(starlark_list().add(&one).equals(starlark_list()));
+  EXPECT_FALSE(starlark_list().add(&none).add(&one).equals(starlark_list()));
+  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list()));
+
+  EXPECT_FALSE(starlark_list().equals(starlark_list().add(&none)));
+  EXPECT_TRUE(starlark_list().add(&none).equals(starlark_list().add(&none)));
+  EXPECT_FALSE(starlark_list().add(&one).equals(starlark_list().add(&none)));
+  EXPECT_FALSE(starlark_list().add(&none).add(&one).equals(starlark_list().add(&none)));
+  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list().add(&none)));
+
+  EXPECT_FALSE(starlark_list().equals(starlark_list().add(&one)));
+  EXPECT_FALSE(starlark_list().add(&none).equals(starlark_list().add(&one)));
+  EXPECT_TRUE(starlark_list().add(&one).equals(starlark_list().add(&one)));
+  EXPECT_FALSE(starlark_list().add(&none).add(&one).equals(starlark_list().add(&one)));
+  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list().add(&one)));
+
+  EXPECT_FALSE(starlark_list().equals(starlark_list().add(&none).add(&one)));
+  EXPECT_FALSE(starlark_list().add(&none).equals(starlark_list().add(&none).add(&one)));
+  EXPECT_FALSE(starlark_list().add(&one).equals(starlark_list().add(&none).add(&one)));
+  EXPECT_TRUE(starlark_list().add(&none).add(&one).equals(starlark_list().add(&none).add(&one)));
+  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list().add(&none).add(&one)));
+}
+
+TEST(StarlarkList, EqualsRecursion) {
+  starlark_list list_a;
+  starlark_list list_b;
+  list_a.add(&list_b);
+  list_b.add(&list_a);
+  EXPECT_TRUE(list_a.equals(list_b));
+}
+
 }  // namespace

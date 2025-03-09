@@ -73,9 +73,9 @@ bool starlark_bytes::truthy() const {
   return !value.empty();
 }
 
-bool starlark_bytes::equals(const starlark_obj& other) const {
-  return type() == other.type() &&
-      value == (static_cast<const starlark_bytes*>(&other))->value;
+bool starlark_bytes::inner_equals(comparator& comp, const starlark_obj* other) const {
+  return type() == other->type() &&
+      value == (static_cast<const starlark_bytes*>(other))->value;
 }
 
 int64_t starlark_bytes::hash() const {

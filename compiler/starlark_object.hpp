@@ -41,6 +41,28 @@ class printer {
   std::unordered_set<const starlark_obj*> stack;
 };
 
+class comparator {
+ public:
+  struct pending_task {
+    const starlark_obj* lhs = nullptr;
+    const starlark_obj* rhs = nullptr;
+    bool operator==(const pending_task& other) const = default;
+  };
+
+  void add_task(pending_task&& task);
+  bool run();
+
+ private:
+  struct pending_task_hash {
+    size_t operator()(const pending_task task) const;
+
+    std::hash<const starlark_obj*> hash_fn;
+  };
+
+  std::vector<pending_task> tasks;
+  std::unordered_set<pending_task, pending_task_hash> executed_tasks;
+};
+
 class starlark_obj {
  public:
   virtual ~starlark_obj();
@@ -48,13 +70,15 @@ class starlark_obj {
   virtual std::string str() const;
   std::string repr() const;
   virtual bool truthy() const = 0;
-  virtual bool equals(const starlark_obj& other) const = 0;
+  bool equals(const starlark_obj& other) const;
   virtual int64_t hash() const = 0;
 
  protected:
   virtual bool inner_repr(printer& print, printer_action action) const = 0;
+  virtual bool inner_equals(comparator& comp, const starlark_obj* other) const = 0;
 
   friend class printer;
+  friend class comparator;
 };
 
 struct starlark_hash {

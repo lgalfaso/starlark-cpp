@@ -29,9 +29,9 @@ bool starlark_bool::truthy() const {
   return value;
 }
 
-bool starlark_bool::equals(const starlark_obj& other) const {
-  return type() == other.type() &&
-    value == other.truthy();
+bool starlark_bool::inner_equals(comparator& comp, const starlark_obj* other) const {
+  return type() == other->type() &&
+    value == other->truthy();
 }
 
 int64_t starlark_bool::hash() const {

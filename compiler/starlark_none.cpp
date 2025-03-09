@@ -23,8 +23,8 @@ bool starlark_none::truthy() const {
   return false;
 }
 
-bool starlark_none::equals(const starlark_obj& other) const {
-  return type() == other.type();
+bool starlark_none::inner_equals(comparator& comp, const starlark_obj* other) const {
+  return type() == other->type();
 }
 
 int64_t starlark_none::hash() const {
