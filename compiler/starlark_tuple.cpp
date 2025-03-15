@@ -2,6 +2,7 @@
 
 #include "compiler/starlark_tuple.hpp"
 
+#include <bit>
 #include <string>
 
 namespace starlark {
@@ -34,10 +35,8 @@ bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
       return true;
     }
     case printer_action::print_element_separator:
-      print.append(", ");
-      return true;
     case printer_action::print_in_element_separator:
-      print.append(": ");
+      print.append(", ");
       return true;
     case printer_action::print_final:
       if (values.size() == 1) {
@@ -74,8 +73,26 @@ bool starlark_tuple::truthy() const {
 }
 
 int64_t starlark_tuple::hash() const {
-  // TODO(lmirelmann): Implement.
-  return 0;
+  constexpr uint64_t hash_prime1 = 11400714785074694791UL;
+  constexpr uint64_t hash_prime2 = 14029467366897019727UL;
+  constexpr uint64_t hash_prime5 = 2870177450012600261UL;
+
+  // TODO(lmirelmann): Implement without recursion.
+  int64_t acc = hash_prime5;
+  for (const auto& element : values) {
+    int64_t element_hash = element->hash();
+    if (element_hash == -1) {
+      return -1;
+    }
+    acc += element_hash * hash_prime2;
+    acc = std::rotl<uint64_t>(acc, 31);
+    acc *= hash_prime1;
+  }
+  acc += values.size() ^ (hash_prime5 ^ 3527539UL);
+  if (acc == -1) {
+    return 1546275796;
+  }
+  return acc;
 }
 
 starlark_tuple& starlark_tuple::add(starlark_obj* element) {

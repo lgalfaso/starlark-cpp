@@ -30,6 +30,18 @@ TEST(StarlarkTuple, Str) {
   EXPECT_EQ("(None, True, 1)", starlark_tuple().add(&none).add(&true_obj).add(&one).str());
 }
 
+TEST(StarlarkTuple, StrRecursion) {
+  // This test is not fully real, as this specific case cannot happen. That said, it is
+  // possible to have an equivalent case by doing:
+  //   a = ([],)
+  //   a[0].append(a)
+  // In the example above, the result should be that `str(a) == '([(...)],)'`.
+  // This test is equivalent.
+  starlark_tuple tuple;
+  tuple.add(&tuple);
+  EXPECT_EQ("((...),)", tuple.str());
+}
+
 TEST(StarlarkTuple, Truthy) {
   starlark_none none;
   EXPECT_FALSE(starlark_tuple().truthy());
@@ -39,6 +51,7 @@ TEST(StarlarkTuple, Truthy) {
 TEST(StarlarkTuple, Equals) {
   starlark_none none;
   starlark_integer one(1);
+  EXPECT_FALSE(starlark_tuple().equals(none));
   EXPECT_TRUE(starlark_tuple().equals(starlark_tuple()));
   EXPECT_FALSE(starlark_tuple().add(&none).equals(starlark_tuple()));
   EXPECT_FALSE(starlark_tuple().add(&one).equals(starlark_tuple()));
@@ -70,6 +83,17 @@ TEST(StarlarkTuple, EqualsRecursion) {
   tuple_a.add(&tuple_b);
   tuple_b.add(&tuple_a);
   EXPECT_TRUE(tuple_a.equals(tuple_b));
+}
+
+TEST(StarlarkTuple, Hash) {
+  starlark_none none;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  EXPECT_EQ(5740354900026072187, starlark_tuple().hash());
+  EXPECT_EQ(-8753497827991233192, starlark_tuple().add(&zero).hash());
+  EXPECT_EQ(-8458139203682520985, starlark_tuple().add(&zero).add(&zero).hash());
+  EXPECT_EQ(-6644214454873602895, starlark_tuple().add(&one).hash());
+  EXPECT_EQ(9181102132670838864, starlark_tuple().add(&none).hash());
 }
 
 }  // namespace
