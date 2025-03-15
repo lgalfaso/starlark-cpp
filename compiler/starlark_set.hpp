@@ -20,6 +20,7 @@ class starlark_set : public starlark_obj {
   bool truthy() const override;
   int64_t hash() const override;
   starlark_set& add(starlark_obj* element);
+  bool contains(starlark_obj* obj) const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
