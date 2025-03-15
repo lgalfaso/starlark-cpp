@@ -59,8 +59,12 @@ class comparator {
     std::hash<const starlark_obj*> hash_fn;
   };
 
+  struct pending_task_equals_to {
+    bool operator()(const pending_task& lhs, const pending_task& rhs) const;
+  };
+
   std::vector<pending_task> tasks;
-  std::unordered_set<pending_task, pending_task_hash> executed_tasks;
+  std::unordered_set<pending_task, pending_task_hash, pending_task_equals_to> executed_tasks;
 };
 
 class starlark_obj {

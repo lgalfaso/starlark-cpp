@@ -42,6 +42,9 @@ bool comparator::run() {
   while (!tasks.empty()) {
     auto top = tasks.back();
     tasks.pop_back();
+    if (top.lhs == top.rhs) {
+      continue;
+    }
     if (executed_tasks.insert(top).second) {
       if (!top.lhs->inner_equals(*this, top.rhs)) {
         return false;
@@ -53,6 +56,11 @@ bool comparator::run() {
 
 size_t comparator::pending_task_hash::operator()(const pending_task task) const {
   return hash_fn(task.lhs) ^ hash_fn(task.rhs);
+}
+
+bool comparator::pending_task_equals_to::operator()(const pending_task& lhs, const pending_task& rhs) const {
+  return (lhs.lhs == rhs.lhs && lhs.rhs == rhs.rhs) ||
+         (lhs.lhs == rhs.rhs && lhs.rhs == rhs.lhs);
 }
 
 starlark_obj::~starlark_obj() {}
