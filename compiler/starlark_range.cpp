@@ -31,6 +31,18 @@ int64_t starlark_range::hash() const {
   return -1;
 }
 
+void starlark_range::set_start(const starlark_obj* value) {
+  // TODO(lmirelmann): Implement.
+}
+
+void starlark_range::set_end(const starlark_obj* value) {
+  // TODO(lmirelmann): Implement.
+}
+
+void starlark_range::set_step(const starlark_obj* value) {
+  // TODO(lmirelmann): Implement.
+}
+
 }  // namespace compiler
 }  // namespace starlark
 

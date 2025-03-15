@@ -17,10 +17,18 @@ class starlark_range : public starlark_obj {
   std::string_view type() const override;
   bool truthy() const override;
   int64_t hash() const override;
+  void set_start(const starlark_obj* value);
+  void set_end(const starlark_obj* value);
+  void set_step(const starlark_obj* value);
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(comparator& comp, const starlark_obj* other) const override;
+
+  uint64_t start = 0;
+  uint64_t end;
+  uint64_t step = 1;
+  uint64_t last;
 };
 
 }  // namespace compiler
