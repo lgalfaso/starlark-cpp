@@ -6,17 +6,11 @@
 
 #include <string>
 
+#include "compiler/hex_encoder.hpp"
 #include "compiler/siphash.hpp"
 
 namespace starlark {
 namespace compiler {
-
-namespace {
-
-// TODO(lmirelmann): Move the hex encoding to a printer.
-static const char hex[] = "0123456789abcdef";
-
-}  // namespace
 
 starlark_bytes::starlark_bytes(const std::string& value) : value(value) {}
 
@@ -26,7 +20,6 @@ std::string_view starlark_bytes::type() const {
 
 bool starlark_bytes::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::print_top);
-  // TODO(lmirelmann): Append directly to the printer.
   std::string result = "b";
   bool use_single_quote = !value.contains('\'') || value.contains('"');
   if (use_single_quote) {
@@ -35,30 +28,7 @@ bool starlark_bytes::inner_repr(printer& print, printer_action action) const {
     result += "\"";
   }
   for (unsigned char c : value) {
-    switch (c) {
-      case '\t':
-        result += "\\t"; break;
-      case '\n':
-        result += "\\n"; break;
-      case '\r':
-        result += "\\r"; break;
-      case '\'':
-        if (use_single_quote) {
-          result += "\\";
-        }
-        result += "'"; break;
-      case '\\':
-        result += "\\\\"; break;
-      default:
-        if (0x20 <= c && c <= 0x7e) {
-          result += c;
-        } else {
-          result += "\\x";
-          result += hex[c >> 4];
-          result += hex[c & 0xf];
-        }
-        break;
-    }
+    write_printable(c, use_single_quote, /*allow_non_ascii_printable=*/ false, result);
   }
   if (use_single_quote) {
     result += "'";

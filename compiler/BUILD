@@ -17,6 +17,15 @@ cc_library(
 )
 
 cc_library(
+    name = "hex_encoder",
+    srcs = ["hex_encoder.cpp"],
+    hdrs = ["hex_encoder.hpp"],
+    deps = [
+        "//unicode:encode",
+    ],
+)
+
+cc_library(
     name = "siphash",
     srcs = ["siphash.cpp"],
     hdrs = ["siphash.hpp"],
@@ -152,6 +161,7 @@ cc_library(
     srcs = ["starlark_bytes.cpp"],
     hdrs = ["starlark_bytes.hpp"],
     deps = [
+        ":hex_encoder",
         ":siphash",
         ":starlark_object",
     ],
@@ -333,6 +343,7 @@ cc_test(
         ":starlark_integer",
         ":starlark_none",
         ":starlark_set",
+        ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
 )
@@ -342,9 +353,9 @@ cc_library(
     srcs = ["starlark_string.cpp"],
     hdrs = ["starlark_string.hpp"],
     deps = [
+        ":hex_encoder",
         ":siphash",
         ":starlark_object",
-        "//unicode:encode",
         "//unicode:utf8_reader",
     ],
 )
