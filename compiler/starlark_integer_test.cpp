@@ -106,6 +106,8 @@ TEST(StarlarkInteger, Hash) {
   EXPECT_EQ(-2, starlark_integer(-0x5fffffffffffffff).hash());
   EXPECT_EQ(-0x1000000000000002, starlark_integer(-0x6fffffffffffffff).hash());
   EXPECT_EQ(-3, starlark_integer(-0x7fffffffffffffff).hash());
+  EXPECT_EQ(-4, starlark_integer(-0x8000000000000000).hash());
+  EXPECT_EQ(-4, starlark_integer(std::numeric_limits<int64_t>::min()).hash());
 }
 
 }  // namespace
