@@ -34,9 +34,8 @@ bool starlark_list::inner_repr(printer& print, printer_action action) const {
       return true;
     }
     case printer_action::print_element_separator:
-      print.append(", ");
-      return true;
     case printer_action::print_in_element_separator:
+      print.append(", ");
       return true;
     case printer_action::print_final:
       print.append("]");
