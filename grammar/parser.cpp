@@ -381,16 +381,16 @@ bool parser::expect(token_type expected_token) {
   return false;
 }
 
-void parser::add_error(const std::string& message) {
+void parser::add_error(std::string_view message) {
   add_error(message, lex.current_token().start());
 }
 
-void parser::add_error(const std::string& message, position pos) {
+void parser::add_error(std::string_view message, position pos) {
   logging.log(log_level::ERROR, message, module, pos);
   recover = true;
 }
 
-void parser::add_warning(const std::string& message) {
+void parser::add_warning(std::string_view message) {
   logging.log(log_level::WARNING, message, module, lex.current_token().start());
   recover = true;
 }

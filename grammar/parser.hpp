@@ -44,9 +44,9 @@ class parser {
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;
   bool expect(token_type expected_token);
-  void add_error(const std::string& error_message);
-  void add_error(const std::string& error_message, position);
-  void add_warning(const std::string& error_message);
+  void add_error(std::string_view error_message);
+  void add_error(std::string_view error_message, position);
+  void add_warning(std::string_view error_message);
   void create_block(const std::set<std::string>& symbols,
                     const std::set<starlark::ast::Identifier*>& identifiers,
                     google::protobuf::RepeatedPtrField<std::string>* binding);
