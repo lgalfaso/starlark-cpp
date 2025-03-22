@@ -79,6 +79,9 @@ cc_test(
 cc_fuzz_test(
     name = "utf8_reader_fuzz_test",
     srcs = ["utf8_reader_fuzz_test.cpp"],
+    corpus = [
+        "//unicode/utf8_corpus:corpus_filegroup",
+    ],
     deps = [
         ":utf8_reader",
     ],
