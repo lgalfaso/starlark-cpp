@@ -438,7 +438,6 @@ number number::operator*(const number& other) const {
 // static.
 std::pair<number, number> number::div(const number& dividend,
                                       const number& divisor) {
-  int s_shift = kBitsInBase;
   if (divisor == zero) {
     return std::make_pair(zero, zero);
   }
@@ -448,6 +447,8 @@ std::pair<number, number> number::div(const number& dividend,
   if (abs_cmp(dividend.values_, divisor.values_) < 0) {
     return std::make_pair(zero, dividend);
   }
+
+  int s_shift = divisor.values_.size() > 1 ? 0 : kBitsInBase;
   number dd = divisor << s_shift;
   number d, r = dividend << s_shift;
   int divisor_bit_size = dd.bit_size();
@@ -708,8 +709,6 @@ number number::montgomery(const number& m, const nbase& inv_m, const number& x,
   }
   return a;
 }
-
-
 
 number& number::pow_mod(const number& power, const number& modulus) {
   if (*this == zero) {
