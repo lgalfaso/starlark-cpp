@@ -10,8 +10,6 @@
 #define CONCAT(a, b) CONCAT_HELPER(a, b)
 #define COUNTER_NAME(x) CONCAT(x, __COUNTER__)
 
-namespace {
-
 template<typename F>
 struct ScopeExit {
   explicit ScopeExit(F f_) : f(f_) {}
@@ -23,8 +21,6 @@ struct DeferHelper {
   template<typename F>
   ScopeExit<F> operator+(F f) { return ScopeExit(f); }
 };
-
-}  // namespace
 
 #define defer [[maybe_unused]] const auto & COUNTER_NAME(DEFER_) = DeferHelper() + [&]()
 

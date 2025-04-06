@@ -80,7 +80,6 @@ int64_t starlark_integer::hash() const {
     result = -2;
   }
   return result;
-
 }
 
 int starlark_integer::numeric_type() const {

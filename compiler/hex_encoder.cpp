@@ -2,6 +2,8 @@
 
 #include "compiler/hex_encoder.hpp"
 
+#include <string>
+
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 

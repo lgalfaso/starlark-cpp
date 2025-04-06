@@ -28,7 +28,8 @@ static void BM_Karatsuba(benchmark::State& state) {
   }
 }
 // Register the function as a benchmark
-BENCHMARK(BM_Karatsuba)->DenseRange(0, 64, 1)->DenseRange(64, 1024, 16)->DenseRange(1024, 8192, 64);
+BENCHMARK(BM_Karatsuba)->DenseRange(0, 64, 1)->DenseRange(64, 1024, 16)
+    ->DenseRange(1024, 8192, 64);
 
 }  // namespace number_benchmark
 }  // namespace starlark

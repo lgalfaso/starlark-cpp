@@ -42,7 +42,7 @@ namespace starlark {
 namespace grammar {
 
 enum class message_type {
-  FILE,
+  STARLARK_FILE,
   STATEMENT,
   DEF_STATEMENT,
   IF_STATEMENT,
@@ -231,7 +231,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
 
   to_process.push_back(message{
     .file = starlark_file,
-    .type = message_type::FILE,
+    .type = message_type::STARLARK_FILE,
     .enter = true,
   });
   while (!to_process.empty()) {
@@ -242,7 +242,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
       exit_message.enter = false;
       to_process.push_back(exit_message);
       switch (top.type) {
-        case message_type::FILE:
+        case message_type::STARLARK_FILE:
           listener.enter_file(top.file);
           add_statements(top.file->statement());
           break;
@@ -879,7 +879,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
       }
     } else {
       switch (top.type) {
-        case message_type::FILE:
+        case message_type::STARLARK_FILE:
           listener.exit_file(top.file);
           break;
         case message_type::STATEMENT:

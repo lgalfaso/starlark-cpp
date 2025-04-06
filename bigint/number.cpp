@@ -21,12 +21,15 @@ namespace {
 
 int exponentiation_mask_size(int bit_size) {
   // Based on the number of bits in the power, and the mask size, the number of
-  // operations is about `bits - 1 + std::ceil(bits/(mask_size + 0.5)) + pow(2, mask_size - 1) - 1`.
+  // operations is about
+  // `bits - 1 + std::ceil(bits/(mask_size + 0.5)) + pow(2, mask_size - 1) - 1`.
   // This formula assumes that the number of `1`s and `0`s in the power
   // are about the same and in random positions.
-  // If this holds true, then the mask size is minimized using the constants below.
+  // If this holds true, then the mask size is minimized using the
+  // constants below.
 
-  // There is no need to do anything fancier, this is very cheap compared to an exponentiation.
+  // There is no need to do anything fancier, this is very cheap compared to
+  // an exponentiation.
   if (bit_size < 64) {
     return 1;
   }
@@ -270,7 +273,8 @@ number& number::mod_pow2(int power) {
     return *this;
   }
   values_.resize((power + kBitsInBase - 1) / kBitsInBase);
-  values_.back() &= (~nbase{0}) >> (kBitsInBase - 1 - (power + kBitsInBase -1) % kBitsInBase);
+  values_.back() &= (~nbase{0}) >>
+      (kBitsInBase - 1 - (power + kBitsInBase -1) % kBitsInBase);
   normalize();
   return *this;
 }
@@ -456,8 +460,9 @@ std::pair<number, number> number::div(const number& dividend,
     nbase base_divisor = r.bits(r_s, kBitsInBase);
     nbase base_division = base_divisor / factor;
     number base_division_number(base_division);
-    int shift_factor = (dividend_bit_size - (kBitsInBase - std::countl_zero(base_divisor))) -
-                       (divisor_bit_size - bits_in_factor);
+    int shift_factor =
+        (dividend_bit_size - (kBitsInBase - std::countl_zero(base_divisor))) -
+        (divisor_bit_size - bits_in_factor);
     number base_division_times_dd;
     if (shift_factor > 0) {
       base_division_times_dd = (dd * base_division_number) << shift_factor;
@@ -734,7 +739,8 @@ number& number::pow_mod(const number& power, const number& modulus) {
   int j = modulus.countr_zero();
   q >>= j;
 
-  // 2. Compute `x_2 = this->mod_pow(power, 2^j)` using the binary method and modulo arithmetics `2^j`.
+  // 2. Compute `x_2 = this->mod_pow(power, 2^j)` using the binary method and
+  //    modulo arithmetics `2^j`.
   number x_2;
   if (j > 0) {
     x_2 = one;
@@ -752,7 +758,8 @@ number& number::pow_mod(const number& power, const number& modulus) {
     }
   }
 
-  // 3. Compute `x_1 = this->mod_pow(power, q)` using Montgomery with sliding windows.
+  // 3. Compute `x_1 = this->mod_pow(power, q)` using Montgomery with
+  //    sliding windows.
   number x_1;
   if (q > one) {
     x_1 = *this;
