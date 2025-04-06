@@ -22,6 +22,7 @@ cc_library(
             "$(location " + f + ")",
             "$(location " + f.replace(".star", ".txt") + ")",
         ],
+        size = "small",
         data = [
             f,
             f.replace(".star", ".txt"),
@@ -165,6 +166,7 @@ cc_binary(
             f,
             ":parser_test_encoder_" + f.replace("/", "_"),
         ],
+        size = "small",
         deps = [
             ":parser",
             ":parsing_options",
@@ -186,6 +188,7 @@ cc_binary(
         data = [
             f,
         ],
+        size = "small",
         deps = [
             ":parser",
             ":parsing_options",
@@ -208,6 +211,7 @@ cc_binary(
         data = [
             f,
         ],
+        size = "small",
         deps = [
             ":parser",
             ":parsing_options",
@@ -223,6 +227,7 @@ cc_binary(
 cc_test(
     name = "parser_test",
     srcs = ["parser_test.cpp"],
+    size = "small",
     deps = [
         ":parser",
         "//grammar/proto:starlark_cc_proto",
