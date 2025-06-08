@@ -96,8 +96,8 @@ int64_t starlark_float::hash() const {
   return mantissa;
 }
 
-int starlark_float::numeric_type() const {
-  return type_float;
+starlark_numeric_type starlark_float::numeric_type() const {
+  return starlark_numeric_type::type_float;
 }
 
 double starlark_float::as_float() const {

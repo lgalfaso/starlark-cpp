@@ -85,29 +85,29 @@ bool starlark_numeric::inner_equals(comparator& comp, const starlark_obj* other)
     return false;
   }
   const starlark_numeric& n_other = *static_cast<const starlark_numeric*>(other);
-  if (numeric_type() == type_float) {
-    if (n_other.numeric_type() == type_float) {
+  if (numeric_type() == starlark_numeric_type::type_float) {
+    if (n_other.numeric_type() == starlark_numeric_type::type_float) {
       if (std::isnan(as_float()) && std::isnan(n_other.as_float())) {
         return true;
       }
       return as_float() == n_other.as_float();
-    } else if (n_other.numeric_type() == type_int64) {
+    } else if (n_other.numeric_type() == starlark_numeric_type::type_int64) {
       return as_float() == n_other.as_int64();
     } else {
       return equals_fb(as_float(), n_other.as_bigint());
     }
-  } else if (numeric_type() == type_int64) {
-    if (n_other.numeric_type() == type_float) {
+  } else if (numeric_type() == starlark_numeric_type::type_int64) {
+    if (n_other.numeric_type() == starlark_numeric_type::type_float) {
       return as_int64() == n_other.as_float();
-    } else if (n_other.numeric_type() == type_int64) {
+    } else if (n_other.numeric_type() == starlark_numeric_type::type_int64) {
       return as_int64() == n_other.as_int64();
     } else {
       return equals_ib(as_int64(), n_other.as_bigint());
     }
   } else {
-    if (n_other.numeric_type() == type_float) {
+    if (n_other.numeric_type() == starlark_numeric_type::type_float) {
       return equals_fb(n_other.as_float(), as_bigint());
-    } else if (n_other.numeric_type() == type_int64) {
+    } else if (n_other.numeric_type() == starlark_numeric_type::type_int64) {
       return equals_ib(n_other.as_int64(), as_bigint());
     } else {
       return as_bigint() == n_other.as_bigint();

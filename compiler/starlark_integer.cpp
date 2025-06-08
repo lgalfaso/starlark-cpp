@@ -82,8 +82,8 @@ int64_t starlark_integer::hash() const {
   return result;
 }
 
-int starlark_integer::numeric_type() const {
-  return type_int64;
+starlark_numeric_type starlark_integer::numeric_type() const {
+  return starlark_numeric_type::type_int64;
 }
 
 int64_t starlark_integer::as_int64() const {

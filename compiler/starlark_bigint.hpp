@@ -23,7 +23,7 @@ class starlark_bigint : public starlark_numeric {
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
-  int numeric_type() const override;
+  starlark_numeric_type numeric_type() const override;
   const starlark::bigint::number& as_bigint() const override;
 
  private:

@@ -56,8 +56,8 @@ int64_t starlark_bigint::hash() const {
   return result;
 }
 
-int starlark_bigint::numeric_type() const {
-  return type_bigint;
+starlark_numeric_type starlark_bigint::numeric_type() const {
+  return starlark_numeric_type::type_bigint;
 }
 
 const starlark::bigint::number& starlark_bigint::as_bigint() const {

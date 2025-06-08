@@ -21,7 +21,7 @@ class starlark_integer : public starlark_numeric {
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
-  int numeric_type() const override;
+  starlark_numeric_type numeric_type() const override;
   int64_t as_int64() const override;
 
  private:
