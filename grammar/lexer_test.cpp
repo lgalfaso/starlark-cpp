@@ -432,6 +432,18 @@ foo = "bar\ud83d")starlark",
        { "Invalid escape sequence:2,11" });
 }
 
+TEST(LexerTest, StringTripleQuoteEscapeSequence) {
+  check(R"starlark(
+foo = """\n"""
+)starlark",
+        "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\n\"):2,7:2,15 NEWLINE:2,15:2,16 EOF:3,1:3,1");
+  check(R"starlark(
+foo = """\
+"""
+)starlark",
+        "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\"):2,7:3,4 NEWLINE:3,4:3,5 EOF:4,1:4,1");
+}
+
 TEST(LexerTest, RawStrings) {
   check(R"starlark(
 foo = r"bar\\n"
