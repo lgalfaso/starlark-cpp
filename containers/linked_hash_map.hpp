@@ -68,6 +68,14 @@ class linked_hash_map {
     return order.rend();
   }
 
+  std::list<std::pair<const Key, Value>>::const_iterator find(const Key& key) const {
+    auto inner_result = values.find(key);
+    if (inner_result == values.end()) {
+      return order.cend();
+    }
+    return inner_result->second;
+  }
+
   std::pair<typename std::list<std::pair<const Key, Value>>::iterator, bool> insert(const Key& key, const Value& value) {
     auto result = values.find(key);
     if (result != values.end()) {

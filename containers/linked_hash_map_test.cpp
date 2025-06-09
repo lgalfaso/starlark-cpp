@@ -82,6 +82,15 @@ TEST(LinkedHashMap, Contains) {
   EXPECT_FALSE(map.contains(2));
 }
 
+TEST(LinkedHashMap, Find) {
+  linked_hash_map<int, int, int_hash, int_equals_to> map;
+  EXPECT_EQ(map.find(1), map.end());
+  EXPECT_EQ(map.find(2), map.end());
+  map.insert(1, 101);
+  EXPECT_EQ(map.find(1), map.begin());
+  EXPECT_EQ(map.find(2), map.end());
+}
+
 TEST(LinkedHashMap, Size) {
   linked_hash_map<int, int, int_hash, int_equals_to> map;
   EXPECT_EQ(0, map.size());
