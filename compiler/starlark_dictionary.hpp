@@ -25,7 +25,7 @@ class starlark_dictionary : public starlark_obj {
   bool inner_equals(comparator& comp, const starlark_obj* other) const override;
 
  private:
-  starlark::cnt::linked_hash_map<starlark_obj*, starlark_obj*, starlark_hash, starlark_equals_to> values;
+  starlark::cnt::linked_hash_map<starlark_obj*, starlark_obj*, starlark_hash_op, starlark_equals_to> values;
 };
 
 }  // namespace compiler

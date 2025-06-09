@@ -88,12 +88,33 @@ bool starlark_obj::equals(const starlark_obj& other) const {
   return cmp.run();
 }
 
-size_t starlark_hash::operator()(const starlark_obj* value) const {
+size_t starlark_hash_op::operator()(const starlark_obj* value) const {
   return value->hash();
 }
 
 bool starlark_equals_to::operator()(const starlark_obj* lhs, const starlark_obj* rhs) const {
   return lhs->equals(*rhs);
+}
+
+int64_t starlark_hash(std::span<int64_t> values) {
+  constexpr uint64_t hash_prime1 = 11400714785074694791UL;
+  constexpr uint64_t hash_prime2 = 14029467366897019727UL;
+  constexpr uint64_t hash_prime5 = 2870177450012600261UL;
+
+  int64_t acc = hash_prime5;
+  for (const auto& element_hash : values) {
+    if (element_hash == -1) {
+      return -1;
+    }
+    acc += element_hash * hash_prime2;
+    acc = std::rotl<uint64_t>(acc, 31);
+    acc *= hash_prime1;
+  }
+  acc += values.size() ^ (hash_prime5 ^ 3527539UL);
+  if (acc == -1) {
+    return 1546275796;
+  }
+  return acc;
 }
 
 }  // namespace compiler

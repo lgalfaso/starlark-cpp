@@ -3,9 +3,10 @@
 #ifndef COMPILER_STARLARK_OBJECT_HPP_
 #define COMPILER_STARLARK_OBJECT_HPP_
 
-#include <unordered_set>
+#include <span>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 #pragma GCC visibility push(default)
@@ -85,13 +86,15 @@ class starlark_obj {
   friend class comparator;
 };
 
-struct starlark_hash {
+struct starlark_hash_op {
   size_t operator()(const starlark_obj* value) const;
 };
 
 struct starlark_equals_to {
   bool operator()(const starlark_obj* lhs, const starlark_obj* rhs) const;
 };
+
+int64_t starlark_hash(std::span<int64_t> values);
 
 }  // namespace compiler
 }  // namespace starlark

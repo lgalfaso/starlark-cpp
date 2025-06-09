@@ -73,26 +73,17 @@ bool starlark_tuple::truthy() const {
 }
 
 int64_t starlark_tuple::hash() const {
-  constexpr uint64_t hash_prime1 = 11400714785074694791UL;
-  constexpr uint64_t hash_prime2 = 14029467366897019727UL;
-  constexpr uint64_t hash_prime5 = 2870177450012600261UL;
-
-  // TODO(lmirelmann): Implement without recursion.
-  int64_t acc = hash_prime5;
+  std::vector<int64_t> element_hashes;
+  element_hashes.reserve(values.size());
   for (const auto& element : values) {
+    // TODO(lmirelmann): Implement without recursion.
     int64_t element_hash = element->hash();
     if (element_hash == -1) {
       return -1;
     }
-    acc += element_hash * hash_prime2;
-    acc = std::rotl<uint64_t>(acc, 31);
-    acc *= hash_prime1;
+    element_hashes.push_back(element_hash);
   }
-  acc += values.size() ^ (hash_prime5 ^ 3527539UL);
-  if (acc == -1) {
-    return 1546275796;
-  }
-  return acc;
+  return starlark_hash(std::span(element_hashes.begin(), element_hashes.end()));
 }
 
 starlark_tuple& starlark_tuple::add(starlark_obj* element) {
