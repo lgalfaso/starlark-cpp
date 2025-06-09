@@ -19,10 +19,10 @@ class starlark_bigint : public starlark_numeric {
   explicit starlark_bigint(const starlark::bigint::number& value);
   std::string_view type() const override;
   bool truthy() const override;
-  int64_t hash() const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
+  std::variant<int64_t, pending_hash> inner_hash() const override;
   starlark_numeric_type numeric_type() const override;
   const starlark::bigint::number& as_bigint() const override;
 

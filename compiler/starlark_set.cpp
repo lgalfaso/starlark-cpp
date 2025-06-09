@@ -73,7 +73,7 @@ bool starlark_set::inner_equals(comparator& comp, const starlark_obj* other) con
   return true;
 }
 
-int64_t starlark_set::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_set::inner_hash() const {
   // TODO(lmirelmann): At the moment, the understanding is that this is the right behavior.
   //   This may be revisited once we implement freeze.
   return -1;

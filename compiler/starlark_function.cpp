@@ -26,7 +26,7 @@ bool starlark_built_in_function::inner_equals(comparator& comp, const starlark_o
   return false;
 }
 
-int64_t starlark_built_in_function::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_built_in_function::inner_hash() const {
   // TODO(lmirelmann): Implement.
   return 0;
 }
@@ -52,7 +52,7 @@ bool starlark_function::inner_equals(comparator& comp, const starlark_obj* other
   return false;
 }
 
-int64_t starlark_function::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_function::inner_hash() const {
   // TODO(lmirelmann): Implement.
   return 0;
 }

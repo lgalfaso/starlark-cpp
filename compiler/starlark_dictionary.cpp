@@ -82,7 +82,7 @@ bool starlark_dictionary::inner_equals(comparator& comp, const starlark_obj* oth
   return true;
 }
 
-int64_t starlark_dictionary::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_hash() const {
   // TODO(lmirelmann): At the moment, the understanding is that this is the right behavior.
   //   This may be revisited once we implement freeze.
   return -1;

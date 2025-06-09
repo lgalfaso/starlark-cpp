@@ -30,7 +30,7 @@ bool starlark_bigint::truthy() const {
   return value != bigint::number::zero;
 }
 
-int64_t starlark_bigint::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_bigint::inner_hash() const {
   int64_t result = 0;
   for (int i = value.length() - 1; i >= 0; --i) {
     auto y = value.at(i);

@@ -4,8 +4,6 @@
 
 #include <cassert>
 
-#include <iostream>
-
 #include <bit>
 #include <format>
 #include <string>
@@ -32,7 +30,7 @@ bool starlark_integer::truthy() const {
   return value != 0;
 }
 
-int64_t starlark_integer::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash() const {
   // This implementation makes the assumption that the right shifting of
   // negative numbers is not sign extended, and that the representation of
   // integers is two's coplement. The point in the code that makes
@@ -81,7 +79,7 @@ int64_t starlark_integer::hash() const {
   if (result == -1) {
     result = -2;
   }
-  return result;
+  return (int64_t)result;
 }
 
 starlark_numeric_type starlark_integer::numeric_type() const {

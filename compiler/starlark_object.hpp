@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <variant>
 #include <vector>
 
 #pragma GCC visibility push(default)
@@ -76,11 +77,14 @@ class starlark_obj {
   std::string repr() const;
   virtual bool truthy() const = 0;
   bool equals(const starlark_obj& other) const;
-  virtual int64_t hash() const = 0;
+  int64_t hash() const;
 
  protected:
+  typedef std::span<const starlark_obj* const> pending_hash;
+
   virtual bool inner_repr(printer& print, printer_action action) const = 0;
   virtual bool inner_equals(comparator& comp, const starlark_obj* other) const = 0;
+  virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
 
   friend class printer;
   friend class comparator;

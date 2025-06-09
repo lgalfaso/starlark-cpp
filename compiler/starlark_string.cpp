@@ -61,11 +61,11 @@ bool starlark_string::inner_equals(comparator& comp, const starlark_obj* other) 
          value == other->str();
 }
 
-int64_t starlark_string::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() const {
   if (value.length() == 0) {
     return 0;
   }
-  return siphash(value.data(), value.length(), 0x0001020304050607, 0x08090a0b0c0d0e0f);
+  return (int64_t)siphash(value.data(), value.length(), 0x0001020304050607, 0x08090a0b0c0d0e0f);
 }
 
 }  // namespace compiler

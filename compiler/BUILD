@@ -407,6 +407,7 @@ cc_library(
     srcs = ["starlark_tuple.cpp"],
     hdrs = ["starlark_tuple.hpp"],
     deps = [
+        ":starlark_list",
         ":starlark_object",
     ],
 )

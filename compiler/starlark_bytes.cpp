@@ -48,11 +48,11 @@ bool starlark_bytes::inner_equals(comparator& comp, const starlark_obj* other) c
       value == (static_cast<const starlark_bytes*>(other))->value;
 }
 
-int64_t starlark_bytes::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::inner_hash() const {
   if (value.length() == 0) {
     return 0;
   }
-  return siphash(value.data(), value.length(), 0x0001020304050607, 0x08090a0b0c0d0e0f);
+  return (int64_t)siphash(value.data(), value.length(), 0x0001020304050607, 0x08090a0b0c0d0e0f);
 }
 
 }  // namespace compiler

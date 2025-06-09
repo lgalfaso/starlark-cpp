@@ -17,10 +17,10 @@ class starlark_float : public starlark_numeric {
   explicit starlark_float(double value);
   std::string_view type() const override;
   bool truthy() const override;
-  int64_t hash() const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
+  std::variant<int64_t, pending_hash> inner_hash() const override;
   starlark_numeric_type numeric_type() const override;
   double as_float() const override;
 

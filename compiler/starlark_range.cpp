@@ -26,7 +26,7 @@ bool starlark_range::inner_equals(comparator& comp, const starlark_obj* other) c
   return false;
 }
 
-int64_t starlark_range::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_range::inner_hash() const {
   // TODO(lmirelmann): Implement.
   return -1;
 }

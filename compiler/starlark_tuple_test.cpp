@@ -6,11 +6,13 @@
 
 #include "compiler/starlark_bool.hpp"
 #include "compiler/starlark_integer.hpp"
+#include "compiler/starlark_list.hpp"
 #include "compiler/starlark_none.hpp"
 #include "compiler/starlark_tuple.hpp"
 
 using starlark::compiler::starlark_bool;
 using starlark::compiler::starlark_integer;
+using starlark::compiler::starlark_list;
 using starlark::compiler::starlark_none;
 using starlark::compiler::starlark_tuple;
 
@@ -89,11 +91,15 @@ TEST(StarlarkTuple, Hash) {
   starlark_none none;
   starlark_integer zero(0);
   starlark_integer one(1);
+  starlark_tuple tuple;
+  starlark_list list;
   EXPECT_EQ(5740354900026072187, starlark_tuple().hash());
   EXPECT_EQ(-8753497827991233192, starlark_tuple().add(&zero).hash());
   EXPECT_EQ(-8458139203682520985, starlark_tuple().add(&zero).add(&zero).hash());
   EXPECT_EQ(-6644214454873602895, starlark_tuple().add(&one).hash());
   EXPECT_EQ(9181102132670838864, starlark_tuple().add(&none).hash());
+  EXPECT_EQ(-5486347211504344842, starlark_tuple().add(&tuple).hash());
+  EXPECT_EQ(-1, starlark_tuple().add(&list).hash());
 }
 
 }  // namespace

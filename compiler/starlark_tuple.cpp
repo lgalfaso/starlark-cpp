@@ -72,18 +72,8 @@ bool starlark_tuple::truthy() const {
   return !values.empty();
 }
 
-int64_t starlark_tuple::hash() const {
-  std::vector<int64_t> element_hashes;
-  element_hashes.reserve(values.size());
-  for (const auto& element : values) {
-    // TODO(lmirelmann): Implement without recursion.
-    int64_t element_hash = element->hash();
-    if (element_hash == -1) {
-      return -1;
-    }
-    element_hashes.push_back(element_hash);
-  }
-  return starlark_hash(std::span(element_hashes.begin(), element_hashes.end()));
+std::variant<int64_t, starlark_obj::pending_hash> starlark_tuple::inner_hash() const {
+  return std::span(values.begin(), values.end());
 }
 
 starlark_tuple& starlark_tuple::add(starlark_obj* element) {

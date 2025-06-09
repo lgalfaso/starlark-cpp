@@ -67,7 +67,7 @@ bool starlark_list::inner_equals(comparator& comp, const starlark_obj* other) co
   return true;
 }
 
-int64_t starlark_list::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_list::inner_hash() const {
   // TODO(lmirelmann): Implement, the spec states that the object is hashable if:
   // - If is freezed
   // - All entries are freezed

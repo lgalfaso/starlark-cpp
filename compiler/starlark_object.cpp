@@ -88,6 +88,46 @@ bool starlark_obj::equals(const starlark_obj& other) const {
   return cmp.run();
 }
 
+int64_t starlark_obj::hash() const {
+  auto candidate = inner_hash();
+  if (std::holds_alternative<int64_t>(candidate)) {
+    return std::get<int64_t>(candidate);
+  }
+
+  // This implementation is recursion-free.
+  std::vector<std::vector<const starlark_obj*>> pending;
+  std::vector<std::vector<int64_t>> done;
+  pending_hash pending_hash_candidate = std::get<pending_hash>(candidate);
+  pending.emplace_back(pending_hash_candidate.rbegin(), pending_hash_candidate.rend());
+  done.emplace_back();
+  while (true) {
+    if (pending.back().empty()) {
+      pending.pop_back();
+      int64_t new_hash = starlark_hash(std::span<int64_t>(done.back().begin(), done.back().end()));
+      done.pop_back();
+      if (done.empty()) {
+        return new_hash;
+      }
+      done.back().emplace_back(new_hash);
+    } else {
+      const starlark_obj* element = pending.back().back();
+      pending.back().pop_back();
+      candidate = element->inner_hash();
+      if (std::holds_alternative<int64_t>(candidate)) {
+        int64_t new_hash = std::get<int64_t>(candidate);
+        if (new_hash == -1) {
+          return new_hash;
+        }
+        done.back().emplace_back(new_hash);
+      } else {
+        pending_hash pending_hash_candidate = std::get<pending_hash>(candidate);
+        pending.emplace_back(pending_hash_candidate.rbegin(), pending_hash_candidate.rend());
+        done.emplace_back();
+      }
+    }
+  }
+}
+
 size_t starlark_hash_op::operator()(const starlark_obj* value) const {
   return value->hash();
 }

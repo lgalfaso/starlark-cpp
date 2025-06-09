@@ -34,7 +34,7 @@ bool starlark_bool::inner_equals(comparator& comp, const starlark_obj* other) co
     value == other->truthy();
 }
 
-int64_t starlark_bool::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_bool::inner_hash() const {
   return value ? 1 : 0;
 }
 

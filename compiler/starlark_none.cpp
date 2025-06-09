@@ -27,7 +27,7 @@ bool starlark_none::inner_equals(comparator& comp, const starlark_obj* other) co
   return type() == other->type();
 }
 
-int64_t starlark_none::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_none::inner_hash() const {
   return 0xfca86420;
 }
 

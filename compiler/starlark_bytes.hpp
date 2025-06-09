@@ -17,11 +17,11 @@ class starlark_bytes : public starlark_obj {
   explicit starlark_bytes(const std::string& value);
   std::string_view type() const override;
   bool truthy() const override;
-  int64_t hash() const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(comparator& comp, const starlark_obj* other) const override;
+  std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
   std::string value;

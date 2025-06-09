@@ -20,7 +20,7 @@ bool starlark_struct::inner_equals(comparator& comp, const starlark_obj* other) 
   return false;
 }
 
-int64_t starlark_struct::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_struct::inner_hash() const {
   // TODO(lmirelmann): Implement.
   return -1;
 }

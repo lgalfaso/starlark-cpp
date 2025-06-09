@@ -63,7 +63,7 @@ bool starlark_float::truthy() const {
   return value != 0.0;
 }
 
-int64_t starlark_float::hash() const {
+std::variant<int64_t, starlark_obj::pending_hash> starlark_float::inner_hash() const {
   if (!std::isfinite(value)) {
     if (!std::isinf(value)) {
       return 0x10411c89;
