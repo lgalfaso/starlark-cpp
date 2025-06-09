@@ -51,6 +51,7 @@ bool starlark_dictionary::inner_repr(printer& print, printer_action action) cons
       print.append("}");
       return false;
     case printer_action::print_recursion:
+    default:
       print.append("{...}");
       return false;
   }

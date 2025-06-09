@@ -68,6 +68,7 @@ TEST(StarlarkDictionary, Truthy) {
 TEST(StarlarkDictionary, Equals) {
   starlark_none none;
   starlark_bool bool_true(true);
+  EXPECT_FALSE(starlark_dictionary().equals(none));
   EXPECT_TRUE(starlark_dictionary().equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_dictionary().insert(&none, &none).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_dictionary().equals(starlark_dictionary().insert(&none, &none)));
@@ -91,6 +92,10 @@ TEST(StarlarkDictionary, EqualsInDifferentOrder) {
   dict_3.insert(&bool_false, &bool_false).insert(&bool_true, &bool_true).insert(&two, &two).insert(&one, &one).insert(&zero, &zero).insert(&none, &none);
   EXPECT_TRUE(dict_1.equals(dict_2));
   EXPECT_TRUE(dict_1.equals(dict_3));
+}
+
+TEST(StarlarkDictionary, Hash) {
+  EXPECT_EQ(starlark_dictionary().hash(), -1);
 }
 
 }  // namespace
