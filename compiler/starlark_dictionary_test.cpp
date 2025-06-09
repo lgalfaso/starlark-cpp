@@ -65,4 +65,32 @@ TEST(StarlarkDictionary, Truthy) {
   EXPECT_TRUE(starlark_dictionary().insert(&none, &none).truthy());
 }
 
+TEST(StarlarkDictionary, Equals) {
+  starlark_none none;
+  starlark_bool bool_true(true);
+  EXPECT_TRUE(starlark_dictionary().equals(starlark_dictionary()));
+  EXPECT_FALSE(starlark_dictionary().insert(&none, &none).equals(starlark_dictionary()));
+  EXPECT_FALSE(starlark_dictionary().equals(starlark_dictionary().insert(&none, &none)));
+  EXPECT_TRUE(starlark_dictionary().insert(&none, &none).equals(starlark_dictionary().insert(&none, &none)));
+  EXPECT_FALSE(starlark_dictionary().insert(&none, &bool_true).equals(starlark_dictionary().insert(&none, &none)));
+  EXPECT_FALSE(starlark_dictionary().insert(&bool_true, &none).equals(starlark_dictionary().insert(&none, &none)));
+}
+
+TEST(StarlarkDictionary, EqualsInDifferentOrder) {
+  starlark_none none;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_bool bool_true(true);
+  starlark_bool bool_false(false);
+  starlark_dictionary dict_1;
+  starlark_dictionary dict_2;
+  starlark_dictionary dict_3;
+  dict_1.insert(&none, &none).insert(&zero, &zero).insert(&one, &one).insert(&two, &two).insert(&bool_true, &bool_true).insert(&bool_false, &bool_false);
+  dict_2.insert(&none, &none).insert(&zero, &zero).insert(&one, &one).insert(&two, &two).insert(&bool_true, &bool_true).insert(&bool_false, &bool_false);
+  dict_3.insert(&bool_false, &bool_false).insert(&bool_true, &bool_true).insert(&two, &two).insert(&one, &one).insert(&zero, &zero).insert(&none, &none);
+  EXPECT_TRUE(dict_1.equals(dict_2));
+  EXPECT_TRUE(dict_1.equals(dict_3));
+}
+
 }  // namespace

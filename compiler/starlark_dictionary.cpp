@@ -61,18 +61,35 @@ bool starlark_dictionary::truthy() const {
 }
 
 bool starlark_dictionary::inner_equals(comparator& comp, const starlark_obj* other) const {
-  // TODO(lmirelmann): Implement.
-  return false;
+  if (type() != other->type()) {
+    return false;
+  }
+  const starlark_dictionary* n_other = reinterpret_cast<const starlark_dictionary*>(other);
+  if (values.size() != n_other->values.size()) {
+    return false;
+  }
+  for (const auto& element : values) {
+    auto other_element = n_other->values.find(element.first);
+    if (other_element == n_other->values.end()) {
+      return false;
+    }
+    comp.add_task(comparator::pending_task{
+      .lhs = element.second,
+      .rhs = other_element->second,
+    });
+  }
+  return true;
 }
 
 int64_t starlark_dictionary::hash() const {
-  // TODO(lmirelmann): Implement.
+  // TODO(lmirelmann): At the moment, the understanding is that this is the right behavior.
+  //   This may be revisited once we implement freeze.
   return -1;
 }
 
 starlark_dictionary& starlark_dictionary::insert(starlark_obj* key, starlark_obj* value) {
   if (key->hash() == -1) {
-    // TODO(lmirelmann): Handle this case.
+    // TODO(lmirelmann): Report the error.
     return *this;
   }
   values.insert(key, value);

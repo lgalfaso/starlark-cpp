@@ -74,13 +74,14 @@ bool starlark_set::inner_equals(comparator& comp, const starlark_obj* other) con
 }
 
 int64_t starlark_set::hash() const {
-  // TODO(lmirelmann): Implement once we implement freeze.
+  // TODO(lmirelmann): At the moment, the understanding is that this is the right behavior.
+  //   This may be revisited once we implement freeze.
   return -1;
 }
 
 starlark_set& starlark_set::add(starlark_obj* element) {
   if (element->hash() == -1) {
-    // TODO(lmirelmann): Handle this case.
+    // TODO(lmirelmann): Report the error.
     return *this;
   }
   values.insert(element);
