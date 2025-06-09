@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+#include <iostream>
+
 #include <bit>
 #include <format>
 #include <string>
@@ -21,7 +23,7 @@ std::string_view starlark_integer::type() const {
 }
 
 bool starlark_integer::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::top);
+  assert(action == printer_action::print_top);
   print.append(std::to_string(value));
   return false;
 }
@@ -64,8 +66,8 @@ int64_t starlark_integer::hash() const {
    * }
    * return result;
   */
-  int64_t result = value;
-  bool sign = result < 0;
+  uint64_t result = value;
+  bool sign = value < 0;
   if (sign) {
     result = -result;
   }
