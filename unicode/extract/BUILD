@@ -1,6 +1,6 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 package(
     default_visibility = ["//visibility:public"],

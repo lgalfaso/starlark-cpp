@@ -1,8 +1,8 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 load("//grammar:starlark_proto_encoder.bzl", "starlark_proto_encoder")
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test", "cc_binary")
 
 cc_library(
     name = "ast_listener",
@@ -17,12 +17,12 @@ cc_library(
 [
     cc_test(
         name = "ast_listener_test_" + f.replace("/", "_"),
+        size = "small",
         srcs = ["ast_listener_test.cpp"],
         args = [
             "$(location " + f + ")",
             "$(location " + f.replace(".star", ".txt") + ")",
         ],
-        size = "small",
         data = [
             f,
             f.replace(".star", ".txt"),
@@ -157,6 +157,7 @@ cc_binary(
     ),
     cc_test(
         name = "parser_test_" + f.replace("/", "_"),
+        size = "small",
         srcs = ["parser_test_check.cpp"],
         args = [
             "$(location " + f + ")",
@@ -166,7 +167,6 @@ cc_binary(
             f,
             ":parser_test_encoder_" + f.replace("/", "_"),
         ],
-        size = "small",
         deps = [
             ":parser",
             ":parsing_options",
@@ -181,6 +181,7 @@ cc_binary(
 [
     cc_test(
         name = "parser_test_" + f.replace("/", "_"),
+        size = "small",
         srcs = ["parser_test_valid.cpp"],
         args = [
             "$(location " + f + ")",
@@ -188,7 +189,6 @@ cc_binary(
         data = [
             f,
         ],
-        size = "small",
         deps = [
             ":parser",
             ":parsing_options",
@@ -204,6 +204,7 @@ cc_binary(
 [
     cc_test(
         name = "parser_test_" + f.replace("/", "_"),
+        size = "small",
         srcs = ["parser_test_invalid.cpp"],
         args = [
             "$(location " + f + ")",
@@ -211,7 +212,6 @@ cc_binary(
         data = [
             f,
         ],
-        size = "small",
         deps = [
             ":parser",
             ":parsing_options",
@@ -226,8 +226,8 @@ cc_binary(
 
 cc_test(
     name = "parser_test",
-    srcs = ["parser_test.cpp"],
     size = "small",
+    srcs = ["parser_test.cpp"],
     deps = [
         ":parser",
         "//grammar/proto:starlark_cc_proto",
