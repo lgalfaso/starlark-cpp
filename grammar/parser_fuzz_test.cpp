@@ -3,7 +3,7 @@
 #include <string_view>
 
 #include "grammar/parser.hpp"
-#include "grammar/proto/starlark.pb.h"
+#include "proto/starlark_ast.pb.h"
 
 using starlark::ast::File;
 using starlark::grammar::logger;

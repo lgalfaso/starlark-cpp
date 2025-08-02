@@ -10,7 +10,7 @@
 
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
-#include "grammar/proto/starlark.pb.h"
+#include "proto/starlark_ast.pb.h"
 
 using google::protobuf::Arena;
 using starlark::grammar::log_level;

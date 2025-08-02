@@ -10,7 +10,7 @@ cc_library(
     hdrs = ["ast_listener.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        "//grammar/proto:starlark_cc_proto",
+        "//proto:starlark_ast_cc_proto",
     ],
 )
 
@@ -32,7 +32,7 @@ cc_library(
             ":parser",
             ":parsing_options",
             ":quoted",
-            "//grammar/proto:starlark_cc_proto",
+            "//proto:starlark_ast_cc_proto",
             "//third-party:defer",
             "@googletest//:gtest_main",
             "@protobuf",
@@ -121,7 +121,7 @@ cc_library(
         ":lexer",
         ":logging",
         ":options",
-        "//grammar/proto:starlark_cc_proto",
+        "//proto:starlark_ast_cc_proto",
         "//third-party:defer",
         "//unicode:normalization",
     ],
@@ -132,7 +132,7 @@ cc_binary(
     testonly = True,
     srcs = ["parser_proto_encoder.cpp"],
     deps = [
-        "//grammar/proto:starlark_cc_proto",
+        "//proto:starlark_ast_cc_proto",
         "//third-party:defer",
         "@protobuf",
     ],
@@ -143,7 +143,7 @@ cc_binary(
     srcs = ["parser_main.cpp"],
     deps = [
         ":parser",
-        "//grammar/proto:starlark_cc_proto",
+        "//proto:starlark_ast_cc_proto",
         "//third-party:defer",
         "@protobuf",
     ],
@@ -170,7 +170,7 @@ cc_binary(
         deps = [
             ":parser",
             ":parsing_options",
-            "//grammar/proto:starlark_cc_proto",
+            "//proto:starlark_ast_cc_proto",
             "//third-party:defer",
             "@googletest//:gtest_main",
             "@protobuf",
@@ -192,7 +192,7 @@ cc_binary(
         deps = [
             ":parser",
             ":parsing_options",
-            "//grammar/proto:starlark_cc_proto",
+            "//proto:starlark_ast_cc_proto",
             "//third-party:defer",
             "@googletest//:gtest_main",
             "@protobuf",
@@ -215,7 +215,7 @@ cc_binary(
         deps = [
             ":parser",
             ":parsing_options",
-            "//grammar/proto:starlark_cc_proto",
+            "//proto:starlark_ast_cc_proto",
             "//third-party:defer",
             "@googletest//:gtest_main",
             "@protobuf",
@@ -230,7 +230,7 @@ cc_test(
     srcs = ["parser_test.cpp"],
     deps = [
         ":parser",
-        "//grammar/proto:starlark_cc_proto",
+        "//proto:starlark_ast_cc_proto",
         "@googletest//:gtest_main",
         "@protobuf",
     ],

@@ -10,7 +10,7 @@
 #include "third-party/defer.hpp"
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
-#include "grammar/proto/starlark.pb.h"
+#include "proto/starlark_ast.pb.h"
 
 using starlark::grammar::log_level;
 using starlark::grammar::logger;

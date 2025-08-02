@@ -11,8 +11,8 @@
 #include "grammar/ast_listener.hpp"
 #include "grammar/parser.hpp"
 #include "grammar/parsing_options.hpp"
-#include "grammar/proto/starlark.pb.h"
 #include "grammar/quoted.hpp"
+#include "proto/starlark_ast.pb.h"
 #include "third-party/defer.hpp"
 
 using starlark::grammar::log_level;

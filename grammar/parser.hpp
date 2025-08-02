@@ -12,7 +12,7 @@
 #include "grammar/lexer.hpp"
 #include "grammar/logging.hpp"
 #include "grammar/options.hpp"
-#include "grammar/proto/starlark.pb.h"
+#include "proto/starlark_ast.pb.h"
 
 #pragma GCC visibility push(default)
 

@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "grammar/proto/starlark.pb.h"
+#include "proto/starlark_ast.pb.h"
 
 #pragma GCC visibility push(default)
 

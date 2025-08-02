@@ -21,6 +21,6 @@ cc_library(
         "//grammar:logging",
         "//grammar:options",
         "//grammar:parser",
-        "//grammar/proto:starlark_cc_proto",
+        "//proto:starlark_ast_cc_proto",
     ],
 )

@@ -11,7 +11,7 @@
 
 #include "grammar/parser.hpp"
 #include "grammar/parsing_options.hpp"
-#include "grammar/proto/starlark.pb.h"
+#include "proto/starlark_ast.pb.h"
 #include "third-party/defer.hpp"
 
 using google::protobuf::util::MessageDifferencer;

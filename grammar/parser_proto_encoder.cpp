@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "grammar/proto/starlark.pb.h"
+#include "proto/starlark_ast.pb.h"
 #include "third-party/defer.hpp"
 
 using google::protobuf::TextFormat;
