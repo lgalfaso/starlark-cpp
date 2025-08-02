@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package starlark.bytecode;
+
+message Program {
+  repeated OpCode op_code = 1;
+}
+
+message OpCode {
+  oneof op_code {
+    // TODO(lmirelmann): It is unclear whether None, True and False are a reserved words.
+    // ConstNone const_none = 1;
+    // ConstBool const_bool = 2;
+    ConstInt const_int = 3;
+    ConstFloat const_float = 4;
+    ConstString const_string = 5;
+    ConstBytes const_bytes = 6;
+    Drop drop = 7;
+  }
+}
+
+// message ConstNone {}
+// message ConstBool {}
+message ConstInt {
+  string value = 1;
+}
+message ConstFloat {}
+message ConstString {}
+message ConstBytes {}
+message Drop {}
+

@@ -14,3 +14,15 @@ cc_proto_library(
     visibility = ["//visibility:public"],
     deps = [":starlark_ast_proto"],
 )
+
+proto_library(
+    name = "starlark_bytecode_proto",
+    srcs = ["starlark_bytecode.proto"],
+    visibility = ["//visibility:public"],
+)
+
+cc_proto_library(
+    name = "starlark_bytecode_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":starlark_bytecode_proto"],
+)

@@ -16,7 +16,6 @@
 
 using google::protobuf::Arena;
 using google::protobuf::Message;
-using google::protobuf::util::MessageDifferencer;
 using starlark::ast::File;
 using starlark::grammar::log_level;
 using starlark::grammar::logger;

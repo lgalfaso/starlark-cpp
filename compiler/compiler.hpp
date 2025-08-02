@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-#include "compiler/bytecode.hpp"
+#include "proto/starlark_bytecode.pb.h"
 
 #pragma GCC visibility push(default)
 
@@ -15,7 +15,8 @@ namespace compiler {
 class compiler {
  public:
   explicit compiler(std::string_view starlark_program);
-  program compile();
+  // TODO(lmirelmann): Define whether this should take an Arena and return a pointer to `Program`.
+  starlark::bytecode::Program compile();
 
  private:
   std::string_view starlark_program;

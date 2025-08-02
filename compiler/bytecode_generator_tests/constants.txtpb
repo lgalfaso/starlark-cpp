@@ -1,0 +1,9 @@
+op_code {
+  const_int {
+    value: "1"
+  }
+}
+op_code {
+  drop {
+  }
+}

@@ -6,11 +6,13 @@
 #include <string>
 
 #include "grammar/ast_listener.hpp"
-#include "grammar/parser.hpp"
 #include "grammar/logging.hpp"
 #include "grammar/options.hpp"
+#include "grammar/parser.hpp"
 
 using starlark::ast::File;
+using starlark::ast::Statement;
+using starlark::bytecode::Program;
 using starlark::grammar::ast_listener;
 using starlark::grammar::ast_listener_base;
 using starlark::grammar::log_level;
@@ -25,17 +27,29 @@ namespace {
 
 class bytecode_generator : public ast_listener_base {
  public:
-  explicit bytecode_generator(program& output) : output(output) {}
+  explicit bytecode_generator(Program& output);
+  void exit_statement(const Statement* statement);
+  void enter_int_value(const std::string* int_value);
 
  private:
-  program& output;
+  Program& output;
 };
+
+bytecode_generator::bytecode_generator(Program& output) : output(output) {}
+
+void bytecode_generator::exit_statement(const Statement* statement) {
+  output.add_op_code()->mutable_drop();
+}
+
+void bytecode_generator::enter_int_value(const std::string* int_value) {
+  *output.add_op_code()->mutable_const_int()->mutable_value() = *int_value;
+}
 
 }  // namespace
 
 compiler::compiler(std::string_view starlark_program) : starlark_program(starlark_program) {}
 
-program compiler::compile() {
+Program compiler::compile() {
   logger logging;
   // TODO(lmirelmann): Log level should be configurable.
   logging.set_level(log_level::WARNING);
@@ -51,7 +65,7 @@ program compiler::compile() {
 
   // TODO(lmirelmann): If there are errors, then return early.
 
-  program result;
+  Program result;
   bytecode_generator listener(result);
   starlark::grammar::ast_walker walker;
   walker.walk(starlark_file, listener);
