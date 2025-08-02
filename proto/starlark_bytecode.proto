@@ -8,19 +8,16 @@ message Program {
 
 message OpCode {
   oneof op_code {
-    // TODO(lmirelmann): It is unclear whether None, True and False are a reserved words.
-    // ConstNone const_none = 1;
-    // ConstBool const_bool = 2;
-    ConstInt const_int = 3;
-    ConstFloat const_float = 4;
-    ConstString const_string = 5;
-    ConstBytes const_bytes = 6;
-    Drop drop = 7;
+    // TODO(lmirelmann): `None`, `True` and `False` are not reserved words.
+    //     https://github.com/bazelbuild/starlark/issues/312
+    ConstInt const_int = 1;
+    ConstFloat const_float = 2;
+    ConstString const_string = 3;
+    ConstBytes const_bytes = 4;
+    Drop drop = 5;
   }
 }
 
-// message ConstNone {}
-// message ConstBool {}
 message ConstInt {
   string value = 1;
 }
