@@ -7,9 +7,6 @@ proto_library(
     name = "starlark_ast_proto",
     srcs = ["starlark_ast.proto"],
     visibility = ["//visibility:public"],
-    deps = [
-        "@protobuf//:any_proto",
-    ],
 )
 
 cc_proto_library(
