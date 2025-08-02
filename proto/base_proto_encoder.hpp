@@ -9,14 +9,13 @@
 
 #include <memory>
 
-#include "proto/starlark_ast.pb.h"
 #include "third-party/defer.hpp"
 
 using google::protobuf::TextFormat;
 using google::protobuf::io::FileInputStream;
-using starlark::ast::File;
 
-int main(int argc, char* argv[]) {
+template<typename T>
+int encode_proto(int argc, char* argv[]) {
   if (argc != 3) {
     return 1;
   }
@@ -28,8 +27,8 @@ int main(int argc, char* argv[]) {
   defer { close(in_fd); };
 
   auto input = std::make_unique<FileInputStream>(in_fd);
-  File starlark_file;
-  if (!TextFormat::Parse(input.get(), &starlark_file)) {
+  T starlark_type;
+  if (!TextFormat::Parse(input.get(), &starlark_type)) {
     return 3;
   }
 
@@ -43,7 +42,7 @@ int main(int argc, char* argv[]) {
   }
   defer { close(out_fd); };
 
-  if (!starlark_file.SerializeToFileDescriptor(out_fd)) {
+  if (!starlark_type.SerializeToFileDescriptor(out_fd)) {
     return 5;
   }
   if (fchmod(out_fd, S_IRUSR) != 0) {

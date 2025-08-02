@@ -7,19 +7,13 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/text_format.h>
-
 #include <string>
 
 #include "compiler/compiler.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "third-party/defer.hpp"
 
-using google::protobuf::Arena;
 using google::protobuf::Message;
-using google::protobuf::TextFormat;
-using google::protobuf::io::FileInputStream;
 using google::protobuf::util::MessageDifferencer;
 using starlark::bytecode::Program;
 using starlark::compiler::compiler;
@@ -57,9 +51,7 @@ TEST(CompilerBytecode, TestCase) {
     int proto_fd = open(argv[2].c_str(), O_RDONLY);
     ASSERT_GT(proto_fd, 0);
     defer { close(proto_fd); };
-    // TODO(lmirelmann): Add a rule that encodes the proto and use the binary here.
-    auto input = std::make_unique<FileInputStream>(proto_fd);
-    ASSERT_TRUE(TextFormat::Parse(input.get(), &starlark_program));
+    ASSERT_TRUE(starlark_program.ParseFromFileDescriptor(proto_fd));
   }
 
   compiler star_compiler(starlark_code);

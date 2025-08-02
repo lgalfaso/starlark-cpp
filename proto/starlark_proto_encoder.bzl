@@ -21,7 +21,7 @@ def _starlark_proto_encoder_rule_impl(ctx):
             outputs.append(output_file)
     return DefaultInfo(files = depset(outputs))
 
-_starlark_proto_encoder_rule = rule(
+_starlark_ast_proto_encoder_rule = rule(
     implementation = _starlark_proto_encoder_rule_impl,
     attrs = {
         "input": attr.label_list(
@@ -29,7 +29,7 @@ _starlark_proto_encoder_rule = rule(
         ),
         "strip_prefix": attr.string(),
         "_encoder": attr.label(
-            default = Label("//grammar:parser_proto_encoder"),
+            default = Label("//proto:ast_proto_encoder"),
             allow_single_file = True,
             executable = True,
             cfg = "exec",
@@ -37,10 +37,34 @@ _starlark_proto_encoder_rule = rule(
     },
 )
 
-def starlark_proto_encoder(**kwargs):
+def starlark_ast_proto_encoder(**kwargs):
     if "strip_prefix" in kwargs:
         fail("Cannot have the argument `strip_prefix`")
-    _starlark_proto_encoder_rule(
+    _starlark_ast_proto_encoder_rule(
+        strip_prefix = native.package_name(),
+        **kwargs
+    )
+
+_starlark_bytecode_proto_encoder_rule = rule(
+    implementation = _starlark_proto_encoder_rule_impl,
+    attrs = {
+        "input": attr.label_list(
+            allow_files = [".txtpb"],
+        ),
+        "strip_prefix": attr.string(),
+        "_encoder": attr.label(
+            default = Label("//proto:bytecode_proto_encoder"),
+            allow_single_file = True,
+            executable = True,
+            cfg = "exec",
+        ),
+    },
+)
+
+def starlark_bytecode_proto_encoder(**kwargs):
+    if "strip_prefix" in kwargs:
+        fail("Cannot have the argument `strip_prefix`")
+    _starlark_bytecode_proto_encoder_rule(
         strip_prefix = native.package_name(),
         **kwargs
     )

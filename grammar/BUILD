@@ -2,7 +2,7 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
-load("//grammar:starlark_proto_encoder.bzl", "starlark_proto_encoder")
+load("//proto:starlark_proto_encoder.bzl", "starlark_ast_proto_encoder")
 
 cc_library(
     name = "ast_listener",
@@ -128,17 +128,6 @@ cc_library(
 )
 
 cc_binary(
-    name = "parser_proto_encoder",
-    testonly = True,
-    srcs = ["parser_proto_encoder.cpp"],
-    deps = [
-        "//proto:starlark_ast_cc_proto",
-        "//third-party:defer",
-        "@protobuf",
-    ],
-)
-
-cc_binary(
     name = "parser_main",
     srcs = ["parser_main.cpp"],
     deps = [
@@ -150,7 +139,7 @@ cc_binary(
 )
 
 [[
-    starlark_proto_encoder(
+    starlark_ast_proto_encoder(
         name = "parser_test_encoder_" + f.replace("/", "_"),
         testonly = True,
         input = [f.removesuffix(".star") + ".txtpb"],
