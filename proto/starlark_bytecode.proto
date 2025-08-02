@@ -21,8 +21,17 @@ message OpCode {
 message ConstInt {
   string value = 1;
 }
-message ConstFloat {}
-message ConstString {}
-message ConstBytes {}
+
+message ConstFloat {
+  double value = 1;
+}
+
+message ConstString {
+  string value = 1;
+}
+
+message ConstBytes {
+  string value = 1;
+}
 message Drop {}
 

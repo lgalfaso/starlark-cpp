@@ -28,8 +28,11 @@ namespace {
 class bytecode_generator : public ast_listener_base {
  public:
   explicit bytecode_generator(Program& output);
-  void exit_statement(const Statement* statement);
-  void enter_int_value(const std::string* int_value);
+  void exit_statement(const Statement* statement) override;
+  void enter_int_value(const std::string* int_value) override;
+  void enter_float_value(double float_value) override;
+  void enter_string_value(const std::string* string_value) override;
+  void enter_bytes_value(const std::string* bytes_value) override;
 
  private:
   Program& output;
@@ -43,6 +46,18 @@ void bytecode_generator::exit_statement(const Statement* statement) {
 
 void bytecode_generator::enter_int_value(const std::string* int_value) {
   *output.add_op_code()->mutable_const_int()->mutable_value() = *int_value;
+}
+
+void bytecode_generator::enter_float_value(double float_value) {
+  output.add_op_code()->mutable_const_float()->set_value(float_value);
+}
+
+void bytecode_generator::enter_string_value(const std::string* string_value) {
+  *output.add_op_code()->mutable_const_string()->mutable_value() = *string_value;
+}
+
+void bytecode_generator::enter_bytes_value(const std::string* bytes_value) {
+  *output.add_op_code()->mutable_const_bytes()->mutable_value() = *bytes_value;
 }
 
 }  // namespace
