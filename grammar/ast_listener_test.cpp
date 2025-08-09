@@ -314,6 +314,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "ENTER ListExpression\n";
   }
 
+  void mid_list_expression(const starlark::ast::ListExpr* list_expression) override {
+    output += "MID ListExpression\n";
+  }
+
   void exit_list_expression(const starlark::ast::ListExpr* list_expression) override {
     output += "EXIT ListExpression\n";
   }
@@ -328,6 +332,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
 
   void enter_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {
     output += "ENTER DictionaryExpression\n";
+  }
+
+  void mid_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {
+    output += "MID DictionaryExpression\n";
   }
 
   void exit_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {

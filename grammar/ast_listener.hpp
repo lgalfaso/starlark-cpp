@@ -82,10 +82,12 @@ class ast_listener {
   virtual void enter_bytes_value(const std::string* bytes_value) = 0;
   virtual void exit_bytes_value(const std::string* bytes_value) = 0;
   virtual void enter_list_expression(const starlark::ast::ListExpr* list_expression) = 0;
+  virtual void mid_list_expression(const starlark::ast::ListExpr* list_expression) = 0;
   virtual void exit_list_expression(const starlark::ast::ListExpr* list_expression) = 0;
   virtual void enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) = 0;
   virtual void exit_list_comprehension(const starlark::ast::ListComp* list_comprehension) = 0;
   virtual void enter_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) = 0;
+  virtual void mid_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) = 0;
   virtual void exit_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) = 0;
   virtual void enter_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) = 0;
   virtual void exit_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) = 0;
@@ -168,10 +170,12 @@ class ast_listener_base : public ast_listener {
   void enter_bytes_value(const std::string* bytes_value) override;
   void exit_bytes_value(const std::string* bytes_value) override;
   void enter_list_expression(const starlark::ast::ListExpr* list_expression) override;
+  void mid_list_expression(const starlark::ast::ListExpr* list_expression) override;
   void exit_list_expression(const starlark::ast::ListExpr* list_expression) override;
   void enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) override;
   void exit_list_comprehension(const starlark::ast::ListComp* list_comprehension) override;
   void enter_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override;
+  void mid_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override;
   void exit_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override;
   void enter_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override;
   void exit_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override;

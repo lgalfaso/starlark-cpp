@@ -208,9 +208,11 @@ void ast_listener_base::enter_bytes_value(const std::string* bytes_value) {}
 void ast_listener_base::exit_bytes_value(const std::string* bytes_value) {}
 void ast_listener_base::enter_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::exit_list_expression(const ListExpr* list_expression) {}
+void ast_listener_base::mid_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::enter_list_comprehension(const ListComp* list_comprehension) {}
 void ast_listener_base::exit_list_comprehension(const ListComp* list_comprehension) {}
 void ast_listener_base::enter_dictionary_expression(const DictExpr* dictionary_expression) {}
+void ast_listener_base::mid_dictionary_expression(const DictExpr* dictionary_expression) {}
 void ast_listener_base::exit_dictionary_expression(const DictExpr* dictionary_expression) {}
 void ast_listener_base::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {}
 void ast_listener_base::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {}
@@ -786,6 +788,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
         case message_type::kListExpression:
           listener.enter_list_expression(top.list_expression);
           for (auto it = top.list_expression->element().rbegin(); it != top.list_expression->element().rend(); ++it) {
+            if (it != top.list_expression->element().rbegin()) {
+              to_process.push_back(message{
+                .list_expression = top.list_expression,
+                .type = message_type::kListExpression,
+                .op = message_type_op::kMid,
+              });
+            }
             to_process.push_back(message{
               .expression = &*it,
               .type = message_type::kExpression,
@@ -811,6 +820,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
         case message_type::kDictionaryExpression:
           listener.enter_dictionary_expression(top.dictionary_expression);
           for (auto it = top.dictionary_expression->entry().rbegin(); it != top.dictionary_expression->entry().rend(); ++it) {
+            if (it != top.dictionary_expression->entry().rbegin()) {
+              to_process.push_back(message{
+                .dictionary_expression = top.dictionary_expression,
+                .type = message_type::kDictionaryExpression,
+                .op = message_type_op::kMid,
+              });
+            }
             to_process.push_back(message{
               .map_entry = &*it,
               .type = message_type::kMapEntry,
@@ -1019,6 +1035,12 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
       switch (top.type) {
         case message_type::kBinaryExpression:
           listener.mid_binary_expression(top.binary_expression);
+          break;
+        case message_type::kListExpression:
+          listener.mid_list_expression(top.list_expression);
+          break;
+        case message_type::kDictionaryExpression:
+          listener.mid_dictionary_expression(top.dictionary_expression);
           break;
         default:
           break;

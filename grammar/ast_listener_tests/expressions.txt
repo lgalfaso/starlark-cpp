@@ -139,6 +139,7 @@ ENTER IntValue("1")
 EXIT IntValue
 EXIT Expression
 EXIT MapEntry
+MID DictionaryExpression
 ENTER MapEntry
 ENTER Expression
 ENTER StringValue("b")
@@ -172,6 +173,7 @@ ENTER Expression
 ENTER StringValue("a")
 EXIT StringValue
 EXIT Expression
+MID ListExpression
 ENTER Expression
 ENTER StringValue("b")
 EXIT StringValue
@@ -207,10 +209,12 @@ ENTER Expression
 ENTER IntValue("1")
 EXIT IntValue
 EXIT Expression
+MID ListExpression
 ENTER Expression
 ENTER IntValue("2")
 EXIT IntValue
 EXIT Expression
+MID ListExpression
 ENTER Expression
 ENTER IntValue("3")
 EXIT IntValue
@@ -251,10 +255,12 @@ ENTER Expression
 ENTER IntValue("4")
 EXIT IntValue
 EXIT Expression
+MID ListExpression
 ENTER Expression
 ENTER IntValue("5")
 EXIT IntValue
 EXIT Expression
+MID ListExpression
 ENTER Expression
 ENTER IntValue("6")
 EXIT IntValue
