@@ -182,6 +182,7 @@ void ast_listener_base::exit_if_expression(const IfExpr* if_expression) {}
 void ast_listener_base::enter_unary_expression(const UnaryExpr* unary_expression) {}
 void ast_listener_base::exit_unary_expression(const UnaryExpr* unary_expression) {}
 void ast_listener_base::enter_binary_expression(const BinaryExpr* binary_expression) {}
+void ast_listener_base::mid_binary_expression(const BinaryExpr* binary_expression) {}
 void ast_listener_base::exit_binary_expression(const BinaryExpr* binary_expression) {}
 void ast_listener_base::enter_lambda_expression(const LambdaExpr* lambda_expression) {}
 void ast_listener_base::exit_lambda_expression(const LambdaExpr* lambda_expression) {}
@@ -888,7 +889,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           });
           break;
       }
-    } else {
+    } else if (top.op == message_type_op::kExit) {
       switch (top.type) {
         case message_type::kStarlarkFile:
           listener.exit_file(top.file);
@@ -1012,6 +1013,14 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kMapEntry:
           listener.exit_map_entry(top.map_entry);
+          break;
+      }
+    } else {
+      switch (top.type) {
+        case message_type::kBinaryExpression:
+          listener.mid_binary_expression(top.binary_expression);
+          break;
+        default:
           break;
       }
     }

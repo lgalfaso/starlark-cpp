@@ -57,6 +57,7 @@ class ast_listener {
   virtual void enter_unary_expression(const starlark::ast::UnaryExpr* unary_expression) = 0;
   virtual void exit_unary_expression(const starlark::ast::UnaryExpr* unary_expression) = 0;
   virtual void enter_binary_expression(const starlark::ast::BinaryExpr* binary_expression) = 0;
+  virtual void mid_binary_expression(const starlark::ast::BinaryExpr* binary_expression) = 0;
   virtual void exit_binary_expression(const starlark::ast::BinaryExpr* binary_expression) = 0;
   virtual void enter_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) = 0;
   virtual void exit_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) = 0;
@@ -142,6 +143,7 @@ class ast_listener_base : public ast_listener {
   void enter_unary_expression(const starlark::ast::UnaryExpr* unary_expression) override;
   void exit_unary_expression(const starlark::ast::UnaryExpr* unary_expression) override;
   void enter_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override;
+  void mid_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override;
   void exit_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override;
   void enter_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override;
   void exit_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override;

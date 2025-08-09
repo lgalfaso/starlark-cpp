@@ -101,12 +101,14 @@ ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
 EXIT Expression
+MID BinaryExpression
 ENTER Expression
 ENTER IntValue("2")
 EXIT IntValue
 EXIT Expression
 EXIT BinaryExpression
 EXIT Expression
+MID BinaryExpression
 ENTER Expression
 ENTER IntValue("0")
 EXIT IntValue

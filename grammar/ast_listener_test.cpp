@@ -214,6 +214,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "ENTER BinaryExpression\n";
   }
 
+  void mid_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override {
+    output += "MID BinaryExpression\n";
+  }
+
   void exit_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override {
     output += "EXIT BinaryExpression\n";
   }
