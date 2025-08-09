@@ -401,7 +401,7 @@ TEST(Parser, TestCase) {
   }
 
   logger logging;
-  logging.set_level(log_level::ERROR);
+  logging.set_level(log_level::kError);
   starlark::grammar::options opts = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, opts, {}, logging);
   google::protobuf::Arena arena;

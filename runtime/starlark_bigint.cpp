@@ -21,7 +21,7 @@ std::string_view starlark_bigint::type() const {
 }
 
 bool starlark_bigint::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::print_top);
+  assert(action == printer_action::kPrintTop);
   print.append(value.to_string(10));
   return false;
 }
@@ -57,7 +57,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bigint::inner_hash() 
 }
 
 starlark_numeric_type starlark_bigint::numeric_type() const {
-  return starlark_numeric_type::type_bigint;
+  return starlark_numeric_type::kBigInt;
 }
 
 const starlark::bigint::number& starlark_bigint::as_bigint() const {

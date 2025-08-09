@@ -24,8 +24,8 @@ void printer::run() {
   while (!tasks.empty()) {
     auto top = tasks.back();
     tasks.pop_back();
-    if (top.action == printer_action::print_top && !stack.insert(top.obj).second) {
-      top.obj->inner_repr(*this, printer_action::print_recursion);
+    if (top.action == printer_action::kPrintTop && !stack.insert(top.obj).second) {
+      top.obj->inner_repr(*this, printer_action::kPrintRecursion);
       continue;
     }
     if (!top.obj->inner_repr(*this, top.action)) {
@@ -73,7 +73,7 @@ std::string starlark_obj::repr() const {
   printer print;
   print.add_task(printer::pending_task{
     .obj = this,
-    .action = printer_action::print_top,
+    .action = printer_action::kPrintTop,
   });
   print.run();
   return print.value();

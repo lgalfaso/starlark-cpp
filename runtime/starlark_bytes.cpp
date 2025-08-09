@@ -19,7 +19,7 @@ std::string_view starlark_bytes::type() const {
 }
 
 bool starlark_bytes::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::print_top);
+  assert(action == printer_action::kPrintTop);
   std::string result = "b";
   bool use_single_quote = !value.contains('\'') || value.contains('"');
   if (use_single_quote) {

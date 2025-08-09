@@ -12,9 +12,9 @@ namespace starlark {
 namespace runtime {
 
 enum class starlark_numeric_type {
-  type_int64,
-  type_bigint,
-  type_float
+  kInt64,
+  kBigInt,
+  kFloat
 };
 
 class starlark_numeric : public starlark_obj {

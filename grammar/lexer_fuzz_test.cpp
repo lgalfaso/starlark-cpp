@@ -15,7 +15,7 @@ void LexerFuzzing(const char* data, size_t size) {
   lexer l(std::string_view(data, size), logging);
   do {
     l.next_token();
-  } while (l.current_token().type() != token_type::eof);
+  } while (l.current_token().type() != token_type::kEof);
 }
 
 }  // namespace

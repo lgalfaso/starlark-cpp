@@ -18,11 +18,11 @@ namespace runtime {
 class starlark_obj;
 
 enum class printer_action {
-  print_top,
-  print_element_separator,
-  print_in_element_separator,
-  print_final,
-  print_recursion,
+  kPrintTop,
+  kPrintElementSeparator,
+  kPrintInElementSeparator,
+  kPrintFinal,
+  kPrintRecursion,
 };
 
 class printer {

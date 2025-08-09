@@ -22,7 +22,7 @@ std::string_view starlark_float::type() const {
 }
 
 bool starlark_float::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::print_top);
+  assert(action == printer_action::kPrintTop);
   // This tries to follow the same format as Python.
   auto result = std::format("{:.17g}", value);
   if (std::isfinite(value)) {
@@ -97,7 +97,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_float::inner_hash() c
 }
 
 starlark_numeric_type starlark_float::numeric_type() const {
-  return starlark_numeric_type::type_float;
+  return starlark_numeric_type::kFloat;
 }
 
 double starlark_float::as_float() const {

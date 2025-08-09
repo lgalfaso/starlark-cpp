@@ -16,7 +16,7 @@ std::string_view starlark_bool::type() const {
 }
 
 bool starlark_bool::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::print_top);
+  assert(action == printer_action::kPrintTop);
   if (value) {
     print.append("True");
   } else {

@@ -13,13 +13,13 @@ std::string_view starlark_dictionary::type() const {
 
 bool starlark_dictionary::inner_repr(printer& print, printer_action action) const {
   switch (action) {
-    case printer_action::print_top: {
+    case printer_action::kPrintTop: {
       if (values.size() == 0) {
         print.append("{}");
         return false;
       }
       print.append("{");
-      printer_action new_action = printer_action::print_final;
+      printer_action new_action = printer_action::kPrintFinal;
       for (auto it = values.rbegin(); it != values.rend(); ++it) {
         print.add_task(printer::pending_task{
           .obj = this,
@@ -27,30 +27,30 @@ bool starlark_dictionary::inner_repr(printer& print, printer_action action) cons
         });
         print.add_task(printer::pending_task{
           .obj = it->second,
-          .action = printer_action::print_top,
+          .action = printer_action::kPrintTop,
         });
         print.add_task(printer::pending_task{
           .obj = this,
-          .action = printer_action::print_in_element_separator,
+          .action = printer_action::kPrintInElementSeparator,
         });
         print.add_task(printer::pending_task{
           .obj = it->first,
-          .action = printer_action::print_top,
+          .action = printer_action::kPrintTop,
         });
-        new_action = printer_action::print_element_separator;
+        new_action = printer_action::kPrintElementSeparator;
       }
       return true;
     }
-    case printer_action::print_element_separator:
+    case printer_action::kPrintElementSeparator:
       print.append(", ");
       return true;
-    case printer_action::print_in_element_separator:
+    case printer_action::kPrintInElementSeparator:
       print.append(": ");
       return true;
-    case printer_action::print_final:
+    case printer_action::kPrintFinal:
       print.append("}");
       return false;
-    case printer_action::print_recursion:
+    case printer_action::kPrintRecursion:
     default:
       print.append("{...}");
       return false;

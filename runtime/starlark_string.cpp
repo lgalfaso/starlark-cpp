@@ -26,7 +26,7 @@ std::string starlark_string::str() const {
 }
 
 bool starlark_string::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::print_top);
+  assert(action == printer_action::kPrintTop);
   // TODO(lmirelmann): If this function were to be executed a lot and were to become
   // a performance issue, then there are a few things that can be optimized:
   // - The check for `use_single_quote` can be done in one pass

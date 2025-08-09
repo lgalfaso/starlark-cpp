@@ -16,11 +16,11 @@ namespace starlark {
 namespace grammar {
 
 enum class log_level {
-  DEBUG,
-  INFO,
-  WARNING,
-  ERROR,
-  FATAL,
+  kDebug,
+  kInfo,
+  kWarning,
+  kError,
+  kFatal,
 };
 
 struct log_entry {
@@ -42,7 +42,7 @@ class logger {
 
  private:
   std::vector<grammar::log_entry> entries;
-  log_level level = log_level::WARNING;
+  log_level level = log_level::kWarning;
 };
 
 

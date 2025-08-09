@@ -14,7 +14,7 @@ std::string_view starlark_none::type() const {
 }
 
 bool starlark_none::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::print_top);
+  assert(action == printer_action::kPrintTop);
   print.append("None");
   return false;
 }

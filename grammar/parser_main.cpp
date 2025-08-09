@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
 
     std::string arg{argv[i]};
     logger logging;
-    logging.set_level(log_level::ERROR);
+    logging.set_level(log_level::kError);
     bool is_build_or_workspace =
         arg.ends_with("WORKSPACE") ||
         arg.ends_with("WORKSPACE.bazel") ||

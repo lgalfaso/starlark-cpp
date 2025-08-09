@@ -67,7 +67,7 @@ compiler::compiler(std::string_view starlark_program) : starlark_program(starlar
 Program compiler::compile() {
   logger logging;
   // TODO(lmirelmann): Log level should be configurable.
-  logging.set_level(log_level::WARNING);
+  logging.set_level(log_level::kWarning);
   // TODO(lmirelmann): The extra symbols should be configurable.
   std::set<std::string> extra_symbols;
   parser star_parser(starlark_program,

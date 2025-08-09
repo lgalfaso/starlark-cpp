@@ -85,7 +85,7 @@ message AssignStmt {
     SLASH_EQUALS = 5;
     SLASH_SLASH_EQUALS = 6;
     PERCENT_EQUALS = 7;
-    AMP_EQUALS = 8;
+    AMPERSAND_EQUALS = 8;
     PIPE_EQUALS = 9;
     HAT_EQUALS = 10;
     LESS_LESS_EQUALS = 11;

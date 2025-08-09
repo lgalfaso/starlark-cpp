@@ -23,89 +23,89 @@ using testing::IsEmpty;
 namespace {
 
 const std::map<token_type, std::string> mapping = {
-  {token_type::ampersand, "AMPERSAND"},
-  {token_type::ampersand_equals, "AMPERSAND_EQUALS"},
-  {token_type::and_, "AND"},
-  {token_type::as, "AS"},
-  {token_type::assert, "ASSERT"},
-  {token_type::break_, "BREAK"},
-  {token_type::bytes, "BYTES"},
-  {token_type::caret, "CARET"},
-  {token_type::caret_equals, "CARET_EQUALS"},
-  {token_type::class_, "CLASS"},
-  {token_type::colon, "COLON"},
-  {token_type::comma, "COMMA"},
-  {token_type::continue_, "CONTINUE"},
-  {token_type::def, "DEF"},
-  {token_type::del, "DEL"},
-  {token_type::dot, "DOT"},
-  {token_type::elif, "ELIF"},
-  {token_type::else_, "ELSE"},
-  {token_type::bof, "BOF"},
-  {token_type::eof, "EOF"},
-  {token_type::equals, "EQUALS"},
-  {token_type::equals_equals, "EQUALS_EQUALS"},
-  {token_type::except, "EXCEPT"},
-  {token_type::finally, "FINALLY"},
-  {token_type::float_, "FLOAT"},
-  {token_type::for_, "FOR"},
-  {token_type::from, "FROM"},
-  {token_type::global, "GLOBAL"},
-  {token_type::greater, "GREATER"},
-  {token_type::greater_equals, "GREATER_EQUALS"},
-  {token_type::greater_greater, "GREATER_GREATER"},
-  {token_type::greater_greater_equals, "GREATER_GREATER_EQUALS"},
-  {token_type::identifier, "IDENTIFIER"},
-  {token_type::if_, "IF"},
-  {token_type::illegal, "ILLEGAL"},
-  {token_type::import, "IMPORT"},
-  {token_type::in, "IN"},
-  {token_type::indent, "INDENT"},
-  {token_type::int_, "INT"},
-  {token_type::is, "IS"},
-  {token_type::lambda, "LAMBDA"},
-  {token_type::lbrace, "LBRACE"},
-  {token_type::lbracket, "LBRACKET"},
-  {token_type::less, "LESS"},
-  {token_type::less_equals, "LESS_EQUALS"},
-  {token_type::less_less, "LESS_LESS"},
-  {token_type::less_less_equals, "LESS_LESS_EQUALS"},
-  {token_type::load, "LOAD"},
-  {token_type::lparen, "LPAREN"},
-  {token_type::minus, "MINUS"},
-  {token_type::minus_equals, "MINUS_EQUALS"},
-  {token_type::newline, "NEWLINE"},
-  {token_type::nonlocal, "NONLOCAL"},
-  {token_type::not_, "NOT"},
-  {token_type::not_equals, "NOT_EQUALS"},
-  {token_type::or_, "OR"},
-  {token_type::outdent, "OUTDENT"},
-  {token_type::pass, "PASS"},
-  {token_type::percent, "PERCENT"},
-  {token_type::percent_equals, "PERCENT_EQUALS"},
-  {token_type::pipe, "PIPE"},
-  {token_type::pipe_equals, "PIPE_EQUALS"},
-  {token_type::plus, "PLUS"},
-  {token_type::plus_equals, "PLUS_EQUALS"},
-  {token_type::raise, "RAISE"},
-  {token_type::rbrace, "RBRACE"},
-  {token_type::rbracket, "RBRACKET"},
-  {token_type::return_, "RETURN"},
-  {token_type::rparen, "RPAREN"},
-  {token_type::semi, "SEMI"},
-  {token_type::slash, "SLASH"},
-  {token_type::slash_equals, "SLASH_EQUALS"},
-  {token_type::slash_slash, "SLASH_SLASH"},
-  {token_type::slash_slash_equals, "SLASH_SLASH_EQUALS"},
-  {token_type::star, "STAR"},
-  {token_type::star_equals, "STAR_EQUALS"},
-  {token_type::star_star, "STAR_STAR"},
-  {token_type::string, "STRING"},
-  {token_type::tilde, "TILDE"},
-  {token_type::try_, "TRY"},
-  {token_type::while_, "WHILE"},
-  {token_type::with, "WITH"},
-  {token_type::yield, "YIELD"},
+  {token_type::kAmpersand, "AMPERSAND"},
+  {token_type::kAmpersandEquals, "AMPERSAND_EQUALS"},
+  {token_type::kAnd, "AND"},
+  {token_type::kAs, "AS"},
+  {token_type::kAssert, "ASSERT"},
+  {token_type::kBreak, "BREAK"},
+  {token_type::kBytes, "BYTES"},
+  {token_type::kCaret, "CARET"},
+  {token_type::kCaretEquals, "CARET_EQUALS"},
+  {token_type::kClass, "CLASS"},
+  {token_type::kColon, "COLON"},
+  {token_type::kComma, "COMMA"},
+  {token_type::kContinue, "CONTINUE"},
+  {token_type::kDef, "DEF"},
+  {token_type::kDel, "DEL"},
+  {token_type::kDot, "DOT"},
+  {token_type::kElif, "ELIF"},
+  {token_type::kElse, "ELSE"},
+  {token_type::kBof, "BOF"},
+  {token_type::kEof, "EOF"},
+  {token_type::kEquals, "EQUALS"},
+  {token_type::kEqualsEquals, "EQUALS_EQUALS"},
+  {token_type::kExcept, "EXCEPT"},
+  {token_type::kFinally, "FINALLY"},
+  {token_type::kFloat, "FLOAT"},
+  {token_type::kFor, "FOR"},
+  {token_type::kFrom, "FROM"},
+  {token_type::kGlobal, "GLOBAL"},
+  {token_type::kGreater, "GREATER"},
+  {token_type::kGreaterEquals, "GREATER_EQUALS"},
+  {token_type::kGreaterGreater, "GREATER_GREATER"},
+  {token_type::kGreaterGreaterEquals, "GREATER_GREATER_EQUALS"},
+  {token_type::kIdentifier, "IDENTIFIER"},
+  {token_type::kIf, "IF"},
+  {token_type::kIllegal, "ILLEGAL"},
+  {token_type::kImport, "IMPORT"},
+  {token_type::kIn, "IN"},
+  {token_type::kIndent, "INDENT"},
+  {token_type::kInt, "INT"},
+  {token_type::kIs, "IS"},
+  {token_type::kLambda, "LAMBDA"},
+  {token_type::kLBrace, "LBRACE"},
+  {token_type::kLBracket, "LBRACKET"},
+  {token_type::kLess, "LESS"},
+  {token_type::kLessEquals, "LESS_EQUALS"},
+  {token_type::kLessLess, "LESS_LESS"},
+  {token_type::kLessLessEquals, "LESS_LESS_EQUALS"},
+  {token_type::kLoad, "LOAD"},
+  {token_type::kLParen, "LPAREN"},
+  {token_type::kMinus, "MINUS"},
+  {token_type::kMinusEquals, "MINUS_EQUALS"},
+  {token_type::kNewline, "NEWLINE"},
+  {token_type::kNonlocal, "NONLOCAL"},
+  {token_type::kNot, "NOT"},
+  {token_type::kNotEquals, "NOT_EQUALS"},
+  {token_type::kOr, "OR"},
+  {token_type::kOutdent, "OUTDENT"},
+  {token_type::kPass, "PASS"},
+  {token_type::kPercent, "PERCENT"},
+  {token_type::kPercentEquals, "PERCENT_EQUALS"},
+  {token_type::kPipe, "PIPE"},
+  {token_type::kPipeEquals, "PIPE_EQUALS"},
+  {token_type::kPlus, "PLUS"},
+  {token_type::kPlusEquals, "PLUS_EQUALS"},
+  {token_type::kRaise, "RAISE"},
+  {token_type::kRBrace, "RBRACE"},
+  {token_type::kRBracket, "RBRACKET"},
+  {token_type::kReturn, "RETURN"},
+  {token_type::kRParen, "RPAREN"},
+  {token_type::kSemi, "SEMI"},
+  {token_type::kSlash, "SLASH"},
+  {token_type::kSlashEquals, "SLASH_EQUALS"},
+  {token_type::kSlashSlash, "SLASH_SLASH"},
+  {token_type::kSlashSlashEquals, "SLASH_SLASH_EQUALS"},
+  {token_type::kStar, "STAR"},
+  {token_type::kStarEquals, "STAR_EQUALS"},
+  {token_type::kStarStar, "STAR_STAR"},
+  {token_type::kString, "STRING"},
+  {token_type::kTilde, "TILDE"},
+  {token_type::kTry, "TRY"},
+  {token_type::kWhile, "WHILE"},
+  {token_type::kWith, "WITH"},
+  {token_type::kYield, "YIELD"},
 };
 
 std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
@@ -114,18 +114,18 @@ std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
     input.next_token();
     const auto& current_token = input.current_token();
     parts.push_back(mapping.at(current_token.type()));
-    if (current_token.type() == token_type::identifier ||
-        current_token.type() == token_type::string ||
-        current_token.type() == token_type::bytes ||
-        current_token.type() == token_type::illegal) {
+    if (current_token.type() == token_type::kIdentifier ||
+        current_token.type() == token_type::kString ||
+        current_token.type() == token_type::kBytes ||
+        current_token.type() == token_type::kIllegal) {
       parts.back() += "(";
       parts.back() += quoted(current_token.string_value());
       parts.back() += ")";
-    } else if (current_token.type() == token_type::int_) {
+    } else if (current_token.type() == token_type::kInt) {
       parts.back() += "(";
       parts.back() += current_token.int_value().to_string(10);
       parts.back() += ")";
-    } else if (current_token.type() == token_type::float_) {
+    } else if (current_token.type() == token_type::kFloat) {
       parts.back() += "(";
       parts.back() += std::to_string(current_token.double_value());
       parts.back() += ")";
@@ -138,7 +138,7 @@ std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
     parts.back() += std::to_string(current_token.end().row);
     parts.back() += ",";
     parts.back() += std::to_string(current_token.end().column);
-  } while (input.current_token().type() != token_type::eof);
+  } while (input.current_token().type() != token_type::kEof);
   return parts;
 }
 

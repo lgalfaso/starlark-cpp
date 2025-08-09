@@ -21,7 +21,7 @@ std::string_view starlark_integer::type() const {
 }
 
 bool starlark_integer::inner_repr(printer& print, printer_action action) const {
-  assert(action == printer_action::print_top);
+  assert(action == printer_action::kPrintTop);
   print.append(std::to_string(value));
   return false;
 }
@@ -83,7 +83,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash()
 }
 
 starlark_numeric_type starlark_integer::numeric_type() const {
-  return starlark_numeric_type::type_int64;
+  return starlark_numeric_type::kInt64;
 }
 
 int64_t starlark_integer::as_int64() const {

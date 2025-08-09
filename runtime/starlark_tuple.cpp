@@ -14,13 +14,13 @@ std::string_view starlark_tuple::type() const {
 
 bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
   switch (action) {
-    case printer_action::print_top: {
+    case printer_action::kPrintTop: {
       if (values.size() == 0) {
         print.append("()");
         return false;
       }
       print.append("(");
-      printer_action new_action = printer_action::print_final;
+      printer_action new_action = printer_action::kPrintFinal;
       for (auto it = values.rbegin(); it != values.rend(); ++it) {
         print.add_task(printer::pending_task{
           .obj = this,
@@ -28,24 +28,24 @@ bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
         });
         print.add_task(printer::pending_task{
           .obj = *it,
-          .action = printer_action::print_top,
+          .action = printer_action::kPrintTop,
         });
-        new_action = printer_action::print_element_separator;
+        new_action = printer_action::kPrintElementSeparator;
       }
       return true;
     }
-    case printer_action::print_element_separator:
-    case printer_action::print_in_element_separator:
+    case printer_action::kPrintElementSeparator:
+    case printer_action::kPrintInElementSeparator:
       print.append(", ");
       return true;
-    case printer_action::print_final:
+    case printer_action::kPrintFinal:
       if (values.size() == 1) {
         print.append(",)");
       } else {
         print.append(")");
       }
       return false;
-    case printer_action::print_recursion:
+    case printer_action::kPrintRecursion:
       print.append("(...)");
       return false;
   }

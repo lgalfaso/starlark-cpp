@@ -25,85 +25,85 @@ namespace grammar {
 namespace {
 
 static const std::map<std::string, token_type, std::less<>> all_operators = {
-  {"&", token_type::ampersand},
-  {"&=", token_type::ampersand_equals},
-  {"^", token_type::caret},
-  {"^=", token_type::caret_equals},
-  {":", token_type::colon},
-  {",", token_type::comma},
-  {".", token_type::dot},
-  {"=", token_type::equals},
-  {"==", token_type::equals_equals},
-  {">", token_type::greater},
-  {">=", token_type::greater_equals},
-  {">>", token_type::greater_greater},
-  {">>=", token_type::greater_greater_equals},
-  {"{", token_type::lbrace},
-  {"[", token_type::lbracket},
-  {"(", token_type::lparen},
-  {"<", token_type::less},
-  {"<=", token_type::less_equals},
-  {"<<", token_type::less_less},
-  {"<<=", token_type::less_less_equals},
-  {"-", token_type::minus},
-  {"-=", token_type::minus_equals},
-  {"!=", token_type::not_equals},
-  {"%", token_type::percent},
-  {"%=", token_type::percent_equals},
-  {"|", token_type::pipe},
-  {"|=", token_type::pipe_equals},
-  {"+", token_type::plus},
-  {"+=", token_type::plus_equals},
-  {"}", token_type::rbrace},
-  {"]", token_type::rbracket},
-  {")", token_type::rparen},
-  {";", token_type::semi},
-  {"/", token_type::slash},
-  {"/=", token_type::slash_equals},
-  {"//", token_type::slash_slash},
-  {"//=", token_type::slash_slash_equals},
-  {"*", token_type::star},
-  {"*=", token_type::star_equals},
-  {"**", token_type::star_star},
-  {"~", token_type::tilde},
+  {"&", token_type::kAmpersand},
+  {"&=", token_type::kAmpersandEquals},
+  {"^", token_type::kCaret},
+  {"^=", token_type::kCaretEquals},
+  {":", token_type::kColon},
+  {",", token_type::kComma},
+  {".", token_type::kDot},
+  {"=", token_type::kEquals},
+  {"==", token_type::kEqualsEquals},
+  {">", token_type::kGreater},
+  {">=", token_type::kGreaterEquals},
+  {">>", token_type::kGreaterGreater},
+  {">>=", token_type::kGreaterGreaterEquals},
+  {"{", token_type::kLBrace},
+  {"[", token_type::kLBracket},
+  {"(", token_type::kLParen},
+  {"<", token_type::kLess},
+  {"<=", token_type::kLessEquals},
+  {"<<", token_type::kLessLess},
+  {"<<=", token_type::kLessLessEquals},
+  {"-", token_type::kMinus},
+  {"-=", token_type::kMinusEquals},
+  {"!=", token_type::kNotEquals},
+  {"%", token_type::kPercent},
+  {"%=", token_type::kPercentEquals},
+  {"|", token_type::kPipe},
+  {"|=", token_type::kPipeEquals},
+  {"+", token_type::kPlus},
+  {"+=", token_type::kPlusEquals},
+  {"}", token_type::kRBrace},
+  {"]", token_type::kRBracket},
+  {")", token_type::kRParen},
+  {";", token_type::kSemi},
+  {"/", token_type::kSlash},
+  {"/=", token_type::kSlashEquals},
+  {"//", token_type::kSlashSlash},
+  {"//=", token_type::kSlashSlashEquals},
+  {"*", token_type::kStar},
+  {"*=", token_type::kStarEquals},
+  {"**", token_type::kStarStar},
+  {"~", token_type::kTilde},
 };
 
 static const std::map<std::string, token_type, std::less<>> all_keywords = {
-  {"and", token_type::and_},
-  {"break", token_type::break_},
-  {"continue", token_type::continue_},
-  {"def", token_type::def},
-  {"elif", token_type::elif},
-  {"else", token_type::else_},
-  {"for", token_type::for_},
-  {"if", token_type::if_},
-  {"in", token_type::in},
-  {"lambda", token_type::lambda},
-  {"load", token_type::load},
-  {"not", token_type::not_},
-  {"or", token_type::or_},
-  {"pass", token_type::pass},
-  {"return", token_type::return_},
+  {"and", token_type::kAnd},
+  {"break", token_type::kBreak},
+  {"continue", token_type::kContinue},
+  {"def", token_type::kDef},
+  {"elif", token_type::kElif},
+  {"else", token_type::kElse},
+  {"for", token_type::kFor},
+  {"if", token_type::kIf},
+  {"in", token_type::kIn},
+  {"lambda", token_type::kLambda},
+  {"load", token_type::kLoad},
+  {"not", token_type::kNot},
+  {"or", token_type::kOr},
+  {"pass", token_type::kPass},
+  {"return", token_type::kReturn},
 
 
-  {"as", token_type::as},
-  {"assert", token_type::assert},
-  {"async", token_type::async},
-  {"await", token_type::await},
-  {"class", token_type::class_},
-  {"del", token_type::del},
-  {"except", token_type::except},
-  {"finally", token_type::finally},
-  {"from", token_type::from},
-  {"global", token_type::global},
-  {"import", token_type::import},
-  {"is", token_type::is},
-  {"nonlocal", token_type::nonlocal},
-  {"raise", token_type::raise},
-  {"try", token_type::try_},
-  {"while", token_type::while_},
-  {"with", token_type::with},
-  {"yield", token_type::yield},
+  {"as", token_type::kAs},
+  {"assert", token_type::kAssert},
+  {"async", token_type::kAsync},
+  {"await", token_type::kAwait},
+  {"class", token_type::kClass},
+  {"del", token_type::kDel},
+  {"except", token_type::kExcept},
+  {"finally", token_type::kFinally},
+  {"from", token_type::kFrom},
+  {"global", token_type::kGlobal},
+  {"import", token_type::kImport},
+  {"is", token_type::kIs},
+  {"nonlocal", token_type::kNonlocal},
+  {"raise", token_type::kRaise},
+  {"try", token_type::kTry},
+  {"while", token_type::kWhile},
+  {"with", token_type::kWith},
+  {"yield", token_type::kYield},
 };
 
 std::map<char, std::vector<std::pair<std::string, token_type>>>
@@ -128,24 +128,24 @@ int isoctal(int c) {
 lexer::lexer(std::string_view input, logger& logging) : lexer(input, options{}, logging) {}
 
 lexer::lexer(std::string_view input, const options& opts, logger& logging) :
-    opts(opts), input(input), source_code(input, false), current(token_type::bof, get_position(), get_position()), indent_stack(1), logging(logging) {}
+    opts(opts), input(input), source_code(input, false), current(token_type::kBof, get_position(), get_position()), indent_stack(1), logging(logging) {}
 
 const token& lexer::current_token() const {
   return current;
 }
 
 void lexer::next_token() {
-  bool after_newline = current.type() == token_type::newline;
+  bool after_newline = current.type() == token_type::kNewline;
   [[maybe_unused]] auto start_token = current.type();
   [[maybe_unused]] auto start_pos = get_position();
   tokenize();
 
-  assert(current.type() != token_type::bof);
-  assert(start_pos.pos < get_position().pos || start_token != current.type() || start_token == token_type::outdent);
+  assert(current.type() != token_type::kBof);
+  assert(start_pos.pos < get_position().pos || start_token != current.type() || start_token == token_type::kOutdent);
 
   // Always have a `newline` token before `eof`.
-  if (current.type() == token_type::eof && !after_newline) {
-    current.set_type(token_type::newline);
+  if (current.type() == token_type::kEof && !after_newline) {
+    current.set_type(token_type::kNewline);
   }
 }
 
@@ -155,23 +155,23 @@ const std::vector<std::pair<position, position>>& lexer::comments() const {
 
 void lexer::tokenize() {
   bool parse_statement =
-      (current.type() == token_type::newline || current.type() == token_type::bof) &&
+      (current.type() == token_type::kNewline || current.type() == token_type::kBof) &&
       open_brackets == 0;
   consume_indentation(parse_statement);
 
   if (pending_indents < 0) {
     pending_indents++;
-    current = token(token_type::outdent, get_position(), get_position());
+    current = token(token_type::kOutdent, get_position(), get_position());
     return;
   } else if (pending_indents > 0) {
     pending_indents--;
     auto pos = get_position();
-    current = token(token_type::indent, pos - (indent_ignore + indent_stack.back() - indent_stack[indent_stack.size() - 2]), pos);
+    current = token(token_type::kIndent, pos - (indent_ignore + indent_stack.back() - indent_stack[indent_stack.size() - 2]), pos);
     return;
   }
 
   if (source_code.empty()) {
-    current = token{token_type::eof, get_position(), get_position()};
+    current = token{token_type::kEof, get_position(), get_position()};
     return;
   }
 
@@ -233,7 +233,7 @@ void lexer::tokenize() {
     case '\n': {
       auto start = get_position();
       source_code.skip();
-      current = token{token_type::newline, start, get_position()};
+      current = token{token_type::kNewline, start, get_position()};
       newline();
       return;
     }
@@ -255,19 +255,19 @@ void lexer::tokenize() {
         auto end_pos = source_code.pos();
         last_begin_of_line += (end_pos - start.pos - 1);
         auto end = get_position();
-        current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+        current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
         add_error("Unexpected character", start);
         return;
       }
       if (auto element = all_keywords.find(identifier_name); element != all_keywords.end()) {
         current = token{element->second, start, get_position()};
       } else {
-        current = token{token_type::identifier, start, get_position(), identifier_name};
+        current = token{token_type::kIdentifier, start, get_position(), identifier_name};
       }
       return;
     }
   }
-  current = token{token_type::eof, get_position(), get_position()};
+  current = token{token_type::kEof, get_position(), get_position()};
 }
 
 void lexer::consume_indentation(bool modify_indents) {
@@ -285,8 +285,8 @@ void lexer::consume_indentation(bool modify_indents) {
       indentation_length++;
       add_warning("Tab characters are not allowed for indentation. Use spaces instead.", start);
     } else if (source_code.peek() == '\n') {
-      if (current.type() != token_type::newline &&
-          current.type() != token_type::bof &&
+      if (current.type() != token_type::kNewline &&
+          current.type() != token_type::kBof &&
           open_brackets == 0) {
         break;
       }
@@ -335,7 +335,7 @@ void lexer::read_operator(char first_char) {
     }
   }
   source_code.skip();
-  current = token{token_type::illegal, start, get_position(), std::string {} + first_char};
+  current = token{token_type::kIllegal, start, get_position(), std::string {} + first_char};
 }
 
 void lexer::read_numeric() {
@@ -344,7 +344,7 @@ void lexer::read_numeric() {
   if (!optional_value.has_value()) {
     add_error("Unable to parse numeric value", start);
     auto end = get_position();
-    current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+    current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
     return;
   }
   auto value = optional_value.value();
@@ -354,19 +354,19 @@ void lexer::read_numeric() {
     double double_value = std::strtod(value.c_str(), &end);
     if (double_value == HUGE_VAL || end != &value.back() + 1) {
       add_error("Unable to parse numeric value", start);
-      current = token{token_type::illegal, start, get_position(), value};
+      current = token{token_type::kIllegal, start, get_position(), value};
       return;
     }
-    current = token{token_type::float_, start, get_position(), double_value};
+    current = token{token_type::kFloat, start, get_position(), double_value};
   } else {
     const char* end;
     starlark::bigint::number int_value = parse_number(value, &end);
     if (end != &value.back() + 1) {
       add_error("Unable to parse numeric value", start);
-      current = token{token_type::illegal, start, get_position(), value};
+      current = token{token_type::kIllegal, start, get_position(), value};
       return;
     }
-    current = token{token_type::int_, start, get_position(), int_value};
+    current = token{token_type::kInt, start, get_position(), int_value};
   }
 }
 
@@ -383,7 +383,7 @@ void lexer::read_string() {
     } else {
       add_error("Unterminated string", get_position());
       auto end = get_position();
-      current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+      current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
       return;
     }
   }
@@ -401,9 +401,9 @@ void lexer::read_string() {
             (is_triple && !is_single_quote && source_code.capture("\"\"\""))) {
           if (found_errors) {
             auto end = get_position();
-            current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+            current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
           } else {
-            current = token{is_bytes ? token_type::bytes : token_type::string, start, get_position(), result};
+            current = token{is_bytes ? token_type::kBytes : token_type::kString, start, get_position(), result};
           }
           return;
         }
@@ -545,7 +545,7 @@ void lexer::read_string() {
         }
         add_error("Unterminated string", get_position());
         auto end = get_position();
-        current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+        current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
         return;
       }
       case '\r':
@@ -574,7 +574,7 @@ void lexer::read_string() {
 
   add_error("Unterminated string", get_position());
   auto end = get_position();
-  current = token{token_type::illegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
+  current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos, end.pos - start.pos)}};
 }
 
 bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_value, int min_size, int max_size, int base) {
@@ -666,11 +666,11 @@ std::string lexer::read_identifier_or_keyword() {
 }
 
 void lexer::add_error(std::string_view message, position pos) {
-  logging.log(log_level::ERROR, message, module, pos);
+  logging.log(log_level::kError, message, module, pos);
 }
 
 void lexer::add_warning(std::string_view message, position pos) {
-  logging.log(log_level::WARNING, message, module, pos);
+  logging.log(log_level::kWarning, message, module, pos);
 }
 
 void lexer::add_comment(position start, position end) {
