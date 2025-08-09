@@ -43,8 +43,15 @@ message OpCode {
     BinarySlash binary_slash = 28;
     BinarySlashSlash binary_slash_slash = 29;
 
-    JumpAddress if_true = 30;
-    JumpAddress if_false = 31;
+    JumpAddress goto = 30;
+    JumpAddress if_true = 31;
+    JumpAddress if_false = 32;
+
+    MakeTuple make_tuple = 33;
+    MakeList make_list = 34;
+    AddToList add_to_list = 35;
+    MakeDictionary make_dictionary = 36;
+    AddToDictionary add_to_dictionary = 37;
   }
 }
 
@@ -93,3 +100,17 @@ message BinarySlashSlash {}
 message JumpAddress {
   uint32 address = 1;
 }
+
+message MakeTuple {
+  uint32 number_of_elements = 1;
+}
+
+message MakeList {
+  uint32 reserve_size = 1;
+}
+message AddToList {}
+
+message MakeDictionary {
+  uint32 reserve_size = 1;
+}
+message AddToDictionary {}

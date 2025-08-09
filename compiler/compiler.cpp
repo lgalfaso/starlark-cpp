@@ -12,8 +12,11 @@
 #include "grammar/parser.hpp"
 
 using starlark::ast::BinaryExpr;
+using starlark::ast::DictExpr;
 using starlark::ast::Expression;
 using starlark::ast::File;
+using starlark::ast::ListExpr;
+using starlark::ast::Tuple;
 using starlark::ast::UnaryExpr;
 using starlark::bytecode::Program;
 using starlark::grammar::ast_listener;
@@ -39,6 +42,14 @@ class bytecode_generator : public ast_listener_base {
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
+
+  void exit_tuple(const Tuple* tuple) override;
+  void enter_list_expression(const ListExpr* list_expression) override;
+  void mid_list_expression(const ListExpr* list_expression) override;
+  void exit_list_expression(const ListExpr* list_expression) override;
+  void enter_dictionary_expression(const DictExpr* dictionary_expression) override;
+  void mid_dictionary_expression(const DictExpr* dictionary_expression) override;
+  void exit_dictionary_expression(const DictExpr* dictionary_expression) override;
 
  private:
   Program& output;
@@ -173,6 +184,38 @@ void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_express
       break;
   }
   binary_op_mid_pos.erase(binary_expression);
+}
+
+void bytecode_generator::exit_tuple(const Tuple* tuple) {
+  output.add_op_code()->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
+}
+
+void bytecode_generator::enter_list_expression(const starlark::ast::ListExpr* list_expression) {
+  output.add_op_code()->mutable_make_list()->set_reserve_size(list_expression->element_size());
+}
+
+void bytecode_generator::mid_list_expression(const starlark::ast::ListExpr* list_expression) {
+  output.add_op_code()->mutable_add_to_list();
+}
+
+void bytecode_generator::exit_list_expression(const starlark::ast::ListExpr* list_expression) {
+  if (list_expression->element_size() != 0) {
+    output.add_op_code()->mutable_add_to_list();
+  }
+}
+
+void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_expression) {
+  output.add_op_code()->mutable_make_dictionary()->set_reserve_size(dictionary_expression->entry_size());
+}
+
+void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
+  output.add_op_code()->mutable_add_to_dictionary();
+}
+
+void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
+  if (dictionary_expression->entry_size() != 0) {
+    output.add_op_code()->mutable_add_to_dictionary();
+  }
 }
 
 }  // namespace
