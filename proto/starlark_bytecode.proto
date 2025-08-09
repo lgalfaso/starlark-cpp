@@ -8,13 +8,43 @@ message Program {
 
 message OpCode {
   oneof op_code {
-    // TODO(lmirelmann): `None`, `True` and `False` are not reserved words.
-    //     https://github.com/bazelbuild/starlark/issues/312
+    // There are no op codes for `None`, `True` and `False` as they are not reserved words.
+    // https://github.com/bazelbuild/starlark/issues/312
     ConstInt const_int = 1;
     ConstFloat const_float = 2;
     ConstString const_string = 3;
     ConstBytes const_bytes = 4;
+
     Drop drop = 5;
+    Dup dup = 6;
+
+    UnaryPlus unary_plus = 7;
+    UnaryMinus unary_minus = 8;
+    UnaryTilde unary_tilde = 9;
+    UnaryNot unary_not = 10;
+
+    BinaryEqualsEquals binary_equals_equals = 11;
+    BinaryBangEquals binary_bang_equals = 12;
+    BinaryLessThan binary_less_than = 13;
+    BinaryGreateThan binary_greater_than = 14;
+    BinaryLessThanEquals binary_less_than_equals = 15;
+    BinaryGreaterThanEquals binary_greater_than_equals = 16;
+    BinaryIn binary_in = 17;
+    BinaryNotIn binary_not_in = 18;
+    BinaryPipe binary_pipe = 19;
+    BinaryHat binary_hat = 20;
+    BinaryAmpersand binary_ampersand = 21;
+    BinaryLessThanLessThan binary_less_than_less_than = 22;
+    BinaryGreaterThanGreaterThan binary_greater_than_greater_than = 23;
+    BinaryMinus binary_minus = 24;
+    BinaryPlus binary_plus = 25;
+    BinaryStar binary_star = 26;
+    BinaryPercent binary_percent = 27;
+    BinarySlash binary_slash = 28;
+    BinarySlashSlash binary_slash_slash = 29;
+
+    JumpAddress if_true = 30;
+    JumpAddress if_false = 31;
   }
 }
 
@@ -33,5 +63,33 @@ message ConstString {
 message ConstBytes {
   string value = 1;
 }
-message Drop {}
 
+message Drop {}
+message Dup {}
+message UnaryPlus {}
+message UnaryMinus {}
+message UnaryTilde {}
+message UnaryNot {}
+message BinaryEqualsEquals {}
+message BinaryBangEquals {}
+message BinaryLessThan {}
+message BinaryGreateThan {}
+message BinaryLessThanEquals {}
+message BinaryGreaterThanEquals {}
+message BinaryIn {}
+message BinaryNotIn {}
+message BinaryPipe {}
+message BinaryHat {}
+message BinaryAmpersand {}
+message BinaryLessThanLessThan {}
+message BinaryGreaterThanGreaterThan {}
+message BinaryMinus {}
+message BinaryPlus {}
+message BinaryStar {}
+message BinaryPercent {}
+message BinarySlash {}
+message BinarySlashSlash {}
+
+message JumpAddress {
+  uint32 address = 1;
+}

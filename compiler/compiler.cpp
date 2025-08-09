@@ -2,6 +2,7 @@
 
 #include "compiler/compiler.hpp"
 
+#include <map>
 #include <set>
 #include <string>
 
@@ -10,8 +11,10 @@
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
 
+using starlark::ast::BinaryExpr;
+using starlark::ast::Expression;
 using starlark::ast::File;
-using starlark::ast::Statement;
+using starlark::ast::UnaryExpr;
 using starlark::bytecode::Program;
 using starlark::grammar::ast_listener;
 using starlark::grammar::ast_listener_base;
@@ -28,19 +31,23 @@ namespace {
 class bytecode_generator : public ast_listener_base {
  public:
   explicit bytecode_generator(Program& output);
-  void exit_statement(const Statement* statement) override;
+  void exit_expression_statement(const Expression* statement) override;
   void enter_int_value(const std::string* int_value) override;
   void enter_float_value(double float_value) override;
   void enter_string_value(const std::string* string_value) override;
   void enter_bytes_value(const std::string* bytes_value) override;
+  void exit_unary_expression(const UnaryExpr* unary_expression) override;
+  void mid_binary_expression(const BinaryExpr* binary_expression) override;
+  void exit_binary_expression(const BinaryExpr* binary_expression) override;
 
  private:
   Program& output;
+  std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
 
-void bytecode_generator::exit_statement(const Statement* statement) {
+void bytecode_generator::exit_expression_statement(const Expression* statement) {
   output.add_op_code()->mutable_drop();
 }
 
@@ -58,6 +65,114 @@ void bytecode_generator::enter_string_value(const std::string* string_value) {
 
 void bytecode_generator::enter_bytes_value(const std::string* bytes_value) {
   *output.add_op_code()->mutable_const_bytes()->mutable_value() = *bytes_value;
+}
+
+void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression) {
+  switch (unary_expression->operator_()) {
+    case UnaryExpr::PLUS:
+      output.add_op_code()->mutable_unary_plus();
+      break;
+    case UnaryExpr::MINUS:
+      output.add_op_code()->mutable_unary_minus();
+      break;
+    case UnaryExpr::TILDE:
+      output.add_op_code()->mutable_unary_tilde();
+      break;
+    case UnaryExpr::NOT:
+      output.add_op_code()->mutable_unary_not();
+      break;
+    default:
+      break;
+  }
+}
+
+void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expression) {
+  binary_op_mid_pos[binary_expression] = output.op_code_size();
+  switch (binary_expression->operator_()) {
+    case BinaryExpr::OR:
+      output.add_op_code()->mutable_dup();
+      output.add_op_code()->mutable_if_true();
+      output.add_op_code()->mutable_drop();
+      break;
+    case BinaryExpr::AND:
+      output.add_op_code()->mutable_dup();
+      output.add_op_code()->mutable_if_false();
+      output.add_op_code()->mutable_drop();
+      break;
+    default:
+      break;
+  }
+}
+
+void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_expression) {
+  switch (binary_expression->operator_()) {
+    case BinaryExpr::OR:
+      output.mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_true()->set_address(output.op_code_size());
+      break;
+    case BinaryExpr::AND:
+      output.mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_false()->set_address(output.op_code_size());
+      break;
+    case BinaryExpr::EQUALS_EQUALS:
+      output.add_op_code()->mutable_binary_equals_equals();
+      break;
+    case BinaryExpr::BANG_EQUALS:
+      output.add_op_code()->mutable_binary_bang_equals();
+      break;
+    case BinaryExpr::LESS_THAN:
+      output.add_op_code()->mutable_binary_less_than();
+      break;
+    case BinaryExpr::GREATER_THAN:
+      output.add_op_code()->mutable_binary_greater_than();
+      break;
+    case BinaryExpr::LESS_THAN_EQUALS:
+      output.add_op_code()->mutable_binary_less_than_equals();
+      break;
+    case BinaryExpr::GREATER_THAN_EQUALS:
+      output.add_op_code()->mutable_binary_greater_than_equals();
+      break;
+    case BinaryExpr::IN:
+      output.add_op_code()->mutable_binary_in();
+      break;
+    case BinaryExpr::NOT_IN:
+      output.add_op_code()->mutable_binary_not_in();
+      break;
+    case BinaryExpr::PIPE:
+      output.add_op_code()->mutable_binary_pipe();
+      break;
+    case BinaryExpr::HAT:
+      output.add_op_code()->mutable_binary_hat();
+      break;
+    case BinaryExpr::AMPERSAND:
+      output.add_op_code()->mutable_binary_ampersand();
+      break;
+    case BinaryExpr::LESS_THAN_LESS_THAN:
+      output.add_op_code()->mutable_binary_less_than_less_than();
+      break;
+    case BinaryExpr::GREATER_THAN_GREATER_THAN:
+      output.add_op_code()->mutable_binary_greater_than_greater_than();
+      break;
+    case BinaryExpr::MINUS:
+      output.add_op_code()->mutable_binary_minus();
+      break;
+    case BinaryExpr::PLUS:
+      output.add_op_code()->mutable_binary_plus();
+      break;
+    case BinaryExpr::STAR:
+      output.add_op_code()->mutable_binary_star();
+      break;
+    case BinaryExpr::PERCENT:
+      output.add_op_code()->mutable_binary_percent();
+      break;
+    case BinaryExpr::SLASH:
+      output.add_op_code()->mutable_binary_slash();
+      break;
+    case BinaryExpr::SLASH_SLASH:
+      output.add_op_code()->mutable_binary_slash_slash();
+      break;
+    default:
+      break;
+  }
+  binary_op_mid_pos.erase(binary_expression);
 }
 
 }  // namespace

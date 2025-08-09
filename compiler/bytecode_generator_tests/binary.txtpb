@@ -1,0 +1,109 @@
+op_code { const_int { value: "0" } }  # 0
+op_code { dup {} }                    # 1
+op_code { if_true { address: 5 } }    # 2
+op_code { drop {} }                   # 3
+op_code { const_int { value: "1" } }  # 4
+op_code { drop {} }                   # 5
+
+op_code { const_int { value: "0" } }  # 6
+op_code { dup {} }                    # 7
+op_code { if_false { address: 11 } }  # 8
+op_code { drop {} }                   # 9
+op_code { const_int { value: "1" } }  # 10
+op_code { drop {} }                   # 11
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_equals_equals {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_bang_equals {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_less_than {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_greater_than {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_less_than_equals {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_greater_than_equals {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_in {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_not_in {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_pipe {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_hat {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_ampersand {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_less_than_less_than {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_greater_than_greater_than {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_minus {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_plus {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_star {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_percent {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_slash {} }
+op_code { drop {} }
+
+op_code { const_int { value: "0" } }
+op_code { const_int { value: "1" } }
+op_code { binary_slash_slash {} }
+op_code { drop {} }
+

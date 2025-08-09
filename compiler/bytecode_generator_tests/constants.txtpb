@@ -1,36 +1,8 @@
-op_code {
-  const_int {
-    value: "1"
-  }
-}
-op_code {
-  drop {
-  }
-}
-op_code {
-  const_float {
-    value: 1.1
-  }
-}
-op_code {
-  drop {
-  }
-}
-op_code {
-  const_string {
-    value: "abc"
-  }
-}
-op_code {
-  drop {
-  }
-}
-op_code {
-  const_bytes {
-    value: "def"
-  }
-}
-op_code {
-  drop {
-  }
-}
+op_code { const_int { value: "1" } }
+op_code { drop {} }
+op_code { const_float { value: 1.1 } }
+op_code { drop {} }
+op_code { const_string { value: "abc" } }
+op_code { drop {} }
+op_code { const_bytes { value: "def" } }
+op_code { drop {} }
