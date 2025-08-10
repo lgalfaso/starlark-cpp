@@ -3,6 +3,7 @@
 #ifndef COMPILER_COMPILER_HPP_
 #define COMPILER_COMPILER_HPP_
 
+#include <set>
 #include <string_view>
 
 #include "proto/starlark_bytecode.pb.h"
@@ -14,9 +15,12 @@ namespace compiler {
 
 class compiler {
  public:
-  explicit compiler();
+  explicit compiler(std::set<std::string> &binding);
   // TODO(lmirelmann): Define whether this should take an Arena and return a pointer to `Program`.
   starlark::bytecode::Program compile(std::string_view starlark_program);
+
+ private:
+  const std::set<std::string> binding;
 };
 
 }  // namespace compiler

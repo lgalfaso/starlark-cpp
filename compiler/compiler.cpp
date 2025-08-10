@@ -228,7 +228,7 @@ void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_e
 
 }  // namespace
 
-compiler::compiler() {}
+compiler::compiler(std::set<std::string>& binding) : binding(binding) {}
 
 Program compiler::compile(std::string_view starlark_program) {
   logger logging;

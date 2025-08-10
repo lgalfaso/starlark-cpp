@@ -7,6 +7,7 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
+#include <set>
 #include <string>
 
 #include "compiler/compiler.hpp"
@@ -54,7 +55,8 @@ TEST(CompilerBytecode, TestCase) {
     ASSERT_TRUE(expected_starlark_program.ParseFromFileDescriptor(proto_fd));
   }
 
-  compiler star_compiler;
+  std::set<std::string> binding{"None, True, False, len"};
+  compiler star_compiler(binding);
   Program actual_starlark_program = star_compiler.compile(starlark_code);
 
   EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_program, expected_starlark_program)) <<
