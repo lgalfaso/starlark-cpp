@@ -14,12 +14,9 @@ namespace compiler {
 
 class compiler {
  public:
-  explicit compiler(std::string_view starlark_program);
+  explicit compiler();
   // TODO(lmirelmann): Define whether this should take an Arena and return a pointer to `Program`.
-  starlark::bytecode::Program compile();
-
- private:
-  std::string_view starlark_program;
+  starlark::bytecode::Program compile(std::string_view starlark_program);
 };
 
 }  // namespace compiler

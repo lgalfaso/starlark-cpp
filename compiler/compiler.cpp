@@ -228,9 +228,9 @@ void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_e
 
 }  // namespace
 
-compiler::compiler(std::string_view starlark_program) : starlark_program(starlark_program) {}
+compiler::compiler() {}
 
-Program compiler::compile() {
+Program compiler::compile(std::string_view starlark_program) {
   logger logging;
   // TODO(lmirelmann): Log level should be configurable.
   logging.set_level(log_level::kWarning);

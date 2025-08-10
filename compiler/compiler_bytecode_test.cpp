@@ -46,19 +46,19 @@ TEST(CompilerBytecode, TestCase) {
     read(starlark_fd, starlark_code.data(), sb.st_size);
   }
 
-  Program starlark_program;
+  Program expected_starlark_program;
   {
     int proto_fd = open(argv[2].c_str(), O_RDONLY);
     ASSERT_GT(proto_fd, 0);
     defer { close(proto_fd); };
-    ASSERT_TRUE(starlark_program.ParseFromFileDescriptor(proto_fd));
+    ASSERT_TRUE(expected_starlark_program.ParseFromFileDescriptor(proto_fd));
   }
 
-  compiler star_compiler(starlark_code);
-  Program actual_starlark_program = star_compiler.compile();
+  compiler star_compiler;
+  Program actual_starlark_program = star_compiler.compile(starlark_code);
 
-  EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_program, starlark_program)) <<
-    describe_diff(actual_starlark_program, starlark_program);
+  EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_program, expected_starlark_program)) <<
+    describe_diff(actual_starlark_program, expected_starlark_program);
 }
 
 }  // namespace
