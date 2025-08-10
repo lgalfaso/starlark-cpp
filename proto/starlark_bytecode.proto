@@ -52,6 +52,8 @@ message OpCode {
     AddToList add_to_list = 35;
     MakeDictionary make_dictionary = 36;
     AddToDictionary add_to_dictionary = 37;
+
+    Load load = 38;
   }
 }
 
@@ -114,3 +116,8 @@ message MakeDictionary {
   uint32 reserve_size = 1;
 }
 message AddToDictionary {}
+
+message Load {
+  int64 frame = 1;
+  int64 pos_in_frame = 2;
+}

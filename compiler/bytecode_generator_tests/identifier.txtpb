@@ -1,0 +1,6 @@
+op_code { load { frame: 2 pos_in_frame: 1 } }
+op_code { drop { } }
+op_code { load { frame: 2 pos_in_frame: 2 } }
+op_code { drop { } }
+op_code { load { frame: 2 pos_in_frame: 0 } }
+op_code { drop { } }

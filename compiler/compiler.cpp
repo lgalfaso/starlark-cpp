@@ -25,6 +25,7 @@ using starlark::grammar::log_level;
 using starlark::grammar::logger;
 using starlark::grammar::options;
 using starlark::grammar::parser;
+using starlark::ast::Identifier;
 
 namespace starlark {
 namespace compiler {
@@ -39,6 +40,7 @@ class bytecode_generator : public ast_listener_base {
   void enter_float_value(double float_value) override;
   void enter_string_value(const std::string* string_value) override;
   void enter_bytes_value(const std::string* bytes_value) override;
+  void enter_identifier(const Identifier* identifier) override;
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
@@ -76,6 +78,12 @@ void bytecode_generator::enter_string_value(const std::string* string_value) {
 
 void bytecode_generator::enter_bytes_value(const std::string* bytes_value) {
   *output.add_op_code()->mutable_const_bytes()->mutable_value() = *bytes_value;
+}
+
+void bytecode_generator::enter_identifier(const Identifier* identifier) {
+  auto* id_op = output.add_op_code()->mutable_load();
+  id_op->set_frame(identifier->frame());
+  id_op->set_pos_in_frame(identifier->pos_in_frame());
 }
 
 void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression) {
