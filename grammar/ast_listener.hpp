@@ -53,6 +53,7 @@ class ast_listener {
   virtual void enter_tuple(const starlark::ast::Tuple* tuple) = 0;
   virtual void exit_tuple(const starlark::ast::Tuple* tuple) = 0;
   virtual void enter_if_expression(const starlark::ast::IfExpr* if_expression) = 0;
+  virtual void mid_if_expression(const starlark::ast::IfExpr* if_expression) = 0;
   virtual void exit_if_expression(const starlark::ast::IfExpr* if_expression) = 0;
   virtual void enter_unary_expression(const starlark::ast::UnaryExpr* unary_expression) = 0;
   virtual void exit_unary_expression(const starlark::ast::UnaryExpr* unary_expression) = 0;
@@ -141,6 +142,7 @@ class ast_listener_base : public ast_listener {
   void enter_tuple(const starlark::ast::Tuple* tuple) override;
   void exit_tuple(const starlark::ast::Tuple* tuple) override;
   void enter_if_expression(const starlark::ast::IfExpr* if_expression) override;
+  void mid_if_expression(const starlark::ast::IfExpr* if_expression) override;
   void exit_if_expression(const starlark::ast::IfExpr* if_expression) override;
   void enter_unary_expression(const starlark::ast::UnaryExpr* unary_expression) override;
   void exit_unary_expression(const starlark::ast::UnaryExpr* unary_expression) override;

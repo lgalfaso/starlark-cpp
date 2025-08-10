@@ -11,10 +11,12 @@ ENTER Expression
 ENTER Identifier("True")
 EXIT Identifier
 EXIT Expression
+MID IfExpression
 ENTER Expression
 ENTER IntValue("1")
 EXIT IntValue
 EXIT Expression
+MID IfExpression
 ENTER Expression
 ENTER IntValue("2")
 EXIT IntValue

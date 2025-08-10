@@ -178,6 +178,7 @@ void ast_listener_base::exit_expression(const Expression* expresion) {}
 void ast_listener_base::enter_tuple(const Tuple* tuple) {}
 void ast_listener_base::exit_tuple(const Tuple* tuple) {}
 void ast_listener_base::enter_if_expression(const IfExpr* if_expression) {}
+void ast_listener_base::mid_if_expression(const IfExpr* if_expression) {}
 void ast_listener_base::exit_if_expression(const IfExpr* if_expression) {}
 void ast_listener_base::enter_unary_expression(const UnaryExpr* unary_expression) {}
 void ast_listener_base::exit_unary_expression(const UnaryExpr* unary_expression) {}
@@ -654,9 +655,19 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
             .op = message_type_op::kEnter,
           });
           to_process.push_back(message{
+            .if_expression = top.if_expression,
+            .type = message_type::kIfExpression,
+            .op = message_type_op::kMid,
+          });
+          to_process.push_back(message{
             .expression = &top.if_expression->if_value(),
             .type = message_type::kExpression,
             .op = message_type_op::kEnter,
+          });
+          to_process.push_back(message{
+            .if_expression = top.if_expression,
+            .type = message_type::kIfExpression,
+            .op = message_type_op::kMid,
           });
           to_process.push_back(message{
             .expression = &top.if_expression->if_test(),
@@ -1041,6 +1052,9 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kDictionaryExpression:
           listener.mid_dictionary_expression(top.dictionary_expression);
+          break;
+        case message_type::kIfExpression:
+          listener.mid_if_expression(top.if_expression);
           break;
         default:
           break;

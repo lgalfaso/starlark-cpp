@@ -198,6 +198,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "ENTER IfExpression\n";
   }
 
+  void mid_if_expression(const starlark::ast::IfExpr* if_expression) override {
+    output += "MID IfExpression\n";
+  }
+
   void exit_if_expression(const starlark::ast::IfExpr* if_expression) override {
     output += "EXIT IfExpression\n";
   }
