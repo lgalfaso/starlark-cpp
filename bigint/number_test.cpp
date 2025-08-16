@@ -456,7 +456,8 @@ TEST(Number, ToString) {
       "1000111000111000111000111000111000111000111000111000111000111000"
       "1110001110001110001110001110001110001110001110001110001110001110"
       "0011100011100011100011100011100011100011100011100011100011100011"
-      "10001110001110001110001110001110001110010101100011110001", p.to_string(2));
+      "10001110001110001110001110001110001110010101100011110001",
+      p.to_string(2));
   EXPECT_EQ("1210120000101212111212112122120212221201210101010012210010"
       "0000021122200022102121220120102120021011012020122122020102212210"
       "2101210202111011202100100121120002120021102122200102012111112112"
@@ -782,7 +783,8 @@ TEST(Number, ToString) {
       "c21h9i1d1e5ke2k43a3k1aigij5ea1cgf6ae1ab2962d14e09gccikhh75cee04k"
       "k74k4ek71chjbf0i5d7i3gh7d12ifhff5bff9bb97dki71b7ddii967id406h78c"
       "cj33hcade3ih67kkb6b422j371c5kk9b395ah26b1g09709f9bc9ebia2b144k9j"
-      "012b28f9beef478fgfc2b41ggkc7gaa27i7a869d8g9f6gi8i215dei8jh", p.to_string(21));
+      "012b28f9beef478fgfc2b41ggkc7gaa27i7a869d8g9f6gi8i215dei8jh",
+      p.to_string(21));
   EXPECT_EQ("3iaad485i1b3j8cjcab5f9he794ge017claah2gd4ia62c0h856i2lge7h"
       "bhl80h59ack91l8e31b70kic043bd164fi0j2g8cc4jgeak4d8klfhje7f2ee9ah"
       "3i9edkl9ilah1kf7a498ffc54keg7bbe84k1dfb121a9j24khakjl39lhlh004e4"
@@ -865,7 +867,8 @@ TEST(Number, ToString) {
       "giileab8c44gk24k3f8hlnd134g11jdb1hkonk1afch9i80adcbh3bmgibd10aae"
       "707c7k9abkpj02hjm4h48id0ecb8bcdmpoi5bbrjba9ic9529je3ccfg1ner0aid"
       "crabg024mcnl5f5llolj4q08np8e91rjh3c11iq743jiilero60304dl5o9nn5nm"
-      "c2lpmei3lkhb0bnkc4mohbqa6de6aa9lpa0grakrhgi82kmke9oh40igh", p.to_string(28));
+      "c2lpmei3lkhb0bnkc4mohbqa6de6aa9lpa0grakrhgi82kmke9oh40igh",
+      p.to_string(28));
   EXPECT_EQ("3b0o25638l6sfikfmo80cnc2oqibo5q8if41iq5j192gbqb60hopr85gfq"
       "ab61fsbdqkk2jgh6j2hc9ndai5e8aqr4dfmo9lfgc40i08828he12s133aksam6e"
       "hmmo7jpe61ejml5ioaono5k2rrlqlmibn887lk01ibrjqrbmems8s31g69medf3q"
@@ -1202,17 +1205,33 @@ TEST(Number, ModPowSimpleEvenMod) {
   number p = number::parse_hex(kBigPrime);
   number r = number::parse_hex(kBigNumber);
   number::nbase power2 = 50;
-  EXPECT_EQ(number::one, r.pow_mod((p - number::one) * (number::one << power2), p * (number::one << (power2 - 1))));
+  EXPECT_EQ(number::one,
+            r.pow_mod((p - number::one) * (number::one << power2),
+                      p * (number::one << (power2 - 1))));
 }
 
 TEST(Number, ModPowSimplePower2Mod) {
   number r = number::parse_hex(kBigNumber);
   number::nbase power2 = 500;
-  EXPECT_EQ(number::one, r.pow_mod(number::one << power2, number::one << (power2 - 1)));
+  EXPECT_EQ(number::one,
+            r.pow_mod(number::one << power2, number::one << (power2 - 1)));
 }
 
 TEST(Number, ModPowOdd) {
-  number result = "5eb71a8bd609c2e5aefc8fe4b2e5d551eef7de5f980c0c4c614fecff165c5296de6df9e8c6d85adfa93e5bab99ffa6626afba78defd3ce1055e9549f8a3064d9edfa72d27f095ce84b6f478740835b33f4f96a262d5a1432014b41fe89c8179964712fa482ef78c3d8035bfd16f9626f4e8c1cfc4b9cebc19c326cbd61e9939e059d65c1964cf31e9e684b8b4892d3532ebefc54a9df552ad03b77e6109492c598923bcc90e22a12dc79c93bff7baa111ec8988da937bda38f8812bc3a7d2cce60add7e9242f0ff1d61ea71b5e62697ad9111899a362023b0e0554af8edd608c309c8a7dad28a9c241a10ce2e9363347acf0758f7efcfb1e37d5fd7b39caaa41d04c1328804a8659d030ae23c49168e6db4f7183c81f6df62840859b0a625d9c7c9ec38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e3916e9701"_number;
+  number result =
+  "5eb71a8bd609c2e5aefc8fe4b2e5d551eef7de5f980c0c4c614fecff165c5296"
+  "de6df9e8c6d85adfa93e5bab99ffa6626afba78defd3ce1055e9549f8a3064d9"
+  "edfa72d27f095ce84b6f478740835b33f4f96a262d5a1432014b41fe89c81799"
+  "64712fa482ef78c3d8035bfd16f9626f4e8c1cfc4b9cebc19c326cbd61e9939e"
+  "059d65c1964cf31e9e684b8b4892d3532ebefc54a9df552ad03b77e6109492c5"
+  "98923bcc90e22a12dc79c93bff7baa111ec8988da937bda38f8812bc3a7d2cce"
+  "60add7e9242f0ff1d61ea71b5e62697ad9111899a362023b0e0554af8edd608c"
+  "309c8a7dad28a9c241a10ce2e9363347acf0758f7efcfb1e37d5fd7b39caaa41"
+  "d04c1328804a8659d030ae23c49168e6db4f7183c81f6df62840859b0a625d9c"
+  "7c9ec38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38"
+  "e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e"
+  "38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e3"
+  "8e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e3916e9701"_number;
   number p = number::parse_hex(kBigPrime);
   number r = number::parse_hex(kBigNumber);
   EXPECT_EQ(result, r.pow_mod(p - number::one, p << 12));

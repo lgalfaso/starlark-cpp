@@ -43,8 +43,8 @@ static void BM_NumberMultShort(benchmark::State& state) {
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(BM_NumberMultShort)
-    ->RangeMultiplier(2)->Range(1<<4, 1<<22)->Complexity();
+BENCHMARK(BM_NumberMultShort)->RangeMultiplier(2)->Range(1<<4, 1<<22)
+    ->Complexity();
 
 // NOLINTNEXTLINE(runtime/references)
 static void BM_NumberMult(benchmark::State& state) {
@@ -57,8 +57,8 @@ static void BM_NumberMult(benchmark::State& state) {
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(BM_NumberMult)
-    ->RangeMultiplier(2)->Range(1<<4, 1<<22)->Complexity();
+BENCHMARK(BM_NumberMult)->RangeMultiplier(2)->Range(1<<4, 1<<22)
+    ->Complexity();
 
 }  // namespace number_benchmark
 }  // namespace starlark
