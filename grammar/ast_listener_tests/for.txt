@@ -9,12 +9,14 @@ ENTER ListExpression
 EXIT ListExpression
 EXIT Expression
 EXIT ForInExpression
+MID ForStatement
 ENTER LoopVariables
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
 EXIT Expression
 EXIT LoopVariables
+MID ForStatement
 ENTER Statement
 ENTER ContinueStatement
 EXIT ContinueStatement
@@ -29,12 +31,14 @@ ENTER ListExpression
 EXIT ListExpression
 EXIT Expression
 EXIT ForInExpression
+MID ForStatement
 ENTER LoopVariables
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
 EXIT Expression
 EXIT LoopVariables
+MID ForStatement
 ENTER Statement
 ENTER BreakStatement
 EXIT BreakStatement
@@ -49,6 +53,7 @@ ENTER ListExpression
 EXIT ListExpression
 EXIT Expression
 EXIT ForInExpression
+MID ForStatement
 ENTER LoopVariables
 ENTER Expression
 ENTER Tuple
@@ -63,6 +68,7 @@ EXIT Expression
 EXIT Tuple
 EXIT Expression
 EXIT LoopVariables
+MID ForStatement
 ENTER Statement
 ENTER Pass
 EXIT Pass

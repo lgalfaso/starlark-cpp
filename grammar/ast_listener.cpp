@@ -148,6 +148,7 @@ void ast_listener_base::exit_def_statement(const DefStmt* def_statement) {}
 void ast_listener_base::enter_if_statement(const IfStmt* if_statement) {}
 void ast_listener_base::exit_if_statement(const IfStmt* if_statement) {}
 void ast_listener_base::enter_for_statement(const ForStmt* for_statement) {}
+void ast_listener_base::mid_for_statement(const ForStmt* for_statement) {}
 void ast_listener_base::exit_for_statement(const ForStmt* for_statement) {}
 void ast_listener_base::enter_return_statement(const ReturnStmt* return_statement) {}
 void ast_listener_base::exit_return_statement(const ReturnStmt* return_statement) {}
@@ -396,9 +397,19 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.enter_for_statement(top.for_statement);
           add_statements(top.for_statement->statement());
           to_process.push_back(message{
+            .for_statement = &top.statement->for_statement(),
+            .type = message_type::kForStatement,
+            .op = message_type_op::kMid,
+          });
+          to_process.push_back(message{
             .for_loop_variables = &top.for_statement->loop_variables(),
             .type = message_type::kForLoopVariables,
             .op = message_type_op::kEnter,
+          });
+          to_process.push_back(message{
+            .for_statement = &top.statement->for_statement(),
+            .type = message_type::kForStatement,
+            .op = message_type_op::kMid,
           });
           to_process.push_back(message{
             .for_in_expression = &top.for_statement->expression(),
@@ -1055,6 +1066,9 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kIfExpression:
           listener.mid_if_expression(top.if_expression);
+          break;
+        case message_type::kForStatement:
+          listener.mid_for_statement(top.for_statement);
           break;
         default:
           break;

@@ -23,6 +23,7 @@ class ast_listener {
   virtual void enter_if_statement(const starlark::ast::IfStmt* if_statement) = 0;
   virtual void exit_if_statement(const starlark::ast::IfStmt* if_statement) = 0;
   virtual void enter_for_statement(const starlark::ast::ForStmt* for_statement) = 0;
+  virtual void mid_for_statement(const starlark::ast::ForStmt* for_statement) = 0;
   virtual void exit_for_statement(const starlark::ast::ForStmt* for_statement) = 0;
   virtual void enter_return_statement(const starlark::ast::ReturnStmt* return_statement) = 0;
   virtual void exit_return_statement(const starlark::ast::ReturnStmt* return_statement) = 0;
@@ -112,6 +113,7 @@ class ast_listener_base : public ast_listener {
   void enter_if_statement(const starlark::ast::IfStmt* if_statement) override;
   void exit_if_statement(const starlark::ast::IfStmt* if_statement) override;
   void enter_for_statement(const starlark::ast::ForStmt* for_statement) override;
+  void mid_for_statement(const starlark::ast::ForStmt* for_statement) override;
   void exit_for_statement(const starlark::ast::ForStmt* for_statement) override;
   void enter_return_statement(const starlark::ast::ReturnStmt* return_statement) override;
   void exit_return_statement(const starlark::ast::ReturnStmt* return_statement) override;

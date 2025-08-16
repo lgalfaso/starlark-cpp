@@ -73,6 +73,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "ENTER ForStatement\n";
   }
 
+  void mid_for_statement(const starlark::ast::ForStmt* for_statement) override {
+    output += "MID ForStatement\n";
+  }
+
   void exit_for_statement(const starlark::ast::ForStmt* for_statement) override {
     output += "EXIT ForStatement\n";
   }
