@@ -2,10 +2,6 @@ ENTER File
 ENTER Statement
 ENTER AssignStatement
 ENTER Expression
-ENTER Identifier("a")
-EXIT Identifier
-EXIT Expression
-ENTER Expression
 ENTER BinaryExpression
 ENTER Expression
 ENTER IntValue("1")
@@ -17,6 +13,10 @@ ENTER IntValue("2")
 EXIT IntValue
 EXIT Expression
 EXIT BinaryExpression
+EXIT Expression
+ENTER Expression
+ENTER Identifier("a")
+EXIT Identifier
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement

@@ -396,13 +396,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.enter_for_statement(top.for_statement);
           add_statements(top.for_statement->statement());
           to_process.push_back(message{
-            .for_in_expression = &top.for_statement->expression(),
-            .type = message_type::kForInExpression,
+            .for_loop_variables = &top.for_statement->loop_variables(),
+            .type = message_type::kForLoopVariables,
             .op = message_type_op::kEnter,
           });
           to_process.push_back(message{
-            .for_loop_variables = &top.for_statement->loop_variables(),
-            .type = message_type::kForLoopVariables,
+            .for_in_expression = &top.for_statement->expression(),
+            .type = message_type::kForInExpression,
             .op = message_type_op::kEnter,
           });
           break;
@@ -444,12 +444,12 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
         case message_type::kAssignStatement:
           listener.enter_assign_statement(top.assign_statement);
           to_process.push_back(message{
-            .expression = &top.assign_statement->rhs(),
+            .expression = &top.assign_statement->lhs(),
             .type = message_type::kExpression,
             .op = message_type_op::kEnter,
           });
           to_process.push_back(message{
-            .expression = &top.assign_statement->lhs(),
+            .expression = &top.assign_statement->rhs(),
             .type = message_type::kExpression,
             .op = message_type_op::kEnter,
           });
