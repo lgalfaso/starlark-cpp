@@ -397,7 +397,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.enter_for_statement(top.for_statement);
           add_statements(top.for_statement->statement());
           to_process.push_back(message{
-            .for_statement = &top.statement->for_statement(),
+            .for_statement = top.for_statement,
             .type = message_type::kForStatement,
             .op = message_type_op::kMid,
           });
@@ -407,7 +407,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
             .op = message_type_op::kEnter,
           });
           to_process.push_back(message{
-            .for_statement = &top.statement->for_statement(),
+            .for_statement = top.for_statement,
             .type = message_type::kForStatement,
             .op = message_type_op::kMid,
           });
