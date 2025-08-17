@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #include "grammar/ast_listener.hpp"
 #include "grammar/logging.hpp"
@@ -12,6 +13,8 @@
 #include "grammar/parser.hpp"
 
 using starlark::ast::BinaryExpr;
+using starlark::ast::BreakStmt;
+using starlark::ast::ContinueStmt;
 using starlark::ast::DictExpr;
 using starlark::ast::DotExpr;
 using starlark::ast::Expression;
@@ -60,8 +63,11 @@ class bytecode_generator : public ast_listener_base {
   void mid_if_expression(const IfExpr* if_expression) override;
   void exit_if_expression(const IfExpr* if_expression) override;
 
+  void enter_for_statement(const ForStmt* for_statement) override;
   void mid_for_statement(const ForStmt* for_statement) override;
   void exit_for_statement(const ForStmt* for_statement) override;
+  void exit_break_statement(const starlark::ast::BreakStmt* break_statement) override;
+  void exit_continue_statement(const starlark::ast::ContinueStmt* continue_statement) override;
 
   void exit_file(const File* starlark_file) override;
 
@@ -70,6 +76,8 @@ class bytecode_generator : public ast_listener_base {
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
   std::map<const IfExpr*, uint64_t> if_expression_op_mid_pos;
   std::map<const ForStmt*, uint64_t> for_statement_op_mid_pos;
+  std::vector<std::vector<uint64_t>> for_statement_op_continue;
+  std::vector<std::vector<uint64_t>> for_statement_op_break;
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
@@ -271,6 +279,11 @@ void bytecode_generator::exit_if_expression(const IfExpr* if_expression) {
   if_expression_op_mid_pos.erase(if_expression);
 }
 
+void bytecode_generator::enter_for_statement(const ForStmt* for_statement) {
+  for_statement_op_continue.push_back({});
+  for_statement_op_break.push_back({});
+}
+
 void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
   auto op_code_size = output.op_code_size();
   if (!for_statement_op_mid_pos.contains(for_statement)) {
@@ -285,9 +298,32 @@ void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
 
 void bytecode_generator::exit_for_statement(const ForStmt* for_statement) {
   auto op_code_size = output.op_code_size();
-  output.add_op_code()->mutable_goto_()->set_address(for_statement_op_mid_pos[for_statement] + 1);
+  auto begin_address = for_statement_op_mid_pos[for_statement] + 1;
+  output.add_op_code()->mutable_goto_()->set_address(begin_address);
   output.mutable_op_code(for_statement_op_mid_pos[for_statement] + 1)->mutable_for_iterator()->set_address(op_code_size + 1);
+
+  // Fix `break` and `continue` statements.
+  for (auto i : for_statement_op_break.back()) {
+    output.mutable_op_code(i)->mutable_goto_()->set_address(op_code_size + 1);
+  }
+  for (auto i : for_statement_op_continue.back()) {
+    output.mutable_op_code(i)->mutable_goto_()->set_address(begin_address);
+  }
+
+  // Cleanup.
+  for_statement_op_continue.pop_back();
+  for_statement_op_break.pop_back();
   for_statement_op_mid_pos.erase(for_statement);
+}
+
+void bytecode_generator::exit_break_statement(const BreakStmt* break_statement) {
+  for_statement_op_break.back().push_back(output.op_code_size());
+  output.add_op_code()->mutable_goto_();
+}
+
+void bytecode_generator::exit_continue_statement(const ContinueStmt* continue_statement) {
+  for_statement_op_continue.back().push_back(output.op_code_size());
+  output.add_op_code()->mutable_goto_();
 }
 
 void bytecode_generator::exit_file(const File* starlark_file) {
