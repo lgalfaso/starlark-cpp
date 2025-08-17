@@ -18,8 +18,9 @@ op_code { goto { address: 20 } }
 op_code { const_string { value: "def" } }
 op_code { drop { } }
 op_code { goto { address: 11 } }
+op_code { drop { } }                             # 20
 
-op_code { make_list { reserve_size: 3 } }        # 20
+op_code { make_list { reserve_size: 3 } }
 op_code { dup { } }
 op_code { const_int { value: "1" } }
 op_code { add_to_list { } }
@@ -30,12 +31,12 @@ op_code { dup { } }
 op_code { const_int { value: "3" } }
 op_code { add_to_list { } }
 op_code { get_iterator { } }
-op_code { for_iterator { address: 63 } }         # 31
+op_code { for_iterator { address: 65 } }         # 32
 op_code { load { frame: 1 } }
 op_code { assign { } }
 op_code { const_string { value: "abc" } }
 op_code { drop { } }
-op_code { goto { address: 63 } }
+op_code { goto { address: 65 } }
 op_code { make_list { reserve_size: 3 } }
 op_code { dup { } }
 op_code { const_int { value: "4" } }
@@ -47,19 +48,21 @@ op_code { dup { } }
 op_code { const_int { value: "6" } }
 op_code { add_to_list { } }
 op_code { get_iterator { } }
-op_code { for_iterator { address: 57 } }         # 48
+op_code { for_iterator { address: 58 } }         # 49
 op_code { load { frame: 1 pos_in_frame: 1 } }
 op_code { assign { } }
 op_code { const_string { value: "def" } }
 op_code { drop { } }
-op_code { goto { address: 57 } }
+op_code { goto { address: 58 } }
 op_code { const_string { value: "ghi" } }
 op_code { drop { } }
-op_code { goto { address: 48 } }
-op_code { const_string { value: "jkl" } }        # 57
+op_code { goto { address: 49 } }
+op_code { drop { } }                             # 58
+op_code { const_string { value: "jkl" } }        # 59
 op_code { drop { } }
-op_code { goto { address: 63 } }
+op_code { goto { address: 65 } }
 op_code { const_string { value: "mno" } }
 op_code { drop { } }
-op_code { goto { address: 31 } }
-op_code { end { } }                              # 63
+op_code { goto { address: 32 } }
+op_code { drop { } }                             # 65
+op_code { end { } }                              # 66
