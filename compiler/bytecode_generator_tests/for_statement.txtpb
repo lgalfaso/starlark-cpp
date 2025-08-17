@@ -1,0 +1,60 @@
+op_code { make_list { reserve_size: 3 } }        # 0
+op_code { dup {} }                               # 1
+op_code { const_int { value: "0" } }             # 2
+op_code { add_to_list {} }                       # 3
+op_code { dup {} }                               # 4
+op_code { const_int { value: "1" } }             # 5
+op_code { add_to_list {} }                       # 6
+op_code { dup {} }                               # 7
+op_code { const_int { value: "2" } }             # 8
+op_code { add_to_list {} }                       # 9
+op_code { get_iterator {} }                      # 10
+op_code { for_iterator { address: 17 } }         # 11
+op_code { load { frame: 1 pos_in_frame: 0 } }    # 12
+op_code { assign {} }                            # 13
+op_code { const_string { value: "abc" } }        # 14
+op_code { drop {} }                              # 15
+op_code { goto { address: 11 } }                 # 16
+
+
+op_code { make_list { reserve_size: 2 } }        # 17
+op_code { dup {} }                               # 18
+op_code { const_int { value: "0" } }             # 19
+op_code { const_int { value: "1" } }             # 20
+op_code { make_tuple { number_of_elements: 2 } } # 21
+op_code { add_to_list {} }                       # 22
+op_code { dup {} }                               # 23
+op_code { const_int { value: "2" } }             # 24
+op_code { const_int { value: "3" } }             # 25
+op_code { make_tuple { number_of_elements: 2 } } # 26
+op_code { add_to_list {} }                       # 27
+op_code { get_iterator {} }                      # 28
+op_code { for_iterator { address: 37 } }         # 29
+op_code { load { frame: 1 } }                    # 30
+op_code { load { frame: 1 pos_in_frame: 1 } }    # 31
+op_code { make_tuple { number_of_elements: 2 } } # 32
+op_code { assign {} }                            # 33
+op_code { const_string { value: "def" } }        # 34
+op_code { drop {} }                              # 35
+op_code { goto { address: 29 } }                 # 36
+
+
+op_code { make_list { reserve_size: 3 } }        # 37
+op_code { dup {} }                               # 38
+op_code { const_int { value: "0" } }             # 39
+op_code { add_to_list {} }                       # 40
+op_code { dup {} }                               # 41
+op_code { const_int { value: "1" } }             # 42
+op_code { add_to_list {} }                       # 43
+op_code { dup {} }                               # 44
+op_code { const_int { value: "2" } }             # 45
+op_code { add_to_list {} }                       # 46
+op_code { get_iterator {} }                      # 47
+op_code { for_iterator { address: 55 } }         # 48
+op_code { load { frame: 1 } }                    # 49
+op_code { dot_member { member: 'b' } }           # 50
+op_code { assign {} }                            # 51
+op_code { const_string { value: "ghi" } }        # 52
+op_code { drop {} }                              # 53
+op_code { goto { address: 48 } }                 # 54
+

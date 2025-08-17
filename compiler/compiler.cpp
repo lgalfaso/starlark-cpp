@@ -15,6 +15,7 @@ using starlark::ast::BinaryExpr;
 using starlark::ast::DictExpr;
 using starlark::ast::Expression;
 using starlark::ast::File;
+using starlark::ast::ForStmt;
 using starlark::ast::Identifier;
 using starlark::ast::IfExpr;
 using starlark::ast::ListExpr;
@@ -59,10 +60,14 @@ class bytecode_generator : public ast_listener_base {
   void mid_if_expression(const IfExpr* if_expression) override;
   void exit_if_expression(const IfExpr* if_expression) override;
 
+  void mid_for_statement(const ForStmt* for_statement) override;
+  void exit_for_statement(const ForStmt* for_statement) override;
+
  private:
   Program& output;
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
   std::map<const IfExpr*, uint64_t> if_expression_op_mid_pos;
+  std::map<const ForStmt*, uint64_t> for_statement_op_mid_pos;
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
@@ -262,6 +267,25 @@ void bytecode_generator::exit_if_expression(const IfExpr* if_expression) {
   auto op_code_size = output.op_code_size();
   output.mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_goto_()->set_address(op_code_size);
   if_expression_op_mid_pos.erase(if_expression);
+}
+
+void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
+  auto op_code_size = output.op_code_size();
+  if (!for_statement_op_mid_pos.contains(for_statement)) {
+    // This is the first time this is called for this `for statement`.
+    for_statement_op_mid_pos[for_statement] = op_code_size;
+    output.add_op_code()->mutable_get_iterator();
+    output.add_op_code()->mutable_for_iterator();
+  } else {
+    output.add_op_code()->mutable_assign();
+  }
+}
+
+void bytecode_generator::exit_for_statement(const ForStmt* for_statement) {
+  auto op_code_size = output.op_code_size();
+  output.add_op_code()->mutable_goto_()->set_address(for_statement_op_mid_pos[for_statement] + 1);
+  output.mutable_op_code(for_statement_op_mid_pos[for_statement] + 1)->mutable_for_iterator()->set_address(op_code_size + 1);
+  for_statement_op_mid_pos.erase(for_statement);
 }
 
 }  // namespace

@@ -53,7 +53,13 @@ message OpCode {
     MakeDictionary make_dictionary = 36;
     AddToDictionary add_to_dictionary = 37;
 
-    Load load = 38;
+    PosInFrame load = 38;
+    PosInFrame store = 39;
+
+    GetIterator get_iterator = 40;
+    ForIterator for_iterator = 41;
+
+    Assign assign = 42;
 
     DotMember dot_member = 43;
   }
@@ -119,10 +125,17 @@ message MakeDictionary {
 }
 message AddToDictionary {}
 
-message Load {
+message PosInFrame {
   int64 frame = 1;
   int64 pos_in_frame = 2;
 }
+
+message GetIterator {}
+message ForIterator {
+  uint32 address = 1;
+}
+
+message Assign {}
 
 message DotMember {
   string member = 1;
