@@ -25,3 +25,4 @@ op_code { const_int { value: "5" } }
 op_code { add_to_list {} }
 op_code { drop {} }
 
+op_code { end {} }

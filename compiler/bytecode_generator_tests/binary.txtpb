@@ -107,3 +107,4 @@ op_code { const_int { value: "1" } }
 op_code { binary_slash_slash {} }
 op_code { drop {} }
 
+op_code { end {} }

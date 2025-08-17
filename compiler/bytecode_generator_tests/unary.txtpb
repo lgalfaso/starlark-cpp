@@ -10,3 +10,4 @@ op_code { drop {} }
 op_code { const_int { value: "1" } }
 op_code { unary_not {} }
 op_code { drop {} }
+op_code { end {} }

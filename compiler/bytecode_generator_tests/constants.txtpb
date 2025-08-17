@@ -6,3 +6,4 @@ op_code { const_string { value: "abc" } }
 op_code { drop {} }
 op_code { const_bytes { value: "def" } }
 op_code { drop {} }
+op_code { end {} }

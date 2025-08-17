@@ -58,3 +58,4 @@ op_code { const_string { value: "ghi" } }        # 52
 op_code { drop {} }                              # 53
 op_code { goto { address: 48 } }                 # 54
 
+op_code { end {} }

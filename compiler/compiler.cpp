@@ -63,6 +63,8 @@ class bytecode_generator : public ast_listener_base {
   void mid_for_statement(const ForStmt* for_statement) override;
   void exit_for_statement(const ForStmt* for_statement) override;
 
+  void exit_file(const File* starlark_file) override;
+
  private:
   Program& output;
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
@@ -286,6 +288,10 @@ void bytecode_generator::exit_for_statement(const ForStmt* for_statement) {
   output.add_op_code()->mutable_goto_()->set_address(for_statement_op_mid_pos[for_statement] + 1);
   output.mutable_op_code(for_statement_op_mid_pos[for_statement] + 1)->mutable_for_iterator()->set_address(op_code_size + 1);
   for_statement_op_mid_pos.erase(for_statement);
+}
+
+void bytecode_generator::exit_file(const File* starlark_file) {
+  output.add_op_code()->mutable_end();
 }
 
 }  // namespace

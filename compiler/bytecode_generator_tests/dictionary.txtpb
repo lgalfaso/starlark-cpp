@@ -30,4 +30,4 @@ op_code { const_string { value: "c" } }
 op_code { const_int { value: "3" } }
 op_code { add_to_dictionary {} }
 op_code { drop {} }
-
+op_code { end {} }
