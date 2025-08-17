@@ -1,0 +1,4 @@
+op_code { const_string { value: "abc" } }
+op_code { dot_member { member: "capitalize" } }
+op_code { drop { } }
+

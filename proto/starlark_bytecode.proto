@@ -54,6 +54,8 @@ message OpCode {
     AddToDictionary add_to_dictionary = 37;
 
     Load load = 38;
+
+    DotMember dot_member = 43;
   }
 }
 
@@ -120,4 +122,8 @@ message AddToDictionary {}
 message Load {
   int64 frame = 1;
   int64 pos_in_frame = 2;
+}
+
+message DotMember {
+  string member = 1;
 }

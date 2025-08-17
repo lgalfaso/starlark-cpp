@@ -27,6 +27,7 @@ using starlark::grammar::log_level;
 using starlark::grammar::logger;
 using starlark::grammar::options;
 using starlark::grammar::parser;
+using starlark::ast::DotExpr;
 
 namespace starlark {
 namespace compiler {
@@ -45,6 +46,7 @@ class bytecode_generator : public ast_listener_base {
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
+  void exit_dot_expression(const DotExpr* dot_expression) override;
 
   void exit_tuple(const Tuple* tuple) override;
   void enter_list_expression(const ListExpr* list_expression) override;
@@ -197,6 +199,10 @@ void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_express
       break;
   }
   binary_op_mid_pos.erase(binary_expression);
+}
+
+void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
+  *output.add_op_code()->mutable_dot_member()->mutable_member() = dot_expression->identifier().nfkc_name();
 }
 
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
