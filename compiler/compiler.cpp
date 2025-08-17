@@ -13,6 +13,7 @@
 
 using starlark::ast::BinaryExpr;
 using starlark::ast::DictExpr;
+using starlark::ast::DotExpr;
 using starlark::ast::Expression;
 using starlark::ast::File;
 using starlark::ast::ForStmt;
@@ -28,7 +29,6 @@ using starlark::grammar::log_level;
 using starlark::grammar::logger;
 using starlark::grammar::options;
 using starlark::grammar::parser;
-using starlark::ast::DotExpr;
 
 namespace starlark {
 namespace compiler {
