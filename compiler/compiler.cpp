@@ -12,6 +12,7 @@
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
 
+using google::protobuf::RepeatedPtrField;
 using starlark::ast::BinaryExpr;
 using starlark::ast::BreakStmt;
 using starlark::ast::ContinueStmt;
@@ -22,7 +23,9 @@ using starlark::ast::File;
 using starlark::ast::ForStmt;
 using starlark::ast::Identifier;
 using starlark::ast::IfExpr;
+using starlark::ast::IfStmt;
 using starlark::ast::ListExpr;
+using starlark::ast::Statement;
 using starlark::ast::Tuple;
 using starlark::ast::UnaryExpr;
 using starlark::bytecode::Program;
@@ -69,12 +72,20 @@ class bytecode_generator : public ast_listener_base {
   void exit_break_statement(const starlark::ast::BreakStmt* break_statement) override;
   void exit_continue_statement(const starlark::ast::ContinueStmt* continue_statement) override;
 
+  void enter_if_statement(const IfStmt* if_statement) override;
+  void exit_if_statement(const IfStmt* if_statement) override;
+  void enter_then(const RepeatedPtrField<Statement>* then) override;
+  void exit_then(const RepeatedPtrField<Statement>* then) override;
+
   void exit_file(const File* starlark_file) override;
 
  private:
   Program& output;
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
   std::map<const IfExpr*, uint64_t> if_expression_op_mid_pos;
+  std::map<const google::protobuf::RepeatedPtrField<starlark::ast::Statement>*, uint64_t> if_statement_then;
+  std::vector<std::vector<uint64_t>> if_statement_to_fix_to_the_end;
+
   std::map<const ForStmt*, uint64_t> for_statement_op_mid_pos;
   std::vector<std::vector<uint64_t>> for_statement_op_continue;
   std::vector<std::vector<uint64_t>> for_statement_op_break;
@@ -325,6 +336,32 @@ void bytecode_generator::exit_break_statement(const BreakStmt* break_statement) 
 void bytecode_generator::exit_continue_statement(const ContinueStmt* continue_statement) {
   for_statement_op_continue.back().push_back(output.op_code_size());
   output.add_op_code()->mutable_goto_();
+}
+
+void bytecode_generator::enter_if_statement(const IfStmt* if_statement) {
+  if_statement_to_fix_to_the_end.push_back({});
+}
+
+void bytecode_generator::exit_if_statement(const IfStmt* if_statement) {
+  auto op_code_size = output.op_code_size();
+  for (auto pos : if_statement_to_fix_to_the_end.back()) {
+    output.mutable_op_code(pos)->mutable_goto_()->set_address(op_code_size);
+  }
+  if_statement_to_fix_to_the_end.pop_back();
+}
+
+void bytecode_generator::enter_then(const RepeatedPtrField<Statement>* then) {
+  if_statement_then[then] = output.op_code_size();
+  output.add_op_code()->mutable_if_false();
+}
+
+void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
+  auto op_code_size = output.op_code_size();
+  output.mutable_op_code(if_statement_then[then])->mutable_if_false()->set_address(op_code_size + 1);
+  output.add_op_code()->mutable_goto_();
+  if_statement_to_fix_to_the_end.back().push_back(op_code_size);
+
+  if_statement_then.erase(then);
 }
 
 void bytecode_generator::exit_file(const File* starlark_file) {
