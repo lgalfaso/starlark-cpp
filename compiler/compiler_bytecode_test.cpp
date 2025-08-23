@@ -55,7 +55,7 @@ TEST(CompilerBytecode, TestCase) {
     ASSERT_TRUE(expected_starlark_program.ParseFromFileDescriptor(proto_fd));
   }
 
-  std::set<std::string> binding{"None, True, False, len"};
+  std::set<std::string, std::less<>> binding{"None, True, False, len"};
   compiler star_compiler(binding);
   Program actual_starlark_program = star_compiler.compile(starlark_code);
 

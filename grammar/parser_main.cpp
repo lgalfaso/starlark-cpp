@@ -20,7 +20,7 @@ using starlark::ast::File;
 
 namespace {
 
-static const std::set<std::string> BUILD_symbols = {
+static const std::set<std::string, std::less<>> BUILD_symbols = {
     "depset",          "existing_rule", "existing_rules", "exports_files", "glob",                   "module_name",
     "module_version",  "package",       "package_group",  "package_name",  "package_relative_label", "repo_name",
     "repository_name", "select",        "subpackages",
@@ -62,7 +62,7 @@ static const std::set<std::string> BUILD_symbols = {
     "json",
 };
 
-static const std::set<std::string> WORKSPACE_symbols = {
+static const std::set<std::string, std::less<>> WORKSPACE_symbols = {
     "bind", "register_execution_platforms", "register_toolchains", "workspace",
 
     // These should not be needed, but there are repositories that expect them to be predefined.
@@ -72,13 +72,13 @@ static const std::set<std::string> WORKSPACE_symbols = {
     "android_sdk_repository",
 };
 
-static const std::set<std::string> MODULE_symbols = {
+static const std::set<std::string, std::less<>> MODULE_symbols = {
     "archive_override", "bazel_dep",                 "git_override",  "include",                      "inject_repo",         "local_path_override",
     "module",           "multiple_version_override", "override_repo", "register_execution_platforms", "register_toolchains", "single_version_override",
     "use_extension",    "use_repo",                  "use_repo_rule",
 };
 
-static const std::set<std::string> bzl_symbols = {
+static const std::set<std::string, std::less<>> bzl_symbols = {
     "analysis_test_transition", "aspect",           "configuration_field", "depset", "exec_group", "exec_transition",
     "macro",                    "module_extension", "provider",            "repository_rule", "rule", "select",
     "subrule",                  "tag_class",        "visibility",
@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
         arg.ends_with("WORKSPACE.bazel") ||
         arg.ends_with("BUILD") ||
         arg.ends_with("BUILD.bazel");
-    std::set<std::string> extra_symbols;
+    std::set<std::string, std::less<>> extra_symbols;
     if (arg.ends_with("BUILD") || arg.ends_with("BUILD.bazel")) {
       extra_symbols = BUILD_symbols;
     }

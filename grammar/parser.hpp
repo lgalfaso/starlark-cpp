@@ -20,7 +20,7 @@ namespace starlark {
 namespace grammar {
 
 struct parsing_block {
-  std::set<std::string> identifiers;
+  std::set<std::string, std::less<>> identifiers;
   google::protobuf::RepeatedPtrField<std::string>* id_store;
   std::vector<std::pair<starlark::ast::Identifier*, int>> to_resolve;
 };
@@ -28,7 +28,7 @@ struct parsing_block {
 class parser {
  public:
   parser(std::string_view input, logger& logging);
-  parser(std::string_view input, const options& opts, const std::set<std::string>& bindings, logger& logging);
+  parser(std::string_view input, const options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
@@ -47,7 +47,7 @@ class parser {
   void add_error(std::string_view error_message);
   void add_error(std::string_view error_message, position);
   void add_warning(std::string_view error_message);
-  void create_block(const std::set<std::string>& symbols,
+  void create_block(const std::set<std::string, std::less<>>& symbols,
                     const std::set<starlark::ast::Identifier*>& identifiers,
                     google::protobuf::RepeatedPtrField<std::string>* binding);
   void drop_block();
@@ -58,12 +58,12 @@ class parser {
   options opts;
   lexer lex;
   logger& logging;
-  std::set<std::string> base_bindings;
+  std::set<std::string, std::less<>> base_bindings;
 
   std::vector<int> nested_loops;
   bool recover = false;
   bool found_non_load = false;
-  std::vector<std::pair<std::set<std::string>, std::set<starlark::ast::Identifier*>>> parse_parameter_identifiers;
+  std::vector<std::pair<std::set<std::string, std::less<>>, std::set<starlark::ast::Identifier*>>> parse_parameter_identifiers;
   std::vector<parsing_block> parser_blocks;
   std::map<starlark::ast::Identifier*, position> identifier_positions;
 };

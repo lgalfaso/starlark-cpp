@@ -122,10 +122,10 @@ struct message {
     const CallExpr* call_expression;
     const SliceExpr* slice_expression;
     const Identifier* identifier;
-    const std::string* int_value;
+    const std::string_view int_value;
     const double float_value;
-    const std::string* string_value;
-    const std::string* bytes_value;
+    const std::string_view string_value;
+    const std::string_view bytes_value;
     const ListExpr* list_expression;
     const ListComp* list_comprehension;
     const DictExpr* dictionary_expression;
@@ -200,14 +200,14 @@ void ast_listener_base::enter_slice_expression(const SliceExpr* slice_expression
 void ast_listener_base::exit_slice_expression(const SliceExpr* slice_expression) {}
 void ast_listener_base::enter_identifier(const Identifier* identifier) {}
 void ast_listener_base::exit_identifier(const Identifier* identifier) {}
-void ast_listener_base::enter_int_value(const std::string* int_value) {}
-void ast_listener_base::exit_int_value(const std::string* int_value) {}
+void ast_listener_base::enter_int_value(const std::string_view int_value) {}
+void ast_listener_base::exit_int_value(const std::string_view int_value) {}
 void ast_listener_base::enter_float_value(double float_value) {}
 void ast_listener_base::exit_float_value(double float_value) {}
-void ast_listener_base::enter_string_value(const std::string* string_value) {}
-void ast_listener_base::exit_string_value(const std::string* string_value) {}
-void ast_listener_base::enter_bytes_value(const std::string* bytes_value) {}
-void ast_listener_base::exit_bytes_value(const std::string* bytes_value) {}
+void ast_listener_base::enter_string_value(const std::string_view string_value) {}
+void ast_listener_base::exit_string_value(const std::string_view string_value) {}
+void ast_listener_base::enter_bytes_value(const std::string_view bytes_value) {}
+void ast_listener_base::exit_bytes_value(const std::string_view bytes_value) {}
 void ast_listener_base::enter_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::exit_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::mid_list_expression(const ListExpr* list_expression) {}
@@ -589,7 +589,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
               break;
             case Expression::kIntValue:
               to_process.push_back(message{
-                .int_value = &top.expression->int_value(),
+                .int_value = top.expression->int_value(),
                 .type = message_type::kIntValue,
                 .op = message_type_op::kEnter,
               });
@@ -603,14 +603,14 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
               break;
             case Expression::kStringValue:
               to_process.push_back(message{
-                .string_value = &top.expression->string_value(),
+                .string_value = top.expression->string_value(),
                 .type = message_type::kStringValue,
                 .op = message_type_op::kEnter,
               });
               break;
             case Expression::kBytesValue:
               to_process.push_back(message{
-                .bytes_value = &top.expression->bytes_value(),
+                .bytes_value = top.expression->bytes_value(),
                 .type = message_type::kBytesValue,
                 .op = message_type_op::kEnter,
               });

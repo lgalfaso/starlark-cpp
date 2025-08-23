@@ -240,7 +240,7 @@ const std::set<std::string> predeclared_symbols = {
 parser::parser(std::string_view input, logger& logging) : parser(input, options{}, {}, logging) {
 }
 
-parser::parser(std::string_view input, const options& opts, const std::set<std::string>& bindings, logger& logging)
+parser::parser(std::string_view input, const options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging)
     : opts(opts), lex(input, opts, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
   base_bindings.insert(predeclared_symbols.begin(), predeclared_symbols.end());
   lex.next_token();
@@ -422,7 +422,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           // with a previous `load` statement.
           if (is_top_level_block()) {
             if (parser_blocks.back().identifiers.contains(def_statement->function_name().nfkc_name())) {
-              add_error("`def` statement redefines previously defined `load` symbol '" + def_statement->function_name().name() + "'");
+              add_error(std::format("`def` statement redefines previously defined `load` symbol '{}'", def_statement->function_name().name()));
             }
           }
           bind(def_statement->function_name());
@@ -701,7 +701,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
             break;
           case token_type::kLoad: {
-            std::set<std::string> symbols;
+            std::set<std::string, std::less<>> symbols;
             if (found_non_load && opts.require_load_statements_first) {
               add_error("`load` statements must appear before other statements");
             }
@@ -745,16 +745,16 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 load_param->mutable_local_name()->set_nfkc_name(to_nfkc(load_param->remote_name()));
               }
               resolve(load_param->mutable_local_name());
-              if (!symbols.insert(load_param->local_name().nfkc_name()).second) {
-                add_error("`load` statement defines '" + load_param->local_name().name() + "' more than once");
+              if (!symbols.emplace(load_param->local_name().nfkc_name()).second) {
+                add_error(std::format("`load` statement defines '{}' more than once", load_param->local_name().name()));
               }
               if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name()) && !opts.allow_top_level_rebinding) {
-                add_error("`load` statement redefines previously defined value '" + load_param->local_name().name() + "'");
+                add_error(std::format("`load` statement redefines previously defined value '{}'", load_param->local_name().name()));
               }
               // The spec does not specify whether it is an error to bind to the file block multiple times.
               // We are taking the possition that if `allow_top_level_rebinding` is `false`, then this is not allowed.
-              if (!parser_blocks.back().identifiers.insert(load_param->local_name().nfkc_name()).second && !opts.allow_top_level_rebinding) {
-                add_error("Multiple bindings for the top-level load symbol '" + load_param->local_name().name() + "'");
+              if (!parser_blocks.back().identifiers.emplace(load_param->local_name().nfkc_name()).second && !opts.allow_top_level_rebinding) {
+                add_error(std::format("Multiple bindings for the top-level load symbol '{}'", load_param->local_name().name()));
               }
               lex.next_token();
             }
@@ -1584,7 +1584,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::kParseParameters:
         if (top.parse_parameters_first || capture(token_type::kComma)) {
           if (top.parse_parameters_first) {
-            parse_parameter_identifiers.emplace_back(std::set<std::string>{}, std::set<Identifier*>{});
+            parse_parameter_identifiers.emplace_back(std::set<std::string, std::less<>>{}, std::set<Identifier*>{});
           }
           if (is_current(token_type::kIdentifier)) {
             if (top.found_star_star_parameter) {
@@ -1611,8 +1611,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 .test = param->mutable_initialization(),
               });
             }
-            if (!parse_parameter_identifiers.back().first.insert(param->identifier().nfkc_name()).second) {
-              add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
+            if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
+              add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
             }
             // The parameters need to be resolved. The issue is that the block does not yet exists so there
             // is a need to store the Identifiers and resolve them later.
@@ -1637,8 +1637,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             param->mutable_star();
             if (is_current(token_type::kIdentifier)) {
               set_identifier(*param->mutable_identifier());
-              if (!parse_parameter_identifiers.back().first.insert(param->identifier().nfkc_name()).second) {
-                add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
+              if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
+                add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
               }
               parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
@@ -1663,8 +1663,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (!set_identifier(*param->mutable_identifier())) {
               add_error("Expected identifier after STAR_STAR when parsing parameters");
             } else {
-              if (!parse_parameter_identifiers.back().first.insert(param->identifier().nfkc_name()).second) {
-                add_error("duplicate argument '" + param->identifier().name() + "' in function definition");
+              if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
+                add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
               }
               parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
@@ -1706,7 +1706,7 @@ void parser::bind_and_resolve(Expression* base) {
         case Expression::kIdentifier:
           if (is_top_level_block() &&
               parser_blocks.back().identifiers.contains(top->identifier().nfkc_name())) {
-            add_error("Variable '" + top->identifier().name() + "' redefines symbol previously defined by a load statement");
+            add_error(std::format("Variable '{}' redefines symbol previously defined by a load statement", top->identifier().name()));
           }
           bind(top->identifier());
           break;
@@ -1745,11 +1745,11 @@ void parser::bind(const Identifier& identifier) {
   // This leaves to interpretation whether a `def` can be rebound. The rule followed is that `def` and variables should
   // be consistent, follow the same rules, and be handled equally.
   if (is_top_level_block()) {
-    if (!parser_blocks[parser_blocks.size() - 2].identifiers.insert(identifier.nfkc_name()).second && !opts.allow_top_level_rebinding) {
-      add_error("Multiple bindings for the top-level symbol '" + identifier.name() + "'");
+    if (!parser_blocks[parser_blocks.size() - 2].identifiers.emplace(identifier.nfkc_name()).second && !opts.allow_top_level_rebinding) {
+      add_error(std::format("Multiple bindings for the top-level symbol '{}'", identifier.name()));
     }
   } else {
-    parser_blocks.back().identifiers.insert(identifier.nfkc_name());
+    parser_blocks.back().identifiers.emplace(identifier.nfkc_name());
   }
 }
 
@@ -1765,7 +1765,7 @@ bool parser::set_identifier(Identifier& identifier) {
   return true;
 }
 
-void parser::create_block(const std::set<std::string>& symbols,
+void parser::create_block(const std::set<std::string, std::less<>>& symbols,
                     const std::set<Identifier*>& identifiers,
                     google::protobuf::RepeatedPtrField<std::string>* binding) {
   parser_blocks.emplace_back(symbols, binding);
@@ -1784,7 +1784,7 @@ void parser::drop_block() {
     auto pos = parser_blocks.back().identifiers.find(entry.first->nfkc_name());
     if (pos == parser_blocks.back().identifiers.end()) {
       if (parser_blocks.size() == 1) {
-        add_error("name '" + entry.first->name() + "' is not defined", identifier_positions[entry.first]);
+        add_error(std::format("name '{}' is not defined", entry.first->name()), identifier_positions[entry.first]);
         entry.first->set_frame(-1);
         entry.first->set_pos_in_frame(-1);
       } else {

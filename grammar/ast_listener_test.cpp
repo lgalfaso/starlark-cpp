@@ -286,11 +286,11 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT Identifier\n";
   }
 
-  void enter_int_value(const std::string* int_value) override {
-    output += "ENTER IntValue(" + starlark::grammar::quoted(*int_value) + ")\n";
+  void enter_int_value(const std::string_view int_value) override {
+    output += "ENTER IntValue(" + starlark::grammar::quoted(int_value) + ")\n";
   }
 
-  void exit_int_value(const std::string* int_value) override {
+  void exit_int_value(const std::string_view int_value) override {
     output += "EXIT IntValue\n";
   }
 
@@ -302,19 +302,19 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT FloatValue\n";
   }
 
-  void enter_string_value(const std::string* string_value) override {
-    output += "ENTER StringValue(" + starlark::grammar::quoted(*string_value) + ")\n";
+  void enter_string_value(const std::string_view string_value) override {
+    output += "ENTER StringValue(" + starlark::grammar::quoted(string_value) + ")\n";
   }
 
-  void exit_string_value(const std::string* string_value) override {
+  void exit_string_value(const std::string_view string_value) override {
     output += "EXIT StringValue\n";
   }
 
-  void enter_bytes_value(const std::string* bytes_value) override {
-    output += "ENTER BytesValue(" + starlark::grammar::quoted(*bytes_value) + ")\n";
+  void enter_bytes_value(const std::string_view bytes_value) override {
+    output += "ENTER BytesValue(" + starlark::grammar::quoted(bytes_value) + ")\n";
   }
 
-  void exit_bytes_value(const std::string* bytes_value) override {
+  void exit_bytes_value(const std::string_view bytes_value) override {
     output += "EXIT BytesValue\n";
   }
 
