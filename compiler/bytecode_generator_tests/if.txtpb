@@ -1,11 +1,11 @@
 op_code { load { frame: 2 pos_in_frame: 2 } }    # 0
 op_code { if_false { address: 5 } }              # 1
-op_code { load { frame: 2 } }                    # 2
+op_code { load { frame: 2 pos_in_frame: 0 } }    # 2
 op_code { drop {} }                              # 3
 op_code { goto { address: 5 } }                  # 4
 
 
-op_code { load { frame: 2 } }                    # 5
+op_code { load { frame: 2 pos_in_frame: 0 } }    # 5
 op_code { if_false { address: 10 } }             # 6
 op_code { const_int { value: "0" } }             # 7
 op_code { drop { } }                             # 8

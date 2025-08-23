@@ -22,6 +22,8 @@ statement {
                 identifier {
                   name: "y"
                   nfkc_name: "y"
+                  frame: 0
+                  pos_in_frame: 0
                 }
               }
               in {
@@ -53,6 +55,8 @@ statement {
             identifier {
               name: "x"
               nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
             }
           }
           in {

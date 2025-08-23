@@ -10,7 +10,7 @@ op_code { const_int { value: "3" } }
 op_code { add_to_list { } }
 op_code { get_iterator { } }
 op_code { for_iterator { address: 20 } }    # 11
-op_code { load { frame: 1 } }
+op_code { load { frame: 1 pos_in_frame: 0 } }
 op_code { assign { } }
 op_code { const_string { value: "abc" } }
 op_code { drop { } }
@@ -32,7 +32,7 @@ op_code { const_int { value: "3" } }
 op_code { add_to_list { } }
 op_code { get_iterator { } }
 op_code { for_iterator { address: 65 } }    # 32
-op_code { load { frame: 1 } }
+op_code { load { frame: 1 pos_in_frame: 0} }
 op_code { assign { } }
 op_code { const_string { value: "abc" } }
 op_code { drop { } }

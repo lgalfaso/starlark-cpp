@@ -31,7 +31,7 @@ op_code { make_tuple { number_of_elements: 2 } } # 27
 op_code { add_to_list {} }                       # 28
 op_code { get_iterator {} }                      # 29
 op_code { for_iterator { address: 38 } }         # 30
-op_code { load { frame: 1 } }                    # 31
+op_code { load { frame: 1 pos_in_frame: 0 } }    # 31
 op_code { load { frame: 1 pos_in_frame: 1 } }    # 32
 op_code { make_tuple { number_of_elements: 2 } } # 33
 op_code { assign {} }                            # 34
@@ -53,7 +53,7 @@ op_code { const_int { value: "2" } }             # 47
 op_code { add_to_list {} }                       # 48
 op_code { get_iterator {} }                      # 49
 op_code { for_iterator { address: 57 } }         # 50
-op_code { load { frame: 1 } }                    # 51
+op_code { load { frame: 1 pos_in_frame: 0 } }    # 51
 op_code { dot_member { member: 'b' } }           # 52
 op_code { assign {} }                            # 53
 op_code { const_string { value: "ghi" } }        # 54

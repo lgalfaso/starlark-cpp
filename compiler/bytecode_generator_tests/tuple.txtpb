@@ -1,4 +1,4 @@
-op_code { make_tuple { } }
+op_code { make_tuple { number_of_elements: 0 } }
 op_code { drop { } }
 op_code { const_int { value: "0" } }
 op_code { make_tuple { number_of_elements: 1 } }
