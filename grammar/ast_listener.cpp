@@ -895,13 +895,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
         case message_type::kForClause:
           listener.enter_for_clause(top.for_clause);
           to_process.push_back(message{
-            .for_in_expression = &top.for_clause->in(),
-            .type = message_type::kForInExpression,
+            .for_loop_variables = &top.for_clause->loop_variables(),
+            .type = message_type::kForLoopVariables,
             .op = message_type_op::kEnter,
           });
           to_process.push_back(message{
-            .for_loop_variables = &top.for_clause->loop_variables(),
-            .type = message_type::kForLoopVariables,
+            .for_in_expression = &top.for_clause->in(),
+            .type = message_type::kForInExpression,
             .op = message_type_op::kEnter,
           });
           break;
