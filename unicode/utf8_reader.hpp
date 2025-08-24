@@ -37,7 +37,7 @@ class utf8_reader {
   static constexpr std::uint32_t max_code_point = 0x10'ffffu;
 
  private:
-  const std::string_view input;
+  std::string_view input;
   std::size_t input_pos = 0;
   bool strict;
 };

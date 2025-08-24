@@ -45,10 +45,10 @@ class bytecode_generator : public ast_listener_base {
  public:
   explicit bytecode_generator(Program& output);
   void exit_expression_statement(const Expression* statement) override;
-  void enter_int_value(const std::string_view int_value) override;
+  void enter_int_value(std::string_view int_value) override;
   void enter_float_value(double float_value) override;
-  void enter_string_value(const std::string_view string_value) override;
-  void enter_bytes_value(const std::string_view bytes_value) override;
+  void enter_string_value(std::string_view string_value) override;
+  void enter_bytes_value(std::string_view bytes_value) override;
   void enter_identifier(const Identifier* identifier) override;
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
@@ -97,7 +97,7 @@ void bytecode_generator::exit_expression_statement(const Expression* statement) 
   output.add_op_code()->mutable_drop();
 }
 
-void bytecode_generator::enter_int_value(const std::string_view int_value) {
+void bytecode_generator::enter_int_value(std::string_view int_value) {
   output.add_op_code()->mutable_const_int()->set_value(int_value);
 }
 
@@ -105,11 +105,11 @@ void bytecode_generator::enter_float_value(double float_value) {
   output.add_op_code()->mutable_const_float()->set_value(float_value);
 }
 
-void bytecode_generator::enter_string_value(const std::string_view string_value) {
+void bytecode_generator::enter_string_value(std::string_view string_value) {
   output.add_op_code()->mutable_const_string()->set_value(string_value);
 }
 
-void bytecode_generator::enter_bytes_value(const std::string_view bytes_value) {
+void bytecode_generator::enter_bytes_value(std::string_view bytes_value) {
   output.add_op_code()->mutable_const_bytes()->set_value(bytes_value);
 }
 

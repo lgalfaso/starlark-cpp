@@ -122,10 +122,10 @@ struct message {
     const CallExpr* call_expression;
     const SliceExpr* slice_expression;
     const Identifier* identifier;
-    const std::string_view int_value;
+    std::string_view int_value;
     const double float_value;
-    const std::string_view string_value;
-    const std::string_view bytes_value;
+    std::string_view string_value;
+    std::string_view bytes_value;
     const ListExpr* list_expression;
     const ListComp* list_comprehension;
     const DictExpr* dictionary_expression;
@@ -200,14 +200,14 @@ void ast_listener_base::enter_slice_expression(const SliceExpr* slice_expression
 void ast_listener_base::exit_slice_expression(const SliceExpr* slice_expression) {}
 void ast_listener_base::enter_identifier(const Identifier* identifier) {}
 void ast_listener_base::exit_identifier(const Identifier* identifier) {}
-void ast_listener_base::enter_int_value(const std::string_view int_value) {}
-void ast_listener_base::exit_int_value(const std::string_view int_value) {}
+void ast_listener_base::enter_int_value(std::string_view int_value) {}
+void ast_listener_base::exit_int_value(std::string_view int_value) {}
 void ast_listener_base::enter_float_value(double float_value) {}
 void ast_listener_base::exit_float_value(double float_value) {}
-void ast_listener_base::enter_string_value(const std::string_view string_value) {}
-void ast_listener_base::exit_string_value(const std::string_view string_value) {}
-void ast_listener_base::enter_bytes_value(const std::string_view bytes_value) {}
-void ast_listener_base::exit_bytes_value(const std::string_view bytes_value) {}
+void ast_listener_base::enter_string_value(std::string_view string_value) {}
+void ast_listener_base::exit_string_value(std::string_view string_value) {}
+void ast_listener_base::enter_bytes_value(std::string_view bytes_value) {}
+void ast_listener_base::exit_bytes_value(std::string_view bytes_value) {}
 void ast_listener_base::enter_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::exit_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::mid_list_expression(const ListExpr* list_expression) {}
