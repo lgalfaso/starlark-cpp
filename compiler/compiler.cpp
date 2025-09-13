@@ -237,19 +237,15 @@ void bytecode_generator::exit_tuple(const Tuple* tuple) {
 
 void bytecode_generator::enter_list_expression(const starlark::ast::ListExpr* list_expression) {
   output.add_op_code()->mutable_make_list()->set_reserve_size(list_expression->element_size());
-  if (list_expression->element_size() != 0) {
-    output.add_op_code()->mutable_dup();
-  }
 }
 
 void bytecode_generator::mid_list_expression(const starlark::ast::ListExpr* list_expression) {
-  output.add_op_code()->mutable_add_to_list();
-  output.add_op_code()->mutable_dup();
+  output.add_op_code()->mutable_add_to_list()->set_pos(1);
 }
 
 void bytecode_generator::exit_list_expression(const starlark::ast::ListExpr* list_expression) {
   if (list_expression->element_size() != 0) {
-    output.add_op_code()->mutable_add_to_list();
+    output.add_op_code()->mutable_add_to_list()->set_pos(1);
   }
 }
 
