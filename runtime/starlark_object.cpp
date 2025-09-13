@@ -2,6 +2,7 @@
 
 #include "runtime/starlark_object.hpp"
 
+#include <bit>
 #include <string>
 #include <utility>
 
