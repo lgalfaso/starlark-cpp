@@ -1,33 +1,27 @@
 op_code { make_dictionary { reserve_size: 0 } }
 op_code { drop {} }
 op_code { make_dictionary { reserve_size: 1} }
-op_code { dup {} }
 op_code { const_string { value: "a" } }
 op_code { const_int { value: "1" } }
-op_code { add_to_dictionary {} }
+op_code { add_to_dictionary { pos: 1 } }
 op_code { drop {} }
 op_code { make_dictionary { reserve_size: 2} }
-op_code { dup {} }
 op_code { const_string { value: "a" } }
 op_code { const_int { value: "1" } }
-op_code { add_to_dictionary {} }
-op_code { dup {} }
+op_code { add_to_dictionary { pos: 1 } }
 op_code { const_string { value: "b" } }
 op_code { const_int { value: "2" } }
-op_code { add_to_dictionary {} }
+op_code { add_to_dictionary { pos: 1 } }
 op_code { drop {} }
 op_code { make_dictionary { reserve_size: 3} }
-op_code { dup {} }
 op_code { const_string { value: "a" } }
 op_code { const_int { value: "1" } }
-op_code { add_to_dictionary {} }
-op_code { dup {} }
+op_code { add_to_dictionary { pos: 1 } }
 op_code { const_string { value: "b" } }
 op_code { const_int { value: "2" } }
-op_code { add_to_dictionary {} }
-op_code { dup {} }
+op_code { add_to_dictionary { pos: 1 } }
 op_code { const_string { value: "c" } }
 op_code { const_int { value: "3" } }
-op_code { add_to_dictionary {} }
+op_code { add_to_dictionary { pos: 1 } }
 op_code { drop {} }
 op_code { end {} }

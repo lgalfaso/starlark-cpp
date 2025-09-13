@@ -251,19 +251,15 @@ void bytecode_generator::exit_list_expression(const starlark::ast::ListExpr* lis
 
 void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_expression) {
   output.add_op_code()->mutable_make_dictionary()->set_reserve_size(dictionary_expression->entry_size());
-  if (dictionary_expression->entry_size() != 0) {
-    output.add_op_code()->mutable_dup();
-  }
 }
 
 void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
-  output.add_op_code()->mutable_add_to_dictionary();
-  output.add_op_code()->mutable_dup();
+  output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
 }
 
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
-    output.add_op_code()->mutable_add_to_dictionary();
+    output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
   }
 }
 

@@ -127,7 +127,9 @@ message AddToList {
 message MakeDictionary {
   uint32 reserve_size = 1;
 }
-message AddToDictionary {}
+message AddToDictionary {
+  uint32 pos = 1;
+}
 
 message PosInFrame {
   int64 frame = 1;
