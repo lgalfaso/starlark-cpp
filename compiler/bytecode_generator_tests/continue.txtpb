@@ -15,7 +15,7 @@ op_code { goto { address: 8 } }
 op_code { const_string { value: "def" } }
 op_code { drop { } }
 op_code { goto { address: 8 } }
-op_code { drop { } }                        # 17
+op_code { end_iterator { } }                # 17
 
 op_code { make_list: { reserve_size: 3 } }  # 18
 op_code { const_int { value: "1" } }
@@ -48,13 +48,13 @@ op_code { goto { address: 40 } }
 op_code { const_string { value: "ghi" } }
 op_code { drop { } }
 op_code { goto { address: 40 } }
-op_code { drop { } }                        # 49
+op_code { end_iterator { } }                # 49
 op_code { const_string { value: "jkl" } }
 op_code { drop { } }
 op_code { goto { address: 26 } }
 op_code { const_string { value: "mno" } }
 op_code { drop { } }
 op_code { goto { address: 26 } }
-op_code { drop { } }                        # 56
+op_code { end_iterator { } }                # 56
 op_code { end { } }                         # 57
 

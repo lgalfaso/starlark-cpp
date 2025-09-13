@@ -12,7 +12,7 @@ op_code { assign {} }                            # 10
 op_code { const_string { value: "abc" } }        # 11
 op_code { drop {} }                              # 12
 op_code { goto { address: 8 } }                  # 13
-op_code { drop {} }                              # 14
+op_code { end_iterator {} }                      # 14
 
 
 op_code { make_list { reserve_size: 2 } }        # 15
@@ -33,7 +33,7 @@ op_code { assign {} }                            # 29
 op_code { const_string { value: "def" } }        # 30
 op_code { drop {} }                              # 31
 op_code { goto { address: 25 } }                 # 32
-op_code { drop {} }                              # 33
+op_code { end_iterator {} }                      # 33
 
 
 op_code { make_list { reserve_size: 3 } }        # 34
@@ -51,6 +51,6 @@ op_code { assign {} }                            # 45
 op_code { const_string { value: "ghi" } }        # 46
 op_code { drop {} }                              # 47
 op_code { goto { address: 42 } }                 # 48
-op_code { drop {} }                              # 49
+op_code { end_iterator {} }                      # 49
 
 op_code { end {} }                               # 50

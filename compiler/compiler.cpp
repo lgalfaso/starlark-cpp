@@ -304,7 +304,7 @@ void bytecode_generator::exit_for_statement(const ForStmt* for_statement) {
   auto begin_address = for_statement_op_mid_pos[for_statement] + 1;
   output.add_op_code()->mutable_goto_()->set_address(begin_address);
   output.mutable_op_code(for_statement_op_mid_pos[for_statement] + 1)->mutable_for_iterator()->set_address(op_code_size + 1);
-  output.add_op_code()->mutable_drop();
+  output.add_op_code()->mutable_end_iterator();
 
   // Fix `break` and `continue` statements.
   for (auto i : for_statement_op_break.back()) {

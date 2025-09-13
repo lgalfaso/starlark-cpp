@@ -58,12 +58,13 @@ message OpCode {
 
     GetIterator get_iterator = 40;
     ForIterator for_iterator = 41;
+    EndIterator end_iterator = 42;
 
-    Assign assign = 42;
+    Assign assign = 43;
 
-    DotMember dot_member = 43;
+    DotMember dot_member = 44;
 
-    End end = 44;
+    End end = 45;
   }
 }
 
@@ -140,6 +141,7 @@ message GetIterator {}
 message ForIterator {
   uint32 address = 1;
 }
+message EndIterator {}
 
 message Assign {}
 
