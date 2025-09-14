@@ -221,6 +221,7 @@ void ast_listener_base::exit_dictionary_comprehension(const DictComp* dictionary
 void ast_listener_base::enter_comp_clause(const CompClause* comp_clause) {}
 void ast_listener_base::exit_comp_clause(const CompClause* comp_clause) {}
 void ast_listener_base::enter_for_clause(const ForClause* for_clause) {}
+void ast_listener_base::mid_for_clause(const ForClause* for_clause) {}
 void ast_listener_base::exit_for_clause(const ForClause* for_clause) {}
 void ast_listener_base::enter_if_clause(const Expression* if_clause) {}
 void ast_listener_base::exit_if_clause(const Expression* if_clause) {}
@@ -900,6 +901,11 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
             .op = message_type_op::kEnter,
           });
           to_process.push_back(message{
+            .for_clause = top.for_clause,
+            .type = message_type::kForClause,
+            .op = message_type_op::kMid,
+          });
+          to_process.push_back(message{
             .for_in_expression = &top.for_clause->in(),
             .type = message_type::kForInExpression,
             .op = message_type_op::kEnter,
@@ -1069,6 +1075,9 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kForStatement:
           listener.mid_for_statement(top.for_statement);
+          break;
+        case message_type::kForClause:
+          listener.mid_for_clause(top.for_clause);
           break;
         default:
           break;

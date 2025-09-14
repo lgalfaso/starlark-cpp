@@ -370,6 +370,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "ENTER ForClause\n";
   }
 
+  void mid_for_clause(const starlark::ast::ForClause* for_clause) override {
+    output += "MID ForClause\n";
+  }
+
   void exit_for_clause(const starlark::ast::ForClause* for_clause) override {
     output += "EXIT ForClause\n";
   }

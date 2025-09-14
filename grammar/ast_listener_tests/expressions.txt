@@ -85,6 +85,7 @@ EXIT Argument
 EXIT CallExpression
 EXIT Expression
 EXIT ForInExpression
+MID ForClause
 ENTER LoopVariables
 ENTER Expression
 ENTER Identifier("a")
@@ -177,6 +178,7 @@ EXIT Expression
 EXIT ListExpression
 EXIT Expression
 EXIT ForInExpression
+MID ForClause
 ENTER LoopVariables
 ENTER Expression
 ENTER Identifier("a")

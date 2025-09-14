@@ -96,6 +96,7 @@ class ast_listener {
   virtual void enter_comp_clause(const starlark::ast::CompClause* comp_clause) = 0;
   virtual void exit_comp_clause(const starlark::ast::CompClause* comp_clause) = 0;
   virtual void enter_for_clause(const starlark::ast::ForClause* for_clause) = 0;
+  virtual void mid_for_clause(const starlark::ast::ForClause* for_clause) = 0;
   virtual void exit_for_clause(const starlark::ast::ForClause* for_clause) = 0;
   virtual void enter_if_clause(const starlark::ast::Expression* if_clause) = 0;
   virtual void exit_if_clause(const starlark::ast::Expression* if_clause) = 0;
@@ -186,6 +187,7 @@ class ast_listener_base : public ast_listener {
   void enter_comp_clause(const starlark::ast::CompClause* comp_clause) override;
   void exit_comp_clause(const starlark::ast::CompClause* comp_clause) override;
   void enter_for_clause(const starlark::ast::ForClause* for_clause) override;
+  void mid_for_clause(const starlark::ast::ForClause* for_clause) override;
   void exit_for_clause(const starlark::ast::ForClause* for_clause) override;
   void enter_if_clause(const starlark::ast::Expression* if_clause) override;
   void exit_if_clause(const starlark::ast::Expression* if_clause) override;
