@@ -93,7 +93,7 @@ class bytecode_generator : public ast_listener_base {
   Program& output;
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
   std::map<const IfExpr*, uint64_t> if_expression_op_mid_pos;
-  std::map<const google::protobuf::RepeatedPtrField<starlark::ast::Statement>*, uint64_t> if_statement_then;
+  std::map<const RepeatedPtrField<Statement>*, uint64_t> if_statement_then;
   std::vector<std::vector<uint64_t>> if_statement_to_fix_to_the_end;
 
   std::map<const ForStmt*, uint64_t> for_statement_op_mid_pos;
