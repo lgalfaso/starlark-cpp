@@ -15,6 +15,7 @@
 using google::protobuf::RepeatedPtrField;
 using starlark::ast::BinaryExpr;
 using starlark::ast::BreakStmt;
+using starlark::ast::CompClause;
 using starlark::ast::ContinueStmt;
 using starlark::ast::DictExpr;
 using starlark::ast::DotExpr;
@@ -24,6 +25,7 @@ using starlark::ast::ForStmt;
 using starlark::ast::Identifier;
 using starlark::ast::IfExpr;
 using starlark::ast::IfStmt;
+using starlark::ast::ListComp;
 using starlark::ast::ListExpr;
 using starlark::ast::Statement;
 using starlark::ast::Tuple;
@@ -63,6 +65,14 @@ class bytecode_generator : public ast_listener_base {
   void mid_dictionary_expression(const DictExpr* dictionary_expression) override;
   void exit_dictionary_expression(const DictExpr* dictionary_expression) override;
 
+  void enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) override;
+  void exit_list_comprehension(const starlark::ast::ListComp* list_comprehension) override;
+  void enter_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override;
+  void exit_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override;
+  void mid_for_clause(const starlark::ast::ForClause* for_clause) override;
+  void exit_for_clause(const starlark::ast::ForClause* for_clause) override;
+  void exit_if_clause(const starlark::ast::Expression* if_clause) override;
+
   void mid_if_expression(const IfExpr* if_expression) override;
   void exit_if_expression(const IfExpr* if_expression) override;
 
@@ -89,6 +99,9 @@ class bytecode_generator : public ast_listener_base {
   std::map<const ForStmt*, uint64_t> for_statement_op_mid_pos;
   std::vector<std::vector<uint64_t>> for_statement_op_continue;
   std::vector<std::vector<uint64_t>> for_statement_op_break;
+  std::vector<std::vector<uint64_t>> comprehension_comp_clause;
+
+  void fix_comp_clause(const RepeatedPtrField<CompClause>& clauses);
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
@@ -265,6 +278,55 @@ void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_e
   }
 }
 
+void bytecode_generator::enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) {
+  comprehension_comp_clause.push_back({});
+  output.add_op_code()->mutable_make_list()->set_reserve_size(0);
+}
+
+void bytecode_generator::exit_list_comprehension(const starlark::ast::ListComp* list_comprehension) {
+  int number_for_clauses = 0;
+  for (const auto& clause : list_comprehension->clause()) {
+    if (clause.comp_clause_type_case() == CompClause::kForClause) {
+      number_for_clauses++;
+    }
+  }
+  output.add_op_code()->mutable_add_to_list()->set_pos(number_for_clauses + 1);
+  fix_comp_clause(list_comprehension->clause());
+  comprehension_comp_clause.pop_back();
+}
+
+void bytecode_generator::enter_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) {
+  comprehension_comp_clause.push_back({});
+  output.add_op_code()->mutable_make_dictionary()->set_reserve_size(0);
+}
+
+void bytecode_generator::exit_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) {
+  int number_for_clauses = 0;
+  for (const auto& clause : dictionary_comprehension->clause()) {
+    if (clause.comp_clause_type_case() == CompClause::kForClause) {
+      number_for_clauses++;
+    }
+  }
+  output.add_op_code()->mutable_add_to_dictionary()->set_pos(number_for_clauses + 1);
+  fix_comp_clause(dictionary_comprehension->clause());
+  comprehension_comp_clause.pop_back();
+}
+
+void bytecode_generator::mid_for_clause(const starlark::ast::ForClause* for_clause) {
+  output.add_op_code()->mutable_get_iterator();
+  comprehension_comp_clause.back().push_back(output.op_code_size());
+  output.add_op_code()->mutable_for_iterator();
+}
+
+void bytecode_generator::exit_for_clause(const starlark::ast::ForClause* for_clause) {
+  output.add_op_code()->mutable_assign();
+}
+
+void bytecode_generator::exit_if_clause(const starlark::ast::Expression* if_clause) {
+  comprehension_comp_clause.back().push_back(output.op_code_size());
+  output.add_op_code()->mutable_if_false();
+}
+
 void bytecode_generator::mid_if_expression(const IfExpr* if_expression) {
   auto op_code_size = output.op_code_size();
   if (!if_expression_op_mid_pos.contains(if_expression)) {
@@ -360,6 +422,24 @@ void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
 
 void bytecode_generator::exit_file(const File* starlark_file) {
   output.add_op_code()->mutable_end();
+}
+
+
+void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& clauses) {
+  int clause_pos = 0;
+  auto clauses_count = clauses.size();
+  for (auto it = clauses.rbegin(); it != clauses.rend(); ++it) {
+    const auto& clause = *it;
+    if (clause.comp_clause_type_case() == CompClause::kForClause) {
+      output.mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
+          ->mutable_for_iterator()->set_address(output.op_code_size());
+      output.add_op_code()->mutable_end_iterator();
+    } else {
+      output.mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
+          ->mutable_if_false()->set_address(output.op_code_size());
+    }
+    clause_pos++;
+  }
 }
 
 }  // namespace
