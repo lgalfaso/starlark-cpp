@@ -5,10 +5,10 @@ module(
     version = "0.0.1",
 )
 
-bazel_dep(name = "rules_cc", version = "0.2.5")
+bazel_dep(name = "rules_cc", version = "0.2.8")
 bazel_dep(name = "google_benchmark", version = "1.9.4")
 bazel_dep(name = "googletest", version = "1.17.0")
-bazel_dep(name = "protobuf", version = "32.0")
+bazel_dep(name = "protobuf", version = "32.1")
 bazel_dep(name = "rules_fuzzing", version = "0.6.0")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -21,6 +21,6 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 """,
-    integrity = "sha256-yG3YHysUpDsMwGSqX4mqckE4aAHjXFnHmE5XmDJjTrI=",
-    url = "https://unicode.org/Public/16.0.0/ucd/UCD.zip",
+    integrity = "sha256-IGbRkJsuqTkWzgktocDuSAjqPvhAfJS08U9bfrJj0o4=",
+    url = "https://unicode.org/Public/17.0.0/ucd/UCD.zip",
 )
