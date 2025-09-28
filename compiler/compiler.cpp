@@ -47,6 +47,7 @@ namespace {
 class bytecode_generator : public ast_listener_base {
  public:
   explicit bytecode_generator(Program& output);
+  void enter_load_statement(const starlark::ast::LoadStmt* load_statement) override;
   void exit_expression_statement(const Expression* statement) override;
   void enter_int_value(std::string_view int_value) override;
   void enter_float_value(double float_value) override;
@@ -110,6 +111,16 @@ class bytecode_generator : public ast_listener_base {
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
+
+void bytecode_generator::enter_load_statement(const starlark::ast::LoadStmt* load_statement) {
+  auto* load_op = output.add_op_code()->mutable_load_module();
+  load_op->set_module(load_statement->module());
+  for (const auto& symbol : load_statement->load_param()) {
+    auto* load_param = load_op->add_value();
+    load_param->set_identifier(symbol.local_name().nfkc_name());
+    load_param->set_remote_symbol(symbol.remote_name());
+  }
+}
 
 void bytecode_generator::exit_expression_statement(const Expression* statement) {
   output.add_op_code()->mutable_drop();

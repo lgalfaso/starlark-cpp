@@ -1,0 +1,5 @@
+op_code { load_module { module: "module1" value { identifier: "a" remote_symbol: "a" } } }
+op_code { load_module { module: "module2" value { identifier: "b" remote_symbol: "b" } value { identifier: "c" remote_symbol: "c" } } }
+op_code { load_module { module: "module3" value { identifier: "d" remote_symbol: "e" } } }
+op_code { load_module { module: "module4" value { identifier: "f" remote_symbol: "f" } value { identifier: "g" remote_symbol: "h" } } }
+op_code { end { } }
