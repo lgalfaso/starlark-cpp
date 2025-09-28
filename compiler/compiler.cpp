@@ -272,6 +272,9 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
 }
 
 void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
+  // TODO(lmirelmann): I think it would be better not to generate the `make_tuple` entry
+  //     and change `add_to_dictionary` to take two elements from the stack.
+  //     The underlying issue is that dictionary comprehension expressions still take a tuple.
   output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
   output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
 }
