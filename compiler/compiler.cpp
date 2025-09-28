@@ -13,6 +13,7 @@
 #include "grammar/parser.hpp"
 
 using google::protobuf::RepeatedPtrField;
+using starlark::ast::Argument;
 using starlark::ast::BinaryExpr;
 using starlark::ast::BreakStmt;
 using starlark::ast::CompClause;
@@ -86,6 +87,10 @@ class bytecode_generator : public ast_listener_base {
   void exit_if_statement(const IfStmt* if_statement) override;
   void enter_then(const RepeatedPtrField<Statement>* then) override;
   void exit_then(const RepeatedPtrField<Statement>* then) override;
+
+  void exit_call_expression(const starlark::ast::CallExpr* call_expression) override;
+  void enter_argument(const starlark::ast::Argument* argument) override;
+  void exit_argument(const starlark::ast::Argument* argument) override;
 
   void exit_file(const File* starlark_file) override;
 
@@ -418,6 +423,49 @@ void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
   if_statement_to_fix_to_the_end.back().push_back(op_code_size);
 
   if_statement_then.erase(then);
+}
+
+void bytecode_generator::exit_call_expression(const starlark::ast::CallExpr* call_expression) {
+  int pos_arguments = 0;
+  int named_arguments = 0;
+  bool varadic_pos_arg = false;
+  bool varadic_named_arg = false;
+
+  for (const auto& arg : call_expression->argument()) {
+    switch (arg.argument_type_case()) {
+      case Argument::kValue:
+        pos_arguments++;
+        break;
+      case Argument::kNamedArgument:
+        named_arguments++;
+        break;
+      case Argument::kStarArgument:
+        varadic_pos_arg = true;
+        break;
+      case Argument::kStarStarArgument:
+        varadic_named_arg = true;
+        break;
+      case Argument::ARGUMENT_TYPE_NOT_SET:
+        break;
+    }
+  }
+  auto* call = output.add_op_code()->mutable_call();
+  call->set_positional_arguments_count(pos_arguments);
+  call->set_named_arguments_count(named_arguments);
+  call->set_has_varadic_positional_argument(varadic_pos_arg);
+  call->set_has_varadic_named_argument(varadic_named_arg);
+}
+
+void bytecode_generator::enter_argument(const starlark::ast::Argument* argument) {
+  if (argument->argument_type_case() == Argument::kNamedArgument) {
+    output.add_op_code()->mutable_const_string()->set_value(argument->named_argument().identifier().nfkc_name());
+  }
+}
+
+void bytecode_generator::exit_argument(const starlark::ast::Argument* argument) {
+  if (argument->argument_type_case() == Argument::kNamedArgument) {
+    output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
+  }
 }
 
 void bytecode_generator::exit_file(const File* starlark_file) {

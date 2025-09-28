@@ -63,8 +63,9 @@ message OpCode {
     Assign assign = 43;
 
     DotMember dot_member = 44;
+    Call call = 45;
 
-    End end = 45;
+    End end = 46;
   }
 }
 
@@ -147,6 +148,13 @@ message Assign {}
 
 message DotMember {
   string member = 1;
+}
+
+message Call {
+    int32 positional_arguments_count = 1;
+    int32 named_arguments_count = 2;
+    bool has_varadic_positional_argument = 3;
+    bool has_varadic_named_argument = 4;
 }
 
 message End {}
