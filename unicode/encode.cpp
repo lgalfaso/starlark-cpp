@@ -12,7 +12,7 @@ namespace unicode {
 
 void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict) {
   if ((strict && !ucd::is_assigned(character)) || !is_in_range(character)) {
-    character = utf8_reader::replacement_character;
+    character = utf8_reader::kReplacementCharacter;
   }
   if (character <= 0x7f) {
     output += static_cast<char>(character);

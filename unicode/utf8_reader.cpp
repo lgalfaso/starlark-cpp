@@ -20,20 +20,20 @@ inline bool is_utf8_continue(char input) {
 }  // namespace
 
 bool is_in_range(std::uint32_t code_point) {
-  return code_point <= utf8_reader::max_code_point;
+  return code_point <= utf8_reader::kMaxCodePoint;
 }
 
 bool is_surrogate(std::uint32_t code_point) {
   return (0xD800 <= code_point) && (code_point <= 0xDFFF);
 }
 
-const std::uint32_t utf8_reader::replacement_character;
-const std::uint32_t utf8_reader::bom_character;
-const std::uint32_t utf8_reader::max_code_point;
+const std::uint32_t utf8_reader::kReplacementCharacter;
+const std::uint32_t utf8_reader::kBomCharacter;
+const std::uint32_t utf8_reader::kMaxCodePoint;
 
 utf8_reader::utf8_reader(string_view input, bool strict) : input(input), strict(strict) {
   // If the source code starts with a BOM, then ignore it.
-  if (peek_code_point() == bom_character) {
+  if (peek_code_point() == kBomCharacter) {
     skip_code_point();
   }
 }
@@ -59,16 +59,16 @@ char utf8_reader::peek(std::size_t delta) const {
 
 std::uint32_t utf8_reader::peek_code_point() const {
   if (empty()) {
-    return replacement_character;
+    return kReplacementCharacter;
   }
   const unsigned char current_char = input[input_pos];
   int length = std::countl_one(current_char);
   if (length > pending()) {
-    return replacement_character;
+    return kReplacementCharacter;
   }
   for (int i = 1; i < length; ++i) {
     if (!is_utf8_continue(input[input_pos + i])) {
-      return replacement_character;
+      return kReplacementCharacter;
     }
   }
   std::uint32_t candidate;
@@ -78,14 +78,14 @@ std::uint32_t utf8_reader::peek_code_point() const {
       break;
     case 2:
       if (input[input_pos] == '\xc0' || input[input_pos] == '\xc1') {
-        return replacement_character;
+        return kReplacementCharacter;
       }
       candidate = (static_cast<std::uint32_t>(input[input_pos    ]) & 0x1f) << 6 |
                   (static_cast<std::uint32_t>(input[input_pos + 1]) & 0x3f);
       break;
     case 3:
       if (input[input_pos] == '\xe0' && ((unsigned char)input[input_pos + 1]) < 0xa0) {
-        return replacement_character;
+        return kReplacementCharacter;
       }
       candidate = (static_cast<std::uint32_t>(input[input_pos    ]) & 0x0f) << 12 |
                   (static_cast<std::uint32_t>(input[input_pos + 1]) & 0x3f) << 6 |
@@ -93,10 +93,10 @@ std::uint32_t utf8_reader::peek_code_point() const {
       break;
     case 4:
       if (input[input_pos] == '\xf0' && ((unsigned char)input[input_pos + 1]) < 0x90) {
-        return replacement_character;
+        return kReplacementCharacter;
       }
       if (input[input_pos] == '\xf4' && ((unsigned char)input[input_pos + 1]) >= 0x90) {
-        return replacement_character;
+        return kReplacementCharacter;
       }
       candidate = (static_cast<std::uint32_t>(input[input_pos    ]) & 0x07) << 18 |
                   (static_cast<std::uint32_t>(input[input_pos + 1]) & 0x3f) << 12 |
@@ -104,11 +104,11 @@ std::uint32_t utf8_reader::peek_code_point() const {
                   (static_cast<std::uint32_t>(input[input_pos + 3]) & 0x3f);
       break;
     default:
-      candidate = replacement_character;
+      candidate = kReplacementCharacter;
       break;
   }
   if ((strict && (!ucd::is_assigned(candidate) || is_surrogate(candidate))) || !is_in_range(candidate)) {
-    candidate = replacement_character;
+    candidate = kReplacementCharacter;
   }
   return candidate;
 }

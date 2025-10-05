@@ -512,14 +512,14 @@ void lexer::read_string() {
             break;
           case 'u':
             source_code.skip();
-            if (!read_escaped_char(result, true, unicode::utf8_reader::max_code_point, 4, 4, 16)) {
+            if (!read_escaped_char(result, true, unicode::utf8_reader::kMaxCodePoint, 4, 4, 16)) {
               add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
             break;
           case 'U':
             source_code.skip();
-            if (!read_escaped_char(result, true, unicode::utf8_reader::max_code_point, 8, 8, 16)) {
+            if (!read_escaped_char(result, true, unicode::utf8_reader::kMaxCodePoint, 8, 8, 16)) {
               add_error("Invalid escape sequence", escape_start);
               found_errors = true;
             }
@@ -554,7 +554,7 @@ void lexer::read_string() {
       default: {
         // This is a lot of extra work to report the right column.
         auto ch = source_code.peek_code_point();
-        if (ch == unicode::utf8_reader::replacement_character) {
+        if (ch == unicode::utf8_reader::kReplacementCharacter) {
           result += source_code.peek();
           source_code.skip();
         } else {

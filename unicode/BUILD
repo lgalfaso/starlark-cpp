@@ -71,6 +71,7 @@ cc_test(
     size = "small",
     srcs = ["utf8_reader_test.cpp"],
     deps = [
+        ":encode",
         ":utf8_reader",
         "@googletest//:gtest_main",
     ],

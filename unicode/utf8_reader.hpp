@@ -30,11 +30,11 @@ class utf8_reader {
   bool capture(std::string_view candidate);
 
   // Unicode replacement character.
-  static constexpr std::uint32_t replacement_character = 0xfffdu;
+  static constexpr std::uint32_t kReplacementCharacter = 0xfffdu;
   // Unicode byte order mark.
-  static constexpr std::uint32_t bom_character = 0xfeffu;
+  static constexpr std::uint32_t kBomCharacter = 0xfeffu;
   // Unicode maximum Unicode code point.
-  static constexpr std::uint32_t max_code_point = 0x10'ffffu;
+  static constexpr std::uint32_t kMaxCodePoint = 0x10'ffffu;
 
  private:
   std::string_view input;
