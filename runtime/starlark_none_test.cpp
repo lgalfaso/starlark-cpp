@@ -31,6 +31,7 @@ using starlark::runtime::starlark_function;
 using starlark::runtime::starlark_integer;
 using starlark::runtime::starlark_list;
 using starlark::runtime::starlark_none;
+using starlark::runtime::starlark_obj;
 using starlark::runtime::starlark_range;
 using starlark::runtime::starlark_set;
 using starlark::runtime::starlark_string;
@@ -38,6 +39,10 @@ using starlark::runtime::starlark_struct;
 using starlark::runtime::starlark_tuple;
 
 namespace {
+
+starlark_obj* base_fn(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*> &) {
+  return nullptr;
+}
 
 TEST(StarlarkNone, Type) {
   EXPECT_EQ("NoneType", starlark_none{}.type());
@@ -56,7 +61,7 @@ TEST(StarlarkNone, Equals) {
   EXPECT_FALSE(starlark_none().equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_bool(false)));
   EXPECT_FALSE(starlark_none().equals(starlark_bytes("")));
-  EXPECT_FALSE(starlark_none().equals(starlark_built_in_function()));
+  EXPECT_FALSE(starlark_none().equals(starlark_built_in_function(base_fn, "fn_name")));
   EXPECT_FALSE(starlark_none().equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_none().equals(starlark_float(0.0)));
   EXPECT_FALSE(starlark_none().equals(starlark_function()));

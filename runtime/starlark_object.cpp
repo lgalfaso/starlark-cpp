@@ -129,6 +129,11 @@ int64_t starlark_obj::hash() const {
   }
 }
 
+starlark_obj* starlark_obj::call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args) {
+  // TODO(lmirelmann): Generate an error as the object is not callable.
+  return nullptr;
+}
+
 size_t starlark_hash_op::operator()(const starlark_obj* value) const {
   return value->hash();
 }
