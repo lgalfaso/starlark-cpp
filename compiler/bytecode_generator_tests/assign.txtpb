@@ -1,0 +1,35 @@
+op_code { const_int { value: "1" } }
+op_code { load { frame: 1 pos_in_frame: 0 } }
+op_code { assign { } }
+op_code { const_int { value: "2" } }
+op_code { load { frame: 1 pos_in_frame: 1 } }
+op_code { plus_assign { } }
+op_code { const_int { value: "3" } }
+op_code { load { frame: 1 pos_in_frame: 2 } }
+op_code { minus_assign { } }
+op_code { const_int { value: "4" } }
+op_code { load { frame: 1 pos_in_frame: 3 } }
+op_code { slash_assign { } }
+op_code { const_int { value: "5" } }
+op_code { load { frame: 1 pos_in_frame: 4 } }
+op_code { slash_slash_assign { } }
+op_code { const_int { value: "6" } }
+op_code { load { frame: 1 pos_in_frame: 5 } }
+op_code { percent_assign { } }
+op_code { const_int { value: "7" } }
+op_code { load { frame: 1 pos_in_frame: 6 } }
+op_code { ampersand_assign { } }
+op_code { const_int { value: "8" } }
+op_code { load { frame: 1 pos_in_frame: 7 } }
+op_code { pipe_assign { } }
+op_code { const_int { value: "9" } }
+op_code { load { frame: 1 pos_in_frame: 8 } }
+op_code { hat_assign { } }
+op_code { const_int { value: "10" } }
+op_code { load { frame: 1 pos_in_frame: 9 } }
+op_code { greater_greater_assign { } }
+op_code { const_int { value: "11" } }
+op_code { load { frame: 1 pos_in_frame: 10 } }
+op_code { less_less_assign { } }
+op_code { end { } }
+

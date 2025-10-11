@@ -14,6 +14,7 @@
 
 using google::protobuf::RepeatedPtrField;
 using starlark::ast::Argument;
+using starlark::ast::AssignStmt;
 using starlark::ast::BinaryExpr;
 using starlark::ast::BreakStmt;
 using starlark::ast::CompClause;
@@ -92,6 +93,8 @@ class bytecode_generator : public ast_listener_base {
   void exit_call_expression(const starlark::ast::CallExpr* call_expression) override;
   void enter_argument(const starlark::ast::Argument* argument) override;
   void exit_argument(const starlark::ast::Argument* argument) override;
+
+  void exit_assign_statement(const starlark::ast::AssignStmt* assign_statement) override;
 
   void exit_file(const File* starlark_file) override;
 
@@ -479,6 +482,49 @@ void bytecode_generator::enter_argument(const starlark::ast::Argument* argument)
 void bytecode_generator::exit_argument(const starlark::ast::Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
     output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
+  }
+}
+
+void bytecode_generator::exit_assign_statement(const starlark::ast::AssignStmt* assign_statement) {
+  switch (assign_statement->op()) {
+    case AssignStmt::EQUALS:
+      output.add_op_code()->mutable_assign();
+      break;
+    case AssignStmt::PLUS_EQUALS:
+      output.add_op_code()->mutable_plus_assign();
+      break;
+    case AssignStmt::MINUS_EQUALS:
+      output.add_op_code()->mutable_minus_assign();
+      break;
+    case AssignStmt::STAR_EQUALS:
+      output.add_op_code()->mutable_star_assign();
+      break;
+    case AssignStmt::SLASH_EQUALS:
+      output.add_op_code()->mutable_slash_assign();
+      break;
+    case AssignStmt::SLASH_SLASH_EQUALS:
+      output.add_op_code()->mutable_slash_slash_assign();
+      break;
+    case AssignStmt::PERCENT_EQUALS:
+      output.add_op_code()->mutable_percent_assign();
+      break;
+    case AssignStmt::AMPERSAND_EQUALS:
+      output.add_op_code()->mutable_ampersand_assign();
+      break;
+    case AssignStmt::PIPE_EQUALS:
+      output.add_op_code()->mutable_pipe_assign();
+      break;
+    case AssignStmt::HAT_EQUALS:
+      output.add_op_code()->mutable_hat_assign();
+      break;
+    case AssignStmt::LESS_LESS_EQUALS:
+      output.add_op_code()->mutable_less_less_assign();
+      break;
+    case AssignStmt::GREATER_GREATER_EQUALS:
+      output.add_op_code()->mutable_greater_greater_assign();
+      break;
+    default:
+      break;
   }
 }
 

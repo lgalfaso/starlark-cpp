@@ -61,12 +61,24 @@ message OpCode {
     EndIterator end_iterator = 42;
 
     Assign assign = 43;
+    Assign plus_assign= 44;
+    Assign minus_assign = 45;
+    Assign star_assign = 46;
+    Assign slash_assign = 47;
+    Assign slash_slash_assign = 48;
+    Assign percent_assign = 49;
+    Assign ampersand_assign = 50;
+    Assign pipe_assign = 51;
+    Assign hat_assign = 52;
+    Assign less_less_assign = 53;
+    Assign greater_greater_assign = 54;
 
-    DotMember dot_member = 44;
-    Call call = 45;
-    LoadModule load_module = 46;
 
-    End end = 47;
+    DotMember dot_member = 55;
+    Call call = 56;
+    LoadModule load_module = 57;
+
+    End end = 58;
   }
 }
 
