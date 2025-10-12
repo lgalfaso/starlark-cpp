@@ -102,4 +102,35 @@ TEST(StarlarkTuple, Hash) {
   EXPECT_EQ(-1, starlark_tuple().add(&list).hash());
 }
 
+TEST(StarlarkTuple, DeepHash) {
+  std::vector<starlark_tuple> all_tuples;
+  all_tuples.reserve(100);
+  all_tuples.emplace_back();
+  for (int i = 0; i < 20; ++i) {
+    all_tuples.emplace_back();
+    for (int j = 0; j < 3; ++j) {
+      all_tuples.back().add(&*++all_tuples.rbegin());
+    }
+  }
+  EXPECT_EQ(5945621570837202953, all_tuples.back().hash());
+  for (int i = 0; i < 20; ++i) {
+    all_tuples.emplace_back();
+    for (int j = 0; j < 3; ++j) {
+      all_tuples.back().add(&*++all_tuples.rbegin());
+    }
+  }
+  EXPECT_EQ(-1112958194652280302, all_tuples.back().hash());
+}
+
+TEST(StarlarkTuple, HashRecursion) {
+  // In theory, this construction is not possible. This test is designed to
+  // check whether we are able to detect and handle this pathological case.
+  starlark_tuple tuple1;
+  starlark_tuple tuple2;
+  tuple1.add(&tuple2);
+  tuple2.add(&tuple1);
+  // TODO(lmirelmann): This should change once hash recursions are implemented.
+  EXPECT_EQ(-1, tuple1.hash());
+}
+
 }  // namespace
