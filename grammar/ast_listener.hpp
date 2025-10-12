@@ -75,6 +75,8 @@ class ast_listener {
   virtual void exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) = 0;
   virtual void enter_identifier(const starlark::ast::Identifier* identifier) = 0;
   virtual void exit_identifier(const starlark::ast::Identifier* identifier) = 0;
+  virtual void enter_none_value() = 0;
+  virtual void exit_none_value() = 0;
   virtual void enter_int_value(std::string_view int_value) = 0;
   virtual void exit_int_value(std::string_view int_value) = 0;
   virtual void enter_float_value(double float_value) = 0;
@@ -166,6 +168,8 @@ class ast_listener_base : public ast_listener {
   void exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) override;
   void enter_identifier(const starlark::ast::Identifier* identifier) override;
   void exit_identifier(const starlark::ast::Identifier* identifier) override;
+  void enter_none_value() override;
+  void exit_none_value() override;
   void enter_int_value(std::string_view int_value) override;
   void exit_int_value(std::string_view int_value) override;
   void enter_float_value(double float_value) override;

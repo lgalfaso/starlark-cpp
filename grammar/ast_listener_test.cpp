@@ -286,6 +286,14 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT Identifier\n";
   }
 
+  void enter_none_value() override {
+    output += "ENTER NoneValue\n";
+  }
+
+  void exit_none_value() override {
+    output += "EXIT NoneValue\n";
+  }
+
   void enter_int_value(std::string_view int_value) override {
     output += "ENTER IntValue(" + starlark::grammar::quoted(int_value) + ")\n";
   }

@@ -71,6 +71,7 @@ enum class message_type {
   kCallExpression,
   kSliceExpression,
   kIdentifier,
+  kNoneValue,
   kIntValue,
   kFloatValue,
   kStringValue,
@@ -200,6 +201,8 @@ void ast_listener_base::enter_slice_expression(const SliceExpr* slice_expression
 void ast_listener_base::exit_slice_expression(const SliceExpr* slice_expression) {}
 void ast_listener_base::enter_identifier(const Identifier* identifier) {}
 void ast_listener_base::exit_identifier(const Identifier* identifier) {}
+void ast_listener_base::enter_none_value() {}
+void ast_listener_base::exit_none_value() {}
 void ast_listener_base::enter_int_value(std::string_view int_value) {}
 void ast_listener_base::exit_int_value(std::string_view int_value) {}
 void ast_listener_base::enter_float_value(double float_value) {}
@@ -768,6 +771,11 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
                   .type = message_type::kExpression,
                   .op = message_type_op::kEnter,
                 });
+              } else {
+                to_process.push_back(message{
+                  .type = message_type::kNoneValue,
+                  .op = message_type_op::kEnter,
+                });
               }
               if (top.slice_expression->slice().has_end()) {
                 to_process.push_back(message{
@@ -775,11 +783,21 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
                   .type = message_type::kExpression,
                   .op = message_type_op::kEnter,
                 });
+              } else {
+                to_process.push_back(message{
+                  .type = message_type::kNoneValue,
+                  .op = message_type_op::kEnter,
+                });
               }
               if (top.slice_expression->slice().has_start()) {
                 to_process.push_back(message{
                   .expression = &top.slice_expression->slice().start(),
                   .type = message_type::kExpression,
+                  .op = message_type_op::kEnter,
+                });
+              } else {
+                to_process.push_back(message{
+                  .type = message_type::kNoneValue,
                   .op = message_type_op::kEnter,
                 });
               }
@@ -795,6 +813,9 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kIdentifier:
           listener.enter_identifier(top.identifier);
+          break;
+        case message_type::kNoneValue:
+          listener.enter_none_value();
           break;
         case message_type::kIntValue:
           listener.enter_int_value(top.int_value);
@@ -1021,6 +1042,9 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kIdentifier:
           listener.exit_identifier(top.identifier);
+          break;
+        case message_type::kNoneValue:
+          listener.exit_none_value();
           break;
         case message_type::kIntValue:
           listener.exit_int_value(top.int_value);
