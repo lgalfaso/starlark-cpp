@@ -15,10 +15,11 @@
 #include "proto/starlark_ast.pb.h"
 #include "third-party/defer.hpp"
 
+using starlark::ast::File;
+using starlark::ast::SliceExpr;
 using starlark::grammar::log_level;
 using starlark::grammar::logger;
 using starlark::grammar::parser;
-using starlark::ast::File;
 using testing::IsEmpty;
 using testing::SizeIs;
 
@@ -271,11 +272,29 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
   }
 
   void enter_slice_expression(const starlark::ast::SliceExpr* slice_expression) override {
-    output += "ENTER SliceExpression\n";
+    switch (slice_expression->slice_type_case()) {
+      case SliceExpr::kIndex:
+        output += "ENTER SliceIndexExpression\n";
+        break;
+      case SliceExpr::kSlice:
+        output += "ENTER SliceRangeExpression\n";
+        break;
+      default:
+        break;
+    }
   }
 
   void exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) override {
-    output += "EXIT SliceExpression\n";
+    switch (slice_expression->slice_type_case()) {
+      case SliceExpr::kIndex:
+        output += "EXIT SliceIndexExpression\n";
+        break;
+      case SliceExpr::kSlice:
+        output += "EXIT SliceRangeExpression\n";
+        break;
+      default:
+        break;
+    }
   }
 
   void enter_identifier(const starlark::ast::Identifier* identifier) override {

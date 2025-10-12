@@ -248,7 +248,7 @@ EXIT Expression
 EXIT ListExpression
 EXIT Expression
 ENTER Expression
-ENTER SliceExpression
+ENTER SliceRangeExpression
 ENTER Expression
 ENTER Identifier("d")
 EXIT Identifier
@@ -269,7 +269,7 @@ ENTER Expression
 ENTER IntValue("1")
 EXIT IntValue
 EXIT Expression
-EXIT SliceExpression
+EXIT SliceRangeExpression
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement

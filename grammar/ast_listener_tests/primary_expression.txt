@@ -50,7 +50,7 @@ ENTER IntValue("1")
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceExpression
+ENTER SliceIndexExpression
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
@@ -59,7 +59,7 @@ ENTER Expression
 ENTER IntValue("0")
 EXIT IntValue
 EXIT Expression
-EXIT SliceExpression
+EXIT SliceIndexExpression
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
