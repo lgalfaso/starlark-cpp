@@ -58,6 +58,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "ENTER Def(" + starlark::grammar::quoted(def_statement->function_name().name()) + ")\n";
   }
 
+  void mid_def_statement(const starlark::ast::DefStmt* def_statement) override {
+    output += "MID Def\n";
+  }
+
   void exit_def_statement(const starlark::ast::DefStmt* def_statement) override {
     output += "EXIT Def\n";
   }
@@ -233,6 +237,10 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
 
   void enter_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override {
     output += "ENTER LambdaExpression\n";
+  }
+
+  void mid_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override {
+    output += "MID LambdaExpression\n";
   }
 
   void exit_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override {

@@ -3,6 +3,7 @@ ENTER Statement
 ENTER Def("foo")
 ENTER Parameter("a")
 EXIT Parameter
+MID Def
 ENTER Statement
 ENTER IfStatement
 ENTER Expression
@@ -39,6 +40,7 @@ ENTER Identifier("True")
 EXIT Identifier
 EXIT Expression
 EXIT Parameter
+MID Def
 ENTER Statement
 ENTER Pass
 EXIT Pass

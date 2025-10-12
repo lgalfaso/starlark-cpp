@@ -3,6 +3,7 @@ ENTER Statement
 ENTER Def("foo")
 ENTER Parameter("a")
 EXIT Parameter
+MID Def
 ENTER Statement
 ENTER Pass
 EXIT Pass

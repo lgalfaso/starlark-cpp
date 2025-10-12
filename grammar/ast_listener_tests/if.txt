@@ -1,6 +1,7 @@
 ENTER File
 ENTER Statement
 ENTER Def("foo")
+MID Def
 ENTER Statement
 ENTER IfStatement
 ENTER Expression

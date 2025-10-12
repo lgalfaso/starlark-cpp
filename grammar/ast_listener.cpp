@@ -145,6 +145,7 @@ void ast_listener_base::exit_file(const File* starlark_file) {}
 void ast_listener_base::enter_statement(const Statement* statement) {}
 void ast_listener_base::exit_statement(const Statement* statement) {}
 void ast_listener_base::enter_def_statement(const DefStmt* def_statement) {}
+void ast_listener_base::mid_def_statement(const DefStmt* def_statement) {}
 void ast_listener_base::exit_def_statement(const DefStmt* def_statement) {}
 void ast_listener_base::enter_if_statement(const IfStmt* if_statement) {}
 void ast_listener_base::exit_if_statement(const IfStmt* if_statement) {}
@@ -188,6 +189,7 @@ void ast_listener_base::enter_binary_expression(const BinaryExpr* binary_express
 void ast_listener_base::mid_binary_expression(const BinaryExpr* binary_expression) {}
 void ast_listener_base::exit_binary_expression(const BinaryExpr* binary_expression) {}
 void ast_listener_base::enter_lambda_expression(const LambdaExpr* lambda_expression) {}
+void ast_listener_base::mid_lambda_expression(const LambdaExpr* lambda_expression) {}
 void ast_listener_base::exit_lambda_expression(const LambdaExpr* lambda_expression) {}
 void ast_listener_base::enter_for_loop_variables(const Expression* loop_variables) {}
 void ast_listener_base::exit_for_loop_variables(const Expression* loop_variables) {}
@@ -341,6 +343,11 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
         case message_type::kDefStatement:
           listener.enter_def_statement(top.def_statement);
           add_statements(top.def_statement->statement());
+          to_process.push_back(message{
+            .def_statement = top.def_statement,
+            .type = message_type::kDefStatement,
+            .op = message_type_op::kMid,
+          });
           for (auto it = top.def_statement->parameter().rbegin(); it != top.def_statement->parameter().rend(); ++it) {
             to_process.push_back(message{
               .parameter = &*it,
@@ -723,6 +730,11 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
             .type = message_type::kExpression,
             .op = message_type_op::kEnter,
           });
+          to_process.push_back(message{
+            .lambda_expression = top.lambda_expression,
+            .type = message_type::kLambdaExpression,
+            .op = message_type_op::kMid,
+          });
           for (auto it = top.lambda_expression->parameter().rbegin(); it != top.lambda_expression->parameter().rend(); ++it) {
             to_process.push_back(message{
               .parameter = &*it,
@@ -1102,6 +1114,12 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kForClause:
           listener.mid_for_clause(top.for_clause);
+          break;
+        case message_type::kDefStatement:
+          listener.mid_def_statement(top.def_statement);
+          break;
+        case message_type::kLambdaExpression:
+          listener.mid_lambda_expression(top.lambda_expression);
           break;
         default:
           break;

@@ -19,6 +19,7 @@ class ast_listener {
   virtual void enter_statement(const starlark::ast::Statement* statement) = 0;
   virtual void exit_statement(const starlark::ast::Statement* statement) = 0;
   virtual void enter_def_statement(const starlark::ast::DefStmt* def_statement) = 0;
+  virtual void mid_def_statement(const starlark::ast::DefStmt* def_statement) = 0;
   virtual void exit_def_statement(const starlark::ast::DefStmt* def_statement) = 0;
   virtual void enter_if_statement(const starlark::ast::IfStmt* if_statement) = 0;
   virtual void exit_if_statement(const starlark::ast::IfStmt* if_statement) = 0;
@@ -62,6 +63,7 @@ class ast_listener {
   virtual void mid_binary_expression(const starlark::ast::BinaryExpr* binary_expression) = 0;
   virtual void exit_binary_expression(const starlark::ast::BinaryExpr* binary_expression) = 0;
   virtual void enter_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) = 0;
+  virtual void mid_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) = 0;
   virtual void exit_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) = 0;
   virtual void enter_for_loop_variables(const starlark::ast::Expression* loop_variables) = 0;
   virtual void exit_for_loop_variables(const starlark::ast::Expression* loop_variables) = 0;
@@ -112,6 +114,7 @@ class ast_listener_base : public ast_listener {
   void enter_statement(const starlark::ast::Statement* statement) override;
   void exit_statement(const starlark::ast::Statement* statement) override;
   void enter_def_statement(const starlark::ast::DefStmt* def_statement) override;
+  void mid_def_statement(const starlark::ast::DefStmt* def_statement) override;
   void exit_def_statement(const starlark::ast::DefStmt* def_statement) override;
   void enter_if_statement(const starlark::ast::IfStmt* if_statement) override;
   void exit_if_statement(const starlark::ast::IfStmt* if_statement) override;
@@ -155,6 +158,7 @@ class ast_listener_base : public ast_listener {
   void mid_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override;
   void exit_binary_expression(const starlark::ast::BinaryExpr* binary_expression) override;
   void enter_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override;
+  void mid_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override;
   void exit_lambda_expression(const starlark::ast::LambdaExpr* lambda_expression) override;
   void enter_for_loop_variables(const starlark::ast::Expression* loop_variables) override;
   void exit_for_loop_variables(const starlark::ast::Expression* loop_variables) override;

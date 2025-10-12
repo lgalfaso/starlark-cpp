@@ -31,6 +31,7 @@ ENTER Expression
 ENTER LambdaExpression
 ENTER Parameter("x")
 EXIT Parameter
+MID LambdaExpression
 ENTER Expression
 ENTER Identifier("True")
 EXIT Identifier

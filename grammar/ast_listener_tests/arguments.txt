@@ -5,6 +5,7 @@ ENTER Parameter("kargs")
 EXIT Parameter
 ENTER Parameter("kwargs")
 EXIT Parameter
+MID Def
 ENTER Statement
 ENTER Pass
 EXIT Pass
