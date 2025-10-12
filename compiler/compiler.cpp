@@ -29,6 +29,7 @@ using starlark::ast::IfExpr;
 using starlark::ast::IfStmt;
 using starlark::ast::ListComp;
 using starlark::ast::ListExpr;
+using starlark::ast::SliceExpr;
 using starlark::ast::Statement;
 using starlark::ast::Tuple;
 using starlark::ast::UnaryExpr;
@@ -50,6 +51,7 @@ class bytecode_generator : public ast_listener_base {
   explicit bytecode_generator(Program& output);
   void enter_load_statement(const starlark::ast::LoadStmt* load_statement) override;
   void exit_expression_statement(const Expression* statement) override;
+  void enter_none_value() override;
   void enter_int_value(std::string_view int_value) override;
   void enter_float_value(double float_value) override;
   void enter_string_value(std::string_view string_value) override;
@@ -59,6 +61,7 @@ class bytecode_generator : public ast_listener_base {
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_dot_expression(const DotExpr* dot_expression) override;
+  void exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) override;
 
   void exit_tuple(const Tuple* tuple) override;
   void enter_list_expression(const ListExpr* list_expression) override;
@@ -127,6 +130,10 @@ void bytecode_generator::enter_load_statement(const starlark::ast::LoadStmt* loa
 
 void bytecode_generator::exit_expression_statement(const Expression* statement) {
   output.add_op_code()->mutable_drop();
+}
+
+void bytecode_generator::enter_none_value() {
+  output.add_op_code()->mutable_const_none();
 }
 
 void bytecode_generator::enter_int_value(std::string_view int_value) {
@@ -263,6 +270,20 @@ void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
   output.add_op_code()->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
 }
 
+void bytecode_generator::exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) {
+  // TODO(lmirelmann): Implement.
+  switch (slice_expression->slice_type_case()) {
+    case SliceExpr::kIndex:
+      output.add_op_code()->mutable_index_member();
+      break;
+    case SliceExpr::kSlice:
+      output.add_op_code()->mutable_slice_range();
+      break;
+    default:
+      break;
+  }
+}
+
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
   output.add_op_code()->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
 }
@@ -288,7 +309,7 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
 void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
   // TODO(lmirelmann): I think it would be better not to generate the `make_tuple` entry
   //     and change `add_to_dictionary` to take two elements from the stack.
-  //     The underlying issue is that dictionary comprehension expressions still take a tuple.
+  //     The underlying issue is that dictionary comprehension expressions still takes a tuple.
   output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
   output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
 }

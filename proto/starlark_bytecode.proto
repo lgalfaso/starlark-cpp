@@ -8,12 +8,14 @@ message Program {
 
 message OpCode {
   oneof op_code {
-    // There are no op codes for `None`, `True` and `False` as they are not reserved words.
+    // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
     ConstInt const_int = 1;
     ConstFloat const_float = 2;
     ConstString const_string = 3;
     ConstBytes const_bytes = 4;
+    // This op code is generated when there is a slice with missing operands.
+    ConstNone const_none = 59;
 
     Drop drop = 5;
     Dup dup = 6;
@@ -75,12 +77,16 @@ message OpCode {
 
 
     DotMember dot_member = 55;
+    IndexMember index_member = 60;
+    SliceRange slice_range = 61;
     Call call = 56;
     LoadModule load_module = 57;
 
     End end = 58;
   }
 }
+
+message ConstNone {}
 
 message ConstInt {
   string value = 1;
@@ -162,6 +168,9 @@ message Assign {}
 message DotMember {
   string member = 1;
 }
+
+message IndexMember {}
+message SliceRange{}
 
 message Call {
     int32 positional_arguments_count = 1;
