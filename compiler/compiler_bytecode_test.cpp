@@ -51,7 +51,7 @@ TEST(CompilerBytecode, TestCase) {
   compiler star_compiler(binding);
   Program actual_starlark_program = star_compiler.compile(starlark_code);
 
-  EXPECT_THAT(expected_starlark_program, EqualsProto(actual_starlark_program));
+  EXPECT_THAT(actual_starlark_program, EqualsProto(expected_starlark_program));
 }
 
 }  // namespace
