@@ -14,7 +14,6 @@
 #include "proto/starlark_ast.pb.h"
 #include "third-party/defer.hpp"
 
-using google::protobuf::util::MessageDifferencer;
 using starlark::grammar::log_level;
 using starlark::grammar::logger;
 using starlark::grammar::parser;

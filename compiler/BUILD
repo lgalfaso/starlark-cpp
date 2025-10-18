@@ -40,6 +40,7 @@ cc_library(
             "//proto:starlark_bytecode_cc_proto",
             "@googletest//:gtest_main",
             "@protobuf",
+            "@protobuf-matchers//protobuf-matchers",
         ],
     )
 ] for f in glob(["bytecode_generator_tests/*.star"])]

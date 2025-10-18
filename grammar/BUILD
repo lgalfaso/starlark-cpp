@@ -163,6 +163,7 @@ cc_binary(
             "//third-party:defer",
             "@googletest//:gtest_main",
             "@protobuf",
+            "@protobuf-matchers//protobuf-matchers",
         ],
     ),
 ] for f in glob(["parser_tests/*.star"])]

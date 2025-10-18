@@ -12,25 +12,17 @@
 
 #include "compiler/compiler.hpp"
 #include "proto/starlark_bytecode.pb.h"
+#include "protobuf-matchers/protocol-buffer-matchers.h"
 #include "third-party/defer.hpp"
 
-using google::protobuf::Message;
-using google::protobuf::util::MessageDifferencer;
-using starlark::bytecode::Program;
-using starlark::compiler::compiler;
-using testing::IsEmpty;
-using testing::SizeIs;
+using ::google::protobuf::Message;
+using ::protobuf_matchers::EqualsProto;
+using ::starlark::bytecode::Program;
+using ::starlark::compiler::compiler;
+using ::testing::IsEmpty;
+using ::testing::SizeIs;
 
 namespace {
-
-std::string describe_diff(const Message& actual, const Message& expected) {
-  MessageDifferencer differencer;
-  std::string diff;
-
-  differencer.ReportDifferencesToString(&diff);
-  differencer.Compare(expected, actual);
-  return "with the difference:\n" + diff;
-}
 
 TEST(CompilerBytecode, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
@@ -59,8 +51,7 @@ TEST(CompilerBytecode, TestCase) {
   compiler star_compiler(binding);
   Program actual_starlark_program = star_compiler.compile(starlark_code);
 
-  EXPECT_TRUE(MessageDifferencer::Equals(actual_starlark_program, expected_starlark_program)) <<
-    describe_diff(actual_starlark_program, expected_starlark_program);
+  EXPECT_THAT(expected_starlark_program, EqualsProto(actual_starlark_program));
 }
 
 }  // namespace

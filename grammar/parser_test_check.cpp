@@ -12,27 +12,19 @@
 #include "grammar/parser.hpp"
 #include "grammar/parsing_options.hpp"
 #include "proto/starlark_ast.pb.h"
+#include "protobuf-matchers/protocol-buffer-matchers.h"
 #include "third-party/defer.hpp"
 
-using google::protobuf::Message;
-using google::protobuf::util::MessageDifferencer;
-using starlark::grammar::log_level;
-using starlark::grammar::logger;
-using starlark::grammar::parser;
-using starlark::ast::File;
-using testing::IsEmpty;
-using testing::SizeIs;
+using ::google::protobuf::Message;
+using ::protobuf_matchers::EqualsProto;
+using ::starlark::ast::File;
+using ::starlark::grammar::log_level;
+using ::starlark::grammar::logger;
+using ::starlark::grammar::parser;
+using ::testing::IsEmpty;
+using ::testing::SizeIs;
 
 namespace {
-
-std::string describe_diff(const Message& actual, const Message& expected) {
-  MessageDifferencer differencer;
-  std::string diff;
-
-  differencer.ReportDifferencesToString(&diff);
-  differencer.Compare(expected, actual);
-  return "with the difference:\n" + diff;
-}
 
 std::string show_errors(const logger& logging) {
   std::string result;
@@ -73,8 +65,7 @@ TEST(Parser, TestCase) {
   google::protobuf::Arena arena;
   File* actual_starlark_file = star_parser.parse_file(arena);
 
-  EXPECT_TRUE(MessageDifferencer::Equals(*actual_starlark_file, starlark_file)) <<
-      describe_diff(*actual_starlark_file, starlark_file);
+  EXPECT_THAT(starlark_file, EqualsProto(*actual_starlark_file));
   EXPECT_THAT(logging, IsEmpty()) << show_errors(logging);
 }
 
