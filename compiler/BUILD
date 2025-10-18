@@ -42,5 +42,5 @@ cc_library(
             "@protobuf",
             "@protobuf-matchers//protobuf-matchers",
         ],
-    )
+    ),
 ] for f in glob(["bytecode_generator_tests/*.star"])]
