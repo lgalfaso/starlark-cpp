@@ -68,4 +68,72 @@ statement {
     }
   }
 }
-
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "1"
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_expression {
+      element {
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+          frame: 1
+          pos_in_frame: 0
+        }
+      }
+      element {
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+          frame: 1
+          pos_in_frame: 0
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_expression {
+      element {
+        list_expression {
+          element {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+              frame: 1
+              pos_in_frame: 0
+            }
+          }
+        }
+      }
+      element {
+        list_expression {
+          element {
+            identifier {
+              name: "a"
+              nfkc_name: "a"
+              frame: 1
+              pos_in_frame: 0
+            }
+          }
+        }
+      }
+    }
+  }
+}
+module_binding: "a"

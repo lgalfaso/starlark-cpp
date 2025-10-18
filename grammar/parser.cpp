@@ -195,11 +195,15 @@ struct frame {
       Argument* previous_argument;
     };
     Entry* entry;
-    RepeatedPtrField<CompClause>* comp_clauses;
+    struct {
+      RepeatedPtrField<CompClause>* comp_clauses;
+      bool first_comp_clause;
+    };
     struct {
       CompClause* comp_clause;
       Expression* comp_clause_primary;
-      bool comp_clause_primary_first;
+      bool comp_clause_primary_first_expression_part;
+      bool comp_clause_resolve_in_test;
     };
     struct {
       RepeatedPtrField<Parameter>* parameters;
@@ -426,7 +430,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
           }
           bind(def_statement->function_name());
-          resolve(def_statement->mutable_function_name());
+          resolve(def_statement->mutable_function_name(), 0);
 
           if (!expect(token_type::kLParen)) {
             break;
@@ -744,7 +748,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 load_param->mutable_local_name()->set_name(load_param->remote_name());
                 load_param->mutable_local_name()->set_nfkc_name(to_nfkc(load_param->remote_name()));
               }
-              resolve(load_param->mutable_local_name());
+              resolve(load_param->mutable_local_name(), 0);
               if (!symbols.emplace(load_param->local_name().nfkc_name()).second) {
                 add_error(std::format("`load` statement defines '{}' more than once", load_param->local_name().name()));
               }
@@ -835,7 +839,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .expression_allow_trailing_comma = false,
           });
         } else {
-          resolve(top.statement->mutable_expression_statement());
+          resolve(top.statement->mutable_expression_statement(), 0);
         }
         break;
       case parser_state::kParseExpression:
@@ -1240,6 +1244,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         create_block({}, {}, nullptr);
         frames.emplace_back(frame{
           .state = parser_state::kParseListFinal,
+          .primary = top.primary,
         });
         frames.emplace_back(frame{
           .state = parser_state::kParseList_0,
@@ -1266,6 +1271,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             frames.emplace_back(frame{
               .state = parser_state::kParseCompClauses,
               .comp_clauses = top.primary->mutable_list_comprehension()->mutable_clause(),
+              .first_comp_clause = true,
             });
             break;
           case token_type::kRBracket:
@@ -1292,10 +1298,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::kParseListComprehensionFinal:
-        resolve(top.primary->mutable_list_comprehension()->mutable_test());
+        resolve(top.primary->mutable_list_comprehension()->mutable_test(), 0);
         break;
       case parser_state::kParseListFinal:
         drop_block();
+        if (top.primary->expression_type_case() == Expression::kListComprehension) {
+          resolve(top.primary->mutable_list_comprehension()->mutable_clause(0)->mutable_for_clause()->mutable_in(), 1);
+        }
         if (!expect(token_type::kRBracket)) {
           break;
         }
@@ -1311,6 +1320,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         create_block({}, {}, nullptr);
         frames.emplace_back(frame{
           .state = parser_state::kParseDictFinal,
+          .primary = top.primary,
         });
         frames.emplace_back(frame{
           .state = parser_state::kParseDict_0,
@@ -1337,6 +1347,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             frames.emplace_back(frame{
               .state = parser_state::kParseCompClauses,
               .comp_clauses = top.primary->mutable_dictionary_comprehension()->mutable_clause(),
+              .first_comp_clause = true,
             });
             break;
           case token_type::kRBrace:
@@ -1363,11 +1374,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::kParseDictComprehensionFinal:
-        resolve(top.primary->mutable_dictionary_comprehension()->mutable_entry()->mutable_key());
-        resolve(top.primary->mutable_dictionary_comprehension()->mutable_entry()->mutable_value());
+        resolve(top.primary->mutable_dictionary_comprehension()->mutable_entry()->mutable_key(), 0);
+        resolve(top.primary->mutable_dictionary_comprehension()->mutable_entry()->mutable_value(), 0);
         break;
       case parser_state::kParseDictFinal:
         drop_block();
+        if (top.primary->expression_type_case() == Expression::kDictionaryComprehension) {
+          resolve(top.primary->mutable_dictionary_comprehension()->mutable_clause(0)->mutable_for_clause()->mutable_in(), 1);
+        }
         expect(token_type::kRBrace);
         break;
       case parser_state::kParseEntry:
@@ -1393,12 +1407,17 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (capture(token_type::kFor)) {
           auto* comp_clause = top.comp_clauses->Add();
           auto* comp_clause_primary = comp_clause->mutable_for_clause()->mutable_loop_variables();
-          frames.emplace_back(top);
+          frames.emplace_back(frame{
+            .state = parser_state::kParseCompClauses,
+            .comp_clauses = top.comp_clauses,
+            .first_comp_clause = false,
+          });
           frames.emplace_back(frame{
             .state = parser_state::kParseCompClauses_0,
             .comp_clause = comp_clause,
             .comp_clause_primary = comp_clause_primary,
-            .comp_clause_primary_first = true,
+            .comp_clause_primary_first_expression_part = true,
+            .comp_clause_resolve_in_test = !top.first_comp_clause,
           });
           frames.emplace_back(frame{
             .state = parser_state::kParsePrimary,
@@ -1425,7 +1444,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::kParseCompClauses_0:
         if (capture(token_type::kComma)) {
           // If there are multiple loop varaibles, transform into a tuple.
-          if (top.comp_clause_primary_first) {
+          if (top.comp_clause_primary_first_expression_part) {
             Expression* first_primary = Arena::Create<Expression>(top.comp_clause_primary->GetArena());
             first_primary->Swap(top.comp_clause_primary);
             first_primary->Swap(top.comp_clause_primary->mutable_tuple()->add_value());
@@ -1435,7 +1454,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::kParseCompClauses_0,
             .comp_clause = top.comp_clause,
             .comp_clause_primary = top.comp_clause_primary,
-            .comp_clause_primary_first = false,
+            .comp_clause_primary_first_expression_part = false,
+            .comp_clause_resolve_in_test = top.comp_clause_resolve_in_test,
           });
           frames.emplace_back(frame{
             .state = parser_state::kParsePrimary,
@@ -1447,10 +1467,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!expect(token_type::kIn)) {
             break;
           }
-          frames.emplace_back(frame{
-            .state = parser_state::kParseResolveTest,
-            .test = top.comp_clause->mutable_for_clause()->mutable_in(),
-          });
+          // The first `for in` test should be reslved one frame up.
+          if (top.comp_clause_resolve_in_test) {
+            frames.emplace_back(frame{
+              .state = parser_state::kParseResolveTest,
+              .test = top.comp_clause->mutable_for_clause()->mutable_in(),
+            });
+          }
           // Do not allow `IfExpr` nor lambdas.
           frames.emplace_back(frame{
             .state = parser_state::kParseTestP,
@@ -1683,17 +1706,17 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::kParseResolveTest:
-        resolve(top.test);
+        resolve(top.test, 0);
         break;
       case parser_state::kParseResolveExpression:
-        resolve(top.expression);
+        resolve(top.expression, 0);
         break;
     }
   } while (!frames.empty());
 }
 
 void parser::bind_and_resolve(Expression* base) {
-  resolve(base);
+  resolve(base, 0);
   std::vector<Expression*> frames{base};
   do {
     auto top = frames.back();
@@ -1770,7 +1793,7 @@ void parser::create_block(const std::set<std::string, std::less<>>& symbols,
                     google::protobuf::RepeatedPtrField<std::string>* binding) {
   parser_blocks.emplace_back(symbols, binding);
   for (auto* id : identifiers) {
-    resolve(id);
+    resolve(id, 0);
   }
 }
 
@@ -1788,7 +1811,8 @@ void parser::drop_block() {
         entry.first->set_frame(-1);
         entry.first->set_pos_in_frame(-1);
       } else {
-        parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry.first, entry.second + 1);
+        auto new_pos = entry.second + (parser_blocks.back().id_store == nullptr ? 0 : 1);
+        parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry.first, new_pos);
       }
     } else {
       entry.first->set_frame(entry.second);
@@ -1798,11 +1822,11 @@ void parser::drop_block() {
   parser_blocks.pop_back();
 }
 
-void parser::resolve(Identifier* identifier) {
-  parser_blocks.back().to_resolve.emplace_back(identifier, 0);
+void parser::resolve(Identifier* identifier, int base_frame) {
+  parser_blocks.back().to_resolve.emplace_back(identifier, base_frame);
 }
 
-void parser::resolve(Expression* base) {
+void parser::resolve(Expression* base, int base_frame) {
   std::vector<Expression*> frames{base};
   do {
     auto top = frames.back();
@@ -1828,7 +1852,7 @@ void parser::resolve(Expression* base) {
           }
           break;
         case Expression::kIdentifier:
-          resolve(top->mutable_identifier());
+          resolve(top->mutable_identifier(), base_frame);
           break;
         case Expression::kCallExpression:
           frames.push_back(top->mutable_call_expression()->mutable_primary_expression());

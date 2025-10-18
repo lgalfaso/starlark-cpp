@@ -65,7 +65,7 @@ TEST(Parser, TestCase) {
   google::protobuf::Arena arena;
   File* actual_starlark_file = star_parser.parse_file(arena);
 
-  EXPECT_THAT(starlark_file, EqualsProto(*actual_starlark_file));
+  EXPECT_THAT(*actual_starlark_file, EqualsProto(starlark_file));
   EXPECT_THAT(logging, IsEmpty()) << show_errors(logging);
 }
 

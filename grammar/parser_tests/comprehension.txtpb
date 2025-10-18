@@ -1,0 +1,151 @@
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "x"
+        nfkc_name: "x"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      list_expression {
+        element {
+          list_expression {
+            element {
+              int_value: "1"
+            }
+            element {
+              int_value: "2"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    list_comprehension {
+      test {
+        identifier {
+          name: "x"
+          nfkc_name: "x"
+          frame: 0
+          pos_in_frame: 0
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          in {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 2
+              pos_in_frame: 0
+            }
+          }
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "y"
+              nfkc_name: "y"
+              frame: 0
+              pos_in_frame: 1
+            }
+          }
+          in {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+        }
+      }
+      comprehension_binding: "x"
+      comprehension_binding: "y"
+    }
+  }
+}
+statement {
+  expression_statement {
+    dictionary_comprehension {
+      entry {
+        key {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+        value {
+          identifier {
+            name: "x"
+            nfkc_name: "x"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+          in {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 2
+              pos_in_frame: 0
+            }
+          }
+        }
+      }
+      clause {
+        for_clause {
+          loop_variables {
+            identifier {
+              name: "y"
+              nfkc_name: "y"
+              frame: 0
+              pos_in_frame: 1
+            }
+          }
+          in {
+            identifier {
+              name: "x"
+              nfkc_name: "x"
+              frame: 0
+              pos_in_frame: 0
+            }
+          }
+        }
+      }
+      comprehension_binding: "x"
+      comprehension_binding: "y"
+    }
+  }
+}
+module_binding: "x"
+
