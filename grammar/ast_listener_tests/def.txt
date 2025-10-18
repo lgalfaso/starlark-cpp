@@ -13,6 +13,8 @@ EXIT Expression
 ENTER Then
 ENTER Statement
 ENTER ReturnStatement None
+ENTER NoneValue
+EXIT NoneValue
 EXIT ReturnStatement
 EXIT Statement
 EXIT Then

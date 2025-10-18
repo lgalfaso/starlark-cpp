@@ -436,6 +436,11 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
               .type = message_type::kExpression,
               .op = message_type_op::kEnter,
             });
+          } else {
+            to_process.push_back(message{
+              .type = message_type::kNoneValue,
+              .op = message_type_op::kEnter,
+            });
           }
           break;
         case message_type::kForLoopVariables:
