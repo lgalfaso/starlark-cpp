@@ -7,11 +7,11 @@
 namespace starlark {
 namespace grammar {
 
-position position::operator-(std::size_t places) const {
+position operator-(const position& pos, std::size_t places) {
   return position{
-    .row = row,
-    .column = column - places,
-    .pos = pos - places,
+    .row = pos.row,
+    .column = pos.column - places,
+    .pos = pos.pos - places,
   };
 }
 

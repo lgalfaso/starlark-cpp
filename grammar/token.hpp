@@ -107,9 +107,9 @@ struct position {
   std::size_t row;
   std::size_t column;
   std::size_t pos;
-
-  position operator-(std::size_t places) const;
 };
+
+position operator-(const position& pos, std::size_t places);
 
 class token {
  public:
