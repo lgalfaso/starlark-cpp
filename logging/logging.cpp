@@ -30,6 +30,8 @@ LogEntry create_log(LogLevel level, std::string_view message, std::string_view m
 
 }  // namespace
 
+logger::~logger() = default;
+
 void logger::set_level(LogLevel level) {
   this->level = level;
 }
@@ -55,6 +57,37 @@ bool logger::empty() const {
 
 std::vector<LogEntry>::size_type logger::size() const {
   return entries.size();
+}
+
+logger_wrap::logger_wrap(logger& delegate) : inner_logger(delegate),
+  state(log_report{.debug = 0, .info = 0, .warning = 0, .error = 0, .fatal = 0}) {
+}
+
+void logger_wrap::log(starlark::logging::LogLevel level, std::string_view message, std::string_view module, const starlark::logging::Position& pos) {
+  switch (level) {
+    case LogLevel::LOG_LEVEL_DEBUG:
+      state.debug++;
+      break;
+    case LogLevel::LOG_LEVEL_INFO:
+      state.info++;
+      break;
+    case LogLevel::LOG_LEVEL_WARNING:
+      state.warning++;
+      break;
+    case LogLevel::LOG_LEVEL_ERROR:
+      state.error++;
+      break;
+    case LogLevel::LOG_LEVEL_FATAL:
+      state.fatal++;
+      break;
+    default:
+      break;
+  }
+  inner_logger.log(level, message, module, pos);
+}
+
+logger_wrap::log_report logger_wrap::report() {
+  return state;
 }
 
 }  // namespace logging
