@@ -4,19 +4,10 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
-#include <string>
-#include <utility>
-
 #include "containers/flat_map.hpp"
 
 using starlark::cnt::flat_map;
-using testing::Eq;
 using testing::Pair;
-
-// TODO(lmirelmann): Move matchers to a common place.
-MATCHER_P(IsIteratorPointingTo, n, "") {
-  return (*arg == n);
-}
 
 namespace {
 
@@ -27,10 +18,21 @@ TEST(FlatMap, Find) {
     {4, "4"},
   });
   EXPECT_EQ(map.end(), map.find(0));
-  EXPECT_THAT(map.find(1), IsIteratorPointingTo(std::make_pair(1, "1")));
-  EXPECT_THAT(map.find(2), IsIteratorPointingTo(std::make_pair(2, "2")));
+
+  auto it = map.find(1);
+  ASSERT_NE(map.end(), it);
+  EXPECT_THAT(*it, Pair(1, "1"));
+
+  it = map.find(2);
+  ASSERT_NE(map.end(), it);
+  EXPECT_THAT(*it, Pair(2, "2"));
+
   EXPECT_EQ(map.end(), map.find(3));
-  EXPECT_THAT(map.find(4), IsIteratorPointingTo(std::make_pair(4, "4")));
+
+  it = map.find(4);
+  ASSERT_NE(map.end(), it);
+  EXPECT_THAT(*it, Pair(4, "4"));
+
   EXPECT_EQ(map.end(), map.find(5));
 }
 
