@@ -9,9 +9,9 @@ cc_library(
     hdrs = ["compiler.hpp"],
     deps = [
         "//grammar:ast_listener",
-        "//grammar:logging",
         "//grammar:options",
         "//grammar:parser",
+        "//logging",
         "//proto:starlark_ast_cc_proto",
         "//proto:starlark_bytecode_cc_proto",
     ],

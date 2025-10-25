@@ -11,13 +11,14 @@
 #include "grammar/lexer.hpp"
 #include "grammar/options.hpp"
 #include "grammar/quoted.hpp"
+#include "logging/logging.hpp"
 
 using starlark::bigint::number;
-using starlark::grammar::options;
 using starlark::grammar::lexer;
-using starlark::grammar::logger;
+using starlark::grammar::options;
 using starlark::grammar::quoted;
 using starlark::grammar::token_type;
+using starlark::logging::logger;
 using testing::IsEmpty;
 
 namespace {

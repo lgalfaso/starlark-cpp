@@ -8,9 +8,9 @@
 #include <vector>
 
 #include "grammar/ast_listener.hpp"
-#include "grammar/logging.hpp"
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
+#include "logging/logging.hpp"
 
 using google::protobuf::RepeatedPtrField;
 using starlark::ast::Argument;
@@ -44,10 +44,10 @@ using starlark::ast::UnaryExpr;
 using starlark::bytecode::Program;
 using starlark::grammar::ast_listener;
 using starlark::grammar::ast_listener_base;
-using starlark::grammar::log_level;
-using starlark::grammar::logger;
 using starlark::grammar::options;
 using starlark::grammar::parser;
+using starlark::logging::log_level;
+using starlark::logging::logger;
 
 namespace starlark {
 namespace compiler {

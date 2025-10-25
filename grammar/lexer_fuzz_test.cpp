@@ -5,8 +5,8 @@
 #include "grammar/lexer.hpp"
 
 using starlark::grammar::lexer;
-using starlark::grammar::logger;
 using starlark::grammar::token_type;
+using starlark::logging::logger;
 
 namespace {
 

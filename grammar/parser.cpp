@@ -29,6 +29,8 @@ using starlark::ast::LambdaExpr;
 using starlark::ast::Parameter;
 using starlark::ast::Statement;
 using starlark::ast::UnaryExpr;
+using starlark::logging::log_level;
+using starlark::logging::logger;
 using starlark::unicode::to_nfkc;
 
 namespace starlark {

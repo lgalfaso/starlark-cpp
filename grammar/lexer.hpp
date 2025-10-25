@@ -8,9 +8,9 @@
 #include <utility>
 #include <vector>
 
-#include "grammar/logging.hpp"
-#include "grammar/token.hpp"
 #include "grammar/options.hpp"
+#include "grammar/token.hpp"
+#include "logging/logging.hpp"
 #include "unicode/utf8_reader.hpp"
 
 #pragma GCC visibility push(default)
@@ -20,8 +20,8 @@ namespace grammar {
 
 class lexer {
  public:
-  lexer(std::string_view input, logger& logging);
-  lexer(std::string_view input, const options& options, logger& logging);
+  lexer(std::string_view input, starlark::logging::logger& logging);
+  lexer(std::string_view input, const options& options, starlark::logging::logger& logging);
   const token& current_token() const;
   void next_token();
   const std::vector<std::pair<position, position>>& comments() const;
@@ -53,7 +53,7 @@ class lexer {
   std::vector<int> indent_stack;
   int open_brackets = 0;
 
-  logger& logging;
+  starlark::logging::logger& logging;
   std::vector<std::pair<position, position>> comments_found;
 };
 

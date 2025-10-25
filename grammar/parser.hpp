@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "grammar/lexer.hpp"
-#include "grammar/logging.hpp"
 #include "grammar/options.hpp"
+#include "logging/logging.hpp"
 #include "proto/starlark_ast.pb.h"
 
 #pragma GCC visibility push(default)
@@ -27,8 +27,8 @@ struct parsing_block {
 
 class parser {
  public:
-  parser(std::string_view input, logger& logging);
-  parser(std::string_view input, const options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging);
+  parser(std::string_view input, starlark::logging::logger& logging);
+  parser(std::string_view input, const options& opts, const std::set<std::string, std::less<>>& bindings, starlark::logging::logger& logging);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
@@ -57,7 +57,7 @@ class parser {
 
   options opts;
   lexer lex;
-  logger& logging;
+  starlark::logging::logger& logging;
   std::set<std::string, std::less<>> base_bindings;
 
   std::vector<int> nested_loops;

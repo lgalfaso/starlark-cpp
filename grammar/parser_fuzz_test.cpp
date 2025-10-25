@@ -6,8 +6,8 @@
 #include "proto/starlark_ast.pb.h"
 
 using starlark::ast::File;
-using starlark::grammar::logger;
 using starlark::grammar::parser;
+using starlark::logging::logger;
 
 namespace {
 

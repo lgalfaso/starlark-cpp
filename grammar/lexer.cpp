@@ -16,8 +16,10 @@
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
-using starlark::unicode::utf8_encode_code_point;
 using starlark::bigint::parse_number;
+using starlark::logging::log_level;
+using starlark::logging::logger;
+using starlark::unicode::utf8_encode_code_point;
 
 namespace starlark {
 namespace grammar {

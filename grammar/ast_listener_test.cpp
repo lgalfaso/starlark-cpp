@@ -17,9 +17,9 @@
 
 using starlark::ast::File;
 using starlark::ast::SliceExpr;
-using starlark::grammar::log_level;
-using starlark::grammar::logger;
 using starlark::grammar::parser;
+using starlark::logging::log_level;
+using starlark::logging::logger;
 using testing::IsEmpty;
 using testing::SizeIs;
 

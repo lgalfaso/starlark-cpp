@@ -47,10 +47,10 @@ cc_library(
     hdrs = ["lexer.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        ":logging",
         ":numeric_parser",
         ":options",
         ":token",
+        "//logging",
         "//unicode:encode",
         "//unicode:ucd",
         "//unicode:utf8_reader",
@@ -83,16 +83,6 @@ cc_fuzz_test(
 )
 
 cc_library(
-    name = "logging",
-    srcs = ["logging.cpp"],
-    hdrs = ["logging.hpp"],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":token",
-    ],
-)
-
-cc_library(
     name = "numeric_parser",
     srcs = ["numeric_parser.cpp"],
     hdrs = ["numeric_parser.hpp"],
@@ -119,8 +109,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":lexer",
-        ":logging",
         ":options",
+        "//logging",
         "//proto:starlark_ast_cc_proto",
         "//third-party:defer",
         "//unicode:normalization",

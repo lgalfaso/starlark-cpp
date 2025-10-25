@@ -13,11 +13,11 @@
 #include "proto/starlark_ast.pb.h"
 
 using google::protobuf::Arena;
-using starlark::grammar::log_level;
-using starlark::grammar::logger;
-using starlark::grammar::parser;
-using starlark::grammar::options;
 using starlark::ast::File;
+using starlark::grammar::options;
+using starlark::grammar::parser;
+using starlark::logging::log_level;
+using starlark::logging::logger;
 using testing::IsEmpty;
 using testing::Not;
 using testing::SizeIs;
