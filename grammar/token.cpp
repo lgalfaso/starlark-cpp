@@ -4,24 +4,26 @@
 
 #include <string>
 
+using starlark::logging::Position;
+
 namespace starlark {
 namespace grammar {
 
-position operator-(const position& pos, std::size_t places) {
-  return position{
-    .row = pos.row,
-    .column = pos.column - places,
-    .pos = pos.pos - places,
-  };
+Position operator-(const Position& pos, std::size_t places) {
+  Position result;
+  result.set_row(pos.row());
+  result.set_column(pos.column() - places);
+  result.set_pos(pos.pos() - places);
+  return result;
 }
 
-token::token(token_type tok_type, position tok_start, position tok_end) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end) {}
+token::token(token_type tok_type, Position tok_start, Position tok_end) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end) {}
 
-token::token(token_type tok_type, position tok_start, position tok_end, const bigint::number& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, Position tok_start, Position tok_end, const bigint::number& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
-token::token(token_type tok_type, position tok_start, position tok_end, double value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, Position tok_start, Position tok_end, double value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
-token::token(token_type tok_type, position tok_start, position tok_end, const std::string& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
+token::token(token_type tok_type, Position tok_start, Position tok_end, const std::string& value) : tok_type(tok_type), tok_start(tok_start), tok_end(tok_end), value(value) {}
 
 token_type token::type() const {
   return tok_type;
@@ -54,11 +56,11 @@ const std::string& token::string_value() const {
   return empty_string;
 }
 
-position token::start() const {
+Position token::start() const {
   return tok_start;
 }
 
-position token::end() const {
+Position token::end() const {
   return tok_end;
 }
 

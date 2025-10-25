@@ -18,7 +18,7 @@ using google::protobuf::Arena;
 using google::protobuf::Message;
 using starlark::ast::File;
 using starlark::grammar::parser;
-using starlark::logging::log_level;
+using starlark::logging::LogLevel;
 using starlark::logging::logger;
 using testing::IsEmpty;
 using testing::SizeIs;
@@ -29,7 +29,7 @@ std::string show_errors(const logger& logging) {
   std::string result;
 
   for (const auto& entry : logging) {
-    result += "[" + std::to_string(entry.pos.row) + "," + std::to_string(entry.pos.column) + "] " + entry.module + ":" + entry.message + "\n";
+    result += "[" + std::to_string(entry.pos().row()) + "," + std::to_string(entry.pos().column()) + "] " + std::string(entry.module()) + ":" + std::string(entry.message()) + "\n";
   }
   return result;
 }
@@ -50,7 +50,7 @@ TEST(Parser, TestCase) {
   }
 
   logger logging;
-  logging.set_level(log_level::kError);
+  logging.set_level(LogLevel::LOG_LEVEL_ERROR);
   starlark::grammar::options options = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, options, {}, logging);
   Arena arena;

@@ -8,7 +8,7 @@ cc_library(
     hdrs = ["logging.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        "//grammar:token",
+        "//proto:starlark_logging_cc_proto",
     ],
 )
 

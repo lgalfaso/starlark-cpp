@@ -16,7 +16,7 @@
 
 using starlark::ast::File;
 using starlark::grammar::parser;
-using starlark::logging::log_level;
+using starlark::logging::LogLevel;
 using starlark::logging::logger;
 using testing::IsEmpty;
 using testing::Not;
@@ -40,7 +40,7 @@ TEST(Parser, TestCase) {
   }
 
   logger logging;
-  logging.set_level(log_level::kError);
+  logging.set_level(LogLevel::LOG_LEVEL_ERROR);
   starlark::grammar::options options = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, options, {}, logging);
   google::protobuf::Arena arena;

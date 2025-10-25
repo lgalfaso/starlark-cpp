@@ -269,6 +269,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//bigint:number",
+        "//proto:starlark_logging_cc_proto",
     ],
 )
 

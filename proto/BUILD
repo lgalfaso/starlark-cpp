@@ -28,6 +28,19 @@ cc_proto_library(
     deps = [":starlark_bytecode_proto"],
 )
 
+proto_library(
+    name = "starlark_logging_proto",
+    srcs = ["starlark_logging.proto"],
+    visibility = ["//visibility:public"],
+    deps = ["@protobuf//:timestamp_proto"],
+)
+
+cc_proto_library(
+    name = "starlark_logging_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":starlark_logging_proto"],
+)
+
 cc_library(
     name = "base_proto_encoder",
     testonly = True,

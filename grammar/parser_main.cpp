@@ -15,7 +15,7 @@
 using starlark::ast::File;
 using starlark::grammar::options;
 using starlark::grammar::parser;
-using starlark::logging::log_level;
+using starlark::logging::LogLevel;
 using starlark::logging::logger;
 
 namespace {
@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
 
     std::string arg{argv[i]};
     logger logging;
-    logging.set_level(log_level::kError);
+    logging.set_level(LogLevel::LOG_LEVEL_ERROR);
     bool is_build_or_workspace =
         arg.ends_with("WORKSPACE") ||
         arg.ends_with("WORKSPACE.bazel") ||
@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
       std::cout << "Unable to parse: " << argv[i] << "\n";
     }
     for (const auto& entry : logging) {
-      std::cout << "  " << entry.module << ":" << entry.message << ":" << entry.pos.row << "," << entry.pos.column << "\n";
+      std::cout << "  " << entry.module() << ":" << entry.message() << ":" << entry.pos().row() << "," << entry.pos().column() << "\n";
     }
   }
 

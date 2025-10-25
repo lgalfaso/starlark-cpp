@@ -16,7 +16,7 @@ using google::protobuf::Arena;
 using starlark::ast::File;
 using starlark::grammar::options;
 using starlark::grammar::parser;
-using starlark::logging::log_level;
+using starlark::logging::LogLevel;
 using starlark::logging::logger;
 using testing::IsEmpty;
 using testing::Not;
@@ -26,7 +26,7 @@ namespace {
 
 void checkInvalid(std::string_view program, const options& opts) {
   logger logging;
-  logging.set_level(log_level::kError);
+  logging.set_level(LogLevel::LOG_LEVEL_ERROR);
   parser star_parser(program, opts, {}, logging);
   Arena arena;
   star_parser.parse_file(arena);

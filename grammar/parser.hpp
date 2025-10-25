@@ -45,7 +45,7 @@ class parser {
   bool is_current(token_type expected_token) const;
   bool expect(token_type expected_token);
   void add_error(std::string_view error_message);
-  void add_error(std::string_view error_message, position);
+  void add_error(std::string_view error_message, const starlark::logging::Position&);
   void add_warning(std::string_view error_message);
   void create_block(const std::set<std::string, std::less<>>& symbols,
                     const std::set<starlark::ast::Identifier*>& identifiers,
@@ -65,7 +65,7 @@ class parser {
   bool found_non_load = false;
   std::vector<std::pair<std::set<std::string, std::less<>>, std::set<starlark::ast::Identifier*>>> parse_parameter_identifiers;
   std::vector<parsing_block> parser_blocks;
-  std::map<starlark::ast::Identifier*, position> identifier_positions;
+  std::map<starlark::ast::Identifier*, starlark::logging::Position> identifier_positions;
 };
 
 }  // namespace grammar

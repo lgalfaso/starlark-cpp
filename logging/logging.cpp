@@ -2,44 +2,50 @@
 
 #include "logging/logging.hpp"
 
+#include <chrono>
 #include <string>
 #include <vector>
-
-using starlark::grammar::position;
 
 namespace starlark {
 namespace logging {
 
 namespace {
 
-log_entry create_log(log_level level, std::string_view message, std::string_view module, const position& pos) {
-  return log_entry{
-    .level = level,
-    .module = std::string{module},
-    .message = std::string{message},
-    .pos = pos,
-    .timestamp = std::chrono::system_clock::now(),
-  };
+LogEntry create_log(LogLevel level, std::string_view message, std::string_view module, const Position& pos) {
+  const std::chrono::time_point<std::chrono::system_clock> now =
+        std::chrono::system_clock::now();
+  auto now_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(
+      now.time_since_epoch()).count();
+  auto now_in_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+      now.time_since_epoch()).count();
+  LogEntry entry;
+  entry.set_level(level);
+  entry.set_module(module);
+  entry.set_message(message);
+  *entry.mutable_pos() = pos;
+  entry.mutable_timestamp()->set_seconds(now_in_seconds);
+  entry.mutable_timestamp()->set_nanos(now_in_ns % 1'000'000'000);
+  return entry;
 }
 
 }  // namespace
 
-void logger::set_level(log_level level) {
+void logger::set_level(LogLevel level) {
   this->level = level;
 }
 
-void logger::log(log_level level, std::string_view message, std::string_view module, const position& pos) {
+void logger::log(LogLevel level, std::string_view message, std::string_view module, const Position& pos) {
   if (level < this->level) {
     return;
   }
   entries.emplace_back(create_log(level, message, module, pos));
 }
 
-std::vector<log_entry>::const_iterator logger::begin() const {
+std::vector<LogEntry>::const_iterator logger::begin() const {
   return entries.begin();
 }
 
-std::vector<log_entry>::const_iterator logger::end() const {
+std::vector<LogEntry>::const_iterator logger::end() const {
   return entries.end();
 }
 
@@ -47,7 +53,7 @@ bool logger::empty() const {
   return entries.empty();
 }
 
-std::vector<log_entry>::size_type logger::size() const {
+std::vector<LogEntry>::size_type logger::size() const {
   return entries.size();
 }
 

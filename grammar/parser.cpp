@@ -29,7 +29,8 @@ using starlark::ast::LambdaExpr;
 using starlark::ast::Parameter;
 using starlark::ast::Statement;
 using starlark::ast::UnaryExpr;
-using starlark::logging::log_level;
+using starlark::logging::LogLevel;
+using starlark::logging::Position;
 using starlark::logging::logger;
 using starlark::unicode::to_nfkc;
 
@@ -391,13 +392,13 @@ void parser::add_error(std::string_view message) {
   add_error(message, lex.current_token().start());
 }
 
-void parser::add_error(std::string_view message, position pos) {
-  logging.log(log_level::kError, message, module, pos);
+void parser::add_error(std::string_view message, const Position& pos) {
+  logging.log(LogLevel::LOG_LEVEL_ERROR, message, module, pos);
   recover = true;
 }
 
 void parser::add_warning(std::string_view message) {
-  logging.log(log_level::kWarning, message, module, lex.current_token().start());
+  logging.log(LogLevel::LOG_LEVEL_WARNING, message, module, lex.current_token().start());
   recover = true;
 }
 

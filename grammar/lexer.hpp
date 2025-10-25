@@ -24,7 +24,7 @@ class lexer {
   lexer(std::string_view input, const options& options, starlark::logging::logger& logging);
   const token& current_token() const;
   void next_token();
-  const std::vector<std::pair<position, position>>& comments() const;
+  const std::vector<std::pair<starlark::logging::Position, starlark::logging::Position>>& comments() const;
 
   static constexpr std::string module = "Lexer";
 
@@ -36,11 +36,11 @@ class lexer {
   void read_string();
   bool read_escaped_char(std::string& result, bool utf8_encode, int max_value, int min_size, int max_size, int base);
   std::string read_identifier_or_keyword();
-  void add_error(std::string_view message, position pos);
-  void add_warning(std::string_view message, position pos);
-  void add_comment(position start, position end);
+  void add_error(std::string_view message, starlark::logging::Position pos);
+  void add_warning(std::string_view message, starlark::logging::Position pos);
+  void add_comment(starlark::logging::Position start, starlark::logging::Position end);
   void newline();
-  position get_position() const;
+  starlark::logging::Position get_position() const;
 
   options opts;
   std::size_t current_line = 0;
@@ -54,7 +54,7 @@ class lexer {
   int open_brackets = 0;
 
   starlark::logging::logger& logging;
-  std::vector<std::pair<position, position>> comments_found;
+  std::vector<std::pair<starlark::logging::Position, starlark::logging::Position>> comments_found;
 };
 
 }  // namespace grammar

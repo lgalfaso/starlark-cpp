@@ -46,7 +46,7 @@ using starlark::grammar::ast_listener;
 using starlark::grammar::ast_listener_base;
 using starlark::grammar::options;
 using starlark::grammar::parser;
-using starlark::logging::log_level;
+using starlark::logging::LogLevel;
 using starlark::logging::logger;
 
 namespace starlark {
@@ -672,7 +672,7 @@ Program compiler::compile(std::string_view starlark_program) {
   // TODO(lmirelmann): The logger should be a parameter, but there should be a way to know
   // whether the parser generated an error.
   logger logging;
-  logging.set_level(log_level::kWarning);
+  logging.set_level(LogLevel::LOG_LEVEL_WARNING);
   // TODO(lmirelmann): The extra symbols should be configurable.
   std::set<std::string, std::less<>> extra_symbols;
   parser star_parser(starlark_program,

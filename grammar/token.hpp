@@ -8,6 +8,7 @@
 #include <variant>
 
 #include "bigint/number.hpp"
+#include "proto/starlark_logging.pb.h"
 
 #pragma GCC visibility push(default)
 
@@ -103,32 +104,26 @@ enum class token_type {
   kYield,
 };
 
-struct position {
-  std::size_t row;
-  std::size_t column;
-  std::size_t pos;
-};
-
-position operator-(const position& pos, std::size_t places);
+starlark::logging::Position operator-(const starlark::logging::Position& pos, std::size_t places);
 
 class token {
  public:
-  token(token_type type, position start, position end);
-  token(token_type type, position start, position end, const bigint::number& value);
-  token(token_type type, position start, position end, double value);
-  token(token_type type, position start, position end, const std::string& value);
+  token(token_type type, starlark::logging::Position start, starlark::logging::Position end);
+  token(token_type type, starlark::logging::Position start, starlark::logging::Position end, const bigint::number& value);
+  token(token_type type, starlark::logging::Position start, starlark::logging::Position end, double value);
+  token(token_type type, starlark::logging::Position start, starlark::logging::Position end, const std::string& value);
   token_type type() const;
   void set_type(token_type new_type);
   const bigint::number& int_value() const;
   double double_value() const;
   const std::string& string_value() const;
-  position start() const;
-  position end() const;
+  starlark::logging::Position start() const;
+  starlark::logging::Position end() const;
 
  private:
   token_type tok_type;
-  position tok_start;
-  position tok_end;
+  starlark::logging::Position tok_start;
+  starlark::logging::Position tok_end;
   std::variant<double, bigint::number, std::string> value;
 };
 

@@ -16,7 +16,6 @@
 using starlark::bigint::number;
 using starlark::grammar::lexer;
 using starlark::grammar::options;
-using starlark::grammar::quoted;
 using starlark::grammar::token_type;
 using starlark::logging::logger;
 using testing::IsEmpty;
@@ -120,7 +119,7 @@ std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
         current_token.type() == token_type::kBytes ||
         current_token.type() == token_type::kIllegal) {
       parts.back() += "(";
-      parts.back() += quoted(current_token.string_value());
+      parts.back() += starlark::grammar::quoted(current_token.string_value());
       parts.back() += ")";
     } else if (current_token.type() == token_type::kInt) {
       parts.back() += "(";
@@ -132,13 +131,13 @@ std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
       parts.back() += ")";
     }
     parts.back() += ":";
-    parts.back() += std::to_string(current_token.start().row);
+    parts.back() += std::to_string(current_token.start().row());
     parts.back() += ",";
-    parts.back() += std::to_string(current_token.start().column);
+    parts.back() += std::to_string(current_token.start().column());
     parts.back() += ":";
-    parts.back() += std::to_string(current_token.end().row);
+    parts.back() += std::to_string(current_token.end().row());
     parts.back() += ",";
-    parts.back() += std::to_string(current_token.end().column);
+    parts.back() += std::to_string(current_token.end().column());
   } while (input.current_token().type() != token_type::kEof);
   return parts;
 }
@@ -171,7 +170,7 @@ void checkComments(std::string_view input, const std::vector<std::string>& expec
   read_tokens(l, input);
   std::vector<std::string> comments;
   for (const auto& [comment_start, comment_end] : l.comments()) {
-    comments.emplace_back(input.substr(comment_start.pos, comment_end.pos - comment_start.pos));
+    comments.emplace_back(input.substr(comment_start.pos(), comment_end.pos() - comment_start.pos()));
   }
   EXPECT_EQ(expected_comments, comments);
 }
@@ -183,11 +182,11 @@ void checkErrors(std::string_view input, std::string_view expected, const std::v
 
   std::vector<std::string> errors;
   for (const auto& log_entry : logging) {
-    errors.emplace_back(log_entry.message);
+    errors.emplace_back(log_entry.message());
     errors.back() += ":";
-    errors.back() += std::to_string(log_entry.pos.row);
+    errors.back() += std::to_string(log_entry.pos().row());
     errors.back() += ",";
-    errors.back() += std::to_string(log_entry.pos.column);
+    errors.back() += std::to_string(log_entry.pos().column());
   }
   EXPECT_EQ(expected_errors, errors);
 }
