@@ -17,18 +17,26 @@ using starlark::ast::Argument;
 using starlark::ast::AssignStmt;
 using starlark::ast::BinaryExpr;
 using starlark::ast::BreakStmt;
+using starlark::ast::CallExpr;
 using starlark::ast::CompClause;
 using starlark::ast::ContinueStmt;
+using starlark::ast::DefStmt;
+using starlark::ast::DictComp;
 using starlark::ast::DictExpr;
 using starlark::ast::DotExpr;
 using starlark::ast::Expression;
 using starlark::ast::File;
+using starlark::ast::ForClause;
 using starlark::ast::ForStmt;
 using starlark::ast::Identifier;
 using starlark::ast::IfExpr;
 using starlark::ast::IfStmt;
+using starlark::ast::LambdaExpr;
 using starlark::ast::ListComp;
 using starlark::ast::ListExpr;
+using starlark::ast::LoadStmt;
+using starlark::ast::Parameter;
+using starlark::ast::ReturnStmt;
 using starlark::ast::SliceExpr;
 using starlark::ast::Statement;
 using starlark::ast::Tuple;
@@ -49,7 +57,7 @@ namespace {
 class bytecode_generator : public ast_listener_base {
  public:
   explicit bytecode_generator(Program& output);
-  void enter_load_statement(const starlark::ast::LoadStmt* load_statement) override;
+  void enter_load_statement(const LoadStmt* load_statement) override;
   void exit_expression_statement(const Expression* statement) override;
   void enter_none_value() override;
   void enter_int_value(std::string_view int_value) override;
@@ -61,7 +69,7 @@ class bytecode_generator : public ast_listener_base {
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_dot_expression(const DotExpr* dot_expression) override;
-  void exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) override;
+  void exit_slice_expression(const SliceExpr* slice_expression) override;
 
   void exit_tuple(const Tuple* tuple) override;
   void enter_list_expression(const ListExpr* list_expression) override;
@@ -71,13 +79,13 @@ class bytecode_generator : public ast_listener_base {
   void mid_dictionary_expression(const DictExpr* dictionary_expression) override;
   void exit_dictionary_expression(const DictExpr* dictionary_expression) override;
 
-  void enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) override;
-  void exit_list_comprehension(const starlark::ast::ListComp* list_comprehension) override;
-  void enter_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override;
-  void exit_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) override;
-  void mid_for_clause(const starlark::ast::ForClause* for_clause) override;
-  void exit_for_clause(const starlark::ast::ForClause* for_clause) override;
-  void exit_if_clause(const starlark::ast::Expression* if_clause) override;
+  void enter_list_comprehension(const ListComp* list_comprehension) override;
+  void exit_list_comprehension(const ListComp* list_comprehension) override;
+  void enter_dictionary_comprehension(const DictComp* dictionary_comprehension) override;
+  void exit_dictionary_comprehension(const DictComp* dictionary_comprehension) override;
+  void mid_for_clause(const ForClause* for_clause) override;
+  void exit_for_clause(const ForClause* for_clause) override;
+  void exit_if_clause(const Expression* if_clause) override;
 
   void mid_if_expression(const IfExpr* if_expression) override;
   void exit_if_expression(const IfExpr* if_expression) override;
@@ -85,19 +93,26 @@ class bytecode_generator : public ast_listener_base {
   void enter_for_statement(const ForStmt* for_statement) override;
   void mid_for_statement(const ForStmt* for_statement) override;
   void exit_for_statement(const ForStmt* for_statement) override;
-  void exit_break_statement(const starlark::ast::BreakStmt* break_statement) override;
-  void exit_continue_statement(const starlark::ast::ContinueStmt* continue_statement) override;
+  void exit_break_statement(const BreakStmt* break_statement) override;
+  void exit_continue_statement(const ContinueStmt* continue_statement) override;
 
   void enter_if_statement(const IfStmt* if_statement) override;
   void exit_if_statement(const IfStmt* if_statement) override;
   void enter_then(const RepeatedPtrField<Statement>* then) override;
   void exit_then(const RepeatedPtrField<Statement>* then) override;
 
-  void exit_call_expression(const starlark::ast::CallExpr* call_expression) override;
-  void enter_argument(const starlark::ast::Argument* argument) override;
-  void exit_argument(const starlark::ast::Argument* argument) override;
+  void exit_call_expression(const CallExpr* call_expression) override;
+  void enter_argument(const Argument* argument) override;
+  void exit_argument(const Argument* argument) override;
 
-  void exit_assign_statement(const starlark::ast::AssignStmt* assign_statement) override;
+  void exit_assign_statement(const AssignStmt* assign_statement) override;
+
+  void exit_return_statement(const ReturnStmt* return_statement) override;
+
+  void mid_lambda_expression(const LambdaExpr* lambda_expression) override;
+  void exit_lambda_expression(const LambdaExpr* lambda_expression) override;
+  void mid_def_statement(const DefStmt* def_statement) override;
+  void exit_def_statement(const DefStmt* def_statement) override;
 
   void exit_file(const File* starlark_file) override;
 
@@ -106,6 +121,7 @@ class bytecode_generator : public ast_listener_base {
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
   std::map<const IfExpr*, uint64_t> if_expression_op_mid_pos;
   std::map<const RepeatedPtrField<Statement>*, uint64_t> if_statement_then;
+  std::map<const RepeatedPtrField<Parameter>*, uint64_t> def_or_lambda_expression_goto;
   std::vector<std::vector<uint64_t>> if_statement_to_fix_to_the_end;
 
   std::map<const ForStmt*, uint64_t> for_statement_op_mid_pos;
@@ -114,11 +130,13 @@ class bytecode_generator : public ast_listener_base {
   std::vector<std::vector<uint64_t>> comprehension_comp_clause;
 
   void fix_comp_clause(const RepeatedPtrField<CompClause>& clauses);
+  void mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
+  void exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
 
-void bytecode_generator::enter_load_statement(const starlark::ast::LoadStmt* load_statement) {
+void bytecode_generator::enter_load_statement(const LoadStmt* load_statement) {
   auto* load_op = output.add_op_code()->mutable_load_module();
   load_op->set_module(load_statement->module());
   for (const auto& symbol : load_statement->load_param()) {
@@ -270,8 +288,7 @@ void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
   output.add_op_code()->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
 }
 
-void bytecode_generator::exit_slice_expression(const starlark::ast::SliceExpr* slice_expression) {
-  // TODO(lmirelmann): Implement.
+void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression) {
   switch (slice_expression->slice_type_case()) {
     case SliceExpr::kIndex:
       output.add_op_code()->mutable_index_member();
@@ -288,15 +305,15 @@ void bytecode_generator::exit_tuple(const Tuple* tuple) {
   output.add_op_code()->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
 }
 
-void bytecode_generator::enter_list_expression(const starlark::ast::ListExpr* list_expression) {
+void bytecode_generator::enter_list_expression(const ListExpr* list_expression) {
   output.add_op_code()->mutable_make_list()->set_reserve_size(list_expression->element_size());
 }
 
-void bytecode_generator::mid_list_expression(const starlark::ast::ListExpr* list_expression) {
+void bytecode_generator::mid_list_expression(const ListExpr* list_expression) {
   output.add_op_code()->mutable_add_to_list()->set_pos(1);
 }
 
-void bytecode_generator::exit_list_expression(const starlark::ast::ListExpr* list_expression) {
+void bytecode_generator::exit_list_expression(const ListExpr* list_expression) {
   if (list_expression->element_size() != 0) {
     output.add_op_code()->mutable_add_to_list()->set_pos(1);
   }
@@ -321,12 +338,12 @@ void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_e
   }
 }
 
-void bytecode_generator::enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) {
+void bytecode_generator::enter_list_comprehension(const ListComp* list_comprehension) {
   comprehension_comp_clause.push_back({});
   output.add_op_code()->mutable_make_list()->set_reserve_size(0);
 }
 
-void bytecode_generator::exit_list_comprehension(const starlark::ast::ListComp* list_comprehension) {
+void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehension) {
   int number_for_clauses = 0;
   for (const auto& clause : list_comprehension->clause()) {
     if (clause.comp_clause_type_case() == CompClause::kForClause) {
@@ -338,12 +355,12 @@ void bytecode_generator::exit_list_comprehension(const starlark::ast::ListComp* 
   comprehension_comp_clause.pop_back();
 }
 
-void bytecode_generator::enter_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) {
+void bytecode_generator::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {
   comprehension_comp_clause.push_back({});
   output.add_op_code()->mutable_make_dictionary()->set_reserve_size(0);
 }
 
-void bytecode_generator::exit_dictionary_comprehension(const starlark::ast::DictComp* dictionary_comprehension) {
+void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {
   int number_for_clauses = 0;
   for (const auto& clause : dictionary_comprehension->clause()) {
     if (clause.comp_clause_type_case() == CompClause::kForClause) {
@@ -355,17 +372,17 @@ void bytecode_generator::exit_dictionary_comprehension(const starlark::ast::Dict
   comprehension_comp_clause.pop_back();
 }
 
-void bytecode_generator::mid_for_clause(const starlark::ast::ForClause* for_clause) {
+void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
   output.add_op_code()->mutable_get_iterator();
   comprehension_comp_clause.back().push_back(output.op_code_size());
   output.add_op_code()->mutable_for_iterator();
 }
 
-void bytecode_generator::exit_for_clause(const starlark::ast::ForClause* for_clause) {
+void bytecode_generator::exit_for_clause(const ForClause* for_clause) {
   output.add_op_code()->mutable_assign();
 }
 
-void bytecode_generator::exit_if_clause(const starlark::ast::Expression* if_clause) {
+void bytecode_generator::exit_if_clause(const Expression* if_clause) {
   comprehension_comp_clause.back().push_back(output.op_code_size());
   output.add_op_code()->mutable_if_false();
 }
@@ -463,7 +480,7 @@ void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
   if_statement_then.erase(then);
 }
 
-void bytecode_generator::exit_call_expression(const starlark::ast::CallExpr* call_expression) {
+void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
   int pos_arguments = 0;
   int named_arguments = 0;
   bool varadic_pos_arg = false;
@@ -494,19 +511,19 @@ void bytecode_generator::exit_call_expression(const starlark::ast::CallExpr* cal
   call->set_has_varadic_named_argument(varadic_named_arg);
 }
 
-void bytecode_generator::enter_argument(const starlark::ast::Argument* argument) {
+void bytecode_generator::enter_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
     output.add_op_code()->mutable_const_string()->set_value(argument->named_argument().identifier().nfkc_name());
   }
 }
 
-void bytecode_generator::exit_argument(const starlark::ast::Argument* argument) {
+void bytecode_generator::exit_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
     output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
   }
 }
 
-void bytecode_generator::exit_assign_statement(const starlark::ast::AssignStmt* assign_statement) {
+void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statement) {
   switch (assign_statement->op()) {
     case AssignStmt::EQUALS:
       output.add_op_code()->mutable_assign();
@@ -549,10 +566,86 @@ void bytecode_generator::exit_assign_statement(const starlark::ast::AssignStmt* 
   }
 }
 
+void bytecode_generator::exit_return_statement(const ReturnStmt* return_statement) {
+  output.add_op_code()->mutable_return_();
+}
+
+void bytecode_generator::mid_lambda_expression(const LambdaExpr* lambda_expression) {
+  mid_def_or_lambda_expression(&lambda_expression->parameter());
+}
+
+void bytecode_generator::exit_lambda_expression(const LambdaExpr* lambda_expression) {
+  output.add_op_code()->mutable_return_();
+  exit_def_or_lambda_expression(&lambda_expression->parameter());
+}
+
+void bytecode_generator::mid_def_statement(const DefStmt* def_statement) {
+  mid_def_or_lambda_expression(&def_statement->parameter());
+}
+void bytecode_generator::exit_def_statement(const DefStmt* def_statement) {
+  if (!output.op_code().rbegin()->has_return_()) {
+    output.add_op_code()->mutable_const_none();
+    output.add_op_code()->mutable_return_();
+  }
+  exit_def_or_lambda_expression(&def_statement->parameter());
+  auto* id_op = output.add_op_code()->mutable_load();
+  id_op->set_frame(def_statement->function_name().frame());
+  id_op->set_pos_in_frame(def_statement->function_name().pos_in_frame());
+  output.add_op_code()->mutable_assign();
+}
+
+void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
+  // Capture the function signature.
+  auto signature_pos = output.function_signature_size();
+  auto* function_signature = output.add_function_signature();
+  int arguments_with_defaults_count = 0;
+  function_signature->set_has_star_argument(false);
+  function_signature->set_has_star_star_argument(false);
+  for (const auto& param : *params) {
+    function_signature->add_name(param.identifier().nfkc_name());
+    switch (param.parameter_type_case()) {
+      case Parameter::kInitialization:
+        ++arguments_with_defaults_count;
+        break;
+      case Parameter::kStar:
+        function_signature->set_has_star_argument(true);
+        break;
+      case Parameter::kStarStar:
+        function_signature->set_has_star_star_argument(true);
+        break;
+      default:
+        break;
+    }
+  }
+  function_signature->set_default_arguments_count(arguments_with_defaults_count);
+
+  // Maybe prepare the default arguments.
+  if (arguments_with_defaults_count > 0) {
+    output.add_op_code()->mutable_make_tuple()->set_number_of_elements(arguments_with_defaults_count);
+  }
+  // Call make_function with the signature.
+  auto* make_function = output.add_op_code()->mutable_make_function();
+  make_function->set_signature(signature_pos);
+
+  // Maybe store the default arguments.
+  if (arguments_with_defaults_count > 0) {
+    output.add_op_code()->mutable_set_default_values();
+  }
+  def_or_lambda_expression_goto[params] = output.op_code_size();
+  make_function->set_entrypoint(output.op_code_size() + 1);
+  // Create the goto to skip the bytecodes.
+  output.add_op_code();
+}
+
+void bytecode_generator::exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
+  // Fix the goto and clean up the cache.
+  output.mutable_op_code(def_or_lambda_expression_goto[params])->mutable_goto_()->set_address(output.op_code_size());
+  def_or_lambda_expression_goto.erase(params);
+}
+
 void bytecode_generator::exit_file(const File* starlark_file) {
   output.add_op_code()->mutable_end();
 }
-
 
 void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& clauses) {
   int clause_pos = 0;
@@ -576,8 +669,9 @@ void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& cla
 compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(binding) {}
 
 Program compiler::compile(std::string_view starlark_program) {
+  // TODO(lmirelmann): The logger should be a parameter, but there should be a way to know
+  // whether the parser generated an error.
   logger logging;
-  // TODO(lmirelmann): Log level should be configurable.
   logging.set_level(log_level::kWarning);
   // TODO(lmirelmann): The extra symbols should be configurable.
   std::set<std::string, std::less<>> extra_symbols;
@@ -593,7 +687,7 @@ Program compiler::compile(std::string_view starlark_program) {
 
   Program result;
   bytecode_generator listener(result);
-  starlark::grammar::ast_walker walker;
+  grammar::ast_walker walker;
   walker.walk(starlark_file, listener);
   return result;
 }

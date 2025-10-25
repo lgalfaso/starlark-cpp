@@ -1,0 +1,56 @@
+op_code { make_function { signature: 0 entrypoint: 2 } }
+op_code { goto { address: 4 } }
+op_code { const_int { value: "1" } }
+op_code { return { } }
+op_code { load { frame: 1 pos_in_frame: 0 } }
+op_code { assign { } }
+op_code { make_function { signature: 1 entrypoint: 8 } }
+op_code { goto { address: 10 } }
+op_code { const_none { } }
+op_code { return { } }
+op_code { load { frame: 1 pos_in_frame: 1 } }
+op_code { assign { } }
+op_code { make_function { signature: 2 entrypoint: 14 } }
+op_code { goto { address: 18 } }
+op_code { load { frame: 0 pos_in_frame: 0 } }
+op_code { const_int { value: "1" } }
+op_code { binary_plus { } }
+op_code { return { } }
+op_code { load { frame: 1 pos_in_frame: 2 } }
+op_code { assign { } }
+op_code { const_int { value: "1" } }
+op_code { make_tuple { number_of_elements: 1 } }
+op_code { make_function { signature: 3 entrypoint: 25 } }
+op_code { set_default_values { } }
+op_code { goto { address: 29 } }
+op_code { load { frame: 0 pos_in_frame: 0 } }
+op_code { load { frame: 0 pos_in_frame: 1 } }
+op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: false } }
+op_code { return { } }
+op_code { load { frame: 1 pos_in_frame: 3 } }
+op_code { assign { } }
+op_code { make_function { signature: 4 entrypoint: 33 } }
+op_code { goto { address: 37 } }
+op_code { load { frame: 0 pos_in_frame: 0 } }
+op_code { load { frame: 0 pos_in_frame: 1 } }
+op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: true has_varadic_named_argument: false } }
+op_code { return { } }
+op_code { load { frame: 1 pos_in_frame: 4 } }
+op_code { assign { } }
+op_code { make_function { signature: 5 entrypoint: 41 } }
+op_code { goto { address: 45 } }
+op_code { load { frame: 0 pos_in_frame: 0 } }
+op_code { load { frame: 0 pos_in_frame: 1 } }
+op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: true } }
+op_code { return { } }
+op_code { load { frame: 1 pos_in_frame: 5 } }
+op_code { assign { } }
+op_code { end { } }
+function_signature { default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
+function_signature { default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
+function_signature { name: "a" default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
+function_signature { name: "a" name: "b" default_arguments_count: 1 has_star_argument: false has_star_star_argument: false }
+function_signature { name: "a" name: "b" default_arguments_count: 0 has_star_argument: true has_star_star_argument: false }
+function_signature { name: "a" name: "b" default_arguments_count: 0 has_star_argument: false has_star_star_argument: true }
+
+

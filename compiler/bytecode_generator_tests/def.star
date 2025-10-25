@@ -1,0 +1,13 @@
+def foo1():
+  return 1
+def foo2():
+  pass
+def foo3(a):
+  return a + 1
+def foo4(a, b = 1):
+  return a(b)
+def foo5(a, *b):
+  return a(*b)
+def foo6(a, **b):
+  return a(**b)
+

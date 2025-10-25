@@ -4,9 +4,11 @@ package starlark.bytecode;
 
 message Program {
   repeated OpCode op_code = 1;
+  repeated FunctionSignature function_signature = 2;
 }
 
 message OpCode {
+  // next_id: 65
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -14,7 +16,6 @@ message OpCode {
     ConstFloat const_float = 2;
     ConstString const_string = 3;
     ConstBytes const_bytes = 4;
-    // This op code is generated when there is a slice with missing operands.
     ConstNone const_none = 59;
 
     Drop drop = 5;
@@ -81,6 +82,10 @@ message OpCode {
     SliceRange slice_range = 61;
     Call call = 56;
     LoadModule load_module = 57;
+    Return return = 62;
+
+    MakeFunction make_function = 63;
+    SetDefaultValues set_default_values = 64;
 
     End end = 58;
   }
@@ -188,4 +193,20 @@ message LoadModule {
   }
 }
 
+message Return {}
+
 message End {}
+
+message FunctionSignature {
+  repeated string name = 1;
+  uint64 default_arguments_count = 2;
+  bool has_star_argument = 3;
+  bool has_star_star_argument = 4;
+}
+
+message MakeFunction {
+  uint32 signature = 1;
+  uint32 entrypoint = 2;
+}
+
+message SetDefaultValues {}
