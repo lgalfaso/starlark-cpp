@@ -19,10 +19,20 @@ using ::google::protobuf::Message;
 using ::protobuf_matchers::EqualsProto;
 using ::starlark::bytecode::Program;
 using ::starlark::compiler::compiler;
+using ::starlark::grammar::options;
+using ::starlark::logging::logger;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
 
 namespace {
+
+std::string get_errors(logger& logging) {
+  std::string result;
+  for (const auto& log : logging) {
+    result += log.DebugString();
+  }
+  return result;
+}
 
 TEST(CompilerBytecode, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
@@ -49,9 +59,17 @@ TEST(CompilerBytecode, TestCase) {
 
   std::set<std::string, std::less<>> binding{"None, True, False, len"};
   compiler star_compiler(binding);
-  Program actual_starlark_program = star_compiler.compile(starlark_code);
+  options opt {
+    .allow_top_level_for = true,
+    .allow_top_level_if = true,
+    .allow_top_level_rebinding = true,
+  };
+  logger logging;
+  google::protobuf::Arena arena;
+  Program* actual_starlark_program = star_compiler.compile(starlark_code, opt, logging, arena);
 
-  EXPECT_THAT(actual_starlark_program, EqualsProto(expected_starlark_program));
+  ASSERT_NE(actual_starlark_program, nullptr) << get_errors(logging);
+  EXPECT_THAT(*actual_starlark_program, EqualsProto(expected_starlark_program));
 }
 
 }  // namespace

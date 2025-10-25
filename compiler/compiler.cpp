@@ -12,6 +12,7 @@
 #include "grammar/parser.hpp"
 #include "logging/logging.hpp"
 
+using google::protobuf::Arena;
 using google::protobuf::RepeatedPtrField;
 using starlark::ast::Argument;
 using starlark::ast::AssignStmt;
@@ -48,6 +49,7 @@ using starlark::grammar::options;
 using starlark::grammar::parser;
 using starlark::logging::LogLevel;
 using starlark::logging::logger;
+using starlark::logging::logger_wrap;
 
 namespace starlark {
 namespace compiler {
@@ -668,25 +670,25 @@ void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& cla
 
 compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(binding) {}
 
-Program compiler::compile(std::string_view starlark_program) {
-  // TODO(lmirelmann): The logger should be a parameter, but there should be a way to know
-  // whether the parser generated an error.
-  logger logging;
-  logging.set_level(LogLevel::LOG_LEVEL_WARNING);
+Program* compiler::compile(std::string_view starlark_program, options opt, logger& logging, Arena& arena) {
+  logger_wrap logging_wrap(logging);
   // TODO(lmirelmann): The extra symbols should be configurable.
   std::set<std::string, std::less<>> extra_symbols;
   parser star_parser(starlark_program,
-                     // TODO(lmirelmann): Grammar options should be configurable.
-                     options{},
+                     opt,
                      extra_symbols,
-                     logging);
-  google::protobuf::Arena arena;
-  File* starlark_file = star_parser.parse_file(arena);
+                     logging_wrap);
+  google::protobuf::Arena parser_arena;
+  File* starlark_file = star_parser.parse_file(parser_arena);
 
+  auto report = logging_wrap.report();
+  if (report.error > 0 || report.fatal > 0) {
+    return nullptr;
+  }
   // TODO(lmirelmann): If there are errors, then return early.
 
-  Program result;
-  bytecode_generator listener(result);
+  Program* result = Arena::Create<Program>(&arena);
+  bytecode_generator listener(*result);
   grammar::ast_walker walker;
   walker.walk(starlark_file, listener);
   return result;

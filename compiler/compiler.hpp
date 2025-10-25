@@ -6,6 +6,8 @@
 #include <set>
 #include <string_view>
 
+#include "grammar/options.hpp"
+#include "logging/logging.hpp"
 #include "proto/starlark_bytecode.pb.h"
 
 #pragma GCC visibility push(default)
@@ -16,8 +18,11 @@ namespace compiler {
 class compiler {
  public:
   explicit compiler(std::set<std::string, std::less<>> &binding);
-  // TODO(lmirelmann): Define whether this should take an Arena and return a pointer to `Program`.
-  starlark::bytecode::Program compile(std::string_view starlark_program);
+  starlark::bytecode::Program* compile(
+      std::string_view starlark_program,
+      starlark::grammar::options options,
+      starlark::logging::logger& logging,
+      google::protobuf::Arena& arena);
 
  private:
   const std::set<std::string, std::less<>> binding;

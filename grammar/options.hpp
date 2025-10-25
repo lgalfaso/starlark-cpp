@@ -40,6 +40,12 @@ struct options {
 
   // Whether to allow a top-level rebindings.
   bool allow_top_level_rebinding = false;
+
+  // Whether to allow a top-level `for` statements.
+  bool allow_top_level_for = false;
+
+  // Whether to allow a top-level `if` statements.
+  bool allow_top_level_if = false;
 };
 
 }  // namespace grammar
