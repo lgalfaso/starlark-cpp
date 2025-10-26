@@ -15,10 +15,6 @@
 namespace starlark {
 namespace logging {
 
-// TODO(lmirelmann): Create a tee logger that allows us to receive a logger from an external source,
-//   use it with a tee wrapper and still be able to know whether logs of a specific level were triggered
-//   even if the logger was set to a level that this event would not be logged.
-
 class logger {
  public:
   virtual ~logger();
