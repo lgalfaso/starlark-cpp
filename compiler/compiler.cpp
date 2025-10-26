@@ -326,16 +326,11 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
 }
 
 void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
-  // TODO(lmirelmann): I think it would be better not to generate the `make_tuple` entry
-  //     and change `add_to_dictionary` to take two elements from the stack.
-  //     The underlying issue is that dictionary comprehension expressions still takes a tuple.
-  output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
   output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
 }
 
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
-    output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
     output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
   }
 }
@@ -682,10 +677,10 @@ Program* compiler::compile(std::string_view starlark_program, options opt, logge
   File* starlark_file = star_parser.parse_file(parser_arena);
 
   auto report = logging_wrap.report();
+  // If there are errors, then return early.
   if (report.error > 0 || report.fatal > 0) {
     return nullptr;
   }
-  // TODO(lmirelmann): If there are errors, then return early.
 
   Program* result = Arena::Create<Program>(&arena);
   bytecode_generator listener(*result);
