@@ -79,14 +79,17 @@ class starlark_obj {
   virtual bool truthy() const = 0;
   bool equals(const starlark_obj& other) const;
   int64_t hash() const;
+  void freeze();
   virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args);
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;
+  bool freezed = false;
 
   virtual bool inner_repr(printer& print, printer_action action) const = 0;
   virtual bool inner_equals(comparator& comp, const starlark_obj* other) const = 0;
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
+  virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
 
   friend class printer;
   friend class comparator;

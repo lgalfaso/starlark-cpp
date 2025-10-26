@@ -148,9 +148,31 @@ int64_t starlark_obj::hash() const {
   }
 }
 
+void starlark_obj::freeze() {
+  if (freezed) {
+    return;
+  }
+  freezed = true;
+  std::vector<starlark_obj*> to_freeze;
+  inner_freeze(to_freeze);
+  while (!to_freeze.empty()) {
+    auto* element = to_freeze.back();
+    to_freeze.pop_back();
+    if (element->freezed) {
+      continue;
+    }
+    element->freezed = true;
+    element->inner_freeze(to_freeze);
+  }
+}
+
 starlark_obj* starlark_obj::call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args) {
   // TODO(lmirelmann): Generate an error as the object is not callable.
   return nullptr;
+}
+
+void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
+  return;
 }
 
 size_t starlark_hash_op::operator()(const starlark_obj* value) const {
