@@ -25,4 +25,5 @@ b"these are bytes"
 c = 1 if True else 2
 def foo():
   a += 1
-
+d = {}
+d[1,2] = 3

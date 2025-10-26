@@ -1,6 +1,7 @@
 module_binding: "a"
 module_binding: "b"
 module_binding: "c"
+module_binding: "d"
 module_binding: "foo"
 module_binding: "identifier"
 module_binding: "words"
@@ -11,7 +12,7 @@ statement {
         name: "words"
         nfkc_name: "words"
         frame: 1
-        pos_in_frame: 5
+        pos_in_frame: 6
       }
     }
     op: EQUALS
@@ -27,7 +28,7 @@ statement {
         name: "identifier"
         nfkc_name: "identifier"
         frame: 1
-        pos_in_frame: 4
+        pos_in_frame: 5
       }
     }
     op: EQUALS
@@ -42,7 +43,7 @@ statement {
       name: "identifier"
       nfkc_name: "identifier"
       frame: 1
-      pos_in_frame: 4
+      pos_in_frame: 5
     }
   }
 }
@@ -126,7 +127,7 @@ statement {
               name: "foo"
               nfkc_name: "foo"
               frame: 2
-              pos_in_frame: 3
+              pos_in_frame: 4
             }
           }
         }
@@ -161,7 +162,7 @@ statement {
               name: "foo"
               nfkc_name: "foo"
               frame: 2
-              pos_in_frame: 3
+              pos_in_frame: 4
             }
           }
         }
@@ -235,7 +236,7 @@ statement {
               name: "foo"
               nfkc_name: "foo"
               frame: 2
-              pos_in_frame: 3
+              pos_in_frame: 4
             }
           }
         }
@@ -348,7 +349,7 @@ statement {
               name: "words"
               nfkc_name: "words"
               frame: 2
-              pos_in_frame: 5
+              pos_in_frame: 6
             }
           }
         }
@@ -406,7 +407,7 @@ statement {
               name: "words"
               nfkc_name: "words"
               frame: 2
-              pos_in_frame: 5
+              pos_in_frame: 6
             }
           }
         }
@@ -574,7 +575,7 @@ statement {
       name: "foo"
       nfkc_name: "foo"
       frame: 1
-      pos_in_frame: 3
+      pos_in_frame: 4
     }
     function_binding: "a"
     statement {
@@ -592,6 +593,53 @@ statement {
           int_value: "1"
         }
       }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "d"
+        nfkc_name: "d"
+        frame: 1
+        pos_in_frame: 3
+      }
+    }
+    op: EQUALS
+    rhs {
+      dictionary_expression {
+      }
+    }
+  }
+}
+statement {
+  assign_statement {
+    lhs {
+      slice_expression {
+        primary_expression {
+          identifier {
+            name: "d"
+            nfkc_name: "d"
+            frame: 1
+            pos_in_frame: 3
+          }
+        }
+        index {
+          tuple {
+            value {
+              int_value: "1"
+            }
+            value {
+              int_value: "2"
+            }
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: "3"
     }
   }
 }

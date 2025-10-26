@@ -1109,13 +1109,16 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .primary = top.primary,
               .primary_must_be_target = top.primary_must_be_target,
             });
-            // TODO(lmirelmann): Change this once https://github.com/bazelbuild/starlark/issues/291
-            // is resolved. The current implementation follows the grammar from Starlark, but this
-            // is not the same as the grammar from Python.
+            // This code makes the assumption that https://github.com/bazelbuild/starlark/issues/291
+            // will be resolved to this syntax
+            //
+            //   SliceSuffix = '[' [Test] ':' [Test] [':' [Test]] ']'
+            //               | '[' Expression ']'
+            //               .
+            //
             frames.emplace_back(frame{
-              .state = parser_state::kParseExpression,
-              .expression = top.primary->mutable_slice_expression()->mutable_index(),
-              .expression_allow_trailing_comma = true,
+              .state = parser_state::kParseTest,
+              .test = top.primary->mutable_slice_expression()->mutable_index(),
             });
           }
         } else {
@@ -1147,11 +1150,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::kParsePrimaryIndex_0:
         if (capture(token_type::kColon)) {
-          // TODO(lmirelmann): Solve this issue once https://github.com/bazelbuild/starlark/issues/291
-          // is resolved.
-          // if (!top.primary->slice_expression().index().has_value()) {
-          //   add_error("Unexpected TUPLE");
-          // }
           {
             Expression* expression = Arena::Create<Expression>(top.primary->GetArena());
             expression->Swap(top.primary->mutable_slice_expression()->mutable_index());
@@ -1161,6 +1159,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::kParsePrimaryIndex_1,
             .primary = top.primary,
             .primary_must_be_target = top.primary_must_be_target,
+          });
+        } else {
+          frames.emplace_back(frame{
+            .state = parser_state::kParseExpression_0,
+            .expression = top.primary->mutable_slice_expression()->mutable_index(),
+            .expression_allow_trailing_comma = false,
           });
         }
         break;
