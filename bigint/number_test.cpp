@@ -1251,5 +1251,14 @@ TEST(Number, ModPow) {
   EXPECT_EQ(r0, r);
 }
 
+TEST(Number, ParseNumber) {
+  EXPECT_EQ("1234567890abcdefabcdef"_number,
+            starlark::bigint::parse_number("0x1234567890abcdefABCDEFG", nullptr));
+  EXPECT_EQ("1234567890abcdefabcdef"_number,
+            starlark::bigint::parse_number("0x1234567890abcdefABCDEF!", nullptr));
+  EXPECT_EQ("499602d2"_number,
+            starlark::bigint::parse_number("1234567890abcdefABCDEFG", nullptr));
+}
+
 }  // namespace
 
