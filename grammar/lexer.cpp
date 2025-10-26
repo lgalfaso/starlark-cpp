@@ -144,7 +144,7 @@ void lexer::next_token() {
   tokenize();
 
   assert(current.type() != token_type::kBof);
-  assert(start_pos.pos < get_position().pos || start_token != current.type() || start_token == token_type::kOutdent);
+  assert(start_pos.pos() < get_position().pos() || start_token != current.type() || start_token == token_type::kOutdent);
 
   // Always have a `newline` token before `eof`.
   if (current.type() == token_type::kEof && !after_newline) {
