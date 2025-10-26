@@ -3,8 +3,10 @@
 #include "runtime/starlark_object.hpp"
 
 #include <bit>
+#include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace starlark {
 namespace runtime {

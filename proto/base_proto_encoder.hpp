@@ -1,5 +1,8 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
+#ifndef PROTO_BASE_PROTO_ENCODER_HPP_
+#define PROTO_BASE_PROTO_ENCODER_HPP_
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -51,4 +54,6 @@ int encode_proto(int argc, char* argv[]) {
 
   return 0;
 }
+
+#endif  // PROTO_BASE_PROTO_ENCODER_HPP_
 

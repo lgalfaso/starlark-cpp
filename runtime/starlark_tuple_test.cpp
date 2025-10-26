@@ -4,6 +4,8 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <vector>
+
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"

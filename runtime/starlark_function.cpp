@@ -3,7 +3,9 @@
 #include "runtime/starlark_function.hpp"
 
 #include <format>
+#include <map>
 #include <string>
+#include <vector>
 
 namespace starlark {
 namespace runtime {

@@ -2,6 +2,7 @@
 
 #include "grammar/parser.hpp"
 
+#include <functional>
 #include <map>
 #include <set>
 #include <string>

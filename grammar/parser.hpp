@@ -3,6 +3,7 @@
 #ifndef GRAMMAR_PARSER_HPP_
 #define GRAMMAR_PARSER_HPP_
 
+#include <functional>
 #include <map>
 #include <set>
 #include <string>

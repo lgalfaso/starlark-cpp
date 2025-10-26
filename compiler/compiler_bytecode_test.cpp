@@ -7,6 +7,7 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
+#include <functional>
 #include <set>
 #include <string>
 

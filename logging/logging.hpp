@@ -40,7 +40,7 @@ class logger_wrap : public logger {
     int fatal;
   };
 
-  logger_wrap(logger&);
+  explicit logger_wrap(logger&);
   void log(starlark::logging::LogLevel level, std::string_view message, std::string_view module, const starlark::logging::Position& pos) override;
   log_report report();
 

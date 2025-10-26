@@ -79,7 +79,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash()
   if (result == -1) {
     result = -2;
   }
-  return (int64_t)result;
+  return static_cast<int64_t>(result);
 }
 
 starlark_numeric_type starlark_integer::numeric_type() const {

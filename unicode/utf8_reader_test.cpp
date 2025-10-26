@@ -6,6 +6,7 @@
 
 #include <limits>
 #include <random>
+#include <string>
 
 #include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
@@ -401,9 +402,9 @@ TEST(SourceTest, Random6) {
 
 TEST(UTF8Reader, AllCharacters) {
   char source[8];
-  source[0] = (char)((0xE0) | (utf8_reader::kBomCharacter >> 12));
-  source[1] = (char)((0x80) | (0x3F & (utf8_reader::kBomCharacter >> 6)));
-  source[2] = (char)((0x80) | (0x3F & utf8_reader::kBomCharacter));
+  source[0] = static_cast<char>((0xE0) | (utf8_reader::kBomCharacter >> 12));
+  source[1] = static_cast<char>((0x80) | (0x3F & (utf8_reader::kBomCharacter >> 6)));
+  source[2] = static_cast<char>((0x80) | (0x3F & utf8_reader::kBomCharacter));
 
   auto do_checks = [&source](int code_point, int length){
     utf8_reader reader(std::string_view(source, 3 + length), true);

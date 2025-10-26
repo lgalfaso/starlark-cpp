@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <functional>
 #include <iostream>
 #include <set>
 #include <string>

@@ -33,5 +33,5 @@ class starlark_tuple : public starlark_obj {
 
 #pragma GCC visibility pop
 
-#endif  // RUNTIMRUNTIME_STARLARK_TUPLE_HPP_
+#endif  // RUNTIME_STARLARK_TUPLE_HPP_
 

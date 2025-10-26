@@ -4,6 +4,8 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <string>
+
 #include "containers/flat_map.hpp"
 
 using starlark::cnt::flat_map;

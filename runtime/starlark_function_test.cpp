@@ -4,6 +4,10 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "runtime/starlark_function.hpp"
 
 using starlark::runtime::starlark_built_in_function;

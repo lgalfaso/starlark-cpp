@@ -24,7 +24,6 @@ class starlark_numeric : public starlark_obj {
   virtual int64_t as_int64() const;
   virtual const starlark::bigint::number& as_bigint() const;
   virtual double as_float() const;
-
 };
 
 starlark::bigint::number from_int64(int64_t value);

@@ -2,6 +2,7 @@
 
 #include "compiler/compiler.hpp"
 
+#include <functional>
 #include <map>
 #include <set>
 #include <string>

@@ -3,7 +3,9 @@
 #ifndef COMPILER_COMPILER_HPP_
 #define COMPILER_COMPILER_HPP_
 
+#include <functional>
 #include <set>
+#include <string>
 #include <string_view>
 
 #include "grammar/options.hpp"

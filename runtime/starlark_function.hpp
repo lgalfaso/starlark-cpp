@@ -3,7 +3,9 @@
 #ifndef RUNTIME_STARLARK_FUNCTION_HPP_
 #define RUNTIME_STARLARK_FUNCTION_HPP_
 
+#include <map>
 #include <string>
+#include <vector>
 
 #include "runtime/starlark_object.hpp"
 
