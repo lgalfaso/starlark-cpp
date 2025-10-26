@@ -667,11 +667,9 @@ compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(bindin
 
 Program* compiler::compile(std::string_view starlark_program, options opt, logger& logging, Arena& arena) {
   logger_wrap logging_wrap(logging);
-  // TODO(lmirelmann): The extra symbols should be configurable.
-  std::set<std::string, std::less<>> extra_symbols;
   parser star_parser(starlark_program,
                      opt,
-                     extra_symbols,
+                     binding,
                      logging_wrap);
   google::protobuf::Arena parser_arena;
   File* starlark_file = star_parser.parse_file(parser_arena);
