@@ -1,0 +1,63 @@
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      list_expression {
+      }
+    }
+  }
+}
+statement {
+  def_statement {
+    function_name {
+      name: "foo"
+      nfkc_name: "foo"
+      frame: 1
+      pos_in_frame: 1
+    }
+    statement {
+      assign_statement {
+        lhs {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+        op: EQUALS
+        rhs {
+          list_expression {
+            element {
+              int_value: "1"
+            }
+          }
+        }
+      }
+    }
+    statement {
+      return_statement {
+        expression {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 0
+            pos_in_frame: 0
+          }
+        }
+      }
+    }
+    function_binding: "a"
+  }
+}
+module_binding: "a"
+module_binding: "foo"
+
