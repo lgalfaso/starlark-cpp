@@ -1,4 +1,7 @@
 block {
+  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { slots: 0 } }
+
   op_code { load { frame: 2 pos_in_frame: 21 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: false } }
   op_code { drop { } }
@@ -61,7 +64,7 @@ block {
   op_code { const_string { value: "i" } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_varadic_positional_argument: true has_varadic_named_argument: false } }
   op_code { drop { } }
 
@@ -81,7 +84,7 @@ block {
   op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_varadic_positional_argument: true has_varadic_named_argument: false } }
   op_code { drop { } }
 
@@ -100,7 +103,7 @@ block {
   op_code { load { frame: 2 pos_in_frame: 21 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { load { frame: 2 pos_in_frame: 8 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
@@ -115,7 +118,7 @@ block {
   op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { load { frame: 2 pos_in_frame: 8 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
@@ -128,7 +131,7 @@ block {
   op_code { const_string { value: "k" } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { load { frame: 2 pos_in_frame: 8 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
@@ -157,7 +160,7 @@ block {
   op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_varadic_positional_argument: true has_varadic_named_argument: false } }
   op_code { drop { } }
 
@@ -168,7 +171,7 @@ block {
   op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { load { frame: 2 pos_in_frame: 8 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
@@ -180,7 +183,7 @@ block {
   op_code { load { frame: 2 pos_in_frame: 21 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: true has_varadic_named_argument: false } }
   op_code { drop { } }
 
@@ -193,6 +196,8 @@ block {
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: true } }
   op_code { drop { } }
 
+  op_code { drop_frame { } }
+  op_code { drop_frame { } }
   op_code { end { } }
 }
 

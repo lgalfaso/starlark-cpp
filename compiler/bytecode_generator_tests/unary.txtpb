@@ -1,4 +1,6 @@
 block {
+  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { slots: 0 } }
   op_code { const_int { value: "1" } }
   op_code { unary_plus {} }
   op_code { drop {} }
@@ -11,5 +13,7 @@ block {
   op_code { const_int { value: "1" } }
   op_code { unary_not {} }
   op_code { drop {} }
+  op_code { drop_frame {} }
+  op_code { drop_frame {} }
   op_code { end {} }
 }

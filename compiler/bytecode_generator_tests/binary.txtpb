@@ -1,17 +1,19 @@
 block {
-  op_code { const_int { value: "0" } }  # 0
-  op_code { dup {} }                    # 1
-  op_code { if_true { address: 5 } }    # 2
-  op_code { drop {} }                   # 3
-  op_code { const_int { value: "1" } }  # 4
+  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { slots: 0 } }
+  op_code { const_int { value: "0" } }  # 2
+  op_code { dup {} }                    # 3
+  op_code { if_true { address: 7 } }    # 4
   op_code { drop {} }                   # 5
+  op_code { const_int { value: "1" } }  # 6
+  op_code { drop {} }                   # 7
 
-  op_code { const_int { value: "0" } }  # 6
-  op_code { dup {} }                    # 7
-  op_code { if_false { address: 11 } }  # 8
-  op_code { drop {} }                   # 9
-  op_code { const_int { value: "1" } }  # 10
+  op_code { const_int { value: "0" } }  # 8
+  op_code { dup {} }                    # 9
+  op_code { if_false { address: 13 } }  # 10
   op_code { drop {} }                   # 11
+  op_code { const_int { value: "1" } }  # 12
+  op_code { drop {} }                   # 13
 
   op_code { const_int { value: "0" } }
   op_code { const_int { value: "1" } }
@@ -107,6 +109,8 @@ block {
   op_code { const_int { value: "1" } }
   op_code { binary_slash_slash {} }
   op_code { drop {} }
+  op_code { drop_frame {} }
+  op_code { drop_frame {} }
 
   op_code { end {} }
 }

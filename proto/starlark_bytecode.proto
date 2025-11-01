@@ -3,17 +3,19 @@ edition = "2024";
 package starlark.bytecode;
 
 message Program {
-  // TODO(lmirelmann): There is a need to create the instructions that will create a frame and will get out of the frame.
   repeated Block block = 1;
 }
 
 message Block {
   repeated OpCode op_code = 1;
-  FunctionSignature function_signature = 2;
+  oneof symbols {
+    FunctionSignature function_signature = 2;
+    SymbolsTable exportable_symbols = 3;
+  }
 }
 
 message OpCode {
-  // next_id: 65
+  // next_id: 67
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -92,6 +94,9 @@ message OpCode {
     MakeFunction make_function = 63;
     SetDefaultValues set_default_values = 64;
 
+    CreateFrame create_frame = 65;
+    DropFrame drop_frame = 66;
+
     End end = 58;
   }
 }
@@ -152,14 +157,14 @@ message MakeList {
   uint32 reserve_size = 1;
 }
 message AddToList {
-  uint32 pos = 1;
+  uint32 pos_in_stack = 1;
 }
 
 message MakeDictionary {
   uint32 reserve_size = 1;
 }
 message AddToDictionary {
-  uint32 pos = 1;
+  uint32 pos_in_stack = 1;
 }
 
 message PosInFrame {
@@ -183,34 +188,48 @@ message IndexMember {}
 message SliceRange{}
 
 message Call {
-    int32 positional_arguments_count = 1;
-    int32 named_arguments_count = 2;
-    bool has_varadic_positional_argument = 3;
-    bool has_varadic_named_argument = 4;
+  int32 positional_arguments_count = 1;
+  int32 named_arguments_count = 2;
+  bool has_varadic_positional_argument = 3;
+  bool has_varadic_named_argument = 4;
 }
 
 message LoadModule {
   string module = 1;
   repeated Value value = 2;
   message Value {
-    string identifier = 1;
-    string remote_symbol = 2;
+    string remote_symbol = 1;
+    PosInFrame pos = 2;
   }
 }
 
 message Return {}
-
-message End {}
-
-message FunctionSignature {
-  repeated string name = 1;
-  uint64 default_arguments_count = 2;
-  bool has_star_argument = 3;
-  bool has_star_star_argument = 4;
-}
 
 message MakeFunction {
   uint32 entrypoint = 1;
 }
 
 message SetDefaultValues {}
+
+message CreateFrame {
+  uint32 slots = 1;
+}
+
+message DropFrame {}
+
+message End {}
+
+message FunctionSignature {
+  repeated Param param = 1;
+  uint64 default_arguments_count = 2;
+  bool has_star_argument = 3;
+  bool has_star_star_argument = 4;
+  message Param {
+    string name = 1;
+    PosInFrame pos = 2;
+  }
+}
+
+message SymbolsTable {
+  repeated string symbol = 1;
+}

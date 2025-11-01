@@ -61,7 +61,8 @@ namespace {
 class bytecode_generator : public ast_listener_base {
  public:
   explicit bytecode_generator(Program& output);
-  ~bytecode_generator();
+  void enter_file(const File* starlark_file) override;
+  void exit_file(const File* starlark_file) override;
   void enter_load_statement(const LoadStmt* load_statement) override;
   void exit_expression_statement(const Expression* statement) override;
   void enter_none_value() override;
@@ -119,8 +120,6 @@ class bytecode_generator : public ast_listener_base {
   void mid_def_statement(const DefStmt* def_statement) override;
   void exit_def_statement(const DefStmt* def_statement) override;
 
-  void exit_file(const File* starlark_file) override;
-
  private:
   Program& output;
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
@@ -141,14 +140,24 @@ class bytecode_generator : public ast_listener_base {
   const Block& block() const;
 };
 
-bytecode_generator::bytecode_generator(Program& output) : output(output) {
+bytecode_generator::bytecode_generator(Program& output) : output(output) {}
+
+void bytecode_generator::enter_file(const File* starlark_file) {
   blocks.push_back(0);
   output.add_block();
+  for (auto& symbol : starlark_file->module_binding()) {
+    mutable_block()->mutable_exportable_symbols()->add_symbol(symbol);
+  }
+  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(starlark_file->module_binding_size());
+  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(starlark_file->file_binding_size());
 }
 
-bytecode_generator::~bytecode_generator() {
+void bytecode_generator::exit_file(const File* starlark_file) {
   assert(blocks.size() == 1);
   assert(blocks.back() == 0);
+  mutable_block()->add_op_code()->mutable_drop_frame();
+  mutable_block()->add_op_code()->mutable_drop_frame();
+  mutable_block()->add_op_code()->mutable_end();
 }
 
 void bytecode_generator::enter_load_statement(const LoadStmt* load_statement) {
@@ -156,8 +165,9 @@ void bytecode_generator::enter_load_statement(const LoadStmt* load_statement) {
   load_op->set_module(load_statement->module());
   for (const auto& symbol : load_statement->load_param()) {
     auto* load_param = load_op->add_value();
-    load_param->set_identifier(symbol.local_name().nfkc_name());
     load_param->set_remote_symbol(symbol.remote_name());
+    load_param->mutable_pos()->set_frame(symbol.local_name().frame());
+    load_param->mutable_pos()->set_pos_in_frame(symbol.local_name().pos_in_frame());
   }
 }
 
@@ -325,12 +335,12 @@ void bytecode_generator::enter_list_expression(const ListExpr* list_expression) 
 }
 
 void bytecode_generator::mid_list_expression(const ListExpr* list_expression) {
-  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos(1);
+  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos_in_stack(1);
 }
 
 void bytecode_generator::exit_list_expression(const ListExpr* list_expression) {
   if (list_expression->element_size() != 0) {
-    mutable_block()->add_op_code()->mutable_add_to_list()->set_pos(1);
+    mutable_block()->add_op_code()->mutable_add_to_list()->set_pos_in_stack(1);
   }
 }
 
@@ -339,18 +349,19 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
 }
 
 void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
-  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos(1);
+  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(1);
 }
 
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
-    mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos(1);
+    mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(1);
   }
 }
 
 void bytecode_generator::enter_list_comprehension(const ListComp* list_comprehension) {
   comprehension_comp_clause.push_back({});
   mutable_block()->add_op_code()->mutable_make_list()->set_reserve_size(0);
+  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(list_comprehension->comprehension_binding_size());
 }
 
 void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehension) {
@@ -360,14 +371,16 @@ void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehens
       number_for_clauses++;
     }
   }
-  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos(number_for_clauses + 1);
+  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos_in_stack(number_for_clauses + 1);
   fix_comp_clause(list_comprehension->clause());
   comprehension_comp_clause.pop_back();
+  mutable_block()->add_op_code()->mutable_drop_frame();
 }
 
 void bytecode_generator::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {
   comprehension_comp_clause.push_back({});
   mutable_block()->add_op_code()->mutable_make_dictionary()->set_reserve_size(0);
+  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(dictionary_comprehension->comprehension_binding_size());
 }
 
 void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {
@@ -377,9 +390,10 @@ void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionar
       number_for_clauses++;
     }
   }
-  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos(number_for_clauses + 1);
+  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(number_for_clauses + 1);
   fix_comp_clause(dictionary_comprehension->clause());
   comprehension_comp_clause.pop_back();
+  mutable_block()->add_op_code()->mutable_drop_frame();
 }
 
 void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
@@ -582,6 +596,7 @@ void bytecode_generator::exit_return_statement(const ReturnStmt* return_statemen
 
 void bytecode_generator::mid_lambda_expression(const LambdaExpr* lambda_expression) {
   mid_def_or_lambda_expression(&lambda_expression->parameter());
+  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(lambda_expression->function_binding_size());
 }
 
 void bytecode_generator::exit_lambda_expression(const LambdaExpr* lambda_expression) {
@@ -591,6 +606,7 @@ void bytecode_generator::exit_lambda_expression(const LambdaExpr* lambda_express
 
 void bytecode_generator::mid_def_statement(const DefStmt* def_statement) {
   mid_def_or_lambda_expression(&def_statement->parameter());
+  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(def_statement->function_binding_size());
 }
 
 void bytecode_generator::exit_def_statement(const DefStmt* def_statement) {
@@ -646,16 +662,15 @@ void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Par
   function_signature->set_has_star_argument(has_star_argument);
   function_signature->set_has_star_star_argument(has_star_star_argument);
   for (const auto& param : *params) {
-    function_signature->add_name(param.identifier().nfkc_name());
+    auto fn_param = function_signature->add_param();
+    fn_param->set_name(param.identifier().nfkc_name());
+    fn_param->mutable_pos()->set_frame(param.identifier().frame());
+    fn_param->mutable_pos()->set_pos_in_frame(param.identifier().pos_in_frame());
   }
 }
 
 void bytecode_generator::exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
   blocks.pop_back();
-}
-
-void bytecode_generator::exit_file(const File* starlark_file) {
-  mutable_block()->add_op_code()->mutable_end();
 }
 
 void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& clauses) {

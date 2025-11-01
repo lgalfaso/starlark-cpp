@@ -1,4 +1,10 @@
 block {
+  exportable_symbols {
+    symbol: "a"
+    symbol: "b"
+  }
+  op_code { create_frame { slots: 2 } }
+  op_code { create_frame { slots: 0 } }
   op_code { make_list { reserve_size: 0 } }
   op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign { } }
@@ -101,5 +107,7 @@ block {
   op_code { const_int { value: "32" } }
   op_code { index_member { } }
   op_code { assign { } }
+  op_code { drop_frame { } }
+  op_code { drop_frame { } }
   op_code { end { } }
 }

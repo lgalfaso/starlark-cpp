@@ -1,10 +1,14 @@
 block {
-  op_code { load { frame: 2 pos_in_frame: 1 } }  # 0
-  op_code { if_false { address: 4 } }            # 1
-  op_code { load { frame: 2 pos_in_frame: 2 } }  # 2
-  op_code { goto { address: 5 } }                # 3
-  op_code { load { frame: 2 pos_in_frame: 0 } }  # 4
-  op_code { drop { } }                           # 5
+  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { slots: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } }  # 2
+  op_code { if_false { address: 6 } }            # 3
+  op_code { load { frame: 2 pos_in_frame: 2 } }  # 4
+  op_code { goto { address: 7 } }                # 5
+  op_code { load { frame: 2 pos_in_frame: 0 } }  # 6
+  op_code { drop { } }                           # 7
+  op_code { drop_frame { } }
+  op_code { drop_frame { } }
 
   op_code { end {} }
 }

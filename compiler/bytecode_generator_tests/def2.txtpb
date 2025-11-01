@@ -1,16 +1,25 @@
 block {
+  exportable_symbols {
+    symbol: "a"
+    symbol: "foo"
+  }
+  op_code { create_frame { slots: 2 } }
+  op_code { create_frame { slots: 0 } }
   op_code { make_list { reserve_size: 0 } }
   op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign {} }
   op_code { make_function { entrypoint: 1 } }
   op_code { load { frame: 1 pos_in_frame: 1 } }
   op_code { assign { } }
+  op_code { drop_frame { } }
+  op_code { drop_frame { } }
   op_code { end { } }
 }
 block {
+  op_code { create_frame { slots: 1 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_int { value: "1" } }
-  op_code { add_to_list { pos: 1 } }
+  op_code { add_to_list { pos_in_stack: 1 } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { assign { } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
