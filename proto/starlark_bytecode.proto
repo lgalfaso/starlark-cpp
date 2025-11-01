@@ -3,14 +3,13 @@ edition = "2024";
 package starlark.bytecode;
 
 message Program {
-  // TODO(lmirelmann): Move the signature to the block.
   // TODO(lmirelmann): There is a need to create the instructions that will create a frame and will get out of the frame.
   repeated Block block = 1;
-  repeated FunctionSignature function_signature = 2;
 }
 
 message Block {
   repeated OpCode op_code = 1;
+  FunctionSignature function_signature = 2;
 }
 
 message OpCode {
@@ -211,8 +210,7 @@ message FunctionSignature {
 }
 
 message MakeFunction {
-  uint32 signature = 1;
-  uint32 entrypoint = 2;
+  uint32 entrypoint = 1;
 }
 
 message SetDefaultValues {}

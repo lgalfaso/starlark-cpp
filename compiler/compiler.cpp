@@ -608,36 +608,30 @@ void bytecode_generator::exit_def_statement(const DefStmt* def_statement) {
 
 void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
   // Capture the function signature.
-  auto signature_pos = output.function_signature_size();
-  auto* function_signature = output.add_function_signature();
   int arguments_with_defaults_count = 0;
-  function_signature->set_has_star_argument(false);
-  function_signature->set_has_star_star_argument(false);
+  bool has_star_argument = false;
+  bool has_star_star_argument = false;
   for (const auto& param : *params) {
-    function_signature->add_name(param.identifier().nfkc_name());
     switch (param.parameter_type_case()) {
       case Parameter::kInitialization:
         ++arguments_with_defaults_count;
         break;
       case Parameter::kStar:
-        function_signature->set_has_star_argument(true);
+        has_star_argument = true;
         break;
       case Parameter::kStarStar:
-        function_signature->set_has_star_star_argument(true);
+        has_star_star_argument = true;
         break;
       default:
         break;
     }
   }
-  function_signature->set_default_arguments_count(arguments_with_defaults_count);
 
   // Maybe prepare the default arguments.
   if (arguments_with_defaults_count > 0) {
     mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(arguments_with_defaults_count);
   }
-  // Call make_function with the signature.
   auto* make_function = mutable_block()->add_op_code()->mutable_make_function();
-  make_function->set_signature(signature_pos);
 
   // Maybe store the default arguments.
   if (arguments_with_defaults_count > 0) {
@@ -647,6 +641,13 @@ void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Par
   make_function->set_entrypoint(block_for_function);
   blocks.push_back(block_for_function);
   output.add_block();
+  auto* function_signature = mutable_block()->mutable_function_signature();
+  function_signature->set_default_arguments_count(arguments_with_defaults_count);
+  function_signature->set_has_star_argument(has_star_argument);
+  function_signature->set_has_star_star_argument(has_star_star_argument);
+  for (const auto& param : *params) {
+    function_signature->add_name(param.identifier().nfkc_name());
+  }
 }
 
 void bytecode_generator::exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
