@@ -1,8 +1,10 @@
-op_code { load { frame: 2 pos_in_frame: 1 } }  # 0
-op_code { if_false { address: 4 } }            # 1
-op_code { load { frame: 2 pos_in_frame: 2 } }  # 2
-op_code { goto { address: 5 } }                # 3
-op_code { load { frame: 2 pos_in_frame: 0 } }  # 4
-op_code { drop { } }                           # 5
+block {
+  op_code { load { frame: 2 pos_in_frame: 1 } }  # 0
+  op_code { if_false { address: 4 } }            # 1
+  op_code { load { frame: 2 pos_in_frame: 2 } }  # 2
+  op_code { goto { address: 5 } }                # 3
+  op_code { load { frame: 2 pos_in_frame: 0 } }  # 4
+  op_code { drop { } }                           # 5
 
-op_code { end {} }
+  op_code { end {} }
+}

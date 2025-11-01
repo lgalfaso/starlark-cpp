@@ -43,6 +43,7 @@ using starlark::ast::SliceExpr;
 using starlark::ast::Statement;
 using starlark::ast::Tuple;
 using starlark::ast::UnaryExpr;
+using starlark::bytecode::Block;
 using starlark::bytecode::Program;
 using starlark::grammar::ast_listener;
 using starlark::grammar::ast_listener_base;
@@ -60,6 +61,7 @@ namespace {
 class bytecode_generator : public ast_listener_base {
  public:
   explicit bytecode_generator(Program& output);
+  ~bytecode_generator();
   void enter_load_statement(const LoadStmt* load_statement) override;
   void exit_expression_statement(const Expression* statement) override;
   void enter_none_value() override;
@@ -124,8 +126,8 @@ class bytecode_generator : public ast_listener_base {
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
   std::map<const IfExpr*, uint64_t> if_expression_op_mid_pos;
   std::map<const RepeatedPtrField<Statement>*, uint64_t> if_statement_then;
-  std::map<const RepeatedPtrField<Parameter>*, uint64_t> def_or_lambda_expression_goto;
   std::vector<std::vector<uint64_t>> if_statement_to_fix_to_the_end;
+  std::vector<int> blocks;
 
   std::map<const ForStmt*, uint64_t> for_statement_op_mid_pos;
   std::vector<std::vector<uint64_t>> for_statement_op_continue;
@@ -135,12 +137,22 @@ class bytecode_generator : public ast_listener_base {
   void fix_comp_clause(const RepeatedPtrField<CompClause>& clauses);
   void mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
   void exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
+  Block* mutable_block();
+  const Block& block() const;
 };
 
-bytecode_generator::bytecode_generator(Program& output) : output(output) {}
+bytecode_generator::bytecode_generator(Program& output) : output(output) {
+  blocks.push_back(0);
+  output.add_block();
+}
+
+bytecode_generator::~bytecode_generator() {
+  assert(blocks.size() == 1);
+  assert(blocks.back() == 0);
+}
 
 void bytecode_generator::enter_load_statement(const LoadStmt* load_statement) {
-  auto* load_op = output.add_op_code()->mutable_load_module();
+  auto* load_op = mutable_block()->add_op_code()->mutable_load_module();
   load_op->set_module(load_statement->module());
   for (const auto& symbol : load_statement->load_param()) {
     auto* load_param = load_op->add_value();
@@ -150,31 +162,31 @@ void bytecode_generator::enter_load_statement(const LoadStmt* load_statement) {
 }
 
 void bytecode_generator::exit_expression_statement(const Expression* statement) {
-  output.add_op_code()->mutable_drop();
+  mutable_block()->add_op_code()->mutable_drop();
 }
 
 void bytecode_generator::enter_none_value() {
-  output.add_op_code()->mutable_const_none();
+  mutable_block()->add_op_code()->mutable_const_none();
 }
 
 void bytecode_generator::enter_int_value(std::string_view int_value) {
-  output.add_op_code()->mutable_const_int()->set_value(int_value);
+  mutable_block()->add_op_code()->mutable_const_int()->set_value(int_value);
 }
 
 void bytecode_generator::enter_float_value(double float_value) {
-  output.add_op_code()->mutable_const_float()->set_value(float_value);
+  mutable_block()->add_op_code()->mutable_const_float()->set_value(float_value);
 }
 
 void bytecode_generator::enter_string_value(std::string_view string_value) {
-  output.add_op_code()->mutable_const_string()->set_value(string_value);
+  mutable_block()->add_op_code()->mutable_const_string()->set_value(string_value);
 }
 
 void bytecode_generator::enter_bytes_value(std::string_view bytes_value) {
-  output.add_op_code()->mutable_const_bytes()->set_value(bytes_value);
+  mutable_block()->add_op_code()->mutable_const_bytes()->set_value(bytes_value);
 }
 
 void bytecode_generator::enter_identifier(const Identifier* identifier) {
-  auto* id_op = output.add_op_code()->mutable_load();
+  auto* id_op = mutable_block()->add_op_code()->mutable_load();
   id_op->set_frame(identifier->frame());
   id_op->set_pos_in_frame(identifier->pos_in_frame());
 }
@@ -182,16 +194,16 @@ void bytecode_generator::enter_identifier(const Identifier* identifier) {
 void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression) {
   switch (unary_expression->operator_()) {
     case UnaryExpr::PLUS:
-      output.add_op_code()->mutable_unary_plus();
+      mutable_block()->add_op_code()->mutable_unary_plus();
       break;
     case UnaryExpr::MINUS:
-      output.add_op_code()->mutable_unary_minus();
+      mutable_block()->add_op_code()->mutable_unary_minus();
       break;
     case UnaryExpr::TILDE:
-      output.add_op_code()->mutable_unary_tilde();
+      mutable_block()->add_op_code()->mutable_unary_tilde();
       break;
     case UnaryExpr::NOT:
-      output.add_op_code()->mutable_unary_not();
+      mutable_block()->add_op_code()->mutable_unary_not();
       break;
     default:
       break;
@@ -199,17 +211,17 @@ void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression
 }
 
 void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expression) {
-  binary_op_mid_pos[binary_expression] = output.op_code_size();
+  binary_op_mid_pos[binary_expression] = block().op_code_size();
   switch (binary_expression->operator_()) {
     case BinaryExpr::OR:
-      output.add_op_code()->mutable_dup();
-      output.add_op_code()->mutable_if_true();
-      output.add_op_code()->mutable_drop();
+      mutable_block()->add_op_code()->mutable_dup();
+      mutable_block()->add_op_code()->mutable_if_true();
+      mutable_block()->add_op_code()->mutable_drop();
       break;
     case BinaryExpr::AND:
-      output.add_op_code()->mutable_dup();
-      output.add_op_code()->mutable_if_false();
-      output.add_op_code()->mutable_drop();
+      mutable_block()->add_op_code()->mutable_dup();
+      mutable_block()->add_op_code()->mutable_if_false();
+      mutable_block()->add_op_code()->mutable_drop();
       break;
     default:
       break;
@@ -219,67 +231,67 @@ void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expressi
 void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_expression) {
   switch (binary_expression->operator_()) {
     case BinaryExpr::OR:
-      output.mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_true()->set_address(output.op_code_size());
+      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_true()->set_address(block().op_code_size());
       break;
     case BinaryExpr::AND:
-      output.mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_false()->set_address(output.op_code_size());
+      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_false()->set_address(block().op_code_size());
       break;
     case BinaryExpr::EQUALS_EQUALS:
-      output.add_op_code()->mutable_binary_equals_equals();
+      mutable_block()->add_op_code()->mutable_binary_equals_equals();
       break;
     case BinaryExpr::BANG_EQUALS:
-      output.add_op_code()->mutable_binary_bang_equals();
+      mutable_block()->add_op_code()->mutable_binary_bang_equals();
       break;
     case BinaryExpr::LESS_THAN:
-      output.add_op_code()->mutable_binary_less_than();
+      mutable_block()->add_op_code()->mutable_binary_less_than();
       break;
     case BinaryExpr::GREATER_THAN:
-      output.add_op_code()->mutable_binary_greater_than();
+      mutable_block()->add_op_code()->mutable_binary_greater_than();
       break;
     case BinaryExpr::LESS_THAN_EQUALS:
-      output.add_op_code()->mutable_binary_less_than_equals();
+      mutable_block()->add_op_code()->mutable_binary_less_than_equals();
       break;
     case BinaryExpr::GREATER_THAN_EQUALS:
-      output.add_op_code()->mutable_binary_greater_than_equals();
+      mutable_block()->add_op_code()->mutable_binary_greater_than_equals();
       break;
     case BinaryExpr::IN:
-      output.add_op_code()->mutable_binary_in();
+      mutable_block()->add_op_code()->mutable_binary_in();
       break;
     case BinaryExpr::NOT_IN:
-      output.add_op_code()->mutable_binary_not_in();
+      mutable_block()->add_op_code()->mutable_binary_not_in();
       break;
     case BinaryExpr::PIPE:
-      output.add_op_code()->mutable_binary_pipe();
+      mutable_block()->add_op_code()->mutable_binary_pipe();
       break;
     case BinaryExpr::HAT:
-      output.add_op_code()->mutable_binary_hat();
+      mutable_block()->add_op_code()->mutable_binary_hat();
       break;
     case BinaryExpr::AMPERSAND:
-      output.add_op_code()->mutable_binary_ampersand();
+      mutable_block()->add_op_code()->mutable_binary_ampersand();
       break;
     case BinaryExpr::LESS_THAN_LESS_THAN:
-      output.add_op_code()->mutable_binary_less_than_less_than();
+      mutable_block()->add_op_code()->mutable_binary_less_than_less_than();
       break;
     case BinaryExpr::GREATER_THAN_GREATER_THAN:
-      output.add_op_code()->mutable_binary_greater_than_greater_than();
+      mutable_block()->add_op_code()->mutable_binary_greater_than_greater_than();
       break;
     case BinaryExpr::MINUS:
-      output.add_op_code()->mutable_binary_minus();
+      mutable_block()->add_op_code()->mutable_binary_minus();
       break;
     case BinaryExpr::PLUS:
-      output.add_op_code()->mutable_binary_plus();
+      mutable_block()->add_op_code()->mutable_binary_plus();
       break;
     case BinaryExpr::STAR:
-      output.add_op_code()->mutable_binary_star();
+      mutable_block()->add_op_code()->mutable_binary_star();
       break;
     case BinaryExpr::PERCENT:
-      output.add_op_code()->mutable_binary_percent();
+      mutable_block()->add_op_code()->mutable_binary_percent();
       break;
     case BinaryExpr::SLASH:
-      output.add_op_code()->mutable_binary_slash();
+      mutable_block()->add_op_code()->mutable_binary_slash();
       break;
     case BinaryExpr::SLASH_SLASH:
-      output.add_op_code()->mutable_binary_slash_slash();
+      mutable_block()->add_op_code()->mutable_binary_slash_slash();
       break;
     default:
       break;
@@ -288,16 +300,16 @@ void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_express
 }
 
 void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
-  output.add_op_code()->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+  mutable_block()->add_op_code()->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
 }
 
 void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression) {
   switch (slice_expression->slice_type_case()) {
     case SliceExpr::kIndex:
-      output.add_op_code()->mutable_index_member();
+      mutable_block()->add_op_code()->mutable_index_member();
       break;
     case SliceExpr::kSlice:
-      output.add_op_code()->mutable_slice_range();
+      mutable_block()->add_op_code()->mutable_slice_range();
       break;
     default:
       break;
@@ -305,40 +317,40 @@ void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression
 }
 
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
-  output.add_op_code()->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
+  mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
 }
 
 void bytecode_generator::enter_list_expression(const ListExpr* list_expression) {
-  output.add_op_code()->mutable_make_list()->set_reserve_size(list_expression->element_size());
+  mutable_block()->add_op_code()->mutable_make_list()->set_reserve_size(list_expression->element_size());
 }
 
 void bytecode_generator::mid_list_expression(const ListExpr* list_expression) {
-  output.add_op_code()->mutable_add_to_list()->set_pos(1);
+  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos(1);
 }
 
 void bytecode_generator::exit_list_expression(const ListExpr* list_expression) {
   if (list_expression->element_size() != 0) {
-    output.add_op_code()->mutable_add_to_list()->set_pos(1);
+    mutable_block()->add_op_code()->mutable_add_to_list()->set_pos(1);
   }
 }
 
 void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_expression) {
-  output.add_op_code()->mutable_make_dictionary()->set_reserve_size(dictionary_expression->entry_size());
+  mutable_block()->add_op_code()->mutable_make_dictionary()->set_reserve_size(dictionary_expression->entry_size());
 }
 
 void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
-  output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
+  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos(1);
 }
 
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
-    output.add_op_code()->mutable_add_to_dictionary()->set_pos(1);
+    mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos(1);
   }
 }
 
 void bytecode_generator::enter_list_comprehension(const ListComp* list_comprehension) {
   comprehension_comp_clause.push_back({});
-  output.add_op_code()->mutable_make_list()->set_reserve_size(0);
+  mutable_block()->add_op_code()->mutable_make_list()->set_reserve_size(0);
 }
 
 void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehension) {
@@ -348,14 +360,14 @@ void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehens
       number_for_clauses++;
     }
   }
-  output.add_op_code()->mutable_add_to_list()->set_pos(number_for_clauses + 1);
+  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos(number_for_clauses + 1);
   fix_comp_clause(list_comprehension->clause());
   comprehension_comp_clause.pop_back();
 }
 
 void bytecode_generator::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {
   comprehension_comp_clause.push_back({});
-  output.add_op_code()->mutable_make_dictionary()->set_reserve_size(0);
+  mutable_block()->add_op_code()->mutable_make_dictionary()->set_reserve_size(0);
 }
 
 void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {
@@ -365,42 +377,42 @@ void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionar
       number_for_clauses++;
     }
   }
-  output.add_op_code()->mutable_add_to_dictionary()->set_pos(number_for_clauses + 1);
+  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos(number_for_clauses + 1);
   fix_comp_clause(dictionary_comprehension->clause());
   comprehension_comp_clause.pop_back();
 }
 
 void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
-  output.add_op_code()->mutable_get_iterator();
-  comprehension_comp_clause.back().push_back(output.op_code_size());
-  output.add_op_code()->mutable_for_iterator();
+  mutable_block()->add_op_code()->mutable_get_iterator();
+  comprehension_comp_clause.back().push_back(block().op_code_size());
+  mutable_block()->add_op_code()->mutable_for_iterator();
 }
 
 void bytecode_generator::exit_for_clause(const ForClause* for_clause) {
-  output.add_op_code()->mutable_assign();
+  mutable_block()->add_op_code()->mutable_assign();
 }
 
 void bytecode_generator::exit_if_clause(const Expression* if_clause) {
-  comprehension_comp_clause.back().push_back(output.op_code_size());
-  output.add_op_code()->mutable_if_false();
+  comprehension_comp_clause.back().push_back(block().op_code_size());
+  mutable_block()->add_op_code()->mutable_if_false();
 }
 
 void bytecode_generator::mid_if_expression(const IfExpr* if_expression) {
-  auto op_code_size = output.op_code_size();
+  auto op_code_size = block().op_code_size();
   if (!if_expression_op_mid_pos.contains(if_expression)) {
     // This is the first time this is called for this `if expression`.
     if_expression_op_mid_pos[if_expression] = op_code_size;
-    output.add_op_code()->mutable_if_false();
+    mutable_block()->add_op_code()->mutable_if_false();
   } else {
-    output.mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_if_false()->set_address(op_code_size + 1);
+    mutable_block()->mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_if_false()->set_address(op_code_size + 1);
     if_expression_op_mid_pos[if_expression] = op_code_size;
-    output.add_op_code()->mutable_goto_();
+    mutable_block()->add_op_code()->mutable_goto_();
   }
 }
 
 void bytecode_generator::exit_if_expression(const IfExpr* if_expression) {
-  auto op_code_size = output.op_code_size();
-  output.mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_goto_()->set_address(op_code_size);
+  auto op_code_size = block().op_code_size();
+  mutable_block()->mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_goto_()->set_address(op_code_size);
   if_expression_op_mid_pos.erase(if_expression);
 }
 
@@ -410,30 +422,30 @@ void bytecode_generator::enter_for_statement(const ForStmt* for_statement) {
 }
 
 void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
-  auto op_code_size = output.op_code_size();
+  auto op_code_size = block().op_code_size();
   if (!for_statement_op_mid_pos.contains(for_statement)) {
     // This is the first time this is called for this `for statement`.
     for_statement_op_mid_pos[for_statement] = op_code_size;
-    output.add_op_code()->mutable_get_iterator();
-    output.add_op_code()->mutable_for_iterator();
+    mutable_block()->add_op_code()->mutable_get_iterator();
+    mutable_block()->add_op_code()->mutable_for_iterator();
   } else {
-    output.add_op_code()->mutable_assign();
+    mutable_block()->add_op_code()->mutable_assign();
   }
 }
 
 void bytecode_generator::exit_for_statement(const ForStmt* for_statement) {
-  auto op_code_size = output.op_code_size();
+  auto op_code_size = block().op_code_size();
   auto begin_address = for_statement_op_mid_pos[for_statement] + 1;
-  output.add_op_code()->mutable_goto_()->set_address(begin_address);
-  output.mutable_op_code(for_statement_op_mid_pos[for_statement] + 1)->mutable_for_iterator()->set_address(op_code_size + 1);
-  output.add_op_code()->mutable_end_iterator();
+  mutable_block()->add_op_code()->mutable_goto_()->set_address(begin_address);
+  mutable_block()->mutable_op_code(for_statement_op_mid_pos[for_statement] + 1)->mutable_for_iterator()->set_address(op_code_size + 1);
+  mutable_block()->add_op_code()->mutable_end_iterator();
 
   // Fix `break` and `continue` statements.
   for (auto i : for_statement_op_break.back()) {
-    output.mutable_op_code(i)->mutable_goto_()->set_address(op_code_size + 1);
+    mutable_block()->mutable_op_code(i)->mutable_goto_()->set_address(op_code_size + 1);
   }
   for (auto i : for_statement_op_continue.back()) {
-    output.mutable_op_code(i)->mutable_goto_()->set_address(begin_address);
+    mutable_block()->mutable_op_code(i)->mutable_goto_()->set_address(begin_address);
   }
 
   // Cleanup.
@@ -443,13 +455,13 @@ void bytecode_generator::exit_for_statement(const ForStmt* for_statement) {
 }
 
 void bytecode_generator::exit_break_statement(const BreakStmt* break_statement) {
-  for_statement_op_break.back().push_back(output.op_code_size());
-  output.add_op_code()->mutable_goto_();
+  for_statement_op_break.back().push_back(block().op_code_size());
+  mutable_block()->add_op_code()->mutable_goto_();
 }
 
 void bytecode_generator::exit_continue_statement(const ContinueStmt* continue_statement) {
-  for_statement_op_continue.back().push_back(output.op_code_size());
-  output.add_op_code()->mutable_goto_();
+  for_statement_op_continue.back().push_back(block().op_code_size());
+  mutable_block()->add_op_code()->mutable_goto_();
 }
 
 void bytecode_generator::enter_if_statement(const IfStmt* if_statement) {
@@ -457,22 +469,22 @@ void bytecode_generator::enter_if_statement(const IfStmt* if_statement) {
 }
 
 void bytecode_generator::exit_if_statement(const IfStmt* if_statement) {
-  auto op_code_size = output.op_code_size();
+  auto op_code_size = block().op_code_size();
   for (auto pos : if_statement_to_fix_to_the_end.back()) {
-    output.mutable_op_code(pos)->mutable_goto_()->set_address(op_code_size);
+    mutable_block()->mutable_op_code(pos)->mutable_goto_()->set_address(op_code_size);
   }
   if_statement_to_fix_to_the_end.pop_back();
 }
 
 void bytecode_generator::enter_then(const RepeatedPtrField<Statement>* then) {
-  if_statement_then[then] = output.op_code_size();
-  output.add_op_code()->mutable_if_false();
+  if_statement_then[then] = block().op_code_size();
+  mutable_block()->add_op_code()->mutable_if_false();
 }
 
 void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
-  auto op_code_size = output.op_code_size();
-  output.mutable_op_code(if_statement_then[then])->mutable_if_false()->set_address(op_code_size + 1);
-  output.add_op_code()->mutable_goto_();
+  auto op_code_size = block().op_code_size();
+  mutable_block()->mutable_op_code(if_statement_then[then])->mutable_if_false()->set_address(op_code_size + 1);
+  mutable_block()->add_op_code()->mutable_goto_();
   if_statement_to_fix_to_the_end.back().push_back(op_code_size);
 
   if_statement_then.erase(then);
@@ -502,7 +514,7 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
         break;
     }
   }
-  auto* call = output.add_op_code()->mutable_call();
+  auto* call = mutable_block()->add_op_code()->mutable_call();
   call->set_positional_arguments_count(pos_arguments);
   call->set_named_arguments_count(named_arguments);
   call->set_has_varadic_positional_argument(varadic_pos_arg);
@@ -511,53 +523,53 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
 
 void bytecode_generator::enter_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
-    output.add_op_code()->mutable_const_string()->set_value(argument->named_argument().identifier().nfkc_name());
+    mutable_block()->add_op_code()->mutable_const_string()->set_value(argument->named_argument().identifier().nfkc_name());
   }
 }
 
 void bytecode_generator::exit_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
-    output.add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
+    mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
   }
 }
 
 void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statement) {
   switch (assign_statement->op()) {
     case AssignStmt::EQUALS:
-      output.add_op_code()->mutable_assign();
+      mutable_block()->add_op_code()->mutable_assign();
       break;
     case AssignStmt::PLUS_EQUALS:
-      output.add_op_code()->mutable_plus_assign();
+      mutable_block()->add_op_code()->mutable_plus_assign();
       break;
     case AssignStmt::MINUS_EQUALS:
-      output.add_op_code()->mutable_minus_assign();
+      mutable_block()->add_op_code()->mutable_minus_assign();
       break;
     case AssignStmt::STAR_EQUALS:
-      output.add_op_code()->mutable_star_assign();
+      mutable_block()->add_op_code()->mutable_star_assign();
       break;
     case AssignStmt::SLASH_EQUALS:
-      output.add_op_code()->mutable_slash_assign();
+      mutable_block()->add_op_code()->mutable_slash_assign();
       break;
     case AssignStmt::SLASH_SLASH_EQUALS:
-      output.add_op_code()->mutable_slash_slash_assign();
+      mutable_block()->add_op_code()->mutable_slash_slash_assign();
       break;
     case AssignStmt::PERCENT_EQUALS:
-      output.add_op_code()->mutable_percent_assign();
+      mutable_block()->add_op_code()->mutable_percent_assign();
       break;
     case AssignStmt::AMPERSAND_EQUALS:
-      output.add_op_code()->mutable_ampersand_assign();
+      mutable_block()->add_op_code()->mutable_ampersand_assign();
       break;
     case AssignStmt::PIPE_EQUALS:
-      output.add_op_code()->mutable_pipe_assign();
+      mutable_block()->add_op_code()->mutable_pipe_assign();
       break;
     case AssignStmt::HAT_EQUALS:
-      output.add_op_code()->mutable_hat_assign();
+      mutable_block()->add_op_code()->mutable_hat_assign();
       break;
     case AssignStmt::LESS_LESS_EQUALS:
-      output.add_op_code()->mutable_less_less_assign();
+      mutable_block()->add_op_code()->mutable_less_less_assign();
       break;
     case AssignStmt::GREATER_GREATER_EQUALS:
-      output.add_op_code()->mutable_greater_greater_assign();
+      mutable_block()->add_op_code()->mutable_greater_greater_assign();
       break;
     default:
       break;
@@ -565,7 +577,7 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
 }
 
 void bytecode_generator::exit_return_statement(const ReturnStmt* return_statement) {
-  output.add_op_code()->mutable_return_();
+  mutable_block()->add_op_code()->mutable_return_();
 }
 
 void bytecode_generator::mid_lambda_expression(const LambdaExpr* lambda_expression) {
@@ -573,23 +585,25 @@ void bytecode_generator::mid_lambda_expression(const LambdaExpr* lambda_expressi
 }
 
 void bytecode_generator::exit_lambda_expression(const LambdaExpr* lambda_expression) {
-  output.add_op_code()->mutable_return_();
+  mutable_block()->add_op_code()->mutable_return_();
   exit_def_or_lambda_expression(&lambda_expression->parameter());
 }
 
 void bytecode_generator::mid_def_statement(const DefStmt* def_statement) {
   mid_def_or_lambda_expression(&def_statement->parameter());
 }
+
 void bytecode_generator::exit_def_statement(const DefStmt* def_statement) {
-  if (!output.op_code().rbegin()->has_return_()) {
-    output.add_op_code()->mutable_const_none();
-    output.add_op_code()->mutable_return_();
+  if (block().op_code().empty() ||
+      !block().op_code().rbegin()->has_return_()) {
+    mutable_block()->add_op_code()->mutable_const_none();
+    mutable_block()->add_op_code()->mutable_return_();
   }
   exit_def_or_lambda_expression(&def_statement->parameter());
-  auto* id_op = output.add_op_code()->mutable_load();
+  auto* id_op = mutable_block()->add_op_code()->mutable_load();
   id_op->set_frame(def_statement->function_name().frame());
   id_op->set_pos_in_frame(def_statement->function_name().pos_in_frame());
-  output.add_op_code()->mutable_assign();
+  mutable_block()->add_op_code()->mutable_assign();
 }
 
 void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
@@ -619,30 +633,28 @@ void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Par
 
   // Maybe prepare the default arguments.
   if (arguments_with_defaults_count > 0) {
-    output.add_op_code()->mutable_make_tuple()->set_number_of_elements(arguments_with_defaults_count);
+    mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(arguments_with_defaults_count);
   }
   // Call make_function with the signature.
-  auto* make_function = output.add_op_code()->mutable_make_function();
+  auto* make_function = mutable_block()->add_op_code()->mutable_make_function();
   make_function->set_signature(signature_pos);
 
   // Maybe store the default arguments.
   if (arguments_with_defaults_count > 0) {
-    output.add_op_code()->mutable_set_default_values();
+    mutable_block()->add_op_code()->mutable_set_default_values();
   }
-  def_or_lambda_expression_goto[params] = output.op_code_size();
-  make_function->set_entrypoint(output.op_code_size() + 1);
-  // Create the goto to skip the bytecodes.
-  output.add_op_code();
+  int block_for_function = output.block_size();
+  make_function->set_entrypoint(block_for_function);
+  blocks.push_back(block_for_function);
+  output.add_block();
 }
 
 void bytecode_generator::exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
-  // Fix the goto and clean up the cache.
-  output.mutable_op_code(def_or_lambda_expression_goto[params])->mutable_goto_()->set_address(output.op_code_size());
-  def_or_lambda_expression_goto.erase(params);
+  blocks.pop_back();
 }
 
 void bytecode_generator::exit_file(const File* starlark_file) {
-  output.add_op_code()->mutable_end();
+  mutable_block()->add_op_code()->mutable_end();
 }
 
 void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& clauses) {
@@ -651,15 +663,23 @@ void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& cla
   for (auto it = clauses.rbegin(); it != clauses.rend(); ++it) {
     const auto& clause = *it;
     if (clause.comp_clause_type_case() == CompClause::kForClause) {
-      output.mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
-          ->mutable_for_iterator()->set_address(output.op_code_size());
-      output.add_op_code()->mutable_end_iterator();
+      mutable_block()->mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
+          ->mutable_for_iterator()->set_address(block().op_code_size());
+      mutable_block()->add_op_code()->mutable_end_iterator();
     } else {
-      output.mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
-          ->mutable_if_false()->set_address(output.op_code_size());
+      mutable_block()->mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
+          ->mutable_if_false()->set_address(block().op_code_size());
     }
     clause_pos++;
   }
+}
+
+Block* bytecode_generator::mutable_block() {
+  return output.mutable_block(blocks.back());
+}
+
+const Block& bytecode_generator::block() const {
+  return output.block(blocks.back());
 }
 
 }  // namespace

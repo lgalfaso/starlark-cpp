@@ -16,27 +16,31 @@ function_signature {
     has_star_argument: false
     has_star_star_argument: false
 }
-op_code { make_function { signature: 0 entrypoint: 2 } }   #  0
-op_code { goto { address: 4 } }                            #  1
-op_code { const_string { value: "1" } }                    #  2
-op_code { return { } }                                     #  3
-op_code { drop { } }                                       #  4
-op_code { make_function { signature: 1 entrypoint: 7 } }   #  5
-op_code { goto { address: 11 } }                           #  6
-op_code { load { frame: 0 pos_in_frame: 0 } }              #  7
-op_code { const_int { value: "1" } }                       #  8
-op_code { binary_plus { } }                                #  9
-op_code { return { } }                                     # 10
-op_code { drop { } }                                       # 11
-op_code { const_int { value: "1" } }                       # 12
-op_code { make_tuple { number_of_elements: 1 } }           # 13
-op_code { make_function {signature: 2 entrypoint: 17 } }   # 14
-op_code { set_default_values { } }                         # 15
-op_code { goto { address: 21 } }                           # 16
-op_code { load { frame: 0 pos_in_frame: 0 } }              # 17
-op_code { load { frame: 0 pos_in_frame: 1 } }              # 18
-op_code { binary_plus { } }                                # 19
-op_code { return { } }                                     # 20
-op_code { drop { } }                                       # 21
-op_code { end { } }                                        # 22
-
+block {
+  op_code { make_function { signature: 0 entrypoint: 1 } }   #  0
+  op_code { drop { } }                                       #  1
+  op_code { make_function { signature: 1 entrypoint: 2 } }   #  2
+  op_code { drop { } }                                       #  3
+  op_code { const_int { value: "1" } }                       #  4
+  op_code { make_tuple { number_of_elements: 1 } }           #  5
+  op_code { make_function {signature: 2 entrypoint: 3 } }    #  6
+  op_code { set_default_values { } }                         #  7
+  op_code { drop { } }                                       #  8
+  op_code { end { } }                                        #  9
+}
+block {
+  op_code { const_string { value: "1" } }                    #  0
+  op_code { return { } }                                     #  1
+}
+block {
+  op_code { load { frame: 0 pos_in_frame: 0 } }              #  0
+  op_code { const_int { value: "1" } }                       #  1
+  op_code { binary_plus { } }                                #  2
+  op_code { return { } }                                     #  3
+}
+block {
+  op_code { load { frame: 0 pos_in_frame: 0 } }              # 0
+  op_code { load { frame: 0 pos_in_frame: 1 } }              # 1
+  op_code { binary_plus { } }                                # 2
+  op_code { return { } }                                     # 3
+}

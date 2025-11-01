@@ -1,99 +1,100 @@
-op_code { load { frame: 2 pos_in_frame: 2 } }    # 0
-op_code { if_false { address: 5 } }              # 1
-op_code { load { frame: 2 pos_in_frame: 0 } }    # 2
-op_code { drop {} }                              # 3
-op_code { goto { address: 5 } }                  # 4
+block {
+  op_code { load { frame: 2 pos_in_frame: 2 } }    # 0
+  op_code { if_false { address: 5 } }              # 1
+  op_code { load { frame: 2 pos_in_frame: 0 } }    # 2
+  op_code { drop {} }                              # 3
+  op_code { goto { address: 5 } }                  # 4
 
 
-op_code { load { frame: 2 pos_in_frame: 0 } }    # 5
-op_code { if_false { address: 10 } }             # 6
-op_code { const_int { value: "0" } }             # 7
-op_code { drop { } }                             # 8
-op_code { goto { address: 12 } }                 # 9
-op_code { load { frame: 2 pos_in_frame: 2 } }    # 10
-op_code { drop { } }                             # 11
+  op_code { load { frame: 2 pos_in_frame: 0 } }    # 5
+  op_code { if_false { address: 10 } }             # 6
+  op_code { const_int { value: "0" } }             # 7
+  op_code { drop { } }                             # 8
+  op_code { goto { address: 12 } }                 # 9
+  op_code { load { frame: 2 pos_in_frame: 2 } }    # 10
+  op_code { drop { } }                             # 11
 
-op_code { const_string: { value: "a" } }         # 12
-op_code { if_false { address: 17 } }             # 13
-op_code { const_int { value: "1" } }             # 14
-op_code { drop { } }                             # 15
-op_code { goto { address: 22 } }                 # 16
-op_code { const_string: { value: "b" } }         # 17
-op_code { if_false { address: 22 } }             # 18
-op_code { const_int { value: "2" } }             # 19
-op_code { drop { } }                             # 20
-op_code { goto { address: 22 } }                 # 21
+  op_code { const_string: { value: "a" } }         # 12
+  op_code { if_false { address: 17 } }             # 13
+  op_code { const_int { value: "1" } }             # 14
+  op_code { drop { } }                             # 15
+  op_code { goto { address: 22 } }                 # 16
+  op_code { const_string: { value: "b" } }         # 17
+  op_code { if_false { address: 22 } }             # 18
+  op_code { const_int { value: "2" } }             # 19
+  op_code { drop { } }                             # 20
+  op_code { goto { address: 22 } }                 # 21
 
 
-op_code { const_string: { value: "a" } }         # 22
-op_code { if_false { address: 27 } }             # 23
-op_code { const_int { value: "1" } }             # 24
-op_code { drop { } }                             # 25
-op_code { goto { address: 34 } }                 # 26
-op_code { const_string: { value: "b" } }         # 27
-op_code { if_false { address: 32 } }             # 28
-op_code { const_int { value: "2" } }             # 29
-op_code { drop { } }                             # 30
-op_code { goto { address: 34 } }                 # 31
-op_code { const_int { value: "3" } }             # 32
-op_code { drop { } }                             # 33
+  op_code { const_string: { value: "a" } }         # 22
+  op_code { if_false { address: 27 } }             # 23
+  op_code { const_int { value: "1" } }             # 24
+  op_code { drop { } }                             # 25
+  op_code { goto { address: 34 } }                 # 26
+  op_code { const_string: { value: "b" } }         # 27
+  op_code { if_false { address: 32 } }             # 28
+  op_code { const_int { value: "2" } }             # 29
+  op_code { drop { } }                             # 30
+  op_code { goto { address: 34 } }                 # 31
+  op_code { const_int { value: "3" } }             # 32
+  op_code { drop { } }                             # 33
 
-op_code { const_string { value: "a" } }          # 34
-op_code { if_false { address: 39 } }             # 35
-op_code { const_int { value: "1" } }             # 36
-op_code { drop { } }                             # 37
-op_code { goto { address: 49 } }                 # 38
-op_code { const_string { value: "b" } }          # 39
-op_code { if_false { address: 44 } }             # 40
-op_code { const_int { value: "2" } }             # 41
-op_code { drop { } }                             # 42
-op_code { goto { address: 49 } }                 # 43
-op_code { const_string { value: "c" } }          # 44
-op_code { if_false { address: 49 } }             # 45
-op_code { const_int { value: "3" } }             # 46
-op_code { drop { } }                             # 47
-op_code { goto { address: 49 } }                 # 48
+  op_code { const_string { value: "a" } }          # 34
+  op_code { if_false { address: 39 } }             # 35
+  op_code { const_int { value: "1" } }             # 36
+  op_code { drop { } }                             # 37
+  op_code { goto { address: 49 } }                 # 38
+  op_code { const_string { value: "b" } }          # 39
+  op_code { if_false { address: 44 } }             # 40
+  op_code { const_int { value: "2" } }             # 41
+  op_code { drop { } }                             # 42
+  op_code { goto { address: 49 } }                 # 43
+  op_code { const_string { value: "c" } }          # 44
+  op_code { if_false { address: 49 } }             # 45
+  op_code { const_int { value: "3" } }             # 46
+  op_code { drop { } }                             # 47
+  op_code { goto { address: 49 } }                 # 48
 
-op_code { const_string { value: "a" } }          # 49
-op_code { if_false { address: 54 } }             # 50
-op_code { const_int { value: "1" } }             # 51
-op_code { drop { } }                             # 52
-op_code { goto { address: 66 } }                 # 53
-op_code { const_string { value: "b" } }          # 54
-op_code { if_false { address: 59 } }             # 55
-op_code { const_int { value: "2" } }             # 56
-op_code { drop { } }                             # 57
-op_code { goto { address: 66 } }                 # 58
-op_code { const_string { value: "c" } }          # 59
-op_code { if_false { address: 64 } }             # 60
-op_code { const_int { value: "3" } }             # 61
-op_code { drop { } }                             # 62
-op_code { goto { address: 66 } }                 # 63
-op_code { const_int { value: "4" } }             # 64
-op_code { drop { } }                             # 65
+  op_code { const_string { value: "a" } }          # 49
+  op_code { if_false { address: 54 } }             # 50
+  op_code { const_int { value: "1" } }             # 51
+  op_code { drop { } }                             # 52
+  op_code { goto { address: 66 } }                 # 53
+  op_code { const_string { value: "b" } }          # 54
+  op_code { if_false { address: 59 } }             # 55
+  op_code { const_int { value: "2" } }             # 56
+  op_code { drop { } }                             # 57
+  op_code { goto { address: 66 } }                 # 58
+  op_code { const_string { value: "c" } }          # 59
+  op_code { if_false { address: 64 } }             # 60
+  op_code { const_int { value: "3" } }             # 61
+  op_code { drop { } }                             # 62
+  op_code { goto { address: 66 } }                 # 63
+  op_code { const_int { value: "4" } }             # 64
+  op_code { drop { } }                             # 65
 
-op_code { const_string { value: "a" } }          # 66
-op_code { if_false { address: 86 } }             # 67
-op_code { const_string { value: "b" } }          # 68
-op_code { if_false { address: 78 } }             # 69
-op_code { const_string { value: "c" } }          # 70
-op_code { if_false { address: 75 } }             # 71
-op_code { const_int { value: "5" } }             # 72
-op_code { drop { } }                             # 73
-op_code { goto { address: 77 } }                 # 74
-op_code { const_int { value: "6" } }             # 75
-op_code { drop { } }                             # 76
-op_code { goto { address: 85 } }                 # 77
-op_code { const_string { value: "d" } }          # 78
-op_code { if_false { address: 83 } }             # 79
-op_code { const_int { value: "7" } }             # 80
-op_code { drop { } }                             # 81
-op_code { goto { address: 85 } }                 # 82
-op_code { const_int { value: "8" } }             # 83
-op_code { drop { } }                             # 84
-op_code { goto { address: 88 } }                 # 85
-op_code { const_int { value: "9" } }             # 86
-op_code { drop { } }                             # 87
+  op_code { const_string { value: "a" } }          # 66
+  op_code { if_false { address: 86 } }             # 67
+  op_code { const_string { value: "b" } }          # 68
+  op_code { if_false { address: 78 } }             # 69
+  op_code { const_string { value: "c" } }          # 70
+  op_code { if_false { address: 75 } }             # 71
+  op_code { const_int { value: "5" } }             # 72
+  op_code { drop { } }                             # 73
+  op_code { goto { address: 77 } }                 # 74
+  op_code { const_int { value: "6" } }             # 75
+  op_code { drop { } }                             # 76
+  op_code { goto { address: 85 } }                 # 77
+  op_code { const_string { value: "d" } }          # 78
+  op_code { if_false { address: 83 } }             # 79
+  op_code { const_int { value: "7" } }             # 80
+  op_code { drop { } }                             # 81
+  op_code { goto { address: 85 } }                 # 82
+  op_code { const_int { value: "8" } }             # 83
+  op_code { drop { } }                             # 84
+  op_code { goto { address: 88 } }                 # 85
+  op_code { const_int { value: "9" } }             # 86
+  op_code { drop { } }                             # 87
 
-op_code { end { } }                              # 88
-
+  op_code { end { } }                              # 88
+}
