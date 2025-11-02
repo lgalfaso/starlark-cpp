@@ -10,26 +10,20 @@ block {
   op_code { create_frame { slots: 6 } }
   op_code { create_frame { slots: 0 } }
   op_code { make_function { entrypoint: 1 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
-  op_code { assign { } }
+  op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { make_function { entrypoint: 2 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
-  op_code { assign { } }
+  op_code { store { frame: 1 pos_in_frame: 1 } }
   op_code { make_function { entrypoint: 3 } }
-  op_code { load { frame: 1 pos_in_frame: 2 } }
-  op_code { assign { } }
+  op_code { store { frame: 1 pos_in_frame: 2 } }
   op_code { const_int { value: "1" } }
   op_code { make_tuple { number_of_elements: 1 } }
   op_code { make_function { entrypoint: 4 } }
   op_code { set_default_values { } }
-  op_code { load { frame: 1 pos_in_frame: 3 } }
-  op_code { assign { } }
+  op_code { store { frame: 1 pos_in_frame: 3 } }
   op_code { make_function { entrypoint: 5 } }
-  op_code { load { frame: 1 pos_in_frame: 4 } }
-  op_code { assign { } }
+  op_code { store { frame: 1 pos_in_frame: 4 } }
   op_code { make_function { entrypoint: 6 } }
-  op_code { load { frame: 1 pos_in_frame: 5 } }
-  op_code { assign { } }
+  op_code { store { frame: 1 pos_in_frame: 5 } }
   op_code { drop_frame { } }
   op_code { drop_frame { } }
   op_code { end { } }

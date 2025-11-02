@@ -550,7 +550,14 @@ void bytecode_generator::exit_argument(const Argument* argument) {
 void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statement) {
   switch (assign_statement->op()) {
     case AssignStmt::EQUALS:
-      mutable_block()->add_op_code()->mutable_assign();
+      if (assign_statement->lhs().expression_type_case() == Expression::kIdentifier) {
+        // If we are storing in a frame, then generate the corresponding instruction.
+        auto* last_op_code = mutable_block()->mutable_op_code(block().op_code_size() - 1);
+        last_op_code->mutable_store()->set_frame(assign_statement->lhs().identifier().frame());
+        last_op_code->mutable_store()->set_pos_in_frame(assign_statement->lhs().identifier().pos_in_frame());
+      } else {
+        mutable_block()->add_op_code()->mutable_assign();
+      }
       break;
     case AssignStmt::PLUS_EQUALS:
       mutable_block()->add_op_code()->mutable_plus_assign();
@@ -616,10 +623,9 @@ void bytecode_generator::exit_def_statement(const DefStmt* def_statement) {
     mutable_block()->add_op_code()->mutable_return_();
   }
   exit_def_or_lambda_expression(&def_statement->parameter());
-  auto* id_op = mutable_block()->add_op_code()->mutable_load();
+  auto* id_op = mutable_block()->add_op_code()->mutable_store();
   id_op->set_frame(def_statement->function_name().frame());
   id_op->set_pos_in_frame(def_statement->function_name().pos_in_frame());
-  mutable_block()->add_op_code()->mutable_assign();
 }
 
 void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
