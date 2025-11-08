@@ -15,7 +15,7 @@ using starlark::unicode::utf8_reader;
 namespace starlark {
 namespace runtime {
 
-starlark_string::starlark_string(const std::string& value) : value(value) {}
+starlark_string::starlark_string(std::string_view value) : value(value) {}
 
 std::string_view starlark_string::type() const {
   return "string";

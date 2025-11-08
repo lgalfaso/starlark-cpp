@@ -14,7 +14,7 @@ namespace runtime {
 
 class starlark_bytes : public starlark_obj {
  public:
-  explicit starlark_bytes(const std::string& value);
+  explicit starlark_bytes(std::string_view value);
   std::string_view type() const override;
   bool truthy() const override;
 

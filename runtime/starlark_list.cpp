@@ -7,6 +7,10 @@
 namespace starlark {
 namespace runtime {
 
+starlark_list::starlark_list(std::size_t reserve_size) {
+  values.reserve(reserve_size);
+}
+
 std::string_view starlark_list::type() const {
   return "list";
 }

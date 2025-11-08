@@ -12,7 +12,7 @@
 namespace starlark {
 namespace runtime {
 
-starlark_bytes::starlark_bytes(const std::string& value) : value(value) {}
+starlark_bytes::starlark_bytes(std::string_view value) : value(value) {}
 
 std::string_view starlark_bytes::type() const {
   return "bytes";
