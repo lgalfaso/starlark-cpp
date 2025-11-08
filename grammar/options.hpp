@@ -3,6 +3,9 @@
 #ifndef GRAMMAR_OPTIONS_HPP_
 #define GRAMMAR_OPTIONS_HPP_
 
+#include <set>
+#include <string>
+
 #pragma GCC visibility push(default)
 
 namespace starlark {
@@ -47,6 +50,8 @@ struct options {
   // Whether to allow a top-level `if` statements.
   bool allow_top_level_if = false;
 };
+
+extern const std::set<std::string> predeclared_symbols;
 
 }  // namespace grammar
 }  // namespace starlark

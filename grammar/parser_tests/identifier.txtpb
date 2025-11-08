@@ -1,0 +1,23 @@
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      identifier {
+        name: "None"
+        nfkc_name: "None"
+        frame: 2
+        pos_in_frame: 1
+      }
+    }
+  }
+}
+module_binding: "a"
+

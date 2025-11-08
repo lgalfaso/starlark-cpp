@@ -233,6 +233,7 @@ cc_fuzz_test(
 cc_library(
     name = "options",
     hdrs = ["options.hpp"],
+    srcs = ["options.cpp"],
     visibility = ["//visibility:public"],
 )
 
