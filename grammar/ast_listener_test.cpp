@@ -321,12 +321,20 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT NoneValue\n";
   }
 
-  void enter_int_value(std::string_view int_value) override {
-    output += "ENTER IntValue(" + starlark::grammar::quoted(int_value) + ")\n";
+  void enter_int_value(std::int64_t int_value) override {
+    output += "ENTER IntValue(" + std::to_string(int_value) + ")\n";
   }
 
-  void exit_int_value(std::string_view int_value) override {
+  void exit_int_value(std::int64_t int_value) override {
     output += "EXIT IntValue\n";
+  }
+
+  void enter_big_int_value(std::string_view big_int_value) override {
+    output += "ENTER BigIntValue(" + starlark::grammar::quoted(big_int_value) + ")\n";
+  }
+
+  void exit_big_int_value(std::string_view big_int_value) override {
+    output += "EXIT BigIntValue\n";
   }
 
   void enter_float_value(double float_value) override {

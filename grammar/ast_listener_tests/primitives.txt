@@ -10,7 +10,7 @@ EXIT Statement
 ENTER Statement
 ENTER ExpressionStatement
 ENTER Expression
-ENTER IntValue("1")
+ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
 EXIT ExpressionStatement
@@ -44,12 +44,12 @@ ENTER ExpressionStatement
 ENTER Expression
 ENTER ListExpression
 ENTER Expression
-ENTER IntValue("1")
+ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
 MID ListExpression
 ENTER Expression
-ENTER IntValue("2")
+ENTER IntValue(2)
 EXIT IntValue
 EXIT Expression
 EXIT ListExpression

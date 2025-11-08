@@ -3,7 +3,7 @@ statement {
     unary_expression {
       operator: MINUS
       test {
-        int_value: "1"
+        int_value: 1
       }
     }
   }
@@ -13,7 +13,7 @@ statement {
     unary_expression {
       operator: PLUS
       test {
-        int_value: "1"
+        int_value: 1
       }
     }
   }
@@ -23,7 +23,7 @@ statement {
     unary_expression {
       operator: TILDE
       test {
-        int_value: "1"
+        int_value: 1
       }
     }
   }
@@ -105,7 +105,7 @@ statement {
                     unary_expression {
                       operator: PLUS
                       test {
-                        int_value: "1"
+                        int_value: 1
                       }
                     }
                   }
@@ -129,7 +129,7 @@ statement {
             unary_expression {
               operator: TILDE
               test {
-                int_value: "1"
+                int_value: 1
               }
             }
           }

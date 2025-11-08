@@ -4,7 +4,7 @@ block {
   op_code { make_dictionary { reserve_size: 0 } }  #   2
   op_code { create_frame { slots: 1 } }            #   3
   op_code { make_list { reserve_size: 1 } }        #   4
-  op_code { const_int { value: "0" } }             #   5
+  op_code { const_int { value: 0 } }               #   5
   op_code { add_to_list { pos_in_stack: 1 } }      #   6
   op_code { get_iterator { } }                     #   7
   op_code { for_iterator { address: 14 } }         #   8
@@ -20,14 +20,14 @@ block {
   op_code { make_dictionary { reserve_size: 0 } }  #  17
   op_code { create_frame { slots: 2 } }            #  18
   op_code { make_list { reserve_size: 1 } }        #  19
-  op_code { const_int { value: "1" } }             #  20
+  op_code { const_int { value: 1 } }               #  20
   op_code { add_to_list { pos_in_stack: 1 } }      #  21
   op_code { get_iterator { } }                     #  22
   op_code { for_iterator { address: 37 } }         #  23
   op_code { load { frame: 0 pos_in_frame: 0 } }    #  24
   op_code { assign { } }                           #  25
   op_code { make_list { reserve_size: 1 } }        #  26
-  op_code { const_int { value: "2" } }             #  27
+  op_code { const_int { value: 2 } }               #  27
   op_code { add_to_list { pos_in_stack: 1 } }      #  28
   op_code { get_iterator { } }                     #  29
   op_code { for_iterator { address: 36 } }         #  30
@@ -44,20 +44,20 @@ block {
   op_code { make_dictionary { reserve_size: 0 } }  #  40
   op_code { create_frame { slots: 2 } }            #  41
   op_code { make_list { reserve_size: 3 } }        #  42
-  op_code { const_int { value: "3" } }             #  43
+  op_code { const_int { value: 3 } }               #  43
   op_code { add_to_list { pos_in_stack: 1 } }      #  44
-  op_code { const_int { value: "4" } }             #  45
+  op_code { const_int { value: 4 } }               #  45
   op_code { add_to_list { pos_in_stack: 1 } }      #  46
-  op_code { const_int { value: "5" } }             #  47
+  op_code { const_int { value: 5 } }               #  47
   op_code { add_to_list { pos_in_stack: 1 } }      #  48
   op_code { get_iterator { } }                     #  49
   op_code { for_iterator { address: 74 } }         #  50
   op_code { load { frame: 0 pos_in_frame: 0 } }    #  51
   op_code { assign { } }                           #  52
   op_code { load { frame: 0 pos_in_frame: 0 } }    #  53
-  op_code { const_int { value: "2" } }             #  54
+  op_code { const_int { value: 2 } }               #  54
   op_code { binary_percent { } }                   #  55
-  op_code { const_int { value: "0" } }             #  56
+  op_code { const_int { value: 0 } }               #  56
   op_code { binary_equals_equals { } }             #  57
   op_code { if_false { address: 74 } }             #  58
   op_code { make_list { reserve_size: 3 } }        #  59
@@ -82,7 +82,7 @@ block {
   op_code { make_dictionary { reserve_size: 0 } }  #  77
   op_code { create_frame { slots: 1 } }            #  78
   op_code { make_list { reserve_size: 1 } }        #  79
-  op_code { const_int { value: "0" } }             #  80
+  op_code { const_int { value: 0 } }               #  80
   op_code { add_to_list { pos_in_stack: 1 } }      #  81
   op_code { get_iterator { } }                     #  82
   op_code { for_iterator { address: 90 } }         #  83
@@ -101,11 +101,11 @@ block {
   op_code { make_dictionary { reserve_size: 0 } }  #  95
   op_code { create_frame { slots: 1 } }            #  96
   op_code { make_list { reserve_size: 3 } }        #  97
-  op_code { const_int { value: "0" } }             #  98
+  op_code { const_int { value: 0 } }               #  98
   op_code { add_to_list { pos_in_stack: 1 } }      #  99
-  op_code { const_int { value: "1" } }             # 100
+  op_code { const_int { value: 1 } }               # 100
   op_code { add_to_list { pos_in_stack: 1 } }      # 101
-  op_code { const_int { value: "2" } }             # 103
+  op_code { const_int { value: 2 } }               # 103
   op_code { add_to_list { pos_in_stack: 1 } }      # 103
   op_code { get_iterator { } }                     # 104
   op_code { for_iterator { address: 111 } }        # 105
@@ -148,7 +148,7 @@ block {
   op_code { load { frame: 0 pos_in_frame: 1 } }    # 141
   op_code { assign { } }                           # 142
   op_code { make_list { reserve_size: 1 } }        # 143
-  op_code { const_int { value: "0" } }             # 144
+  op_code { const_int { value: 0 } }               # 144
   op_code { add_to_list { pos_in_stack: 1 } }      # 145
   op_code { get_iterator { } }                     # 146
   op_code { for_iterator { address: 153 } }        # 147

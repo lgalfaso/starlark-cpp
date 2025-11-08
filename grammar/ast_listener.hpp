@@ -79,8 +79,10 @@ class ast_listener {
   virtual void exit_identifier(const starlark::ast::Identifier* identifier) = 0;
   virtual void enter_none_value() = 0;
   virtual void exit_none_value() = 0;
-  virtual void enter_int_value(std::string_view int_value) = 0;
-  virtual void exit_int_value(std::string_view int_value) = 0;
+  virtual void enter_int_value(std::int64_t int_value) = 0;
+  virtual void exit_int_value(std::int64_t int_value) = 0;
+  virtual void enter_big_int_value(std::string_view big_int_value) = 0;
+  virtual void exit_big_int_value(std::string_view big_int_value) = 0;
   virtual void enter_float_value(double float_value) = 0;
   virtual void exit_float_value(double float_value) = 0;
   virtual void enter_string_value(std::string_view string_value) = 0;
@@ -174,8 +176,10 @@ class ast_listener_base : public ast_listener {
   void exit_identifier(const starlark::ast::Identifier* identifier) override;
   void enter_none_value() override;
   void exit_none_value() override;
-  void enter_int_value(std::string_view int_value) override;
-  void exit_int_value(std::string_view int_value) override;
+  void enter_int_value(std::int64_t int_value) override;
+  void exit_int_value(std::int64_t int_value) override;
+  void enter_big_int_value(std::string_view big_int_value) override;
+  void exit_big_int_value(std::string_view big_int_value) override;
   void enter_float_value(double float_value) override;
   void exit_float_value(double float_value) override;
   void enter_string_value(std::string_view string_value) override;

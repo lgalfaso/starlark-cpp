@@ -6,11 +6,11 @@ block {
   op_code { create_frame { slots: 2 } }            #  0
   op_code { create_frame { slots: 0 } }            #  1
   op_code { make_list { reserve_size: 3 } }        #  2
-  op_code { const_int { value: "0" } }             #  3
+  op_code { const_int { value: 0 } }               #  3
   op_code { add_to_list { pos_in_stack: 1 } }      #  4
-  op_code { const_int { value: "1" } }             #  5
+  op_code { const_int { value: 1 } }               #  5
   op_code { add_to_list { pos_in_stack: 1 } }      #  6
-  op_code { const_int { value: "2" } }             #  7
+  op_code { const_int { value: 2 } }               #  7
   op_code { add_to_list { pos_in_stack: 1 } }      #  8
   op_code { get_iterator {} }                      #  9
   op_code { for_iterator { address: 16 } }         # 10
@@ -23,12 +23,12 @@ block {
 
 
   op_code { make_list { reserve_size: 2 } }        # 17
-  op_code { const_int { value: "0" } }             # 18
-  op_code { const_int { value: "1" } }             # 19
+  op_code { const_int { value: 0 } }               # 18
+  op_code { const_int { value: 1 } }               # 19
   op_code { make_tuple { number_of_elements: 2 } } # 20
   op_code { add_to_list { pos_in_stack: 1 } }      # 21
-  op_code { const_int { value: "2" } }             # 22
-  op_code { const_int { value: "3" } }             # 23
+  op_code { const_int { value: 2 } }               # 22
+  op_code { const_int { value: 3 } }               # 23
   op_code { make_tuple { number_of_elements: 2 } } # 24
   op_code { add_to_list { pos_in_stack: 1 } }      # 25
   op_code { get_iterator {} }                      # 26
@@ -44,11 +44,11 @@ block {
 
 
   op_code { make_list { reserve_size: 3 } }        # 36
-  op_code { const_int { value: "0" } }             # 37
+  op_code { const_int { value: 0 } }               # 37
   op_code { add_to_list { pos_in_stack: 1 } }      # 38
-  op_code { const_int { value: "1" } }             # 39
+  op_code { const_int { value: 1 } }               # 39
   op_code { add_to_list { pos_in_stack: 1 } }      # 40
-  op_code { const_int { value: "2" } }             # 41
+  op_code { const_int { value: 2 } }               # 41
   op_code { add_to_list { pos_in_stack: 1 } }      # 42
   op_code { get_iterator {} }                      # 43
   op_code { for_iterator { address: 51 } }         # 44

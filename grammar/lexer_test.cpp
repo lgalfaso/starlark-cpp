@@ -28,6 +28,8 @@ const std::map<token_type, std::string> mapping = {
   {token_type::kAnd, "AND"},
   {token_type::kAs, "AS"},
   {token_type::kAssert, "ASSERT"},
+  {token_type::kBigInt, "BIG_INT"},
+  {token_type::kBof, "BOF"},
   {token_type::kBreak, "BREAK"},
   {token_type::kBytes, "BYTES"},
   {token_type::kCaret, "CARET"},
@@ -41,7 +43,6 @@ const std::map<token_type, std::string> mapping = {
   {token_type::kDot, "DOT"},
   {token_type::kElif, "ELIF"},
   {token_type::kElse, "ELSE"},
-  {token_type::kBof, "BOF"},
   {token_type::kEof, "EOF"},
   {token_type::kEquals, "EQUALS"},
   {token_type::kEqualsEquals, "EQUALS_EQUALS"},
@@ -63,9 +64,9 @@ const std::map<token_type, std::string> mapping = {
   {token_type::kIndent, "INDENT"},
   {token_type::kInt, "INT"},
   {token_type::kIs, "IS"},
-  {token_type::kLambda, "LAMBDA"},
   {token_type::kLBrace, "LBRACE"},
   {token_type::kLBracket, "LBRACKET"},
+  {token_type::kLambda, "LAMBDA"},
   {token_type::kLess, "LESS"},
   {token_type::kLessEquals, "LESS_EQUALS"},
   {token_type::kLessLess, "LESS_LESS"},
@@ -123,7 +124,11 @@ std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
       parts.back() += ")";
     } else if (current_token.type() == token_type::kInt) {
       parts.back() += "(";
-      parts.back() += current_token.int_value().to_string(10);
+      parts.back() += std::to_string(current_token.int_value());
+      parts.back() += ")";
+    } else if (current_token.type() == token_type::kBigInt) {
+      parts.back() += "(";
+      parts.back() += current_token.big_int_value().to_string(10);
       parts.back() += ")";
     } else if (current_token.type() == token_type::kFloat) {
       parts.back() += "(";
@@ -229,8 +234,11 @@ TEST(LexerTest, Integer) {
   checkErrors("0o18", "ILLEGAL(\"0o18\"):1,1:1,5 NEWLINE:1,5:1,5 EOF:1,5:1,5", { "Unable to parse numeric value:1,1" });
   check("0x1234567890", "INT(78187493520):1,1:1,13 NEWLINE:1,13:1,13 EOF:1,13:1,13");
   check("0X1234567890", "INT(78187493520):1,1:1,13 NEWLINE:1,13:1,13 EOF:1,13:1,13");
-  check("0X1234567890ABCDEFabcdef", "INT(22007822917795467892608495):1,1:1,25 NEWLINE:1,25:1,25 EOF:1,25:1,25");
-  check("12345678901234567890", "INT(12345678901234567890):1,1:1,21 NEWLINE:1,21:1,21 EOF:1,21:1,21");
+  check("0X7fffffffffffffff", "INT(9223372036854775807):1,1:1,19 NEWLINE:1,19:1,19 EOF:1,19:1,19");
+  check("0X8000000000000000", "BIG_INT(9223372036854775808):1,1:1,19 NEWLINE:1,19:1,19 EOF:1,19:1,19");
+  check("0Xffffffffffffffff", "BIG_INT(18446744073709551615):1,1:1,19 NEWLINE:1,19:1,19 EOF:1,19:1,19");
+  check("0X1234567890ABCDEFabcdef", "BIG_INT(22007822917795467892608495):1,1:1,25 NEWLINE:1,25:1,25 EOF:1,25:1,25");
+  check("12345678901234567890", "BIG_INT(12345678901234567890):1,1:1,21 NEWLINE:1,21:1,21 EOF:1,21:1,21");
 }
 
 TEST(LexerTest, Float) {

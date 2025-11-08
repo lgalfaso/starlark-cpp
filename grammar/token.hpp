@@ -26,6 +26,7 @@ enum class token_type {
   kAssert,
   kAsync,
   kAwait,
+  kBigInt,
   kBreak,
   kBytes,
   kCaret,
@@ -109,12 +110,14 @@ starlark::logging::Position operator-(const starlark::logging::Position& pos, st
 class token {
  public:
   token(token_type type, starlark::logging::Position start, starlark::logging::Position end);
+  token(token_type type, starlark::logging::Position start, starlark::logging::Position end, std::int64_t value);
   token(token_type type, starlark::logging::Position start, starlark::logging::Position end, const bigint::number& value);
   token(token_type type, starlark::logging::Position start, starlark::logging::Position end, double value);
   token(token_type type, starlark::logging::Position start, starlark::logging::Position end, const std::string& value);
   token_type type() const;
   void set_type(token_type new_type);
-  const bigint::number& int_value() const;
+  std::int64_t int_value() const;
+  const bigint::number& big_int_value() const;
   double double_value() const;
   const std::string& string_value() const;
   starlark::logging::Position start() const;
@@ -124,7 +127,7 @@ class token {
   token_type tok_type;
   starlark::logging::Position tok_start;
   starlark::logging::Position tok_end;
-  std::variant<double, bigint::number, std::string> value;
+  std::variant<double, std::int64_t, bigint::number, std::string> value;
 };
 
 }  // namespace grammar

@@ -5,7 +5,7 @@ block {
   op_code { drop { } }                                       #  2
   op_code { make_function { entrypoint: 2 } }                #  3
   op_code { drop { } }                                       #  4
-  op_code { const_int { value: "1" } }                       #  5
+  op_code { const_int { value: 1 } }                         #  5
   op_code { make_tuple { number_of_elements: 1 } }           #  6
   op_code { make_function { entrypoint: 3 } }                #  7
   op_code { set_default_values { } }                         #  8
@@ -23,7 +23,7 @@ block {
 block {
   op_code { create_frame { slots: 1 } }                      #  0
   op_code { load { frame: 0 pos_in_frame: 0 } }              #  1
-  op_code { const_int { value: "1" } }                       #  2
+  op_code { const_int { value: 1 } }                         #  2
   op_code { binary_plus { } }                                #  3
   op_code { return { } }                                     #  4
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } } default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }

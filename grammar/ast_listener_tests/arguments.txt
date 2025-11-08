@@ -45,7 +45,7 @@ ENTER StringValue("x")
 EXIT StringValue
 EXIT Expression
 ENTER Expression
-ENTER IntValue("1")
+ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
 EXIT MapEntry

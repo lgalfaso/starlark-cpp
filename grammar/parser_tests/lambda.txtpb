@@ -286,21 +286,21 @@ statement {
         test {
           if_expression {
             if_value {
-              int_value: "1"
+              int_value: 1
             }
             if_test {
-              int_value: "2"
+              int_value: 2
             }
             else_value {
               if_expression {
                 if_value {
-                  int_value: "3"
+                  int_value: 3
                 }
                 if_test {
-                  int_value: "4"
+                  int_value: 4
                 }
                 else_value {
-                  int_value: "5"
+                  int_value: 5
                 }
               }
             }

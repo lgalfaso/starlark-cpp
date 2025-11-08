@@ -133,7 +133,7 @@ statement {
         }
         statement {
           expression_statement {
-            int_value: "1"
+            int_value: 1
           }
         }
         elif {
@@ -147,7 +147,7 @@ statement {
           }
           statement {
             expression_statement {
-              int_value: "2"
+              int_value: 2
             }
           }
         }
@@ -165,7 +165,7 @@ statement {
         }
         statement {
           expression_statement {
-            int_value: "1"
+            int_value: 1
           }
         }
         elif {
@@ -179,13 +179,13 @@ statement {
           }
           statement {
             expression_statement {
-              int_value: "2"
+              int_value: 2
             }
           }
         }
         else_statement {
           expression_statement {
-            int_value: "3"
+            int_value: 3
           }
         }
       }
@@ -202,7 +202,7 @@ statement {
         }
         statement {
           expression_statement {
-            int_value: "1"
+            int_value: 1
           }
         }
         elif {
@@ -216,7 +216,7 @@ statement {
           }
           statement {
             expression_statement {
-              int_value: "2"
+              int_value: 2
             }
           }
         }
@@ -231,7 +231,7 @@ statement {
           }
           statement {
             expression_statement {
-              int_value: "3"
+              int_value: 3
             }
           }
         }
@@ -249,7 +249,7 @@ statement {
         }
         statement {
           expression_statement {
-            int_value: "1"
+            int_value: 1
           }
         }
         elif {
@@ -263,7 +263,7 @@ statement {
           }
           statement {
             expression_statement {
-              int_value: "2"
+              int_value: 2
             }
           }
         }
@@ -278,13 +278,13 @@ statement {
           }
           statement {
             expression_statement {
-              int_value: "3"
+              int_value: 3
             }
           }
         }
         else_statement {
           expression_statement {
-            int_value: "4"
+            int_value: 4
           }
         }
       }

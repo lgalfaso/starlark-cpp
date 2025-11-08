@@ -369,7 +369,11 @@ void lexer::read_numeric() {
       current = token{token_type::kIllegal, start, get_position(), value};
       return;
     }
-    current = token{token_type::kInt, start, get_position(), int_value};
+    if (int_value.bit_size() < 64) {
+      current = token{token_type::kInt, start, get_position(), static_cast<std::int64_t>(int_value.at(0))};
+    } else {
+      current = token{token_type::kBigInt, start, get_position(), int_value};
+    }
   }
 }
 

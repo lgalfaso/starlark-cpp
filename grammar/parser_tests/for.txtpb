@@ -23,7 +23,7 @@ statement {
         }
         op: EQUALS
         rhs {
-          int_value: "1"
+          int_value: 1
         }
       }
     }
@@ -244,7 +244,7 @@ statement {
         expression {
           list_expression {
             element {
-              int_value: "1"
+              int_value: 1
             }
           }
         }
@@ -273,7 +273,7 @@ statement {
             element {
               tuple {
                 value {
-                  int_value: "1"
+                  int_value: 1
                 }
               }
             }

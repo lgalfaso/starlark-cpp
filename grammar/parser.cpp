@@ -94,6 +94,7 @@ bool is_target(const Expression* base) {
           break;
         case Expression::kCallExpression:
         case Expression::kIntValue:
+        case Expression::kBigIntValue:
         case Expression::kFloatValue:
         case Expression::kStringValue:
         case Expression::kBytesValue:
@@ -307,6 +308,7 @@ bool parser::expect(token_type expected_token) {
     case token_type::kAssert:                 add_error("Expected ASSERT");                 break;
     case token_type::kAsync:                  add_error("Expected ASYNC");                  break;
     case token_type::kAwait:                  add_error("Expected AWAIT");                  break;
+    case token_type::kBigInt:                 add_error("Expected BIG_INT");                break;
     case token_type::kBof:                    add_error("Expected BOF");                    break;
     case token_type::kBreak:                  add_error("Expected BREAK");                  break;
     case token_type::kBytes:                  add_error("Expected BYTES");                  break;
@@ -342,9 +344,9 @@ bool parser::expect(token_type expected_token) {
     case token_type::kIndent:                 add_error("Expected INDENT");                 break;
     case token_type::kInt:                    add_error("Expected INT");                    break;
     case token_type::kIs:                     add_error("Expected IS");                     break;
-    case token_type::kLambda:                 add_error("Expected LAMBDA");                 break;
     case token_type::kLBrace:                 add_error("Expected LBRACE");                 break;
     case token_type::kLBracket:               add_error("Expected LBRACKET");               break;
+    case token_type::kLambda:                 add_error("Expected LAMBDA");                 break;
     case token_type::kLess:                   add_error("Expected LESS");                   break;
     case token_type::kLessEquals:             add_error("Expected LESS_EQUALS");            break;
     case token_type::kLessLess:               add_error("Expected LESS_LESS");              break;
@@ -1195,7 +1197,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::kParseOperand:
         if (is_current(token_type::kInt)) {
-          top.primary->set_int_value(lex.current_token().int_value().to_string(10));
+          top.primary->set_int_value(lex.current_token().int_value());
+          lex.next_token();
+        } else if (is_current(token_type::kBigInt)) {
+          top.primary->set_big_int_value(lex.current_token().big_int_value().to_string(10));
           lex.next_token();
         } else if (is_current(token_type::kIdentifier)) {
           set_identifier(*top.primary->mutable_identifier());
@@ -1748,6 +1753,7 @@ void parser::bind_and_resolve(Expression* base) {
           break;
         case Expression::kCallExpression:
         case Expression::kIntValue:
+        case Expression::kBigIntValue:
         case Expression::kFloatValue:
         case Expression::kStringValue:
         case Expression::kBytesValue:
@@ -1880,6 +1886,7 @@ void parser::resolve(Expression* base, int base_frame) {
           }
           break;
         case Expression::kIntValue:
+        case Expression::kBigIntValue:
         case Expression::kFloatValue:
         case Expression::kStringValue:
         case Expression::kBytesValue:

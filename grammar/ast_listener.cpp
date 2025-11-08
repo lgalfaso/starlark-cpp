@@ -73,6 +73,7 @@ enum class message_type {
   kIdentifier,
   kNoneValue,
   kIntValue,
+  kBigIntValue,
   kFloatValue,
   kStringValue,
   kBytesValue,
@@ -123,7 +124,8 @@ struct message {
     const CallExpr* call_expression;
     const SliceExpr* slice_expression;
     const Identifier* identifier;
-    std::string_view int_value;
+    std::int64_t int_value;
+    std::string_view big_int_value;
     const double float_value;
     std::string_view string_value;
     std::string_view bytes_value;
@@ -205,8 +207,10 @@ void ast_listener_base::enter_identifier(const Identifier* identifier) {}
 void ast_listener_base::exit_identifier(const Identifier* identifier) {}
 void ast_listener_base::enter_none_value() {}
 void ast_listener_base::exit_none_value() {}
-void ast_listener_base::enter_int_value(std::string_view int_value) {}
-void ast_listener_base::exit_int_value(std::string_view int_value) {}
+void ast_listener_base::enter_int_value(std::int64_t int_value) {}
+void ast_listener_base::exit_int_value(std::int64_t int_value) {}
+void ast_listener_base::enter_big_int_value(std::string_view big_int_value) {}
+void ast_listener_base::exit_big_int_value(std::string_view big_int_value) {}
 void ast_listener_base::enter_float_value(double float_value) {}
 void ast_listener_base::exit_float_value(double float_value) {}
 void ast_listener_base::enter_string_value(std::string_view string_value) {}
@@ -610,6 +614,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
                 .op = message_type_op::kEnter,
               });
               break;
+            case Expression::kBigIntValue:
+              to_process.push_back(message{
+                .big_int_value = top.expression->big_int_value(),
+                .type = message_type::kBigIntValue,
+                .op = message_type_op::kEnter,
+              });
+              break;
             case Expression::kFloatValue:
               to_process.push_back(message{
                 .float_value = top.expression->float_value(),
@@ -836,6 +847,9 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kIntValue:
           listener.enter_int_value(top.int_value);
+          break;
+        case message_type::kBigIntValue:
+          listener.enter_big_int_value(top.big_int_value);
           break;
         case message_type::kFloatValue:
           listener.enter_float_value(top.float_value);
@@ -1065,6 +1079,9 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kIntValue:
           listener.exit_int_value(top.int_value);
+          break;
+        case message_type::kBigIntValue:
+          listener.exit_big_int_value(top.big_int_value);
           break;
         case message_type::kFloatValue:
           listener.exit_float_value(top.float_value);

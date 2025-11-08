@@ -15,7 +15,7 @@ statement {
     rhs {
       tuple {
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
     }
@@ -35,13 +35,13 @@ statement {
     rhs {
       tuple {
         value {
-          int_value: "1"
+          int_value: 1
         }
         value {
-          int_value: "2"
+          int_value: 2
         }
         value {
-          int_value: "3"
+          int_value: 3
         }
       }
     }
@@ -75,7 +75,7 @@ statement {
             element {
               tuple {
                 value {
-                  int_value: "1"
+                  int_value: 1
                 }
               }
             }

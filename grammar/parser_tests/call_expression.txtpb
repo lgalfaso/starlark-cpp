@@ -29,7 +29,7 @@ statement {
       }
       argument {
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
     }
@@ -48,17 +48,17 @@ statement {
       }
       argument {
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
       argument {
         value {
-          int_value: "2"
+          int_value: 2
         }
       }
       argument {
         value {
-          int_value: "3"
+          int_value: 3
         }
       }
     }
@@ -77,7 +77,7 @@ statement {
       }
       argument {
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
     }
@@ -96,17 +96,17 @@ statement {
       }
       argument {
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
       argument {
         value {
-          int_value: "2"
+          int_value: 2
         }
       }
       argument {
         value {
-          int_value: "3"
+          int_value: 3
         }
       }
     }
@@ -129,21 +129,21 @@ statement {
               }
               argument {
                 value {
-                  int_value: "1"
+                  int_value: 1
                 }
               }
             }
           }
           argument {
             value {
-              int_value: "2"
+              int_value: 2
             }
           }
         }
       }
       argument {
         value {
-          int_value: "3"
+          int_value: 3
         }
       }
     }
@@ -167,7 +167,7 @@ statement {
             nfkc_name: "bar"
           }
           value {
-            int_value: "1"
+            int_value: 1
           }
         }
       }
@@ -235,12 +235,12 @@ statement {
       }
       argument {
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
       argument {
         value {
-          int_value: "2"
+          int_value: 2
         }
       }
       argument {
@@ -250,7 +250,7 @@ statement {
             nfkc_name: "a"
           }
           value {
-            int_value: "3"
+            int_value: 3
           }
         }
       }
@@ -261,7 +261,7 @@ statement {
             nfkc_name: "b"
           }
           value {
-            int_value: "4"
+            int_value: 4
           }
         }
       }
@@ -313,7 +313,7 @@ statement {
     }
     op: EQUALS
     rhs {
-      int_value: "1"
+      int_value: 1
     }
   }
 }

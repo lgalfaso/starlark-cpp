@@ -33,7 +33,7 @@ ENTER AssignStatement
 ENTER Expression
 ENTER ListExpression
 ENTER Expression
-ENTER IntValue("0")
+ENTER IntValue(0)
 EXIT IntValue
 EXIT Expression
 EXIT ListExpression
@@ -47,7 +47,7 @@ EXIT Statement
 ENTER Statement
 ENTER AssignStatement
 ENTER Expression
-ENTER IntValue("1")
+ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
@@ -57,7 +57,7 @@ ENTER Identifier("a")
 EXIT Identifier
 EXIT Expression
 ENTER Expression
-ENTER IntValue("0")
+ENTER IntValue(0)
 EXIT IntValue
 EXIT Expression
 EXIT SliceIndexExpression

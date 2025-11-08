@@ -4,12 +4,12 @@ ENTER AssignStatement
 ENTER Expression
 ENTER BinaryExpression
 ENTER Expression
-ENTER IntValue("1")
+ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
 MID BinaryExpression
 ENTER Expression
-ENTER IntValue("2")
+ENTER IntValue(2)
 EXIT IntValue
 EXIT Expression
 EXIT BinaryExpression

@@ -33,7 +33,7 @@ statement {
     }
     op: EQUALS
     rhs {
-      int_value: "1"
+      int_value: 1
     }
   }
 }
@@ -49,7 +49,7 @@ statement {
 }
 statement {
   expression_statement {
-    int_value: "1234"
+    int_value: 1234
   }
 }
 statement {
@@ -77,7 +77,7 @@ statement {
   expression_statement {
     list_expression {
       element {
-        int_value: "1"
+        int_value: 1
       }
     }
   }
@@ -86,16 +86,16 @@ statement {
   expression_statement {
     list_expression {
       element {
-        int_value: "1"
+        int_value: 1
       }
       element {
-        int_value: "2"
+        int_value: 2
       }
       element {
-        int_value: "3"
+        int_value: 3
       }
       element {
-        int_value: "4"
+        int_value: 4
       }
     }
   }
@@ -182,13 +182,13 @@ statement {
                 }
                 operator: PERCENT
                 rhs {
-                  int_value: "2"
+                  int_value: 2
                 }
               }
             }
             operator: EQUALS_EQUALS
             rhs {
-              int_value: "0"
+              int_value: 0
             }
           }
         }
@@ -256,13 +256,13 @@ statement {
                 }
                 operator: PERCENT
                 rhs {
-                  int_value: "2"
+                  int_value: 2
                 }
               }
             }
             operator: EQUALS_EQUALS
             rhs {
-              int_value: "0"
+              int_value: 0
             }
           }
         }
@@ -284,7 +284,7 @@ statement {
           string_value: "a"
         }
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
     }
@@ -298,7 +298,7 @@ statement {
           string_value: "a"
         }
         value {
-          int_value: "1"
+          int_value: 1
         }
       }
       entry {
@@ -306,7 +306,7 @@ statement {
           string_value: "b"
         }
         value {
-          int_value: "2"
+          int_value: 2
         }
       }
     }
@@ -427,13 +427,13 @@ statement {
                 }
                 operator: PERCENT
                 rhs {
-                  int_value: "2"
+                  int_value: 2
                 }
               }
             }
             operator: EQUALS_EQUALS
             rhs {
-              int_value: "0"
+              int_value: 0
             }
           }
         }
@@ -448,14 +448,14 @@ statement {
 }
 statement {
   expression_statement {
-    int_value: "1"
+    int_value: 1
   }
 }
 statement {
   expression_statement {
     tuple {
       value {
-        int_value: "1"
+        int_value: 1
       }
     }
   }
@@ -464,10 +464,10 @@ statement {
   expression_statement {
     tuple {
       value {
-        int_value: "1"
+        int_value: 1
       }
       value {
-        int_value: "2"
+        int_value: 2
       }
     }
   }
@@ -478,17 +478,17 @@ statement {
       lhs {
         binary_expression {
           lhs {
-            int_value: "1"
+            int_value: 1
           }
           operator: PLUS
           rhs {
-            int_value: "2"
+            int_value: 2
           }
         }
       }
       operator: STAR
       rhs {
-        int_value: "3"
+        int_value: 3
       }
     }
   }
@@ -552,7 +552,7 @@ statement {
     rhs {
       if_expression {
         if_value {
-          int_value: "1"
+          int_value: 1
         }
         if_test {
           identifier {
@@ -563,7 +563,7 @@ statement {
           }
         }
         else_value {
-          int_value: "2"
+          int_value: 2
         }
       }
     }
@@ -590,7 +590,7 @@ statement {
         }
         op: PLUS_EQUALS
         rhs {
-          int_value: "1"
+          int_value: 1
         }
       }
     }
@@ -628,10 +628,10 @@ statement {
         index {
           tuple {
             value {
-              int_value: "1"
+              int_value: 1
             }
             value {
-              int_value: "2"
+              int_value: 2
             }
           }
         }
@@ -639,7 +639,7 @@ statement {
     }
     op: EQUALS
     rhs {
-      int_value: "3"
+      int_value: 3
     }
   }
 }

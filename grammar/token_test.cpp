@@ -15,7 +15,8 @@ namespace {
 TEST(Token, DefaultValues) {
   token t(token_type::kIllegal, {}, {});
   EXPECT_EQ("", t.string_value());
-  EXPECT_EQ(number(0), t.int_value());
+  EXPECT_EQ(0, t.int_value());
+  EXPECT_EQ(number(0), t.big_int_value());
   t = token(token_type::kIllegal, {}, {}, "");
   EXPECT_EQ(0.0, t.double_value());
 }

@@ -160,12 +160,14 @@ message LambdaExpr {
 }
 
 message Expression {
+  // Next_ID: 19
   oneof expression_type {
     DotExpr dot_expression = 1;
     CallExpr call_expression = 2;
     SliceExpr slice_expression = 3;
     Identifier identifier = 4;
-    string int_value = 5;
+    int64 int_value = 18;
+    string big_int_value = 5;
     double float_value = 6;
     string string_value = 7;
     string bytes_value = 8;

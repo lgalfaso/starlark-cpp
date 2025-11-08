@@ -22,17 +22,17 @@ statement {
       lhs {
         binary_expression {
           lhs {
-            int_value: "1"
+            int_value: 1
           }
           operator: PLUS
           rhs {
-            int_value: "2"
+            int_value: 2
           }
         }
       }
       operator: PLUS
       rhs {
-        int_value: "3"
+        int_value: 3
       }
     }
   }
@@ -43,11 +43,11 @@ statement {
       lhs {
         binary_expression {
           lhs {
-            int_value: "1"
+            int_value: 1
           }
           operator: STAR
           rhs {
-            int_value: "2"
+            int_value: 2
           }
         }
       }
@@ -55,11 +55,11 @@ statement {
       rhs {
         binary_expression {
           lhs {
-            int_value: "3"
+            int_value: 3
           }
           operator: STAR
           rhs {
-            int_value: "4"
+            int_value: 4
           }
         }
       }

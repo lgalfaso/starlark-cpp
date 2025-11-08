@@ -66,7 +66,8 @@ class bytecode_generator : public ast_listener_base {
   void enter_load_statement(const LoadStmt* load_statement) override;
   void exit_expression_statement(const Expression* statement) override;
   void enter_none_value() override;
-  void enter_int_value(std::string_view int_value) override;
+  void enter_int_value(std::int64_t int_value) override;
+  void enter_big_int_value(std::string_view big_int_value) override;
   void enter_float_value(double float_value) override;
   void enter_string_value(std::string_view string_value) override;
   void enter_bytes_value(std::string_view bytes_value) override;
@@ -179,8 +180,12 @@ void bytecode_generator::enter_none_value() {
   mutable_block()->add_op_code()->mutable_const_none();
 }
 
-void bytecode_generator::enter_int_value(std::string_view int_value) {
+void bytecode_generator::enter_int_value(std::int64_t int_value) {
   mutable_block()->add_op_code()->mutable_const_int()->set_value(int_value);
+}
+
+void bytecode_generator::enter_big_int_value(std::string_view big_int_value) {
+  mutable_block()->add_op_code()->mutable_const_big_int()->set_value(big_int_value);
 }
 
 void bytecode_generator::enter_float_value(double float_value) {

@@ -12,7 +12,7 @@ ENTER Then
 ENTER Statement
 ENTER ReturnStatement expression
 ENTER Expression
-ENTER IntValue("1")
+ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
 EXIT ReturnStatement
@@ -27,7 +27,7 @@ ENTER Then
 ENTER Statement
 ENTER ReturnStatement expression
 ENTER Expression
-ENTER IntValue("2")
+ENTER IntValue(2)
 EXIT IntValue
 EXIT Expression
 EXIT ReturnStatement
@@ -43,7 +43,7 @@ ENTER Then
 ENTER Statement
 ENTER ReturnStatement expression
 ENTER Expression
-ENTER IntValue("3")
+ENTER IntValue(3)
 EXIT IntValue
 EXIT Expression
 EXIT ReturnStatement
@@ -54,7 +54,7 @@ ENTER Else
 ENTER Statement
 ENTER ReturnStatement expression
 ENTER Expression
-ENTER IntValue("4")
+ENTER IntValue(4)
 EXIT IntValue
 EXIT Expression
 EXIT ReturnStatement
