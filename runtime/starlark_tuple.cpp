@@ -8,6 +8,10 @@
 namespace starlark {
 namespace runtime {
 
+starlark_tuple::starlark_tuple(int reserve_size) {
+  values.reserve(reserve_size);
+}
+
 std::string_view starlark_tuple::type() const {
   return "tuple";
 }
