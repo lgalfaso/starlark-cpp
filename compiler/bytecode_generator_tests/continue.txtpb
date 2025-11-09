@@ -13,18 +13,17 @@ block {
   op_code { const_int { value: 3 } }
   op_code { add_to_list { pos_in_stack: 1 } }
   op_code { get_iterator { } }
-  op_code { for_iterator { address: 19 } }    # 10
-  op_code { load { frame: 1 pos_in_frame: 0 } }
-  op_code { assign { } }
+  op_code { for_iterator { address: 18 } }    # 10
+  op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { const_string { value: "abc" } }
   op_code { drop { } }
   op_code { goto { address: 10 } }
   op_code { const_string { value: "def" } }
   op_code { drop { } }
   op_code { goto { address: 10 } }
-  op_code { end_iterator { } }                # 19
+  op_code { end_iterator { } }                # 18
 
-  op_code { make_list: { reserve_size: 3 } }  # 20
+  op_code { make_list: { reserve_size: 3 } }  # 19
   op_code { const_int { value: 1 } }
   op_code { add_to_list { pos_in_stack: 1 } }
   op_code { const_int { value: 2 } }
@@ -32,12 +31,11 @@ block {
   op_code { const_int { value: 3 } }
   op_code { add_to_list { pos_in_stack: 1 } }
   op_code { get_iterator { } }
-  op_code { for_iterator { address: 58 } }    # 28
-  op_code { load { frame: 1 pos_in_frame: 0} }
-  op_code { assign { } }
+  op_code { for_iterator { address: 55 } }    # 27
+  op_code { store { frame: 1 pos_in_frame: 0} }
   op_code { const_string { value: "abc" } }
   op_code { drop { } }
-  op_code { goto { address: 28 } }
+  op_code { goto { address: 27 } }
   op_code { make_list { reserve_size: 3 } }
   op_code { const_int { value: 4 } }
   op_code { add_to_list { pos_in_stack: 1 } }
@@ -46,24 +44,23 @@ block {
   op_code { const_int { value: 6 } }
   op_code { add_to_list { pos_in_stack: 1 } }
   op_code { get_iterator { } }
-  op_code { for_iterator { address: 51 } }    # 42
-  op_code { load { frame: 1 pos_in_frame: 1 } }
-  op_code { assign { } }
+  op_code { for_iterator { address: 48 } }    # 40
+  op_code { store { frame: 1 pos_in_frame: 1 } }
   op_code { const_string { value: "def" } }
   op_code { drop { } }
-  op_code { goto { address: 42 } }
+  op_code { goto { address: 40 } }
   op_code { const_string { value: "ghi" } }
   op_code { drop { } }
-  op_code { goto { address: 42 } }
-  op_code { end_iterator { } }                # 51
+  op_code { goto { address: 40 } }
+  op_code { end_iterator { } }                # 48
   op_code { const_string { value: "jkl" } }
   op_code { drop { } }
-  op_code { goto { address: 28 } }
+  op_code { goto { address: 27 } }
   op_code { const_string { value: "mno" } }
   op_code { drop { } }
-  op_code { goto { address: 28 } }
-  op_code { end_iterator { } }                # 58
-  op_code { drop_frame { } }                  # 59
-  op_code { drop_frame { } }                  # 60
-  op_code { end { } }                         # 61
+  op_code { goto { address: 27 } }
+  op_code { end_iterator { } }                # 55
+  op_code { drop_frame { } }                  # 56
+  op_code { drop_frame { } }                  # 57
+  op_code { end { } }                         # 58
 }

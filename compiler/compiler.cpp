@@ -139,6 +139,7 @@ class bytecode_generator : public ast_listener_base {
   void exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
   Block* mutable_block();
   const Block& block() const;
+  void assign_or_store(const Expression& expression);
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
@@ -408,7 +409,7 @@ void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
 }
 
 void bytecode_generator::exit_for_clause(const ForClause* for_clause) {
-  mutable_block()->add_op_code()->mutable_assign();
+  assign_or_store(for_clause->loop_variables());
 }
 
 void bytecode_generator::exit_if_clause(const Expression* if_clause) {
@@ -448,7 +449,7 @@ void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
     mutable_block()->add_op_code()->mutable_get_iterator();
     mutable_block()->add_op_code()->mutable_for_iterator();
   } else {
-    mutable_block()->add_op_code()->mutable_assign();
+    assign_or_store(for_statement->loop_variables());
   }
 }
 
@@ -555,14 +556,7 @@ void bytecode_generator::exit_argument(const Argument* argument) {
 void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statement) {
   switch (assign_statement->op()) {
     case AssignStmt::EQUALS:
-      if (assign_statement->lhs().expression_type_case() == Expression::kIdentifier) {
-        // If we are storing in a frame, then generate the corresponding instruction.
-        auto* last_op_code = mutable_block()->mutable_op_code(block().op_code_size() - 1);
-        last_op_code->mutable_store()->set_frame(assign_statement->lhs().identifier().frame());
-        last_op_code->mutable_store()->set_pos_in_frame(assign_statement->lhs().identifier().pos_in_frame());
-      } else {
-        mutable_block()->add_op_code()->mutable_assign();
-      }
+      assign_or_store(assign_statement->lhs());
       break;
     case AssignStmt::PLUS_EQUALS:
       mutable_block()->add_op_code()->mutable_plus_assign();
@@ -707,6 +701,18 @@ Block* bytecode_generator::mutable_block() {
 
 const Block& bytecode_generator::block() const {
   return output.block(blocks.back());
+}
+
+void bytecode_generator::assign_or_store(const Expression& expression) {
+  // TODO(lmirelmann): This is not handling the destructuring assignments.
+  if (expression.expression_type_case() == Expression::kIdentifier) {
+    // If we are storing in a frame, then generate the corresponding instruction.
+    auto* last_op_code = mutable_block()->mutable_op_code(block().op_code_size() - 1);
+    last_op_code->mutable_store()->set_frame(expression.identifier().frame());
+    last_op_code->mutable_store()->set_pos_in_frame(expression.identifier().pos_in_frame());
+  } else {
+    mutable_block()->add_op_code()->mutable_assign();
+  }
 }
 
 }  // namespace

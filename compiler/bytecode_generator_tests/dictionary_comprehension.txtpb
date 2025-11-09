@@ -7,162 +7,151 @@ block {
   op_code { const_int { value: 0 } }               #   5
   op_code { add_to_list { pos_in_stack: 1 } }      #   6
   op_code { get_iterator { } }                     #   7
-  op_code { for_iterator { address: 14 } }         #   8
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #   9
-  op_code { assign { } }                           #  10
+  op_code { for_iterator { address: 13 } }         #   8
+  op_code { store { frame: 0 pos_in_frame: 0 } }   #   9
+  op_code { load { frame: 0 pos_in_frame: 0 } }    #  10
   op_code { load { frame: 0 pos_in_frame: 0 } }    #  11
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  12
-  op_code { add_to_dictionary { pos_in_stack: 3 } }#  13
-  op_code { end_iterator { } }                     #  14
-  op_code { drop_frame { } }                       #  15
-  op_code { drop { } }                             #  16
+  op_code { add_to_dictionary { pos_in_stack: 3 } }#  12
+  op_code { end_iterator { } }                     #  13
+  op_code { drop_frame { } }                       #  14
+  op_code { drop { } }                             #  15
 
-  op_code { make_dictionary { reserve_size: 0 } }  #  17
-  op_code { create_frame { slots: 2 } }            #  18
-  op_code { make_list { reserve_size: 1 } }        #  19
-  op_code { const_int { value: 1 } }               #  20
-  op_code { add_to_list { pos_in_stack: 1 } }      #  21
-  op_code { get_iterator { } }                     #  22
-  op_code { for_iterator { address: 37 } }         #  23
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  24
-  op_code { assign { } }                           #  25
-  op_code { make_list { reserve_size: 1 } }        #  26
-  op_code { const_int { value: 2 } }               #  27
-  op_code { add_to_list { pos_in_stack: 1 } }      #  28
-  op_code { get_iterator { } }                     #  29
-  op_code { for_iterator { address: 36 } }         #  30
+  op_code { make_dictionary { reserve_size: 0 } }  #  16
+  op_code { create_frame { slots: 2 } }            #  17
+  op_code { make_list { reserve_size: 1 } }        #  18
+  op_code { const_int { value: 1 } }               #  19
+  op_code { add_to_list { pos_in_stack: 1 } }      #  20
+  op_code { get_iterator { } }                     #  21
+  op_code { for_iterator { address: 34 } }         #  22
+  op_code { store { frame: 0 pos_in_frame: 0 } }   #  23
+  op_code { make_list { reserve_size: 1 } }        #  24
+  op_code { const_int { value: 2 } }               #  25
+  op_code { add_to_list { pos_in_stack: 1 } }      #  26
+  op_code { get_iterator { } }                     #  27
+  op_code { for_iterator { address: 33 } }         #  28
+  op_code { store { frame: 0 pos_in_frame: 1 } }   #  29
+  op_code { load { frame: 0 pos_in_frame: 1 } }    #  30
   op_code { load { frame: 0 pos_in_frame: 1 } }    #  31
-  op_code { assign { } }                           #  32
-  op_code { load { frame: 0 pos_in_frame: 1 } }    #  33
-  op_code { load { frame: 0 pos_in_frame: 1 } }    #  34
-  op_code { add_to_dictionary { pos_in_stack: 4 } }#  35
-  op_code { end_iterator { } }                     #  36
-  op_code { end_iterator { } }                     #  37
-  op_code { drop_frame { } }                       #  38
-  op_code { drop { } }                             #  39
+  op_code { add_to_dictionary { pos_in_stack: 4 } }#  32
+  op_code { end_iterator { } }                     #  33
+  op_code { end_iterator { } }                     #  34
+  op_code { drop_frame { } }                       #  35
+  op_code { drop { } }                             #  36
 
-  op_code { make_dictionary { reserve_size: 0 } }  #  40
-  op_code { create_frame { slots: 2 } }            #  41
-  op_code { make_list { reserve_size: 3 } }        #  42
-  op_code { const_int { value: 3 } }               #  43
-  op_code { add_to_list { pos_in_stack: 1 } }      #  44
-  op_code { const_int { value: 4 } }               #  45
-  op_code { add_to_list { pos_in_stack: 1 } }      #  46
-  op_code { const_int { value: 5 } }               #  47
-  op_code { add_to_list { pos_in_stack: 1 } }      #  48
-  op_code { get_iterator { } }                     #  49
-  op_code { for_iterator { address: 74 } }         #  50
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  51
-  op_code { assign { } }                           #  52
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  53
-  op_code { const_int { value: 2 } }               #  54
-  op_code { binary_percent { } }                   #  55
-  op_code { const_int { value: 0 } }               #  56
-  op_code { binary_equals_equals { } }             #  57
-  op_code { if_false { address: 74 } }             #  58
-  op_code { make_list { reserve_size: 3 } }        #  59
+  op_code { make_dictionary { reserve_size: 0 } }  #  37
+  op_code { create_frame { slots: 2 } }            #  38
+  op_code { make_list { reserve_size: 3 } }        #  39
+  op_code { const_int { value: 3 } }               #  40
+  op_code { add_to_list { pos_in_stack: 1 } }      #  41
+  op_code { const_int { value: 4 } }               #  42
+  op_code { add_to_list { pos_in_stack: 1 } }      #  43
+  op_code { const_int { value: 5 } }               #  44
+  op_code { add_to_list { pos_in_stack: 1 } }      #  45
+  op_code { get_iterator { } }                     #  46
+  op_code { for_iterator { address: 69 } }         #  47
+  op_code { store { frame: 0 pos_in_frame: 0 } }   #  48
+  op_code { load { frame: 0 pos_in_frame: 0 } }    #  49
+  op_code { const_int { value: 2 } }               #  50
+  op_code { binary_percent { } }                   #  51
+  op_code { const_int { value: 0 } }               #  52
+  op_code { binary_equals_equals { } }             #  53
+  op_code { if_false { address: 69 } }             #  54
+  op_code { make_list { reserve_size: 3 } }        #  55
+  op_code { load { frame: 0 pos_in_frame: 0 } }    #  56
+  op_code { add_to_list { pos_in_stack: 1 } }      #  57
+  op_code { load { frame: 0 pos_in_frame: 0 } }    #  58
+  op_code { add_to_list { pos_in_stack: 1 } }      #  59
   op_code { load { frame: 0 pos_in_frame: 0 } }    #  60
   op_code { add_to_list { pos_in_stack: 1 } }      #  61
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  62
-  op_code { add_to_list { pos_in_stack: 1 } }      #  63
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  64
-  op_code { add_to_list { pos_in_stack: 1 } }      #  65
-  op_code { get_iterator { } }                     #  66
-  op_code { for_iterator { address: 73 } }         #  67
-  op_code { load { frame: 0 pos_in_frame: 1 } }    #  68
-  op_code { assign { } }                           #  69
-  op_code { load { frame: 0 pos_in_frame: 1 } }    #  70
-  op_code { load { frame: 0 pos_in_frame: 1 } }    #  71
-  op_code { add_to_dictionary { pos_in_stack: 4 } }#  72
-  op_code { end_iterator { } }                     #  73
-  op_code { end_iterator { } }                     #  74
-  op_code { drop_frame { } }                       #  75
-  op_code { drop { } }                             #  76
+  op_code { get_iterator { } }                     #  62
+  op_code { for_iterator { address: 68 } }         #  63
+  op_code { store { frame: 0 pos_in_frame: 1 } }   #  64
+  op_code { load { frame: 0 pos_in_frame: 1 } }    #  65
+  op_code { load { frame: 0 pos_in_frame: 1 } }    #  66
+  op_code { add_to_dictionary { pos_in_stack: 4 } }#  67
+  op_code { end_iterator { } }                     #  68
+  op_code { end_iterator { } }                     #  69
+  op_code { drop_frame { } }                       #  70
+  op_code { drop { } }                             #  71
 
-  op_code { make_dictionary { reserve_size: 0 } }  #  77
-  op_code { create_frame { slots: 1 } }            #  78
-  op_code { make_list { reserve_size: 1 } }        #  79
-  op_code { const_int { value: 0 } }               #  80
-  op_code { add_to_list { pos_in_stack: 1 } }      #  81
-  op_code { get_iterator { } }                     #  82
-  op_code { for_iterator { address: 90 } }         #  83
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  84
-  op_code { assign { } }                           #  85
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  86
-  op_code { load { frame: 0 pos_in_frame: 0 } }    #  87
-  op_code { dot_member { member: "y" } }           #  88
-  op_code { add_to_dictionary { pos_in_stack: 3 } }#  89
-  op_code { end_iterator { } }                     #  90
-  op_code { drop_frame { } }                       #  91
-  op_code { drop { } }                             #  92
+  op_code { make_dictionary { reserve_size: 0 } }  #  72
+  op_code { create_frame { slots: 1 } }            #  73
+  op_code { make_list { reserve_size: 1 } }        #  74
+  op_code { const_int { value: 0 } }               #  75
+  op_code { add_to_list { pos_in_stack: 1 } }      #  76
+  op_code { get_iterator { } }                     #  77
+  op_code { for_iterator { address: 84 } }         #  78
+  op_code { store { frame: 0 pos_in_frame: 0 } }   #  79
+  op_code { load { frame: 0 pos_in_frame: 0 } }    #  80
+  op_code { load { frame: 0 pos_in_frame: 0 } }    #  81
+  op_code { dot_member { member: "y" } }           #  82
+  op_code { add_to_dictionary { pos_in_stack: 3 } }#  83
+  op_code { end_iterator { } }                     #  84
+  op_code { drop_frame { } }                       #  85
+  op_code { drop { } }                             #  86
 
-  op_code { make_dictionary { reserve_size: 0 } }  #  93
-  op_code { create_frame { slots: 1 } }            #  94
-  op_code { make_dictionary { reserve_size: 0 } }  #  95
-  op_code { create_frame { slots: 1 } }            #  96
-  op_code { make_list { reserve_size: 3 } }        #  97
-  op_code { const_int { value: 0 } }               #  98
-  op_code { add_to_list { pos_in_stack: 1 } }      #  99
-  op_code { const_int { value: 1 } }               # 100
-  op_code { add_to_list { pos_in_stack: 1 } }      # 101
-  op_code { const_int { value: 2 } }               # 103
-  op_code { add_to_list { pos_in_stack: 1 } }      # 103
-  op_code { get_iterator { } }                     # 104
-  op_code { for_iterator { address: 111 } }        # 105
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 106
-  op_code { assign { } }                           # 107
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 108
+  op_code { make_dictionary { reserve_size: 0 } }  #  87
+  op_code { create_frame { slots: 1 } }            #  88
+  op_code { make_dictionary { reserve_size: 0 } }  #  89
+  op_code { create_frame { slots: 1 } }            #  90
+  op_code { make_list { reserve_size: 3 } }        #  91
+  op_code { const_int { value: 0 } }               #  92
+  op_code { add_to_list { pos_in_stack: 1 } }      #  93
+  op_code { const_int { value: 1 } }               #  94
+  op_code { add_to_list { pos_in_stack: 1 } }      #  95
+  op_code { const_int { value: 2 } }               #  96
+  op_code { add_to_list { pos_in_stack: 1 } }      #  97
+  op_code { get_iterator { } }                     #  98
+  op_code { for_iterator { address: 104 } }        #  99
+  op_code { store { frame: 0 pos_in_frame: 0 } }   # 100
+  op_code { load { frame: 0 pos_in_frame: 0 } }    # 101
+  op_code { load { frame: 0 pos_in_frame: 0 } }    # 102
+  op_code { add_to_dictionary { pos_in_stack: 3 } }# 103
+  op_code { end_iterator { } }                     # 104
+  op_code { drop_frame { } }                       # 105
+  op_code { get_iterator { } }                     # 106
+  op_code { for_iterator { address: 112 } }        # 107
+  op_code { store { frame: 0 pos_in_frame: 0 } }   # 108
   op_code { load { frame: 0 pos_in_frame: 0 } }    # 109
-  op_code { add_to_dictionary { pos_in_stack: 3 } }# 110
-  op_code { end_iterator { } }                     # 111
-  op_code { drop_frame { } }                       # 112
-  op_code { get_iterator { } }                     # 113
-  op_code { for_iterator { address: 120 } }        # 114
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 115
-  op_code { assign { } }                           # 116
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 117
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 118
-  op_code { add_to_dictionary { pos_in_stack: 3 } }# 119
-  op_code { end_iterator { } }                     # 120
-  op_code { drop_frame { } }                       # 121
-  op_code { drop { } }                             # 122
+  op_code { load { frame: 0 pos_in_frame: 0 } }    # 110
+  op_code { add_to_dictionary { pos_in_stack: 3 } }# 111
+  op_code { end_iterator { } }                     # 112
+  op_code { drop_frame { } }                       # 113
+  op_code { drop { } }                             # 114
 
-  op_code { make_dictionary { reserve_size: 0 } }  # 123
-  op_code { create_frame { slots: 2 } }            # 124
-  op_code { make_dictionary { reserve_size: 0 } }  # 125
-  op_code { create_frame { slots: 1 } }            # 126
-  op_code { make_list { reserve_size: 1 } }        # 127
-  op_code { load { frame: 1 pos_in_frame: 0 } }    # 128
-  op_code { add_to_list { pos_in_stack: 1 } }      # 129
+  op_code { make_dictionary { reserve_size: 0 } }  # 115
+  op_code { create_frame { slots: 2 } }            # 116
+  op_code { make_dictionary { reserve_size: 0 } }  # 117
+  op_code { create_frame { slots: 1 } }            # 118
+  op_code { make_list { reserve_size: 1 } }        # 119
+  op_code { load { frame: 1 pos_in_frame: 0 } }    # 120
+  op_code { add_to_list { pos_in_stack: 1 } }      # 121
+  op_code { get_iterator { } }                     # 122
+  op_code { for_iterator { address: 128 } }        # 123
+  op_code { store { frame: 0 pos_in_frame: 0 } }   # 124
+  op_code { load { frame: 0 pos_in_frame: 0 } }    # 125
+  op_code { load { frame: 0 pos_in_frame: 0 } }    # 126
+  op_code { add_to_dictionary { pos_in_stack: 3 } }# 127
+  op_code { end_iterator { } }                     # 128
+  op_code { drop_frame { } }                       # 129
   op_code { get_iterator { } }                     # 130
-  op_code { for_iterator { address: 137 } }        # 131
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 132
-  op_code { assign { } }                           # 133
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 134
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 135
-  op_code { add_to_dictionary { pos_in_stack: 3 } }# 136
-  op_code { end_iterator { } }                     # 137
-  op_code { drop_frame { } }                       # 138
-  op_code { get_iterator { } }                     # 139
-  op_code { for_iterator { address: 154 } }        # 140
-  op_code { load { frame: 0 pos_in_frame: 1 } }    # 141
-  op_code { assign { } }                           # 142
-  op_code { make_list { reserve_size: 1 } }        # 143
-  op_code { const_int { value: 0 } }               # 144
-  op_code { add_to_list { pos_in_stack: 1 } }      # 145
-  op_code { get_iterator { } }                     # 146
-  op_code { for_iterator { address: 153 } }        # 147
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 148
-  op_code { assign { } }                           # 149
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 150
-  op_code { load { frame: 0 pos_in_frame: 0 } }    # 151
-  op_code { add_to_dictionary { pos_in_stack: 4 } }# 152
-  op_code { end_iterator { } }                     # 153
-  op_code { end_iterator { } }                     # 154
-  op_code { drop_frame { } }                       # 155
-  op_code { drop { } }                             # 156
-  op_code { drop_frame { } }                       # 157
-  op_code { drop_frame { } }                       # 158
+  op_code { for_iterator { address: 143 } }        # 131
+  op_code { store { frame: 0 pos_in_frame: 1 } }   # 132
+  op_code { make_list { reserve_size: 1 } }        # 133
+  op_code { const_int { value: 0 } }               # 134
+  op_code { add_to_list { pos_in_stack: 1 } }      # 135
+  op_code { get_iterator { } }                     # 136
+  op_code { for_iterator { address: 142 } }        # 137
+  op_code { store { frame: 0 pos_in_frame: 0 } }   # 138
+  op_code { load { frame: 0 pos_in_frame: 0 } }    # 139
+  op_code { load { frame: 0 pos_in_frame: 0 } }    # 140
+  op_code { add_to_dictionary { pos_in_stack: 4 } }# 141
+  op_code { end_iterator { } }                     # 142
+  op_code { end_iterator { } }                     # 143
+  op_code { drop_frame { } }                       # 144
+  op_code { drop { } }                             # 145
+  op_code { drop_frame { } }                       # 146
+  op_code { drop_frame { } }                       # 147
 
-  op_code { end { } }                              # 159
+  op_code { end { } }                              # 148
 }
