@@ -88,14 +88,14 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
   return -1;
 }
 
-starlark_dictionary& starlark_dictionary::insert(starlark_obj* key, starlark_obj* value) {
+bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value) {
   // TODO(lmirelmann): If this is freezed, then this is an error.
   if (key->hash() == -1) {
     // TODO(lmirelmann): Report the error.
-    return *this;
+    return false;
   }
-  values.insert(key, value);
-  return *this;
+  auto [it, result] = values.insert(key, value);
+  return result;
 }
 
 }  // namespace runtime

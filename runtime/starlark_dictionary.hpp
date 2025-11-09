@@ -17,7 +17,7 @@ class starlark_dictionary : public starlark_obj {
  public:
   std::string_view type() const override;
   bool truthy() const override;
-  starlark_dictionary& insert(starlark_obj* key, starlark_obj* value);
+  bool insert(starlark_obj* key, starlark_obj* value);
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

@@ -30,9 +30,13 @@ TEST(StarlarkDictionary, Str) {
   starlark_bool true_obj(true);
   starlark_integer one(1);
   EXPECT_EQ("{}", starlark_dictionary().str());
-  EXPECT_EQ("{'1': None}", starlark_dictionary().insert(&s1, &none).str());
-  EXPECT_EQ("{'1': None, '2': True}", starlark_dictionary().insert(&s1, &none).insert(&s2, &true_obj).str());
-  EXPECT_EQ("{'1': None, '2': True, '3': 1}", starlark_dictionary().insert(&s1, &none).insert(&s2, &true_obj).insert(&s3, &one).str());
+  starlark_dictionary dict;
+  dict.insert(&s1, &none);
+  EXPECT_EQ("{'1': None}", dict.str());
+  dict.insert(&s2, &true_obj);
+  EXPECT_EQ("{'1': None, '2': True}", dict.str());
+  dict.insert(&s3, &one);
+  EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict.str());
 }
 
 TEST(StarlarkDictionary, StrOrder) {
@@ -42,8 +46,16 @@ TEST(StarlarkDictionary, StrOrder) {
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
-  EXPECT_EQ("{'1': None, '2': True, '3': 1}", starlark_dictionary().insert(&s1, &none).insert(&s2, &true_obj).insert(&s3, &one).str());
-  EXPECT_EQ("{'3': 1, '1': None, '2': True}", starlark_dictionary().insert(&s3, &one).insert(&s1, &none).insert(&s2, &true_obj).str());
+  starlark_dictionary dict_1;
+  dict_1.insert(&s1, &none);
+  dict_1.insert(&s2, &true_obj);
+  dict_1.insert(&s3, &one);
+  EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict_1.str());
+  starlark_dictionary dict_2;
+  dict_2.insert(&s3, &one);
+  dict_2.insert(&s1, &none);
+  dict_2.insert(&s2, &true_obj);
+  EXPECT_EQ("{'3': 1, '1': None, '2': True}", dict_2.str());
 }
 
 TEST(StarlarkDictionary, StrContainsItself) {
@@ -55,14 +67,19 @@ TEST(StarlarkDictionary, StrContainsItself) {
   starlark_bool true_obj(true);
   starlark_integer one(1);
   starlark_dictionary map;
-  map.insert(&s1, &none).insert(&s2, &true_obj).insert(&s3, &one).insert(&s4, &map);
+  map.insert(&s1, &none);
+  map.insert(&s2, &true_obj);
+  map.insert(&s3, &one);
+  map.insert(&s4, &map);
   EXPECT_EQ("{'1': None, '2': True, '3': 1, '4': {...}}", map.str());
 }
 
 TEST(StarlarkDictionary, Truthy) {
   starlark_none none;
-  EXPECT_FALSE(starlark_dictionary().truthy());
-  EXPECT_TRUE(starlark_dictionary().insert(&none, &none).truthy());
+  starlark_dictionary dict;
+  EXPECT_FALSE(dict.truthy());
+  dict.insert(&none, &none);
+  EXPECT_TRUE(dict.truthy());
 }
 
 TEST(StarlarkDictionary, Equals) {
@@ -70,11 +87,19 @@ TEST(StarlarkDictionary, Equals) {
   starlark_bool bool_true(true);
   EXPECT_FALSE(starlark_dictionary().equals(none));
   EXPECT_TRUE(starlark_dictionary().equals(starlark_dictionary()));
-  EXPECT_FALSE(starlark_dictionary().insert(&none, &none).equals(starlark_dictionary()));
-  EXPECT_FALSE(starlark_dictionary().equals(starlark_dictionary().insert(&none, &none)));
-  EXPECT_TRUE(starlark_dictionary().insert(&none, &none).equals(starlark_dictionary().insert(&none, &none)));
-  EXPECT_FALSE(starlark_dictionary().insert(&none, &bool_true).equals(starlark_dictionary().insert(&none, &none)));
-  EXPECT_FALSE(starlark_dictionary().insert(&bool_true, &none).equals(starlark_dictionary().insert(&none, &none)));
+  starlark_dictionary dict_1;
+  dict_1.insert(&none, &none);
+  starlark_dictionary dict_2;
+  dict_2.insert(&none, &none);
+  EXPECT_FALSE(dict_1.equals(starlark_dictionary()));
+  EXPECT_FALSE(starlark_dictionary().equals(dict_1));
+  EXPECT_TRUE(dict_1.equals(dict_2));
+  starlark_dictionary dict_3;
+  dict_3.insert(&none, &bool_true);
+  EXPECT_FALSE(dict_3.equals(dict_1));
+  starlark_dictionary dict_4;
+  dict_4.insert(&bool_true, &none);
+  EXPECT_FALSE(dict_4.equals(dict_1));
 }
 
 TEST(StarlarkDictionary, EqualsInDifferentOrder) {
@@ -87,9 +112,24 @@ TEST(StarlarkDictionary, EqualsInDifferentOrder) {
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;
   starlark_dictionary dict_3;
-  dict_1.insert(&none, &none).insert(&zero, &zero).insert(&one, &one).insert(&two, &two).insert(&bool_true, &bool_true).insert(&bool_false, &bool_false);
-  dict_2.insert(&none, &none).insert(&zero, &zero).insert(&one, &one).insert(&two, &two).insert(&bool_true, &bool_true).insert(&bool_false, &bool_false);
-  dict_3.insert(&bool_false, &bool_false).insert(&bool_true, &bool_true).insert(&two, &two).insert(&one, &one).insert(&zero, &zero).insert(&none, &none);
+  dict_1.insert(&none, &none);
+  dict_1.insert(&zero, &zero);
+  dict_1.insert(&one, &one);
+  dict_1.insert(&two, &two);
+  dict_1.insert(&bool_true, &bool_true);
+  dict_1.insert(&bool_false, &bool_false);
+  dict_2.insert(&none, &none);
+  dict_2.insert(&zero, &zero);
+  dict_2.insert(&one, &one);
+  dict_2.insert(&two, &two);
+  dict_2.insert(&bool_true, &bool_true);
+  dict_2.insert(&bool_false, &bool_false);
+  dict_3.insert(&bool_false, &bool_false);
+  dict_3.insert(&bool_true, &bool_true);
+  dict_3.insert(&two, &two);
+  dict_3.insert(&one, &one);
+  dict_3.insert(&zero, &zero);
+  dict_3.insert(&none, &none);
   EXPECT_TRUE(dict_1.equals(dict_2));
   EXPECT_TRUE(dict_1.equals(dict_3));
 }
@@ -97,5 +137,7 @@ TEST(StarlarkDictionary, EqualsInDifferentOrder) {
 TEST(StarlarkDictionary, Hash) {
   EXPECT_EQ(starlark_dictionary().hash(), -1);
 }
+
+// TODO(lmirelmann): Test the return value of `insert`.
 
 }  // namespace

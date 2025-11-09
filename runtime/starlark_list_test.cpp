@@ -24,52 +24,78 @@ TEST(StarlarkList, Str) {
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
-  EXPECT_EQ("[]", starlark_list().str());
-  EXPECT_EQ("[None]", starlark_list().add(&none).str());
-  EXPECT_EQ("[None, True]", starlark_list().add(&none).add(&true_obj).str());
-  EXPECT_EQ("[None, True, 1]", starlark_list().add(&none).add(&true_obj).add(&one).str());
+  starlark_list list;
+  EXPECT_EQ("[]", list.str());
+  list.add(&none);
+  EXPECT_EQ("[None]", list.str());
+  list.add(&true_obj);
+  EXPECT_EQ("[None, True]", list.str());
+  list.add(&one);
+  EXPECT_EQ("[None, True, 1]", list.str());
 }
 
 TEST(StarlarkList, StrRecursion) {
   // Bazel prints `[1, [1, ..., 1], 1]`, Python prints `[1, [...], 1]`.
   starlark_list list;
   starlark_integer one(1);
-  list.add(&one).add(&list).add(&one);
+  list.add(&one);
+  list.add(&list);
+  list.add(&one);
   EXPECT_EQ("[1, [...], 1]", list.str());
 }
 
 TEST(StarlarkList, Truthy) {
   starlark_none none;
-  EXPECT_FALSE(starlark_list().truthy());
-  EXPECT_TRUE(starlark_list().add(&none).truthy());
+  starlark_list list;
+  EXPECT_FALSE(list.truthy());
+  list.add(&none);
+  EXPECT_TRUE(list.truthy());
 }
 
 TEST(StarlarkList, Equals) {
   starlark_none none;
   starlark_integer one(1);
-  EXPECT_TRUE(starlark_list().equals(starlark_list()));
-  EXPECT_FALSE(starlark_list().add(&none).equals(starlark_list()));
-  EXPECT_FALSE(starlark_list().add(&one).equals(starlark_list()));
-  EXPECT_FALSE(starlark_list().add(&none).add(&one).equals(starlark_list()));
-  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list()));
+  starlark_list list1;
+  starlark_list list2;
+  starlark_list list3;
+  starlark_list list4;
+  starlark_list list5;
+  list2.add(&none);
+  list3.add(&one);
+  list4.add(&none);
+  list4.add(&one);
+  list5.add(&one);
+  list5.add(&none);
 
-  EXPECT_FALSE(starlark_list().equals(starlark_list().add(&none)));
-  EXPECT_TRUE(starlark_list().add(&none).equals(starlark_list().add(&none)));
-  EXPECT_FALSE(starlark_list().add(&one).equals(starlark_list().add(&none)));
-  EXPECT_FALSE(starlark_list().add(&none).add(&one).equals(starlark_list().add(&none)));
-  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list().add(&none)));
+  EXPECT_TRUE(list1.equals(list1));
+  EXPECT_FALSE(list2.equals(list1));
+  EXPECT_FALSE(list3.equals(list1));
+  EXPECT_FALSE(list4.equals(list1));
+  EXPECT_FALSE(list5.equals(list1));
 
-  EXPECT_FALSE(starlark_list().equals(starlark_list().add(&one)));
-  EXPECT_FALSE(starlark_list().add(&none).equals(starlark_list().add(&one)));
-  EXPECT_TRUE(starlark_list().add(&one).equals(starlark_list().add(&one)));
-  EXPECT_FALSE(starlark_list().add(&none).add(&one).equals(starlark_list().add(&one)));
-  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list().add(&one)));
+  EXPECT_FALSE(list1.equals(list2));
+  EXPECT_TRUE(list2.equals(list2));
+  EXPECT_FALSE(list3.equals(list2));
+  EXPECT_FALSE(list4.equals(list2));
+  EXPECT_FALSE(list5.equals(list2));
 
-  EXPECT_FALSE(starlark_list().equals(starlark_list().add(&none).add(&one)));
-  EXPECT_FALSE(starlark_list().add(&none).equals(starlark_list().add(&none).add(&one)));
-  EXPECT_FALSE(starlark_list().add(&one).equals(starlark_list().add(&none).add(&one)));
-  EXPECT_TRUE(starlark_list().add(&none).add(&one).equals(starlark_list().add(&none).add(&one)));
-  EXPECT_FALSE(starlark_list().add(&one).add(&none).equals(starlark_list().add(&none).add(&one)));
+  EXPECT_FALSE(list1.equals(list3));
+  EXPECT_FALSE(list2.equals(list3));
+  EXPECT_TRUE(list3.equals(list3));
+  EXPECT_FALSE(list4.equals(list3));
+  EXPECT_FALSE(list5.equals(list3));
+
+  EXPECT_FALSE(list1.equals(list4));
+  EXPECT_FALSE(list2.equals(list4));
+  EXPECT_FALSE(list3.equals(list4));
+  EXPECT_TRUE(list4.equals(list4));
+  EXPECT_FALSE(list5.equals(list4));
+
+  EXPECT_FALSE(list1.equals(list5));
+  EXPECT_FALSE(list2.equals(list5));
+  EXPECT_FALSE(list3.equals(list5));
+  EXPECT_FALSE(list4.equals(list5));
+  EXPECT_TRUE(list5.equals(list5));
 }
 
 TEST(StarlarkList, EqualsRecursion) {

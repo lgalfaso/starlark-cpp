@@ -78,10 +78,9 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_list::inner_hash() co
   return -1;
 }
 
-starlark_list& starlark_list::add(starlark_obj* element) {
+void starlark_list::add(starlark_obj* element) {
   // TODO(lmirelmann): If this is freezed, then this is an error.
   values.push_back(element);
-  return *this;
 }
 
 }  // namespace runtime
