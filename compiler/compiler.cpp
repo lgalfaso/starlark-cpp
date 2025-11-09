@@ -354,12 +354,12 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
 }
 
 void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
-  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(1);
+  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(2);
 }
 
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
-    mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(1);
+    mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(2);
   }
 }
 
@@ -395,7 +395,7 @@ void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionar
       number_for_clauses++;
     }
   }
-  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(number_for_clauses + 1);
+  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(number_for_clauses + 2);
   fix_comp_clause(dictionary_comprehension->clause());
   comprehension_comp_clause.pop_back();
   mutable_block()->add_op_code()->mutable_drop_frame();
