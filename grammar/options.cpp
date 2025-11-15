@@ -2,6 +2,9 @@
 
 #include "grammar/options.hpp"
 
+#include <set>
+#include <string>
+
 namespace starlark {
 namespace grammar {
 
