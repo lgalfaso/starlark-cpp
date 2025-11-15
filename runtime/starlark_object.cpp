@@ -173,6 +173,14 @@ starlark_obj* starlark_obj::call(const std::vector<starlark_obj*>& pos_args, con
   return nullptr;
 }
 
+int64_t starlark_obj::sequence_size() const {
+  return -1;
+}
+
+void starlark_obj::unpack(std::vector<starlark_obj*>& consumer) {
+  return;
+}
+
 void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   return;
 }

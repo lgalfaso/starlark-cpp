@@ -19,6 +19,8 @@ class starlark_list : public starlark_obj {
   std::string_view type() const override;
   void add(starlark_obj* element);
   bool truthy() const override;
+  int64_t sequence_size() const override;
+  void unpack(std::vector<starlark_obj*>& consumer) override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

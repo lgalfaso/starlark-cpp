@@ -20,8 +20,8 @@ EXIT Expression
 EXIT IfExpression
 EXIT Expression
 ENTER Expression
-ENTER Identifier("a")
-EXIT Identifier
+ENTER IdentifierForAssignment("a")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -39,8 +39,8 @@ EXIT Expression
 EXIT LambdaExpression
 EXIT Expression
 ENTER Expression
-ENTER Identifier("b")
-EXIT Identifier
+ENTER IdentifierForAssignment("b")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -59,8 +59,8 @@ EXIT Expression
 EXIT Tuple
 EXIT Expression
 ENTER Expression
-ENTER Identifier("c")
-EXIT Identifier
+ENTER IdentifierForAssignment("c")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -89,8 +89,8 @@ EXIT ForInExpression
 MID ForClause
 ENTER LoopVariables
 ENTER Expression
-ENTER Identifier("a")
-EXIT Identifier
+ENTER IdentifierForAssignment("a")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT LoopVariables
 EXIT ForClause
@@ -182,8 +182,8 @@ EXIT ForInExpression
 MID ForClause
 ENTER LoopVariables
 ENTER Expression
-ENTER Identifier("a")
-EXIT Identifier
+ENTER IdentifierForAssignment("a")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT LoopVariables
 EXIT ForClause
@@ -223,8 +223,8 @@ EXIT Expression
 EXIT ListExpression
 EXIT Expression
 ENTER Expression
-ENTER Identifier("d")
-EXIT Identifier
+ENTER IdentifierForAssignment("d")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -249,7 +249,7 @@ EXIT Expression
 EXIT ListExpression
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("d")
 EXIT Identifier
@@ -270,7 +270,7 @@ ENTER Expression
 ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement

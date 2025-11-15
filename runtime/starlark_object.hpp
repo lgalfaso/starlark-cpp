@@ -81,6 +81,8 @@ class starlark_obj {
   int64_t hash() const;
   void freeze();
   virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args);
+  virtual int64_t sequence_size() const;
+  virtual void unpack(std::vector<starlark_obj*>& consumer);
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;

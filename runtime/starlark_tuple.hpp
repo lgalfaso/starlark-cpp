@@ -19,6 +19,8 @@ class starlark_tuple : public starlark_obj {
   std::string_view type() const override;
   starlark_tuple& add(starlark_obj* element);
   bool truthy() const override;
+  int64_t sequence_size() const override;
+  void unpack(std::vector<starlark_obj*>& consumer) override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
@@ -26,7 +28,7 @@ class starlark_tuple : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
-  std::vector<const starlark_obj*> values;
+  std::vector<starlark_obj*> values;
 };
 
 }  // namespace runtime

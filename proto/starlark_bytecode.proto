@@ -15,7 +15,7 @@ message Block {
 }
 
 message OpCode {
-  // next_id: 68
+  // next_id: 71
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -71,7 +71,10 @@ message OpCode {
     ForIterator for_iterator = 41;
     EndIterator end_iterator = 42;
 
-    Assign assign = 43;
+    Unpack unpack = 70;
+    DotMember assign_dot_member = 43;
+    IndexMember assign_index_member = 68;
+    SliceRange assign_slice_range = 69;
     Assign plus_assign= 44;
     Assign minus_assign = 45;
     Assign star_assign = 46;
@@ -184,6 +187,10 @@ message ForIterator {
   uint32 address = 1;
 }
 message EndIterator {}
+
+message Unpack {
+  uint32 number_of_elements = 1;
+}
 
 message Assign {}
 

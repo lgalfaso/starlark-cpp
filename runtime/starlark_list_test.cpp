@@ -4,15 +4,19 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <vector>
+
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_list;
-using starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_obj;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -104,6 +108,39 @@ TEST(StarlarkList, EqualsRecursion) {
   list_a.add(&list_b);
   list_b.add(&list_a);
   EXPECT_TRUE(list_a.equals(list_b));
+}
+
+TEST(StarlarkList, SequenceSize) {
+  starlark_none none;
+  starlark_integer one(1);
+  starlark_list list;
+  EXPECT_EQ(0, list.sequence_size());
+  list.add(&one);
+  EXPECT_EQ(1, list.sequence_size());
+  list.add(&none);
+  EXPECT_EQ(2, list.sequence_size());
+}
+
+TEST(StarlarkList, Unpack) {
+  starlark_none none;
+  starlark_integer one(1);
+  starlark_list list;
+  std::vector<starlark_obj*> stack;
+
+  list.unpack(stack);
+  EXPECT_THAT(stack, SizeIs(0));
+
+  list.add(&one);
+  list.unpack(stack);
+  ASSERT_THAT(stack, SizeIs(1));
+  EXPECT_THAT(stack[0], &one);
+
+  stack.clear();
+  list.add(&none);
+  list.unpack(stack);
+  ASSERT_THAT(stack, SizeIs(2));
+  EXPECT_THAT(stack[0], &none);
+  EXPECT_THAT(stack[1], &one);
 }
 
 }  // namespace

@@ -203,6 +203,14 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT Tuple\n";
   }
 
+  void enter_tuple_for_assignment(const starlark::ast::Tuple* tuple) override {
+    output += "ENTER TupleForAssignment\n";
+  }
+
+  void exit_tuple_for_assignment(const starlark::ast::Tuple* tuple) override {
+    output += "EXIT TupleForAssignment\n";
+  }
+
   void enter_if_expression(const starlark::ast::IfExpr* if_expression) override {
     output += "ENTER IfExpression\n";
   }
@@ -271,6 +279,14 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT DotExpression\n";
   }
 
+  void enter_dot_expression_for_assignment(const starlark::ast::DotExpr* dot_expression) override {
+    output += "ENTER DotExpressionForAssignment\n";
+  }
+
+  void exit_dot_expression_for_assignment(const starlark::ast::DotExpr* dot_expression) override {
+    output += "EXIT DotExpressionForAssignment\n";
+  }
+
   void enter_call_expression(const starlark::ast::CallExpr* call_expression) override {
     output += "ENTER CallExpression\n";
   }
@@ -305,12 +321,46 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     }
   }
 
+  void enter_slice_expression_for_assignment(const starlark::ast::SliceExpr* slice_expression) override {
+    switch (slice_expression->slice_type_case()) {
+      case SliceExpr::kIndex:
+        output += "ENTER SliceIndexExpressionForAssignment\n";
+        break;
+      case SliceExpr::kSlice:
+        output += "ENTER SliceRangeExpressionForAssignment\n";
+        break;
+      default:
+        break;
+    }
+  }
+
+  void exit_slice_expression_for_assignment(const starlark::ast::SliceExpr* slice_expression) override {
+    switch (slice_expression->slice_type_case()) {
+      case SliceExpr::kIndex:
+        output += "EXIT SliceIndexExpressionForAssignment\n";
+        break;
+      case SliceExpr::kSlice:
+        output += "EXIT SliceRangeExpressionForAssignment\n";
+        break;
+      default:
+        break;
+    }
+  }
+
   void enter_identifier(const starlark::ast::Identifier* identifier) override {
     output += "ENTER Identifier(" + starlark::grammar::quoted(identifier->name()) + ")\n";
   }
 
   void exit_identifier(const starlark::ast::Identifier* identifier) override {
     output += "EXIT Identifier\n";
+  }
+
+  void enter_identifier_for_assignment(const starlark::ast::Identifier* identifier) override {
+    output += "ENTER IdentifierForAssignment(" + starlark::grammar::quoted(identifier->name()) + ")\n";
+  }
+
+  void exit_identifier_for_assignment(const starlark::ast::Identifier* identifier) override {
+    output += "EXIT IdentifierForAssignment\n";
   }
 
   void enter_none_value() override {
@@ -371,6 +421,18 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
 
   void exit_list_expression(const starlark::ast::ListExpr* list_expression) override {
     output += "EXIT ListExpression\n";
+  }
+
+  void enter_list_expression_for_assignment(const starlark::ast::ListExpr* list_expression) override {
+    output += "ENTER ListExpressionForAssignment\n";
+  }
+
+  void mid_list_expression_for_assignment(const starlark::ast::ListExpr* list_expression) override {
+    output += "MID ListExpressionForAssignment\n";
+  }
+
+  void exit_list_expression_for_assignment(const starlark::ast::ListExpr* list_expression) override {
+    output += "EXIT ListExpressionForAssignment\n";
   }
 
   void enter_list_comprehension(const starlark::ast::ListComp* list_comprehension) override {

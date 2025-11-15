@@ -12,11 +12,13 @@
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_tuple.hpp"
 
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_list;
-using starlark::runtime::starlark_none;
-using starlark::runtime::starlark_tuple;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_obj;
+using ::starlark::runtime::starlark_tuple;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -133,6 +135,39 @@ TEST(StarlarkTuple, HashRecursion) {
   tuple2.add(&tuple1);
   // TODO(lmirelmann): This should change once hash recursions are implemented.
   EXPECT_EQ(-1, tuple1.hash());
+}
+
+TEST(StarlarkTuple, SequenceSize) {
+  starlark_none none;
+  starlark_integer one(1);
+  starlark_tuple tuple;
+  EXPECT_EQ(0, tuple.sequence_size());
+  tuple.add(&one);
+  EXPECT_EQ(1, tuple.sequence_size());
+  tuple.add(&none);
+  EXPECT_EQ(2, tuple.sequence_size());
+}
+
+TEST(StarlarkTuple, Unpack) {
+  starlark_none none;
+  starlark_integer one(1);
+  starlark_tuple tuple;
+  std::vector<starlark_obj*> stack;
+
+  tuple.unpack(stack);
+  EXPECT_THAT(stack, SizeIs(0));
+
+  tuple.add(&one);
+  tuple.unpack(stack);
+  ASSERT_THAT(stack, SizeIs(1));
+  EXPECT_THAT(stack[0], &one);
+
+  stack.clear();
+  tuple.add(&none);
+  tuple.unpack(stack);
+  ASSERT_THAT(stack, SizeIs(2));
+  EXPECT_THAT(stack[0], &none);
+  EXPECT_THAT(stack[1], &one);
 }
 
 }  // namespace

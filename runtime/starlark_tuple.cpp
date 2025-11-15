@@ -76,6 +76,16 @@ bool starlark_tuple::truthy() const {
   return !values.empty();
 }
 
+int64_t starlark_tuple::sequence_size() const {
+  return values.size();
+}
+
+void starlark_tuple::unpack(std::vector<starlark_obj*>& consumer) {
+  for (auto it = values.rbegin(); it != values.rend(); ++it) {
+    consumer.push_back(*it);
+  }
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_tuple::inner_hash() const {
   return std::span(values.begin(), values.end());
 }

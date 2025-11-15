@@ -39,8 +39,8 @@ EXIT Expression
 EXIT ListExpression
 EXIT Expression
 ENTER Expression
-ENTER Identifier("a")
-EXIT Identifier
+ENTER IdentifierForAssignment("a")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -51,7 +51,7 @@ ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceIndexExpression
+ENTER SliceIndexExpressionForAssignment
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
@@ -60,7 +60,7 @@ ENTER Expression
 ENTER IntValue(0)
 EXIT IntValue
 EXIT Expression
-EXIT SliceIndexExpression
+EXIT SliceIndexExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement

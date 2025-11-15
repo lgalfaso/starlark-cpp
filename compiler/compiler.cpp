@@ -72,15 +72,20 @@ class bytecode_generator : public ast_listener_base {
   void enter_string_value(std::string_view string_value) override;
   void enter_bytes_value(std::string_view bytes_value) override;
   void enter_identifier(const Identifier* identifier) override;
+  void enter_identifier_for_assignment(const Identifier* identifier) override;
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_dot_expression(const DotExpr* dot_expression) override;
+  void exit_dot_expression_for_assignment(const DotExpr* dot_expression) override;
   void exit_slice_expression(const SliceExpr* slice_expression) override;
+  void exit_slice_expression_for_assignment(const SliceExpr* slice_expression) override;
 
   void exit_tuple(const Tuple* tuple) override;
+  void enter_tuple_for_assignment(const Tuple* tuple) override;
   void enter_list_expression(const ListExpr* list_expression) override;
   void exit_list_expression(const ListExpr* list_expression) override;
+  void enter_list_expression_for_assignment(const ListExpr* list_expression) override;
   void enter_dictionary_expression(const DictExpr* dictionary_expression) override;
   void exit_dictionary_expression(const DictExpr* dictionary_expression) override;
 
@@ -89,7 +94,6 @@ class bytecode_generator : public ast_listener_base {
   void enter_dictionary_comprehension(const DictComp* dictionary_comprehension) override;
   void exit_dictionary_comprehension(const DictComp* dictionary_comprehension) override;
   void mid_for_clause(const ForClause* for_clause) override;
-  void exit_for_clause(const ForClause* for_clause) override;
   void exit_if_clause(const Expression* if_clause) override;
 
   void mid_if_expression(const IfExpr* if_expression) override;
@@ -137,7 +141,6 @@ class bytecode_generator : public ast_listener_base {
   void exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
   Block* mutable_block();
   const Block& block() const;
-  void assign_or_store(const Expression& expression);
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
@@ -201,6 +204,12 @@ void bytecode_generator::enter_bytes_value(std::string_view bytes_value) {
 
 void bytecode_generator::enter_identifier(const Identifier* identifier) {
   auto* id_op = mutable_block()->add_op_code()->mutable_load();
+  id_op->set_frame(identifier->frame());
+  id_op->set_pos_in_frame(identifier->pos_in_frame());
+}
+
+void bytecode_generator::enter_identifier_for_assignment(const Identifier* identifier) {
+  auto* id_op = mutable_block()->add_op_code()->mutable_store();
   id_op->set_frame(identifier->frame());
   id_op->set_pos_in_frame(identifier->pos_in_frame());
 }
@@ -317,6 +326,10 @@ void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
   mutable_block()->add_op_code()->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
 }
 
+void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_expression) {
+  mutable_block()->add_op_code()->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+}
+
 void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression) {
   switch (slice_expression->slice_type_case()) {
     case SliceExpr::kIndex:
@@ -330,8 +343,25 @@ void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression
   }
 }
 
+void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* slice_expression) {
+  switch (slice_expression->slice_type_case()) {
+    case SliceExpr::kIndex:
+      mutable_block()->add_op_code()->mutable_assign_index_member();
+      break;
+    case SliceExpr::kSlice:
+      mutable_block()->add_op_code()->mutable_assign_slice_range();
+      break;
+    default:
+      break;
+  }
+}
+
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
   mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
+}
+
+void bytecode_generator::enter_tuple_for_assignment(const Tuple* tuple) {
+  mutable_block()->add_op_code()->mutable_unpack()->set_number_of_elements(tuple->value_size());
 }
 
 void bytecode_generator::enter_list_expression(const ListExpr* list_expression) {
@@ -344,6 +374,10 @@ void bytecode_generator::exit_list_expression(const ListExpr* list_expression) {
     add_to_list->set_pos_in_stack(list_expression->element_size());
     add_to_list->set_number_of_elements(list_expression->element_size());
   }
+}
+
+void bytecode_generator::enter_list_expression_for_assignment(const ListExpr* list_expression) {
+  mutable_block()->add_op_code()->mutable_unpack()->set_number_of_elements(list_expression->element_size());
 }
 
 void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_expression) {
@@ -406,10 +440,6 @@ void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
   mutable_block()->add_op_code()->mutable_for_iterator();
 }
 
-void bytecode_generator::exit_for_clause(const ForClause* for_clause) {
-  assign_or_store(for_clause->loop_variables());
-}
-
 void bytecode_generator::exit_if_clause(const Expression* if_clause) {
   comprehension_comp_clause.back().push_back(block().op_code_size());
   mutable_block()->add_op_code()->mutable_if_false();
@@ -446,8 +476,6 @@ void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
     for_statement_op_mid_pos[for_statement] = op_code_size;
     mutable_block()->add_op_code()->mutable_get_iterator();
     mutable_block()->add_op_code()->mutable_for_iterator();
-  } else {
-    assign_or_store(for_statement->loop_variables());
   }
 }
 
@@ -554,7 +582,7 @@ void bytecode_generator::exit_argument(const Argument* argument) {
 void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statement) {
   switch (assign_statement->op()) {
     case AssignStmt::EQUALS:
-      assign_or_store(assign_statement->lhs());
+      // No-op.
       break;
     case AssignStmt::PLUS_EQUALS:
       mutable_block()->add_op_code()->mutable_plus_assign();
@@ -699,18 +727,6 @@ Block* bytecode_generator::mutable_block() {
 
 const Block& bytecode_generator::block() const {
   return output.block(blocks.back());
-}
-
-void bytecode_generator::assign_or_store(const Expression& expression) {
-  // TODO(lmirelmann): This is not handling the destructuring assignments.
-  if (expression.expression_type_case() == Expression::kIdentifier) {
-    // If we are storing in a frame, then generate the corresponding instruction.
-    auto* last_op_code = mutable_block()->mutable_op_code(block().op_code_size() - 1);
-    last_op_code->mutable_store()->set_frame(expression.identifier().frame());
-    last_op_code->mutable_store()->set_pos_in_frame(expression.identifier().pos_in_frame());
-  } else {
-    mutable_block()->add_op_code()->mutable_assign();
-  }
 }
 
 }  // namespace

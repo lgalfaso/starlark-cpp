@@ -6,3 +6,7 @@ for a, b in [(0, 1), (2, 3)]:
 
 for a.b in [0, 1, 2]:
     "ghi"
+
+for [a, b] in [(0, 1), (2, 3)]:
+    "jkl"
+

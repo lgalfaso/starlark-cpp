@@ -6,8 +6,8 @@ ENTER ListExpression
 EXIT ListExpression
 EXIT Expression
 ENTER Expression
-ENTER Identifier("a")
-EXIT Identifier
+ENTER IdentifierForAssignment("a")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -18,8 +18,8 @@ ENTER ListExpression
 EXIT ListExpression
 EXIT Expression
 ENTER Expression
-ENTER Identifier("b")
-EXIT Identifier
+ENTER IdentifierForAssignment("b")
+EXIT IdentifierForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -30,7 +30,7 @@ ENTER IntValue(2)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceIndexExpression
+ENTER SliceIndexExpressionForAssignment
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
@@ -39,7 +39,7 @@ ENTER Expression
 ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
-EXIT SliceIndexExpression
+EXIT SliceIndexExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -50,7 +50,7 @@ ENTER IntValue(3)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
@@ -61,7 +61,7 @@ ENTER NoneValue
 EXIT NoneValue
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -72,7 +72,7 @@ ENTER IntValue(5)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
@@ -85,7 +85,7 @@ ENTER NoneValue
 EXIT NoneValue
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -96,7 +96,7 @@ ENTER IntValue(7)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
@@ -109,7 +109,7 @@ EXIT IntValue
 EXIT Expression
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -120,7 +120,7 @@ ENTER IntValue(10)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("a")
 EXIT Identifier
@@ -135,7 +135,7 @@ EXIT IntValue
 EXIT Expression
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -146,7 +146,7 @@ ENTER IntValue(11)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -157,7 +157,7 @@ ENTER NoneValue
 EXIT NoneValue
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -168,7 +168,7 @@ ENTER IntValue(13)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -181,7 +181,7 @@ ENTER NoneValue
 EXIT NoneValue
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -192,7 +192,7 @@ ENTER IntValue(15)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -205,7 +205,7 @@ EXIT IntValue
 EXIT Expression
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -216,7 +216,7 @@ ENTER IntValue(18)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -231,7 +231,7 @@ EXIT IntValue
 EXIT Expression
 ENTER NoneValue
 EXIT NoneValue
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -242,7 +242,7 @@ ENTER IntValue(20)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -255,7 +255,7 @@ ENTER Expression
 ENTER IntValue(19)
 EXIT IntValue
 EXIT Expression
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -266,7 +266,7 @@ ENTER IntValue(23)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -281,7 +281,7 @@ ENTER Expression
 ENTER IntValue(22)
 EXIT IntValue
 EXIT Expression
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -292,7 +292,7 @@ ENTER IntValue(26)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -307,7 +307,7 @@ ENTER Expression
 ENTER IntValue(25)
 EXIT IntValue
 EXIT Expression
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -318,7 +318,7 @@ ENTER IntValue(30)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceRangeExpression
+ENTER SliceRangeExpressionForAssignment
 ENTER Expression
 ENTER Identifier("b")
 EXIT Identifier
@@ -335,7 +335,7 @@ ENTER Expression
 ENTER IntValue(29)
 EXIT IntValue
 EXIT Expression
-EXIT SliceRangeExpression
+EXIT SliceRangeExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement
@@ -346,7 +346,7 @@ ENTER IntValue(33)
 EXIT IntValue
 EXIT Expression
 ENTER Expression
-ENTER SliceIndexExpression
+ENTER SliceIndexExpressionForAssignment
 ENTER Expression
 ENTER SliceIndexExpression
 ENTER Expression
@@ -363,7 +363,7 @@ ENTER Expression
 ENTER IntValue(32)
 EXIT IntValue
 EXIT Expression
-EXIT SliceIndexExpression
+EXIT SliceIndexExpressionForAssignment
 EXIT Expression
 EXIT AssignStatement
 EXIT Statement

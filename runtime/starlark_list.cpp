@@ -54,6 +54,16 @@ bool starlark_list::truthy() const {
   return !values.empty();
 }
 
+int64_t starlark_list::sequence_size() const {
+  return values.size();
+}
+
+void starlark_list::unpack(std::vector<starlark_obj*>& consumer) {
+  for (auto it = values.rbegin(); it != values.rend(); ++it) {
+    consumer.push_back(*it);
+  }
+}
+
 bool starlark_list::inner_equals(comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
