@@ -101,7 +101,7 @@ block {
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { assign_slice_range { } }
-  op_code { drop_frame { } }
-  op_code { drop_frame { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
   op_code { end { } }
 }

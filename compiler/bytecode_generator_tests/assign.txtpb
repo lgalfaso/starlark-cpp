@@ -50,7 +50,7 @@ block {
   op_code { const_int { value: 12 } }
   op_code { load { frame: 1 pos_in_frame: 11 } }
   op_code { star_assign { } }
-  op_code { drop_frame { } }
-  op_code { drop_frame { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
   op_code { end { } }
 }

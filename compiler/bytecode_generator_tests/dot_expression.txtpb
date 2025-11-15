@@ -3,8 +3,8 @@ block {
   op_code { create_frame { slots: 0 } }
   op_code { const_string { value: "abc" } }
   op_code { dot_member { member: "capitalize" } }
-  op_code { drop { } }
-  op_code { drop_frame { } }
-  op_code { drop_frame { } }
+  op_code { pop { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
   op_code { end {} }
 }

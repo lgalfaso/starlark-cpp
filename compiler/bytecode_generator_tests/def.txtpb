@@ -24,8 +24,8 @@ block {
   op_code { store { frame: 1 pos_in_frame: 4 } }
   op_code { make_function { entrypoint: 6 } }
   op_code { store { frame: 1 pos_in_frame: 5 } }
-  op_code { drop_frame { } }
-  op_code { drop_frame { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
   op_code { end { } }
 }
 block {

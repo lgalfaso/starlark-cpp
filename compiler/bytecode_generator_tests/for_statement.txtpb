@@ -14,7 +14,7 @@ block {
   op_code { for_iterator { address: 13 } }                               #  8
   op_code { store { frame: 1 pos_in_frame: 0 } }                         #  9
   op_code { const_string { value: "abc" } }                              # 10
-  op_code { drop {} }                                                    # 11
+  op_code { pop {} }                                                     # 11
   op_code { goto { address: 8 } }                                        # 12
   op_code { end_iterator {} }                                            # 13
 
@@ -33,7 +33,7 @@ block {
   op_code { store { frame: 1 pos_in_frame: 0 } }                         # 25
   op_code { store { frame: 1 pos_in_frame: 1 } }                         # 26
   op_code { const_string { value: "def" } }                              # 27
-  op_code { drop {} }                                                    # 28
+  op_code { pop {} }                                                     # 28
   op_code { goto { address: 23 } }                                       # 29
   op_code { end_iterator {} }                                            # 30
 
@@ -48,7 +48,7 @@ block {
   op_code { load { frame: 1 pos_in_frame: 0 } }                          # 38
   op_code { assign_dot_member { member: 'b' } }                          # 39
   op_code { const_string { value: "ghi" } }                              # 40
-  op_code { drop {} }                                                    # 41
+  op_code { pop {} }                                                     # 41
   op_code { goto { address: 37 } }                                       # 42
   op_code { end_iterator {} }                                            # 43
 
@@ -66,11 +66,11 @@ block {
   op_code { store { frame: 1 pos_in_frame: 0 } }                         # 55
   op_code { store { frame: 1 pos_in_frame: 1 } }                         # 56
   op_code { const_string { value: "jkl" } }                              # 57
-  op_code { drop { } }                                                   # 58
+  op_code { pop { } }                                                    # 58
   op_code { goto { address: 53 } }                                       # 59
   op_code { end_iterator { } }                                           # 60
 
-  op_code { drop_frame {} }                                              # 61
-  op_code { drop_frame {} }                                              # 62
+  op_code { pop_frame { } }                                              # 61
+  op_code { pop_frame { } }                                              # 62
   op_code { end {} }                                                     # 63
 }

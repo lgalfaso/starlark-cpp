@@ -2,14 +2,14 @@ block {
   op_code { create_frame { slots: 0 } }
   op_code { create_frame { slots: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { drop {} }
+  op_code { pop {} }
   op_code { const_float { value: 1.1 } }
-  op_code { drop {} }
+  op_code { pop {} }
   op_code { const_string { value: "abc" } }
-  op_code { drop {} }
+  op_code { pop {} }
   op_code { const_bytes { value: "def" } }
-  op_code { drop {} }
-  op_code { drop_frame {} }
-  op_code { drop_frame {} }
+  op_code { pop {} }
+  op_code { pop_frame {} }
+  op_code { pop_frame {} }
   op_code { end {} }
 }

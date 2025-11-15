@@ -26,8 +26,7 @@ message OpCode {
     ConstBytes const_bytes = 4;
     ConstNone const_none = 59;
 
-    Drop drop = 5;
-    Dup dup = 6;
+    Pop pop = 5;
 
     UnaryPlus unary_plus = 7;
     UnaryMinus unary_minus = 8;
@@ -55,8 +54,9 @@ message OpCode {
     BinarySlashSlash binary_slash_slash = 29;
 
     JumpAddress goto = 30;
-    JumpAddress if_true = 31;
-    JumpAddress if_false = 32;
+    JumpAddress jump_if_false = 32;
+    JumpAddress jump_if_true_or_pop = 31;
+    JumpAddress jump_if_false_or_pop = 6;
 
     MakeTuple make_tuple = 33;
     MakeList make_list = 34;
@@ -99,7 +99,7 @@ message OpCode {
     SetDefaultValues set_default_values = 64;
 
     CreateFrame create_frame = 65;
-    DropFrame drop_frame = 66;
+    PopFrame pop_frame = 66;
 
     End end = 58;
   }
@@ -127,8 +127,7 @@ message ConstBytes {
   string value = 1;
 }
 
-message Drop {}
-message Dup {}
+message Pop {}
 message UnaryPlus {}
 message UnaryMinus {}
 message UnaryTilde {}
@@ -229,7 +228,7 @@ message CreateFrame {
   uint32 slots = 1;
 }
 
-message DropFrame {}
+message PopFrame {}
 
 message End {}
 

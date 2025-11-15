@@ -158,8 +158,8 @@ void bytecode_generator::enter_file(const File* starlark_file) {
 void bytecode_generator::exit_file(const File* starlark_file) {
   assert(blocks.size() == 1);
   assert(blocks.back() == 0);
-  mutable_block()->add_op_code()->mutable_drop_frame();
-  mutable_block()->add_op_code()->mutable_drop_frame();
+  mutable_block()->add_op_code()->mutable_pop_frame();
+  mutable_block()->add_op_code()->mutable_pop_frame();
   mutable_block()->add_op_code()->mutable_end();
 }
 
@@ -175,7 +175,7 @@ void bytecode_generator::enter_load_statement(const LoadStmt* load_statement) {
 }
 
 void bytecode_generator::exit_expression_statement(const Expression* statement) {
-  mutable_block()->add_op_code()->mutable_drop();
+  mutable_block()->add_op_code()->mutable_pop();
 }
 
 void bytecode_generator::enter_none_value() {
@@ -237,14 +237,10 @@ void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expressi
   binary_op_mid_pos[binary_expression] = block().op_code_size();
   switch (binary_expression->operator_()) {
     case BinaryExpr::OR:
-      mutable_block()->add_op_code()->mutable_dup();
-      mutable_block()->add_op_code()->mutable_if_true();
-      mutable_block()->add_op_code()->mutable_drop();
+      mutable_block()->add_op_code()->mutable_jump_if_true_or_pop();
       break;
     case BinaryExpr::AND:
-      mutable_block()->add_op_code()->mutable_dup();
-      mutable_block()->add_op_code()->mutable_if_false();
-      mutable_block()->add_op_code()->mutable_drop();
+      mutable_block()->add_op_code()->mutable_jump_if_false_or_pop();
       break;
     default:
       break;
@@ -254,10 +250,10 @@ void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expressi
 void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_expression) {
   switch (binary_expression->operator_()) {
     case BinaryExpr::OR:
-      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_true()->set_address(block().op_code_size());
+      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression])->mutable_jump_if_true_or_pop()->set_address(block().op_code_size());
       break;
     case BinaryExpr::AND:
-      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression] + 1)->mutable_if_false()->set_address(block().op_code_size());
+      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression])->mutable_jump_if_false_or_pop()->set_address(block().op_code_size());
       break;
     case BinaryExpr::EQUALS_EQUALS:
       mutable_block()->add_op_code()->mutable_binary_equals_equals();
@@ -410,7 +406,7 @@ void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehens
   add_to_list->set_number_of_elements(1);
   fix_comp_clause(list_comprehension->clause());
   comprehension_comp_clause.pop_back();
-  mutable_block()->add_op_code()->mutable_drop_frame();
+  mutable_block()->add_op_code()->mutable_pop_frame();
 }
 
 void bytecode_generator::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {
@@ -431,7 +427,7 @@ void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionar
   add_to_dict->set_number_of_elements(1);
   fix_comp_clause(dictionary_comprehension->clause());
   comprehension_comp_clause.pop_back();
-  mutable_block()->add_op_code()->mutable_drop_frame();
+  mutable_block()->add_op_code()->mutable_pop_frame();
 }
 
 void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
@@ -442,7 +438,7 @@ void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
 
 void bytecode_generator::exit_if_clause(const Expression* if_clause) {
   comprehension_comp_clause.back().push_back(block().op_code_size());
-  mutable_block()->add_op_code()->mutable_if_false();
+  mutable_block()->add_op_code()->mutable_jump_if_false();
 }
 
 void bytecode_generator::mid_if_expression(const IfExpr* if_expression) {
@@ -450,9 +446,9 @@ void bytecode_generator::mid_if_expression(const IfExpr* if_expression) {
   if (!if_expression_op_mid_pos.contains(if_expression)) {
     // This is the first time this is called for this `if expression`.
     if_expression_op_mid_pos[if_expression] = op_code_size;
-    mutable_block()->add_op_code()->mutable_if_false();
+    mutable_block()->add_op_code()->mutable_jump_if_false();
   } else {
-    mutable_block()->mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_if_false()->set_address(op_code_size + 1);
+    mutable_block()->mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_jump_if_false()->set_address(op_code_size + 1);
     if_expression_op_mid_pos[if_expression] = op_code_size;
     mutable_block()->add_op_code()->mutable_goto_();
   }
@@ -524,12 +520,12 @@ void bytecode_generator::exit_if_statement(const IfStmt* if_statement) {
 
 void bytecode_generator::enter_then(const RepeatedPtrField<Statement>* then) {
   if_statement_then[then] = block().op_code_size();
-  mutable_block()->add_op_code()->mutable_if_false();
+  mutable_block()->add_op_code()->mutable_jump_if_false();
 }
 
 void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
   auto op_code_size = block().op_code_size();
-  mutable_block()->mutable_op_code(if_statement_then[then])->mutable_if_false()->set_address(op_code_size + 1);
+  mutable_block()->mutable_op_code(if_statement_then[then])->mutable_jump_if_false()->set_address(op_code_size + 1);
   mutable_block()->add_op_code()->mutable_goto_();
   if_statement_to_fix_to_the_end.back().push_back(op_code_size);
 
@@ -715,7 +711,7 @@ void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& cla
       mutable_block()->add_op_code()->mutable_end_iterator();
     } else {
       mutable_block()->mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
-          ->mutable_if_false()->set_address(block().op_code_size());
+          ->mutable_jump_if_false()->set_address(block().op_code_size());
     }
     clause_pos++;
   }

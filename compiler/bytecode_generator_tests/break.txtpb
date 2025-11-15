@@ -14,10 +14,10 @@ block {
   op_code { for_iterator { address: 16 } }         # 8
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { const_string { value: "abc" } }
-  op_code { drop { } }
+  op_code { pop { } }
   op_code { goto { address: 16 } }
   op_code { const_string { value: "def" } }
-  op_code { drop { } }
+  op_code { pop { } }
   op_code { goto { address: 8 } }
   op_code { end_iterator { } }                     # 16
 
@@ -30,7 +30,7 @@ block {
   op_code { for_iterator { address: 49 } }         # 23
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { const_string { value: "abc" } }
-  op_code { drop { } }
+  op_code { pop { } }
   op_code { goto { address: 49 } }
   op_code { make_list { reserve_size: 3 } }
   op_code { const_int { value: 4 } }
@@ -41,20 +41,20 @@ block {
   op_code { for_iterator { address: 42 } }         # 34
   op_code { store { frame: 1 pos_in_frame: 1 } }
   op_code { const_string { value: "def" } }
-  op_code { drop { } }
+  op_code { pop { } }
   op_code { goto { address: 42 } }
   op_code { const_string { value: "ghi" } }
-  op_code { drop { } }
+  op_code { pop { } }
   op_code { goto { address: 34 } }
   op_code { end_iterator { } }                     # 42
   op_code { const_string { value: "jkl" } }        # 43
-  op_code { drop { } }
+  op_code { pop { } }
   op_code { goto { address: 49 } }
   op_code { const_string { value: "mno" } }
-  op_code { drop { } }
+  op_code { pop { } }
   op_code { goto { address: 23 } }
   op_code { end_iterator { } }                     # 49
-  op_code { drop_frame { } }                       # 50
-  op_code { drop_frame { } }                       # 51
+  op_code { pop_frame { } }                        # 50
+  op_code { pop_frame { } }                        # 51
   op_code { end { } }                              # 52
 }
