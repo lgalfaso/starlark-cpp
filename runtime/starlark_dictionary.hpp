@@ -6,6 +6,7 @@
 #include <string>
 
 #include "containers/linked_hash_map.hpp"
+#include "runtime/error_fn.hpp"
 #include "runtime/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
@@ -17,7 +18,7 @@ class starlark_dictionary : public starlark_obj {
  public:
   std::string_view type() const override;
   bool truthy() const override;
-  bool insert(starlark_obj* key, starlark_obj* value);
+  bool insert(starlark_obj* key, starlark_obj* value, error_fn* error_callback);
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

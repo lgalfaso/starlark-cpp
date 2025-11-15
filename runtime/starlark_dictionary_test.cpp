@@ -4,17 +4,24 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <string>
+#include <vector>
+
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_integer.hpp"
+#include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_string.hpp"
 
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_dictionary;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_none;
-using starlark::runtime::starlark_string;
+using ::testing::SizeIs;
+using ::starlark::runtime::error_fn;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_dictionary;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_string;
 
 namespace {
 
@@ -31,11 +38,11 @@ TEST(StarlarkDictionary, Str) {
   starlark_integer one(1);
   EXPECT_EQ("{}", starlark_dictionary().str());
   starlark_dictionary dict;
-  dict.insert(&s1, &none);
+  dict.insert(&s1, &none, nullptr);
   EXPECT_EQ("{'1': None}", dict.str());
-  dict.insert(&s2, &true_obj);
+  dict.insert(&s2, &true_obj, nullptr);
   EXPECT_EQ("{'1': None, '2': True}", dict.str());
-  dict.insert(&s3, &one);
+  dict.insert(&s3, &one, nullptr);
   EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict.str());
 }
 
@@ -47,14 +54,14 @@ TEST(StarlarkDictionary, StrOrder) {
   starlark_bool true_obj(true);
   starlark_integer one(1);
   starlark_dictionary dict_1;
-  dict_1.insert(&s1, &none);
-  dict_1.insert(&s2, &true_obj);
-  dict_1.insert(&s3, &one);
+  dict_1.insert(&s1, &none, nullptr);
+  dict_1.insert(&s2, &true_obj, nullptr);
+  dict_1.insert(&s3, &one, nullptr);
   EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict_1.str());
   starlark_dictionary dict_2;
-  dict_2.insert(&s3, &one);
-  dict_2.insert(&s1, &none);
-  dict_2.insert(&s2, &true_obj);
+  dict_2.insert(&s3, &one, nullptr);
+  dict_2.insert(&s1, &none, nullptr);
+  dict_2.insert(&s2, &true_obj, nullptr);
   EXPECT_EQ("{'3': 1, '1': None, '2': True}", dict_2.str());
 }
 
@@ -67,10 +74,10 @@ TEST(StarlarkDictionary, StrContainsItself) {
   starlark_bool true_obj(true);
   starlark_integer one(1);
   starlark_dictionary map;
-  map.insert(&s1, &none);
-  map.insert(&s2, &true_obj);
-  map.insert(&s3, &one);
-  map.insert(&s4, &map);
+  map.insert(&s1, &none, nullptr);
+  map.insert(&s2, &true_obj, nullptr);
+  map.insert(&s3, &one, nullptr);
+  map.insert(&s4, &map, nullptr);
   EXPECT_EQ("{'1': None, '2': True, '3': 1, '4': {...}}", map.str());
 }
 
@@ -78,7 +85,7 @@ TEST(StarlarkDictionary, Truthy) {
   starlark_none none;
   starlark_dictionary dict;
   EXPECT_FALSE(dict.truthy());
-  dict.insert(&none, &none);
+  dict.insert(&none, &none, nullptr);
   EXPECT_TRUE(dict.truthy());
 }
 
@@ -88,17 +95,17 @@ TEST(StarlarkDictionary, Equals) {
   EXPECT_FALSE(starlark_dictionary().equals(none));
   EXPECT_TRUE(starlark_dictionary().equals(starlark_dictionary()));
   starlark_dictionary dict_1;
-  dict_1.insert(&none, &none);
+  dict_1.insert(&none, &none, nullptr);
   starlark_dictionary dict_2;
-  dict_2.insert(&none, &none);
+  dict_2.insert(&none, &none, nullptr);
   EXPECT_FALSE(dict_1.equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_dictionary().equals(dict_1));
   EXPECT_TRUE(dict_1.equals(dict_2));
   starlark_dictionary dict_3;
-  dict_3.insert(&none, &bool_true);
+  dict_3.insert(&none, &bool_true, nullptr);
   EXPECT_FALSE(dict_3.equals(dict_1));
   starlark_dictionary dict_4;
-  dict_4.insert(&bool_true, &none);
+  dict_4.insert(&bool_true, &none, nullptr);
   EXPECT_FALSE(dict_4.equals(dict_1));
 }
 
@@ -112,24 +119,24 @@ TEST(StarlarkDictionary, EqualsInDifferentOrder) {
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;
   starlark_dictionary dict_3;
-  dict_1.insert(&none, &none);
-  dict_1.insert(&zero, &zero);
-  dict_1.insert(&one, &one);
-  dict_1.insert(&two, &two);
-  dict_1.insert(&bool_true, &bool_true);
-  dict_1.insert(&bool_false, &bool_false);
-  dict_2.insert(&none, &none);
-  dict_2.insert(&zero, &zero);
-  dict_2.insert(&one, &one);
-  dict_2.insert(&two, &two);
-  dict_2.insert(&bool_true, &bool_true);
-  dict_2.insert(&bool_false, &bool_false);
-  dict_3.insert(&bool_false, &bool_false);
-  dict_3.insert(&bool_true, &bool_true);
-  dict_3.insert(&two, &two);
-  dict_3.insert(&one, &one);
-  dict_3.insert(&zero, &zero);
-  dict_3.insert(&none, &none);
+  dict_1.insert(&none, &none, nullptr);
+  dict_1.insert(&zero, &zero, nullptr);
+  dict_1.insert(&one, &one, nullptr);
+  dict_1.insert(&two, &two, nullptr);
+  dict_1.insert(&bool_true, &bool_true, nullptr);
+  dict_1.insert(&bool_false, &bool_false, nullptr);
+  dict_2.insert(&none, &none, nullptr);
+  dict_2.insert(&zero, &zero, nullptr);
+  dict_2.insert(&one, &one, nullptr);
+  dict_2.insert(&two, &two, nullptr);
+  dict_2.insert(&bool_true, &bool_true, nullptr);
+  dict_2.insert(&bool_false, &bool_false, nullptr);
+  dict_3.insert(&bool_false, &bool_false, nullptr);
+  dict_3.insert(&bool_true, &bool_true, nullptr);
+  dict_3.insert(&two, &two, nullptr);
+  dict_3.insert(&one, &one, nullptr);
+  dict_3.insert(&zero, &zero, nullptr);
+  dict_3.insert(&none, &none, nullptr);
   EXPECT_TRUE(dict_1.equals(dict_2));
   EXPECT_TRUE(dict_1.equals(dict_3));
 }
@@ -138,6 +145,32 @@ TEST(StarlarkDictionary, Hash) {
   EXPECT_EQ(starlark_dictionary().hash(), -1);
 }
 
-// TODO(lmirelmann): Test the return value of `insert`.
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+
+  std::vector<std::string> messages;
+};
+
+TEST(StarlarkDictionary, InsertingUsingUnhashableKey) {
+  starlark_dictionary dict;
+  starlark_list list;
+  starlark_none none;
+  error_handler error_callback;
+
+  EXPECT_FALSE(dict.insert(&list, &none, &error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, InsertReturnValue) {
+  starlark_dictionary dict;
+  starlark_none none;
+  starlark_integer zero(0);
+  EXPECT_TRUE(dict.insert(&none, &none, nullptr));
+  EXPECT_FALSE(dict.insert(&none, &none, nullptr));
+  EXPECT_FALSE(dict.insert(&none, &zero, nullptr));
+}
 
 }  // namespace

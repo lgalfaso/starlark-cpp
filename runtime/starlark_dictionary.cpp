@@ -2,6 +2,7 @@
 
 #include "runtime/starlark_dictionary.hpp"
 
+#include <format>
 #include <string>
 
 namespace starlark {
@@ -88,10 +89,13 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
   return -1;
 }
 
-bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value) {
+bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn* error_callback) {
   // TODO(lmirelmann): If this is freezed, then this is an error.
   if (key->hash() == -1) {
-    // TODO(lmirelmann): Report the error.
+    if (error_callback != nullptr) {
+      // TODO(lmirelmann): Would be nice to add the line number and position.
+      error_callback->add_error(std::format("TypeError: cannot use '{}' as a dict key (unhashable type: '{}')", key->type(), key->type()));
+    }
     return false;
   }
   auto [it, result] = values.insert(key, value);

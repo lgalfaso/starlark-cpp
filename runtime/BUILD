@@ -33,6 +33,12 @@ cc_test(
 )
 
 cc_library(
+    name = "error_fn",
+    hdrs = ["error_fn.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
     name = "starlark_object",
     srcs = ["starlark_object.cpp"],
     hdrs = ["starlark_object.hpp"],
@@ -186,6 +192,7 @@ cc_library(
     srcs = ["starlark_dictionary.cpp"],
     hdrs = ["starlark_dictionary.hpp"],
     deps = [
+        ":error_fn",
         ":starlark_object",
         "//containers:linked_hash_map",
     ],
@@ -199,6 +206,7 @@ cc_test(
         ":starlark_bool",
         ":starlark_dictionary",
         ":starlark_integer",
+        ":starlark_list",
         ":starlark_none",
         ":starlark_string",
         "@googletest//:gtest_main",
