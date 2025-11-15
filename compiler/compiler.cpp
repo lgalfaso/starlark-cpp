@@ -80,10 +80,8 @@ class bytecode_generator : public ast_listener_base {
 
   void exit_tuple(const Tuple* tuple) override;
   void enter_list_expression(const ListExpr* list_expression) override;
-  void mid_list_expression(const ListExpr* list_expression) override;
   void exit_list_expression(const ListExpr* list_expression) override;
   void enter_dictionary_expression(const DictExpr* dictionary_expression) override;
-  void mid_dictionary_expression(const DictExpr* dictionary_expression) override;
   void exit_dictionary_expression(const DictExpr* dictionary_expression) override;
 
   void enter_list_comprehension(const ListComp* list_comprehension) override;
@@ -340,13 +338,11 @@ void bytecode_generator::enter_list_expression(const ListExpr* list_expression) 
   mutable_block()->add_op_code()->mutable_make_list()->set_reserve_size(list_expression->element_size());
 }
 
-void bytecode_generator::mid_list_expression(const ListExpr* list_expression) {
-  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos_in_stack(1);
-}
-
 void bytecode_generator::exit_list_expression(const ListExpr* list_expression) {
   if (list_expression->element_size() != 0) {
-    mutable_block()->add_op_code()->mutable_add_to_list()->set_pos_in_stack(1);
+    auto* add_to_list = mutable_block()->add_op_code()->mutable_add_to_list();
+    add_to_list->set_pos_in_stack(list_expression->element_size());
+    add_to_list->set_number_of_elements(list_expression->element_size());
   }
 }
 
@@ -354,13 +350,11 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
   mutable_block()->add_op_code()->mutable_make_dictionary()->set_reserve_size(dictionary_expression->entry_size());
 }
 
-void bytecode_generator::mid_dictionary_expression(const DictExpr* dictionary_expression) {
-  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(2);
-}
-
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
-    mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(2);
+    auto* add_to_dict = mutable_block()->add_op_code()->mutable_add_to_dictionary();
+    add_to_dict->set_pos_in_stack(2 * dictionary_expression->entry_size());
+    add_to_dict->set_number_of_elements(dictionary_expression->entry_size());
   }
 }
 
@@ -377,7 +371,9 @@ void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehens
       number_for_clauses++;
     }
   }
-  mutable_block()->add_op_code()->mutable_add_to_list()->set_pos_in_stack(number_for_clauses + 1);
+  auto* add_to_list = mutable_block()->add_op_code()->mutable_add_to_list();
+  add_to_list->set_pos_in_stack(number_for_clauses + 1);
+  add_to_list->set_number_of_elements(1);
   fix_comp_clause(list_comprehension->clause());
   comprehension_comp_clause.pop_back();
   mutable_block()->add_op_code()->mutable_drop_frame();
@@ -396,7 +392,9 @@ void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionar
       number_for_clauses++;
     }
   }
-  mutable_block()->add_op_code()->mutable_add_to_dictionary()->set_pos_in_stack(number_for_clauses + 2);
+  auto* add_to_dict = mutable_block()->add_op_code()->mutable_add_to_dictionary();
+  add_to_dict->set_pos_in_stack(number_for_clauses + 2);
+  add_to_dict->set_number_of_elements(1);
   fix_comp_clause(dictionary_comprehension->clause());
   comprehension_comp_clause.pop_back();
   mutable_block()->add_op_code()->mutable_drop_frame();
