@@ -17,6 +17,7 @@ namespace {
 
 const char* XID_Start = "XID_Start";
 const char* XID_Continue = "XID_Continue";
+const char* White_Space = "White_Space";
 
 void read_code_points(const char* file,
                      std::set<std::uint32_t>& set,
@@ -59,7 +60,7 @@ constexpr int max_unicode = 0x10FFFF;
 
 TEST(UcdTest, IsXIdStart) {
   const auto& argv = ::testing::internal::GetArgvs();
-  ASSERT_THAT(argv, SizeIs(2));
+  ASSERT_THAT(argv, SizeIs(3));
 
   std::string path = argv[1];
   std::set<std::uint32_t> all_cps;
@@ -70,9 +71,9 @@ TEST(UcdTest, IsXIdStart) {
   }
 }
 
-TEST(UcdTest, XIsIdContinue) {
+TEST(UcdTest, IsXIdContinue) {
   const auto& argv = ::testing::internal::GetArgvs();
-  ASSERT_THAT(argv, SizeIs(2));
+  ASSERT_THAT(argv, SizeIs(3));
 
   std::string path = argv[1];
   std::set<std::uint32_t> all_cps;
@@ -80,6 +81,19 @@ TEST(UcdTest, XIsIdContinue) {
 
   for (int i = 0; i <= max_unicode; ++i) {
     EXPECT_EQ(all_cps.contains(i), starlark::ucd::is_XID_Continue(i));
+  }
+}
+
+TEST(UcdTest, IsWhiteSpace) {
+  const auto& argv = ::testing::internal::GetArgvs();
+  ASSERT_THAT(argv, SizeIs(3));
+
+  std::string path = argv[2];
+  std::set<std::uint32_t> all_cps;
+  read_code_points(path.c_str(), all_cps, White_Space);
+
+  for (int i = 0; i <= max_unicode; ++i) {
+    EXPECT_EQ(all_cps.contains(i), starlark::ucd::is_White_Space(i));
   }
 }
 

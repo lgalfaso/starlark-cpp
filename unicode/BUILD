@@ -111,9 +111,11 @@ cc_test(
     srcs = ["ucd_test.cpp"],
     args = [
         "$(location @ucd//:DerivedCoreProperties.txt)",
+        "$(location @ucd//:PropList.txt)",
     ],
     data = [
         "@ucd//:DerivedCoreProperties.txt",
+        "@ucd//:PropList.txt",
     ],
     deps = [
         ":ucd",

@@ -74,7 +74,7 @@ const char* CPP_FOOTER = R"CPP(}  // namespace ucd
 constexpr int CODEPOINTS_PER_LINE = 64;
 
 std::set<std::string> binary_unicode_properties = {
-  "XID_Continue", "XID_Start"
+  "White_Space", "XID_Continue", "XID_Start"
 };
 
 std::set<std::string> normalization_properties = {
@@ -369,6 +369,7 @@ void write_impl(const char* derived_core_properties_file,
                 const char* unicode_data_file,
                 const char* composition_exclusions,
                 const char* derived_normalization_props,
+                const char* prop_list,
                 const char* output_file,
                 const char* include_h) {
   FILE* cc_output = fopen(output_file, "w");
@@ -398,6 +399,9 @@ void write_impl(const char* derived_core_properties_file,
     starlark::ucd::read_all_code_points(derived_core_properties_file,
                               binary_properties,
                               binary_unicode_properties);
+    starlark::ucd::read_all_code_points(prop_list,
+                              binary_properties,
+                              binary_unicode_properties);
 
     for (const auto& normalization_property : normalization_properties) {
       if (binary_properties[normalization_property].empty()) {
@@ -424,20 +428,22 @@ void write_impl(const char* derived_core_properties_file,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  if (argc == 8) {
+  if (argc == 9) {
     const char* derived_core_properties_file = argv[1];
     const char* unicode_data_file = argv[2];
     const char* composition_exclusions = argv[3];
     const char* derived_normalization_props = argv[4];
-    const char* output_cpp_file = argv[5];
-    const char* output_hpp_file = argv[6];
-    const char* include_h = argv[7];
+    const char* prop_list = argv[5];
+    const char* output_cpp_file = argv[6];
+    const char* output_hpp_file = argv[7];
+    const char* include_h = argv[8];
 
     write_header(output_hpp_file, include_h);
     write_impl(derived_core_properties_file,
                unicode_data_file,
                composition_exclusions,
                derived_normalization_props,
+               prop_list,
                output_cpp_file,
                include_h);
   }
