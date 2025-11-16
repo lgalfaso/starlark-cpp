@@ -22,21 +22,22 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
-using starlark::runtime::starlark_bigint;
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_built_in_function;
-using starlark::runtime::starlark_bytes;
-using starlark::runtime::starlark_dictionary;
-using starlark::runtime::starlark_float;
-using starlark::runtime::starlark_function;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_list;
-using starlark::runtime::starlark_none;
-using starlark::runtime::starlark_range;
-using starlark::runtime::starlark_set;
-using starlark::runtime::starlark_string;
-using starlark::runtime::starlark_struct;
-using starlark::runtime::starlark_tuple;
+using ::google::protobuf::Arena;
+using ::starlark::runtime::starlark_bigint;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_built_in_function;
+using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_dictionary;
+using ::starlark::runtime::starlark_float;
+using ::starlark::runtime::starlark_function;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_range;
+using ::starlark::runtime::starlark_set;
+using ::starlark::runtime::starlark_string;
+using ::starlark::runtime::starlark_struct;
+using ::starlark::runtime::starlark_tuple;
 
 namespace {
 
@@ -108,6 +109,13 @@ TEST(StarlarkInteger, Hash) {
   EXPECT_EQ(-3, starlark_integer(-0x7fffffffffffffff).hash());
   EXPECT_EQ(-4, starlark_integer(-0x8000000000000000).hash());
   EXPECT_EQ(-4, starlark_integer(std::numeric_limits<int64_t>::min()).hash());
+}
+
+TEST(StarlarkInteger, UnaryMinusEdgeCase) {
+  google::protobuf::Arena arena;
+  auto* result = starlark_integer(std::numeric_limits<int64_t>::min()).unary_minus(arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ("9223372036854775808", result->str());
 }
 
 }  // namespace

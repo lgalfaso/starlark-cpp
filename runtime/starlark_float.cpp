@@ -12,6 +12,8 @@
 #include "runtime/hash.hpp"
 #include "runtime/starlark_numeric.hpp"
 
+using ::google::protobuf::Arena;
+
 namespace starlark {
 namespace runtime {
 
@@ -19,6 +21,15 @@ starlark_float::starlark_float(double value) : value(value) {}
 
 std::string_view starlark_float::type() const {
   return "float";
+}
+
+starlark_obj* starlark_float::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) {
+  return this;
+}
+
+starlark_obj* starlark_float::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) {
+  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
+  return Arena::Create<starlark_float>(&arena, -value);
 }
 
 bool starlark_float::inner_repr(printer& print, printer_action action) const {

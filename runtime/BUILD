@@ -42,6 +42,11 @@ cc_library(
     name = "starlark_object",
     srcs = ["starlark_object.cpp"],
     hdrs = ["starlark_object.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":error_fn",
+        "@protobuf//:protobuf",
+    ],
 )
 
 cc_library(
@@ -219,6 +224,7 @@ cc_library(
     hdrs = ["starlark_integer.hpp"],
     deps = [
         ":hash",
+        ":starlark_bigint",
         ":starlark_numeric",
         ":starlark_object",
         "//bigint:number",

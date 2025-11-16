@@ -11,6 +11,10 @@
 #include <variant>
 #include <vector>
 
+#include "google/protobuf/arena.h"
+
+#include "runtime/error_fn.hpp"
+
 #pragma GCC visibility push(default)
 
 namespace starlark {
@@ -83,6 +87,9 @@ class starlark_obj {
   virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args);
   virtual int64_t sequence_size() const;
   virtual void unpack(std::vector<starlark_obj*>& consumer);
+
+  virtual starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn* error_callback);
+  virtual starlark_obj* unary_minus(google::protobuf::Arena& arena, error_fn* error_callback);
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;

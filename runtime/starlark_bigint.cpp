@@ -9,6 +9,8 @@
 #include "runtime/hash.hpp"
 #include "runtime/starlark_numeric.hpp"
 
+using ::google::protobuf::Arena;
+
 namespace starlark {
 namespace runtime {
 
@@ -28,6 +30,15 @@ bool starlark_bigint::inner_repr(printer& print, printer_action action) const {
 
 bool starlark_bigint::truthy() const {
   return value != bigint::number::zero;
+}
+
+starlark_obj* starlark_bigint::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) {
+  return this;
+}
+
+starlark_obj* starlark_bigint::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) {
+  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
+  return Arena::Create<starlark_bigint>(&arena, -value);
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_bigint::inner_hash() const {

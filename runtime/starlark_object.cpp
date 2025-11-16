@@ -181,6 +181,20 @@ void starlark_obj::unpack(std::vector<starlark_obj*>& consumer) {
   return;
 }
 
+starlark_obj* starlark_obj::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: bad operand type for unary +: '{}'", type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: bad operand type for unary -: '{}'", type()));
+  }
+  return nullptr;
+}
+
 void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   return;
 }
