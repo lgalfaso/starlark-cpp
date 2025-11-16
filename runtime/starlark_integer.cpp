@@ -48,6 +48,11 @@ starlark_obj* starlark_integer::unary_minus(google::protobuf::Arena& arena, erro
   return Arena::Create<starlark_integer>(&arena, -value);
 }
 
+starlark_obj* starlark_integer::unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback) {
+  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
+  return Arena::Create<starlark_integer>(&arena, ~value);
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash() const {
   // This implementation makes the assumption that the right shifting of
   // negative numbers is not sign extended, and that the representation of

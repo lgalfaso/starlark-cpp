@@ -21,6 +21,7 @@ class starlark_bigint : public starlark_numeric {
   bool truthy() const override;
   starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) override;
   starlark_obj* unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) override;
+  starlark_obj* unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback) override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

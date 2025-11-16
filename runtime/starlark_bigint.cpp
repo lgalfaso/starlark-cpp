@@ -10,6 +10,7 @@
 #include "runtime/starlark_numeric.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::bigint::number;
 
 namespace starlark {
 namespace runtime {
@@ -39,6 +40,11 @@ starlark_obj* starlark_bigint::unary_plus(google::protobuf::Arena& arena, error_
 starlark_obj* starlark_bigint::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) {
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
   return Arena::Create<starlark_bigint>(&arena, -value);
+}
+
+starlark_obj* starlark_bigint::unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback) {
+  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
+  return Arena::Create<starlark_bigint>(&arena, -(value + number::one));
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_bigint::inner_hash() const {
