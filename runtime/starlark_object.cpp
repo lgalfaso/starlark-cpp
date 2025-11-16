@@ -178,6 +178,9 @@ int64_t starlark_obj::sequence_size() const {
 }
 
 void starlark_obj::unpack(std::vector<starlark_obj*>& consumer) {
+  // TODO(lmirelmann): Maybe should produce an error. In theory it should not be possible
+  // for this to be called as `sequence_size` should be called first. That said, we could
+  // remove `sequence_size` and add the expected unpack size.
   return;
 }
 
