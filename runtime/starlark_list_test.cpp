@@ -30,11 +30,11 @@ TEST(StarlarkList, Str) {
   starlark_integer one(1);
   starlark_list list;
   EXPECT_EQ("[]", list.str());
-  list.add(&none);
+  list.add(&none, nullptr);
   EXPECT_EQ("[None]", list.str());
-  list.add(&true_obj);
+  list.add(&true_obj, nullptr);
   EXPECT_EQ("[None, True]", list.str());
-  list.add(&one);
+  list.add(&one, nullptr);
   EXPECT_EQ("[None, True, 1]", list.str());
 }
 
@@ -42,9 +42,9 @@ TEST(StarlarkList, StrRecursion) {
   // Bazel prints `[1, [1, ..., 1], 1]`, Python prints `[1, [...], 1]`.
   starlark_list list;
   starlark_integer one(1);
-  list.add(&one);
-  list.add(&list);
-  list.add(&one);
+  list.add(&one, nullptr);
+  list.add(&list, nullptr);
+  list.add(&one, nullptr);
   EXPECT_EQ("[1, [...], 1]", list.str());
 }
 
@@ -52,7 +52,7 @@ TEST(StarlarkList, Truthy) {
   starlark_none none;
   starlark_list list;
   EXPECT_FALSE(list.truthy());
-  list.add(&none);
+  list.add(&none, nullptr);
   EXPECT_TRUE(list.truthy());
 }
 
@@ -64,12 +64,12 @@ TEST(StarlarkList, Equals) {
   starlark_list list3;
   starlark_list list4;
   starlark_list list5;
-  list2.add(&none);
-  list3.add(&one);
-  list4.add(&none);
-  list4.add(&one);
-  list5.add(&one);
-  list5.add(&none);
+  list2.add(&none, nullptr);
+  list3.add(&one, nullptr);
+  list4.add(&none, nullptr);
+  list4.add(&one, nullptr);
+  list5.add(&one, nullptr);
+  list5.add(&none, nullptr);
 
   EXPECT_TRUE(list1.equals(list1));
   EXPECT_FALSE(list2.equals(list1));
@@ -105,20 +105,37 @@ TEST(StarlarkList, Equals) {
 TEST(StarlarkList, EqualsRecursion) {
   starlark_list list_a;
   starlark_list list_b;
-  list_a.add(&list_b);
-  list_b.add(&list_a);
+  list_a.add(&list_b, nullptr);
+  list_b.add(&list_a, nullptr);
   EXPECT_TRUE(list_a.equals(list_b));
 }
 
-TEST(StarlarkList, SequenceSize) {
-  starlark_none none;
-  starlark_integer one(1);
-  starlark_list list;
-  EXPECT_EQ(0, list.sequence_size());
-  list.add(&one);
-  EXPECT_EQ(1, list.sequence_size());
-  list.add(&none);
-  EXPECT_EQ(2, list.sequence_size());
+TEST(StarlarkList, HashWhenNotFreezed) {
+  starlark_list list_a;
+  EXPECT_EQ(-1, list_a.hash());
+}
+
+TEST(StarlarkList, HashWhenFreezed) {
+  starlark_list list_a;
+  list_a.freeze();
+  EXPECT_EQ(-1, list_a.hash());
+}
+
+TEST(StarlarkList, HashRecursion) {
+  starlark_list list_a;
+  starlark_list list_b;
+  list_a.add(&list_b, nullptr);
+  list_b.add(&list_a, nullptr);
+  EXPECT_EQ(-1, list_a.hash());
+}
+
+TEST(StarlarkList, HashRecursionFreezed) {
+  starlark_list list_a;
+  starlark_list list_b;
+  list_a.add(&list_b, nullptr);
+  list_b.add(&list_a, nullptr);
+  list_a.freeze();
+  EXPECT_EQ(-1, list_a.hash());
 }
 
 TEST(StarlarkList, Unpack) {
@@ -130,13 +147,13 @@ TEST(StarlarkList, Unpack) {
   list.unpack(0, stack, nullptr);
   EXPECT_THAT(stack, SizeIs(0));
 
-  list.add(&one);
+  list.add(&one, nullptr);
   list.unpack(1, stack, nullptr);
   ASSERT_THAT(stack, SizeIs(1));
   EXPECT_THAT(stack[0], &one);
 
   stack.clear();
-  list.add(&none);
+  list.add(&none, nullptr);
   list.unpack(2, stack, nullptr);
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
@@ -144,5 +161,6 @@ TEST(StarlarkList, Unpack) {
 }
 
 // TODO(lmirelmann): Test unpack when the number of elements do not match.
+// TODO(lmirelmann): Test trying to add to a freezed list including the error message.
 
 }  // namespace

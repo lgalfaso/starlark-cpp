@@ -92,6 +92,9 @@ bool starlark_obj::equals(const starlark_obj& other) const {
 }
 
 int64_t starlark_obj::hash() const {
+  // Replace this with -1 to disallow the hashing of objects that contain themself.
+  const int64_t recursion_replacement = 1609587929392839161L;
+
   auto candidate = inner_hash();
   if (std::holds_alternative<int64_t>(candidate)) {
     return std::get<int64_t>(candidate);
@@ -129,8 +132,7 @@ int64_t starlark_obj::hash() const {
         done.back().emplace_back(new_hash);
       } else {
         // This is added to detect hash recursions.
-        // TODO(lmirelmann): Replace this for a random constant to support hash of objects that contain themself.
-        cache[element] = -1;
+        cache[element] = recursion_replacement;
         candidate = element->inner_hash();
         if (std::holds_alternative<int64_t>(candidate)) {
           int64_t new_hash = std::get<int64_t>(candidate);

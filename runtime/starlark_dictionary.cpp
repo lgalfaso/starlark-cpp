@@ -84,13 +84,18 @@ bool starlark_dictionary::inner_equals(comparator& comp, const starlark_obj* oth
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_hash() const {
-  // TODO(lmirelmann): At the moment, the understanding is that this is the right behavior.
-  //   This may be revisited once we implement freeze.
+  // My current understanding is that this is the right behavior.
   return -1;
 }
 
 bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn* error_callback) {
-  // TODO(lmirelmann): If this is freezed, then this is an error.
+  if (freezed) {
+    if (error_callback != nullptr) {
+      // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+      error_callback->add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    }
+    return false;
+  }
   if (key->hash() == -1) {
     if (error_callback != nullptr) {
       // TODO(lmirelmann): Would be nice to add the line number and position.

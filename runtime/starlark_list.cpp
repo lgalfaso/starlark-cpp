@@ -89,14 +89,24 @@ bool starlark_list::inner_equals(comparator& comp, const starlark_obj* other) co
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_list::inner_hash() const {
-  // TODO(lmirelmann): Implement, the spec states that the object is hashable if:
-  // - If is freezed
-  // - All entries are freezed
+  // My current understanding is that this is the right behavior.
   return -1;
 }
 
-void starlark_list::add(starlark_obj* element) {
-  // TODO(lmirelmann): If this is freezed, then this is an error.
+void starlark_list::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
+  for (auto* element : values) {
+    to_freeze.push_back(element);
+  }
+}
+
+void starlark_list::add(starlark_obj* element, error_fn* error_callback) {
+  if (freezed) {
+    if (error_callback != nullptr) {
+      // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+      error_callback->add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    }
+    return;
+  }
   values.push_back(element);
 }
 

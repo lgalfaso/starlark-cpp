@@ -65,7 +65,7 @@ bool starlark_set::inner_equals(comparator& comp, const starlark_obj* other) con
     return false;
   }
   for (const auto& element : values) {
-    // TODO(lmirelmann): Implement without recursion.
+    // This will not unboundly recurse as the element is hashable.
     if (!n_other->contains(element)) {
       return false;
     }
@@ -74,18 +74,31 @@ bool starlark_set::inner_equals(comparator& comp, const starlark_obj* other) con
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_set::inner_hash() const {
-  // TODO(lmirelmann): At the moment, the understanding is that this is the right behavior.
-  //   This may be revisited once we implement freeze.
+  // My current understanding is that this is the right behavior.
   return -1;
 }
 
-starlark_set& starlark_set::add(starlark_obj* element) {
-  if (element->hash() == -1) {
-    // TODO(lmirelmann): Report the error.
-    return *this;
+void starlark_set::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
+  for (auto& element : values) {
+    to_freeze.push_back(element);
   }
-  values.insert(element);
-  return *this;
+}
+
+bool starlark_set::add(starlark_obj* element, error_fn* error_callback) {
+  if (freezed) {
+    if (error_callback != nullptr) {
+      // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+      error_callback->add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    }
+    return false;
+  }
+  if (element->hash() == -1) {
+    if (error_callback != nullptr) {
+      error_callback->add_error(std::format("TypeError: cannot use '{}' as a set element (unhashable type: '{}')", element->type(), element->type()));
+    }
+    return false;
+  }
+  return values.insert(element).second;
 }
 
 }  // namespace runtime

@@ -173,4 +173,7 @@ TEST(StarlarkDictionary, InsertReturnValue) {
   EXPECT_FALSE(dict.insert(&none, &zero, nullptr));
 }
 
+// TODO(lmirelmann): Test trying to add to a freezed dict including the error message.
+// TODO(lmirelmann): Test hashing of an unfreezed and freezed dict.
+
 }  // namespace

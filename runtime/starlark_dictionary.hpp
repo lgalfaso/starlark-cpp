@@ -23,6 +23,7 @@ class starlark_dictionary : public starlark_obj {
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(comparator& comp, const starlark_obj* other) const override;
+  // TODO(lmirelmann): Implement inner_freeze.
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:

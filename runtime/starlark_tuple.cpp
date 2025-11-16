@@ -98,6 +98,12 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_tuple::inner_hash() c
   return std::span(values.begin(), values.end());
 }
 
+void starlark_tuple::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
+  for (auto* element : values) {
+    to_freeze.push_back(element);
+  }
+}
+
 starlark_tuple& starlark_tuple::add(starlark_obj* element) {
   values.push_back(element);
   return *this;

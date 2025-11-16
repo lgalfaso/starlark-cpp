@@ -18,12 +18,13 @@ class starlark_set : public starlark_obj {
  public:
   std::string_view type() const override;
   bool truthy() const override;
-  starlark_set& add(starlark_obj* element);
+  bool add(starlark_obj* element, error_fn* error_callback);
   bool contains(starlark_obj* obj) const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(comparator& comp, const starlark_obj* other) const override;
+  void inner_freeze(std::vector<starlark_obj*>& to_freeze) override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:

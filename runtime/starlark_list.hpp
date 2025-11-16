@@ -17,13 +17,14 @@ class starlark_list : public starlark_obj {
  public:
   explicit starlark_list(std::size_t reserve_size = 0);
   std::string_view type() const override;
-  void add(starlark_obj* element);
+  void add(starlark_obj* element, error_fn* error_callback);
   bool truthy() const override;
   void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(comparator& comp, const starlark_obj* other) const override;
+  void inner_freeze(std::vector<starlark_obj*>& to_freeze) override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:

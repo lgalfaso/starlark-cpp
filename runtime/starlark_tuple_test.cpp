@@ -133,8 +133,7 @@ TEST(StarlarkTuple, HashRecursion) {
   starlark_tuple tuple2;
   tuple1.add(&tuple2);
   tuple2.add(&tuple1);
-  // TODO(lmirelmann): This should change once hash recursions are implemented.
-  EXPECT_EQ(-1, tuple1.hash());
+  EXPECT_EQ(-5827241394322601009, tuple1.hash());
 }
 
 TEST(StarlarkTuple, Unpack) {

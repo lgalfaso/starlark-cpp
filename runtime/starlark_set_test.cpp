@@ -27,23 +27,34 @@ TEST(StarlarkSet, Str) {
   starlark_bool true_obj(true);
   starlark_integer one(1);
   EXPECT_EQ("set()", starlark_set().str());
-  EXPECT_EQ("set([None])", starlark_set().add(&none).str());
-  EXPECT_EQ("set([None, True])", starlark_set().add(&none).add(&true_obj).str());
-  EXPECT_EQ("set([None, True, 1])", starlark_set().add(&none).add(&true_obj).add(&one).str());
+  starlark_set set1;
+  set1.add(&none, nullptr);
+  EXPECT_EQ("set([None])", set1.str());
+  set1.add(&true_obj, nullptr);
+  EXPECT_EQ("set([None, True])", set1.str());
+  set1.add(&one, nullptr);
+  EXPECT_EQ("set([None, True, 1])", set1.str());
 }
 
 TEST(StarlarkSet, Truthy) {
   starlark_none none;
-  EXPECT_FALSE(starlark_set().truthy());
-  EXPECT_TRUE(starlark_set().add(&none).truthy());
+  starlark_set set1;
+  EXPECT_FALSE(set1.truthy());
+  set1.add(&none, nullptr);
+  EXPECT_TRUE(set1.truthy());
 }
 
 TEST(StarlarkSet, Equals) {
   starlark_none none;
-  EXPECT_TRUE(starlark_set().equals(starlark_set()));
-  EXPECT_FALSE(starlark_set().add(&none).equals(starlark_set()));
-  EXPECT_FALSE(starlark_set().equals(starlark_set().add(&none)));
-  EXPECT_TRUE(starlark_set().add(&none).equals(starlark_set().add(&none)));
+  starlark_set set1;
+  starlark_set set2;
+  starlark_set set3;
+  set2.add(&none, nullptr);
+  set3.add(&none, nullptr);
+  EXPECT_TRUE(starlark_set().equals(set1));
+  EXPECT_FALSE(set2.equals(set1));
+  EXPECT_FALSE(set1.equals(set2));
+  EXPECT_TRUE(set2.equals(set3));
 }
 
 TEST(StarlarkSet, EqualsInDifferentOrder) {
@@ -56,11 +67,30 @@ TEST(StarlarkSet, EqualsInDifferentOrder) {
   starlark_set set_1;
   starlark_set set_2;
   starlark_set set_3;
-  set_1.add(&none).add(&zero).add(&one).add(&two).add(&bool_true).add(&bool_false);
-  set_2.add(&none).add(&zero).add(&one).add(&two).add(&bool_true).add(&bool_false);
-  set_3.add(&bool_false).add(&bool_true).add(&two).add(&one).add(&zero).add(&none);
+  set_1.add(&none, nullptr);
+  set_1.add(&zero, nullptr);
+  set_1.add(&one, nullptr);
+  set_1.add(&two, nullptr);
+  set_1.add(&bool_true, nullptr);
+  set_1.add(&bool_false, nullptr);
+  set_2.add(&none, nullptr);
+  set_2.add(&zero, nullptr);
+  set_2.add(&one, nullptr);
+  set_2.add(&two, nullptr);
+  set_2.add(&bool_true, nullptr);
+  set_2.add(&bool_false, nullptr);
+  set_3.add(&bool_false, nullptr);
+  set_3.add(&bool_true, nullptr);
+  set_3.add(&two, nullptr);
+  set_3.add(&one, nullptr);
+  set_3.add(&zero, nullptr);
+  set_3.add(&none, nullptr);
   EXPECT_TRUE(set_1.equals(set_2));
   EXPECT_TRUE(set_1.equals(set_3));
 }
+
+// TODO(lmirelmann): Test inner_freeze.
+// TODO(lmirelmann): Test hash of freezed and unfreezed sets.
+// TODO(lmirelmann): Test trying to insert to a freezed set including the error.
 
 }  // namespace
