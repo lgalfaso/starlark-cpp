@@ -6,6 +6,7 @@
 
 #include <bit>
 #include <format>
+#include <limits>
 #include <string>
 
 #include "runtime/hash.hpp"

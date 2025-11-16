@@ -3,6 +3,7 @@
 #include "runtime/starlark_list.hpp"
 
 #include <string>
+#include <vector>
 
 namespace starlark {
 namespace runtime {

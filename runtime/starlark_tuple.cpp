@@ -4,6 +4,7 @@
 
 #include <bit>
 #include <string>
+#include <vector>
 
 namespace starlark {
 namespace runtime {
