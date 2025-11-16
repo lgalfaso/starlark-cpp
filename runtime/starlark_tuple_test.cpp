@@ -137,37 +137,28 @@ TEST(StarlarkTuple, HashRecursion) {
   EXPECT_EQ(-1, tuple1.hash());
 }
 
-TEST(StarlarkTuple, SequenceSize) {
-  starlark_none none;
-  starlark_integer one(1);
-  starlark_tuple tuple;
-  EXPECT_EQ(0, tuple.sequence_size());
-  tuple.add(&one);
-  EXPECT_EQ(1, tuple.sequence_size());
-  tuple.add(&none);
-  EXPECT_EQ(2, tuple.sequence_size());
-}
-
 TEST(StarlarkTuple, Unpack) {
   starlark_none none;
   starlark_integer one(1);
   starlark_tuple tuple;
   std::vector<starlark_obj*> stack;
 
-  tuple.unpack(stack);
+  tuple.unpack(0, stack, nullptr);
   EXPECT_THAT(stack, SizeIs(0));
 
   tuple.add(&one);
-  tuple.unpack(stack);
+  tuple.unpack(1, stack, nullptr);
   ASSERT_THAT(stack, SizeIs(1));
   EXPECT_THAT(stack[0], &one);
 
   stack.clear();
   tuple.add(&none);
-  tuple.unpack(stack);
+  tuple.unpack(2, stack, nullptr);
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
   EXPECT_THAT(stack[1], &one);
 }
+
+// TODO(lmirelmann): Test unpack when the number of elements do not match.
 
 }  // namespace

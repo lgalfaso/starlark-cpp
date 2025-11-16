@@ -85,8 +85,7 @@ class starlark_obj {
   int64_t hash() const;
   void freeze();
   virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args);
-  virtual int64_t sequence_size() const;
-  virtual void unpack(std::vector<starlark_obj*>& consumer);
+  virtual void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback);
 
   virtual starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn* error_callback);
   virtual starlark_obj* unary_minus(google::protobuf::Arena& arena, error_fn* error_callback);

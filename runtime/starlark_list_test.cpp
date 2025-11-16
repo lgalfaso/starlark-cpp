@@ -127,20 +127,22 @@ TEST(StarlarkList, Unpack) {
   starlark_list list;
   std::vector<starlark_obj*> stack;
 
-  list.unpack(stack);
+  list.unpack(0, stack, nullptr);
   EXPECT_THAT(stack, SizeIs(0));
 
   list.add(&one);
-  list.unpack(stack);
+  list.unpack(1, stack, nullptr);
   ASSERT_THAT(stack, SizeIs(1));
   EXPECT_THAT(stack[0], &one);
 
   stack.clear();
   list.add(&none);
-  list.unpack(stack);
+  list.unpack(2, stack, nullptr);
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
   EXPECT_THAT(stack[1], &one);
 }
+
+// TODO(lmirelmann): Test unpack when the number of elements do not match.
 
 }  // namespace

@@ -173,15 +173,10 @@ starlark_obj* starlark_obj::call(const std::vector<starlark_obj*>& pos_args, con
   return nullptr;
 }
 
-int64_t starlark_obj::sequence_size() const {
-  return -1;
-}
-
-void starlark_obj::unpack(std::vector<starlark_obj*>& consumer) {
-  // TODO(lmirelmann): Maybe should produce an error. In theory it should not be possible
-  // for this to be called as `sequence_size` should be called first. That said, we could
-  // remove `sequence_size` and add the expected unpack size.
-  return;
+void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: cannot unpack non-iterable {} object", type()));
+  }
 }
 
 starlark_obj* starlark_obj::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) {

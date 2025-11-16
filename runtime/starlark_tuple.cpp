@@ -76,11 +76,18 @@ bool starlark_tuple::truthy() const {
   return !values.empty();
 }
 
-int64_t starlark_tuple::sequence_size() const {
-  return values.size();
-}
+void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) {
+  if (number_of_elements != values.size()) {
+    if (error_callback != nullptr) {
+      if (values.size() < number_of_elements) {
+        error_callback->add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      } else {
+        error_callback->add_error(std::format("ValueError: too manys values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      }
+    }
+    return;
+  }
 
-void starlark_tuple::unpack(std::vector<starlark_obj*>& consumer) {
   for (auto it = values.rbegin(); it != values.rend(); ++it) {
     consumer.push_back(*it);
   }

@@ -19,8 +19,7 @@ class starlark_tuple : public starlark_obj {
   std::string_view type() const override;
   starlark_tuple& add(starlark_obj* element);
   bool truthy() const override;
-  int64_t sequence_size() const override;
-  void unpack(std::vector<starlark_obj*>& consumer) override;
+  void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

@@ -54,11 +54,17 @@ bool starlark_list::truthy() const {
   return !values.empty();
 }
 
-int64_t starlark_list::sequence_size() const {
-  return values.size();
-}
-
-void starlark_list::unpack(std::vector<starlark_obj*>& consumer) {
+void starlark_list::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) {
+  if (number_of_elements != values.size()) {
+    if (error_callback != nullptr) {
+      if (values.size() < number_of_elements) {
+        error_callback->add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      } else {
+        error_callback->add_error(std::format("ValueError: too manys values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      }
+    }
+    return;
+  }
   for (auto it = values.rbegin(); it != values.rend(); ++it) {
     consumer.push_back(*it);
   }
