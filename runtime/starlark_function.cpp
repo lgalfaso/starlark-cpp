@@ -74,6 +74,7 @@ starlark_obj* starlark_function::call(
     const std::map<std::string, starlark_obj*>& named_args,
     error_fn* error_callback) {
   // TODO(lmirelmann): Implement.
+  return nullptr;
 }
 
 }  // namespace runtime
