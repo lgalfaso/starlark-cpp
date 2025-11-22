@@ -170,8 +170,11 @@ void starlark_obj::freeze() {
   }
 }
 
-starlark_obj* starlark_obj::call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args) {
-  // TODO(lmirelmann): Generate an error as the object is not callable.
+starlark_obj* starlark_obj::call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn* error_callback) {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: '{}' object is not callable", type()));
+    return nullptr;
+  }
   return nullptr;
 }
 

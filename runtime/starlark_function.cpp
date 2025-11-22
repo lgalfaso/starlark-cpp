@@ -38,7 +38,8 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_built_in_function::in
 
 starlark_obj* starlark_built_in_function::call(
     const std::vector<starlark_obj*>& pos_args,
-    const std::map<std::string, starlark_obj*>& named_args) {
+    const std::map<std::string, starlark_obj*>& named_args,
+    error_fn* error_callback) {
   return native_fn(pos_args, named_args);
 }
 
@@ -66,6 +67,13 @@ bool starlark_function::inner_equals(comparator& comp, const starlark_obj* other
 std::variant<int64_t, starlark_obj::pending_hash> starlark_function::inner_hash() const {
   // TODO(lmirelmann): Implement.
   return 0;
+}
+
+starlark_obj* starlark_function::call(
+    const std::vector<starlark_obj*>& pos_args,
+    const std::map<std::string, starlark_obj*>& named_args,
+    error_fn* error_callback) {
+  // TODO(lmirelmann): Implement.
 }
 
 }  // namespace runtime

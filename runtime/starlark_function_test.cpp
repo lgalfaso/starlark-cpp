@@ -60,7 +60,10 @@ TEST_F(FnTest, Call) {
   starlark_built_in_function fn(base_fn, "fn_name");
   EXPECT_CALL(*fn_mock, Call(testing::_, testing::_))
       .WillOnce(testing::Return(nullptr));
-  fn.call({}, {});
+  fn.call({}, {}, nullptr);
+  // TODO(lmirelmann): Check the return value.
 }
+
+// TODO(lmirelmann): Check the error case.
 
 }  // namespace
