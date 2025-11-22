@@ -19,7 +19,7 @@ enum class starlark_numeric_type {
 
 class starlark_numeric : public starlark_obj {
  protected:
-  bool inner_equals(comparator& comp, const starlark_obj* other) const override;
+  bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
   virtual starlark_numeric_type numeric_type() const = 0;
   virtual int64_t as_int64() const;
   virtual const starlark::bigint::number& as_bigint() const;

@@ -37,11 +37,11 @@ void printer::run() {
   }
 }
 
-void comparator::add_task(pending_task&& task) {
+void equals_comparator::add_task(pending_task&& task) {
   tasks.emplace_back(std::move(task));
 }
 
-bool comparator::run() {
+bool equals_comparator::run() {
   while (!tasks.empty()) {
     auto top = tasks.back();
     tasks.pop_back();
@@ -57,11 +57,11 @@ bool comparator::run() {
   return true;
 }
 
-size_t comparator::pending_task_hash::operator()(const pending_task task) const {
+size_t equals_comparator::pending_task_hash::operator()(const pending_task task) const {
   return hash_fn(task.lhs) ^ hash_fn(task.rhs);
 }
 
-bool comparator::pending_task_equals_to::operator()(const pending_task& lhs, const pending_task& rhs) const {
+bool equals_comparator::pending_task_equals_to::operator()(const pending_task& lhs, const pending_task& rhs) const {
   return (lhs.lhs == rhs.lhs && lhs.rhs == rhs.rhs) ||
          (lhs.lhs == rhs.rhs && lhs.rhs == rhs.lhs);
 }
@@ -83,8 +83,8 @@ std::string starlark_obj::repr() const {
 }
 
 bool starlark_obj::equals(const starlark_obj& other) const {
-  comparator cmp;
-  cmp.add_task(comparator::pending_task{
+  equals_comparator cmp;
+  cmp.add_task(equals_comparator::pending_task{
     .lhs = this,
     .rhs = &other,
   });

@@ -56,7 +56,7 @@ bool starlark_string::truthy() const {
   return !value.empty();
 }
 
-bool starlark_string::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->str();
 }

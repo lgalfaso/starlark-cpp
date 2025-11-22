@@ -23,7 +23,7 @@ bool starlark_none::truthy() const {
   return false;
 }
 
-bool starlark_none::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_none::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type();
 }
 

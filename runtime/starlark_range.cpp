@@ -21,7 +21,7 @@ bool starlark_range::truthy() const {
   return false;
 }
 
-bool starlark_range::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_range::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

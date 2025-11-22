@@ -56,7 +56,7 @@ bool starlark_set::contains(starlark_obj* obj) const {
   return values.contains(obj);
 }
 
-bool starlark_set::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
   }

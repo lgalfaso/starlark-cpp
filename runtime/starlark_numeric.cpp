@@ -80,7 +80,7 @@ starlark::bigint::number from_int64(int64_t value) {
   return result;
 }
 
-bool starlark_numeric::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (other->type() != "float" && other->type() != "int") {
     return false;
   }

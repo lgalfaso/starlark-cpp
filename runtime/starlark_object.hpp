@@ -48,7 +48,7 @@ class printer {
   std::unordered_set<const starlark_obj*> stack;
 };
 
-class comparator {
+class equals_comparator {
  public:
   struct pending_task {
     const starlark_obj* lhs = nullptr;
@@ -96,12 +96,12 @@ class starlark_obj {
   bool freezed = false;
 
   virtual bool inner_repr(printer& print, printer_action action) const = 0;
-  virtual bool inner_equals(comparator& comp, const starlark_obj* other) const = 0;
+  virtual bool inner_equals(equals_comparator& comp, const starlark_obj* other) const = 0;
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
 
   friend class printer;
-  friend class comparator;
+  friend class equals_comparator;
 };
 
 struct starlark_hash_op {

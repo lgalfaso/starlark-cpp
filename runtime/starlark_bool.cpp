@@ -29,7 +29,7 @@ bool starlark_bool::truthy() const {
   return value;
 }
 
-bool starlark_bool::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_bool::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
     value == other->truthy();
 }

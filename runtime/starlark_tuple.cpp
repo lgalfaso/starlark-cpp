@@ -56,7 +56,7 @@ bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
   }
 }
 
-bool starlark_tuple::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
   }
@@ -65,7 +65,7 @@ bool starlark_tuple::inner_equals(comparator& comp, const starlark_obj* other) c
     return false;
   }
   for (int i = 0; i < values.size(); ++i) {
-    comp.add_task(comparator::pending_task{
+    comp.add_task(equals_comparator::pending_task{
       .lhs = values[i],
       .rhs = n_other->values[i],
     });

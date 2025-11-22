@@ -62,7 +62,7 @@ bool starlark_dictionary::truthy() const {
   return !values.empty();
 }
 
-bool starlark_dictionary::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
   }
@@ -75,7 +75,7 @@ bool starlark_dictionary::inner_equals(comparator& comp, const starlark_obj* oth
     if (other_element == n_other->values.end()) {
       return false;
     }
-    comp.add_task(comparator::pending_task{
+    comp.add_task(equals_comparator::pending_task{
       .lhs = element.second,
       .rhs = other_element->second,
     });

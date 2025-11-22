@@ -22,7 +22,7 @@ class starlark_range : public starlark_obj {
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
-  bool inner_equals(comparator& comp, const starlark_obj* other) const override;
+  bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
   uint64_t start = 0;

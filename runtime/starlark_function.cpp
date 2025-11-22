@@ -26,7 +26,7 @@ bool starlark_built_in_function::truthy() const {
   return true;
 }
 
-bool starlark_built_in_function::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_built_in_function::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   // TODO(lmirelmann): Implement.
   return false;
 }
@@ -59,7 +59,7 @@ bool starlark_function::truthy() const {
   return true;
 }
 
-bool starlark_function::inner_equals(comparator& comp, const starlark_obj* other) const {
+bool starlark_function::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   // TODO(lmirelmann): Implement.
   return false;
 }
