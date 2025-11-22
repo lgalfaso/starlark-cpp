@@ -43,7 +43,7 @@ bool equals_fb(double lhs, const starlark::bigint::number& rhs) {
     return false;
   }
   if (rhs.countr_zero() != e ||
-      rhs.bit_size() != e + std::bit_ceil<uint64_t>(mantissa)) {
+      rhs.bit_size() != e + 64 - std::countl_zero<uint64_t>(mantissa)) {
     return false;
   }
   return mantissa == rhs.bits(e, 64);

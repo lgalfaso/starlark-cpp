@@ -133,4 +133,13 @@ TEST(StarlarkFloat, Equals) {
   EXPECT_TRUE(starlark_float(NAN).equals(starlark_float(NAN)));
 }
 
+TEST(StarlarkFloat, EqualsVsBigInt) {
+  EXPECT_TRUE(starlark_float(1e50).equals(starlark_bigint(starlark::bigint::parse_number("100000000000000007629769841091887003294964970946560", nullptr))));
+}
+
+TEST(StarlarkFloat, Hash) {
+  EXPECT_EQ(starlark_float(1e50).hash(), 1387127493139725924);
+  EXPECT_EQ(starlark_bigint(starlark::bigint::parse_number("100000000000000007629769841091887003294964970946560", nullptr)).hash(), 1387127493139725924);
+}
+
 }  // namespace
