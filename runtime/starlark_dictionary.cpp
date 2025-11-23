@@ -83,6 +83,13 @@ bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_o
   return true;
 }
 
+void starlark_dictionary::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
+  for (auto& [k, v] : values) {
+    to_freeze.push_back(k);
+    to_freeze.push_back(v);
+  }
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_hash() const {
   // My current understanding is that this is the right behavior.
   return -1;
@@ -98,7 +105,6 @@ bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_f
   }
   if (key->hash() == -1) {
     if (error_callback != nullptr) {
-      // TODO(lmirelmann): Would be nice to add the line number and position.
       error_callback->add_error(std::format("TypeError: cannot use '{}' as a dict key (unhashable type: '{}')", key->type(), key->type()));
     }
     return false;
