@@ -1258,6 +1258,8 @@ TEST(Number, ParseNumber) {
             starlark::bigint::parse_number("0x1234567890abcdefABCDEF!", nullptr));
   EXPECT_EQ("499602d2"_number,
             starlark::bigint::parse_number("1234567890abcdefABCDEFG", nullptr));
+  EXPECT_EQ(-number::one,
+            starlark::bigint::parse_number("-1", nullptr));
 }
 
 }  // namespace

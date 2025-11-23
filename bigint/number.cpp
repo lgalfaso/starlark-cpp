@@ -818,6 +818,11 @@ number& number::pow_mod(const number& power, const number& modulus) {
 number parse_number(std::string_view input, const char** end_ptr) {
   int base;
   std::size_t pos = 0;
+  bool neg = false;
+  if (input.starts_with("-")) {
+    pos += 1;
+    neg = true;
+  }
   if (input.starts_with("0x")) {
     pos += 2;
     base = 16;
@@ -847,6 +852,9 @@ number parse_number(std::string_view input, const char** end_ptr) {
   }
   if (end_ptr != nullptr) {
     *end_ptr = &input[pos];
+  }
+  if (neg) {
+    result.neg();
   }
   return result;
 }
