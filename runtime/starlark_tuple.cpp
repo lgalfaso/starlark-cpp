@@ -76,6 +76,7 @@ bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* o
 void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
   if (other->type() != type()) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
+    return;
   }
   const auto* t_other = static_cast<const starlark_tuple*>(other);
   if (values.size() != t_other->values.size()) {

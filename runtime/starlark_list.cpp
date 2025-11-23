@@ -91,6 +91,7 @@ bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* ot
 void starlark_list::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
   if (other->type() != type()) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
+    return;
   }
   const auto* l_other = static_cast<const starlark_list*>(other);
   if (values.size() != l_other->values.size()) {

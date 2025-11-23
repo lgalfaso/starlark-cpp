@@ -51,6 +51,7 @@ bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* o
 void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
   if (other->type() != type()) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
+    return;
   }
   auto result = value <=> static_cast<const starlark_bytes*>(other)->value;
   if (result != 0) {
