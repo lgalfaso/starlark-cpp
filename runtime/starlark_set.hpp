@@ -20,6 +20,7 @@ class starlark_set : public starlark_obj {
   bool truthy() const override;
   bool add(starlark_obj* element, error_fn* error_callback);
   bool contains(starlark_obj* obj) const;
+  bool binary_in(const starlark_obj& other, error_fn* error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

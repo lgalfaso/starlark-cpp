@@ -56,6 +56,11 @@ bool starlark_set::contains(starlark_obj* obj) const {
   return values.contains(obj);
 }
 
+bool starlark_set::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+  // TODO(lmirelmann): Implement.
+  return false;
+}
+
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;

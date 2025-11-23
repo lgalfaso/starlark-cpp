@@ -56,6 +56,18 @@ bool starlark_string::truthy() const {
   return !value.empty();
 }
 
+bool starlark_string::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    if (error_callback != nullptr) {
+       error_callback->add_error(std::format("TypeError: 'in <string>' requires string as left operand, not {}", other.type()));
+    }
+    return false;
+  }
+
+  const starlark_string& s_other = static_cast<const starlark_string&>(other);
+  return value.contains(s_other.value);
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->str();

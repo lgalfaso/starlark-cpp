@@ -238,6 +238,13 @@ starlark_obj* starlark_obj::unary_tilde(google::protobuf::Arena& arena, error_fn
   return nullptr;
 }
 
+bool starlark_obj::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: argument of type '{}' is not a container or iterable", type()));
+  }
+  return false;
+}
+
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: '{}' not supported between instances of '{}' and '{}'", op, type(), other->type()));

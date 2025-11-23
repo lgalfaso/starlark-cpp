@@ -20,6 +20,7 @@ class starlark_list : public starlark_obj {
   void add(starlark_obj* element, error_fn* error_callback);
   bool truthy() const override;
   void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) override;
+  bool binary_in(const starlark_obj& other, error_fn* error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

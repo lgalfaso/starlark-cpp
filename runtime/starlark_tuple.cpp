@@ -114,6 +114,15 @@ void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj
   }
 }
 
+bool starlark_tuple::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+  for (const auto& element : values) {
+    if (other.equals(*element)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_tuple::inner_hash() const {
   return std::span(values.begin(), values.end());
 }

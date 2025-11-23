@@ -19,6 +19,7 @@ class starlark_string : public starlark_obj {
   std::string_view type() const override;
   std::string str() const override;
   bool truthy() const override;
+  bool binary_in(const starlark_obj& other, error_fn* error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

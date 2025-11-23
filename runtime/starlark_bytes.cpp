@@ -8,6 +8,7 @@
 
 #include "runtime/hex_encoder.hpp"
 #include "runtime/siphash.hpp"
+#include "runtime/starlark_numeric.hpp"
 
 namespace starlark {
 namespace runtime {
@@ -41,6 +42,43 @@ bool starlark_bytes::inner_repr(printer& print, printer_action action) const {
 
 bool starlark_bytes::truthy() const {
   return !value.empty();
+}
+
+bool starlark_bytes::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+  if (other.type() != type() && other.type() != "int") {
+    if (error_callback != nullptr) {
+       error_callback->add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
+    }
+    return false;
+  }
+  if (other.type() == "int") {
+    const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
+    if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
+      auto other_value = n_other.as_int64();
+      if (other_value < 0 || 255 < other_value) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ValueError: byte must be in range(0, 256)");
+        }
+        return false;
+      }
+      return value.contains(static_cast<char>(n_other.as_int64()));
+    }
+    if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
+      auto& other_value = n_other.as_bigint();
+      if (other_value.sign() || other_value.bit_size() >= 8) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ValueError: byte must be in range(0, 256)");
+        }
+        return false;
+      }
+      return value.contains(static_cast<char>(other_value.at(0)));
+    }
+    // Should never happen.
+    return false;
+  }
+
+  const starlark_bytes& s_other = static_cast<const starlark_bytes&>(other);
+  return value.contains(s_other.value);
 }
 
 bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* other) const {

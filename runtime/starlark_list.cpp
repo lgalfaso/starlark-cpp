@@ -71,6 +71,15 @@ void starlark_list::unpack(int32_t number_of_elements, std::vector<starlark_obj*
   }
 }
 
+bool starlark_list::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+  for (const auto& element : values) {
+    if (other.equals(*element)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;

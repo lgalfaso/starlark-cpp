@@ -112,6 +112,7 @@ class starlark_obj {
   virtual starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn* error_callback);
   virtual starlark_obj* unary_minus(google::protobuf::Arena& arena, error_fn* error_callback);
   virtual starlark_obj* unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback);
+  virtual bool binary_in(const starlark_obj& other, error_fn* error_callback) const;
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;
