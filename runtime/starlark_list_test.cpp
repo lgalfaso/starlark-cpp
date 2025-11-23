@@ -16,6 +16,9 @@ using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
+using ::testing::Eq;
+using ::testing::Gt;
+using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
@@ -158,6 +161,52 @@ TEST(StarlarkList, Unpack) {
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
   EXPECT_THAT(stack[1], &one);
+}
+
+TEST(StarlarkList, Order) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_list list1;
+  starlark_list list2;
+  list2.add(&zero, nullptr);
+  starlark_list list3;
+  list3.add(&zero, nullptr);
+  list3.add(&one, nullptr);
+  starlark_list list4;
+  list4.add(&one, nullptr);
+  starlark_list list5;
+  list5.add(&one, nullptr);
+  list5.add(&zero, nullptr);
+
+  EXPECT_THAT(list1.cmp(list1, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(list1.cmp(list2, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(list1.cmp(list3, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(list1.cmp(list4, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(list1.cmp(list5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(list2.cmp(list1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list2.cmp(list2, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(list2.cmp(list3, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(list2.cmp(list4, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(list2.cmp(list5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(list3.cmp(list1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list3.cmp(list2, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list3.cmp(list3, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(list3.cmp(list4, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(list3.cmp(list5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(list4.cmp(list1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list4.cmp(list2, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list4.cmp(list3, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list4.cmp(list4, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(list4.cmp(list5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(list5.cmp(list1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list5.cmp(list2, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list5.cmp(list3, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list5.cmp(list4, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(list5.cmp(list5, "cmp", nullptr), Eq(0));
 }
 
 // TODO(lmirelmann): Test unpack when the number of elements do not match.

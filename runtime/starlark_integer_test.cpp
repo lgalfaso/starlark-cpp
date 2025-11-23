@@ -23,6 +23,8 @@
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::bigint::number;
+using ::starlark::bigint::parse_number;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -38,6 +40,9 @@ using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
+using ::testing::Eq;
+using ::testing::Gt;
+using ::testing::Lt;
 
 namespace {
 
@@ -116,6 +121,40 @@ TEST(StarlarkInteger, UnaryMinusEdgeCase) {
   auto* result = starlark_integer(std::numeric_limits<int64_t>::min()).unary_minus(arena, nullptr);
   ASSERT_NE(result, nullptr);
   EXPECT_EQ("9223372036854775808", result->str());
+}
+
+TEST(StarlarkInteger, OrderVsBigInt) {
+  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", nullptr), Eq(0));
+  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(parse_number("0", nullptr)), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", nullptr), Eq(0));
+  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(parse_number("0", nullptr)), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(parse_number("0", nullptr)), "cmp", nullptr), Eq(0));
+  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(parse_number("0", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", nullptr), Eq(0));
+  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(parse_number("0", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", nullptr), Eq(0));
+
+  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(number::one << 64), "cmp", nullptr), Lt(0));
 }
 
 }  // namespace

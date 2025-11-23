@@ -74,6 +74,27 @@ class equals_comparator {
   std::unordered_set<pending_task, pending_task_hash, pending_task_equals_to> executed_tasks;
 };
 
+class order_comparator {
+ public:
+  enum class pending_task_type {
+    kEvaluate,
+    kLessThan,
+    kGreaterThan,
+    kFail,
+  };
+  struct pending_task {
+    const pending_task_type type;
+    const starlark_obj* lhs = nullptr;
+    const starlark_obj* rhs = nullptr;
+  };
+
+  void add_task(pending_task&& task);
+  int run(std::string_view op, error_fn* error_callback);
+
+ private:
+  std::vector<pending_task> tasks;
+};
+
 class starlark_obj {
  public:
   virtual ~starlark_obj();
@@ -82,6 +103,7 @@ class starlark_obj {
   std::string repr() const;
   virtual bool truthy() const = 0;
   bool equals(const starlark_obj& other) const;
+  int cmp(const starlark_obj& other, std::string_view op, error_fn* error_callback) const;
   int64_t hash() const;
   void freeze();
   virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn* error_callback);
@@ -97,11 +119,13 @@ class starlark_obj {
 
   virtual bool inner_repr(printer& print, printer_action action) const = 0;
   virtual bool inner_equals(equals_comparator& comp, const starlark_obj* other) const = 0;
+  virtual void inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const;
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
 
   friend class printer;
   friend class equals_comparator;
+  friend class order_comparator;
 };
 
 struct starlark_hash_op {

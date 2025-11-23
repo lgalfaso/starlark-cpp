@@ -21,21 +21,24 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
-using starlark::runtime::starlark_bigint;
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_built_in_function;
-using starlark::runtime::starlark_bytes;
-using starlark::runtime::starlark_dictionary;
-using starlark::runtime::starlark_float;
-using starlark::runtime::starlark_function;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_list;
-using starlark::runtime::starlark_none;
-using starlark::runtime::starlark_range;
-using starlark::runtime::starlark_set;
-using starlark::runtime::starlark_string;
-using starlark::runtime::starlark_struct;
-using starlark::runtime::starlark_tuple;
+using ::starlark::runtime::starlark_bigint;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_built_in_function;
+using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_dictionary;
+using ::starlark::runtime::starlark_float;
+using ::starlark::runtime::starlark_function;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_range;
+using ::starlark::runtime::starlark_set;
+using ::starlark::runtime::starlark_string;
+using ::starlark::runtime::starlark_struct;
+using ::starlark::runtime::starlark_tuple;
+using ::testing::Eq;
+using ::testing::Gt;
+using ::testing::Lt;
 
 namespace {
 
@@ -133,6 +136,15 @@ TEST(StarlarkString, Hash) {
   EXPECT_EQ(-0x62f803d77a091faa, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789").hash());
   EXPECT_EQ(-0x19fb4f2fd515d61, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@").hash());
   EXPECT_EQ(-0x77d493a040656198, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@!").hash());
+}
+
+TEST(StarlarkString, Order) {
+  EXPECT_THAT(starlark_string("").cmp(starlark_string(""), "cmp", nullptr), Eq(0));
+  EXPECT_THAT(starlark_string("").cmp(starlark_string("a"), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_string("a").cmp(starlark_string("a"), "cmp", nullptr), Eq(0));
+  EXPECT_THAT(starlark_string("a").cmp(starlark_string(""), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_string("a").cmp(starlark_string("b"), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_string("b").cmp(starlark_string("a"), "cmp", nullptr), Gt(0));
 }
 
 }  // namespace

@@ -88,6 +88,25 @@ bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* ot
   return true;
 }
 
+void starlark_list::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+  if (other->type() != type()) {
+    starlark_obj::inner_cmp(comp, other, op, error_callback);
+  }
+  const auto* l_other = static_cast<const starlark_list*>(other);
+  if (values.size() != l_other->values.size()) {
+    comp.add_task(order_comparator::pending_task{
+      .type = values.size() > l_other->values.size() ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan,
+    });
+  }
+  for (int i = std::min(values.size(), l_other->values.size()) - 1; i >= 0; --i) {
+    comp.add_task(order_comparator::pending_task{
+      .type = order_comparator::pending_task_type::kEvaluate,
+      .lhs = values[i],
+      .rhs = l_other->values[i],
+    });
+  }
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_list::inner_hash() const {
   // My current understanding is that this is the right behavior.
   return -1;

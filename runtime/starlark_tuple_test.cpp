@@ -18,6 +18,9 @@ using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_tuple;
+using ::testing::Eq;
+using ::testing::Lt;
+using ::testing::Gt;
 using ::testing::SizeIs;
 
 namespace {
@@ -156,6 +159,52 @@ TEST(StarlarkTuple, Unpack) {
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
   EXPECT_THAT(stack[1], &one);
+}
+
+TEST(StarlarkList, Order) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_tuple tuple1;
+  starlark_tuple tuple2;
+  tuple2.add(&zero);
+  starlark_tuple tuple3;
+  tuple3.add(&zero);
+  tuple3.add(&one);
+  starlark_tuple tuple4;
+  tuple4.add(&one);
+  starlark_tuple tuple5;
+  tuple5.add(&one);
+  tuple5.add(&zero);
+
+  EXPECT_THAT(tuple1.cmp(tuple1, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(tuple1.cmp(tuple2, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple1.cmp(tuple3, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple1.cmp(tuple4, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple1.cmp(tuple5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(tuple2.cmp(tuple1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple2.cmp(tuple2, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(tuple2.cmp(tuple3, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple2.cmp(tuple4, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple2.cmp(tuple5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(tuple3.cmp(tuple1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple3.cmp(tuple2, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple3.cmp(tuple3, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(tuple3.cmp(tuple4, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple3.cmp(tuple5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(tuple4.cmp(tuple1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple4.cmp(tuple2, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple4.cmp(tuple3, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple4.cmp(tuple4, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(tuple4.cmp(tuple5, "cmp", nullptr), Lt(0));
+
+  EXPECT_THAT(tuple5.cmp(tuple1, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple2, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple3, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple4, "cmp", nullptr), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple5, "cmp", nullptr), Eq(0));
 }
 
 // TODO(lmirelmann): Test unpack when the number of elements do not match.

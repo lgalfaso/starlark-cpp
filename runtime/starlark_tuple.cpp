@@ -73,6 +73,25 @@ bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* o
   return true;
 }
 
+void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+  if (other->type() != type()) {
+    starlark_obj::inner_cmp(comp, other, op, error_callback);
+  }
+  const auto* t_other = static_cast<const starlark_tuple*>(other);
+  if (values.size() != t_other->values.size()) {
+    comp.add_task(order_comparator::pending_task{
+      .type = values.size() > t_other->values.size() ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan,
+    });
+  }
+  for (int i = std::min(values.size(), t_other->values.size()) - 1; i >= 0; --i) {
+    comp.add_task(order_comparator::pending_task{
+      .type = order_comparator::pending_task_type::kEvaluate,
+      .lhs = values[i],
+      .rhs = t_other->values[i],
+    });
+  }
+}
+
 bool starlark_tuple::truthy() const {
   return !values.empty();
 }

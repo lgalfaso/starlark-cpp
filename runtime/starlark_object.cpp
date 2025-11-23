@@ -66,6 +66,29 @@ bool equals_comparator::pending_task_equals_to::operator()(const pending_task& l
          (lhs.lhs == rhs.rhs && lhs.rhs == rhs.lhs);
 }
 
+void order_comparator::add_task(pending_task&& task) {
+  tasks.emplace_back(std::move(task));
+}
+
+int order_comparator::run(std::string_view op, error_fn* error_callback) {
+  while (!tasks.empty()) {
+    auto top = tasks.back();
+    tasks.pop_back();
+    switch (top.type) {
+      case pending_task_type::kEvaluate:
+        top.lhs->inner_cmp(*this, top.rhs, op, error_callback);
+        break;
+      case pending_task_type::kLessThan:
+        return -1;
+      case pending_task_type::kGreaterThan:
+        return 1;
+      case pending_task_type::kFail:
+        return 0;
+    }
+  }
+  return 0;
+}
+
 starlark_obj::~starlark_obj() {}
 
 std::string starlark_obj::str() const {
@@ -89,6 +112,16 @@ bool starlark_obj::equals(const starlark_obj& other) const {
     .rhs = &other,
   });
   return cmp.run();
+}
+
+int starlark_obj::cmp(const starlark_obj& other, std::string_view op, error_fn* error_callback) const {
+  order_comparator cmp;
+  cmp.add_task(order_comparator::pending_task{
+    .type = order_comparator::pending_task_type::kEvaluate,
+    .lhs = this,
+    .rhs = &other,
+  });
+  return cmp.run(op, error_callback);
 }
 
 int64_t starlark_obj::hash() const {
@@ -203,6 +236,15 @@ starlark_obj* starlark_obj::unary_tilde(google::protobuf::Arena& arena, error_fn
     error_callback->add_error(std::format("TypeError: bad operand type for unary ~: '{}'", type()));
   }
   return nullptr;
+}
+
+void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: '{}' not supported between instances of '{}' and '{}'", op, type(), other->type()));
+  }
+  comp.add_task(order_comparator::pending_task{
+    .type = order_comparator::pending_task_type::kFail,
+  });
 }
 
 void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {

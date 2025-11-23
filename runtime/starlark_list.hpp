@@ -24,6 +24,7 @@ class starlark_list : public starlark_obj {
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
+  void inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const override;
   void inner_freeze(std::vector<starlark_obj*>& to_freeze) override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 

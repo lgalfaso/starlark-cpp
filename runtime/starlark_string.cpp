@@ -61,6 +61,18 @@ bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* 
          value == other->str();
 }
 
+void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+  if (other->type() != type()) {
+    starlark_obj::inner_cmp(comp, other, op, error_callback);
+  }
+  auto result = value <=> static_cast<const starlark_string*>(other)->value;
+  if (result != 0) {
+    comp.add_task(order_comparator::pending_task{
+      .type = result > 0 ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan,
+    });
+  }
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() const {
   if (value.length() == 0) {
     return 0;

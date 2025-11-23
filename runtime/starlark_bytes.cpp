@@ -48,6 +48,18 @@ bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* o
       value == (static_cast<const starlark_bytes*>(other))->value;
 }
 
+void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+  if (other->type() != type()) {
+    starlark_obj::inner_cmp(comp, other, op, error_callback);
+  }
+  auto result = value <=> static_cast<const starlark_bytes*>(other)->value;
+  if (result != 0) {
+    comp.add_task(order_comparator::pending_task{
+      .type = result > 0 ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan,
+    });
+  }
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::inner_hash() const {
   if (value.length() == 0) {
     return 0;
