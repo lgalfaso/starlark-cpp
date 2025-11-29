@@ -165,6 +165,7 @@ cc_library(
     deps = [
         ":hex_encoder",
         ":siphash",
+        ":starlark_numeric",
         ":starlark_object",
     ],
 )
