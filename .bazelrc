@@ -12,7 +12,7 @@ build:asan --copt -O1
 build:asan --copt -g
 build:asan --copt -fno-omit-frame-pointer
 build:asan --linkopt -fsanitize=address
-common:asan --test_env=ASAN_OPTIONS=debug=true:print_full_thread_history=true:detect_leaks=1
+common:asan --test_env=ASAN_OPTIONS=debug=true:print_full_thread_history=true
 
 import %workspace%/rules_fuzzer.bazelrc
 
