@@ -2,6 +2,7 @@
 
 #include "runtime/starlark_list.hpp"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 

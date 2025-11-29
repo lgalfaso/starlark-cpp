@@ -205,7 +205,6 @@ TEST(StarlarkFloat, OrderWithBigInt) {
   EXPECT_THAT(starlark_float(1e50).cmp(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946559", nullptr)), "cmp", nullptr), Gt(0));
   EXPECT_EQ(starlark_float(1e50).cmp(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946560", nullptr)), "cmp", nullptr), 0);
   EXPECT_THAT(starlark_float(1e50).cmp(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946561", nullptr)), "cmp", nullptr), Lt(0));
-
 }
 
 }  // namespace

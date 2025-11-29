@@ -2,6 +2,7 @@
 
 #include "runtime/starlark_tuple.hpp"
 
+#include <algorithm>
 #include <bit>
 #include <string>
 #include <vector>
