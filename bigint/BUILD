@@ -12,12 +12,67 @@ cc_library(
     hdrs = ["number.hpp"],
 )
 
+cc_library(
+    name = "number_stream_for_test",
+    srcs = ["number_stream_for_test.cpp"],
+    hdrs = ["number_stream_for_test.hpp"],
+    deps = [
+        ":number",
+    ],
+    testonly = True,
+)
+
 cc_test(
     name = "number_test",
     size = "large",
     srcs = ["number_test.cpp"],
     deps = [
         ":number",
+        ":number_stream_for_test",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "number_logical_or_test",
+    size = "large",
+    srcs = ["number_logical_or_test.cpp"],
+    deps = [
+        ":number",
+        ":number_stream_for_test",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "number_logical_and_test",
+    size = "large",
+    srcs = ["number_logical_and_test.cpp"],
+    deps = [
+        ":number",
+        ":number_stream_for_test",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "number_logical_xor_test",
+    size = "large",
+    srcs = ["number_logical_xor_test.cpp"],
+    deps = [
+        ":number",
+        ":number_stream_for_test",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "number_logical_not_test",
+    size = "large",
+    srcs = ["number_logical_not_test.cpp"],
+    deps = [
+        ":number",
+        ":number_stream_for_test",
         "@googletest//:gtest_main",
     ],
 )

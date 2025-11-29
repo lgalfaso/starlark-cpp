@@ -8,9 +8,11 @@
 #include <vector>
 
 #include "bigint/number.hpp"
+#include "bigint/number_stream_for_test.hpp"
 
-using starlark::bigint::number;
-using starlark::bigint::operator""_number;
+using ::starlark::bigint::number;
+using ::starlark::bigint::operator""_number;
+using ::starlark::bigint::parse_number;
 
 namespace {
 
@@ -69,6 +71,11 @@ TEST(Number, bit_size) {
     EXPECT_EQ(i, n.bit_size());
     n <<= 1;
   }
+}
+
+TEST(Number, bits) {
+  EXPECT_EQ(0, number::one.bits(10, 64));
+  EXPECT_EQ(0x10, (number::one << 4).bits(0, 64));
 }
 
 TEST(Number, Comparators) {
@@ -1253,13 +1260,19 @@ TEST(Number, ModPow) {
 
 TEST(Number, ParseNumber) {
   EXPECT_EQ("1234567890abcdefabcdef"_number,
-            starlark::bigint::parse_number("0x1234567890abcdefABCDEFG", nullptr));
+            parse_number("0x1234567890abcdefABCDEFG", nullptr));
   EXPECT_EQ("1234567890abcdefabcdef"_number,
-            starlark::bigint::parse_number("0x1234567890abcdefABCDEF!", nullptr));
+            parse_number("0x1234567890abcdefABCDEF!", nullptr));
   EXPECT_EQ("499602d2"_number,
-            starlark::bigint::parse_number("1234567890abcdefABCDEFG", nullptr));
-  EXPECT_EQ(-number::one,
-            starlark::bigint::parse_number("-1", nullptr));
+            parse_number("1234567890abcdefABCDEFG", nullptr));
+  EXPECT_EQ(-number::one, parse_number("-1", nullptr));
+  EXPECT_EQ(-number::one, parse_number("-0x1", nullptr));
+  EXPECT_EQ("99999999999999999999999999999999999999999999999999999999999999999999999999999999",
+            parse_number("99999999999999999999999999999999999999999999999999999999999999999999999999999999", nullptr).to_string(10));
+  EXPECT_EQ("77777777777777777777777777777777777777777777777777777777777777777777777777777777",
+            parse_number("077777777777777777777777777777777777777777777777777777777777777777777777777777777", nullptr).to_string(8));
+  EXPECT_EQ("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", nullptr).to_string(16));
 }
 
 }  // namespace

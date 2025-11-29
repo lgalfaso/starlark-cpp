@@ -6,8 +6,7 @@
 
 #include <algorithm>
 #include <bit>
-#include <iomanip>
-#include <sstream>
+#include <limits>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -92,6 +91,18 @@ int number::countr_zero() const {
   return result;
 }
 
+int number::countr_one() const {
+  int result = 0;
+  for (const auto& element : values_) {
+    if (element != std::numeric_limits<nbase>::max()) {
+      result += std::countr_one(element);
+      break;
+    }
+    result += kBitsInBase;
+  }
+  return result;
+}
+
 int number::bit_size() const {
   if (values_.empty()) return 0;
   return values_.size() * kBitsInBase - std::countl_zero<nbase>(values_.back());
@@ -124,6 +135,9 @@ const number number::zero(0);
 // static const.
 const number number::one(1);
 
+// static const.
+const number number::minus_one = -one;
+
 number& number::operator=(const number& other) {
   values_ = other.values_;
   sign_ = other.sign_;
@@ -149,18 +163,26 @@ bool number::sign() const {
 }
 
 std::string number::hex() const {
+  const char* digits = "0123456789abcdef";
   if (values_.empty()) {
     return "0x0";
   }
-  std::stringstream ss;
+  std::string result;
   if (sign_) {
-    ss << "-";
+    result += "-";
   }
-  ss << "0x" << std::hex;
+  result += "0x";
+  bool first = true;
   for (auto it = values_.crbegin(); it != values_.crend(); ++it) {
-    ss << *it << std::setfill('0') << std::setw(kBaseHexSize);
+    for (int i = 60; i >= 0; i -= 4) {
+      char c = digits[((*it) >> i) & 0xf];
+      if (!first || c != '0') {
+        result += c;
+        first = false;
+      }
+    }
   }
-  return ss.str();
+  return result;
 }
 
 std::string number::to_string(int base) const {
@@ -183,11 +205,12 @@ std::string number::to_string(int base) const {
   while (ref != number::zero) {
     const auto [res, rem] = number::div(ref, num_base);
     ref = res;
-    result = nums[rem.at(0)] + result;
+    result += nums[rem.at(0)];
   }
   if (neg) {
-    result = "-" + result;
+    result += "-";
   }
+  std::reverse(result.begin(), result.end());
   return result;
 }
 
@@ -374,9 +397,14 @@ number& number::operator-=(const number& other) {
   return add_dec(other, false);
 }
 
-number number::operator+(const number& other) const {
+number number::operator+(const number& other) const & {
   number result(*this);
   return result += other;
+}
+
+number&& number::operator+(const number& other) && {
+  *this += other;
+  return std::move(*this);
 }
 
 number number::operator-() const {
@@ -384,9 +412,14 @@ number number::operator-() const {
   return result.neg();
 }
 
-number number::operator-(const number& other) const {
+number number::operator-(const number& other) const & {
   number result(*this);
   return result -= other;
+}
+
+number&& number::operator-(const number& other) && {
+  *this -= other;
+  return std::move(*this);
 }
 
 // static.
@@ -430,9 +463,14 @@ number& number::operator*=(const number& other) {
   return karatsuba(other, karatsuba_threshold);
 }
 
-number number::operator*(const number& other) const {
+number number::operator*(const number& other) const & {
   number result(*this);
   return result *= other;
+}
+
+number&& number::operator*(const number& other) && {
+  *this *= other;
+  return std::move(*this);
 }
 
 // static.
@@ -447,6 +485,7 @@ std::pair<number, number> number::div(const number& dividend,
   if (abs_cmp(dividend.values_, divisor.values_) < 0) {
     return std::make_pair(zero, dividend);
   }
+  // TODO(lmirelmann): If needed, it should be possible to rewrite this as a 2 by 1 division.
 
   int s_shift = divisor.values_.size() > 1 ? 0 : kBitsInBase;
   number dd = divisor << s_shift;
@@ -501,9 +540,29 @@ number& number::operator%=(const number& other) {
   return *this;
 }
 
-number number::operator%(const number& other) const {
+number number::operator%(const number& other) const & {
   number result(*this);
   return result %= other;
+}
+
+number&& number::operator%(const number& other) && {
+  *this %= other;
+  return std::move(*this);
+}
+
+number& number::operator/=(const number& other) {
+  std::tie(*this, std::ignore) = div(*this, other);
+  return *this;
+}
+
+number number::operator/(const number& other) const & {
+  number result(*this);
+  return result /= other;
+}
+
+number&& number::operator/(const number& other) && {
+  *this /= other;
+  return std::move(*this);
 }
 
 number& number::long_mult(const number& other) {
@@ -609,9 +668,14 @@ number& number::operator>>=(int pos) {
   return *this;
 }
 
-number number::operator>>(int pos) const {
+number number::operator>>(int pos) const & {
   number result(*this);
   return result >>= pos;
+}
+
+number&& number::operator>>(int pos) && {
+  *this >>= pos;
+  return std::move(*this);
 }
 
 number& number::operator<<=(int pos) {
@@ -619,9 +683,14 @@ number& number::operator<<=(int pos) {
   return *this;
 }
 
-number number::operator<<(int pos) const {
+number number::operator<<(int pos) const & {
   number result(*this);
   return result <<= pos;
+}
+
+number&& number::operator<<(int pos) && {
+  *this <<= pos;
+  return std::move(*this);
 }
 
 // static.
@@ -770,11 +839,8 @@ number& number::pow_mod(const number& power, const number& modulus) {
     number power_(power);
     std::vector<std::pair<int, nbase>> work;
     while (power_ != zero) {
-      int p2 = 0;
-      while (power_.even()) {
-        ++p2;
-        power_ >>= 1;
-      }
+      int p2 = power_.countr_zero();
+      power_ >>= p2;
       work.emplace_back(p2, power_.at(0) & mask);
       power_ >>= mask_size;
     }
@@ -807,7 +873,7 @@ number& number::pow_mod(const number& power, const number& modulus) {
   // 4. Compute `q^-1 (mod 2^j)` and `y = (x_2 - x_1)*(q^-1) (mod 2^j)`.
   number q_inv;
   std::tie(q_inv, std::ignore, std::ignore) = gcd(q, one << j);
-  number y = ((x_2 - x_1)*q_inv).mod_pow2(j);
+  number y = ((x_2 - x_1) * q_inv).mod_pow2(j);
 
 
   // 5. Compute `x = x_1 + q * y`, and return x.
@@ -820,19 +886,34 @@ number parse_number(std::string_view input, const char** end_ptr) {
   std::size_t pos = 0;
   bool neg = false;
   if (input.starts_with("-")) {
-    pos += 1;
+    input.remove_prefix(1);
     neg = true;
   }
+  int mul;
+  int shift;
+  int limit;
   if (input.starts_with("0x")) {
-    pos += 2;
+    input.remove_prefix(2);
     base = 16;
+    mul = 1;
+    shift = 4;
+    limit = 16;
   } else if (input.starts_with("0")) {
-    pos += 1;
+    input.remove_prefix(1);
     base = 8;
+    mul = 1;
+    shift = 3;
+    limit = 21;
   } else {
     base = 10;
+    mul = 5;
+    shift = 1;
+    limit = 19;
   }
   number result;
+  int loops = 0;
+  uint64_t add_cache = 0;
+  uint64_t mult_cache = 1;
   for (; pos < input.length(); ++pos) {
     int c = input[pos];
     if ('0' <= c && c <= '9') {
@@ -847,8 +928,27 @@ number parse_number(std::string_view input, const char** end_ptr) {
     if (c >= base) {
       break;
     }
-    result *= number(base);
-    result += number(c);
+    add_cache *= base;
+    add_cache += c;
+    mult_cache *= mul;
+    ++loops;
+    if (loops == limit) {
+      if (mult_cache != 1) {
+        result *= number(mult_cache);
+      }
+      result <<= shift * loops;
+      result += number(add_cache);
+      loops = 0;
+      add_cache = 0;
+      mult_cache = 1;
+    }
+  }
+  if (loops != 0) {
+    if (mult_cache != 1) {
+      result *= number(mult_cache);
+    }
+    result <<= shift * loops;
+    result += number(add_cache);
   }
   if (end_ptr != nullptr) {
     *end_ptr = &input[pos];
@@ -857,6 +957,214 @@ number parse_number(std::string_view input, const char** end_ptr) {
     result.neg();
   }
   return result;
+}
+
+number& number::logical_or(const number& other) {
+  if (!sign() && !other.sign()) {
+    values_.resize(std::max(values_.size(), other.values_.size()), 0);
+    for (int i = 0; i < other.values_.size(); ++i) {
+      values_[i] |= other.values_[i];
+    }
+  } else if (sign() && other.sign()) {
+    values_.resize(std::min(values_.size(), other.values_.size()), 0);
+    bool this_found_non_zero = false;
+    bool other_found_non_zero = false;
+    bool r_found_non_zero = false;
+    for (int i = 0; i < values_.size(); ++i) {
+      int64_t r = (this_found_non_zero ? ~values_[i] : -values_[i]) |
+                  (other_found_non_zero ? ~other.values_[i] : -other.values_[i]);
+      this_found_non_zero |= values_[i] != 0;
+      other_found_non_zero |= other.values_[i] != 0;
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+  } else {
+    const auto& neg_vals = sign() ? values_ : other.values_;
+    const auto& pos_vals = sign() ? other.values_ : values_;
+    values_.resize(neg_vals.size(), 0);
+    bool neg_found_non_zero = false;
+    bool r_found_non_zero = false;
+    auto min_size = std::min(pos_vals.size(), neg_vals.size());
+    for (int i = 0; i < min_size; ++i) {
+      int64_t r = pos_vals[i] |
+                  (neg_found_non_zero ? ~neg_vals[i] : -neg_vals[i]);
+      neg_found_non_zero |= neg_vals[i] != 0;
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+    for (int i = pos_vals.size(); i < neg_vals.size(); ++i) {
+      int64_t r = (neg_found_non_zero ? ~neg_vals[i] : -neg_vals[i]);
+      neg_found_non_zero |= neg_vals[i] != 0;
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+    sign_ = true;
+  }
+  normalize();
+  return *this;
+}
+
+number& number::logical_and(const number& other) {
+  if (!sign() && !other.sign()) {
+    values_.resize(std::min(values_.size(), other.values_.size()), 0);
+    for (int i = 0; i < std::min(values_.size(), other.values_.size()); ++i) {
+      values_[i] &= other.values_[i];
+    }
+  } else if (sign() && other.sign()) {
+    values_.resize(std::max(values_.size(), other.values_.size()), 0);
+    bool this_found_non_zero = false;
+    bool other_found_non_zero = false;
+    bool r_found_non_zero = false;
+    for (int i = 0; i < other.values_.size(); ++i) {
+      int64_t r = (this_found_non_zero ? ~values_[i] : -values_[i]) &
+                  (other_found_non_zero ? ~other.values_[i] : -other.values_[i]);
+      this_found_non_zero |= values_[i] != 0;
+      other_found_non_zero |= other.values_[i] != 0;
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+    for (int i = other.values_.size(); !r_found_non_zero && i < values_.size(); ++i) {
+      int64_t r = (this_found_non_zero ? ~values_[i] : -values_[i]);
+      this_found_non_zero |= values_[i] != 0;
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+    if (!r_found_non_zero) {
+      values_.push_back(1);
+    }
+  } else {
+    const auto& neg_vals = sign() ? values_ : other.values_;
+    const auto& pos_vals = sign() ? other.values_ : values_;
+    values_.resize(pos_vals.size(), 0);
+    bool neg_found_non_zero = false;
+    auto min_size = std::min(pos_vals.size(), neg_vals.size());
+    for (int i = 0; i < min_size; ++i) {
+      int64_t r = pos_vals[i] &
+                  (neg_found_non_zero ? ~neg_vals[i] : -neg_vals[i]);
+      neg_found_non_zero |= neg_vals[i] != 0;
+      values_[i] = r;
+    }
+    for (int i = neg_vals.size(); i < pos_vals.size(); ++i) {
+      values_[i] = pos_vals[i];
+    }
+    sign_ = false;
+  }
+  normalize();
+  return *this;
+}
+
+number& number::logical_xor(const number& other) {
+  if (!sign() && !other.sign()) {
+    values_.resize(std::max(values_.size(), other.values_.size()), 0);
+    for (int i = 0; i < other.values_.size(); ++i) {
+      values_[i] ^= other.values_[i];
+    }
+  } else if (sign() && other.sign()) {
+    values_.resize(std::max(values_.size(), other.values_.size()), 0);
+    bool this_found_non_zero = false;
+    bool other_found_non_zero = false;
+    for (int i = 0; i < other.values_.size(); ++i) {
+      int64_t r = (this_found_non_zero ? ~values_[i] : -values_[i]) ^
+                  (other_found_non_zero ? ~other.values_[i] : -other.values_[i]);
+      this_found_non_zero |= values_[i] != 0;
+      other_found_non_zero |= other.values_[i] != 0;
+      values_[i] = r;
+    }
+    for (int i = other.values_.size(); i < values_.size(); ++i) {
+      int64_t r = ~(this_found_non_zero ? ~values_[i] : -values_[i]);
+      this_found_non_zero |= values_[i] != 0;
+      values_[i] = r;
+    }
+    sign_ = false;
+  } else {
+    const auto& neg_vals = sign() ? values_ : other.values_;
+    const auto& pos_vals = sign() ? other.values_ : values_;
+    values_.resize(std::max(pos_vals.size(), neg_vals.size()), 0);
+    bool neg_found_non_zero = false;
+    bool r_found_non_zero = false;
+    auto min_size = std::min(pos_vals.size(), neg_vals.size());
+    for (int i = 0; i < min_size; ++i) {
+      int64_t r = pos_vals[i] ^
+                  (neg_found_non_zero ? ~neg_vals[i] : -neg_vals[i]);
+      neg_found_non_zero |= neg_vals[i] != 0;
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+    for (int i = neg_vals.size(); i < pos_vals.size(); ++i) {
+      int64_t r = ~pos_vals[i];
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+    for (int i = pos_vals.size(); i < neg_vals.size(); ++i) {
+      int64_t r = (neg_found_non_zero ? ~neg_vals[i] : -neg_vals[i]);
+      neg_found_non_zero |= neg_vals[i] != 0;
+      values_[i] = (r_found_non_zero ? ~r : -r);
+      r_found_non_zero |= r != 0;
+    }
+    if (!r_found_non_zero) {
+      values_.push_back(1);
+    }
+    sign_ = true;
+  }
+  normalize();
+  return *this;
+}
+
+number& number::logical_not() {
+  *this += one;
+  this->neg();
+  return *this;
+}
+
+number& number::operator|=(const number& other) {
+  return this->logical_or(other);
+}
+
+number number::operator|(const number& other) const & {
+  number result(*this);
+  return result |= other;
+}
+
+number&& number::operator|(const number& other) && {
+  *this |= other;
+  return std::move(*this);
+}
+
+number& number::operator&=(const number& other) {
+  return this->logical_and(other);
+}
+
+number number::operator&(const number& other) const & {
+  number result(*this);
+  return result &= other;
+}
+
+number&& number::operator&(const number& other) && {
+  *this &= other;
+  return std::move(*this);
+}
+
+number& number::operator^=(const number& other) {
+  return this->logical_xor(other);
+}
+
+number number::operator^(const number& other) const & {
+  number result(*this);
+  return result ^= other;
+}
+
+number&& number::operator^(const number& other) && {
+  *this ^= other;
+  return std::move(*this);
+}
+
+number number::operator~() const & {
+  number result(*this);
+  return result.logical_not();
+}
+
+number&& number::operator~() && {
+  return std::move(this->logical_not());
 }
 
 }  // namespace bigint

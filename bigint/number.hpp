@@ -82,19 +82,28 @@ class number {
   number& operator=(const number& other);
   number& operator=(number&& other);
   number& operator+=(const number& other);
-  number operator+(const number& b) const;
+  number operator+(const number& b) const &;
+  number&& operator+(const number& b) &&;
   number& operator-=(const number& other);
   number operator-() const;
-  number operator-(const number& b) const;
+  number operator-(const number& b) const &;
+  number&& operator-(const number& b) &&;
   number& operator*=(const number& other);
-  number operator*(const number& b) const;
+  number operator*(const number& b) const &;
+  number&& operator*(const number& b) &&;
   number& operator%=(const number& other);
-  number operator%(const number& b) const;
+  number operator%(const number& b) const &;
+  number&& operator%(const number& b) &&;
+  number& operator/=(const number& other);
+  number operator/(const number& b) const &;
+  number&& operator/(const number& b) &&;
 
   number& operator>>=(int pos);
-  number operator>>(int pos) const;
+  number operator>>(int pos) const &;
+  number&& operator>>(int pos) &&;
   number& operator<<=(int pos);
-  number operator<<(int pos) const;
+  number operator<<(int pos) const &;
+  number&& operator<<(int pos) &&;
 
   number& pow_mod(const number& power, const number& modulus);
 
@@ -105,6 +114,7 @@ class number {
 
   static const number zero;
   static const number one;
+  static const number minus_one;
 
   // Should not be used by end users.
   number& karatsuba(const number& other,
@@ -116,6 +126,24 @@ class number {
 
   nbase at(values_size_type pos) const;
   int countr_zero() const;
+  int countr_one() const;
+
+  number& operator|=(const number& other);
+  number operator|(const number& other) const &;
+  number&& operator|(const number& other) &&;
+  number& operator&=(const number& other);
+  number operator&(const number& other) const &;
+  number&& operator&(const number& other) &&;
+  number& operator^=(const number& other);
+  number operator^(const number& other) const &;
+  number&& operator^(const number& other) &&;
+  number operator~() const &;
+  number&& operator~() &&;
+
+  number& logical_or(const number& other);
+  number& logical_and(const number& other);
+  number& logical_xor(const number& other);
+  number& logical_not();
 
  private:
   static void normalize(values_type* a);
