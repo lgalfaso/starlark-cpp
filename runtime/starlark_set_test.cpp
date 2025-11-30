@@ -10,11 +10,13 @@
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_tuple.hpp"
 
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_none;
-using starlark::runtime::starlark_set;
-using starlark::runtime::starlark_tuple;
+using ::starlark::runtime::error_fn;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_set;
+using ::starlark::runtime::starlark_tuple;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -87,6 +89,21 @@ TEST(StarlarkSet, EqualsInDifferentOrder) {
   set_3.add(&none, nullptr);
   EXPECT_TRUE(set_1.equals(set_2));
   EXPECT_TRUE(set_1.equals(set_3));
+}
+
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+  std::vector<std::string> messages;
+};
+
+TEST(StarlarkSet, BinaryInWithUnhashable) {
+  starlark_set set_1;
+  starlark_set set_2;
+  error_handler error_callback;
+  EXPECT_FALSE(set_1.binary_in(set_2, &error_callback));
+  EXPECT_THAT(error_callback.messages, SizeIs(0));
 }
 
 // TODO(lmirelmann): Test inner_freeze.

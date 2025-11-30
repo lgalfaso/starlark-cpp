@@ -57,8 +57,8 @@ bool starlark_set::contains(starlark_obj* obj) const {
 }
 
 bool starlark_set::binary_in(const starlark_obj& other, error_fn* error_callback) const {
-  // TODO(lmirelmann): Implement.
-  return false;
+  // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`
+  return values.contains(&const_cast<starlark_obj&>(other));
 }
 
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
