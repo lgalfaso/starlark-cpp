@@ -14,7 +14,6 @@
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_string.hpp"
 
-using ::testing::SizeIs;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_dictionary;
@@ -22,8 +21,17 @@ using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_string;
+using ::testing::SizeIs;
 
 namespace {
+
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+
+  std::vector<std::string> messages;
+};
 
 TEST(StarlarkDictionary, Type) {
   EXPECT_EQ("dict", starlark_dictionary().type());
@@ -142,16 +150,11 @@ TEST(StarlarkDictionary, EqualsInDifferentOrder) {
 }
 
 TEST(StarlarkDictionary, Hash) {
-  EXPECT_EQ(starlark_dictionary().hash(), -1);
+  starlark_dictionary dict;
+  EXPECT_EQ(dict.hash(), -1);
+  dict.freeze();
+  EXPECT_EQ(dict.hash(), -1);
 }
-
-struct error_handler : public error_fn {
-  void add_error(std::string_view error_msg) override {
-    messages.push_back(std::string(error_msg));
-  }
-
-  std::vector<std::string> messages;
-};
 
 TEST(StarlarkDictionary, InsertingUsingUnhashableKey) {
   starlark_dictionary dict;
@@ -173,7 +176,25 @@ TEST(StarlarkDictionary, InsertReturnValue) {
   EXPECT_FALSE(dict.insert(&none, &zero, nullptr));
 }
 
-// TODO(lmirelmann): Test trying to add to a freezed dict including the error message.
-// TODO(lmirelmann): Test hashing of an unfreezed and freezed dict.
+TEST(StarlarkDictionary, Freeze) {
+  starlark_dictionary dict1;
+  starlark_dictionary dict2;
+  starlark_none none;
+  EXPECT_TRUE(dict1.insert(&none, &dict2, nullptr));
+  dict1.freeze();
+  EXPECT_FALSE(dict2.insert(&none, &none, nullptr));
+}
+
+TEST(StarlarkDictionary, InsertFreezed) {
+  starlark_dictionary dict;
+  starlark_none none;
+  error_handler error_callback;
+
+  dict.freeze();
+
+  EXPECT_FALSE(dict.insert(&none, &none, &error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
+}
 
 }  // namespace

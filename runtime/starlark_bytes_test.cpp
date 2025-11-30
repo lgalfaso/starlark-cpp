@@ -21,6 +21,7 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
+using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -38,9 +39,19 @@ using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
 using ::testing::Eq;
 using ::testing::Gt;
+using ::testing::IsEmpty;
 using ::testing::Lt;
+using ::testing::SizeIs;
 
 namespace {
+
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+
+  std::vector<std::string> messages;
+};
 
 TEST(StarlarkBytes, Type) {
   EXPECT_EQ("bytes", starlark_bytes("").type());
@@ -161,6 +172,57 @@ TEST(StarlarkBytes, Order) {
   EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes(""), "cmp", nullptr), Gt(0));
   EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes("b"), "cmp", nullptr), Lt(0));
   EXPECT_THAT(starlark_bytes("b").cmp(starlark_bytes("a"), "cmp", nullptr), Gt(0));
+}
+
+TEST(StarlarkBytes, OrderErrors) {
+  error_handler error_callback;
+  EXPECT_FALSE(starlark_bytes("").cmp(starlark_string(""), "<", &error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'bytes' and 'string'");
+}
+
+TEST(StarlarkBytes, BinaryIn) {
+  error_handler error_callback;
+  EXPECT_TRUE(starlark_bytes("").binary_in(starlark_bytes(""), &error_callback));
+  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_bytes(""), &error_callback));
+  EXPECT_FALSE(starlark_bytes("a").binary_in(starlark_bytes("b"), &error_callback));
+  EXPECT_FALSE(starlark_bytes("a").binary_in(starlark_integer('b'), &error_callback));
+  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_integer('a'), &error_callback));
+  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_bigint('a'), &error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBytes, BinaryInErrors) {
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_string(""), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'string'");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(-1), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(256), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(-1), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(256), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
 }
 
 }  // namespace

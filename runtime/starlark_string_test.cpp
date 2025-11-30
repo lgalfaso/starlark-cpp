@@ -21,6 +21,7 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
+using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -38,9 +39,20 @@ using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
 using ::testing::Eq;
 using ::testing::Gt;
+using ::testing::IsEmpty;
 using ::testing::Lt;
+using ::testing::SizeIs;
 
 namespace {
+
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+
+  std::vector<std::string> messages;
+};
+
 
 TEST(StarlarkString, Type) {
   EXPECT_EQ("string", starlark_string("").type());
@@ -146,5 +158,73 @@ TEST(StarlarkString, Order) {
   EXPECT_THAT(starlark_string("a").cmp(starlark_string("b"), "cmp", nullptr), Lt(0));
   EXPECT_THAT(starlark_string("b").cmp(starlark_string("a"), "cmp", nullptr), Gt(0));
 }
+
+TEST(StarlarkString, OrderErrors) {
+  error_handler error_callback;
+  EXPECT_FALSE(starlark_string("").cmp(starlark_bytes(""), "<", &error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'string' and 'bytes'");
+}
+
+TEST(StarlarkString, BinaryIn) {
+  error_handler error_callback;
+  EXPECT_TRUE(starlark_string("").binary_in(starlark_string(""), &error_callback));
+  EXPECT_TRUE(starlark_string("a").binary_in(starlark_string(""), &error_callback));
+  EXPECT_FALSE(starlark_string("a").binary_in(starlark_string("b"), &error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkString, BinaryInErrors) {
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_string("a").binary_in(starlark_integer('b'), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_string("a").binary_in(starlark_integer('a'), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_string("a").binary_in(starlark_bigint('a'), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_string(""), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'string'");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(-1), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(256), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(-1), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
+  {
+    error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(256), &error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  }
+}
+
+
 
 }  // namespace
