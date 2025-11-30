@@ -22,23 +22,35 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
-using starlark::runtime::starlark_bigint;
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_built_in_function;
-using starlark::runtime::starlark_bytes;
-using starlark::runtime::starlark_dictionary;
-using starlark::runtime::starlark_float;
-using starlark::runtime::starlark_function;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_list;
-using starlark::runtime::starlark_none;
-using starlark::runtime::starlark_range;
-using starlark::runtime::starlark_set;
-using starlark::runtime::starlark_string;
-using starlark::runtime::starlark_struct;
-using starlark::runtime::starlark_tuple;
+using ::starlark::bigint::number;
+using ::starlark::runtime::error_fn;
+using ::starlark::runtime::from_int64;
+using ::starlark::runtime::starlark_bigint;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_built_in_function;
+using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_dictionary;
+using ::starlark::runtime::starlark_float;
+using ::starlark::runtime::starlark_function;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_range;
+using ::starlark::runtime::starlark_set;
+using ::starlark::runtime::starlark_string;
+using ::starlark::runtime::starlark_struct;
+using ::starlark::runtime::starlark_tuple;
+using ::testing::SizeIs;
 
 namespace {
+
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+  
+  std::vector<std::string> messages;
+};
 
 TEST(StarlarkBigInt, Type) {
   EXPECT_EQ("int", starlark_bigint(1).type());
@@ -105,6 +117,145 @@ TEST(StarlarkBigint, Hash) {
   EXPECT_EQ(-2, starlark_bigint(-2).hash());
   EXPECT_EQ(3, starlark_bigint(0x7fffffffffffffff).hash());
   EXPECT_EQ(0x8ec055467e5d2f0, starlark_bigint(starlark::bigint::number::parse_hex("372878134297382479432178392575395348243795483974539854732983475489237589437843728974327985437895798134591087473415034758305861048365874361502763")).hash());
+}
+
+TEST(StarlarkBigint, ShiftZero) {
+  google::protobuf::Arena arena;
+  auto* result = starlark_bigint(0).binary_lshift(starlark_integer(1l << 62), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+  result = starlark_bigint(0).binary_rshift(starlark_integer(1l << 62), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+}
+
+TEST(StarlarkBigint, LShift) {
+  google::protobuf::Arena arena;
+  auto* result = starlark_bigint(1).binary_lshift(starlark_integer(3), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(1 << 3).equals(*result));
+
+  result = starlark_bigint(from_int64(-11)).binary_lshift(starlark_integer(10), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(from_int64(-11264)).equals(*result));
+
+  result = starlark_bigint(1).binary_lshift(starlark_integer(100), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(number::one << 100).equals(*result));
+
+  result = starlark_bigint(1).binary_lshift(starlark_integer(1 << 28), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(number::one << (1 << 28)).equals(*result));
+
+  result = starlark_bigint(1).binary_lshift(starlark_bigint(62), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(1L << 62).equals(*result));
+
+  result = starlark_bigint(1).binary_lshift(starlark_bigint(63), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(number::one << 63).equals(*result));
+}
+
+TEST(StarlarkBigint, RShift) {
+  google::protobuf::Arena arena;
+  auto* result = starlark_bigint(100).binary_rshift(starlark_integer(3), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(100 >> 3).equals(*result));
+
+  result = starlark_bigint(from_int64(-11264)).binary_rshift(starlark_integer(10), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(-11).equals(*result));
+
+  result = starlark_bigint(1).binary_rshift(starlark_integer(64), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+
+  result = starlark_bigint(from_int64(-2)).binary_rshift(starlark_integer(64), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(-1).equals(*result));
+
+  result = starlark_bigint(20).binary_rshift(starlark_bigint(64), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+
+  result = starlark_bigint(20).binary_rshift(starlark_bigint(number::one << 64), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+
+  result = starlark_bigint(20).binary_rshift(starlark_bigint(number::one), arena, nullptr);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(10).equals(*result));
+}
+
+TEST(StarlarkBigint, ShiftInvalidInput) {
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  auto* result = starlark_bigint(100).binary_rshift(starlark_float(3.0), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>: 'int' and 'float'");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_lshift(starlark_float(3.0), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<: 'int' and 'float'");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_lshift(starlark_integer(-1), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_rshift(starlark_integer(-1), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::minus_one), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_rshift(starlark_bigint(number::minus_one), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(1).binary_lshift(starlark_integer(1 << 29), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(1).binary_lshift(starlark_integer(0x7fff'ffff'ffff'ffffL), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one << 100), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one << 63), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  error_callback.messages.clear();
+
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one << 62), arena, &error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  error_callback.messages.clear();
 }
 
 }  // namespace

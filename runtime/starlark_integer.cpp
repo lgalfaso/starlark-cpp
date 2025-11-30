@@ -9,15 +9,26 @@
 #include <limits>
 #include <string>
 
+#include "grammar/options.hpp"
 #include "runtime/hash.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_numeric.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::grammar::log2_max_bigint;
 
 namespace starlark {
 namespace runtime {
+
+namespace {
+
+starlark_integer* create_integer(std::int64_t value, google::protobuf::Arena& arena) {
+  // TODO(lmirelmann): Use a cache of small integers.
+  return Arena::Create<starlark_integer>(&arena, value);
+}
+
+}  // namespace
 
 starlark_integer::starlark_integer(int64_t value) : value(value) {}
 
@@ -35,22 +46,134 @@ bool starlark_integer::truthy() const {
   return value != 0;
 }
 
-starlark_obj* starlark_integer::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) {
-  return this;
+starlark_obj* starlark_integer::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+  return const_cast<starlark_integer*>(this);
 }
 
-starlark_obj* starlark_integer::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) {
+starlark_obj* starlark_integer::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) const {
   if (value == std::numeric_limits<int64_t>::min()) {
     // Need to upgrade to bigint.
     return Arena::Create<starlark_bigint>(&arena, number(static_cast<uint64_t>(value)));
   }
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
-  return Arena::Create<starlark_integer>(&arena, -value);
+  return create_integer(-value, arena);
 }
 
-starlark_obj* starlark_integer::unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback) {
+starlark_obj* starlark_integer::unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback) const {
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
-  return Arena::Create<starlark_integer>(&arena, ~value);
+  return create_integer(~value, arena);
+}
+
+starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_lshift(other, arena, error_callback);
+  }
+  if (value == 0) {
+    return const_cast<starlark_integer*>(this);
+  }
+  const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
+  if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
+    auto shift = n_other.as_int64();
+    if (shift < 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ValueError: negative shift count");
+      }
+      return nullptr;
+    }
+    // Check whether it will fit in an int64_t.
+    int left_shift_space = (value > 0 ? std::countl_zero<uint64_t>(value) : std::countl_one<uint64_t>(value));
+    if (shift < left_shift_space) {
+      return create_integer(value << shift, arena);
+    } else {
+      if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(shift) + 64 - left_shift_space) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("OverflowError: too many digits in integer");
+        }
+        return nullptr;
+      }
+      return Arena::Create<starlark_bigint>(&arena, number(from_int64(value) << shift));
+    }
+  } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
+    const auto& shift = n_other.as_bigint();
+    if (shift.sign()) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ValueError: negative shift count");
+      }
+      return nullptr;
+    }
+    if (shift.length() > 1) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("OverflowError: too many digits in integer");
+      }
+      return nullptr;
+    }
+    auto int_shift = shift.at(0);
+    int left_shift_space = (value > 0 ? std::countl_zero<uint64_t>(value) : std::countl_one<uint64_t>(value));
+    if (int_shift < left_shift_space) {
+      return create_integer(value << int_shift, arena);
+    } else {
+      if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(int_shift) + 64 - left_shift_space) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("OverflowError: too many digits in integer");
+        }
+        return nullptr;
+      }
+      return Arena::Create<starlark_bigint>(&arena, number(from_int64(value) << int_shift));
+    }
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("RuntimeError: unexpected number type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_integer::binary_rshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_rshift(other, arena, error_callback);
+  }
+  if (value == 0) {
+    return const_cast<starlark_integer*>(this);
+  }
+  const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
+  if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
+    auto shift = n_other.as_int64();
+    if (shift < 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ValueError: negative shift count");
+      }
+      return nullptr;
+    }
+    if (shift >= 64) {
+      return create_integer(value >= 0 ? 0 : -1, arena);
+    }
+    return create_integer(value >> shift, arena);
+  } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
+    const auto& shift = n_other.as_bigint();
+    if (shift.sign()) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ValueError: negative shift count");
+      }
+      return nullptr;
+    }
+    if (shift.length() > 1) {
+      return create_integer(value >= 0 ? 0 : -1, arena);
+    }
+    auto int_shift = shift.at(0);
+    if (int_shift >= 64) {
+      return create_integer(value >= 0 ? 0 : -1, arena);
+    }
+    return create_integer(value >> int_shift, arena);
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("RuntimeError: unexpected number type");
+    }
+    return nullptr;
+  }
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash() const {

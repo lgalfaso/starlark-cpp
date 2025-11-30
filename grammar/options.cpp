@@ -17,5 +17,10 @@ const std::set<std::string> predeclared_symbols = {
     "zip",
 };
 
+int64_t log2_max_bigint() {
+  // TODO(lmirelmann): Make this configurable.
+  return 30;  // 2**30.
+}
+
 }  // namespace grammar
 }  // namespace starlark

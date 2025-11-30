@@ -132,6 +132,7 @@ cc_library(
         ":starlark_numeric",
         ":starlark_object",
         "//bigint:number",
+        "//grammar:options",
     ],
 )
 
@@ -229,6 +230,7 @@ cc_library(
         ":starlark_numeric",
         ":starlark_object",
         "//bigint:number",
+        "//grammar:options",
     ],
 )
 

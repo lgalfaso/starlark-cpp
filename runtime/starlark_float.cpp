@@ -23,11 +23,11 @@ std::string_view starlark_float::type() const {
   return "float";
 }
 
-starlark_obj* starlark_float::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) {
-  return this;
+starlark_obj* starlark_float::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+  return const_cast<starlark_float*>(this);
 }
 
-starlark_obj* starlark_float::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) {
+starlark_obj* starlark_float::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) const {
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
   return Arena::Create<starlark_float>(&arena, -value);
 }
