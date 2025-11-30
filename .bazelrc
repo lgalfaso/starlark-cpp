@@ -1,5 +1,5 @@
 common --enable_platform_specific_config
-common --action_env=BAZEL_CXXOPTS="-std=c++2b" --cxxopt=-std=c++2b
+common --cxxopt=-std=c++2b --host_cxxopt=-std=c++2b
 
 common:macos --cxxopt=-fconstexpr-steps=40000000
 coverage --cxxopt=-fno-inline --cxxopt=-fno-exceptions
