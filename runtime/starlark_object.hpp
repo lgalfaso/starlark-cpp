@@ -115,6 +115,9 @@ class starlark_obj {
   virtual bool binary_in(const starlark_obj& other, error_fn* error_callback) const;
   virtual starlark_obj* binary_lshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
   virtual starlark_obj* binary_rshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;

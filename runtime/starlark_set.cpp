@@ -5,6 +5,8 @@
 #include <iterator>
 #include <string>
 
+using ::google::protobuf::Arena;
+
 namespace starlark {
 namespace runtime {
 
@@ -59,6 +61,54 @@ bool starlark_set::contains(starlark_obj* obj) const {
 bool starlark_set::binary_in(const starlark_obj& other, error_fn* error_callback) const {
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`
   return values.contains(&const_cast<starlark_obj&>(other));
+}
+
+starlark_obj* starlark_set::binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_and(other, arena, error_callback);
+  }
+  auto* result = Arena::Create<starlark_set>(&arena);
+  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
+  for (auto& key : values) {
+    if (s_other->contains(key)) {
+      result->add(key, error_callback);
+    }
+  }
+  return result;
+}
+
+starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_pipe(other, arena, error_callback);
+  }
+  auto* result = Arena::Create<starlark_set>(&arena);
+  for (auto& key : values) {
+    result->add(key, error_callback);
+  }
+  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
+  for (auto& key : s_other->values) {
+    result->add(key, error_callback);
+  }
+  return result;
+}
+
+starlark_obj* starlark_set::binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_hat(other, arena, error_callback);
+  }
+  auto* result = Arena::Create<starlark_set>(&arena);
+  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
+  for (auto& key : values) {
+    if (!s_other->values.contains(key)) {
+      result->add(key, error_callback);
+    }
+  }
+  for (auto& key : s_other->values) {
+    if (!values.contains(key)) {
+      result->add(key, error_callback);
+    }
+  }
+  return result;
 }
 
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {

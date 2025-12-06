@@ -6,6 +6,7 @@
 
 #include <limits>
 #include <string>
+#include <vector>
 
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_bigint.hpp"
@@ -26,6 +27,7 @@ using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::from_int64;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -36,16 +38,17 @@ using ::starlark::runtime::starlark_function;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
-using ::testing::SizeIs;
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::Lt;
 using ::testing::Not;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -65,7 +68,6 @@ TEST(StarlarkInteger, Str) {
   EXPECT_EQ("1234", starlark_integer(1234).str());
   EXPECT_EQ("-1234", starlark_integer(-1234).str());
 }
-
 
 TEST(StarlarkInteger, Truthy) {
   EXPECT_FALSE(starlark_integer(0).truthy());
@@ -166,6 +168,15 @@ TEST(StarlarkInteger, OrderVsBigInt) {
   EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", nullptr), Eq(0));
 
   EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(number::one << 64), "cmp", nullptr), Lt(0));
+}
+
+TEST(StarlarkInteger, OrderVsBool) {
+  error_handler error_callback;
+  starlark_bool obj_true(true);
+
+  EXPECT_THAT(starlark_integer(1).cmp(obj_true, "<", &error_callback), Eq(0));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, ShiftZero) {
@@ -305,6 +316,127 @@ TEST(StarlarkInteger, ShiftInvalidInput) {
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
+}
+
+TEST(StarlarkInteger, Membership) {
+  starlark_integer zero(0);
+  error_handler error_callback;
+
+  EXPECT_FALSE(zero.binary_in(zero, &error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument of type 'int' is not a container or iterable");
+}
+
+TEST(StarlarkInteger, Unpack) {
+  starlark_integer zero(0);
+  error_handler error_callback;
+  std::vector<starlark_obj*> consumer;
+
+  zero.unpack(0, consumer, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot unpack non-iterable int object");
+}
+
+TEST(StarlarkInteger, BinaryAnd) {
+  std::vector<int64_t> values = {
+    std::numeric_limits<int64_t>::min(),
+    std::numeric_limits<int64_t>::min() + 1,
+    std::numeric_limits<int64_t>::min() + 2,
+    -2, -1, 0, 1, 1,
+    std::numeric_limits<int64_t>::max() - 2,
+    std::numeric_limits<int64_t>::max() - 1,
+    std::numeric_limits<int64_t>::max(),
+  };
+  google::protobuf::Arena arena;
+  for (const auto a : values) {
+    for (const auto b : values) {
+      auto* r = starlark_integer(a).binary_and(starlark_integer(b), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a & b)));
+      r = starlark_integer(a).binary_and(starlark_bigint(from_int64(b)), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a & b)));
+    }
+  }
+}
+
+TEST(StarlarkInteger, BinaryAndError) {
+  starlark_integer zero(0);
+  starlark_float float_zero(0);
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  zero.binary_and(float_zero, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &: 'int' and 'float'");
+}
+
+TEST(StarlarkInteger, BinaryOr) {
+  std::vector<int64_t> values = {
+    std::numeric_limits<int64_t>::min(),
+    std::numeric_limits<int64_t>::min() + 1,
+    std::numeric_limits<int64_t>::min() + 2,
+    -2, -1, 0, 1, 1,
+    std::numeric_limits<int64_t>::max() - 2,
+    std::numeric_limits<int64_t>::max() - 1,
+    std::numeric_limits<int64_t>::max(),
+  };
+  google::protobuf::Arena arena;
+  for (const auto a : values) {
+    for (const auto b : values) {
+      auto* r = starlark_integer(a).binary_pipe(starlark_integer(b), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a | b)));
+      r = starlark_integer(a).binary_pipe(starlark_bigint(from_int64(b)), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a | b)));
+    }
+  }
+}
+
+TEST(StarlarkInteger, BinaryOrError) {
+  starlark_integer zero(0);
+  starlark_float float_zero(0);
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  zero.binary_pipe(float_zero, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'int' and 'float'");
+}
+
+TEST(StarlarkInteger, BinaryXor) {
+  std::vector<int64_t> values = {
+    std::numeric_limits<int64_t>::min(),
+    std::numeric_limits<int64_t>::min() + 1,
+    std::numeric_limits<int64_t>::min() + 2,
+    -2, -1, 0, 1, 1,
+    std::numeric_limits<int64_t>::max() - 2,
+    std::numeric_limits<int64_t>::max() - 1,
+    std::numeric_limits<int64_t>::max(),
+  };
+  google::protobuf::Arena arena;
+  for (const auto a : values) {
+    for (const auto b : values) {
+      auto* r = starlark_integer(a).binary_hat(starlark_integer(b), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
+      r = starlark_integer(a).binary_hat(starlark_bigint(from_int64(b)), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
+    }
+  }
+}
+
+TEST(StarlarkInteger, BinaryXorError) {
+  starlark_integer zero(0);
+  starlark_float float_zero(0);
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  zero.binary_hat(float_zero, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'int' and 'float'");
 }
 
 }  // namespace

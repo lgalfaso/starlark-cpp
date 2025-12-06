@@ -150,6 +150,63 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, google::
   }
 }
 
+starlark_obj* starlark_bigint::binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_and(other, arena, error_callback);
+  }
+  const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
+  if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
+    return Arena::Create<starlark_bigint>(&arena, value & from_int64(n_other.as_int64()));
+  } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
+    return Arena::Create<starlark_bigint>(&arena, value & n_other.as_bigint());
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("RuntimeError: unexpected number type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_bigint::binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_pipe(other, arena, error_callback);
+  }
+  const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
+  if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
+    return Arena::Create<starlark_bigint>(&arena, value | from_int64(n_other.as_int64()));
+  } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
+    return Arena::Create<starlark_bigint>(&arena, value | n_other.as_bigint());
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("RuntimeError: unexpected number type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_bigint::binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_hat(other, arena, error_callback);
+  }
+  const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
+  if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
+    return Arena::Create<starlark_bigint>(&arena, value ^ from_int64(n_other.as_int64()));
+  } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
+    return Arena::Create<starlark_bigint>(&arena, value ^ n_other.as_bigint());
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("RuntimeError: unexpected number type");
+    }
+    return nullptr;
+  }
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_bigint::inner_hash() const {
   int64_t result = 0;
   for (int i = value.length() - 1; i >= 0; --i) {

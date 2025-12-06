@@ -206,7 +206,6 @@ void starlark_obj::freeze() {
 starlark_obj* starlark_obj::call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn* error_callback) {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: '{}' object is not callable", type()));
-    return nullptr;
   }
   return nullptr;
 }
@@ -255,6 +254,27 @@ starlark_obj* starlark_obj::binary_lshift(const starlark_obj& other, google::pro
 starlark_obj* starlark_obj::binary_rshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for >>: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for &: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for |: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for ^: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }

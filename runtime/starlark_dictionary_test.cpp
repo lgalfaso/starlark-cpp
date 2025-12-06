@@ -197,4 +197,44 @@ TEST(StarlarkDictionary, InsertFreezed) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
 }
 
+TEST(StarlarkDictionary, BinaryPipe) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_string s_zero("zero");
+  starlark_string s_one("one");
+  starlark_string s_two("two");
+  starlark_string s_three("three");
+  starlark_string s_four("four");
+  starlark_dictionary dict_1;
+  starlark_dictionary dict_2;
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  dict_1.insert(&zero, &s_zero, nullptr);
+  dict_1.insert(&one, &s_one, nullptr);
+  dict_2.insert(&zero, &s_four, nullptr);
+  dict_2.insert(&two, &s_two, nullptr);
+  dict_2.insert(&three, &s_three, nullptr);
+
+  auto* dict_3 = dict_1.binary_pipe(dict_2,  arena, &error_callback);
+  ASSERT_NE(dict_3, nullptr);
+  EXPECT_EQ(dict_3->str(), "{0: 'four', 1: 'one', 2: 'two', 3: 'three'}");
+  EXPECT_EQ(dict_1.str(), "{0: 'zero', 1: 'one'}");
+  EXPECT_EQ(dict_2.str(), "{0: 'four', 2: 'two', 3: 'three'}");
+}
+
+TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
+  starlark_dictionary dict;
+  starlark_list list;
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  auto* result = dict.binary_pipe(list, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'dict' and 'list'");
+}
+
 }  // namespace

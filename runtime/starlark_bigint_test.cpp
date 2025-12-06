@@ -6,6 +6,7 @@
 
 #include <limits>
 #include <string>
+#include <vector>
 
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_bigint.hpp"
@@ -48,7 +49,7 @@ struct error_handler : public error_fn {
   void add_error(std::string_view error_msg) override {
     messages.push_back(std::string(error_msg));
   }
-  
+
   std::vector<std::string> messages;
 };
 
@@ -256,6 +257,108 @@ TEST(StarlarkBigint, ShiftInvalidInput) {
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
+}
+
+TEST(StarlarkBigint, BinaryAnd) {
+  std::vector<int64_t> values = {
+    std::numeric_limits<int64_t>::min(),
+    std::numeric_limits<int64_t>::min() + 1,
+    std::numeric_limits<int64_t>::min() + 2,
+    -2, -1, 0, 1, 1,
+    std::numeric_limits<int64_t>::max() - 2,
+    std::numeric_limits<int64_t>::max() - 1,
+    std::numeric_limits<int64_t>::max(),
+  };
+  google::protobuf::Arena arena;
+  for (const auto a : values) {
+    for (const auto b : values) {
+      auto* r = starlark_bigint(from_int64(a)).binary_and(starlark_integer(b), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a & b)));
+      r = starlark_bigint(from_int64(a)).binary_and(starlark_bigint(from_int64(b)), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a & b)));
+    }
+  }
+}
+
+TEST(StarlarkBigint, BinaryAndError) {
+  starlark_bigint zero(0);
+  starlark_float float_zero(0);
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  zero.binary_and(float_zero, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &: 'int' and 'float'");
+}
+
+TEST(StarlarkBigint, BinaryOr) {
+  std::vector<int64_t> values = {
+    std::numeric_limits<int64_t>::min(),
+    std::numeric_limits<int64_t>::min() + 1,
+    std::numeric_limits<int64_t>::min() + 2,
+    -2, -1, 0, 1, 1,
+    std::numeric_limits<int64_t>::max() - 2,
+    std::numeric_limits<int64_t>::max() - 1,
+    std::numeric_limits<int64_t>::max(),
+  };
+  google::protobuf::Arena arena;
+  for (const auto a : values) {
+    for (const auto b : values) {
+      auto* r = starlark_bigint(from_int64(a)).binary_pipe(starlark_integer(b), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a | b)));
+      r = starlark_bigint(from_int64(a)).binary_pipe(starlark_bigint(from_int64(b)), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a | b)));
+    }
+  }
+}
+
+TEST(StarlarkBigint, BinaryOrError) {
+  starlark_bigint zero(0);
+  starlark_float float_zero(0);
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  zero.binary_pipe(float_zero, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'int' and 'float'");
+}
+
+TEST(StarlarkBigint, BinaryXor) {
+  std::vector<int64_t> values = {
+    std::numeric_limits<int64_t>::min(),
+    std::numeric_limits<int64_t>::min() + 1,
+    std::numeric_limits<int64_t>::min() + 2,
+    -2, -1, 0, 1, 1,
+    std::numeric_limits<int64_t>::max() - 2,
+    std::numeric_limits<int64_t>::max() - 1,
+    std::numeric_limits<int64_t>::max(),
+  };
+  google::protobuf::Arena arena;
+  for (const auto a : values) {
+    for (const auto b : values) {
+      auto* r = starlark_bigint(from_int64(a)).binary_hat(starlark_integer(b), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
+      r = starlark_bigint(from_int64(a)).binary_hat(starlark_bigint(from_int64(b)), arena, nullptr);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
+    }
+  }
+}
+
+TEST(StarlarkBigint, BinaryXorError) {
+  starlark_bigint zero(0);
+  starlark_float float_zero(0);
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  zero.binary_hat(float_zero, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'int' and 'float'");
 }
 
 }  // namespace

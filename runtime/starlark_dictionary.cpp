@@ -5,6 +5,8 @@
 #include <format>
 #include <string>
 
+using ::google::protobuf::Arena;
+
 namespace starlark {
 namespace runtime {
 
@@ -65,6 +67,21 @@ bool starlark_dictionary::truthy() const {
 bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn* error_callback) const {
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`
   return values.contains(&const_cast<starlark_obj&>(other));
+}
+
+starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_pipe(other, arena, error_callback);
+  }
+  auto* result = Arena::Create<starlark_dictionary>(&arena);
+  for (auto& [key, value] : values) {
+    result->insert(key, value, error_callback);
+  }
+  const starlark_dictionary* d_other = static_cast<const starlark_dictionary*>(&other);
+  for (auto& [key, value] : d_other->values) {
+    result->insert(key, value, error_callback);
+  }
+  return result;
 }
 
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
