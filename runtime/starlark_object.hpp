@@ -118,6 +118,12 @@ class starlark_obj {
   virtual starlark_obj* binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
   virtual starlark_obj* binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
   virtual starlark_obj* binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
+  virtual starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const;
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;

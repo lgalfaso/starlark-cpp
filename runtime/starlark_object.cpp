@@ -279,6 +279,48 @@ starlark_obj* starlark_obj::binary_hat(const starlark_obj& other, google::protob
   return nullptr;
 }
 
+starlark_obj* starlark_obj::binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for +: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for -: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for *: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for /: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for //: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (error_callback != nullptr) {
+    error_callback->add_error(std::format("TypeError: unsupported operand type(s) for %: '{}' and '{}'", type(), other.type()));
+  }
+  return nullptr;
+}
+
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: '{}' not supported between instances of '{}' and '{}'", op, type(), other->type()));
