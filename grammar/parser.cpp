@@ -2,6 +2,7 @@
 
 #include "grammar/parser.hpp"
 
+#include <format>
 #include <functional>
 #include <map>
 #include <set>
@@ -288,97 +289,98 @@ bool parser::is_current(token_type expected_token) const {
 }
 
 bool parser::expect(token_type expected_token) {
+  static const std::map<token_type, std::string> token_name = {
+    {token_type::kAmpersand,            "AMPERSAND"},
+    {token_type::kAmpersandEquals,      "AMPERSAND_EQUALS"},
+    {token_type::kAnd,                  "AND"},
+    {token_type::kAs,                   "AS"},
+    {token_type::kAssert,               "ASSERT"},
+    {token_type::kAsync,                "ASYNC"},
+    {token_type::kAwait,                "AWAIT"},
+    {token_type::kBigInt,               "BIG_INT"},
+    {token_type::kBof,                  "BOF"},
+    {token_type::kBreak,                "BREAK"},
+    {token_type::kBytes,                "BYTES"},
+    {token_type::kCaret,                "CARET"},
+    {token_type::kCaretEquals,          "CARET_EQUALS"},
+    {token_type::kClass,                "CLASS"},
+    {token_type::kColon,                "COLON"},
+    {token_type::kComma,                "COMMA"},
+    {token_type::kContinue,             "CONTINUE"},
+    {token_type::kDef,                  "DEF"},
+    {token_type::kDel,                  "DEL"},
+    {token_type::kDot,                  "DOT"},
+    {token_type::kElif,                 "ELIF"},
+    {token_type::kElse,                 "ELSE"},
+    {token_type::kEof,                  "EOF"},
+    {token_type::kEquals,               "EQUALS"},
+    {token_type::kEqualsEquals,         "EQUALS_EQUALS"},
+    {token_type::kExcept,               "EXCEPT"},
+    {token_type::kFinally,              "FINALLY"},
+    {token_type::kFloat,                "FLOAT"},
+    {token_type::kFor,                  "FOR"},
+    {token_type::kFrom,                 "FROM"},
+    {token_type::kGlobal,               "GLOBAL"},
+    {token_type::kGreater,              "GREATER"},
+    {token_type::kGreaterEquals,        "GREATER_EQUALS"},
+    {token_type::kGreaterGreater,       "GREATER_GREATER"},
+    {token_type::kGreaterGreaterEquals, "GREATER_GREATER_EQUALS"},
+    {token_type::kIdentifier,           "IDENTIFIER"},
+    {token_type::kIf,                   "IF"},
+    {token_type::kIllegal,              "ILLEGAL"},
+    {token_type::kImport,               "IMPORT"},
+    {token_type::kIn,                   "IN"},
+    {token_type::kIndent,               "INDENT"},
+    {token_type::kInt,                  "INT"},
+    {token_type::kIs,                   "IS"},
+    {token_type::kLBrace,               "LBRACE"},
+    {token_type::kLBracket,             "LBRACKET"},
+    {token_type::kLambda,               "LAMBDA"},
+    {token_type::kLess,                 "LESS"},
+    {token_type::kLessEquals,           "LESS_EQUALS"},
+    {token_type::kLessLess,             "LESS_LESS"},
+    {token_type::kLessLessEquals,       "LESS_LESS_EQUALS"},
+    {token_type::kLoad,                 "LOAD"},
+    {token_type::kLParen,               "LPAREN"},
+    {token_type::kMinus,                "MINUS"},
+    {token_type::kMinusEquals,          "MINUS_EQUALS"},
+    {token_type::kNewline,              "NEWLINE"},
+    {token_type::kNonlocal,             "NONLOCAL"},
+    {token_type::kNot,                  "NOT"},
+    {token_type::kNotEquals,            "NOT_EQUALS"},
+    {token_type::kOr,                   "OR"},
+    {token_type::kOutdent,              "OUTDENT"},
+    {token_type::kPass,                 "PASS"},
+    {token_type::kPercent,              "PERCENT"},
+    {token_type::kPercentEquals,        "PERCENT_EQUALS"},
+    {token_type::kPipe,                 "PIPE"},
+    {token_type::kPipeEquals,           "PIPE_EQUALS"},
+    {token_type::kPlus,                 "PLUS"},
+    {token_type::kPlusEquals,           "PLUS_EQUALS"},
+    {token_type::kRaise,                "RAISE"},
+    {token_type::kRBrace,               "RBRACE"},
+    {token_type::kRBracket,             "RBRACKET"},
+    {token_type::kReturn,               "RETURN"},
+    {token_type::kRParen,               "RPAREN"},
+    {token_type::kSemi,                 "SEMI"},
+    {token_type::kSlash,                "SLASH"},
+    {token_type::kSlashEquals,          "SLASH_EQUALS"},
+    {token_type::kSlashSlash,           "SLASH_SLASH"},
+    {token_type::kSlashSlashEquals,     "SLASH_SLASH_EQUALS"},
+    {token_type::kStar,                 "STAR"},
+    {token_type::kStarEquals,           "STAR_EQUALS"},
+    {token_type::kStarStar,             "STAR_STAR"},
+    {token_type::kString,               "STRING"},
+    {token_type::kTilde,                "TILDE"},
+    {token_type::kTry,                  "TRY"},
+    {token_type::kWhile,                "WHILE"},
+    {token_type::kWith,                 "WITH"},
+    {token_type::kYield,                "YIELD"},
+  };
   if (capture(expected_token)) {
     return true;
   }
-  switch (expected_token) {
-    case token_type::kAmpersand:              add_error("Expected AMPERSAND");              break;
-    case token_type::kAmpersandEquals:        add_error("Expected AMPERSAND_EQUALS");       break;
-    case token_type::kAnd:                    add_error("Expected AND");                    break;
-    case token_type::kAs:                     add_error("Expected AS");                     break;
-    case token_type::kAssert:                 add_error("Expected ASSERT");                 break;
-    case token_type::kAsync:                  add_error("Expected ASYNC");                  break;
-    case token_type::kAwait:                  add_error("Expected AWAIT");                  break;
-    case token_type::kBigInt:                 add_error("Expected BIG_INT");                break;
-    case token_type::kBof:                    add_error("Expected BOF");                    break;
-    case token_type::kBreak:                  add_error("Expected BREAK");                  break;
-    case token_type::kBytes:                  add_error("Expected BYTES");                  break;
-    case token_type::kCaret:                  add_error("Expected CARET");                  break;
-    case token_type::kCaretEquals:            add_error("Expected CARET_EQUALS");           break;
-    case token_type::kClass:                  add_error("Expected CLASS");                  break;
-    case token_type::kColon:                  add_error("Expected COLON");                  break;
-    case token_type::kComma:                  add_error("Expected COMMA");                  break;
-    case token_type::kContinue:               add_error("Expected CONTINUE");               break;
-    case token_type::kDef:                    add_error("Expected DEF");                    break;
-    case token_type::kDel:                    add_error("Expected DEL");                    break;
-    case token_type::kDot:                    add_error("Expected DOT");                    break;
-    case token_type::kElif:                   add_error("Expected ELIF");                   break;
-    case token_type::kElse:                   add_error("Expected ELSE");                   break;
-    case token_type::kEof:                    add_error("Expected EOF");                    break;
-    case token_type::kEquals:                 add_error("Expected EQUALS");                 break;
-    case token_type::kEqualsEquals:           add_error("Expected EQUALS_EQUALS");          break;
-    case token_type::kExcept:                 add_error("Expected EXCEPT");                 break;
-    case token_type::kFinally:                add_error("Expected FINALLY");                break;
-    case token_type::kFloat:                  add_error("Expected FLOAT");                  break;
-    case token_type::kFor:                    add_error("Expected FOR");                    break;
-    case token_type::kFrom:                   add_error("Expected FROM");                   break;
-    case token_type::kGlobal:                 add_error("Expected GLOBAL");                 break;
-    case token_type::kGreater:                add_error("Expected GREATER");                break;
-    case token_type::kGreaterEquals:          add_error("Expected GREATER_EQUALS");         break;
-    case token_type::kGreaterGreater:         add_error("Expected GREATER_GREATER");        break;
-    case token_type::kGreaterGreaterEquals:   add_error("Expected GREATER_GREATER_EQUALS"); break;
-    case token_type::kIdentifier:             add_error("Expected IDENTIFIER");             break;
-    case token_type::kIf:                     add_error("Expected IF");                     break;
-    case token_type::kIllegal:                add_error("Expected ILLEGAL");                break;
-    case token_type::kImport:                 add_error("Expected IMPORT");                 break;
-    case token_type::kIn:                     add_error("Expected IN");                     break;
-    case token_type::kIndent:                 add_error("Expected INDENT");                 break;
-    case token_type::kInt:                    add_error("Expected INT");                    break;
-    case token_type::kIs:                     add_error("Expected IS");                     break;
-    case token_type::kLBrace:                 add_error("Expected LBRACE");                 break;
-    case token_type::kLBracket:               add_error("Expected LBRACKET");               break;
-    case token_type::kLambda:                 add_error("Expected LAMBDA");                 break;
-    case token_type::kLess:                   add_error("Expected LESS");                   break;
-    case token_type::kLessEquals:             add_error("Expected LESS_EQUALS");            break;
-    case token_type::kLessLess:               add_error("Expected LESS_LESS");              break;
-    case token_type::kLessLessEquals:         add_error("Expected LESS_LESS_EQUALS");       break;
-    case token_type::kLoad:                   add_error("Expected LOAD");                   break;
-    case token_type::kLParen:                 add_error("Expected LPAREN");                 break;
-    case token_type::kMinus:                  add_error("Expected MINUS");                  break;
-    case token_type::kMinusEquals:            add_error("Expected MINUS_EQUALS");           break;
-    case token_type::kNewline:                add_error("Expected NEWLINE");                break;
-    case token_type::kNonlocal:               add_error("Expected NONLOCAL");               break;
-    case token_type::kNot:                    add_error("Expected NOT");                    break;
-    case token_type::kNotEquals:              add_error("Expected NOT_EQUALS");             break;
-    case token_type::kOr:                     add_error("Expected OR");                     break;
-    case token_type::kOutdent:                add_error("Expected OUTDENT");                break;
-    case token_type::kPass:                   add_error("Expected PASS");                   break;
-    case token_type::kPercent:                add_error("Expected PERCENT");                break;
-    case token_type::kPercentEquals:          add_error("Expected PERCENT_EQUALS");         break;
-    case token_type::kPipe:                   add_error("Expected PIPE");                   break;
-    case token_type::kPipeEquals:             add_error("Expected PIPE_EQUALS");            break;
-    case token_type::kPlus:                   add_error("Expected PLUS");                   break;
-    case token_type::kPlusEquals:             add_error("Expected PLUS_EQUALS");            break;
-    case token_type::kRaise:                  add_error("Expected RAISE");                  break;
-    case token_type::kRBrace:                 add_error("Expected RBRACE");                 break;
-    case token_type::kRBracket:               add_error("Expected RBRACKET");               break;
-    case token_type::kReturn:                 add_error("Expected RETURN");                 break;
-    case token_type::kRParen:                 add_error("Expected RPAREN");                 break;
-    case token_type::kSemi:                   add_error("Expected SEMI");                   break;
-    case token_type::kSlash:                  add_error("Expected SLASH");                  break;
-    case token_type::kSlashEquals:            add_error("Expected SLASH_EQUALS");           break;
-    case token_type::kSlashSlash:             add_error("Expected SLASH_SLASH");            break;
-    case token_type::kSlashSlashEquals:       add_error("Expected SLASH_SLASH_EQUALS");     break;
-    case token_type::kStar:                   add_error("Expected STAR");                   break;
-    case token_type::kStarEquals:             add_error("Expected STAR_EQUALS");            break;
-    case token_type::kStarStar:               add_error("Expected STAR_STAR");              break;
-    case token_type::kString:                 add_error("Expected STRING");                 break;
-    case token_type::kTilde:                  add_error("Expected TILDE");                  break;
-    case token_type::kTry:                    add_error("Expected TRY");                    break;
-    case token_type::kWhile:                  add_error("Expected WHILE");                  break;
-    case token_type::kWith:                   add_error("Expected WITH");                   break;
-    case token_type::kYield:                  add_error("Expected YIELD");                  break;
-  }
+  add_error(std::format("Expected {}", token_name.at(expected_token)));
   return false;
 }
 
