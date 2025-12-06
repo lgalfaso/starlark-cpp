@@ -5,16 +5,17 @@
 #include "grammar/parser.hpp"
 #include "proto/starlark_ast.pb.h"
 
-using starlark::ast::File;
-using starlark::grammar::parser;
-using starlark::logging::logger;
+using ::google::protobuf::Arena;
+using ::starlark::ast::File;
+using ::starlark::grammar::parser;
+using ::starlark::logging::logger;
 
 namespace {
 
 void ParserFuzzing(const char* data, size_t size) {
   logger logging;
   parser star_parser(std::string_view(data, size), logging);
-  google::protobuf::Arena arena;
+  Arena arena;
   star_parser.parse_file(arena);
 }
 

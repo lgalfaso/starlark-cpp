@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+using ::google::protobuf::Arena;
+
 namespace starlark {
 namespace runtime {
 
@@ -216,21 +218,21 @@ void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>
   }
 }
 
-starlark_obj* starlark_obj::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::unary_plus(Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: bad operand type for unary +: '{}'", type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::unary_minus(Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: bad operand type for unary -: '{}'", type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::unary_tilde(Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: bad operand type for unary ~: '{}'", type()));
   }
@@ -244,77 +246,77 @@ bool starlark_obj::binary_in(const starlark_obj& other, error_fn* error_callback
   return false;
 }
 
-starlark_obj* starlark_obj::binary_lshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_lshift(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for <<: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_rshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_rshift(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for >>: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_and(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for &: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_pipe(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for |: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_hat(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for ^: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for +: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_minus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for -: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for *: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_slash(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for /: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for //: '{}' and '{}'", type(), other.type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (error_callback != nullptr) {
     error_callback->add_error(std::format("TypeError: unsupported operand type(s) for %: '{}' and '{}'", type(), other.type()));
   }

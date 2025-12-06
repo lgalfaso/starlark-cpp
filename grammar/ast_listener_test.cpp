@@ -15,13 +15,14 @@
 #include "proto/starlark_ast.pb.h"
 #include "third-party/defer.hpp"
 
-using starlark::ast::File;
-using starlark::ast::SliceExpr;
-using starlark::grammar::parser;
-using starlark::logging::LogLevel;
-using starlark::logging::logger;
-using testing::IsEmpty;
-using testing::SizeIs;
+using ::google::protobuf::Arena;
+using ::starlark::ast::File;
+using ::starlark::ast::SliceExpr;
+using ::starlark::grammar::parser;
+using ::starlark::logging::LogLevel;
+using ::starlark::logging::logger;
+using ::testing::IsEmpty;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -533,7 +534,7 @@ TEST(Parser, TestCase) {
   logging.set_level(LogLevel::LOG_LEVEL_ERROR);
   starlark::grammar::options opts = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, opts, {}, logging);
-  google::protobuf::Arena arena;
+  Arena arena;
   File* starlark_file = star_parser.parse_file(arena);
   EXPECT_THAT(logging, IsEmpty()) << show_errors(logging);
 

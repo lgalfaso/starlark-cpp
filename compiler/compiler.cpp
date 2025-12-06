@@ -735,7 +735,7 @@ Program* compiler::compile(std::string_view starlark_program, options opt, logge
                      opt,
                      binding,
                      logging_wrap);
-  google::protobuf::Arena parser_arena;
+  Arena parser_arena;
   File* starlark_file = star_parser.parse_file(parser_arena);
 
   auto report = logging_wrap.report();

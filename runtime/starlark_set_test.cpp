@@ -13,6 +13,7 @@
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_tuple.hpp"
 
+using ::google::protobuf::Arena;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_integer;
@@ -153,7 +154,7 @@ TEST(StarlarkSet, BinaryPipe) {
   starlark_integer three(3);
   starlark_set set_1;
   starlark_set set_2;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   set_1.add(&zero, nullptr);
@@ -172,7 +173,7 @@ TEST(StarlarkSet, BinaryPipe) {
 TEST(StarlarkSet, BinaryPipeWithNonSet) {
   starlark_set set;
   starlark_tuple tuple;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   auto* result = set.binary_pipe(tuple, arena, &error_callback);
@@ -188,7 +189,7 @@ TEST(StarlarkSet, BinaryAnd) {
   starlark_integer three(3);
   starlark_set set_1;
   starlark_set set_2;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   set_1.add(&zero, nullptr);
@@ -208,7 +209,7 @@ TEST(StarlarkSet, BinaryAnd) {
 TEST(StarlarkSet, BinaryAndWithNonSet) {
   starlark_set set;
   starlark_tuple tuple;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   auto* result = set.binary_and(tuple, arena, &error_callback);
@@ -224,7 +225,7 @@ TEST(StarlarkSet, BinaryHat) {
   starlark_integer three(3);
   starlark_set set_1;
   starlark_set set_2;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   set_1.add(&zero, nullptr);
@@ -244,7 +245,7 @@ TEST(StarlarkSet, BinaryHat) {
 TEST(StarlarkSet, BinaryHatWithNonSet) {
   starlark_set set;
   starlark_tuple tuple;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   auto* result = set.binary_hat(tuple, arena, &error_callback);
@@ -260,7 +261,7 @@ TEST(StarlarkSet, BinaryMinus) {
   starlark_integer three(3);
   starlark_set set_1;
   starlark_set set_2;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   set_1.add(&zero, nullptr);
@@ -280,7 +281,7 @@ TEST(StarlarkSet, BinaryMinus) {
 TEST(StarlarkSet, BinaryMinusWithNonSet) {
   starlark_set set;
   starlark_tuple tuple;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   auto* result = set.binary_minus(tuple, arena, &error_callback);

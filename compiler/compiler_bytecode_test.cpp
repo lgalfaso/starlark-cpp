@@ -16,6 +16,7 @@
 #include "protobuf-matchers/protocol-buffer-matchers.h"
 #include "third-party/defer.hpp"
 
+using ::google::protobuf::Arena;
 using ::google::protobuf::Message;
 using ::protobuf_matchers::EqualsProto;
 using ::starlark::bytecode::Program;
@@ -66,7 +67,7 @@ TEST(CompilerBytecode, TestCase) {
     .allow_top_level_rebinding = true,
   };
   logger logging;
-  google::protobuf::Arena arena;
+  Arena arena;
   Program* actual_starlark_program = star_compiler.compile(starlark_code, opt, logging, arena);
 
   ASSERT_NE(actual_starlark_program, nullptr) << get_errors(logging);

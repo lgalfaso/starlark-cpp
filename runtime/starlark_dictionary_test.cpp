@@ -14,6 +14,7 @@
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_string.hpp"
 
+using ::google::protobuf::Arena;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_dictionary;
@@ -209,7 +210,7 @@ TEST(StarlarkDictionary, BinaryPipe) {
   starlark_string s_four("four");
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   dict_1.insert(&zero, &s_zero, nullptr);
@@ -228,7 +229,7 @@ TEST(StarlarkDictionary, BinaryPipe) {
 TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
   starlark_dictionary dict;
   starlark_list list;
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   auto* result = dict.binary_pipe(list, arena, &error_callback);

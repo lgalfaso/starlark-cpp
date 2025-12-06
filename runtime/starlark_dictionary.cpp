@@ -69,7 +69,7 @@ bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn* error_c
   return values.contains(&const_cast<starlark_obj&>(other));
 }
 
-starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_pipe(other, arena, error_callback);
   }

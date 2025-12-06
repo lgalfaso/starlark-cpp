@@ -12,6 +12,7 @@
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 
+using ::google::protobuf::Arena;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_integer;
@@ -307,7 +308,7 @@ TEST(StarlarkList, Call) {
 TEST(StarlarkList, UnaryPlus) {
   error_handler error_callback;
   starlark_list list;
-  google::protobuf::Arena arena;
+  Arena arena;
 
   list.unary_plus(arena, &error_callback);
 
@@ -318,7 +319,7 @@ TEST(StarlarkList, UnaryPlus) {
 TEST(StarlarkList, UnaryMinus) {
   error_handler error_callback;
   starlark_list list;
-  google::protobuf::Arena arena;
+  Arena arena;
 
   list.unary_minus(arena, &error_callback);
 
@@ -329,7 +330,7 @@ TEST(StarlarkList, UnaryMinus) {
 TEST(StarlarkList, UnaryTilde) {
   error_handler error_callback;
   starlark_list list;
-  google::protobuf::Arena arena;
+  Arena arena;
 
   list.unary_tilde(arena, &error_callback);
 

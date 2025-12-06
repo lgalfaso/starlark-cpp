@@ -15,6 +15,7 @@
 #include "protobuf-matchers/protocol-buffer-matchers.h"
 #include "third-party/defer.hpp"
 
+using ::google::protobuf::Arena;
 using ::google::protobuf::Message;
 using ::protobuf_matchers::EqualsProto;
 using ::starlark::ast::File;
@@ -62,7 +63,7 @@ TEST(Parser, TestCase) {
   logging.set_level(LogLevel::LOG_LEVEL_ERROR);
   starlark::grammar::options options = starlark::grammar::get_parsing_options(starlark_program);
   parser star_parser(starlark_program, options, {}, logging);
-  google::protobuf::Arena arena;
+  Arena arena;
   File* actual_starlark_file = star_parser.parse_file(arena);
 
   EXPECT_THAT(*actual_starlark_file, EqualsProto(starlark_file));

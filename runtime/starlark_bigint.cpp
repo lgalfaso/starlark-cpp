@@ -35,21 +35,21 @@ bool starlark_bigint::truthy() const {
   return value != bigint::number::zero;
 }
 
-starlark_obj* starlark_bigint::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::unary_plus(Arena& arena, error_fn* error_callback) const {
   return const_cast<starlark_bigint*>(this);
 }
 
-starlark_obj* starlark_bigint::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::unary_minus(Arena& arena, error_fn* error_callback) const {
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
   return Arena::Create<starlark_bigint>(&arena, -value);
 }
 
-starlark_obj* starlark_bigint::unary_tilde(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::unary_tilde(Arena& arena, error_fn* error_callback) const {
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
   return Arena::Create<starlark_bigint>(&arena, -(value + number::one));
 }
 
-starlark_obj* starlark_bigint::binary_lshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::binary_lshift(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_lshift(other, arena, error_callback);
   }
@@ -104,7 +104,7 @@ starlark_obj* starlark_bigint::binary_lshift(const starlark_obj& other, google::
   }
 }
 
-starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_rshift(other, arena, error_callback);
   }
@@ -150,7 +150,7 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, google::
   }
 }
 
-starlark_obj* starlark_bigint::binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::binary_and(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_and(other, arena, error_callback);
   }
@@ -169,7 +169,7 @@ starlark_obj* starlark_bigint::binary_and(const starlark_obj& other, google::pro
   }
 }
 
-starlark_obj* starlark_bigint::binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::binary_pipe(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_pipe(other, arena, error_callback);
   }
@@ -188,7 +188,7 @@ starlark_obj* starlark_bigint::binary_pipe(const starlark_obj& other, google::pr
   }
 }
 
-starlark_obj* starlark_bigint::binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bigint::binary_hat(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_hat(other, arena, error_callback);
   }

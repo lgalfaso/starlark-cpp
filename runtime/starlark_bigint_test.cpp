@@ -23,6 +23,7 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
+using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::from_int64;
@@ -121,7 +122,7 @@ TEST(StarlarkBigint, Hash) {
 }
 
 TEST(StarlarkBigint, ShiftZero) {
-  google::protobuf::Arena arena;
+  Arena arena;
   auto* result = starlark_bigint(0).binary_lshift(starlark_integer(1l << 62), arena, nullptr);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
@@ -131,7 +132,7 @@ TEST(StarlarkBigint, ShiftZero) {
 }
 
 TEST(StarlarkBigint, LShift) {
-  google::protobuf::Arena arena;
+  Arena arena;
   auto* result = starlark_bigint(1).binary_lshift(starlark_integer(3), arena, nullptr);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(1 << 3).equals(*result));
@@ -158,7 +159,7 @@ TEST(StarlarkBigint, LShift) {
 }
 
 TEST(StarlarkBigint, RShift) {
-  google::protobuf::Arena arena;
+  Arena arena;
   auto* result = starlark_bigint(100).binary_rshift(starlark_integer(3), arena, nullptr);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(100 >> 3).equals(*result));
@@ -189,7 +190,7 @@ TEST(StarlarkBigint, RShift) {
 }
 
 TEST(StarlarkBigint, ShiftInvalidInput) {
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   auto* result = starlark_bigint(100).binary_rshift(starlark_float(3.0), arena, &error_callback);
@@ -269,7 +270,7 @@ TEST(StarlarkBigint, BinaryAnd) {
     std::numeric_limits<int64_t>::max() - 1,
     std::numeric_limits<int64_t>::max(),
   };
-  google::protobuf::Arena arena;
+  Arena arena;
   for (const auto a : values) {
     for (const auto b : values) {
       auto* r = starlark_bigint(from_int64(a)).binary_and(starlark_integer(b), arena, nullptr);
@@ -285,7 +286,7 @@ TEST(StarlarkBigint, BinaryAnd) {
 TEST(StarlarkBigint, BinaryAndError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   zero.binary_and(float_zero, arena, &error_callback);
@@ -303,7 +304,7 @@ TEST(StarlarkBigint, BinaryOr) {
     std::numeric_limits<int64_t>::max() - 1,
     std::numeric_limits<int64_t>::max(),
   };
-  google::protobuf::Arena arena;
+  Arena arena;
   for (const auto a : values) {
     for (const auto b : values) {
       auto* r = starlark_bigint(from_int64(a)).binary_pipe(starlark_integer(b), arena, nullptr);
@@ -319,7 +320,7 @@ TEST(StarlarkBigint, BinaryOr) {
 TEST(StarlarkBigint, BinaryOrError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   zero.binary_pipe(float_zero, arena, &error_callback);
@@ -337,7 +338,7 @@ TEST(StarlarkBigint, BinaryXor) {
     std::numeric_limits<int64_t>::max() - 1,
     std::numeric_limits<int64_t>::max(),
   };
-  google::protobuf::Arena arena;
+  Arena arena;
   for (const auto a : values) {
     for (const auto b : values) {
       auto* r = starlark_bigint(from_int64(a)).binary_hat(starlark_integer(b), arena, nullptr);
@@ -353,7 +354,7 @@ TEST(StarlarkBigint, BinaryXor) {
 TEST(StarlarkBigint, BinaryXorError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
-  google::protobuf::Arena arena;
+  Arena arena;
   error_handler error_callback;
 
   zero.binary_hat(float_zero, arena, &error_callback);
