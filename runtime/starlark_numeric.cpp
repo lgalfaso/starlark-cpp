@@ -178,6 +178,22 @@ starlark::bigint::number from_int64(int64_t value) {
   return result;
 }
 
+double to_double(const starlark::bigint::number& value) {
+  int bit_size = value.bit_size();
+  if (bit_size > 1024) {
+    return value.sign() ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
+  }
+  if (bit_size <= 64) {
+    double result = (double)value.at(0);
+    return value.sign() ? -result : result;
+  }
+  // We are taking one extra digit to make sure that the value is rounded up if the last bit is a one.
+  auto digits = std::numeric_limits<double>::digits + 1;
+  double relevant_digits = value.bits(bit_size - digits, digits);
+  double unsigned_result = relevant_digits * std::exp2(bit_size - digits);
+  return value.sign() ? -unsigned_result : unsigned_result;
+}
+
 bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (other->type() != "float" && other->type() != "int") {
     return false;

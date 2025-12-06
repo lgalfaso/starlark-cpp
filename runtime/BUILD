@@ -123,6 +123,16 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "starlark_numeric_test",
+    size = "small",
+    srcs = ["starlark_numeric_test.cpp"],
+    deps = [
+        ":starlark_numeric",
+        "@googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "starlark_bigint",
     srcs = ["starlark_bigint.cpp"],

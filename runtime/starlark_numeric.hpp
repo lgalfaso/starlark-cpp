@@ -30,6 +30,7 @@ class starlark_numeric : public starlark_obj {
 };
 
 starlark::bigint::number from_int64(int64_t value);
+double to_double(const starlark::bigint::number& value);
 
 }  // namespace runtime
 }  // namespace starlark
