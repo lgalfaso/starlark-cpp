@@ -1,5 +1,7 @@
 module_binding: "a"
 module_binding: "b"
+module_binding: "c"
+module_binding: "d"
 module_binding: "foo"
 statement {
   assign_statement {
@@ -8,7 +10,7 @@ statement {
         name: "foo"
         nfkc_name: "foo"
         frame: 1
-        pos_in_frame: 2
+        pos_in_frame: 4
       }
     }
     op: EQUALS
@@ -62,3 +64,39 @@ statement {
     }
   }
 }
+statement {
+  assign_statement {
+    lhs {
+      tuple {
+        value {
+          identifier {
+            name: "c"
+            nfkc_name: "c"
+            frame: 1
+            pos_in_frame: 2
+          }
+        }
+        value {
+          identifier {
+            name: "d"
+            nfkc_name: "d"
+            frame: 1
+            pos_in_frame: 3
+          }
+        }
+      }
+    }
+    op: EQUALS
+    rhs {
+      tuple {
+        value {
+          int_value: 1
+        }
+        value {
+          int_value: 2
+        }
+      }
+    }
+  }
+}
+
