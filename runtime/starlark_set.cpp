@@ -42,7 +42,7 @@ bool starlark_set::inner_repr(printer& print, printer_action action) const {
       print.append("])");
       return false;
     case printer_action::kPrintRecursion:
-      // Not entirelly sure whether it is possible to trigger this path within Starlark.
+      // This is only possible with some extension like `struct` that is hashable even when its elements are not.
       print.append("set([...])");
       return false;
   }
