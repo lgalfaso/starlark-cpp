@@ -157,6 +157,8 @@ TEST(StarlarkFloat, Order) {
   EXPECT_THAT(starlark_float(1.0).cmp(starlark_float(1e50), "cmp", nullptr), Lt(0));
   EXPECT_THAT(starlark_float(1e50).cmp(starlark_float(std::numeric_limits<double>::infinity()), "cmp", nullptr), Lt(0));
   EXPECT_THAT(starlark_float(std::numeric_limits<double>::infinity()).cmp(starlark_float(NAN), "cmp", nullptr), Lt(0));
+  EXPECT_THAT(starlark_float(NAN).cmp(starlark_float(std::numeric_limits<double>::infinity()), "cmp", nullptr), Gt(0));
+  EXPECT_THAT(starlark_float(NAN).cmp(starlark_float(NAN), "cmp", nullptr), Eq(0));
 }
 
 TEST(StarlarkFloat, OrderWithBigInt) {
