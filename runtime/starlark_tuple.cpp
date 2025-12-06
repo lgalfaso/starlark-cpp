@@ -104,7 +104,7 @@ void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj
       if (values.size() < number_of_elements) {
         error_callback->add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
       } else {
-        error_callback->add_error(std::format("ValueError: too manys values to unpack (expected {}, got {})", number_of_elements, values.size()));
+        error_callback->add_error(std::format("ValueError: too many values to unpack (expected {}, got {})", number_of_elements, values.size()));
       }
     }
     return;

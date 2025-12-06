@@ -4,6 +4,7 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <string>
 #include <vector>
 
 #include "runtime/starlark_bool.hpp"
@@ -12,6 +13,7 @@
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_tuple.hpp"
 
+using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
@@ -19,11 +21,19 @@ using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_tuple;
 using ::testing::Eq;
-using ::testing::Lt;
 using ::testing::Gt;
+using ::testing::IsEmpty;
+using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
+
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+  std::vector<std::string> messages;
+};
 
 TEST(StarlarkTuple, Type) {
   EXPECT_EQ("tuple", starlark_tuple().type());
@@ -161,7 +171,33 @@ TEST(StarlarkTuple, Unpack) {
   EXPECT_THAT(stack[1], &one);
 }
 
-TEST(StarlarkList, Order) {
+TEST(StarlarkTuple, UnpackError) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_tuple tuple;
+  tuple.add(&zero);
+  tuple.add(&one);
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    tuple.unpack(3, consumer, &error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
+  }
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    tuple.unpack(1, consumer, &error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
+  }
+}
+
+TEST(StarlarkTuple, Order) {
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_tuple tuple1;
@@ -207,6 +243,39 @@ TEST(StarlarkList, Order) {
   EXPECT_THAT(tuple5.cmp(tuple5, "cmp", nullptr), Eq(0));
 }
 
-// TODO(lmirelmann): Test unpack when the number of elements do not match.
+TEST(StarlarkTuple, OrderError) {
+  error_handler error_callback;
+  starlark_integer one(1);
+  starlark_tuple tuple;
+
+  EXPECT_FALSE(tuple.cmp(one, "<", &error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'tuple' and 'int'");
+}
+
+TEST(StarlarkTuple, Membership) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_tuple tuple;
+  tuple.add(&zero);
+  error_handler error_callback;
+
+  EXPECT_TRUE(tuple.binary_in(zero, &error_callback));
+  EXPECT_FALSE(tuple.binary_in(one, &error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkTuple, Freeze) {
+  error_handler error_callback;
+  starlark_integer one(1);
+  starlark_list list;
+  starlark_tuple tuple;
+
+  tuple.add(&list);
+  tuple.freeze();
+  list.add(&one, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
+}
 
 }  // namespace

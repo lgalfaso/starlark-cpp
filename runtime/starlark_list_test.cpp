@@ -4,6 +4,7 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <string>
 #include <vector>
 
 #include "runtime/starlark_bool.hpp"
@@ -11,6 +12,7 @@
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 
+using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
@@ -18,10 +20,18 @@ using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::testing::Eq;
 using ::testing::Gt;
+using ::testing::IsEmpty;
 using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
+
+struct error_handler : public error_fn {
+  void add_error(std::string_view error_msg) override {
+    messages.push_back(std::string(error_msg));
+  }
+  std::vector<std::string> messages;
+};
 
 TEST(StarlarkList, Type) {
   EXPECT_EQ("list", starlark_list().type());
@@ -163,6 +173,32 @@ TEST(StarlarkList, Unpack) {
   EXPECT_THAT(stack[1], &one);
 }
 
+TEST(StarlarkList, UnpackError) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_list list;
+  list.add(&zero, nullptr);
+  list.add(&one, nullptr);
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    list.unpack(3, consumer, &error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
+  }
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    list.unpack(1, consumer, &error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
+  }
+}
+
 TEST(StarlarkList, Order) {
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -209,7 +245,96 @@ TEST(StarlarkList, Order) {
   EXPECT_THAT(list5.cmp(list5, "cmp", nullptr), Eq(0));
 }
 
-// TODO(lmirelmann): Test unpack when the number of elements do not match.
-// TODO(lmirelmann): Test trying to add to a freezed list including the error message.
+TEST(StarlarkList, OrderError) {
+  error_handler error_callback;
+  starlark_integer one(1);
+  starlark_list list;
+
+  EXPECT_FALSE(list.cmp(one, "<", &error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'list' and 'int'");
+}
+
+TEST(StarlarkList, AddWithFreeze) {
+  error_handler error_callback;
+  starlark_integer one(1);
+  starlark_list list;
+  list.add(&one, &error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  list.freeze();
+  list.add(&one, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
+}
+
+TEST(StarlarkList, AddWithMultipleFreeze) {
+  error_handler error_callback;
+  starlark_integer one(1);
+  starlark_list list;
+  list.add(&one, &error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  list.freeze();
+  list.freeze();
+  list.add(&one, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
+}
+
+TEST(StarlarkList, Membership) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_list list;
+  list.add(&zero, nullptr);
+  error_handler error_callback;
+
+  EXPECT_TRUE(list.binary_in(zero, &error_callback));
+  EXPECT_FALSE(list.binary_in(one, &error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkList, Call) {
+  error_handler error_callback;
+  starlark_list list;
+
+  list.call({}, {}, &error_callback);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object is not callable");
+}
+
+TEST(StarlarkList, UnaryPlus) {
+  error_handler error_callback;
+  starlark_list list;
+  google::protobuf::Arena arena;
+
+  list.unary_plus(arena, &error_callback);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary +: 'list'");
+}
+
+TEST(StarlarkList, UnaryMinus) {
+  error_handler error_callback;
+  starlark_list list;
+  google::protobuf::Arena arena;
+
+  list.unary_minus(arena, &error_callback);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary -: 'list'");
+}
+
+TEST(StarlarkList, UnaryTilde) {
+  error_handler error_callback;
+  starlark_list list;
+  google::protobuf::Arena arena;
+
+  list.unary_tilde(arena, &error_callback);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary ~: 'list'");
+}
 
 }  // namespace
