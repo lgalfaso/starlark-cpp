@@ -7,18 +7,22 @@
 #include <string>
 #include <vector>
 
+#include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
+#include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
+using ::starlark::runtime::starlark_tuple;
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::IsEmpty;
@@ -336,6 +340,66 @@ TEST(StarlarkList, UnaryTilde) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary ~: 'list'");
+}
+
+TEST(StarlarkList, BinaryPlus) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_list list_1;
+  starlark_list list_2;
+  list_1.add(&zero, nullptr);
+  list_2.add(&one, nullptr);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = list_1.binary_plus(list_2, arena, &error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "[0, 1]");
+}
+
+TEST(StarlarkSet, BinaryPlusNotList) {
+  starlark_list list;
+  starlark_tuple tuple;
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = list.binary_plus(tuple, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate list (not \"tuple\") to list");
+}
+
+TEST(StarlarkList, BinaryStar) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_list list;
+  list.add(&zero, nullptr);
+  list.add(&one, nullptr);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_1 = list.binary_star(two, arena, &error_callback);
+  auto* result_2 = list.binary_star(three, arena, &error_callback);
+
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "[0, 1, 0, 1]");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "[0, 1, 0, 1, 0, 1]");
+}
+
+TEST(StarlarkSet, BinaryStarNotInt) {
+  starlark_list list;
+  starlark_tuple tuple;
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = list.binary_star(tuple, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
 }
 
 }  // namespace

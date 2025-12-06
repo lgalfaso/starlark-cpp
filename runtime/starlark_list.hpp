@@ -21,6 +21,8 @@ class starlark_list : public starlark_obj {
   bool truthy() const override;
   void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) override;
   bool binary_in(const starlark_obj& other, error_fn* error_callback) const override;
+  starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
+  starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

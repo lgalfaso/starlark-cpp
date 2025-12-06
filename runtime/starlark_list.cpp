@@ -6,6 +6,13 @@
 #include <string>
 #include <vector>
 
+#include "runtime/starlark_integer.hpp"
+#include "grammar/options.hpp"
+
+using ::google::protobuf::Arena;
+using ::starlark::bigint::number;
+using ::starlark::grammar::max_sequence_size;
+
 namespace starlark {
 namespace runtime {
 
@@ -81,6 +88,79 @@ bool starlark_list::binary_in(const starlark_obj& other, error_fn* error_callbac
   return false;
 }
 
+starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    if (error_callback != nullptr) {
+      error_callback->add_error(std::format("TypeError: can only concatenate list (not \"{}\") to list", other.type()));
+    }
+    return nullptr;
+  }
+  // TODO(lmirelmann): Check the result size.
+  auto* result = Arena::Create<starlark_list>(&arena);
+  for (auto& key : values) {
+    result->add(key, error_callback);
+  }
+  const starlark_list* l_other = static_cast<const starlark_list*>(&other);
+  for (auto& key : l_other->values) {
+    result->add(key, error_callback);
+  }
+  return result;
+}
+
+starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int") {
+    if (error_callback != nullptr) {
+      error_callback->add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
+    }
+    return nullptr;
+  }
+  if (values.empty()) {
+    return Arena::Create<starlark_list>(&arena);
+  }
+  const starlark_numeric* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    auto value = n_other->as_int64();
+    if (value <= 0) {
+      return Arena::Create<starlark_list>(&arena);
+    }
+    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+    auto* result = Arena::Create<starlark_list>(&arena);
+    for (int64_t i = 0; i < value; ++i) {
+      for (auto& key : values) {
+        result->add(key, error_callback);
+      }
+    }
+    return result;
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    const auto& value = n_other->as_bigint();
+    if (value <= number::zero) {
+      return Arena::Create<starlark_list>(&arena);
+    }
+    if (value.bit_size() >= 64) {
+      if (error_callback != nullptr) {
+        error_callback->add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
+      }
+      return nullptr;
+    }
+    uint64_t int_value = value.at(0);
+    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+    auto* result = Arena::Create<starlark_list>(&arena);
+    for (uint64_t i = 0; i < int_value; ++i) {
+      for (auto& key : values) {
+        result->add(key, error_callback);
+      }
+    }
+    return result;
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
+}
+
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
@@ -137,6 +217,7 @@ void starlark_list::add(starlark_obj* element, error_fn* error_callback) {
     }
     return;
   }
+  // TODO(lmirelmann): Check that this does not go over the maximum number of elements.
   values.push_back(element);
 }
 

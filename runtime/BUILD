@@ -297,6 +297,7 @@ cc_library(
     hdrs = ["starlark_list.hpp"],
     deps = [
         ":starlark_object",
+        ":starlark_integer",
     ],
 )
 
@@ -309,6 +310,7 @@ cc_test(
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
+        ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
 )
