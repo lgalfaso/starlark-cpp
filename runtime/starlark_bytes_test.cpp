@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 
 #include <string>
+#include <vector>
 
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_bigint.hpp"
