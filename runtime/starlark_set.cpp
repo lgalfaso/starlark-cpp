@@ -113,7 +113,7 @@ starlark_obj* starlark_set::binary_hat(const starlark_obj& other, google::protob
 
 starlark_obj* starlark_set::binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
   if (other.type() != type()) {
-    return starlark_obj::binary_hat(other, arena, error_callback);
+    return starlark_obj::binary_minus(other, arena, error_callback);
   }
   auto* result = Arena::Create<starlark_set>(&arena);
   const starlark_set* s_other = static_cast<const starlark_set*>(&other);

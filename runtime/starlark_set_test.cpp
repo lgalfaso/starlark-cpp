@@ -272,7 +272,7 @@ TEST(StarlarkSet, BinaryMinus) {
 
   auto* set_3 = set_1.binary_minus(set_2,  arena, &error_callback);
   ASSERT_NE(set_3, nullptr);
-  EXPECT_EQ(set_3->str(), "set([2])");
+  EXPECT_EQ(set_3->str(), "set([1])");
   EXPECT_EQ(set_1.str(), "set([0, 1, 3])");
   EXPECT_EQ(set_2.str(), "set([3, 0, 2])");
 }
