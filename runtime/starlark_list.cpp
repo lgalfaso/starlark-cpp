@@ -97,6 +97,8 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena
   }
   // TODO(lmirelmann): Check the result size.
   auto* result = Arena::Create<starlark_list>(&arena);
+  // TODO(lmirelmann): It should be possible to insert the entire thing using one call to `std::vector::insert`, but
+  // this would slightly break the fact that `add` is the only one adding elements.
   for (auto& key : values) {
     result->add(key, error_callback);
   }
@@ -136,16 +138,16 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
     if (value <= number::zero) {
       return Arena::Create<starlark_list>(&arena);
     }
-    if (value.bit_size() >= 64) {
+    if (value.bit_size() >= 63) {
       if (error_callback != nullptr) {
         error_callback->add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
       }
       return nullptr;
     }
-    uint64_t int_value = value.at(0);
+    int64_t int_value = value.at(0);
     // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
     auto* result = Arena::Create<starlark_list>(&arena);
-    for (uint64_t i = 0; i < int_value; ++i) {
+    for (int64_t i = 0; i < int_value; ++i) {
       for (auto& key : values) {
         result->add(key, error_callback);
       }

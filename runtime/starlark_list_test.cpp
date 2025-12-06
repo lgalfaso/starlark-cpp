@@ -358,7 +358,7 @@ TEST(StarlarkList, BinaryPlus) {
   EXPECT_EQ(result->str(), "[0, 1]");
 }
 
-TEST(StarlarkSet, BinaryPlusNotList) {
+TEST(StarlarkList, BinaryPlusNotList) {
   starlark_list list;
   starlark_tuple tuple;
   Arena arena;
@@ -390,7 +390,7 @@ TEST(StarlarkList, BinaryStar) {
   EXPECT_EQ(result_2->str(), "[0, 1, 0, 1, 0, 1]");
 }
 
-TEST(StarlarkSet, BinaryStarNotInt) {
+TEST(StarlarkList, BinaryStarNotInt) {
   starlark_list list;
   starlark_tuple tuple;
   Arena arena;
