@@ -190,7 +190,7 @@ double to_double(const starlark::bigint::number& value) {
   // We are taking one extra digit to make sure that the value is rounded up if the last bit is a one.
   auto digits = std::numeric_limits<double>::digits + 1;
   double relevant_digits = value.bits(bit_size - digits, digits);
-  double unsigned_result = relevant_digits * std::exp2(bit_size - digits);
+  double unsigned_result = std::ldexp(relevant_digits, bit_size - digits);
   return value.sign() ? -unsigned_result : unsigned_result;
 }
 
