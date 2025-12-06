@@ -91,7 +91,7 @@ starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, google:
         }
         return nullptr;
       }
-      return Arena::Create<starlark_bigint>(&arena, number(from_int64(value) << shift));
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) << shift);
     }
   } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
     const auto& shift = n_other.as_bigint();
@@ -118,7 +118,7 @@ starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, google:
         }
         return nullptr;
       }
-      return Arena::Create<starlark_bigint>(&arena, number(from_int64(value) << int_shift));
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) << int_shift);
     }
   } else {
     // Should not happen.
