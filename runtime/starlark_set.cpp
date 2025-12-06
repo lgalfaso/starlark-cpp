@@ -111,6 +111,20 @@ starlark_obj* starlark_set::binary_hat(const starlark_obj& other, google::protob
   return result;
 }
 
+starlark_obj* starlark_set::binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    return starlark_obj::binary_hat(other, arena, error_callback);
+  }
+  auto* result = Arena::Create<starlark_set>(&arena);
+  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
+  for (auto& key : values) {
+    if (!s_other->values.contains(key)) {
+      result->add(key, error_callback);
+    }
+  }
+  return result;
+}
+
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;

@@ -253,4 +253,40 @@ TEST(StarlarkSet, BinaryHatWithNonSet) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'set' and 'tuple'");
 }
 
+TEST(StarlarkSet, BinaryMinus) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_set set_1;
+  starlark_set set_2;
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  set_1.add(&zero, nullptr);
+  set_1.add(&one, nullptr);
+  set_1.add(&three, nullptr);
+  set_2.add(&three, nullptr);
+  set_2.add(&zero, nullptr);
+  set_2.add(&two, nullptr);
+
+  auto* set_3 = set_1.binary_minus(set_2,  arena, &error_callback);
+  ASSERT_NE(set_3, nullptr);
+  EXPECT_EQ(set_3->str(), "set([2])");
+  EXPECT_EQ(set_1.str(), "set([0, 1, 3])");
+  EXPECT_EQ(set_2.str(), "set([3, 0, 2])");
+}
+
+TEST(StarlarkSet, BinaryMinusWithNonSet) {
+  starlark_set set;
+  starlark_tuple tuple;
+  google::protobuf::Arena arena;
+  error_handler error_callback;
+
+  auto* result = set.binary_minus(tuple, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'set' and 'tuple'");
+}
+
 }  // namespace
