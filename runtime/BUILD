@@ -178,6 +178,7 @@ cc_library(
         ":siphash",
         ":starlark_numeric",
         ":starlark_object",
+        "//grammar:options",
     ],
 )
 
@@ -375,7 +376,10 @@ cc_library(
     deps = [
         ":hex_encoder",
         ":siphash",
+        ":starlark_numeric",
         ":starlark_object",
+        "//bigint:number",
+        "//grammar:options",
         "//unicode:utf8_reader",
     ],
 )

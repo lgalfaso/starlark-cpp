@@ -22,6 +22,7 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
+using ::google::protobuf::Arena;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -226,6 +227,56 @@ TEST(StarlarkString, BinaryInErrors) {
   }
 }
 
+TEST(StarlarkString, BinaryPlus) {
+  starlark_string str_1("abc");
+  starlark_string str_2("def");
+  Arena arena;
+  error_handler error_callback;
 
+  auto* result = str_1.binary_plus(str_2, arena, &error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "abcdef");
+}
+
+TEST(StarlarkString, BinaryPlusNotList) {
+  starlark_string str("abc");
+  starlark_tuple tuple;
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = str.binary_plus(tuple, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to string");
+}
+
+TEST(StarlarkString, BinaryStar) {
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_string str("abc");
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_1 = str.binary_star(two, arena, &error_callback);
+  auto* result_2 = str.binary_star(three, arena, &error_callback);
+
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "abcabc");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "abcabcabc");
+}
+
+TEST(StarlarkString, BinaryStarNotInt) {
+  starlark_string str("abc");
+  starlark_tuple tuple;
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = str.binary_star(tuple, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+}
 
 }  // namespace

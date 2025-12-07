@@ -6,11 +6,17 @@
 
 #include <string>
 
-#include "runtime/siphash.hpp"
+#include "bigint/number.hpp"
+#include "grammar/options.hpp"
 #include "runtime/hex_encoder.hpp"
+#include "runtime/siphash.hpp"
+#include "runtime/starlark_numeric.hpp"
 #include "unicode/utf8_reader.hpp"
 
-using starlark::unicode::utf8_reader;
+using ::google::protobuf::Arena;
+using ::starlark::bigint::number; 
+using ::starlark::grammar::max_string_length;
+using ::starlark::unicode::utf8_reader;
 
 namespace starlark {
 namespace runtime {
@@ -26,6 +32,7 @@ std::string starlark_string::str() const {
 }
 
 bool starlark_string::inner_repr(printer& print, printer_action action) const {
+  // TODO(lmirelmann): The spec mandates that we always use double quotes.
   assert(action == printer_action::kPrintTop);
   // TODO(lmirelmann): If this function were to be executed a lot and were to become
   // a performance issue, then there are a few things that can be optimized:
@@ -66,6 +73,78 @@ bool starlark_string::binary_in(const starlark_obj& other, error_fn* error_callb
 
   const starlark_string& s_other = static_cast<const starlark_string&>(other);
   return value.contains(s_other.value);
+}
+
+starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != type()) {
+    if (error_callback != nullptr) {
+      error_callback->add_error(std::format("TypeError: can't concat {} to string", other.type()));
+    }
+    return nullptr;
+  }
+  // TODO(lmirelmann): Check that the value length would not go over the limit.
+  auto* result = Arena::Create<starlark_string>(&arena, value);
+  const starlark_string* b_other = static_cast<const starlark_string*>(&other);
+  result->value += b_other->value;
+  return result;
+}
+
+starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int") {
+    if (error_callback != nullptr) {
+      error_callback->add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
+    }
+    return nullptr;
+  }
+  if (value.empty()) {
+    return Arena::Create<starlark_string>(&arena, "");
+  }
+  const starlark_numeric* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    auto multiplier = n_other->as_int64();
+    if (multiplier <= 0) {
+      return Arena::Create<starlark_string>(&arena, "");
+    }
+    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+    auto* result = Arena::Create<starlark_string>(&arena, value);
+    for (int64_t i = 1; i < multiplier; ++i) {
+      result->value += value;
+    }
+    return result;
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    const auto& multiplier = n_other->as_bigint();
+    if (multiplier <= number::zero) {
+      return Arena::Create<starlark_string>(&arena, "");
+    }
+    if (multiplier.bit_size() >= 63) {
+      if (error_callback != nullptr) {
+        error_callback->add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
+      }
+      return nullptr;
+    }
+    int64_t int_value = multiplier.at(0);
+    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+    auto* result = Arena::Create<starlark_string>(&arena, value);
+    for (int64_t i = 1; i < int_value; ++i) {
+      result->value += value;
+    }
+    return result;
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_string::binary_percent(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  // TODO(lmirelmann): Implement.
+  if (error_callback != nullptr) {
+    error_callback->add_error("Unimplemented");
+  }
+  return nullptr;
 }
 
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {

@@ -22,6 +22,7 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
+using ::google::protobuf::Arena;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -224,6 +225,58 @@ TEST(StarlarkBytes, BinaryInErrors) {
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
+}
+
+TEST(StarlarkBytes, BinaryPlus) {
+  starlark_bytes bytes_1("abc");
+  starlark_bytes bytes_2("def");
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = bytes_1.binary_plus(bytes_2, arena, &error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "b'abcdef'");
+}
+
+TEST(StarlarkBytes, BinaryPlusNotList) {
+  starlark_bytes bytes("abc");
+  starlark_tuple tuple;
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = bytes.binary_plus(tuple, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to bytes");
+}
+
+TEST(StarlarkBytes, BinaryStar) {
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_bytes bytes("abc");
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_1 = bytes.binary_star(two, arena, &error_callback);
+  auto* result_2 = bytes.binary_star(three, arena, &error_callback);
+
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "b'abcabc'");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "b'abcabcabc'");
+}
+
+TEST(StarlarkBytes, BinaryStarNotInt) {
+  starlark_bytes bytes("abc");
+  starlark_tuple tuple;
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = bytes.binary_star(tuple, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
 }
 
 }  // namespace
