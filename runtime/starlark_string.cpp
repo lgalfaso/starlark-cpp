@@ -14,7 +14,7 @@
 #include "unicode/utf8_reader.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::bigint::number; 
+using ::starlark::bigint::number;
 using ::starlark::grammar::max_string_length;
 using ::starlark::unicode::utf8_reader;
 
