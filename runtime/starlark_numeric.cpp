@@ -8,16 +8,18 @@
 #include <limits>
 #include <string>
 
+using ::starlark::bigint::number;
+
 namespace starlark {
 namespace runtime {
 
 namespace {
 
-bool equals_fb(double lhs, const starlark::bigint::number& rhs) {
+bool equals_fb(double lhs, const number& rhs) {
   if (!std::isfinite(lhs)) {
     return false;
   }
-  if (rhs == starlark::bigint::number::zero) {
+  if (rhs == number::zero) {
     return lhs == 0;
   }
   if (lhs == 0) {
@@ -49,8 +51,8 @@ bool equals_fb(double lhs, const starlark::bigint::number& rhs) {
   return mantissa == rhs.bits(e, 64);
 }
 
-bool equals_ib(int64_t lhs, const starlark::bigint::number& rhs) {
-  if (rhs == starlark::bigint::number::zero) {
+bool equals_ib(int64_t lhs, const number& rhs) {
+  if (rhs == number::zero) {
     return lhs == 0;
   }
   if (lhs == 0) {
@@ -70,12 +72,12 @@ bool equals_ib(int64_t lhs, const starlark::bigint::number& rhs) {
   return rhs.at(0) == lhs;
 }
 
-int cmp_fb(double lhs, const starlark::bigint::number& rhs) {
+int cmp_fb(double lhs, const number& rhs) {
   // Simple cases when `lhs` is infinite, there is a difference in sign or one of the inputs is zero.
   if (!std::isfinite(lhs)) {
     return lhs > 0 ? 1 : -1;
   }
-  if (rhs == starlark::bigint::number::zero) {
+  if (rhs == number::zero) {
     if (lhs != 0) {
       return lhs > 0 ? 1 : -1;
     }
@@ -139,8 +141,8 @@ int cmp_fb(double lhs, const starlark::bigint::number& rhs) {
   return 0;
 }
 
-int cmp_ib(int64_t lhs, const starlark::bigint::number& rhs) {
-  if (rhs == starlark::bigint::number::zero) {
+int cmp_ib(int64_t lhs, const number& rhs) {
+  if (rhs == number::zero) {
       if (lhs != 0) {
         return lhs > 0 ? 1 : -1;
       }
@@ -170,21 +172,21 @@ int cmp_ib(int64_t lhs, const starlark::bigint::number& rhs) {
 
 }  // namespace
 
-starlark::bigint::number from_int64(int64_t value) {
-  starlark::bigint::number result(value);
+number from_int64(int64_t value) {
+  number result(value);
   if (value < 0) {
-    result -= starlark::bigint::number::one << 64;
+    result -= number::one << 64;
   }
   return result;
 }
 
-double to_double(const starlark::bigint::number& value) {
+double to_double(const number& value) {
   int bit_size = value.bit_size();
   if (bit_size > 1024) {
     return value.sign() ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
   }
   if (bit_size <= 64) {
-    double result = (double)value.at(0);
+    double result = static_cast<double>(value.at(0));
     return value.sign() ? -result : result;
   }
   // We are taking one extra digit to make sure that the value is rounded up if the last bit is a one.
@@ -326,8 +328,8 @@ int64_t starlark_numeric::as_int64() const {
   return 0;
 }
 
-const starlark::bigint::number& starlark_numeric::as_bigint() const {
-  return starlark::bigint::number::zero;
+const number& starlark_numeric::as_bigint() const {
+  return number::zero;
 }
 
 double starlark_numeric::as_float() const {

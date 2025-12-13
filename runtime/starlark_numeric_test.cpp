@@ -26,5 +26,5 @@ TEST(ToDouble, FromBigInt) {
   EXPECT_EQ(std::numeric_limits<double>::infinity(), to_double(number::one << 1024));
 }
 
-}
+}  // namespace
 
