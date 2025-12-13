@@ -480,6 +480,9 @@ std::pair<number, number> number::div(const number& dividend,
     return std::make_pair(zero, zero);
   }
   if (abs_cmp(divisor.values_, one.values_) == 0) {
+    if (divisor.sign()) {
+      return std::make_pair(-dividend, zero);
+    }
     return std::make_pair(dividend, zero);
   }
   if (abs_cmp(dividend.values_, divisor.values_) < 0) {

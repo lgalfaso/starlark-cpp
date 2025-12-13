@@ -975,13 +975,13 @@ TEST(Number, DivisionUnits) {
   EXPECT_EQ(d, n);
   std::tie(d, r) = number::div(n, -number::one);
   EXPECT_EQ(r, number::zero);
-  EXPECT_EQ(d, n);
+  EXPECT_EQ(d, -n);
   std::tie(d, r) = number::div(-n, number::one);
   EXPECT_EQ(r, number::zero);
   EXPECT_EQ(d, -n);
   std::tie(d, r) = number::div(-n, -number::one);
   EXPECT_EQ(r, number::zero);
-  EXPECT_EQ(d, -n);
+  EXPECT_EQ(d, n);
 }
 
 TEST(Number, DivisionSmall) {
