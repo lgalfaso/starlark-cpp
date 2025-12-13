@@ -15,6 +15,7 @@
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::bigint::number;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -310,23 +311,36 @@ TEST(StarlarkTuple, BinaryPlusNotList) {
 }
 
 TEST(StarlarkTuple, BinaryStar) {
+  starlark_bigint minus_two(-2);
+  starlark_integer minus_one(-1);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_bigint three(3);
+  starlark_bigint big(number::one << 64);
   starlark_tuple tuple;
+  starlark_tuple tuple0;
   tuple.add(&zero);
   tuple.add(&one);
   Arena arena;
   error_handler error_callback;
 
+  auto* result_0 = tuple0.binary_star(big, arena, &error_callback);
   auto* result_1 = tuple.binary_star(two, arena, &error_callback);
   auto* result_2 = tuple.binary_star(three, arena, &error_callback);
+  auto* result_3 = tuple.binary_star(minus_two, arena, &error_callback);
+  auto* result_4 = tuple.binary_star(minus_one, arena, &error_callback);
 
+  ASSERT_NE(result_0, nullptr);
+  EXPECT_EQ(result_0->str(), "()");
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "(0, 1, 0, 1)");
   ASSERT_NE(result_2, nullptr);
   EXPECT_EQ(result_2->str(), "(0, 1, 0, 1, 0, 1)");
+  ASSERT_NE(result_3, nullptr);
+  EXPECT_EQ(result_3->str(), "()");
+  ASSERT_NE(result_4, nullptr);
+  EXPECT_EQ(result_4->str(), "()");
 }
 
 TEST(StarlarkTuple, BinaryStarNotInt) {
@@ -339,6 +353,19 @@ TEST(StarlarkTuple, BinaryStarNotInt) {
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'list'");
+}
+
+TEST(StarlarkTuple, BinaryStarTooBig) {
+  starlark_tuple tuple;
+  starlark_bigint big(number::one << 64);
+  Arena arena;
+  error_handler error_callback;
+  tuple.add(&big);
+
+  auto* result = tuple.binary_star(big, arena, &error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
 }
 
 }  // namespace
