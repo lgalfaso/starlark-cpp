@@ -23,13 +23,241 @@ std::string_view starlark_float::type() const {
   return "float";
 }
 
-starlark_obj* starlark_float::unary_plus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_float::unary_plus(Arena& arena, error_fn* error_callback) const {
   return const_cast<starlark_float*>(this);
 }
 
-starlark_obj* starlark_float::unary_minus(google::protobuf::Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_float::unary_minus(Arena& arena, error_fn* error_callback) const {
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
   return Arena::Create<starlark_float>(&arena, -value);
+}
+
+starlark_obj* starlark_float::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int" && other.type() != type()) {
+    return starlark_obj::binary_plus(other, arena, error_callback);
+  }
+  auto* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
+    return Arena::Create<starlark_float>(&arena, value + n_other->as_float());
+  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    return Arena::Create<starlark_float>(&arena, value + n_other->as_int64());
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    auto fother = to_double(n_other->as_bigint());
+    if (std::isinf(fother)) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("OverflowError: int too large to convert to float");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, value + fother);
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_float::binary_minus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int" && other.type() != type()) {
+    return starlark_obj::binary_minus(other, arena, error_callback);
+  }
+  auto* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
+    return Arena::Create<starlark_float>(&arena, value - n_other->as_float());
+  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    return Arena::Create<starlark_float>(&arena, value - n_other->as_int64());
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    auto fother = to_double(n_other->as_bigint());
+    if (std::isinf(fother)) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("OverflowError: int too large to convert to float");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, value - fother);
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_float::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int" && other.type() != type()) {
+    return starlark_obj::binary_star(other, arena, error_callback);
+  }
+  auto* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
+    return Arena::Create<starlark_float>(&arena, value * n_other->as_float());
+  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    return Arena::Create<starlark_float>(&arena, value * n_other->as_int64());
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    auto fother = to_double(n_other->as_bigint());
+    if (std::isinf(fother)) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("OverflowError: int too large to convert to float");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, value * fother);
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int" && other.type() != type()) {
+    return starlark_obj::binary_slash(other, arena, error_callback);
+  }
+  auto* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
+    auto v = n_other->as_float();
+    if (v == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, value / v);
+  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    auto v = n_other->as_int64();
+    if (v == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, value / v);
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    auto fother = to_double(n_other->as_bigint());
+    if (fother == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    if (std::isinf(fother)) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("OverflowError: int too large to convert to float");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, value / fother);
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int" && other.type() != type()) {
+    return starlark_obj::binary_slash_slash(other, arena, error_callback);
+  }
+  auto* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
+    auto v = n_other->as_float();
+    if (v == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, std::floor(value / v));
+  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    auto v = n_other->as_int64();
+    if (v == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, std::floor(value / v));
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    auto fother = to_double(n_other->as_bigint());
+    if (fother == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    if (std::isinf(fother)) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("OverflowError: int too large to convert to float");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, std::floor(value / fother));
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
+}
+
+starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() != "int" && other.type() != type()) {
+    return starlark_obj::binary_percent(other, arena, error_callback);
+  }
+  auto* n_other = static_cast<const starlark_numeric*>(&other);
+  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
+    auto v = n_other->as_float();
+    if (v == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, starlark_fmod(value, v));
+  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
+    auto v = n_other->as_int64();
+    if (v == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, starlark_fmod(value, v));
+  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
+    auto fother = to_double(n_other->as_bigint());
+    if (fother == 0) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("ZeroDivisionError: division by zero");
+      }
+      return nullptr;
+    }
+    if (std::isinf(fother)) {
+      if (error_callback != nullptr) {
+        error_callback->add_error("OverflowError: int too large to convert to float");
+      }
+      return nullptr;
+    }
+    return Arena::Create<starlark_float>(&arena, starlark_fmod(value, fother));
+  } else {
+    // Should not happen.
+    assert(false);
+    if (error_callback != nullptr) {
+      error_callback->add_error("TypeError: unknown numeric type");
+    }
+    return nullptr;
+  }
 }
 
 bool starlark_float::inner_repr(printer& print, printer_action action) const {
