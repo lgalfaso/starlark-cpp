@@ -196,6 +196,35 @@ double to_double(const number& value) {
   return value.sign() ? -unsigned_result : unsigned_result;
 }
 
+double starlark_fmod(double a, double b) {
+  double result = std::fmod(a, b);
+  if (result == 0.0) {
+    return copysign(result, b);
+  }
+  if ((result < 0) ^ (b < 0)) {
+    result += b;
+  }
+  return result;
+}
+
+number starlark_div(const number& a, const number& b) {
+  number d, r;
+  std::tie(d, r) = number::div(a, b);
+  if (b.sign() != r.sign() && r != number::zero) {
+    d -= number::one;
+  }
+  return d;
+}
+
+number starlark_mod(const number& a, const number& b) {
+  number d, r;
+  std::tie(d, r) = number::div(a, b);
+  if (b.sign() != r.sign() && r != number::zero) {
+    r += b;
+  }
+  return r;
+}
+
 bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (other->type() != "float" && other->type() != "int") {
     return false;

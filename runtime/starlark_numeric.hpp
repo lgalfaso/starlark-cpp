@@ -31,6 +31,9 @@ class starlark_numeric : public starlark_obj {
 
 starlark::bigint::number from_int64(int64_t value);
 double to_double(const starlark::bigint::number& value);
+double starlark_fmod(double a, double b);
+starlark::bigint::number starlark_div(const starlark::bigint::number& a, const starlark::bigint::number& b);
+starlark::bigint::number starlark_mod(const starlark::bigint::number& a, const starlark::bigint::number& b);
 
 }  // namespace runtime
 }  // namespace starlark
