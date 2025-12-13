@@ -42,6 +42,7 @@ using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
+using ::testing::IsEmpty;
 using ::testing::SizeIs;
 
 namespace {
@@ -360,6 +361,1252 @@ TEST(StarlarkBigint, BinaryXorError) {
   zero.binary_hat(float_zero, arena, &error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'int' and 'float'");
+}
+
+TEST(StarlarkBigint, BinaryPlus) {
+  starlark_float f1(1.0);
+  starlark_integer i1(3);
+  starlark_bigint b1(number::one << 2);
+  starlark_bigint b2(number::one << 4);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = b1.binary_plus(b2, arena, &error_callback);
+  auto* result2 = b1.binary_plus(i1, arena, &error_callback);
+  auto* result3 = b1.binary_plus(f1, arena, &error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("20", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("7", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("5.0", result3->str());
+}
+
+TEST(StarlarkBigint, BinaryPlusError) {
+  starlark_bigint zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.binary_plus(true_obj, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +: 'int' and 'bool'");
+}
+
+TEST(StarlarkBigint, BinaryPlusOverflowError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_float f1(1.0);
+  Arena arena;
+  error_handler error_callback;
+
+  big.binary_plus(f1, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkBigint, BinaryMinus) {
+  starlark_float f1(2.0);
+  starlark_integer i1(4);
+  starlark_bigint b1(number::one << 3);
+  starlark_bigint b2(number::one << 5);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = b1.binary_minus(b2, arena, &error_callback);
+  auto* result2 = b1.binary_minus(i1, arena, &error_callback);
+  auto* result3 = b1.binary_minus(f1, arena, &error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("-24", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("4", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("6.0", result3->str());
+}
+
+TEST(StarlarkBigint, BinaryMinusError) {
+  starlark_bigint zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.binary_minus(true_obj, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'int' and 'bool'");
+}
+
+TEST(StarlarkBigint, BinaryMinusOverflowError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_float f1(1.0);
+  Arena arena;
+  error_handler error_callback;
+
+  big.binary_minus(f1, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkBigint, BinaryStar) {
+  starlark_float f1(2.0);
+  starlark_integer i1(4);
+  starlark_bigint b1(number::one << 3);
+  starlark_bigint b2(number::one << 5);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = b1.binary_star(b2, arena, &error_callback);
+  auto* result2 = b1.binary_star(i1, arena, &error_callback);
+  auto* result3 = b1.binary_star(f1, arena, &error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("256", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("32", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("16.0", result3->str());
+}
+
+TEST(StarlarkBigint, BinaryStarError) {
+  starlark_bigint zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.binary_star(true_obj, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *: 'int' and 'bool'");
+}
+
+TEST(StarlarkBigint, BinaryStarOverflowError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_float f1(1.0);
+  Arena arena;
+  error_handler error_callback;
+
+  big.binary_star(f1, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkBigint, BinarySlash) {
+  starlark_float f1(2.0);
+  starlark_integer i1(4);
+  starlark_bigint b1(number::one << 3);
+  starlark_bigint b2(number::one << 5);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = b1.binary_slash(b2, arena, &error_callback);
+  auto* result2 = b1.binary_slash(i1, arena, &error_callback);
+  auto* result3 = b1.binary_slash(f1, arena, &error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("0.25", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("2.0", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("4.0", result3->str());
+}
+
+TEST(StarlarkBigint, BinarySlashError) {
+  starlark_bigint zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.binary_slash(true_obj, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /: 'int' and 'bool'");
+}
+
+TEST(StarlarkBigint, BinarySlashOverflowError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_float f1(1.0);
+  Arena arena;
+  error_handler error_callback;
+
+  big.binary_slash(f1, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkBigint, BinarySlashOverflowiDenominatorError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash(big, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkBigint, BinarySlashZeroFloatError) {
+  starlark_float f0(0.0);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash(f0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinarySlashZeroIntError) {
+  starlark_integer i0(0);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash(i0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinarySlashZeroBigintError) {
+  starlark_bigint b0(number::zero);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash(b0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinarySlashSlash) {
+  auto test = [](int64_t n, int64_t d, std::string_view r1, std::string_view r2) {
+    starlark_bigint num(n);
+    starlark_bigint denb(d);
+    starlark_integer deni(d);
+    starlark_float denf(d);
+    Arena arena;
+    error_handler error_callback;
+
+    auto* resultb = num.binary_slash_slash(denb, arena, &error_callback);
+    auto* resulti = num.binary_slash_slash(deni, arena, &error_callback);
+    auto* resultf = num.binary_slash_slash(denf, arena, &error_callback);
+
+    EXPECT_THAT(error_callback.messages, SizeIs(0));
+    EXPECT_NE(resultb, nullptr);
+    EXPECT_NE(resulti, nullptr);
+    EXPECT_NE(resultf, nullptr);
+    EXPECT_EQ(r1, resultb->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r1, resulti->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r2, resultf->str()) << "Num: " << n << ", den: " << d;
+  };
+
+  /*
+  ```python
+  for a in range(-10, 11):
+      for b in range(-10, 11):
+          if b!=0:
+              print('  test({}, {}, "{}", "{}");'.format(a, b, (a // b), (a // float(b))))
+  ```
+  */
+  test(-10, -10, "1", "1.0");
+  test(-10, -9, "1", "1.0");
+  test(-10, -8, "1", "1.0");
+  test(-10, -7, "1", "1.0");
+  test(-10, -6, "1", "1.0");
+  test(-10, -5, "2", "2.0");
+  test(-10, -4, "2", "2.0");
+  test(-10, -3, "3", "3.0");
+  test(-10, -2, "5", "5.0");
+  test(-10, -1, "10", "10.0");
+  test(-10, 1, "-10", "-10.0");
+  test(-10, 2, "-5", "-5.0");
+  test(-10, 3, "-4", "-4.0");
+  test(-10, 4, "-3", "-3.0");
+  test(-10, 5, "-2", "-2.0");
+  test(-10, 6, "-2", "-2.0");
+  test(-10, 7, "-2", "-2.0");
+  test(-10, 8, "-2", "-2.0");
+  test(-10, 9, "-2", "-2.0");
+  test(-10, 10, "-1", "-1.0");
+  test(-9, -10, "0", "0.0");
+  test(-9, -9, "1", "1.0");
+  test(-9, -8, "1", "1.0");
+  test(-9, -7, "1", "1.0");
+  test(-9, -6, "1", "1.0");
+  test(-9, -5, "1", "1.0");
+  test(-9, -4, "2", "2.0");
+  test(-9, -3, "3", "3.0");
+  test(-9, -2, "4", "4.0");
+  test(-9, -1, "9", "9.0");
+  test(-9, 1, "-9", "-9.0");
+  test(-9, 2, "-5", "-5.0");
+  test(-9, 3, "-3", "-3.0");
+  test(-9, 4, "-3", "-3.0");
+  test(-9, 5, "-2", "-2.0");
+  test(-9, 6, "-2", "-2.0");
+  test(-9, 7, "-2", "-2.0");
+  test(-9, 8, "-2", "-2.0");
+  test(-9, 9, "-1", "-1.0");
+  test(-9, 10, "-1", "-1.0");
+  test(-8, -10, "0", "0.0");
+  test(-8, -9, "0", "0.0");
+  test(-8, -8, "1", "1.0");
+  test(-8, -7, "1", "1.0");
+  test(-8, -6, "1", "1.0");
+  test(-8, -5, "1", "1.0");
+  test(-8, -4, "2", "2.0");
+  test(-8, -3, "2", "2.0");
+  test(-8, -2, "4", "4.0");
+  test(-8, -1, "8", "8.0");
+  test(-8, 1, "-8", "-8.0");
+  test(-8, 2, "-4", "-4.0");
+  test(-8, 3, "-3", "-3.0");
+  test(-8, 4, "-2", "-2.0");
+  test(-8, 5, "-2", "-2.0");
+  test(-8, 6, "-2", "-2.0");
+  test(-8, 7, "-2", "-2.0");
+  test(-8, 8, "-1", "-1.0");
+  test(-8, 9, "-1", "-1.0");
+  test(-8, 10, "-1", "-1.0");
+  test(-7, -10, "0", "0.0");
+  test(-7, -9, "0", "0.0");
+  test(-7, -8, "0", "0.0");
+  test(-7, -7, "1", "1.0");
+  test(-7, -6, "1", "1.0");
+  test(-7, -5, "1", "1.0");
+  test(-7, -4, "1", "1.0");
+  test(-7, -3, "2", "2.0");
+  test(-7, -2, "3", "3.0");
+  test(-7, -1, "7", "7.0");
+  test(-7, 1, "-7", "-7.0");
+  test(-7, 2, "-4", "-4.0");
+  test(-7, 3, "-3", "-3.0");
+  test(-7, 4, "-2", "-2.0");
+  test(-7, 5, "-2", "-2.0");
+  test(-7, 6, "-2", "-2.0");
+  test(-7, 7, "-1", "-1.0");
+  test(-7, 8, "-1", "-1.0");
+  test(-7, 9, "-1", "-1.0");
+  test(-7, 10, "-1", "-1.0");
+  test(-6, -10, "0", "0.0");
+  test(-6, -9, "0", "0.0");
+  test(-6, -8, "0", "0.0");
+  test(-6, -7, "0", "0.0");
+  test(-6, -6, "1", "1.0");
+  test(-6, -5, "1", "1.0");
+  test(-6, -4, "1", "1.0");
+  test(-6, -3, "2", "2.0");
+  test(-6, -2, "3", "3.0");
+  test(-6, -1, "6", "6.0");
+  test(-6, 1, "-6", "-6.0");
+  test(-6, 2, "-3", "-3.0");
+  test(-6, 3, "-2", "-2.0");
+  test(-6, 4, "-2", "-2.0");
+  test(-6, 5, "-2", "-2.0");
+  test(-6, 6, "-1", "-1.0");
+  test(-6, 7, "-1", "-1.0");
+  test(-6, 8, "-1", "-1.0");
+  test(-6, 9, "-1", "-1.0");
+  test(-6, 10, "-1", "-1.0");
+  test(-5, -10, "0", "0.0");
+  test(-5, -9, "0", "0.0");
+  test(-5, -8, "0", "0.0");
+  test(-5, -7, "0", "0.0");
+  test(-5, -6, "0", "0.0");
+  test(-5, -5, "1", "1.0");
+  test(-5, -4, "1", "1.0");
+  test(-5, -3, "1", "1.0");
+  test(-5, -2, "2", "2.0");
+  test(-5, -1, "5", "5.0");
+  test(-5, 1, "-5", "-5.0");
+  test(-5, 2, "-3", "-3.0");
+  test(-5, 3, "-2", "-2.0");
+  test(-5, 4, "-2", "-2.0");
+  test(-5, 5, "-1", "-1.0");
+  test(-5, 6, "-1", "-1.0");
+  test(-5, 7, "-1", "-1.0");
+  test(-5, 8, "-1", "-1.0");
+  test(-5, 9, "-1", "-1.0");
+  test(-5, 10, "-1", "-1.0");
+  test(-4, -10, "0", "0.0");
+  test(-4, -9, "0", "0.0");
+  test(-4, -8, "0", "0.0");
+  test(-4, -7, "0", "0.0");
+  test(-4, -6, "0", "0.0");
+  test(-4, -5, "0", "0.0");
+  test(-4, -4, "1", "1.0");
+  test(-4, -3, "1", "1.0");
+  test(-4, -2, "2", "2.0");
+  test(-4, -1, "4", "4.0");
+  test(-4, 1, "-4", "-4.0");
+  test(-4, 2, "-2", "-2.0");
+  test(-4, 3, "-2", "-2.0");
+  test(-4, 4, "-1", "-1.0");
+  test(-4, 5, "-1", "-1.0");
+  test(-4, 6, "-1", "-1.0");
+  test(-4, 7, "-1", "-1.0");
+  test(-4, 8, "-1", "-1.0");
+  test(-4, 9, "-1", "-1.0");
+  test(-4, 10, "-1", "-1.0");
+  test(-3, -10, "0", "0.0");
+  test(-3, -9, "0", "0.0");
+  test(-3, -8, "0", "0.0");
+  test(-3, -7, "0", "0.0");
+  test(-3, -6, "0", "0.0");
+  test(-3, -5, "0", "0.0");
+  test(-3, -4, "0", "0.0");
+  test(-3, -3, "1", "1.0");
+  test(-3, -2, "1", "1.0");
+  test(-3, -1, "3", "3.0");
+  test(-3, 1, "-3", "-3.0");
+  test(-3, 2, "-2", "-2.0");
+  test(-3, 3, "-1", "-1.0");
+  test(-3, 4, "-1", "-1.0");
+  test(-3, 5, "-1", "-1.0");
+  test(-3, 6, "-1", "-1.0");
+  test(-3, 7, "-1", "-1.0");
+  test(-3, 8, "-1", "-1.0");
+  test(-3, 9, "-1", "-1.0");
+  test(-3, 10, "-1", "-1.0");
+  test(-2, -10, "0", "0.0");
+  test(-2, -9, "0", "0.0");
+  test(-2, -8, "0", "0.0");
+  test(-2, -7, "0", "0.0");
+  test(-2, -6, "0", "0.0");
+  test(-2, -5, "0", "0.0");
+  test(-2, -4, "0", "0.0");
+  test(-2, -3, "0", "0.0");
+  test(-2, -2, "1", "1.0");
+  test(-2, -1, "2", "2.0");
+  test(-2, 1, "-2", "-2.0");
+  test(-2, 2, "-1", "-1.0");
+  test(-2, 3, "-1", "-1.0");
+  test(-2, 4, "-1", "-1.0");
+  test(-2, 5, "-1", "-1.0");
+  test(-2, 6, "-1", "-1.0");
+  test(-2, 7, "-1", "-1.0");
+  test(-2, 8, "-1", "-1.0");
+  test(-2, 9, "-1", "-1.0");
+  test(-2, 10, "-1", "-1.0");
+  test(-1, -10, "0", "0.0");
+  test(-1, -9, "0", "0.0");
+  test(-1, -8, "0", "0.0");
+  test(-1, -7, "0", "0.0");
+  test(-1, -6, "0", "0.0");
+  test(-1, -5, "0", "0.0");
+  test(-1, -4, "0", "0.0");
+  test(-1, -3, "0", "0.0");
+  test(-1, -2, "0", "0.0");
+  test(-1, -1, "1", "1.0");
+  test(-1, 1, "-1", "-1.0");
+  test(-1, 2, "-1", "-1.0");
+  test(-1, 3, "-1", "-1.0");
+  test(-1, 4, "-1", "-1.0");
+  test(-1, 5, "-1", "-1.0");
+  test(-1, 6, "-1", "-1.0");
+  test(-1, 7, "-1", "-1.0");
+  test(-1, 8, "-1", "-1.0");
+  test(-1, 9, "-1", "-1.0");
+  test(-1, 10, "-1", "-1.0");
+  test(0, -10, "0", "-0.0");
+  test(0, -9, "0", "-0.0");
+  test(0, -8, "0", "-0.0");
+  test(0, -7, "0", "-0.0");
+  test(0, -6, "0", "-0.0");
+  test(0, -5, "0", "-0.0");
+  test(0, -4, "0", "-0.0");
+  test(0, -3, "0", "-0.0");
+  test(0, -2, "0", "-0.0");
+  test(0, -1, "0", "-0.0");
+  test(0, 1, "0", "0.0");
+  test(0, 2, "0", "0.0");
+  test(0, 3, "0", "0.0");
+  test(0, 4, "0", "0.0");
+  test(0, 5, "0", "0.0");
+  test(0, 6, "0", "0.0");
+  test(0, 7, "0", "0.0");
+  test(0, 8, "0", "0.0");
+  test(0, 9, "0", "0.0");
+  test(0, 10, "0", "0.0");
+  test(1, -10, "-1", "-1.0");
+  test(1, -9, "-1", "-1.0");
+  test(1, -8, "-1", "-1.0");
+  test(1, -7, "-1", "-1.0");
+  test(1, -6, "-1", "-1.0");
+  test(1, -5, "-1", "-1.0");
+  test(1, -4, "-1", "-1.0");
+  test(1, -3, "-1", "-1.0");
+  test(1, -2, "-1", "-1.0");
+  test(1, -1, "-1", "-1.0");
+  test(1, 1, "1", "1.0");
+  test(1, 2, "0", "0.0");
+  test(1, 3, "0", "0.0");
+  test(1, 4, "0", "0.0");
+  test(1, 5, "0", "0.0");
+  test(1, 6, "0", "0.0");
+  test(1, 7, "0", "0.0");
+  test(1, 8, "0", "0.0");
+  test(1, 9, "0", "0.0");
+  test(1, 10, "0", "0.0");
+  test(2, -10, "-1", "-1.0");
+  test(2, -9, "-1", "-1.0");
+  test(2, -8, "-1", "-1.0");
+  test(2, -7, "-1", "-1.0");
+  test(2, -6, "-1", "-1.0");
+  test(2, -5, "-1", "-1.0");
+  test(2, -4, "-1", "-1.0");
+  test(2, -3, "-1", "-1.0");
+  test(2, -2, "-1", "-1.0");
+  test(2, -1, "-2", "-2.0");
+  test(2, 1, "2", "2.0");
+  test(2, 2, "1", "1.0");
+  test(2, 3, "0", "0.0");
+  test(2, 4, "0", "0.0");
+  test(2, 5, "0", "0.0");
+  test(2, 6, "0", "0.0");
+  test(2, 7, "0", "0.0");
+  test(2, 8, "0", "0.0");
+  test(2, 9, "0", "0.0");
+  test(2, 10, "0", "0.0");
+  test(3, -10, "-1", "-1.0");
+  test(3, -9, "-1", "-1.0");
+  test(3, -8, "-1", "-1.0");
+  test(3, -7, "-1", "-1.0");
+  test(3, -6, "-1", "-1.0");
+  test(3, -5, "-1", "-1.0");
+  test(3, -4, "-1", "-1.0");
+  test(3, -3, "-1", "-1.0");
+  test(3, -2, "-2", "-2.0");
+  test(3, -1, "-3", "-3.0");
+  test(3, 1, "3", "3.0");
+  test(3, 2, "1", "1.0");
+  test(3, 3, "1", "1.0");
+  test(3, 4, "0", "0.0");
+  test(3, 5, "0", "0.0");
+  test(3, 6, "0", "0.0");
+  test(3, 7, "0", "0.0");
+  test(3, 8, "0", "0.0");
+  test(3, 9, "0", "0.0");
+  test(3, 10, "0", "0.0");
+  test(4, -10, "-1", "-1.0");
+  test(4, -9, "-1", "-1.0");
+  test(4, -8, "-1", "-1.0");
+  test(4, -7, "-1", "-1.0");
+  test(4, -6, "-1", "-1.0");
+  test(4, -5, "-1", "-1.0");
+  test(4, -4, "-1", "-1.0");
+  test(4, -3, "-2", "-2.0");
+  test(4, -2, "-2", "-2.0");
+  test(4, -1, "-4", "-4.0");
+  test(4, 1, "4", "4.0");
+  test(4, 2, "2", "2.0");
+  test(4, 3, "1", "1.0");
+  test(4, 4, "1", "1.0");
+  test(4, 5, "0", "0.0");
+  test(4, 6, "0", "0.0");
+  test(4, 7, "0", "0.0");
+  test(4, 8, "0", "0.0");
+  test(4, 9, "0", "0.0");
+  test(4, 10, "0", "0.0");
+  test(5, -10, "-1", "-1.0");
+  test(5, -9, "-1", "-1.0");
+  test(5, -8, "-1", "-1.0");
+  test(5, -7, "-1", "-1.0");
+  test(5, -6, "-1", "-1.0");
+  test(5, -5, "-1", "-1.0");
+  test(5, -4, "-2", "-2.0");
+  test(5, -3, "-2", "-2.0");
+  test(5, -2, "-3", "-3.0");
+  test(5, -1, "-5", "-5.0");
+  test(5, 1, "5", "5.0");
+  test(5, 2, "2", "2.0");
+  test(5, 3, "1", "1.0");
+  test(5, 4, "1", "1.0");
+  test(5, 5, "1", "1.0");
+  test(5, 6, "0", "0.0");
+  test(5, 7, "0", "0.0");
+  test(5, 8, "0", "0.0");
+  test(5, 9, "0", "0.0");
+  test(5, 10, "0", "0.0");
+  test(6, -10, "-1", "-1.0");
+  test(6, -9, "-1", "-1.0");
+  test(6, -8, "-1", "-1.0");
+  test(6, -7, "-1", "-1.0");
+  test(6, -6, "-1", "-1.0");
+  test(6, -5, "-2", "-2.0");
+  test(6, -4, "-2", "-2.0");
+  test(6, -3, "-2", "-2.0");
+  test(6, -2, "-3", "-3.0");
+  test(6, -1, "-6", "-6.0");
+  test(6, 1, "6", "6.0");
+  test(6, 2, "3", "3.0");
+  test(6, 3, "2", "2.0");
+  test(6, 4, "1", "1.0");
+  test(6, 5, "1", "1.0");
+  test(6, 6, "1", "1.0");
+  test(6, 7, "0", "0.0");
+  test(6, 8, "0", "0.0");
+  test(6, 9, "0", "0.0");
+  test(6, 10, "0", "0.0");
+  test(7, -10, "-1", "-1.0");
+  test(7, -9, "-1", "-1.0");
+  test(7, -8, "-1", "-1.0");
+  test(7, -7, "-1", "-1.0");
+  test(7, -6, "-2", "-2.0");
+  test(7, -5, "-2", "-2.0");
+  test(7, -4, "-2", "-2.0");
+  test(7, -3, "-3", "-3.0");
+  test(7, -2, "-4", "-4.0");
+  test(7, -1, "-7", "-7.0");
+  test(7, 1, "7", "7.0");
+  test(7, 2, "3", "3.0");
+  test(7, 3, "2", "2.0");
+  test(7, 4, "1", "1.0");
+  test(7, 5, "1", "1.0");
+  test(7, 6, "1", "1.0");
+  test(7, 7, "1", "1.0");
+  test(7, 8, "0", "0.0");
+  test(7, 9, "0", "0.0");
+  test(7, 10, "0", "0.0");
+  test(8, -10, "-1", "-1.0");
+  test(8, -9, "-1", "-1.0");
+  test(8, -8, "-1", "-1.0");
+  test(8, -7, "-2", "-2.0");
+  test(8, -6, "-2", "-2.0");
+  test(8, -5, "-2", "-2.0");
+  test(8, -4, "-2", "-2.0");
+  test(8, -3, "-3", "-3.0");
+  test(8, -2, "-4", "-4.0");
+  test(8, -1, "-8", "-8.0");
+  test(8, 1, "8", "8.0");
+  test(8, 2, "4", "4.0");
+  test(8, 3, "2", "2.0");
+  test(8, 4, "2", "2.0");
+  test(8, 5, "1", "1.0");
+  test(8, 6, "1", "1.0");
+  test(8, 7, "1", "1.0");
+  test(8, 8, "1", "1.0");
+  test(8, 9, "0", "0.0");
+  test(8, 10, "0", "0.0");
+  test(9, -10, "-1", "-1.0");
+  test(9, -9, "-1", "-1.0");
+  test(9, -8, "-2", "-2.0");
+  test(9, -7, "-2", "-2.0");
+  test(9, -6, "-2", "-2.0");
+  test(9, -5, "-2", "-2.0");
+  test(9, -4, "-3", "-3.0");
+  test(9, -3, "-3", "-3.0");
+  test(9, -2, "-5", "-5.0");
+  test(9, -1, "-9", "-9.0");
+  test(9, 1, "9", "9.0");
+  test(9, 2, "4", "4.0");
+  test(9, 3, "3", "3.0");
+  test(9, 4, "2", "2.0");
+  test(9, 5, "1", "1.0");
+  test(9, 6, "1", "1.0");
+  test(9, 7, "1", "1.0");
+  test(9, 8, "1", "1.0");
+  test(9, 9, "1", "1.0");
+  test(9, 10, "0", "0.0");
+  test(10, -10, "-1", "-1.0");
+  test(10, -9, "-2", "-2.0");
+  test(10, -8, "-2", "-2.0");
+  test(10, -7, "-2", "-2.0");
+  test(10, -6, "-2", "-2.0");
+  test(10, -5, "-2", "-2.0");
+  test(10, -4, "-3", "-3.0");
+  test(10, -3, "-4", "-4.0");
+  test(10, -2, "-5", "-5.0");
+  test(10, -1, "-10", "-10.0");
+  test(10, 1, "10", "10.0");
+  test(10, 2, "5", "5.0");
+  test(10, 3, "3", "3.0");
+  test(10, 4, "2", "2.0");
+  test(10, 5, "2", "2.0");
+  test(10, 6, "1", "1.0");
+  test(10, 7, "1", "1.0");
+  test(10, 8, "1", "1.0");
+  test(10, 9, "1", "1.0");
+  test(10, 10, "1", "1.0");
+}
+
+TEST(StarlarkBigint, BinarySlashSlashError) {
+  starlark_bigint zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.binary_slash_slash(true_obj, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'int' and 'bool'");
+}
+
+TEST(StarlarkBigint, BinarySlashSlashOverflowError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_float f1(1.0);
+  Arena arena;
+  error_handler error_callback;
+
+  big.binary_slash_slash(f1, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkBigint, BinarySlashSlashOverflowiDenominatorError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash_slash(big, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBigint, BinarySlashSlashZeroFloatError) {
+  starlark_float f0(0.0);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash_slash(f0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinarySlashSlashZeroIntError) {
+  starlark_integer i0(0);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash_slash(i0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinarySlashSlashZeroBigintError) {
+  starlark_bigint b0(number::zero);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_slash_slash(b0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinaryPercent) {
+  auto test = [](int64_t n, int64_t d, std::string_view r1, std::string_view r2) {
+    starlark_bigint num(n);
+    starlark_bigint denb(d);
+    starlark_integer deni(d);
+    starlark_float denf(d);
+    Arena arena;
+    error_handler error_callback;
+
+    auto* resultb = num.binary_percent(denb, arena, &error_callback);
+    auto* resulti = num.binary_percent(deni, arena, &error_callback);
+    auto* resultf = num.binary_percent(denf, arena, &error_callback);
+
+    EXPECT_THAT(error_callback.messages, SizeIs(0));
+    EXPECT_NE(resultb, nullptr);
+    EXPECT_NE(resulti, nullptr);
+    EXPECT_NE(resultf, nullptr);
+    EXPECT_EQ(r1, resultb->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r1, resulti->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r2, resultf->str()) << "Num: " << n << ", den: " << d;
+  };
+
+  /*
+  ```python
+  for a in range(-10, 11):
+      for b in range(-10, 11):
+          if b!=0:
+              print('  test({}, {}, "{}", "{}");'.format(a, b, (a % b), (a % float(b))))
+  ```
+  */
+  test(-10, -10, "0", "-0.0");
+  test(-10, -9, "-1", "-1.0");
+  test(-10, -8, "-2", "-2.0");
+  test(-10, -7, "-3", "-3.0");
+  test(-10, -6, "-4", "-4.0");
+  test(-10, -5, "0", "-0.0");
+  test(-10, -4, "-2", "-2.0");
+  test(-10, -3, "-1", "-1.0");
+  test(-10, -2, "0", "-0.0");
+  test(-10, -1, "0", "-0.0");
+  test(-10, 1, "0", "0.0");
+  test(-10, 2, "0", "0.0");
+  test(-10, 3, "2", "2.0");
+  test(-10, 4, "2", "2.0");
+  test(-10, 5, "0", "0.0");
+  test(-10, 6, "2", "2.0");
+  test(-10, 7, "4", "4.0");
+  test(-10, 8, "6", "6.0");
+  test(-10, 9, "8", "8.0");
+  test(-10, 10, "0", "0.0");
+  test(-9, -10, "-9", "-9.0");
+  test(-9, -9, "0", "-0.0");
+  test(-9, -8, "-1", "-1.0");
+  test(-9, -7, "-2", "-2.0");
+  test(-9, -6, "-3", "-3.0");
+  test(-9, -5, "-4", "-4.0");
+  test(-9, -4, "-1", "-1.0");
+  test(-9, -3, "0", "-0.0");
+  test(-9, -2, "-1", "-1.0");
+  test(-9, -1, "0", "-0.0");
+  test(-9, 1, "0", "0.0");
+  test(-9, 2, "1", "1.0");
+  test(-9, 3, "0", "0.0");
+  test(-9, 4, "3", "3.0");
+  test(-9, 5, "1", "1.0");
+  test(-9, 6, "3", "3.0");
+  test(-9, 7, "5", "5.0");
+  test(-9, 8, "7", "7.0");
+  test(-9, 9, "0", "0.0");
+  test(-9, 10, "1", "1.0");
+  test(-8, -10, "-8", "-8.0");
+  test(-8, -9, "-8", "-8.0");
+  test(-8, -8, "0", "-0.0");
+  test(-8, -7, "-1", "-1.0");
+  test(-8, -6, "-2", "-2.0");
+  test(-8, -5, "-3", "-3.0");
+  test(-8, -4, "0", "-0.0");
+  test(-8, -3, "-2", "-2.0");
+  test(-8, -2, "0", "-0.0");
+  test(-8, -1, "0", "-0.0");
+  test(-8, 1, "0", "0.0");
+  test(-8, 2, "0", "0.0");
+  test(-8, 3, "1", "1.0");
+  test(-8, 4, "0", "0.0");
+  test(-8, 5, "2", "2.0");
+  test(-8, 6, "4", "4.0");
+  test(-8, 7, "6", "6.0");
+  test(-8, 8, "0", "0.0");
+  test(-8, 9, "1", "1.0");
+  test(-8, 10, "2", "2.0");
+  test(-7, -10, "-7", "-7.0");
+  test(-7, -9, "-7", "-7.0");
+  test(-7, -8, "-7", "-7.0");
+  test(-7, -7, "0", "-0.0");
+  test(-7, -6, "-1", "-1.0");
+  test(-7, -5, "-2", "-2.0");
+  test(-7, -4, "-3", "-3.0");
+  test(-7, -3, "-1", "-1.0");
+  test(-7, -2, "-1", "-1.0");
+  test(-7, -1, "0", "-0.0");
+  test(-7, 1, "0", "0.0");
+  test(-7, 2, "1", "1.0");
+  test(-7, 3, "2", "2.0");
+  test(-7, 4, "1", "1.0");
+  test(-7, 5, "3", "3.0");
+  test(-7, 6, "5", "5.0");
+  test(-7, 7, "0", "0.0");
+  test(-7, 8, "1", "1.0");
+  test(-7, 9, "2", "2.0");
+  test(-7, 10, "3", "3.0");
+  test(-6, -10, "-6", "-6.0");
+  test(-6, -9, "-6", "-6.0");
+  test(-6, -8, "-6", "-6.0");
+  test(-6, -7, "-6", "-6.0");
+  test(-6, -6, "0", "-0.0");
+  test(-6, -5, "-1", "-1.0");
+  test(-6, -4, "-2", "-2.0");
+  test(-6, -3, "0", "-0.0");
+  test(-6, -2, "0", "-0.0");
+  test(-6, -1, "0", "-0.0");
+  test(-6, 1, "0", "0.0");
+  test(-6, 2, "0", "0.0");
+  test(-6, 3, "0", "0.0");
+  test(-6, 4, "2", "2.0");
+  test(-6, 5, "4", "4.0");
+  test(-6, 6, "0", "0.0");
+  test(-6, 7, "1", "1.0");
+  test(-6, 8, "2", "2.0");
+  test(-6, 9, "3", "3.0");
+  test(-6, 10, "4", "4.0");
+  test(-5, -10, "-5", "-5.0");
+  test(-5, -9, "-5", "-5.0");
+  test(-5, -8, "-5", "-5.0");
+  test(-5, -7, "-5", "-5.0");
+  test(-5, -6, "-5", "-5.0");
+  test(-5, -5, "0", "-0.0");
+  test(-5, -4, "-1", "-1.0");
+  test(-5, -3, "-2", "-2.0");
+  test(-5, -2, "-1", "-1.0");
+  test(-5, -1, "0", "-0.0");
+  test(-5, 1, "0", "0.0");
+  test(-5, 2, "1", "1.0");
+  test(-5, 3, "1", "1.0");
+  test(-5, 4, "3", "3.0");
+  test(-5, 5, "0", "0.0");
+  test(-5, 6, "1", "1.0");
+  test(-5, 7, "2", "2.0");
+  test(-5, 8, "3", "3.0");
+  test(-5, 9, "4", "4.0");
+  test(-5, 10, "5", "5.0");
+  test(-4, -10, "-4", "-4.0");
+  test(-4, -9, "-4", "-4.0");
+  test(-4, -8, "-4", "-4.0");
+  test(-4, -7, "-4", "-4.0");
+  test(-4, -6, "-4", "-4.0");
+  test(-4, -5, "-4", "-4.0");
+  test(-4, -4, "0", "-0.0");
+  test(-4, -3, "-1", "-1.0");
+  test(-4, -2, "0", "-0.0");
+  test(-4, -1, "0", "-0.0");
+  test(-4, 1, "0", "0.0");
+  test(-4, 2, "0", "0.0");
+  test(-4, 3, "2", "2.0");
+  test(-4, 4, "0", "0.0");
+  test(-4, 5, "1", "1.0");
+  test(-4, 6, "2", "2.0");
+  test(-4, 7, "3", "3.0");
+  test(-4, 8, "4", "4.0");
+  test(-4, 9, "5", "5.0");
+  test(-4, 10, "6", "6.0");
+  test(-3, -10, "-3", "-3.0");
+  test(-3, -9, "-3", "-3.0");
+  test(-3, -8, "-3", "-3.0");
+  test(-3, -7, "-3", "-3.0");
+  test(-3, -6, "-3", "-3.0");
+  test(-3, -5, "-3", "-3.0");
+  test(-3, -4, "-3", "-3.0");
+  test(-3, -3, "0", "-0.0");
+  test(-3, -2, "-1", "-1.0");
+  test(-3, -1, "0", "-0.0");
+  test(-3, 1, "0", "0.0");
+  test(-3, 2, "1", "1.0");
+  test(-3, 3, "0", "0.0");
+  test(-3, 4, "1", "1.0");
+  test(-3, 5, "2", "2.0");
+  test(-3, 6, "3", "3.0");
+  test(-3, 7, "4", "4.0");
+  test(-3, 8, "5", "5.0");
+  test(-3, 9, "6", "6.0");
+  test(-3, 10, "7", "7.0");
+  test(-2, -10, "-2", "-2.0");
+  test(-2, -9, "-2", "-2.0");
+  test(-2, -8, "-2", "-2.0");
+  test(-2, -7, "-2", "-2.0");
+  test(-2, -6, "-2", "-2.0");
+  test(-2, -5, "-2", "-2.0");
+  test(-2, -4, "-2", "-2.0");
+  test(-2, -3, "-2", "-2.0");
+  test(-2, -2, "0", "-0.0");
+  test(-2, -1, "0", "-0.0");
+  test(-2, 1, "0", "0.0");
+  test(-2, 2, "0", "0.0");
+  test(-2, 3, "1", "1.0");
+  test(-2, 4, "2", "2.0");
+  test(-2, 5, "3", "3.0");
+  test(-2, 6, "4", "4.0");
+  test(-2, 7, "5", "5.0");
+  test(-2, 8, "6", "6.0");
+  test(-2, 9, "7", "7.0");
+  test(-2, 10, "8", "8.0");
+  test(-1, -10, "-1", "-1.0");
+  test(-1, -9, "-1", "-1.0");
+  test(-1, -8, "-1", "-1.0");
+  test(-1, -7, "-1", "-1.0");
+  test(-1, -6, "-1", "-1.0");
+  test(-1, -5, "-1", "-1.0");
+  test(-1, -4, "-1", "-1.0");
+  test(-1, -3, "-1", "-1.0");
+  test(-1, -2, "-1", "-1.0");
+  test(-1, -1, "0", "-0.0");
+  test(-1, 1, "0", "0.0");
+  test(-1, 2, "1", "1.0");
+  test(-1, 3, "2", "2.0");
+  test(-1, 4, "3", "3.0");
+  test(-1, 5, "4", "4.0");
+  test(-1, 6, "5", "5.0");
+  test(-1, 7, "6", "6.0");
+  test(-1, 8, "7", "7.0");
+  test(-1, 9, "8", "8.0");
+  test(-1, 10, "9", "9.0");
+  test(0, -10, "0", "-0.0");
+  test(0, -9, "0", "-0.0");
+  test(0, -8, "0", "-0.0");
+  test(0, -7, "0", "-0.0");
+  test(0, -6, "0", "-0.0");
+  test(0, -5, "0", "-0.0");
+  test(0, -4, "0", "-0.0");
+  test(0, -3, "0", "-0.0");
+  test(0, -2, "0", "-0.0");
+  test(0, -1, "0", "-0.0");
+  test(0, 1, "0", "0.0");
+  test(0, 2, "0", "0.0");
+  test(0, 3, "0", "0.0");
+  test(0, 4, "0", "0.0");
+  test(0, 5, "0", "0.0");
+  test(0, 6, "0", "0.0");
+  test(0, 7, "0", "0.0");
+  test(0, 8, "0", "0.0");
+  test(0, 9, "0", "0.0");
+  test(0, 10, "0", "0.0");
+  test(1, -10, "-9", "-9.0");
+  test(1, -9, "-8", "-8.0");
+  test(1, -8, "-7", "-7.0");
+  test(1, -7, "-6", "-6.0");
+  test(1, -6, "-5", "-5.0");
+  test(1, -5, "-4", "-4.0");
+  test(1, -4, "-3", "-3.0");
+  test(1, -3, "-2", "-2.0");
+  test(1, -2, "-1", "-1.0");
+  test(1, -1, "0", "-0.0");
+  test(1, 1, "0", "0.0");
+  test(1, 2, "1", "1.0");
+  test(1, 3, "1", "1.0");
+  test(1, 4, "1", "1.0");
+  test(1, 5, "1", "1.0");
+  test(1, 6, "1", "1.0");
+  test(1, 7, "1", "1.0");
+  test(1, 8, "1", "1.0");
+  test(1, 9, "1", "1.0");
+  test(1, 10, "1", "1.0");
+  test(2, -10, "-8", "-8.0");
+  test(2, -9, "-7", "-7.0");
+  test(2, -8, "-6", "-6.0");
+  test(2, -7, "-5", "-5.0");
+  test(2, -6, "-4", "-4.0");
+  test(2, -5, "-3", "-3.0");
+  test(2, -4, "-2", "-2.0");
+  test(2, -3, "-1", "-1.0");
+  test(2, -2, "0", "-0.0");
+  test(2, -1, "0", "-0.0");
+  test(2, 1, "0", "0.0");
+  test(2, 2, "0", "0.0");
+  test(2, 3, "2", "2.0");
+  test(2, 4, "2", "2.0");
+  test(2, 5, "2", "2.0");
+  test(2, 6, "2", "2.0");
+  test(2, 7, "2", "2.0");
+  test(2, 8, "2", "2.0");
+  test(2, 9, "2", "2.0");
+  test(2, 10, "2", "2.0");
+  test(3, -10, "-7", "-7.0");
+  test(3, -9, "-6", "-6.0");
+  test(3, -8, "-5", "-5.0");
+  test(3, -7, "-4", "-4.0");
+  test(3, -6, "-3", "-3.0");
+  test(3, -5, "-2", "-2.0");
+  test(3, -4, "-1", "-1.0");
+  test(3, -3, "0", "-0.0");
+  test(3, -2, "-1", "-1.0");
+  test(3, -1, "0", "-0.0");
+  test(3, 1, "0", "0.0");
+  test(3, 2, "1", "1.0");
+  test(3, 3, "0", "0.0");
+  test(3, 4, "3", "3.0");
+  test(3, 5, "3", "3.0");
+  test(3, 6, "3", "3.0");
+  test(3, 7, "3", "3.0");
+  test(3, 8, "3", "3.0");
+  test(3, 9, "3", "3.0");
+  test(3, 10, "3", "3.0");
+  test(4, -10, "-6", "-6.0");
+  test(4, -9, "-5", "-5.0");
+  test(4, -8, "-4", "-4.0");
+  test(4, -7, "-3", "-3.0");
+  test(4, -6, "-2", "-2.0");
+  test(4, -5, "-1", "-1.0");
+  test(4, -4, "0", "-0.0");
+  test(4, -3, "-2", "-2.0");
+  test(4, -2, "0", "-0.0");
+  test(4, -1, "0", "-0.0");
+  test(4, 1, "0", "0.0");
+  test(4, 2, "0", "0.0");
+  test(4, 3, "1", "1.0");
+  test(4, 4, "0", "0.0");
+  test(4, 5, "4", "4.0");
+  test(4, 6, "4", "4.0");
+  test(4, 7, "4", "4.0");
+  test(4, 8, "4", "4.0");
+  test(4, 9, "4", "4.0");
+  test(4, 10, "4", "4.0");
+  test(5, -10, "-5", "-5.0");
+  test(5, -9, "-4", "-4.0");
+  test(5, -8, "-3", "-3.0");
+  test(5, -7, "-2", "-2.0");
+  test(5, -6, "-1", "-1.0");
+  test(5, -5, "0", "-0.0");
+  test(5, -4, "-3", "-3.0");
+  test(5, -3, "-1", "-1.0");
+  test(5, -2, "-1", "-1.0");
+  test(5, -1, "0", "-0.0");
+  test(5, 1, "0", "0.0");
+  test(5, 2, "1", "1.0");
+  test(5, 3, "2", "2.0");
+  test(5, 4, "1", "1.0");
+  test(5, 5, "0", "0.0");
+  test(5, 6, "5", "5.0");
+  test(5, 7, "5", "5.0");
+  test(5, 8, "5", "5.0");
+  test(5, 9, "5", "5.0");
+  test(5, 10, "5", "5.0");
+  test(6, -10, "-4", "-4.0");
+  test(6, -9, "-3", "-3.0");
+  test(6, -8, "-2", "-2.0");
+  test(6, -7, "-1", "-1.0");
+  test(6, -6, "0", "-0.0");
+  test(6, -5, "-4", "-4.0");
+  test(6, -4, "-2", "-2.0");
+  test(6, -3, "0", "-0.0");
+  test(6, -2, "0", "-0.0");
+  test(6, -1, "0", "-0.0");
+  test(6, 1, "0", "0.0");
+  test(6, 2, "0", "0.0");
+  test(6, 3, "0", "0.0");
+  test(6, 4, "2", "2.0");
+  test(6, 5, "1", "1.0");
+  test(6, 6, "0", "0.0");
+  test(6, 7, "6", "6.0");
+  test(6, 8, "6", "6.0");
+  test(6, 9, "6", "6.0");
+  test(6, 10, "6", "6.0");
+  test(7, -10, "-3", "-3.0");
+  test(7, -9, "-2", "-2.0");
+  test(7, -8, "-1", "-1.0");
+  test(7, -7, "0", "-0.0");
+  test(7, -6, "-5", "-5.0");
+  test(7, -5, "-3", "-3.0");
+  test(7, -4, "-1", "-1.0");
+  test(7, -3, "-2", "-2.0");
+  test(7, -2, "-1", "-1.0");
+  test(7, -1, "0", "-0.0");
+  test(7, 1, "0", "0.0");
+  test(7, 2, "1", "1.0");
+  test(7, 3, "1", "1.0");
+  test(7, 4, "3", "3.0");
+  test(7, 5, "2", "2.0");
+  test(7, 6, "1", "1.0");
+  test(7, 7, "0", "0.0");
+  test(7, 8, "7", "7.0");
+  test(7, 9, "7", "7.0");
+  test(7, 10, "7", "7.0");
+  test(8, -10, "-2", "-2.0");
+  test(8, -9, "-1", "-1.0");
+  test(8, -8, "0", "-0.0");
+  test(8, -7, "-6", "-6.0");
+  test(8, -6, "-4", "-4.0");
+  test(8, -5, "-2", "-2.0");
+  test(8, -4, "0", "-0.0");
+  test(8, -3, "-1", "-1.0");
+  test(8, -2, "0", "-0.0");
+  test(8, -1, "0", "-0.0");
+  test(8, 1, "0", "0.0");
+  test(8, 2, "0", "0.0");
+  test(8, 3, "2", "2.0");
+  test(8, 4, "0", "0.0");
+  test(8, 5, "3", "3.0");
+  test(8, 6, "2", "2.0");
+  test(8, 7, "1", "1.0");
+  test(8, 8, "0", "0.0");
+  test(8, 9, "8", "8.0");
+  test(8, 10, "8", "8.0");
+  test(9, -10, "-1", "-1.0");
+  test(9, -9, "0", "-0.0");
+  test(9, -8, "-7", "-7.0");
+  test(9, -7, "-5", "-5.0");
+  test(9, -6, "-3", "-3.0");
+  test(9, -5, "-1", "-1.0");
+  test(9, -4, "-3", "-3.0");
+  test(9, -3, "0", "-0.0");
+  test(9, -2, "-1", "-1.0");
+  test(9, -1, "0", "-0.0");
+  test(9, 1, "0", "0.0");
+  test(9, 2, "1", "1.0");
+  test(9, 3, "0", "0.0");
+  test(9, 4, "1", "1.0");
+  test(9, 5, "4", "4.0");
+  test(9, 6, "3", "3.0");
+  test(9, 7, "2", "2.0");
+  test(9, 8, "1", "1.0");
+  test(9, 9, "0", "0.0");
+  test(9, 10, "9", "9.0");
+  test(10, -10, "0", "-0.0");
+  test(10, -9, "-8", "-8.0");
+  test(10, -8, "-6", "-6.0");
+  test(10, -7, "-4", "-4.0");
+  test(10, -6, "-2", "-2.0");
+  test(10, -5, "0", "-0.0");
+  test(10, -4, "-2", "-2.0");
+  test(10, -3, "-2", "-2.0");
+  test(10, -2, "0", "-0.0");
+  test(10, -1, "0", "-0.0");
+  test(10, 1, "0", "0.0");
+  test(10, 2, "0", "0.0");
+  test(10, 3, "1", "1.0");
+  test(10, 4, "2", "2.0");
+  test(10, 5, "0", "0.0");
+  test(10, 6, "4", "4.0");
+  test(10, 7, "3", "3.0");
+  test(10, 8, "2", "2.0");
+  test(10, 9, "1", "1.0");
+  test(10, 10, "0", "0.0");
+}
+
+TEST(StarlarkBigint, BinaryPercentError) {
+  starlark_bigint zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.binary_percent(true_obj, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %: 'int' and 'bool'");
+}
+
+TEST(StarlarkBigint, BinaryPercentOverflowError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_float f1(1.0);
+  Arena arena;
+  error_handler error_callback;
+
+  big.binary_percent(f1, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkBigint, BinaryPercentOverflowiDenominatorError) {
+  starlark_bigint big(number::one << 1200);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_percent(big, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBigint, BinaryPercentZeroFloatError) {
+  starlark_float f0(0.0);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_percent(f0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinaryPercentZeroIntError) {
+  starlark_integer i0(0);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_percent(i0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+}
+
+TEST(StarlarkBigint, BinaryPercentZeroBigintError) {
+  starlark_bigint b0(number::zero);
+  starlark_bigint small(number::one);
+  Arena arena;
+  error_handler error_callback;
+
+  small.binary_percent(b0, arena, &error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
 
 }  // namespace
