@@ -569,6 +569,12 @@ number&& number::operator/(const number& other) && {
 }
 
 number& number::long_mult(const number& other) {
+  if (values_.empty()) {
+    return *this;
+  }
+  if (other.values_.empty()) {
+    *this = zero;
+  }
   long_mult(values_.cbegin(), values_.cend(), other.values_.cbegin(),
             other.values_.cend(), &values_);
   sign_ ^= other.sign_;
@@ -632,6 +638,12 @@ void number::karatsuba_mult(
 
 number& number::karatsuba(const number& other,
                           const values_size_type fallback_threshold) {
+  if (values_.empty()) {
+    return *this;
+  }
+  if (other.values_.empty()) {
+    *this = zero;
+  }
   karatsuba_mult(std::max(values_size_type{1}, fallback_threshold),
                  values_.cbegin(), values_.cend(),
                  other.values_.cbegin(), other.values_.cend(), &values_);

@@ -309,6 +309,24 @@ TEST(Number, MultiplicationToSelf) {
             "12345678901234567890"_number);
 }
 
+TEST(Number, MultiplocationFromZero) {
+  auto n = number::zero * number::minus_one;
+  EXPECT_FALSE(n.sign());
+  EXPECT_EQ(n, number::zero);
+}
+
+TEST(Number, MurtiplocationByZero) {
+  auto n = ((number::minus_one << 200) + number::one) * number::zero;
+  EXPECT_FALSE(n.sign());
+  EXPECT_EQ(n, number::zero);
+}
+
+TEST(Number, MurtiplocationByZeroLongMult) {
+  auto n = ((number::minus_one << 200) + number::one).long_mult(number::zero);
+  EXPECT_FALSE(n.sign());
+  EXPECT_EQ(n, number::zero);
+}
+
 TEST(Number, Karatsuba) {
   const int length = 100;
   std::string block = "1234567890abcdef";
