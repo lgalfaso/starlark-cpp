@@ -403,6 +403,38 @@ TEST(StarlarkList, BinaryStar) {
   EXPECT_EQ(result_5->str(), "[]");
 }
 
+TEST(StarlarkList, BinaryStarReverse) {
+  starlark_bigint minus_two(number::minus_one << 1);
+  starlark_integer minus_one(-1);
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_list list0;
+  starlark_list list1;
+  list1.add(&zero, nullptr);
+  list1.add(&one, nullptr);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_1 = two.binary_star(list1, arena, &error_callback);
+  auto* result_2 = three.binary_star(list1, arena, &error_callback);
+  auto* result_3 = three.binary_star(list0, arena, &error_callback);
+  auto* result_4 = minus_one.binary_star(list1, arena, &error_callback);
+  auto* result_5 = minus_two.binary_star(list1, arena, &error_callback);
+
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "[0, 1, 0, 1]");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "[0, 1, 0, 1, 0, 1]");
+  ASSERT_NE(result_3, nullptr);
+  EXPECT_EQ(result_3->str(), "[]");
+  ASSERT_NE(result_4, nullptr);
+  EXPECT_EQ(result_4->str(), "[]");
+  ASSERT_NE(result_5, nullptr);
+  EXPECT_EQ(result_5->str(), "[]");
+}
+
 TEST(StarlarkList, BinaryStarNotInt) {
   starlark_list list;
   starlark_tuple tuple;

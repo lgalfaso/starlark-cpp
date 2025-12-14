@@ -296,6 +296,9 @@ starlark_obj* starlark_integer::binary_minus(const starlark_obj& other, Arena& a
 }
 
 starlark_obj* starlark_integer::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  if (other.type() == "string" || other.type() == "bytes" || other.type() == "list" || other.type() == "tuple") {
+    return other.binary_star(*this, arena, error_callback);
+  }
   // TODO(lmirelmann): Handle the case of types `string`, `bytes`, `list` and `tuple`.
   if (other.type() != "float" && other.type() != type()) {
     return starlark_obj::binary_star(other, arena, error_callback);

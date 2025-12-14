@@ -343,6 +343,39 @@ TEST(StarlarkTuple, BinaryStar) {
   EXPECT_EQ(result_4->str(), "()");
 }
 
+TEST(StarlarkTuple, BinaryStarReverse) {
+  starlark_bigint minus_two(-2);
+  starlark_integer minus_one(-1);
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_bigint big(number::one << 64);
+  starlark_tuple tuple;
+  starlark_tuple tuple0;
+  tuple.add(&zero);
+  tuple.add(&one);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_0 = big.binary_star(tuple0, arena, &error_callback);
+  auto* result_1 = two.binary_star(tuple, arena, &error_callback);
+  auto* result_2 = three.binary_star(tuple, arena, &error_callback);
+  auto* result_3 = minus_two.binary_star(tuple, arena, &error_callback);
+  auto* result_4 = minus_one.binary_star(tuple, arena, &error_callback);
+
+  ASSERT_NE(result_0, nullptr);
+  EXPECT_EQ(result_0->str(), "()");
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "(0, 1, 0, 1)");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "(0, 1, 0, 1, 0, 1)");
+  ASSERT_NE(result_3, nullptr);
+  EXPECT_EQ(result_3->str(), "()");
+  ASSERT_NE(result_4, nullptr);
+  EXPECT_EQ(result_4->str(), "()");
+}
+
 TEST(StarlarkTuple, BinaryStarNotInt) {
   starlark_list list;
   starlark_tuple tuple;

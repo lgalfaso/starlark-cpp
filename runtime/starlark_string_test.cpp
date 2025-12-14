@@ -281,6 +281,35 @@ TEST(StarlarkString, BinaryStar) {
   EXPECT_EQ(result_5->str(), "");
 }
 
+TEST(StarlarkString, BinaryStarReverse) {
+  starlark_bigint minus_two(-2);
+  starlark_integer minus_one(-1);
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_bigint big(number::one << 64);
+  starlark_string str0("");
+  starlark_string str("abc");
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_1 = two.binary_star(str, arena, &error_callback);
+  auto* result_2 = three.binary_star(str, arena, &error_callback);
+  auto* result_3 = minus_two.binary_star(str, arena, &error_callback);
+  auto* result_4 = minus_one.binary_star(str, arena, &error_callback);
+  auto* result_5 = big.binary_star(str0, arena, &error_callback);
+
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "abcabc");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "abcabcabc");
+  ASSERT_NE(result_3, nullptr);
+  EXPECT_EQ(result_3->str(), "");
+  ASSERT_NE(result_4, nullptr);
+  EXPECT_EQ(result_4->str(), "");
+  ASSERT_NE(result_5, nullptr);
+  EXPECT_EQ(result_5->str(), "");
+}
+
 TEST(StarlarkString, BinaryStarNotInt) {
   starlark_string str("abc");
   starlark_tuple tuple;
