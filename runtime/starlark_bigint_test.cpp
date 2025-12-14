@@ -531,7 +531,7 @@ TEST(StarlarkBigint, BinarySlashOverflowError) {
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
 
-TEST(StarlarkBigint, BinarySlashOverflowiDenominatorError) {
+TEST(StarlarkBigint, BinarySlashOverflowDenominatorError) {
   starlark_bigint big(number::one << 1200);
   starlark_bigint small(number::one);
   Arena arena;

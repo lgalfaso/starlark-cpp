@@ -265,6 +265,7 @@ starlark_obj* starlark_bigint::binary_minus(const starlark_obj& other, Arena& ar
 }
 
 starlark_obj* starlark_bigint::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+  // TODO(lmirelmann): Handle the case of types `string`, `bytes`, `list` and `tuple`.
   if (other.type() != "float" && other.type() != type()) {
     return starlark_obj::binary_star(other, arena, error_callback);
   }

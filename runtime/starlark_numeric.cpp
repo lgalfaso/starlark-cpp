@@ -225,6 +225,22 @@ number starlark_mod(const number& a, const number& b) {
   return r;
 }
 
+int64_t starlark_div(int64_t a, int64_t b) {
+  auto result = a / b;
+  if (a < 0 != b < 0 && result * b != a) {
+    return result - 1;
+  }
+  return result;
+}
+
+int64_t starlark_mod(int64_t a, int64_t b) {
+  auto result = a % b;
+  if (a < 0 != b < 0 && result != 0) {
+    return result + b;
+  }
+  return result;
+}
+
 bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (other->type() != "float" && other->type() != "int") {
     return false;

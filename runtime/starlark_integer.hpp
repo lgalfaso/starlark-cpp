@@ -25,6 +25,12 @@ class starlark_integer : public starlark_numeric {
   starlark_obj* binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
   starlark_obj* binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
   starlark_obj* binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
+  starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
+  starlark_obj* binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
+  starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
+  starlark_obj* binary_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
+  starlark_obj* binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
+  starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn* error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

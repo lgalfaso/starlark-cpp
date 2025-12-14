@@ -34,6 +34,8 @@ double to_double(const starlark::bigint::number& value);
 double starlark_fmod(double a, double b);
 starlark::bigint::number starlark_div(const starlark::bigint::number& a, const starlark::bigint::number& b);
 starlark::bigint::number starlark_mod(const starlark::bigint::number& a, const starlark::bigint::number& b);
+int64_t starlark_div(int64_t a, int64_t b);
+int64_t starlark_mod(int64_t a, int64_t b);
 
 }  // namespace runtime
 }  // namespace starlark

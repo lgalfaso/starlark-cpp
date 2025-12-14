@@ -137,8 +137,10 @@ cc_library(
     name = "starlark_bigint",
     srcs = ["starlark_bigint.cpp"],
     hdrs = ["starlark_bigint.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hash",
+        ":starlark_float",
         ":starlark_numeric",
         ":starlark_object",
         "//bigint:number",
@@ -264,6 +266,16 @@ cc_test(
         ":starlark_string",
         ":starlark_struct",
         ":starlark_tuple",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "starlark_integer_overflow_test",
+    size = "small",
+    srcs = ["starlark_integer_overflow_test.cpp"],
+    deps = [
+        ":starlark_integer",
         "@googletest//:gtest_main",
     ],
 )
