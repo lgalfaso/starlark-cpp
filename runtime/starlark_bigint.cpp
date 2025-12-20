@@ -124,7 +124,7 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, Arena& a
       error_callback.add_error("ValueError: negative shift count");
       return nullptr;
     }
-    if (shift >= 64) {
+    if (shift >= value.bit_size()) {
       return create_integer(value.sign() ? number::minus_one : number::zero, arena);
     }
     return create_integer(value >> shift, arena);
@@ -138,7 +138,7 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, Arena& a
       return create_integer(value.sign() ? number::minus_one : number::zero, arena);
     }
     auto int_shift = shift.at(0);
-    if (int_shift >= 64) {
+    if (int_shift >= value.bit_size()) {
       return create_integer(value.sign() ? number::minus_one : number::zero, arena);
     }
     return create_integer(value >> int_shift, arena);

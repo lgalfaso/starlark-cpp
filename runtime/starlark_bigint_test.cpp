@@ -187,6 +187,13 @@ TEST(StarlarkBigint, RShift) {
   result = starlark_bigint(20).binary_rshift(starlark_bigint(number::one), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(10).equals(*result));
+
+  result = starlark_bigint(number::one << 64).binary_rshift(starlark_integer(64), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(1).equals(*result));
+  result = starlark_bigint(number::one << 64).binary_rshift(starlark_bigint(64), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(1).equals(*result));
 }
 
 TEST(StarlarkBigint, ShiftInvalidInput) {
