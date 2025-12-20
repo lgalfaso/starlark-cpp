@@ -18,6 +18,24 @@ using ::starlark::grammar::log2_max_bigint;
 namespace starlark {
 namespace runtime {
 
+namespace {
+
+starlark_bigint* create_integer(const number& value, Arena& arena) {
+  // TODO(lmirelmann): Check whether we can downgrade.
+  return Arena::Create<starlark_bigint>(&arena, std::move(value));
+}
+
+starlark_bigint* create_integer(number&& value, Arena& arena) {
+  // TODO(lmirelmann): Check whether we can downgrade.
+  return Arena::Create<starlark_bigint>(&arena, std::move(value));
+}
+
+starlark_float* create_float(double value, Arena& arena) {
+  return Arena::Create<starlark_float>(&arena, value);
+}
+
+}  // namespace
+
 starlark_bigint::starlark_bigint(int64_t value) : value(from_int64(value)) {}
 
 starlark_bigint::starlark_bigint(const starlark::bigint::number& value) : value(value) {}
@@ -41,13 +59,12 @@ starlark_obj* starlark_bigint::unary_plus(Arena& arena, error_fn& error_callback
 }
 
 starlark_obj* starlark_bigint::unary_minus(Arena& arena, error_fn& error_callback) const {
-  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
-  return Arena::Create<starlark_bigint>(&arena, -value);
+  return create_integer(-value, arena);
 }
 
 starlark_obj* starlark_bigint::unary_tilde(Arena& arena, error_fn& error_callback) const {
   // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
-  return Arena::Create<starlark_bigint>(&arena, -(value + number::one));
+  return create_integer(-(value + number::one), arena);
 }
 
 starlark_obj* starlark_bigint::binary_lshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
@@ -68,7 +85,7 @@ starlark_obj* starlark_bigint::binary_lshift(const starlark_obj& other, Arena& a
       error_callback.add_error("OverflowError: too many digits in integer");
       return nullptr;
     }
-    return Arena::Create<starlark_bigint>(&arena, value << shift);
+    return create_integer(value << shift, arena);
   } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
     const auto& shift = n_other.as_bigint();
     if (shift.sign()) {
@@ -84,7 +101,7 @@ starlark_obj* starlark_bigint::binary_lshift(const starlark_obj& other, Arena& a
       error_callback.add_error("OverflowError: too many digits in integer");
       return nullptr;
     }
-    return Arena::Create<starlark_bigint>(&arena, value << int_shift);
+    return create_integer(value << int_shift, arena);
   } else {
     // Should not happen.
     assert(false);
@@ -108,9 +125,9 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, Arena& a
       return nullptr;
     }
     if (shift >= 64) {
-      return Arena::Create<starlark_bigint>(&arena, value.sign() ? number::minus_one : number::zero);
+      return create_integer(value.sign() ? number::minus_one : number::zero, arena);
     }
-    return Arena::Create<starlark_bigint>(&arena, value >> shift);
+    return create_integer(value >> shift, arena);
   } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
     const auto& shift = n_other.as_bigint();
     if (shift.sign()) {
@@ -118,13 +135,13 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, Arena& a
       return nullptr;
     }
     if (shift.length() > 1) {
-      return Arena::Create<starlark_bigint>(&arena, value.sign() ? number::minus_one : number::zero);
+      return create_integer(value.sign() ? number::minus_one : number::zero, arena);
     }
     auto int_shift = shift.at(0);
     if (int_shift >= 64) {
-      return Arena::Create<starlark_bigint>(&arena, value.sign() ? number::minus_one : number::zero);
+      return create_integer(value.sign() ? number::minus_one : number::zero, arena);
     }
-    return Arena::Create<starlark_bigint>(&arena, value >> int_shift);
+    return create_integer(value >> int_shift, arena);
   } else {
     // Should not happen.
     assert(false);
@@ -139,9 +156,9 @@ starlark_obj* starlark_bigint::binary_and(const starlark_obj& other, Arena& aren
   }
   const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
   if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
-    return Arena::Create<starlark_bigint>(&arena, value & from_int64(n_other.as_int64()));
+    return create_integer(value & from_int64(n_other.as_int64()), arena);
   } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
-    return Arena::Create<starlark_bigint>(&arena, value & n_other.as_bigint());
+    return create_integer(value & n_other.as_bigint(), arena);
   } else {
     // Should not happen.
     assert(false);
@@ -156,9 +173,9 @@ starlark_obj* starlark_bigint::binary_pipe(const starlark_obj& other, Arena& are
   }
   const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
   if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
-    return Arena::Create<starlark_bigint>(&arena, value | from_int64(n_other.as_int64()));
+    return create_integer(value | from_int64(n_other.as_int64()), arena);
   } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
-    return Arena::Create<starlark_bigint>(&arena, value | n_other.as_bigint());
+    return create_integer(value | n_other.as_bigint(), arena);
   } else {
     // Should not happen.
     assert(false);
@@ -173,9 +190,9 @@ starlark_obj* starlark_bigint::binary_hat(const starlark_obj& other, Arena& aren
   }
   const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
   if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
-    return Arena::Create<starlark_bigint>(&arena, value ^ from_int64(n_other.as_int64()));
+    return create_integer(value ^ from_int64(n_other.as_int64()), arena);
   } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
-    return Arena::Create<starlark_bigint>(&arena, value ^ n_other.as_bigint());
+    return create_integer(value ^ n_other.as_bigint(), arena);
   } else {
     // Should not happen.
     assert(false);
@@ -196,12 +213,12 @@ starlark_obj* starlark_bigint::binary_plus(const starlark_obj& other, Arena& are
         error_callback.add_error("OverflowError: int too large to convert to float");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, fvalue + n_other->as_float());
+      return create_float(fvalue + n_other->as_float(), arena);
     }
     case starlark_numeric_type::kInt64:
-      return Arena::Create<starlark_bigint>(&arena, value + from_int64(n_other->as_int64()));
+      return create_integer(value + from_int64(n_other->as_int64()), arena);
     case starlark_numeric_type::kBigInt:
-      return Arena::Create<starlark_bigint>(&arena, value + n_other->as_bigint());
+      return create_integer(value + n_other->as_bigint(), arena);
   }
 }
 
@@ -217,12 +234,12 @@ starlark_obj* starlark_bigint::binary_minus(const starlark_obj& other, Arena& ar
         error_callback.add_error("OverflowError: int too large to convert to float");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, fvalue - n_other->as_float());
+      return create_float(fvalue - n_other->as_float(), arena);
     }
     case starlark_numeric_type::kInt64:
-      return Arena::Create<starlark_bigint>(&arena, value - from_int64(n_other->as_int64()));
+      return create_integer(value - from_int64(n_other->as_int64()), arena);
     case starlark_numeric_type::kBigInt:
-      return Arena::Create<starlark_bigint>(&arena, value - n_other->as_bigint());
+      return create_integer(value - n_other->as_bigint(), arena);
   }
 }
 
@@ -241,12 +258,12 @@ starlark_obj* starlark_bigint::binary_star(const starlark_obj& other, Arena& are
         error_callback.add_error("OverflowError: int too large to convert to float");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, fvalue * n_other->as_float());
+      return create_float(fvalue * n_other->as_float(), arena);
     }
     case starlark_numeric_type::kInt64:
-      return Arena::Create<starlark_bigint>(&arena, value * from_int64(n_other->as_int64()));
+      return create_integer(value * from_int64(n_other->as_int64()), arena);
     case starlark_numeric_type::kBigInt:
-      return Arena::Create<starlark_bigint>(&arena, value * n_other->as_bigint());
+      return create_integer(value * n_other->as_bigint(), arena);
   }
 }
 
@@ -267,7 +284,7 @@ starlark_obj* starlark_bigint::binary_slash(const starlark_obj& other, Arena& ar
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, fvalue / fother);
+      return create_float(fvalue / fother, arena);
     }
     case starlark_numeric_type::kInt64: {
       auto iother = n_other->as_int64();
@@ -275,7 +292,7 @@ starlark_obj* starlark_bigint::binary_slash(const starlark_obj& other, Arena& ar
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, fvalue / iother);
+      return create_float(fvalue / iother, arena);
     }
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(n_other->as_bigint());
@@ -287,7 +304,7 @@ starlark_obj* starlark_bigint::binary_slash(const starlark_obj& other, Arena& ar
         error_callback.add_error("OverflowError: int too large to convert to float");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, fvalue / fother);
+      return create_float(fvalue / fother, arena);
     }
   }
 }
@@ -309,7 +326,7 @@ starlark_obj* starlark_bigint::binary_slash_slash(const starlark_obj& other, Are
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, std::floor(fvalue / fother));
+      return create_float(std::floor(fvalue / fother), arena);
     }
     case starlark_numeric_type::kInt64: {
       auto iother = n_other->as_int64();
@@ -317,7 +334,7 @@ starlark_obj* starlark_bigint::binary_slash_slash(const starlark_obj& other, Are
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_bigint>(&arena, starlark_div(value, from_int64(iother)));
+      return create_integer(starlark_div(value, from_int64(iother)), arena);
     }
     case starlark_numeric_type::kBigInt: {
       const auto& bother = n_other->as_bigint();
@@ -325,7 +342,7 @@ starlark_obj* starlark_bigint::binary_slash_slash(const starlark_obj& other, Are
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_bigint>(&arena, starlark_div(value, bother));
+      return create_integer(starlark_div(value, bother), arena);
     }
   }
 }
@@ -347,7 +364,7 @@ starlark_obj* starlark_bigint::binary_percent(const starlark_obj& other, Arena& 
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_float>(&arena, starlark_fmod(fvalue, fother));
+      return create_float(starlark_fmod(fvalue, fother), arena);
     }
     case starlark_numeric_type::kInt64: {
       auto iother = n_other->as_int64();
@@ -355,7 +372,7 @@ starlark_obj* starlark_bigint::binary_percent(const starlark_obj& other, Arena& 
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_bigint>(&arena, starlark_mod(value, from_int64(iother)));
+      return create_integer(starlark_mod(value, from_int64(iother)), arena);
     }
     case starlark_numeric_type::kBigInt: {
       const auto& bother = n_other->as_bigint();
@@ -363,7 +380,7 @@ starlark_obj* starlark_bigint::binary_percent(const starlark_obj& other, Arena& 
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
       }
-      return Arena::Create<starlark_bigint>(&arena, starlark_mod(value, bother));
+      return create_integer(starlark_mod(value, bother), arena);
     }
   }
 }
