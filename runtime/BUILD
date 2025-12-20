@@ -154,6 +154,7 @@ cc_test(
     srcs = ["starlark_numeric_test.cpp"],
     deps = [
         ":starlark_numeric",
+        ":starlark_numeric_impl",
         "@googletest//:gtest_main",
     ],
 )

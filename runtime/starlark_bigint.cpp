@@ -106,7 +106,7 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, Arena& a
       return nullptr;
     }
     if (shift >= value.bit_size()) {
-      return create_integer(value.sign() ? number::minus_one : number::zero, arena);
+      return create_integer(value.sign() ? -1 : 0, arena);
     }
     return create_integer(value >> shift, arena);
   } else if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
@@ -116,11 +116,11 @@ starlark_obj* starlark_bigint::binary_rshift(const starlark_obj& other, Arena& a
       return nullptr;
     }
     if (shift.length() > 1) {
-      return create_integer(value.sign() ? number::minus_one : number::zero, arena);
+      return create_integer(value.sign() ? -1 : 0, arena);
     }
     auto int_shift = shift.at(0);
     if (int_shift >= value.bit_size()) {
-      return create_integer(value.sign() ? number::minus_one : number::zero, arena);
+      return create_integer(value.sign() ? -1 : 0, arena);
     }
     return create_integer(value >> int_shift, arena);
   } else {

@@ -22,5 +22,5 @@ struct error_handler : public starlark::runtime::error_fn {
 }  // namespace testing
 }  // namespace starlark
 
-#endif  // RUNTIME_STARLARK_INTEGER_HPP_
+#endif  // RUNTIME_STARLARK_TESTING_HPP_
 

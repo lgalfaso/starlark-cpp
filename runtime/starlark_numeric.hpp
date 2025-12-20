@@ -39,7 +39,6 @@ int64_t starlark_mod(int64_t a, int64_t b);
 
 starlark_obj* create_integer(std::int64_t value, google::protobuf::Arena& arena);
 starlark_obj* create_integer(starlark::bigint::number&& value, google::protobuf::Arena& arena);
-starlark_obj* create_integer(const starlark::bigint::number& value, google::protobuf::Arena& arena);
 starlark_obj* create_float(double value, google::protobuf::Arena& arena);
 
 }  // namespace runtime
