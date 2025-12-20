@@ -239,32 +239,27 @@ starlark_obj* starlark_integer::binary_plus(const starlark_obj& other, Arena& ar
     return starlark_obj::binary_plus(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
-    return Arena::Create<starlark_float>(&arena, value + n_other->as_float());
-  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto iother = n_other->as_int64();
-    auto result = value + iother;
-    // Avoid upgrading to a bigint if possible.
-    // It is possible to change the condition to `((value ^ result) & (iother ^ result)) >= 0`
-    // as explained in Hacker's Delight -- 2–13 Overflow Detection
-    // but the version below is a little less magical.
-    //
-    // Digression note: gcc 15.2 is able to optimize both variations to 5 instructions
-    // clang 21.1.0 does this with 4 instructions for the version not used, and 10 instructions for the version below.
-    // In all cases, all optimized versions are branchless. The difference in performance is negligible in all cases.
-    if (value < 0 != iother < 0 || result < 0 == value < 0) {
-      return Arena::Create<starlark_integer>(&arena, result);
+  switch (n_other->numeric_type()) {
+    case starlark_numeric_type::kFloat:
+      return Arena::Create<starlark_float>(&arena, value + n_other->as_float());
+    case starlark_numeric_type::kInt64: {
+      auto iother = n_other->as_int64();
+      auto result = value + iother;
+      // Avoid upgrading to a bigint if possible.
+      // It is possible to change the condition to `((value ^ result) & (iother ^ result)) >= 0`
+      // as explained in Hacker's Delight -- 2–13 Overflow Detection
+      // but the version below is a little less magical.
+      //
+      // Digression note: gcc 15.2 is able to optimize both variations to 5 instructions
+      // clang 21.1.0 does this with 4 instructions for the version not used, and 10 instructions for the version below.
+      // In all cases, all optimized versions are branchless. The difference in performance is negligible in all cases.
+      if (value < 0 != iother < 0 || result < 0 == value < 0) {
+        return Arena::Create<starlark_integer>(&arena, result);
+      }
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) + from_int64(iother));
     }
-    return Arena::Create<starlark_bigint>(&arena, from_int64(value) + from_int64(iother));
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    return Arena::Create<starlark_bigint>(&arena, from_int64(value) + n_other->as_bigint());
-  } else {
-    // Should not happen.
-    assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
-    return nullptr;
+    case starlark_numeric_type::kBigInt:
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) + n_other->as_bigint());
   }
 }
 
@@ -273,25 +268,20 @@ starlark_obj* starlark_integer::binary_minus(const starlark_obj& other, Arena& a
     return starlark_obj::binary_minus(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
-    return Arena::Create<starlark_float>(&arena, value - n_other->as_float());
-  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto iother = n_other->as_int64();
-    auto result = value - iother;
-    // Avoid upgrading if possible.
-    if (value < 0 == iother < 0 || result < 0 == value < 0) {
-      return Arena::Create<starlark_integer>(&arena, result);
+  switch (n_other->numeric_type()) {
+    case starlark_numeric_type::kFloat:
+      return Arena::Create<starlark_float>(&arena, value - n_other->as_float());
+    case starlark_numeric_type::kInt64: {
+      auto iother = n_other->as_int64();
+      auto result = value - iother;
+      // Avoid upgrading if possible.
+      if (value < 0 == iother < 0 || result < 0 == value < 0) {
+        return Arena::Create<starlark_integer>(&arena, result);
+      }
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) - from_int64(iother));
     }
-    return Arena::Create<starlark_bigint>(&arena, from_int64(value) - from_int64(iother));
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    return Arena::Create<starlark_bigint>(&arena, from_int64(value) - n_other->as_bigint());
-  } else {
-    // Should not happen.
-    assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
-    return nullptr;
+    case starlark_numeric_type::kBigInt:
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) - n_other->as_bigint());
   }
 }
 
@@ -299,39 +289,33 @@ starlark_obj* starlark_integer::binary_star(const starlark_obj& other, Arena& ar
   if (other.type() == "string" || other.type() == "bytes" || other.type() == "list" || other.type() == "tuple") {
     return other.binary_star(*this, arena, error_callback);
   }
-  // TODO(lmirelmann): Handle the case of types `string`, `bytes`, `list` and `tuple`.
   if (other.type() != "float" && other.type() != type()) {
     return starlark_obj::binary_star(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
-    return Arena::Create<starlark_float>(&arena, value * n_other->as_float());
-  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto iother = n_other->as_int64();
-    auto nlz = std::countl_zero<uint64_t>(value) + std::countl_one<uint64_t>(value) +
-        std::countl_zero<uint64_t>(iother) + std::countl_one<uint64_t>(iother);
-    // Avoid upgrading if possible.
-    if (nlz >= 66) {
-      return Arena::Create<starlark_integer>(&arena, value * iother);
-    }
-    if (nlz == 65) {
-      auto iresult = value * iother;
-      if (iresult != std::numeric_limits<int64_t>::min() || value >= 0 || iother >= 0) {
+  switch (n_other->numeric_type()) {
+    case starlark_numeric_type::kFloat:
+      return Arena::Create<starlark_float>(&arena, value * n_other->as_float());
+    case starlark_numeric_type::kInt64: {
+      auto iother = n_other->as_int64();
+      auto nlz = std::countl_zero<uint64_t>(value) + std::countl_one<uint64_t>(value) +
+          std::countl_zero<uint64_t>(iother) + std::countl_one<uint64_t>(iother);
+      // Avoid upgrading if possible.
+      if (nlz >= 66) {
         return Arena::Create<starlark_integer>(&arena, value * iother);
       }
+      if (nlz == 65) {
+        auto iresult = value * iother;
+        if (iresult != std::numeric_limits<int64_t>::min() || value >= 0 || iother >= 0) {
+          return Arena::Create<starlark_integer>(&arena, value * iother);
+        }
+      }
+      // Therea are cases that `nlz == 64` and there is no overflow, but these are harder to
+      // detect without doing the full multiplication.
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) * from_int64(iother));
     }
-    // Therea are cases that `nlz == 64` and there is no overflow, but these are harder to
-    // detect without doing the full multiplication.
-    return Arena::Create<starlark_bigint>(&arena, from_int64(value) * from_int64(iother));
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    return Arena::Create<starlark_bigint>(&arena, from_int64(value) * n_other->as_bigint());
-  } else {
-    // Should not happen.
-    assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
-    return nullptr;
+    case starlark_numeric_type::kBigInt:
+      return Arena::Create<starlark_bigint>(&arena, from_int64(value) * n_other->as_bigint());
   }
 }
 
@@ -340,48 +324,45 @@ starlark_obj* starlark_integer::binary_slash(const starlark_obj& other, Arena& a
     return starlark_obj::binary_slash(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
-    auto v = n_other->as_float();
-    if (v == 0) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+  switch (n_other->numeric_type()) {
+    case starlark_numeric_type::kFloat: {
+      auto fother = n_other->as_float();
+      if (fother == 0) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
       }
-      return nullptr;
+      return Arena::Create<starlark_float>(&arena, value / fother);
     }
-    return Arena::Create<starlark_float>(&arena, value / v);
-  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto iother = n_other->as_int64();
-    if (iother == 0) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+    case starlark_numeric_type::kInt64: {
+      auto iother = n_other->as_int64();
+      if (iother == 0) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
       }
-      return nullptr;
+      return Arena::Create<starlark_float>(&arena, static_cast<double>(value) / iother);
     }
-    return Arena::Create<starlark_float>(&arena, static_cast<double>(value) / iother);
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    auto fother = to_double(n_other->as_bigint());
-    if (fother == 0) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+    case starlark_numeric_type::kBigInt: {
+      auto fother = to_double(n_other->as_bigint());
+      if (fother == 0) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
       }
-      return nullptr;
-    }
-    // This is a difference between Python and the Starlark implementation in Bazel. Python is
-    // happy to return `0` if the integer is too large. Bazel throws an error.
-    if (std::isinf(fother)) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("OverflowError: int too large to convert to float");
+      // This is a difference between Python and the Starlark implementation in Bazel. Python is
+      // happy to return `0` if the integer is too large. Bazel throws an error.
+      if (std::isinf(fother)) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("OverflowError: int too large to convert to float");
+        }
+        return nullptr;
       }
-      return nullptr;
+      return Arena::Create<starlark_float>(&arena, value / fother);
     }
-    return Arena::Create<starlark_float>(&arena, value / fother);
-  } else {
-    // Should not happen.
-    assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
-    return nullptr;
   }
 }
 
@@ -390,44 +371,41 @@ starlark_obj* starlark_integer::binary_slash_slash(const starlark_obj& other, Ar
     return starlark_obj::binary_slash(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
-    auto v = n_other->as_float();
-    if (v == 0) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+  switch (n_other->numeric_type()) {
+    case starlark_numeric_type::kFloat: {
+      auto fother = n_other->as_float();
+      if (fother == 0) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
       }
-      return nullptr;
+      return Arena::Create<starlark_float>(&arena, std::floor(value / fother));
     }
-    return Arena::Create<starlark_float>(&arena, std::floor(value / v));
-  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto iother = n_other->as_int64();
-    if (iother == 0) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+    case starlark_numeric_type::kInt64: {
+      auto iother = n_other->as_int64();
+      if (iother == 0) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
       }
-      return nullptr;
-    }
-    // Handle the overflow.
-    if (value == std::numeric_limits<int64_t>::min() && iother == -1) {
-      return Arena::Create<starlark_bigint>(&arena, starlark_div(from_int64(value), from_int64(iother)));
-    }
-    return Arena::Create<starlark_integer>(&arena, starlark_div(value, iother));
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    auto bother = n_other->as_bigint();
-    if (bother == number::zero) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+      // Handle the overflow.
+      if (value == std::numeric_limits<int64_t>::min() && iother == -1) {
+        return Arena::Create<starlark_bigint>(&arena, starlark_div(from_int64(value), from_int64(iother)));
       }
-      return nullptr;
+      return Arena::Create<starlark_integer>(&arena, starlark_div(value, iother));
     }
-    return Arena::Create<starlark_bigint>(&arena, starlark_div(from_int64(value), bother));
-  } else {
-    // Should not happen.
-    assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
+    case starlark_numeric_type::kBigInt: {
+      auto bother = n_other->as_bigint();
+      if (bother == number::zero) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
+      }
+      return Arena::Create<starlark_bigint>(&arena, starlark_div(from_int64(value), bother));
     }
-    return nullptr;
   }
 }
 
@@ -436,43 +414,40 @@ starlark_obj* starlark_integer::binary_percent(const starlark_obj& other, Arena&
     return starlark_obj::binary_slash(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kFloat) {
-    auto v = n_other->as_float();
-    if (v == 0) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+  switch (n_other->numeric_type()) {
+    case starlark_numeric_type::kFloat: {
+      auto fother = n_other->as_float();
+      if (fother == 0) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
       }
-      return nullptr;
+      return Arena::Create<starlark_float>(&arena, starlark_fmod(value, fother));
     }
-    return Arena::Create<starlark_float>(&arena, starlark_fmod(value, v));
-  } else if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto iother = n_other->as_int64();
-    if (iother == 0) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+    case starlark_numeric_type::kInt64: {
+      auto iother = n_other->as_int64();
+      if (iother == 0) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
       }
-      return nullptr;
-    }
-    if (value == std::numeric_limits<int64_t>::min() && iother == -1) {
-      return Arena::Create<starlark_integer>(&arena, 0);
-    }
-    return Arena::Create<starlark_integer>(&arena, starlark_mod(value, iother));
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    auto bother = n_other->as_bigint();
-    if (bother == number::zero) {
-      if (error_callback != nullptr) {
-        error_callback->add_error("ZeroDivisionError: division by zero");
+      if (value == std::numeric_limits<int64_t>::min() && iother == -1) {
+        return Arena::Create<starlark_integer>(&arena, 0);
       }
-      return nullptr;
+      return Arena::Create<starlark_integer>(&arena, starlark_mod(value, iother));
     }
-    return Arena::Create<starlark_bigint>(&arena, starlark_mod(from_int64(value), bother));
-  } else {
-    // Should not happen.
-    assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
+    case starlark_numeric_type::kBigInt: {
+      auto bother = n_other->as_bigint();
+      if (bother == number::zero) {
+        if (error_callback != nullptr) {
+          error_callback->add_error("ZeroDivisionError: division by zero");
+        }
+        return nullptr;
+      }
+      return Arena::Create<starlark_bigint>(&arena, starlark_mod(from_int64(value), bother));
     }
-    return nullptr;
   }
 }
 
