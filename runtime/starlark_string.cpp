@@ -63,11 +63,9 @@ bool starlark_string::truthy() const {
   return !value.empty();
 }
 
-bool starlark_string::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+bool starlark_string::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   if (other.type() != type()) {
-    if (error_callback != nullptr) {
-       error_callback->add_error(std::format("TypeError: 'in <string>' requires string as left operand, not {}", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: 'in <string>' requires string as left operand, not {}", other.type()));
     return false;
   }
 
@@ -75,11 +73,9 @@ bool starlark_string::binary_in(const starlark_obj& other, error_fn* error_callb
   return value.contains(s_other.value);
 }
 
-starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can't concat {} to string", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can't concat {} to string", other.type()));
     return nullptr;
   }
   // TODO(lmirelmann): Check that the value length would not go over the limit.
@@ -89,11 +85,9 @@ starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& are
   return result;
 }
 
-starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != "int") {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }
   if (value.empty()) {
@@ -117,9 +111,7 @@ starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& are
       return Arena::Create<starlark_string>(&arena, "");
     }
     if (multiplier.bit_size() >= 63) {
-      if (error_callback != nullptr) {
-        error_callback->add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
-      }
+      error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
       return nullptr;
     }
     int64_t int_value = multiplier.at(0);
@@ -132,18 +124,14 @@ starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& are
   } else {
     // Should not happen.
     assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
+    error_callback.add_error("TypeError: unknown numeric type");
     return nullptr;
   }
 }
 
-starlark_obj* starlark_string::binary_percent(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_string::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   // TODO(lmirelmann): Implement.
-  if (error_callback != nullptr) {
-    error_callback->add_error("Unimplemented");
-  }
+  error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
@@ -152,7 +140,7 @@ bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* 
          value == other->str();
 }
 
-void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
   if (other->type() != type()) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
     return;

@@ -13,26 +13,19 @@
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_string.hpp"
+#include "runtime/starlark_testing.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_string;
+using ::starlark::testing::error_handler;
 using ::testing::SizeIs;
 
 namespace {
-
-struct error_handler : public error_fn {
-  void add_error(std::string_view error_msg) override {
-    messages.push_back(std::string(error_msg));
-  }
-
-  std::vector<std::string> messages;
-};
 
 TEST(StarlarkDictionary, Type) {
   EXPECT_EQ("dict", starlark_dictionary().type());
@@ -45,13 +38,15 @@ TEST(StarlarkDictionary, Str) {
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
+  error_handler error_callback;
+
   EXPECT_EQ("{}", starlark_dictionary().str());
   starlark_dictionary dict;
-  dict.insert(&s1, &none, nullptr);
+  dict.insert(&s1, &none, error_callback);
   EXPECT_EQ("{'1': None}", dict.str());
-  dict.insert(&s2, &true_obj, nullptr);
+  dict.insert(&s2, &true_obj, error_callback);
   EXPECT_EQ("{'1': None, '2': True}", dict.str());
-  dict.insert(&s3, &one, nullptr);
+  dict.insert(&s3, &one, error_callback);
   EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict.str());
 }
 
@@ -63,14 +58,16 @@ TEST(StarlarkDictionary, StrOrder) {
   starlark_bool true_obj(true);
   starlark_integer one(1);
   starlark_dictionary dict_1;
-  dict_1.insert(&s1, &none, nullptr);
-  dict_1.insert(&s2, &true_obj, nullptr);
-  dict_1.insert(&s3, &one, nullptr);
+  error_handler error_callback;
+
+  dict_1.insert(&s1, &none, error_callback);
+  dict_1.insert(&s2, &true_obj, error_callback);
+  dict_1.insert(&s3, &one, error_callback);
   EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict_1.str());
   starlark_dictionary dict_2;
-  dict_2.insert(&s3, &one, nullptr);
-  dict_2.insert(&s1, &none, nullptr);
-  dict_2.insert(&s2, &true_obj, nullptr);
+  dict_2.insert(&s3, &one, error_callback);
+  dict_2.insert(&s1, &none, error_callback);
+  dict_2.insert(&s2, &true_obj, error_callback);
   EXPECT_EQ("{'3': 1, '1': None, '2': True}", dict_2.str());
 }
 
@@ -83,38 +80,44 @@ TEST(StarlarkDictionary, StrContainsItself) {
   starlark_bool true_obj(true);
   starlark_integer one(1);
   starlark_dictionary map;
-  map.insert(&s1, &none, nullptr);
-  map.insert(&s2, &true_obj, nullptr);
-  map.insert(&s3, &one, nullptr);
-  map.insert(&s4, &map, nullptr);
+  error_handler error_callback;
+
+  map.insert(&s1, &none, error_callback);
+  map.insert(&s2, &true_obj, error_callback);
+  map.insert(&s3, &one, error_callback);
+  map.insert(&s4, &map, error_callback);
   EXPECT_EQ("{'1': None, '2': True, '3': 1, '4': {...}}", map.str());
 }
 
 TEST(StarlarkDictionary, Truthy) {
   starlark_none none;
   starlark_dictionary dict;
+  error_handler error_callback;
+
   EXPECT_FALSE(dict.truthy());
-  dict.insert(&none, &none, nullptr);
+  dict.insert(&none, &none, error_callback);
   EXPECT_TRUE(dict.truthy());
 }
 
 TEST(StarlarkDictionary, Equals) {
   starlark_none none;
   starlark_bool bool_true(true);
+  error_handler error_callback;
+
   EXPECT_FALSE(starlark_dictionary().equals(none));
   EXPECT_TRUE(starlark_dictionary().equals(starlark_dictionary()));
   starlark_dictionary dict_1;
-  dict_1.insert(&none, &none, nullptr);
+  dict_1.insert(&none, &none, error_callback);
   starlark_dictionary dict_2;
-  dict_2.insert(&none, &none, nullptr);
+  dict_2.insert(&none, &none, error_callback);
   EXPECT_FALSE(dict_1.equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_dictionary().equals(dict_1));
   EXPECT_TRUE(dict_1.equals(dict_2));
   starlark_dictionary dict_3;
-  dict_3.insert(&none, &bool_true, nullptr);
+  dict_3.insert(&none, &bool_true, error_callback);
   EXPECT_FALSE(dict_3.equals(dict_1));
   starlark_dictionary dict_4;
-  dict_4.insert(&bool_true, &none, nullptr);
+  dict_4.insert(&bool_true, &none, error_callback);
   EXPECT_FALSE(dict_4.equals(dict_1));
 }
 
@@ -128,24 +131,26 @@ TEST(StarlarkDictionary, EqualsInDifferentOrder) {
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;
   starlark_dictionary dict_3;
-  dict_1.insert(&none, &none, nullptr);
-  dict_1.insert(&zero, &zero, nullptr);
-  dict_1.insert(&one, &one, nullptr);
-  dict_1.insert(&two, &two, nullptr);
-  dict_1.insert(&bool_true, &bool_true, nullptr);
-  dict_1.insert(&bool_false, &bool_false, nullptr);
-  dict_2.insert(&none, &none, nullptr);
-  dict_2.insert(&zero, &zero, nullptr);
-  dict_2.insert(&one, &one, nullptr);
-  dict_2.insert(&two, &two, nullptr);
-  dict_2.insert(&bool_true, &bool_true, nullptr);
-  dict_2.insert(&bool_false, &bool_false, nullptr);
-  dict_3.insert(&bool_false, &bool_false, nullptr);
-  dict_3.insert(&bool_true, &bool_true, nullptr);
-  dict_3.insert(&two, &two, nullptr);
-  dict_3.insert(&one, &one, nullptr);
-  dict_3.insert(&zero, &zero, nullptr);
-  dict_3.insert(&none, &none, nullptr);
+  error_handler error_callback;
+
+  dict_1.insert(&none, &none, error_callback);
+  dict_1.insert(&zero, &zero, error_callback);
+  dict_1.insert(&one, &one, error_callback);
+  dict_1.insert(&two, &two, error_callback);
+  dict_1.insert(&bool_true, &bool_true, error_callback);
+  dict_1.insert(&bool_false, &bool_false, error_callback);
+  dict_2.insert(&none, &none, error_callback);
+  dict_2.insert(&zero, &zero, error_callback);
+  dict_2.insert(&one, &one, error_callback);
+  dict_2.insert(&two, &two, error_callback);
+  dict_2.insert(&bool_true, &bool_true, error_callback);
+  dict_2.insert(&bool_false, &bool_false, error_callback);
+  dict_3.insert(&bool_false, &bool_false, error_callback);
+  dict_3.insert(&bool_true, &bool_true, error_callback);
+  dict_3.insert(&two, &two, error_callback);
+  dict_3.insert(&one, &one, error_callback);
+  dict_3.insert(&zero, &zero, error_callback);
+  dict_3.insert(&none, &none, error_callback);
   EXPECT_TRUE(dict_1.equals(dict_2));
   EXPECT_TRUE(dict_1.equals(dict_3));
 }
@@ -163,7 +168,7 @@ TEST(StarlarkDictionary, InsertingUsingUnhashableKey) {
   starlark_none none;
   error_handler error_callback;
 
-  EXPECT_FALSE(dict.insert(&list, &none, &error_callback));
+  EXPECT_FALSE(dict.insert(&list, &none, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
 }
@@ -172,18 +177,22 @@ TEST(StarlarkDictionary, InsertReturnValue) {
   starlark_dictionary dict;
   starlark_none none;
   starlark_integer zero(0);
-  EXPECT_TRUE(dict.insert(&none, &none, nullptr));
-  EXPECT_FALSE(dict.insert(&none, &none, nullptr));
-  EXPECT_FALSE(dict.insert(&none, &zero, nullptr));
+  error_handler error_callback;
+
+  EXPECT_TRUE(dict.insert(&none, &none, error_callback));
+  EXPECT_FALSE(dict.insert(&none, &none, error_callback));
+  EXPECT_FALSE(dict.insert(&none, &zero, error_callback));
 }
 
 TEST(StarlarkDictionary, Freeze) {
   starlark_dictionary dict1;
   starlark_dictionary dict2;
   starlark_none none;
-  EXPECT_TRUE(dict1.insert(&none, &dict2, nullptr));
+  error_handler error_callback;
+
+  EXPECT_TRUE(dict1.insert(&none, &dict2, error_callback));
   dict1.freeze();
-  EXPECT_FALSE(dict2.insert(&none, &none, nullptr));
+  EXPECT_FALSE(dict2.insert(&none, &none, error_callback));
 }
 
 TEST(StarlarkDictionary, InsertFreezed) {
@@ -193,7 +202,7 @@ TEST(StarlarkDictionary, InsertFreezed) {
 
   dict.freeze();
 
-  EXPECT_FALSE(dict.insert(&none, &none, &error_callback));
+  EXPECT_FALSE(dict.insert(&none, &none, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
 }
@@ -213,13 +222,13 @@ TEST(StarlarkDictionary, BinaryPipe) {
   Arena arena;
   error_handler error_callback;
 
-  dict_1.insert(&zero, &s_zero, nullptr);
-  dict_1.insert(&one, &s_one, nullptr);
-  dict_2.insert(&zero, &s_four, nullptr);
-  dict_2.insert(&two, &s_two, nullptr);
-  dict_2.insert(&three, &s_three, nullptr);
+  dict_1.insert(&zero, &s_zero, error_callback);
+  dict_1.insert(&one, &s_one, error_callback);
+  dict_2.insert(&zero, &s_four, error_callback);
+  dict_2.insert(&two, &s_two, error_callback);
+  dict_2.insert(&three, &s_three, error_callback);
 
-  auto* dict_3 = dict_1.binary_pipe(dict_2,  arena, &error_callback);
+  auto* dict_3 = dict_1.binary_pipe(dict_2,  arena, error_callback);
   ASSERT_NE(dict_3, nullptr);
   EXPECT_EQ(dict_3->str(), "{0: 'four', 1: 'one', 2: 'two', 3: 'three'}");
   EXPECT_EQ(dict_1.str(), "{0: 'zero', 1: 'one'}");
@@ -232,7 +241,7 @@ TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = dict.binary_pipe(list, arena, &error_callback);
+  auto* result = dict.binary_pipe(list, arena, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'dict' and 'list'");

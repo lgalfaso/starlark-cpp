@@ -19,7 +19,7 @@ class starlark_range : public starlark_obj {
   void set_start(const starlark_obj* value);
   void set_end(const starlark_obj* value);
   void set_step(const starlark_obj* value);
-  bool binary_in(const starlark_obj& other, error_fn* error_callback) const override;
+  bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

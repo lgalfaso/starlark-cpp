@@ -49,11 +49,9 @@ bool starlark_bytes::truthy() const {
   return !value.empty();
 }
 
-bool starlark_bytes::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   if (other.type() != type() && other.type() != "int") {
-    if (error_callback != nullptr) {
-       error_callback->add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
-    }
+     error_callback.add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
     return false;
   }
   if (other.type() == "int") {
@@ -61,9 +59,7 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn* error_callba
     if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
       auto other_value = n_other.as_int64();
       if (other_value < 0 || 255 < other_value) {
-        if (error_callback != nullptr) {
-          error_callback->add_error("ValueError: byte must be in range(0, 256)");
-        }
+        error_callback.add_error("ValueError: byte must be in range(0, 256)");
         return false;
       }
       return value.contains(static_cast<char>(n_other.as_int64()));
@@ -71,9 +67,7 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn* error_callba
     if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
       auto& other_value = n_other.as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
-        if (error_callback != nullptr) {
-          error_callback->add_error("ValueError: byte must be in range(0, 256)");
-        }
+        error_callback.add_error("ValueError: byte must be in range(0, 256)");
         return false;
       }
       return value.contains(static_cast<char>(other_value.at(0)));
@@ -86,11 +80,9 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn* error_callba
   return value.contains(s_other.value);
 }
 
-starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can't concat {} to bytes", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can't concat {} to bytes", other.type()));
     return nullptr;
   }
   // TODO(lmirelmann): Check that the value length would not go over the limit.
@@ -100,11 +92,9 @@ starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& aren
   return result;
 }
 
-starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != "int") {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }
   if (value.empty()) {
@@ -128,9 +118,7 @@ starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& aren
       return Arena::Create<starlark_bytes>(&arena, "");
     }
     if (multiplier.bit_size() >= 63) {
-      if (error_callback != nullptr) {
-        error_callback->add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
-      }
+      error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
       return nullptr;
     }
     int64_t int_value = multiplier.at(0);
@@ -143,9 +131,7 @@ starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& aren
   } else {
     // Should not happen.
     assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
+    error_callback.add_error("TypeError: unknown numeric type");
     return nullptr;
   }
 }
@@ -155,7 +141,7 @@ bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* o
       value == (static_cast<const starlark_bytes*>(other))->value;
 }
 
-void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
   if (other->type() != type()) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
     return;

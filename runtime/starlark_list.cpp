@@ -63,14 +63,12 @@ bool starlark_list::truthy() const {
   return !values.empty();
 }
 
-void starlark_list::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) {
+void starlark_list::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) {
   if (number_of_elements != values.size()) {
-    if (error_callback != nullptr) {
-      if (values.size() < number_of_elements) {
-        error_callback->add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
-      } else {
-        error_callback->add_error(std::format("ValueError: too many values to unpack (expected {}, got {})", number_of_elements, values.size()));
-      }
+    if (values.size() < number_of_elements) {
+      error_callback.add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
+    } else {
+      error_callback.add_error(std::format("ValueError: too many values to unpack (expected {}, got {})", number_of_elements, values.size()));
     }
     return;
   }
@@ -79,7 +77,7 @@ void starlark_list::unpack(int32_t number_of_elements, std::vector<starlark_obj*
   }
 }
 
-bool starlark_list::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+bool starlark_list::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   for (const auto& element : values) {
     if (other.equals(*element)) {
       return true;
@@ -88,11 +86,9 @@ bool starlark_list::binary_in(const starlark_obj& other, error_fn* error_callbac
   return false;
 }
 
-starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can only concatenate list (not \"{}\") to list", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can only concatenate list (not \"{}\") to list", other.type()));
     return nullptr;
   }
   // TODO(lmirelmann): Check the result size.
@@ -109,11 +105,9 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena
   return result;
 }
 
-starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != "int") {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }
   if (values.empty()) {
@@ -139,9 +133,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
       return Arena::Create<starlark_list>(&arena);
     }
     if (value.bit_size() >= 63) {
-      if (error_callback != nullptr) {
-        error_callback->add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
-      }
+      error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
       return nullptr;
     }
     int64_t int_value = value.at(0);
@@ -156,9 +148,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
   } else {
     // Should not happen.
     assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
+    error_callback.add_error("TypeError: unknown numeric type");
     return nullptr;
   }
 }
@@ -180,7 +170,7 @@ bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* ot
   return true;
 }
 
-void starlark_list::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+void starlark_list::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
   if (other->type() != type()) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
     return;
@@ -211,12 +201,10 @@ void starlark_list::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   }
 }
 
-void starlark_list::add(starlark_obj* element, error_fn* error_callback) {
+void starlark_list::add(starlark_obj* element, error_fn& error_callback) {
   if (freezed) {
-    if (error_callback != nullptr) {
-      // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-      error_callback->add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
-    }
+    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
     return;
   }
   // TODO(lmirelmann): Check that this does not go over the maximum number of elements.

@@ -12,11 +12,11 @@
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
+#include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_integer;
@@ -24,6 +24,7 @@ using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::testing::error_handler;
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::IsEmpty;
@@ -31,13 +32,6 @@ using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
-
-struct error_handler : public error_fn {
-  void add_error(std::string_view error_msg) override {
-    messages.push_back(std::string(error_msg));
-  }
-  std::vector<std::string> messages;
-};
 
 TEST(StarlarkTuple, Type) {
   EXPECT_EQ("tuple", starlark_tuple().type());
@@ -158,18 +152,19 @@ TEST(StarlarkTuple, Unpack) {
   starlark_integer one(1);
   starlark_tuple tuple;
   std::vector<starlark_obj*> stack;
+  error_handler error_callback;
 
-  tuple.unpack(0, stack, nullptr);
+  tuple.unpack(0, stack, error_callback);
   EXPECT_THAT(stack, SizeIs(0));
 
   tuple.add(&one);
-  tuple.unpack(1, stack, nullptr);
+  tuple.unpack(1, stack, error_callback);
   ASSERT_THAT(stack, SizeIs(1));
   EXPECT_THAT(stack[0], &one);
 
   stack.clear();
   tuple.add(&none);
-  tuple.unpack(2, stack, nullptr);
+  tuple.unpack(2, stack, error_callback);
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
   EXPECT_THAT(stack[1], &one);
@@ -185,7 +180,7 @@ TEST(StarlarkTuple, UnpackError) {
     std::vector<starlark_obj*> consumer;
     error_handler error_callback;
 
-    tuple.unpack(3, consumer, &error_callback);
+    tuple.unpack(3, consumer, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
@@ -194,7 +189,7 @@ TEST(StarlarkTuple, UnpackError) {
     std::vector<starlark_obj*> consumer;
     error_handler error_callback;
 
-    tuple.unpack(1, consumer, &error_callback);
+    tuple.unpack(1, consumer, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
@@ -215,36 +210,37 @@ TEST(StarlarkTuple, Order) {
   starlark_tuple tuple5;
   tuple5.add(&one);
   tuple5.add(&zero);
+  error_handler error_callback;
 
-  EXPECT_THAT(tuple1.cmp(tuple1, "cmp", nullptr), Eq(0));
-  EXPECT_THAT(tuple1.cmp(tuple2, "cmp", nullptr), Lt(0));
-  EXPECT_THAT(tuple1.cmp(tuple3, "cmp", nullptr), Lt(0));
-  EXPECT_THAT(tuple1.cmp(tuple4, "cmp", nullptr), Lt(0));
-  EXPECT_THAT(tuple1.cmp(tuple5, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple1.cmp(tuple1, "cmp", error_callback), Eq(0));
+  EXPECT_THAT(tuple1.cmp(tuple2, "cmp", error_callback), Lt(0));
+  EXPECT_THAT(tuple1.cmp(tuple3, "cmp", error_callback), Lt(0));
+  EXPECT_THAT(tuple1.cmp(tuple4, "cmp", error_callback), Lt(0));
+  EXPECT_THAT(tuple1.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple2.cmp(tuple1, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple2.cmp(tuple2, "cmp", nullptr), Eq(0));
-  EXPECT_THAT(tuple2.cmp(tuple3, "cmp", nullptr), Lt(0));
-  EXPECT_THAT(tuple2.cmp(tuple4, "cmp", nullptr), Lt(0));
-  EXPECT_THAT(tuple2.cmp(tuple5, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple2.cmp(tuple1, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple2.cmp(tuple2, "cmp", error_callback), Eq(0));
+  EXPECT_THAT(tuple2.cmp(tuple3, "cmp", error_callback), Lt(0));
+  EXPECT_THAT(tuple2.cmp(tuple4, "cmp", error_callback), Lt(0));
+  EXPECT_THAT(tuple2.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple3.cmp(tuple1, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple3.cmp(tuple2, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple3.cmp(tuple3, "cmp", nullptr), Eq(0));
-  EXPECT_THAT(tuple3.cmp(tuple4, "cmp", nullptr), Lt(0));
-  EXPECT_THAT(tuple3.cmp(tuple5, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple3.cmp(tuple1, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple3.cmp(tuple2, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple3.cmp(tuple3, "cmp", error_callback), Eq(0));
+  EXPECT_THAT(tuple3.cmp(tuple4, "cmp", error_callback), Lt(0));
+  EXPECT_THAT(tuple3.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple4.cmp(tuple1, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple4.cmp(tuple2, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple4.cmp(tuple3, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple4.cmp(tuple4, "cmp", nullptr), Eq(0));
-  EXPECT_THAT(tuple4.cmp(tuple5, "cmp", nullptr), Lt(0));
+  EXPECT_THAT(tuple4.cmp(tuple1, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple4.cmp(tuple2, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple4.cmp(tuple3, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple4.cmp(tuple4, "cmp", error_callback), Eq(0));
+  EXPECT_THAT(tuple4.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple5.cmp(tuple1, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple2, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple3, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple4, "cmp", nullptr), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple5, "cmp", nullptr), Eq(0));
+  EXPECT_THAT(tuple5.cmp(tuple1, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple2, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple3, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple4, "cmp", error_callback), Gt(0));
+  EXPECT_THAT(tuple5.cmp(tuple5, "cmp", error_callback), Eq(0));
 }
 
 TEST(StarlarkTuple, OrderError) {
@@ -252,7 +248,7 @@ TEST(StarlarkTuple, OrderError) {
   starlark_integer one(1);
   starlark_tuple tuple;
 
-  EXPECT_FALSE(tuple.cmp(one, "<", &error_callback));
+  EXPECT_FALSE(tuple.cmp(one, "<", error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'tuple' and 'int'");
 }
@@ -264,8 +260,8 @@ TEST(StarlarkTuple, Membership) {
   tuple.add(&zero);
   error_handler error_callback;
 
-  EXPECT_TRUE(tuple.binary_in(zero, &error_callback));
-  EXPECT_FALSE(tuple.binary_in(one, &error_callback));
+  EXPECT_TRUE(tuple.binary_in(zero, error_callback));
+  EXPECT_FALSE(tuple.binary_in(one, error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -277,7 +273,7 @@ TEST(StarlarkTuple, Freeze) {
 
   tuple.add(&list);
   tuple.freeze();
-  list.add(&one, &error_callback);
+  list.add(&one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
 }
@@ -292,7 +288,7 @@ TEST(StarlarkTuple, BinaryPlus) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = tuple_1.binary_plus(tuple_2, arena, &error_callback);
+  auto* result = tuple_1.binary_plus(tuple_2, arena, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(result->str(), "(0, 1)");
@@ -304,7 +300,7 @@ TEST(StarlarkTuple, BinaryPlusNotList) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = tuple.binary_plus(list, arena, &error_callback);
+  auto* result = tuple.binary_plus(list, arena, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate tuple (not \"list\") to tuple");
@@ -325,11 +321,11 @@ TEST(StarlarkTuple, BinaryStar) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result_0 = tuple0.binary_star(big, arena, &error_callback);
-  auto* result_1 = tuple.binary_star(two, arena, &error_callback);
-  auto* result_2 = tuple.binary_star(three, arena, &error_callback);
-  auto* result_3 = tuple.binary_star(minus_two, arena, &error_callback);
-  auto* result_4 = tuple.binary_star(minus_one, arena, &error_callback);
+  auto* result_0 = tuple0.binary_star(big, arena, error_callback);
+  auto* result_1 = tuple.binary_star(two, arena, error_callback);
+  auto* result_2 = tuple.binary_star(three, arena, error_callback);
+  auto* result_3 = tuple.binary_star(minus_two, arena, error_callback);
+  auto* result_4 = tuple.binary_star(minus_one, arena, error_callback);
 
   ASSERT_NE(result_0, nullptr);
   EXPECT_EQ(result_0->str(), "()");
@@ -358,11 +354,11 @@ TEST(StarlarkTuple, BinaryStarReverse) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result_0 = big.binary_star(tuple0, arena, &error_callback);
-  auto* result_1 = two.binary_star(tuple, arena, &error_callback);
-  auto* result_2 = three.binary_star(tuple, arena, &error_callback);
-  auto* result_3 = minus_two.binary_star(tuple, arena, &error_callback);
-  auto* result_4 = minus_one.binary_star(tuple, arena, &error_callback);
+  auto* result_0 = big.binary_star(tuple0, arena, error_callback);
+  auto* result_1 = two.binary_star(tuple, arena, error_callback);
+  auto* result_2 = three.binary_star(tuple, arena, error_callback);
+  auto* result_3 = minus_two.binary_star(tuple, arena, error_callback);
+  auto* result_4 = minus_one.binary_star(tuple, arena, error_callback);
 
   ASSERT_NE(result_0, nullptr);
   EXPECT_EQ(result_0->str(), "()");
@@ -382,7 +378,7 @@ TEST(StarlarkTuple, BinaryStarNotInt) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = tuple.binary_star(list, arena, &error_callback);
+  auto* result = tuple.binary_star(list, arena, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'list'");
@@ -395,7 +391,7 @@ TEST(StarlarkTuple, BinaryStarTooBig) {
   error_handler error_callback;
   tuple.add(&big);
 
-  auto* result = tuple.binary_star(big, arena, &error_callback);
+  auto* result = tuple.binary_star(big, arena, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");

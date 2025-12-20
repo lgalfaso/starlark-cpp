@@ -26,11 +26,9 @@ std::string_view starlark_tuple::type() const {
   return "tuple";
 }
 
-starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can only concatenate tuple (not \"{}\") to tuple", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can only concatenate tuple (not \"{}\") to tuple", other.type()));
     return nullptr;
   }
   // TODO(lmirelmann): Check the result size.
@@ -45,11 +43,9 @@ starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& aren
   return result;
 }
 
-starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != "int") {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
-    }
+    error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }
   if (values.empty()) {
@@ -75,9 +71,7 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
       return Arena::Create<starlark_tuple>(&arena);
     }
     if (value.bit_size() >= 63) {
-      if (error_callback != nullptr) {
-        error_callback->add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
-      }
+      error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
       return nullptr;
     }
     int64_t int_value = value.at(0);
@@ -92,9 +86,7 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
   } else {
     // Should not happen.
     assert(false);
-    if (error_callback != nullptr) {
-      error_callback->add_error("TypeError: unknown numeric type");
-    }
+    error_callback.add_error("TypeError: unknown numeric type");
     return nullptr;
   }
 }
@@ -155,7 +147,7 @@ bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* o
   return true;
 }
 
-void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
   if (other->type() != type()) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
     return;
@@ -179,14 +171,12 @@ bool starlark_tuple::truthy() const {
   return !values.empty();
 }
 
-void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn* error_callback) {
+void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) {
   if (number_of_elements != values.size()) {
-    if (error_callback != nullptr) {
-      if (values.size() < number_of_elements) {
-        error_callback->add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
-      } else {
-        error_callback->add_error(std::format("ValueError: too many values to unpack (expected {}, got {})", number_of_elements, values.size()));
-      }
+    if (values.size() < number_of_elements) {
+      error_callback.add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
+    } else {
+      error_callback.add_error(std::format("ValueError: too many values to unpack (expected {}, got {})", number_of_elements, values.size()));
     }
     return;
   }
@@ -196,7 +186,7 @@ void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj
   }
 }
 
-bool starlark_tuple::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+bool starlark_tuple::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   for (const auto& element : values) {
     if (other.equals(*element)) {
       return true;

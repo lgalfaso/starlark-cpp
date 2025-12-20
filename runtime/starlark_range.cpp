@@ -43,7 +43,7 @@ void starlark_range::set_step(const starlark_obj* value) {
   // TODO(lmirelmann): Implement.
 }
 
-bool starlark_range::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   // TODO(lmirelmann): Implement.
   return false;
 }

@@ -64,12 +64,12 @@ bool starlark_dictionary::truthy() const {
   return !values.empty();
 }
 
-bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`
   return values.contains(&const_cast<starlark_obj&>(other));
 }
 
-starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_pipe(other, arena, error_callback);
   }
@@ -117,18 +117,14 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
   return -1;
 }
 
-bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn* error_callback) {
+bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback) {
   if (freezed) {
-    if (error_callback != nullptr) {
-      // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-      error_callback->add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
-    }
+    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
     return false;
   }
   if (key->hash() == -1) {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: cannot use '{}' as a dict key (unhashable type: '{}')", key->type(), key->type()));
-    }
+    error_callback.add_error(std::format("TypeError: cannot use '{}' as a dict key (unhashable type: '{}')", key->type(), key->type()));
     return false;
   }
   auto [it, result] = values.insert(key, value);

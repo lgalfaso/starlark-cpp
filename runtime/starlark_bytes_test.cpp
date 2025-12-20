@@ -7,12 +7,12 @@
 #include <string>
 #include <vector>
 
-#include "runtime/starlark_function.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_float.hpp"
+#include "runtime/starlark_function.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
@@ -20,11 +20,11 @@
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_struct.hpp"
+#include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -40,6 +40,7 @@ using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::testing::error_handler;
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::IsEmpty;
@@ -47,14 +48,6 @@ using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
-
-struct error_handler : public error_fn {
-  void add_error(std::string_view error_msg) override {
-    messages.push_back(std::string(error_msg));
-  }
-
-  std::vector<std::string> messages;
-};
 
 TEST(StarlarkBytes, Type) {
   EXPECT_EQ("bytes", starlark_bytes("").type());
@@ -169,60 +162,62 @@ TEST(StarlarkBytes, Hash) {
 }
 
 TEST(StarlarkBytes, Order) {
-  EXPECT_THAT(starlark_bytes("").cmp(starlark_bytes(""), "cmp", nullptr), Eq(0));
-  EXPECT_THAT(starlark_bytes("").cmp(starlark_bytes("a"), "cmp", nullptr), Lt(0));
-  EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes("a"), "cmp", nullptr), Eq(0));
-  EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes(""), "cmp", nullptr), Gt(0));
-  EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes("b"), "cmp", nullptr), Lt(0));
-  EXPECT_THAT(starlark_bytes("b").cmp(starlark_bytes("a"), "cmp", nullptr), Gt(0));
+  error_handler error_callback;
+
+  EXPECT_THAT(starlark_bytes("").cmp(starlark_bytes(""), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bytes("").cmp(starlark_bytes("a"), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes("a"), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes(""), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bytes("a").cmp(starlark_bytes("b"), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bytes("b").cmp(starlark_bytes("a"), "cmp", error_callback), Gt(0));
 }
 
 TEST(StarlarkBytes, OrderErrors) {
   error_handler error_callback;
-  EXPECT_FALSE(starlark_bytes("").cmp(starlark_string(""), "<", &error_callback));
+  EXPECT_FALSE(starlark_bytes("").cmp(starlark_string(""), "<", error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'bytes' and 'string'");
 }
 
 TEST(StarlarkBytes, BinaryIn) {
   error_handler error_callback;
-  EXPECT_TRUE(starlark_bytes("").binary_in(starlark_bytes(""), &error_callback));
-  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_bytes(""), &error_callback));
-  EXPECT_FALSE(starlark_bytes("a").binary_in(starlark_bytes("b"), &error_callback));
-  EXPECT_FALSE(starlark_bytes("a").binary_in(starlark_integer('b'), &error_callback));
-  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_integer('a'), &error_callback));
-  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_bigint('a'), &error_callback));
+  EXPECT_TRUE(starlark_bytes("").binary_in(starlark_bytes(""), error_callback));
+  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_bytes(""), error_callback));
+  EXPECT_FALSE(starlark_bytes("a").binary_in(starlark_bytes("b"), error_callback));
+  EXPECT_FALSE(starlark_bytes("a").binary_in(starlark_integer('b'), error_callback));
+  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_integer('a'), error_callback));
+  EXPECT_TRUE(starlark_bytes("a").binary_in(starlark_bigint('a'), error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBytes, BinaryInErrors) {
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_string(""), &error_callback));
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_string(""), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'string'");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(-1), &error_callback));
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(256), &error_callback));
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(-1), &error_callback));
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(256), &error_callback));
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
@@ -234,7 +229,7 @@ TEST(StarlarkBytes, BinaryPlus) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = bytes_1.binary_plus(bytes_2, arena, &error_callback);
+  auto* result = bytes_1.binary_plus(bytes_2, arena, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(result->str(), "b'abcdef'");
@@ -246,7 +241,7 @@ TEST(StarlarkBytes, BinaryPlusNotList) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = bytes.binary_plus(tuple, arena, &error_callback);
+  auto* result = bytes.binary_plus(tuple, arena, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to bytes");
@@ -263,11 +258,11 @@ TEST(StarlarkBytes, BinaryStar) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result_1 = bytes.binary_star(two, arena, &error_callback);
-  auto* result_2 = bytes.binary_star(three, arena, &error_callback);
-  auto* result_3 = bytes.binary_star(minus_two, arena, &error_callback);
-  auto* result_4 = bytes.binary_star(minus_one, arena, &error_callback);
-  auto* result_5 = bytes0.binary_star(big, arena, &error_callback);
+  auto* result_1 = bytes.binary_star(two, arena, error_callback);
+  auto* result_2 = bytes.binary_star(three, arena, error_callback);
+  auto* result_3 = bytes.binary_star(minus_two, arena, error_callback);
+  auto* result_4 = bytes.binary_star(minus_one, arena, error_callback);
+  auto* result_5 = bytes0.binary_star(big, arena, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "b'abcabc'");
@@ -292,11 +287,11 @@ TEST(StarlarkBytes, BinaryStarReverse) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result_1 = two.binary_star(bytes, arena, &error_callback);
-  auto* result_2 = three.binary_star(bytes, arena, &error_callback);
-  auto* result_3 = minus_two.binary_star(bytes, arena, &error_callback);
-  auto* result_4 = minus_one.binary_star(bytes, arena, &error_callback);
-  auto* result_5 = big.binary_star(bytes0, arena, &error_callback);
+  auto* result_1 = two.binary_star(bytes, arena, error_callback);
+  auto* result_2 = three.binary_star(bytes, arena, error_callback);
+  auto* result_3 = minus_two.binary_star(bytes, arena, error_callback);
+  auto* result_4 = minus_one.binary_star(bytes, arena, error_callback);
+  auto* result_5 = big.binary_star(bytes0, arena, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "b'abcabc'");
@@ -316,7 +311,7 @@ TEST(StarlarkBytes, BinaryStarNotInt) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = bytes.binary_star(tuple, arena, &error_callback);
+  auto* result = bytes.binary_star(tuple, arena, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
@@ -328,7 +323,7 @@ TEST(StarlarkBytes, BinaryStarTooBig) {
   Arena arena;
   error_handler error_callback;
 
-  auto* result = bytes.binary_star(big, arena, &error_callback);
+  auto* result = bytes.binary_star(big, arena, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");

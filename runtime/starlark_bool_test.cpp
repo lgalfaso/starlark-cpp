@@ -8,12 +8,12 @@
 #include <string>
 #include <vector>
 
-#include "runtime/starlark_function.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_float.hpp"
+#include "runtime/starlark_function.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
@@ -21,6 +21,7 @@
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_struct.hpp"
+#include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::testing::Lt;
@@ -41,6 +42,7 @@ using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::testing::error_handler;
 
 namespace {
 
@@ -100,10 +102,12 @@ TEST(StarlarkBool, Equals) {
 }
 
 TEST(StarlarkBool, Cmp) {
-  EXPECT_EQ(0, starlark_bool(false).cmp(starlark_bool(false), "cmp", nullptr));
-  EXPECT_THAT(starlark_bool(false).cmp(starlark_bool(true), "cmp", nullptr), Lt(0));
-  EXPECT_EQ(0, starlark_bool(true).cmp(starlark_bool(true), "cmp", nullptr));
-  EXPECT_THAT(starlark_bool(true).cmp(starlark_bool(false), "cmp", nullptr), Gt(0));
+  error_handler error_callback;
+
+  EXPECT_EQ(0, starlark_bool(false).cmp(starlark_bool(false), "cmp", error_callback));
+  EXPECT_THAT(starlark_bool(false).cmp(starlark_bool(true), "cmp", error_callback), Lt(0));
+  EXPECT_EQ(0, starlark_bool(true).cmp(starlark_bool(true), "cmp", error_callback));
+  EXPECT_THAT(starlark_bool(true).cmp(starlark_bool(false), "cmp", error_callback), Gt(0));
 }
 
 TEST(StarlarkBool, Hash) {

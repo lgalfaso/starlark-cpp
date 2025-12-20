@@ -58,12 +58,12 @@ bool starlark_set::contains(starlark_obj* obj) const {
   return values.contains(obj);
 }
 
-bool starlark_set::binary_in(const starlark_obj& other, error_fn* error_callback) const {
+bool starlark_set::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`
   return values.contains(&const_cast<starlark_obj&>(other));
 }
 
-starlark_obj* starlark_set::binary_and(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_set::binary_and(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_and(other, arena, error_callback);
   }
@@ -77,7 +77,7 @@ starlark_obj* starlark_set::binary_and(const starlark_obj& other, Arena& arena, 
   return result;
 }
 
-starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_pipe(other, arena, error_callback);
   }
@@ -92,7 +92,7 @@ starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, Arena& arena,
   return result;
 }
 
-starlark_obj* starlark_set::binary_hat(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_set::binary_hat(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_hat(other, arena, error_callback);
   }
@@ -111,7 +111,7 @@ starlark_obj* starlark_set::binary_hat(const starlark_obj& other, Arena& arena, 
   return result;
 }
 
-starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena, error_fn* error_callback) const {
+starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
     return starlark_obj::binary_minus(other, arena, error_callback);
   }
@@ -153,18 +153,14 @@ void starlark_set::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   }
 }
 
-bool starlark_set::add(starlark_obj* element, error_fn* error_callback) {
+bool starlark_set::add(starlark_obj* element, error_fn& error_callback) {
   if (freezed) {
-    if (error_callback != nullptr) {
-      // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-      error_callback->add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
-    }
+    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
     return false;
   }
   if (element->hash() == -1) {
-    if (error_callback != nullptr) {
-      error_callback->add_error(std::format("TypeError: cannot use '{}' as a set element (unhashable type: '{}')", element->type(), element->type()));
-    }
+    error_callback.add_error(std::format("TypeError: cannot use '{}' as a set element (unhashable type: '{}')", element->type(), element->type()));
     return false;
   }
   return values.insert(element).second;

@@ -280,7 +280,7 @@ bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj*
   }
 }
 
-void starlark_numeric::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn* error_callback) const {
+void starlark_numeric::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
   if (other->type() != "float" && other->type() != "int") {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
     return;

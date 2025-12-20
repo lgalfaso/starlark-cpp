@@ -39,6 +39,16 @@ cc_library(
 )
 
 cc_library(
+    name = "starlark_testing",
+    hdrs = ["starlark_testing.hpp"],
+    visibility = ["//visibility:public"],
+    testonly = True,
+    deps = [
+        ":error_fn",
+    ],
+)
+
+cc_library(
     name = "starlark_object",
     srcs = ["starlark_object.cpp"],
     hdrs = ["starlark_object.hpp"],
@@ -76,6 +86,7 @@ cc_test(
         ":starlark_set",
         ":starlark_string",
         ":starlark_struct",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -166,6 +177,7 @@ cc_test(
         ":starlark_set",
         ":starlark_string",
         ":starlark_struct",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -202,6 +214,7 @@ cc_test(
         ":starlark_set",
         ":starlark_string",
         ":starlark_struct",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -229,6 +242,7 @@ cc_test(
         ":starlark_list",
         ":starlark_none",
         ":starlark_string",
+        ":starlark_testing",
         "@googletest//:gtest_main",
     ],
 )
@@ -265,6 +279,7 @@ cc_test(
         ":starlark_set",
         ":starlark_string",
         ":starlark_struct",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -276,6 +291,7 @@ cc_test(
     srcs = ["starlark_integer_overflow_test.cpp"],
     deps = [
         ":starlark_integer",
+        ":starlark_testing",
         "@googletest//:gtest_main",
     ],
 )
@@ -309,6 +325,7 @@ cc_test(
         ":starlark_set",
         ":starlark_string",
         ":starlark_struct",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -333,6 +350,7 @@ cc_test(
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -376,6 +394,7 @@ cc_test(
         ":starlark_integer",
         ":starlark_none",
         ":starlark_set",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -414,6 +433,7 @@ cc_test(
         ":starlark_set",
         ":starlark_string",
         ":starlark_struct",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -456,6 +476,7 @@ cc_test(
         ":starlark_bool",
         ":starlark_integer",
         ":starlark_none",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -476,6 +497,7 @@ cc_test(
     srcs = ["starlark_function_test.cpp"],
     deps = [
         ":starlark_function",
+        ":starlark_testing",
         "@googletest//:gtest_main",
     ],
 )
