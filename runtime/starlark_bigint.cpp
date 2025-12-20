@@ -8,7 +8,6 @@
 
 #include "grammar/options.hpp"
 #include "runtime/hash.hpp"
-#include "runtime/starlark_float.hpp"
 #include "runtime/starlark_numeric.hpp"
 
 using ::google::protobuf::Arena;
@@ -17,24 +16,6 @@ using ::starlark::grammar::log2_max_bigint;
 
 namespace starlark {
 namespace runtime {
-
-namespace {
-
-starlark_bigint* create_integer(const number& value, Arena& arena) {
-  // TODO(lmirelmann): Check whether we can downgrade.
-  return Arena::Create<starlark_bigint>(&arena, std::move(value));
-}
-
-starlark_bigint* create_integer(number&& value, Arena& arena) {
-  // TODO(lmirelmann): Check whether we can downgrade.
-  return Arena::Create<starlark_bigint>(&arena, std::move(value));
-}
-
-starlark_float* create_float(double value, Arena& arena) {
-  return Arena::Create<starlark_float>(&arena, value);
-}
-
-}  // namespace
 
 starlark_bigint::starlark_bigint(int64_t value) : value(from_int64(value)) {}
 

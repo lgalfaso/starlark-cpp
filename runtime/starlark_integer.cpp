@@ -11,8 +11,6 @@
 
 #include "grammar/options.hpp"
 #include "runtime/hash.hpp"
-#include "runtime/starlark_bigint.hpp"
-#include "runtime/starlark_float.hpp"
 #include "runtime/starlark_numeric.hpp"
 
 using ::google::protobuf::Arena;
@@ -21,24 +19,6 @@ using ::starlark::grammar::log2_max_bigint;
 
 namespace starlark {
 namespace runtime {
-
-namespace {
-
-starlark_integer* create_integer(std::int64_t value, Arena& arena) {
-  // TODO(lmirelmann): Use a cache of small integers.
-  return Arena::Create<starlark_integer>(&arena, value);
-}
-
-starlark_bigint* create_integer(number&& value, Arena& arena) {
-  // TODO(lmirelmann): Check whether we can downgrade.
-  return Arena::Create<starlark_bigint>(&arena, std::move(value));
-}
-
-starlark_float* create_float(double value, Arena& arena) {
-  return Arena::Create<starlark_float>(&arena, value);
-}
-
-}  // namespace
 
 starlark_integer::starlark_integer(int64_t value) : value(value) {}
 

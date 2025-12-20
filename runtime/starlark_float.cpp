@@ -17,14 +17,6 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
-namespace {
-
-starlark_float* create_float(double value, Arena& arena) {
-  return Arena::Create<starlark_float>(&arena, value);
-}
-
-}  // namespace
-
 starlark_float::starlark_float(double value) : value(value) {}
 
 std::string_view starlark_float::type() const {
