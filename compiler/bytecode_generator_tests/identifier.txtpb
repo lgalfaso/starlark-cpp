@@ -1,4 +1,5 @@
 block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "False" symbol: "None" symbol: "True" } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { load { frame: 2 pos_in_frame: 1 } }
@@ -7,6 +8,7 @@ block {
   op_code { pop { } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { pop { } }
+  op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { end { } }

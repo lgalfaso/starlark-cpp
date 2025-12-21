@@ -1,4 +1,5 @@
 block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { make_list { reserve_size: 0 } }
@@ -18,6 +19,7 @@ block {
   op_code { const_int { value: 5 } }
   op_code { add_to_list { pos_in_stack: 3 number_of_elements: 3 } }
   op_code { pop {} }
+  op_code { pop_frame {} }
   op_code { pop_frame {} }
   op_code { pop_frame {} }
 

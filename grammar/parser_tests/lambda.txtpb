@@ -1,34 +1,5 @@
-global_binding { name: "False" used: true }
-global_binding { name: "None" used: false }
-global_binding { name: "True" used: true }
-global_binding { name: "abs" used: false }
-global_binding { name: "all" used: false }
-global_binding { name: "any" used: false }
-global_binding { name: "bool" used: false }
-global_binding { name: "bytes" used: false }
-global_binding { name: "dict" used: false }
-global_binding { name: "dir" used: false }
-global_binding { name: "enumerate" used: false }
-global_binding { name: "fail" used: false }
-global_binding { name: "float" used: false }
-global_binding { name: "getattr" used: false }
-global_binding { name: "hasattr" used: false }
-global_binding { name: "hash" used: false }
-global_binding { name: "int" used: false }
-global_binding { name: "len" used: false }
-global_binding { name: "list" used: false }
-global_binding { name: "max" used: false }
-global_binding { name: "min" used: false }
-global_binding { name: "print" used: false }
-global_binding { name: "range" used: false }
-global_binding { name: "repr" used: false }
-global_binding { name: "reversed" used: false }
-global_binding { name: "set" used: false }
-global_binding { name: "sorted" used: false }
-global_binding { name: "str" used: false }
-global_binding { name: "tuple" used: false }
-global_binding { name: "type" used: false }
-global_binding { name: "zip" used: false }
+global_binding: "False"
+global_binding: "True"
 module_binding: "a"
 module_binding: "b"
 module_binding: "c"
@@ -40,7 +11,7 @@ statement {
           name: "True"
           nfkc_name: "True"
           frame: 3
-          pos_in_frame: 2
+          pos_in_frame: 1
         }
       }
     }
@@ -65,7 +36,7 @@ statement {
               name: "True"
               nfkc_name: "True"
               frame: 3
-              pos_in_frame: 2
+              pos_in_frame: 1
             }
           }
           if_test {
@@ -115,7 +86,7 @@ statement {
           name: "True"
           nfkc_name: "True"
           frame: 3
-          pos_in_frame: 2
+          pos_in_frame: 1
         }
       }
     }
@@ -142,7 +113,7 @@ statement {
           name: "True"
           nfkc_name: "True"
           frame: 3
-          pos_in_frame: 2
+          pos_in_frame: 1
         }
       }
     }
@@ -167,7 +138,7 @@ statement {
           name: "True"
           nfkc_name: "True"
           frame: 3
-          pos_in_frame: 2
+          pos_in_frame: 1
         }
       }
     }
@@ -192,7 +163,7 @@ statement {
           name: "True"
           nfkc_name: "True"
           frame: 3
-          pos_in_frame: 2
+          pos_in_frame: 1
         }
       }
     }
@@ -276,7 +247,7 @@ statement {
                 name: "True"
                 nfkc_name: "True"
                 frame: 3
-                pos_in_frame: 2
+                pos_in_frame: 1
               }
             }
             if_test {
@@ -366,7 +337,7 @@ statement {
                 name: "True"
                 nfkc_name: "True"
                 frame: 2
-                pos_in_frame: 2
+                pos_in_frame: 1
               }
           }
         }

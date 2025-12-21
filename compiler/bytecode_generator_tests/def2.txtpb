@@ -1,10 +1,12 @@
 block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "foo" } }
   op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { make_list { reserve_size: 0 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { make_function { entrypoint: 1 } }
   op_code { store { frame: 1 pos_in_frame: 1 } }
+  op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { end { } }

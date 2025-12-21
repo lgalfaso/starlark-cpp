@@ -29,6 +29,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
+using ::starlark::bytecode::BlockType;
 using ::starlark::bytecode::OpCode;
 using ::starlark::bytecode::Program;
 using ::starlark::compiler::compiler;
@@ -81,31 +82,23 @@ class error_handler : public error_fn {
   logger& log;
 };
 
-frame* run_program(Program* starlark_program, frame* global_frame, Arena& arena, logger& log) {
+frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, Arena& arena, logger& log) {
   std::vector<starlark_obj*> stack;
   std::vector<frame*> frame_stack;
   std::vector<std::pair<int, int>> call_stack;
   int instruction_ptr = 0;
   int block_ptr = 0;
-  // TODO(lmirelmann): This should go into a structure that keeps some of the constants.
-  starlark_bool* bool_true = Arena::Create<starlark_bool>(&arena, true);
-  starlark_bool* bool_false = Arena::Create<starlark_bool>(&arena, false);
-  starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
-  error_handler error_callback(block_ptr, instruction_ptr, starlark_program->block(0).op_code_size() - 1, log);
 
-  if (global_frame != nullptr) {
-    frame_stack.push_back(global_frame);
-  }
   if (starlark_program == nullptr) {
     return nullptr;
   }
-  frame* result = nullptr;
-  if (starlark_program->block(0).op_code(0).op_code_case() == OpCode::kCreateFrame) {
-    instruction_ptr++;
-    result = create_frame(arena, starlark_program->block(0).op_code(0).create_frame().symbol().size(), global_frame);
-    frame_stack.push_back(result);
-  }
+  // TODO(lmirelmann): This should go into a structure that keeps some of the constants.
+  starlark_obj* bool_true = global_context["True"];
+  starlark_obj* bool_false = global_context["False"];
+  starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
+  error_handler error_callback(block_ptr, instruction_ptr, starlark_program->block(0).op_code_size() - 1, log);
 
+  frame* result = nullptr;
   while (true) {
     auto& op_code = starlark_program->block(block_ptr).op_code(instruction_ptr);
     instruction_ptr++;
@@ -223,7 +216,33 @@ std::cerr << "UnboundLocalError: cannot access local variable where it is not as
         }
         break;
       case OpCode::kCreateFrame:
-        frame_stack.push_back(create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back()));
+        switch (op_code.create_frame().block_type()) {
+          case BlockType::PREDECLARED_BLOCK: {
+            assert(frame_stack.empty());
+            auto* global_frame = create_frame(arena, op_code.create_frame().symbol().size(), nullptr);
+            int count = 0;
+            for (const auto& symbol : op_code.create_frame().symbol()) {
+              auto pos = global_context.find(symbol);
+              if (pos == global_context.end()) {
+std::cerr << "Error: Required symbol " << symbol << " not avaible in the global context" << std::endl;
+                return nullptr;
+              } else {
+                global_frame->elements[count] = pos->second;
+                count++;
+              }
+            }
+            frame_stack.push_back(global_frame);
+            break;
+          }
+          case BlockType::MODULE_BLOCK:
+            assert(result == nullptr);
+            result = create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back());
+            frame_stack.push_back(result);
+            break;
+          default:
+            frame_stack.push_back(create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back()));
+            break;
+        }
         break;
       case OpCode::kPopFrame:
         frame_stack.pop_back();
@@ -429,38 +448,27 @@ frame::frame(std::size_t size) : elements(size) {}
 // TODO(lmirelmann): There has to be a way to define the loader.
 interpreter::interpreter() {}
 
-// TODO(lmirelmann): There has to be a way to define the global context.
+// TODO(lmirelmann): There has to be a way to add entries to the global context.
 // TODO(lmirelmann): There has to be a way to define the parsing options.
 // TODO(lmirelmann): The logger should be configurable.
 frame* interpreter::run(std::string_view starlark_code, Arena& arena) {
-  std::map<std::string, starlark_obj*, std::less<>> global_context;
-  // TODO(lmirelmann): Add the other elements from the binding.
-  for (const auto& symbol : predeclared_symbols) {
-    global_context[symbol] = nullptr;
-  }
-  global_context["True"] = Arena::Create<starlark_bool>(&arena, true);
-  global_context["False"] = Arena::Create<starlark_bool>(&arena, false);
-  global_context["None"] = Arena::Create<starlark_none>(&arena);
-
   std::set<std::string, std::less<>> binding;
-  for (const auto& [symbol, value] : global_context) {
-    binding.insert(symbol);
-  }
-
   class compiler star_compiler(binding);
   logger logging;
   Program* starlark_program = star_compiler.compile(starlark_code, options{}, logging, arena);
   if (starlark_program == nullptr) {
     return nullptr;
   }
-  frame* global_frame = create_frame(arena, global_context.size(), nullptr);
-  {
-    int pos = 0;
-    for (auto& [symbol, value] : global_context) {
-      global_frame->elements[pos++] = value;
-    }
+
+  // TODO(lmirelmann): Add the other elements from the binding.
+  std::map<std::string, starlark_obj*, std::less<>> global_context;
+  for (const auto& symbol : predeclared_symbols) {
+    global_context[symbol] = nullptr;
   }
-  return run_program(starlark_program, global_frame, arena, logging);
+  global_context["True"] = Arena::Create<starlark_bool>(&arena, true);
+  global_context["False"] = Arena::Create<starlark_bool>(&arena, false);
+  global_context["None"] = Arena::Create<starlark_none>(&arena);
+  return run_program(starlark_program, global_context, arena, logging);
 }
 
 }  // namespace interpreter

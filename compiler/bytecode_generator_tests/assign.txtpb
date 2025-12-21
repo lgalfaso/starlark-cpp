@@ -1,4 +1,5 @@
 block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "b" symbol: "c" symbol: "d" symbol: "e" symbol: "f" symbol: "g" symbol: "h" symbol: "i" symbol: "j" symbol: "k" symbol: "l" } }
   op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { const_int { value: 1 } }
@@ -36,6 +37,7 @@ block {
   op_code { const_int { value: 12 } }
   op_code { load { frame: 1 pos_in_frame: 11 } }
   op_code { star_assign { } }
+  op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { end { } }

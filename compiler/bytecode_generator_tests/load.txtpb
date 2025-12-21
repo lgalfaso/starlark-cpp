@@ -1,10 +1,12 @@
 block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK symbol: "a" symbol: "b" symbol: "c" symbol: "d" symbol: "f" symbol: "g" } }
   op_code { load_module { module: "module1" value { pos { frame: 0 pos_in_frame: 0 } remote_symbol: "a" } } }
   op_code { load_module { module: "module2" value { pos { frame: 0 pos_in_frame: 1 } remote_symbol: "b" } value { pos { frame: 0 pos_in_frame: 2 } remote_symbol: "c" } } }
   op_code { load_module { module: "module3" value { pos { frame: 0 pos_in_frame: 3 } remote_symbol: "e" } } }
   op_code { load_module { module: "module4" value { pos { frame: 0 pos_in_frame: 4 } remote_symbol: "f" } value { pos { frame: 0 pos_in_frame: 5 } remote_symbol: "h" } } }
+  op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { end { } }

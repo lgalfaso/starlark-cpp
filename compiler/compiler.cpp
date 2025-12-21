@@ -149,6 +149,11 @@ bytecode_generator::bytecode_generator(Program& output) : output(output) {}
 void bytecode_generator::enter_file(const File* starlark_file) {
   blocks.push_back(0);
   output.add_block();
+  auto* predeclared_block = mutable_block()->add_op_code()->mutable_create_frame();
+  predeclared_block->set_block_type(BlockType::PREDECLARED_BLOCK);
+  for (const auto& symbol : starlark_file->global_binding()) {
+    predeclared_block->add_symbol(symbol);
+  }
   auto* module_block = mutable_block()->add_op_code()->mutable_create_frame();
   module_block->set_block_type(BlockType::MODULE_BLOCK);
   for (const auto& symbol : starlark_file->module_binding()) {
@@ -164,6 +169,7 @@ void bytecode_generator::enter_file(const File* starlark_file) {
 void bytecode_generator::exit_file(const File* starlark_file) {
   assert(blocks.size() == 1);
   assert(blocks.back() == 0);
+  mutable_block()->add_op_code()->mutable_pop_frame();
   mutable_block()->add_op_code()->mutable_pop_frame();
   mutable_block()->add_op_code()->mutable_pop_frame();
   mutable_block()->add_op_code()->mutable_end();

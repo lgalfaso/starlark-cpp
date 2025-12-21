@@ -1,4 +1,5 @@
 block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { const_int { value: 1 } }
@@ -9,6 +10,7 @@ block {
   op_code { pop {} }
   op_code { const_bytes { value: "def" } }
   op_code { pop {} }
+  op_code { pop_frame {} }
   op_code { pop_frame {} }
   op_code { pop_frame {} }
   op_code { end {} }

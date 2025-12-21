@@ -251,7 +251,7 @@ File* parser::parse_file(Arena& arena) {
   File* result = Arena::Create<File>(&arena);
 
   // Predeclared block.
-  create_block(base_bindings, {}, nullptr);
+  create_block(base_bindings, {}, result->mutable_global_binding());
   // Module block.
   create_block({}, {}, result->mutable_module_binding());
   // File block.
@@ -267,18 +267,15 @@ File* parser::parse_file(Arena& arena) {
   assert(parse_parameter_identifiers.empty());
   assert(nested_loops.size() == 1 && nested_loops[0] == 0);
   assert(is_top_level_block());
+  assert(parse_parameter_identifiers.empty());
 
-  // Force the resolution of the module and file blocks.
-  while (parser_blocks.size() > 1) {
+  // Force the resolution of the predeclared, module and file blocks.
+  while (!parser_blocks.empty()) {
     drop_block();
   }
-  auto used_global_symbols = drop_block();
-  for (auto& base_binding : base_bindings) {
-    auto* binding = result->add_global_binding();
-    binding->set_name(base_binding);
-    binding->set_used(used_global_symbols.contains(base_binding));
-  }
   identifier_positions.clear();
+  recover = false;
+  found_non_load = false;
   return result;
 }
 
@@ -1810,15 +1807,10 @@ void parser::create_block(const std::set<std::string, std::less<>>& symbols,
   }
 }
 
-std::set<std::string> parser::drop_block() {
-  std::set<std::string> result;
+void parser::drop_block() {
+  std::set<std::string, std::less<>> used_bindings;
 
   assert(!parser_blocks.empty());
-  if (parser_blocks.back().id_store != nullptr) {
-    for (const auto& binding : parser_blocks.back().identifiers) {
-      *parser_blocks.back().id_store->Add() = binding;
-    }
-  }
   for (auto& [entry_id, entry_dis] : parser_blocks.back().to_resolve) {
     auto pos = parser_blocks.back().identifiers.find(entry_id->nfkc_name());
     if (pos == parser_blocks.back().identifiers.end()) {
@@ -1831,13 +1823,22 @@ std::set<std::string> parser::drop_block() {
         parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry_id, new_pos);
       }
     } else {
+      used_bindings.insert(*pos);
+    }
+  }
+  for (auto& [entry_id, entry_dis] : parser_blocks.back().to_resolve) {
+    auto pos = used_bindings.find(entry_id->nfkc_name());
+    if (pos != used_bindings.end()) {
       entry_id->set_frame(entry_dis);
-      entry_id->set_pos_in_frame(std::distance(parser_blocks.back().identifiers.begin(), pos));
-      result.insert(*pos);
+      entry_id->set_pos_in_frame(std::distance(used_bindings.begin(), pos));
+    }
+  }
+  if (parser_blocks.back().id_store != nullptr) {
+    for (const auto& binding : used_bindings) {
+      *parser_blocks.back().id_store->Add() = binding;
     }
   }
   parser_blocks.pop_back();
-  return result;
 }
 
 void parser::resolve(Identifier* identifier, int base_frame) {
