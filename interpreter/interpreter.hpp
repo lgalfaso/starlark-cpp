@@ -8,6 +8,8 @@
 #include <string_view>
 #include <vector>
 
+#include <google/protobuf/repeated_field.h>
+
 #include "runtime/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
@@ -16,10 +18,11 @@ namespace starlark {
 namespace interpreter {
 
 struct frame {
-  explicit frame(std::size_t);
+  frame(std::size_t, const google::protobuf::RepeatedPtrField<std::string>* names);
 
   frame* parent_frame;
   std::vector<starlark::runtime::starlark_obj*> elements;
+  const google::protobuf::RepeatedPtrField<std::string>* names;
 };
 
 class interpreter {

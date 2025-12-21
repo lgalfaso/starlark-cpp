@@ -27,6 +27,7 @@
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
+using ::google::protobuf::RepeatedPtrField;
 using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
 using ::starlark::bytecode::BlockType;
@@ -54,10 +55,10 @@ namespace interpreter {
 
 namespace {
 
-frame* create_frame(Arena& arena, std::size_t size, frame* parent_frame) {
+frame* create_frame(Arena& arena, std::size_t size, frame* parent_frame, const RepeatedPtrField<std::string>* names) {
   // TODO(lmirelmann): Maybe the frame should allocate the vector using the arena.
   // TODO(lmirelmann): If we were to use our own arena, then we could allocate the elements in the same structure.
-  frame* result = Arena::Create<frame>(&arena, size);
+  frame* result = Arena::Create<frame>(&arena, size, names);
   result->parent_frame = parent_frame;
   return result;
 }
@@ -181,9 +182,9 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         assert(frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->elements.size() > op_code.load().pos_in_frame());
         auto* value = frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->elements[op_code.load().pos_in_frame()];
         if (value == nullptr) {
-std::cerr << "UnboundLocalError: cannot access local variable where it is not associated with a value\n";
-          // TODO(lmirelmann): Add the error. The equivalent error from python is
-          //                   `UnboundLocalError: cannot access local variable '{}' where it is not associated with a value`
+          const auto& name = frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->names->Get(op_code.load().pos_in_frame());
+          // TODO(lmirelmann): This error should go to the logger.
+std::cerr << "UnboundLocalError: cannot access local variable '" << name << "' where it is not associated with a value\n";
           return nullptr;
         }
         stack.push_back(value);
@@ -219,7 +220,7 @@ std::cerr << "UnboundLocalError: cannot access local variable where it is not as
         switch (op_code.create_frame().block_type()) {
           case BlockType::PREDECLARED_BLOCK: {
             assert(frame_stack.empty());
-            auto* global_frame = create_frame(arena, op_code.create_frame().symbol().size(), nullptr);
+            auto* global_frame = create_frame(arena, op_code.create_frame().symbol().size(), nullptr, &op_code.create_frame().symbol());
             int count = 0;
             for (const auto& symbol : op_code.create_frame().symbol()) {
               auto pos = global_context.find(symbol);
@@ -236,11 +237,11 @@ std::cerr << "Error: Required symbol " << symbol << " not avaible in the global 
           }
           case BlockType::MODULE_BLOCK:
             assert(result == nullptr);
-            result = create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back());
+            result = create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol());
             frame_stack.push_back(result);
             break;
           default:
-            frame_stack.push_back(create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back()));
+            frame_stack.push_back(create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol()));
             break;
         }
         break;
@@ -437,13 +438,12 @@ std::cerr << "Unknown op-code: " << op_code.op_code_case() << "\n";
         return nullptr;
     }
   }
-
   return result;
 }
 
 }  // namespace
 
-frame::frame(std::size_t size) : elements(size) {}
+frame::frame(std::size_t size, const RepeatedPtrField<std::string>* names) : elements(size), names(names) {}
 
 // TODO(lmirelmann): There has to be a way to define the loader.
 interpreter::interpreter() {}
