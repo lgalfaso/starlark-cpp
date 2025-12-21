@@ -7,6 +7,7 @@ cc_library(
     name = "compiler",
     srcs = ["compiler.cpp"],
     hdrs = ["compiler.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         "//grammar:ast_listener",
         "//grammar:options",

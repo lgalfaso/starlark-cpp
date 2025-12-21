@@ -63,6 +63,7 @@ cc_library(
     name = "starlark_bool",
     srcs = ["starlark_bool.cpp"],
     hdrs = ["starlark_bool.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":starlark_object",
     ],
@@ -97,6 +98,7 @@ cc_library(
     name = "starlark_none",
     srcs = ["starlark_none.cpp"],
     hdrs = ["starlark_none.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":starlark_object",
     ],
@@ -139,6 +141,7 @@ cc_library(
 cc_library(
     name = "starlark_numeric_impl",
     srcs = ["starlark_numeric_impl.cpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":starlark_bigint",
         ":starlark_float",
@@ -203,6 +206,7 @@ cc_library(
     name = "starlark_bytes",
     srcs = ["starlark_bytes.cpp"],
     hdrs = ["starlark_bytes.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hex_encoder",
         ":siphash",
@@ -241,6 +245,7 @@ cc_library(
     name = "starlark_dictionary",
     srcs = ["starlark_dictionary.cpp"],
     hdrs = ["starlark_dictionary.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
         ":starlark_object",
@@ -269,6 +274,7 @@ cc_library(
     name = "starlark_integer",
     srcs = ["starlark_integer.cpp"],
     hdrs = ["starlark_integer.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hash",
         ":starlark_bigint",
@@ -320,6 +326,7 @@ cc_library(
     name = "starlark_float",
     srcs = ["starlark_float.cpp"],
     hdrs = ["starlark_float.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hash",
         ":starlark_numeric",
@@ -356,6 +363,7 @@ cc_library(
     name = "starlark_list",
     srcs = ["starlark_list.cpp"],
     hdrs = ["starlark_list.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":starlark_object",
         ":starlark_integer",
@@ -427,6 +435,7 @@ cc_library(
     name = "starlark_string",
     srcs = ["starlark_string.cpp"],
     hdrs = ["starlark_string.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":hex_encoder",
         ":siphash",
@@ -486,6 +495,7 @@ cc_library(
     name = "starlark_tuple",
     srcs = ["starlark_tuple.cpp"],
     hdrs = ["starlark_tuple.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":starlark_list",
         ":starlark_object",

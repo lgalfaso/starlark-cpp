@@ -1,0 +1,485 @@
+// Copyright 2025 Lucas Mirelmann
+
+#include <gmock/gmock.h>
+#include <gtest/gtest-matchers.h>
+#include <gtest/gtest.h>
+
+#include <string>
+
+#include "bigint/number.hpp"
+#include "interpreter/interpreter.hpp"
+#include "runtime/starlark_bigint.hpp"
+#include "runtime/starlark_bool.hpp"
+#include "runtime/starlark_bytes.hpp"
+#include "runtime/starlark_dictionary.hpp"
+#include "runtime/starlark_float.hpp"
+#include "runtime/starlark_integer.hpp"
+#include "runtime/starlark_list.hpp"
+#include "runtime/starlark_none.hpp"
+#include "runtime/starlark_string.hpp"
+#include "runtime/starlark_testing.hpp"
+#include "runtime/starlark_tuple.hpp"
+
+using ::google::protobuf::Arena;
+using ::starlark::bigint::number;
+using ::starlark::bigint::parse_number;
+using ::starlark::interpreter::frame;
+using ::starlark::interpreter::interpreter;
+using ::starlark::runtime::starlark_bigint;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_dictionary;
+using ::starlark::runtime::starlark_float;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_string;
+using ::starlark::runtime::starlark_tuple;
+using ::starlark::testing::error_handler;
+using ::testing::Contains;
+using ::testing::Not;
+using ::testing::SizeIs;
+
+namespace {
+
+TEST(Interpreter, InvalidProgram) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = [
+)starlark", arena);
+  ASSERT_EQ(nullptr, result);
+}
+
+TEST(Interpreter, Primitives) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = [0]
+b = 1
+c = 0x1234567890abcdefabcdef
+d = None
+e = {'a': 2}
+f = 1.25
+g = "abc"
+h = b"def"
+i = (1, 2, 3, 4)
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(9));
+
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  starlark_string string_a("a");
+  error_handler error_callback;
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  starlark_list element_a;
+  element_a.add(&zero, error_callback);
+  EXPECT_TRUE(element_a.equals(*result->elements[0]));
+  EXPECT_TRUE(starlark_integer(1).equals(*result->elements[1]));
+  number n = parse_number("0x1234567890abcdefabcdef", nullptr);
+  EXPECT_TRUE(starlark_bigint(n).equals(*result->elements[2]));
+  EXPECT_TRUE(starlark_none().equals(*result->elements[3]));
+  starlark_dictionary element_e;
+  element_e.insert(&string_a, &two, error_callback);
+  EXPECT_TRUE(element_e.equals(*result->elements[4]));
+  EXPECT_TRUE(starlark_float(1.25).equals(*result->elements[5]));
+  EXPECT_TRUE(starlark_string("abc").equals(*result->elements[6]));
+  EXPECT_TRUE(starlark_bytes("def").equals(*result->elements[7]));
+  starlark_tuple element_i;
+  element_i.add(&one);
+  element_i.add(&two);
+  element_i.add(&three);
+  element_i.add(&four);
+  EXPECT_TRUE(element_i.equals(*result->elements[8]));
+}
+
+TEST(Interpreter, UseBeforeAssignment) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = b
+b = []
+)starlark", arena);
+  ASSERT_EQ(nullptr, result);
+  // TODO(lmirelmann): Check the error.
+}
+
+TEST(Interpreter, NoDuplicateKeysInDictionaryLiterals) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = {'a': 1, 'a': 2}
+)starlark", arena);
+  ASSERT_EQ(nullptr, result);
+  // TODO(lmirelmann): Check the error.
+}
+
+TEST(Interpreter, ShortCircuit) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = 0 and None
+b = 0 and 1
+c = 1 and None
+d = 1 and 2
+e = 0 or None
+f = 0 or 1
+g = 1 or None
+h = 1 or 2
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(8));
+
+  starlark_none none;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+
+  EXPECT_TRUE(zero.equals(*result->elements[0]));
+  EXPECT_TRUE(zero.equals(*result->elements[1]));
+  EXPECT_TRUE(none.equals(*result->elements[2]));
+  EXPECT_TRUE(two.equals(*result->elements[3]));
+  EXPECT_TRUE(none.equals(*result->elements[4]));
+  EXPECT_TRUE(one.equals(*result->elements[5]));
+  EXPECT_TRUE(one.equals(*result->elements[6]));
+  EXPECT_TRUE(one.equals(*result->elements[7]));
+}
+
+TEST(Interpreter, SimpleCompoundAssignment) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+() = []
+(a, b) = [0, 1]
+[c, d] = (2, 3)
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(4));
+
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(zero.equals(*result->elements[0]));
+  EXPECT_TRUE(one.equals(*result->elements[1]));
+  EXPECT_TRUE(two.equals(*result->elements[2]));
+  EXPECT_TRUE(three.equals(*result->elements[3]));
+}
+
+TEST(Interpreter, UnaryOperator) {
+  // TODO(lmirelmann): Add tests for the other unary operators.
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = not True
+b = not False
+c = -1
+d = -1.25
+e = +1
+f = +1.125
+g = -123456789012345678901234567890
+h = +123456789012345678901234567890
+i = ~-1
+j = ~123456789012345678901234567890
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(10));
+
+  starlark_bool bool_true(true);
+  starlark_bool bool_false(false);
+  starlark_integer minus_one(-1);
+  starlark_float minus_one_25(-1.25);
+  starlark_integer one(1);
+  starlark_float one_125(1.125);
+  number n = parse_number("123456789012345678901234567890", nullptr);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(bool_false.equals(*result->elements[0]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[1]));
+  EXPECT_TRUE(minus_one.equals(*result->elements[2]));
+  EXPECT_TRUE(minus_one_25.equals(*result->elements[3]));
+  EXPECT_TRUE(one.equals(*result->elements[4]));
+  EXPECT_TRUE(one_125.equals(*result->elements[5]));
+  EXPECT_TRUE(starlark_bigint(-n).equals(*result->elements[6]));
+  EXPECT_TRUE(starlark_bigint(n).equals(*result->elements[7]));
+  EXPECT_TRUE(starlark_integer(0).equals(*result->elements[8]));
+  EXPECT_TRUE(starlark_bigint(-(n + number::one)).equals(*result->elements[9]));
+}
+
+TEST(Interpreter, BinaryEqualsOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = [] == []
+b = [] == False
+c = a != []
+d = b != False
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(4));
+
+  starlark_bool bool_true(true);
+  starlark_bool bool_false(false);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(bool_true.equals(*result->elements[0]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[1]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[2]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[3]));
+}
+
+TEST(Interpreter, BinaryLessThanOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a1 = False < True
+a2 = True < False
+b1 = 0 < 1
+b2 = 1 < 0
+c1 = 0.1 < 0.2
+c2 = 0.2 < 0.1
+c3 = 1e50 < 100000000000000007629769841091887003294964970946561
+d1 = "" < "a"
+d2 = "a" < ""
+e1 = b"" < b"a"
+e2 = b"a" < b""
+f1 = () < (1,)
+f2 = (1,) < ()
+g1 = [] < [1]
+g2 = [1] < []
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(15));
+
+  starlark_bool bool_true(true);
+  starlark_bool bool_false(false);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+
+  EXPECT_TRUE(bool_true.equals(*result->elements[0]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[1]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[2]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[3]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[4]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[5]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[6]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[7]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[8]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[9]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[10]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[11]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[12]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[13]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[14]));
+}
+
+TEST(Interpreter, BinaryLessThanOperatorUncomparable) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a1 = False < 1
+)starlark", arena);
+  ASSERT_EQ(nullptr, result);
+}
+
+TEST(Interpreter, BinaryLessThanOrEqualsOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = 0 <= 0
+b = 0 <= 1
+c = 1 <= 0
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(3));
+
+  starlark_bool bool_true(true);
+  starlark_bool bool_false(false);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+
+  EXPECT_TRUE(bool_true.equals(*result->elements[0]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[1]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[2]));
+}
+
+TEST(Interpreter, BinaryGreaterThanOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = 0 > 0
+b = 0 > 1
+c = 1 > 0
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(3));
+
+  starlark_bool bool_true(true);
+  starlark_bool bool_false(false);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+
+  EXPECT_TRUE(bool_false.equals(*result->elements[0]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[1]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[2]));
+}
+
+TEST(Interpreter, BinaryGreaterThanOrEqualsOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = 0 >= 0
+b = 0 >= 1
+c = 1 >= 0
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(3));
+
+  starlark_bool bool_true(true);
+  starlark_bool bool_false(false);
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+
+  EXPECT_TRUE(bool_true.equals(*result->elements[0]));
+  EXPECT_TRUE(bool_false.equals(*result->elements[1]));
+  EXPECT_TRUE(bool_true.equals(*result->elements[2]));
+}
+
+TEST(Interpreter, BinaryMembershipOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a01 = 1 in [1, 2, 3]
+a02 = 4 not in (1, 2, 3)
+
+d = {"one": 1, "two": 2}
+a03 = "one" in d
+a04 = "three" in d
+a05 = 1 in d
+
+a06 = "nasty" in "dynasty"
+a07 = "a" in "banana"
+a08 = "f" not in "way"
+
+a09 = b"nasty" in b"dynasty"
+a10 = 97 in b"abc"
+a11 = 100 in b"abc"
+# a12 = 1 in set([1, 2, 3])
+# a13 = 1 in range(10)
+)starlark", arena);
+  // TODO(lmirelmann): Add the test for `range` and set.
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(12));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(result->elements[0]->truthy());
+  EXPECT_TRUE(result->elements[1]->truthy());
+  EXPECT_TRUE(result->elements[2]->truthy());
+  EXPECT_FALSE(result->elements[3]->truthy());
+  EXPECT_FALSE(result->elements[4]->truthy());
+  EXPECT_TRUE(result->elements[5]->truthy());
+  EXPECT_TRUE(result->elements[6]->truthy());
+  EXPECT_TRUE(result->elements[7]->truthy());
+  EXPECT_TRUE(result->elements[8]->truthy());
+  EXPECT_TRUE(result->elements[9]->truthy());
+  EXPECT_FALSE(result->elements[10]->truthy());
+}
+
+TEST(Interpreter, BinaryShiftOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a01 = 1 << 10
+a02 = 0xff0000 >> 4
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(starlark_integer(1 << 10).equals(*result->elements[0]));
+  EXPECT_TRUE(starlark_integer(0xff0000 >> 4).equals(*result->elements[1]));
+}
+
+TEST(Interpreter, BinaryPipeOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a01 = 10 | 423
+a02 = {1: 'one'} | {2: 'two'}
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(starlark_integer(10 | 423).equals(*result->elements[0]));
+  EXPECT_EQ(result->elements[1]->str(), "{1: 'one', 2: 'two'}");
+}
+
+TEST(Interpreter, BinaryAndOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a01 = 10 & 423
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(1));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(starlark_integer(10 & 423).equals(*result->elements[0]));
+}
+
+TEST(Interpreter, BinaryHatOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a01 = 10 ^ 423
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(1));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_TRUE(starlark_integer(10 ^ 423).equals(*result->elements[0]));
+}
+
+TEST(Interpreter, BinaryPlusOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a01 = (1,2) + (3,4)
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(1));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "(1, 2, 3, 4)");
+}
+
+TEST(Interpreter, BinaryStarOperator) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a01 = (1,2) * 2
+)starlark", arena);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(1));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "(1, 2, 1, 2)");
+}
+
+// TODO(lmirelmann): Add tests for the other binary operators.
+
+TEST(Interpreter, NotPossibleToHaveUnhashableKeys) {
+  interpreter runner;
+  Arena arena;
+  frame* result = runner.run(R"starlark(
+a = {[]: 1}
+)starlark", arena);
+  ASSERT_EQ(nullptr, result);
+  // TODO(lmirelmann): Check the error message.
+}
+
+}  // namespace
+
