@@ -43,7 +43,7 @@ starlark_obj* starlark_built_in_function::call(
     const std::map<std::string, starlark_obj*>& named_args,
     Arena& arena,
     error_fn& error_callback) {
-  return native_fn(pos_args, named_args);
+  return native_fn(pos_args, named_args, arena, error_callback);
 }
 
 std::string_view starlark_function::type() const {

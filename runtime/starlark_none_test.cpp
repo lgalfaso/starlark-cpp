@@ -23,26 +23,28 @@
 #include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
-using starlark::runtime::starlark_bigint;
-using starlark::runtime::starlark_bool;
-using starlark::runtime::starlark_built_in_function;
-using starlark::runtime::starlark_bytes;
-using starlark::runtime::starlark_dictionary;
-using starlark::runtime::starlark_float;
-using starlark::runtime::starlark_function;
-using starlark::runtime::starlark_integer;
-using starlark::runtime::starlark_list;
-using starlark::runtime::starlark_none;
-using starlark::runtime::starlark_obj;
-using starlark::runtime::starlark_range;
-using starlark::runtime::starlark_set;
-using starlark::runtime::starlark_string;
-using starlark::runtime::starlark_struct;
-using starlark::runtime::starlark_tuple;
+using ::google::protobuf::Arena;
+using ::starlark::runtime::error_fn;
+using ::starlark::runtime::starlark_bigint;
+using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_built_in_function;
+using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_dictionary;
+using ::starlark::runtime::starlark_float;
+using ::starlark::runtime::starlark_function;
+using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_obj;
+using ::starlark::runtime::starlark_range;
+using ::starlark::runtime::starlark_set;
+using ::starlark::runtime::starlark_string;
+using ::starlark::runtime::starlark_struct;
+using ::starlark::runtime::starlark_tuple;
 
 namespace {
 
-starlark_obj* base_fn(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*> &) {
+starlark_obj* base_fn(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*> &, Arena& arena, error_fn& error_callback) {
   return nullptr;
 }
 
@@ -59,6 +61,8 @@ TEST(StarlarkNone, Truthy) {
 }
 
 TEST(StarlarkNone, Equals) {
+  Arena arena;
+
   EXPECT_TRUE(starlark_none().equals(starlark_none()));
   EXPECT_FALSE(starlark_none().equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_bool(false)));

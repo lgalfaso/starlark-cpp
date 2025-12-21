@@ -28,7 +28,7 @@ class starlark_function : public starlark_obj {
 
 class starlark_built_in_function : public starlark_obj {
  public:
-  typedef starlark_obj* (fn)(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*>&);
+  typedef starlark_obj* (fn)(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*>&, google::protobuf::Arena& arena, error_fn& error_callback);
 
   starlark_built_in_function(fn* native_fn, const std::string& fn_name);
   std::string_view type() const override;

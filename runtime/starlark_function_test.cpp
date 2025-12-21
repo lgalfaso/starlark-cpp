@@ -12,6 +12,7 @@
 #include "runtime/starlark_testing.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_function;
 using ::starlark::runtime::starlark_obj;
@@ -21,14 +22,14 @@ namespace {
 
 class Fn {
  public:
-  MOCK_METHOD(starlark_obj*, Call, (const std::vector<starlark_obj*>&, (const std::map<std::string, starlark_obj*>&)));
+  MOCK_METHOD(starlark_obj*, Call, (const std::vector<starlark_obj*>&, (const std::map<std::string, starlark_obj*>&), Arena&, error_fn&));
 };
 
 static Fn* fn_mock = nullptr;
 
-starlark_obj* base_fn(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args) {
+starlark_obj* base_fn(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, Arena& arena, error_fn& error_callback) {
   if (fn_mock != nullptr) {
-    return fn_mock->Call(pos_args, named_args);
+    return fn_mock->Call(pos_args, named_args, arena, error_callback);
   }
   return nullptr;
 }
@@ -64,7 +65,7 @@ TEST_F(FnTest, Call) {
   Arena arena;
   error_handler error_callback;
 
-  EXPECT_CALL(*fn_mock, Call(testing::_, testing::_))
+  EXPECT_CALL(*fn_mock, Call(testing::_, testing::_, testing::_, testing::_))
       .WillOnce(testing::Return(nullptr));
   fn.call({}, {}, arena, error_callback);
   // TODO(lmirelmann): Check the return value.

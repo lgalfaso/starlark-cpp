@@ -24,8 +24,8 @@
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
-using ::testing::Lt;
-using ::testing::Gt;
+using ::google::protobuf::Arena;
+using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -43,10 +43,12 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
+using ::testing::Gt;
+using ::testing::Lt;
 
 namespace {
 
-starlark_obj* base_fn(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*> &) {
+starlark_obj* base_fn(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*>&, Arena&, error_fn&) {
   return nullptr;
 }
 
