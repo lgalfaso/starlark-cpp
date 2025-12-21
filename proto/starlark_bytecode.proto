@@ -8,10 +8,7 @@ message Program {
 
 message Block {
   repeated OpCode op_code = 1;
-  oneof symbols {
-    FunctionSignature function_signature = 2;
-    SymbolsTable exportable_symbols = 3;
-  }
+  FunctionSignature function_signature = 2;
 }
 
 message OpCode {
@@ -226,7 +223,17 @@ message MakeFunction {
 message SetDefaultValues {}
 
 message CreateFrame {
-  uint32 slots = 1;
+  BlockType block_type = 1;
+  repeated string symbol = 2;
+}
+
+enum BlockType {
+  BLOCK_TYPE_UNDEFINED = 0;
+  PREDECLARED_BLOCK = 1;
+  MODULE_BLOCK = 2;
+  FILE_BLOCK = 3;
+  FUNCTION_BLOCK = 4;
+  COMPREHENSION_BLOCK = 5;
 }
 
 message PopFrame {}
@@ -245,6 +252,3 @@ message FunctionSignature {
   }
 }
 
-message SymbolsTable {
-  repeated string symbol = 1;
-}

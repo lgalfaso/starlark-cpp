@@ -1,6 +1,6 @@
 block {
-  op_code { create_frame { slots: 0 } }
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: MODULE_BLOCK } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
 
   op_code { load { frame: 2 pos_in_frame: 21 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: false } }

@@ -102,7 +102,7 @@ frame* run_program(Program* starlark_program, frame* global_frame, Arena& arena,
   frame* result = nullptr;
   if (starlark_program->block(0).op_code(0).op_code_case() == OpCode::kCreateFrame) {
     instruction_ptr++;
-    result = create_frame(arena, starlark_program->block(0).op_code(0).create_frame().slots(), global_frame);
+    result = create_frame(arena, starlark_program->block(0).op_code(0).create_frame().symbol().size(), global_frame);
     frame_stack.push_back(result);
   }
 
@@ -223,7 +223,7 @@ std::cerr << "UnboundLocalError: cannot access local variable where it is not as
         }
         break;
       case OpCode::kCreateFrame:
-        frame_stack.push_back(create_frame(arena, op_code.create_frame().slots(), frame_stack.back()));
+        frame_stack.push_back(create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back()));
         break;
       case OpCode::kPopFrame:
         frame_stack.pop_back();

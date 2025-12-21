@@ -1,6 +1,6 @@
 block {
-  op_code { create_frame { slots: 0 } }
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: MODULE_BLOCK } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { const_int { value: 0 } }                # 2
   op_code { jump_if_true_or_pop { address: 5 } }    # 3
   op_code { const_int { value: 1 } }                # 4

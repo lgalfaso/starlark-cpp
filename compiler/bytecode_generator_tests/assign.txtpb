@@ -1,20 +1,6 @@
 block {
-  exportable_symbols {
-    symbol: "a"
-    symbol: "b"
-    symbol: "c"
-    symbol: "d"
-    symbol: "e"
-    symbol: "f"
-    symbol: "g"
-    symbol: "h"
-    symbol: "i"
-    symbol: "j"
-    symbol: "k"
-    symbol: "l"
-  }
-  op_code { create_frame { slots: 12 } }
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "b" symbol: "c" symbol: "d" symbol: "e" symbol: "f" symbol: "g" symbol: "h" symbol: "i" symbol: "j" symbol: "k" symbol: "l" } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { const_int { value: 1 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 2 } }

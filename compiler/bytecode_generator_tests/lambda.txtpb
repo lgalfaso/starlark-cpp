@@ -1,38 +1,38 @@
 block {
-  op_code { create_frame { slots: 0 } }                      #  0
-  op_code { create_frame { slots: 0 } }                      #  1
-  op_code { make_function { entrypoint: 1 } }                #  1
-  op_code { pop { } }                                        #  2
-  op_code { make_function { entrypoint: 2 } }                #  3
-  op_code { pop { } }                                        #  4
-  op_code { const_int { value: 1 } }                         #  5
-  op_code { make_tuple { number_of_elements: 1 } }           #  6
-  op_code { make_function { entrypoint: 3 } }                #  7
-  op_code { set_default_values { } }                         #  8
-  op_code { pop { } }                                        #  9
-  op_code { pop_frame { } }                                  # 10
-  op_code { pop_frame { } }                                  # 11
-  op_code { end { } }                                        # 12
+  op_code { create_frame { block_type: MODULE_BLOCK } }                              #  0
+  op_code { create_frame { block_type: FILE_BLOCK } }                                #  1
+  op_code { make_function { entrypoint: 1 } }                                        #  2
+  op_code { pop { } }                                                                #  3
+  op_code { make_function { entrypoint: 2 } }                                        #  4
+  op_code { pop { } }                                                                #  5
+  op_code { const_int { value: 1 } }                                                 #  6
+  op_code { make_tuple { number_of_elements: 1 } }                                   #  7
+  op_code { make_function { entrypoint: 3 } }                                        #  8
+  op_code { set_default_values { } }                                                 #  9
+  op_code { pop { } }                                                                # 10
+  op_code { pop_frame { } }                                                          # 11
+  op_code { pop_frame { } }                                                          # 12
+  op_code { end { } }                                                                # 13
 }
 block {
-  op_code { create_frame { slots: 0 } }                      #  0
-  op_code { const_string { value: "1" } }                    #  1
-  op_code { return { } }                                     #  2
+  op_code { create_frame { block_type: FUNCTION_BLOCK } }                            #  0
+  op_code { const_string { value: "1" } }                                            #  1
+  op_code { return { } }                                                             #  2
   function_signature { default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
 }
 block {
-  op_code { create_frame { slots: 1 } }                      #  0
-  op_code { load { frame: 0 pos_in_frame: 0 } }              #  1
-  op_code { const_int { value: 1 } }                         #  2
-  op_code { binary_plus { } }                                #  3
-  op_code { return { } }                                     #  4
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }    #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } }                                      #  1
+  op_code { const_int { value: 1 } }                                                 #  2
+  op_code { binary_plus { } }                                                        #  3
+  op_code { return { } }                                                             #  4
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } } default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
 }
 block {
-  op_code { create_frame { slots: 2 } }                      #  0
-  op_code { load { frame: 0 pos_in_frame: 0 } }              #  1
-  op_code { load { frame: 0 pos_in_frame: 1 } }              #  2
-  op_code { binary_plus { } }                                #  3
-  op_code { return { } }                                     #  4
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }    #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } }                                      #  1
+  op_code { load { frame: 0 pos_in_frame: 1 } }                                      #  2
+  op_code { binary_plus { } }                                                        #  3
+  op_code { return { } }                                                             #  4
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } } param { name: "b" pos { frame: 0 pos_in_frame: 1 } } default_arguments_count: 1 has_star_argument: false has_star_star_argument: false }
 }

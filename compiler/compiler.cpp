@@ -13,45 +13,46 @@
 #include "grammar/parser.hpp"
 #include "logging/logging.hpp"
 
-using google::protobuf::Arena;
-using google::protobuf::RepeatedPtrField;
-using starlark::ast::Argument;
-using starlark::ast::AssignStmt;
-using starlark::ast::BinaryExpr;
-using starlark::ast::BreakStmt;
-using starlark::ast::CallExpr;
-using starlark::ast::CompClause;
-using starlark::ast::ContinueStmt;
-using starlark::ast::DefStmt;
-using starlark::ast::DictComp;
-using starlark::ast::DictExpr;
-using starlark::ast::DotExpr;
-using starlark::ast::Expression;
-using starlark::ast::File;
-using starlark::ast::ForClause;
-using starlark::ast::ForStmt;
-using starlark::ast::Identifier;
-using starlark::ast::IfExpr;
-using starlark::ast::IfStmt;
-using starlark::ast::LambdaExpr;
-using starlark::ast::ListComp;
-using starlark::ast::ListExpr;
-using starlark::ast::LoadStmt;
-using starlark::ast::Parameter;
-using starlark::ast::ReturnStmt;
-using starlark::ast::SliceExpr;
-using starlark::ast::Statement;
-using starlark::ast::Tuple;
-using starlark::ast::UnaryExpr;
-using starlark::bytecode::Block;
-using starlark::bytecode::Program;
-using starlark::grammar::ast_listener;
-using starlark::grammar::ast_listener_base;
-using starlark::grammar::options;
-using starlark::grammar::parser;
-using starlark::logging::LogLevel;
-using starlark::logging::logger;
-using starlark::logging::logger_wrap;
+using ::google::protobuf::Arena;
+using ::google::protobuf::RepeatedPtrField;
+using ::starlark::ast::Argument;
+using ::starlark::ast::AssignStmt;
+using ::starlark::ast::BinaryExpr;
+using ::starlark::ast::BreakStmt;
+using ::starlark::ast::CallExpr;
+using ::starlark::ast::CompClause;
+using ::starlark::ast::ContinueStmt;
+using ::starlark::ast::DefStmt;
+using ::starlark::ast::DictComp;
+using ::starlark::ast::DictExpr;
+using ::starlark::ast::DotExpr;
+using ::starlark::ast::Expression;
+using ::starlark::ast::File;
+using ::starlark::ast::ForClause;
+using ::starlark::ast::ForStmt;
+using ::starlark::ast::Identifier;
+using ::starlark::ast::IfExpr;
+using ::starlark::ast::IfStmt;
+using ::starlark::ast::LambdaExpr;
+using ::starlark::ast::ListComp;
+using ::starlark::ast::ListExpr;
+using ::starlark::ast::LoadStmt;
+using ::starlark::ast::Parameter;
+using ::starlark::ast::ReturnStmt;
+using ::starlark::ast::SliceExpr;
+using ::starlark::ast::Statement;
+using ::starlark::ast::Tuple;
+using ::starlark::ast::UnaryExpr;
+using ::starlark::bytecode::Block;
+using ::starlark::bytecode::BlockType;
+using ::starlark::bytecode::Program;
+using ::starlark::grammar::ast_listener;
+using ::starlark::grammar::ast_listener_base;
+using ::starlark::grammar::options;
+using ::starlark::grammar::parser;
+using ::starlark::logging::LogLevel;
+using ::starlark::logging::logger;
+using ::starlark::logging::logger_wrap;
 
 namespace starlark {
 namespace compiler {
@@ -148,11 +149,16 @@ bytecode_generator::bytecode_generator(Program& output) : output(output) {}
 void bytecode_generator::enter_file(const File* starlark_file) {
   blocks.push_back(0);
   output.add_block();
-  for (auto& symbol : starlark_file->module_binding()) {
-    mutable_block()->mutable_exportable_symbols()->add_symbol(symbol);
+  auto* module_block = mutable_block()->add_op_code()->mutable_create_frame();
+  module_block->set_block_type(BlockType::MODULE_BLOCK);
+  for (const auto& symbol : starlark_file->module_binding()) {
+    module_block->add_symbol(symbol);
   }
-  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(starlark_file->module_binding_size());
-  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(starlark_file->file_binding_size());
+  auto* file_block = mutable_block()->add_op_code()->mutable_create_frame();
+  file_block->set_block_type(BlockType::FILE_BLOCK);
+  for (const auto& symbol : starlark_file->file_binding()) {
+    file_block->add_symbol(symbol);
+  }
 }
 
 void bytecode_generator::exit_file(const File* starlark_file) {
@@ -391,7 +397,11 @@ void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_e
 void bytecode_generator::enter_list_comprehension(const ListComp* list_comprehension) {
   comprehension_comp_clause.push_back({});
   mutable_block()->add_op_code()->mutable_make_list()->set_reserve_size(0);
-  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(list_comprehension->comprehension_binding_size());
+  auto* comprehension_block = mutable_block()->add_op_code()->mutable_create_frame();
+  comprehension_block->set_block_type(BlockType::COMPREHENSION_BLOCK);
+  for (const auto&  symbol : list_comprehension->comprehension_binding()) {
+    comprehension_block->add_symbol(symbol);
+  }
 }
 
 void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehension) {
@@ -412,7 +422,11 @@ void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehens
 void bytecode_generator::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {
   comprehension_comp_clause.push_back({});
   mutable_block()->add_op_code()->mutable_make_dictionary()->set_reserve_size(0);
-  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(dictionary_comprehension->comprehension_binding_size());
+  auto* comprehension_block = mutable_block()->add_op_code()->mutable_create_frame();
+  comprehension_block->set_block_type(BlockType::COMPREHENSION_BLOCK);
+  for (const auto& symbol : dictionary_comprehension->comprehension_binding()) {
+    comprehension_block->add_symbol(symbol);
+  }
 }
 
 void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {
@@ -624,7 +638,11 @@ void bytecode_generator::exit_return_statement(const ReturnStmt* return_statemen
 
 void bytecode_generator::mid_lambda_expression(const LambdaExpr* lambda_expression) {
   mid_def_or_lambda_expression(&lambda_expression->parameter());
-  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(lambda_expression->function_binding_size());
+  auto* function_block = mutable_block()->add_op_code()->mutable_create_frame();
+  function_block->set_block_type(BlockType::FUNCTION_BLOCK);
+  for (const auto& symbol : lambda_expression->function_binding()) {
+    function_block->add_symbol(symbol);
+  }
 }
 
 void bytecode_generator::exit_lambda_expression(const LambdaExpr* lambda_expression) {
@@ -634,7 +652,11 @@ void bytecode_generator::exit_lambda_expression(const LambdaExpr* lambda_express
 
 void bytecode_generator::mid_def_statement(const DefStmt* def_statement) {
   mid_def_or_lambda_expression(&def_statement->parameter());
-  mutable_block()->add_op_code()->mutable_create_frame()->set_slots(def_statement->function_binding_size());
+  auto* function_block = mutable_block()->add_op_code()->mutable_create_frame();
+  function_block->set_block_type(BlockType::FUNCTION_BLOCK);
+  for (const auto& symbol : def_statement->function_binding()) {
+    function_block->add_symbol(symbol);
+  }
 }
 
 void bytecode_generator::exit_def_statement(const DefStmt* def_statement) {

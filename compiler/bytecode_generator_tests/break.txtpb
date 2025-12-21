@@ -1,10 +1,6 @@
 block {
-  exportable_symbols {
-    symbol: "i"
-    symbol: "j"
-  }
-  op_code { create_frame { slots: 2 } }
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "i" symbol: "j" } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { make_list { reserve_size: 3 } }
   op_code { const_int { value: 1 } }
   op_code { const_int { value: 2 } }

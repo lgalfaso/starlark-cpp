@@ -1,6 +1,6 @@
 block {
-  op_code { create_frame { slots: 0 } }
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: MODULE_BLOCK } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { make_tuple { number_of_elements: 0 } }
   op_code { pop { } }
   op_code { const_int { value: 0 } }

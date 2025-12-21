@@ -1,6 +1,6 @@
 block {
-  op_code { create_frame { slots: 0 } }
-  op_code { create_frame { slots: 6 } }
+  op_code { create_frame { block_type: MODULE_BLOCK } }
+  op_code { create_frame { block_type: FILE_BLOCK symbol: "a" symbol: "b" symbol: "c" symbol: "d" symbol: "f" symbol: "g" } }
   op_code { load_module { module: "module1" value { pos { frame: 0 pos_in_frame: 0 } remote_symbol: "a" } } }
   op_code { load_module { module: "module2" value { pos { frame: 0 pos_in_frame: 1 } remote_symbol: "b" } value { pos { frame: 0 pos_in_frame: 2 } remote_symbol: "c" } } }
   op_code { load_module { module: "module3" value { pos { frame: 0 pos_in_frame: 3 } remote_symbol: "e" } } }

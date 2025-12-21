@@ -1,14 +1,6 @@
 block {
-  exportable_symbols {
-    symbol: "foo1"
-    symbol: "foo2"
-    symbol: "foo3"
-    symbol: "foo4"
-    symbol: "foo5"
-    symbol: "foo6"
-  }
-  op_code { create_frame { slots: 6 } }
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo1" symbol: "foo2" symbol: "foo3" symbol: "foo4" symbol: "foo5" symbol: "foo6" } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { make_function { entrypoint: 1 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { make_function { entrypoint: 2 } }
@@ -29,19 +21,19 @@ block {
   op_code { end { } }
 }
 block {
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK } }
   op_code { const_int { value: 1 } }
   op_code { return { } }
   function_signature { default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
 }
 block {
-  op_code { create_frame { slots: 0 } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK } }
   op_code { const_none { } }
   op_code { return { } }
   function_signature { default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
 }
 block {
-  op_code { create_frame { slots: 1 } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { const_int { value: 1 } }
   op_code { binary_plus { } }
@@ -49,7 +41,7 @@ block {
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } } default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
 }
 block {
-  op_code { create_frame { slots: 2 } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 1 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: false } }
@@ -57,7 +49,7 @@ block {
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } } default_arguments_count: 1 has_star_argument: false has_star_star_argument: false }
 }
 block {
-  op_code { create_frame { slots: 2 } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: true has_varadic_named_argument: false } }
@@ -65,7 +57,7 @@ block {
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } } default_arguments_count: 0 has_star_argument: true has_star_star_argument: false }
 }
 block {
-  op_code { create_frame { slots: 2 } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: true } }
