@@ -6,6 +6,12 @@ message File {
   repeated Statement statement = 1;
   repeated string module_binding = 2;
   repeated string file_binding = 3;
+  repeated GlobalBinding global_binding = 4;
+}
+
+message GlobalBinding {
+  string name = 1;
+  bool used = 2;
 }
 
 message Statement {

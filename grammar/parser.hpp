@@ -51,7 +51,7 @@ class parser {
   void create_block(const std::set<std::string, std::less<>>& symbols,
                     const std::set<starlark::ast::Identifier*>& identifiers,
                     google::protobuf::RepeatedPtrField<std::string>* binding);
-  void drop_block();
+  std::set<std::string> drop_block();
   void resolve(starlark::ast::Identifier* identifier, int base_frame);
   void resolve(starlark::ast::Expression* test, int base_frame);
   bool is_top_level_block() const;

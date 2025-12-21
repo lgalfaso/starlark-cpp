@@ -268,9 +268,15 @@ File* parser::parse_file(Arena& arena) {
   assert(nested_loops.size() == 1 && nested_loops[0] == 0);
   assert(is_top_level_block());
 
-  // Force the resolution of the predefined, module and file blocks.
-  while (!parser_blocks.empty()) {
+  // Force the resolution of the module and file blocks.
+  while (parser_blocks.size() > 1) {
     drop_block();
+  }
+  auto used_global_symbols = drop_block();
+  for (auto& base_binding : base_bindings) {
+    auto* binding = result->add_global_binding();
+    binding->set_name(base_binding);
+    binding->set_used(used_global_symbols.contains(base_binding));
   }
   identifier_positions.clear();
   return result;
@@ -1804,29 +1810,34 @@ void parser::create_block(const std::set<std::string, std::less<>>& symbols,
   }
 }
 
-void parser::drop_block() {
+std::set<std::string> parser::drop_block() {
+  std::set<std::string> result;
+
+  assert(!parser_blocks.empty());
   if (parser_blocks.back().id_store != nullptr) {
     for (const auto& binding : parser_blocks.back().identifiers) {
       *parser_blocks.back().id_store->Add() = binding;
     }
   }
-  for (auto& entry : parser_blocks.back().to_resolve) {
-    auto pos = parser_blocks.back().identifiers.find(entry.first->nfkc_name());
+  for (auto& [entry_id, entry_dis] : parser_blocks.back().to_resolve) {
+    auto pos = parser_blocks.back().identifiers.find(entry_id->nfkc_name());
     if (pos == parser_blocks.back().identifiers.end()) {
       if (parser_blocks.size() == 1) {
-        add_error(std::format("name '{}' is not defined", entry.first->name()), identifier_positions[entry.first]);
-        entry.first->set_frame(-1);
-        entry.first->set_pos_in_frame(-1);
+        add_error(std::format("name '{}' is not defined", entry_id->name()), identifier_positions[entry_id]);
+        entry_id->set_frame(-1);
+        entry_id->set_pos_in_frame(-1);
       } else {
-        auto new_pos = entry.second + (parser_blocks.back().id_store == nullptr ? 0 : 1);
-        parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry.first, new_pos);
+        auto new_pos = entry_dis + (parser_blocks.back().id_store == nullptr ? 0 : 1);
+        parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry_id, new_pos);
       }
     } else {
-      entry.first->set_frame(entry.second);
-      entry.first->set_pos_in_frame(std::distance(parser_blocks.back().identifiers.begin(), pos));
+      entry_id->set_frame(entry_dis);
+      entry_id->set_pos_in_frame(std::distance(parser_blocks.back().identifiers.begin(), pos));
+      result.insert(*pos);
     }
   }
   parser_blocks.pop_back();
+  return result;
 }
 
 void parser::resolve(Identifier* identifier, int base_frame) {
