@@ -11,4 +11,3 @@ cc_library(
         "//proto:starlark_logging_cc_proto",
     ],
 )
-

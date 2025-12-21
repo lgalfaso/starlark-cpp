@@ -40,9 +40,9 @@ cc_library(
 
 cc_library(
     name = "starlark_testing",
+    testonly = True,
     hdrs = ["starlark_testing.hpp"],
     visibility = ["//visibility:public"],
-    testonly = True,
     deps = [
         ":error_fn",
     ],
@@ -55,7 +55,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
-        "@protobuf//:protobuf",
+        "@protobuf",
     ],
 )
 
@@ -365,8 +365,8 @@ cc_library(
     hdrs = ["starlark_list.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        ":starlark_object",
         ":starlark_integer",
+        ":starlark_object",
     ],
 )
 

@@ -14,12 +14,12 @@ cc_library(
 
 cc_library(
     name = "number_stream_for_test",
+    testonly = True,
     srcs = ["number_stream_for_test.cpp"],
     hdrs = ["number_stream_for_test.hpp"],
     deps = [
         ":number",
     ],
-    testonly = True,
 )
 
 cc_test(
