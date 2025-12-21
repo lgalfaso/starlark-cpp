@@ -1,0 +1,34 @@
+module_binding: "a"
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      call_expression {
+        primary_expression {
+          identifier {
+            name: "len"
+            nfkc_name: "len"
+            frame: 2
+            pos_in_frame: 17
+          }
+        }
+        argument {
+          value {
+            list_expression {
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+

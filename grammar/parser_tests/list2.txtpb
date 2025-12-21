@@ -1,0 +1,61 @@
+module_binding: "a"
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      list_expression {
+        element {
+          list_comprehension {
+            test {
+              identifier {
+                name: "len"
+                nfkc_name: "len"
+                frame: 3
+                pos_in_frame: 17
+              }
+            }
+            clause {
+              for_clause {
+                loop_variables {
+                  identifier {
+                    name: "a"
+                    nfkc_name: "a"
+                    frame: 0
+                    pos_in_frame: 0
+                  }
+                }
+                in {
+                  call_expression {
+                    primary_expression {
+                      identifier {
+                        name: "range"
+                        nfkc_name: "range"
+                        frame: 3
+                        pos_in_frame: 22
+                      }
+                    }
+                    argument {
+                      value {
+                        int_value: 10
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            comprehension_binding: "a"
+          }
+        }
+      }
+    }
+  }
+}
+
