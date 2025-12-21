@@ -39,7 +39,7 @@ struct options {
   bool require_load_statements_first = true;
 
   // Whether to allow variadic arguments `*args` and `**kwargs` is calls.
-  bool allow_varadic_arguments = true;
+  bool allow_variadic_arguments = true;
 
   // Whether to allow a top-level rebindings.
   bool allow_top_level_rebinding = false;

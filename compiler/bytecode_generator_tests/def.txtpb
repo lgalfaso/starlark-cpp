@@ -46,7 +46,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 1 } }
-  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: false } }
+  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { return { } }
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } } default_arguments_count: 1 has_star_argument: false has_star_star_argument: false }
 }
@@ -54,7 +54,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 1 } }
-  op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: true has_varadic_named_argument: false } }
+  op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } }
   op_code { return { } }
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } } default_arguments_count: 0 has_star_argument: true has_star_star_argument: false }
 }
@@ -62,7 +62,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 1 } }
-  op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_varadic_positional_argument: false has_varadic_named_argument: true } }
+  op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { return { } }
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } } default_arguments_count: 0 has_star_argument: false has_star_star_argument: true }
 }

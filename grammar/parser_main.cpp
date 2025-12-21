@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
                        options{
                            .escaped_octal_and_hex_char_are_ascii = false,
                            .require_load_statements_first = !is_build_or_workspace,
-                           .allow_varadic_arguments = !is_build_or_workspace,
+                           .allow_variadic_arguments = !is_build_or_workspace,
                            .allow_top_level_rebinding = is_build_or_workspace,
                        },
                        extra_symbols,

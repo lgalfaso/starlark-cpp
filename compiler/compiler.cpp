@@ -555,8 +555,8 @@ void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
 void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
   int pos_arguments = 0;
   int named_arguments = 0;
-  bool varadic_pos_arg = false;
-  bool varadic_named_arg = false;
+  bool variadic_pos_arg = false;
+  bool variadic_named_arg = false;
 
   for (const auto& arg : call_expression->argument()) {
     switch (arg.argument_type_case()) {
@@ -567,10 +567,10 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
         named_arguments++;
         break;
       case Argument::kStarArgument:
-        varadic_pos_arg = true;
+        variadic_pos_arg = true;
         break;
       case Argument::kStarStarArgument:
-        varadic_named_arg = true;
+        variadic_named_arg = true;
         break;
       case Argument::ARGUMENT_TYPE_NOT_SET:
         break;
@@ -579,8 +579,8 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
   auto* call = mutable_block()->add_op_code()->mutable_call();
   call->set_positional_arguments_count(pos_arguments);
   call->set_named_arguments_count(named_arguments);
-  call->set_has_varadic_positional_argument(varadic_pos_arg);
-  call->set_has_varadic_named_argument(varadic_named_arg);
+  call->set_has_variadic_positional_argument(variadic_pos_arg);
+  call->set_has_variadic_named_argument(variadic_named_arg);
 }
 
 void bytecode_generator::enter_argument(const Argument* argument) {

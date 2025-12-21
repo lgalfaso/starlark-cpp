@@ -46,10 +46,10 @@ foo = lambda: True
 TEST(Parser, VaradicArguments) {
   checkInvalid(R"starlark(
 foo(*[1,2,3])
-)starlark", options{ .allow_varadic_arguments = false, });
+)starlark", options{ .allow_variadic_arguments = false, });
   checkInvalid(R"starlark(
 foo(**{'a': 1, 'b': 2, 'c': 3})
-)starlark", options{ .allow_varadic_arguments = false, });
+)starlark", options{ .allow_variadic_arguments = false, });
 }
 
 }  // namespace

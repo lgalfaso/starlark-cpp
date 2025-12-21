@@ -201,8 +201,8 @@ message SliceRange{}
 message Call {
   int32 positional_arguments_count = 1;
   int32 named_arguments_count = 2;
-  bool has_varadic_positional_argument = 3;
-  bool has_varadic_named_argument = 4;
+  bool has_variadic_positional_argument = 3;
+  bool has_variadic_named_argument = 4;
 }
 
 message LoadModule {

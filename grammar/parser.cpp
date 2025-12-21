@@ -1498,7 +1498,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         // - At most one *args
         // - At most one **kwargs
         if (capture(token_type::kStar)) {
-          if (!opts.allow_varadic_arguments) {
+          if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
           }
@@ -1515,7 +1515,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .test = top.argument->mutable_star_argument(),
           });
         } else if (capture(token_type::kStarStar)) {
-          if (!opts.allow_varadic_arguments) {
+          if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
           }
@@ -1531,7 +1531,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (top.previous_argument != nullptr &&
               (top.previous_argument->has_star_argument() ||
                top.previous_argument->has_star_star_argument())) {
-            add_error("Non-varadic arguments must be before varadic arguments");
+            add_error("Non-variadic arguments must be before variadic arguments");
           }
           if (lex.current_token().type() == token_type::kIdentifier) {
             frames.emplace_back(frame{
