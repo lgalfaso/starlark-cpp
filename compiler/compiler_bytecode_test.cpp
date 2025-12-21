@@ -59,7 +59,8 @@ TEST(CompilerBytecode, TestCase) {
     ASSERT_TRUE(expected_starlark_program.ParseFromFileDescriptor(proto_fd));
   }
 
-  std::set<std::string, std::less<>> binding{"None", "True", "False", "len"};
+  // We are only using the predeclared symbols.
+  std::set<std::string, std::less<>> binding{};
   compiler star_compiler(binding);
   options opt {
     .allow_top_level_for = true,
