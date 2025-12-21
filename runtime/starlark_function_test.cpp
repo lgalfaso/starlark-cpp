@@ -11,10 +11,11 @@
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_testing.hpp"
 
-using starlark::runtime::starlark_built_in_function;
-using starlark::runtime::starlark_function;
-using starlark::runtime::starlark_obj;
-using starlark::testing::error_handler;
+using ::google::protobuf::Arena;
+using ::starlark::runtime::starlark_built_in_function;
+using ::starlark::runtime::starlark_function;
+using ::starlark::runtime::starlark_obj;
+using ::starlark::testing::error_handler;
 
 namespace {
 
@@ -60,11 +61,12 @@ TEST(StarlarkFunction, Str) {
 
 TEST_F(FnTest, Call) {
   starlark_built_in_function fn(base_fn, "fn_name");
+  Arena arena;
   error_handler error_callback;
 
   EXPECT_CALL(*fn_mock, Call(testing::_, testing::_))
       .WillOnce(testing::Return(nullptr));
-  fn.call({}, {}, error_callback);
+  fn.call({}, {}, arena, error_callback);
   // TODO(lmirelmann): Check the return value.
 }
 

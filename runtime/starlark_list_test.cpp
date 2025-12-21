@@ -317,8 +317,9 @@ TEST(StarlarkList, Membership) {
 TEST(StarlarkList, Call) {
   error_handler error_callback;
   starlark_list list;
+  Arena arena;
 
-  list.call({}, {}, error_callback);
+  list.call({}, {}, arena, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object is not callable");

@@ -106,7 +106,7 @@ class starlark_obj {
   int cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;
   void freeze();
-  virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback);
+  virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
   virtual void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback);
 
   virtual starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn& error_callback) const;

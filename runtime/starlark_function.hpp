@@ -18,7 +18,7 @@ class starlark_function : public starlark_obj {
  public:
   std::string_view type() const override;
   bool truthy() const override;
-  starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback) override;
+  starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
@@ -33,7 +33,7 @@ class starlark_built_in_function : public starlark_obj {
   starlark_built_in_function(fn* native_fn, const std::string& fn_name);
   std::string_view type() const override;
   bool truthy() const override;
-  starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback) override;
+  starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) override;
 
  protected:
   fn* native_fn;

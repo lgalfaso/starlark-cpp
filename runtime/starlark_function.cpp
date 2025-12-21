@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+using ::google::protobuf::Arena;
+
 namespace starlark {
 namespace runtime {
 
@@ -39,6 +41,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_built_in_function::in
 starlark_obj* starlark_built_in_function::call(
     const std::vector<starlark_obj*>& pos_args,
     const std::map<std::string, starlark_obj*>& named_args,
+    Arena& arena,
     error_fn& error_callback) {
   return native_fn(pos_args, named_args);
 }
@@ -72,6 +75,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_function::inner_hash(
 starlark_obj* starlark_function::call(
     const std::vector<starlark_obj*>& pos_args,
     const std::map<std::string, starlark_obj*>& named_args,
+    Arena& arena,
     error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   return nullptr;
