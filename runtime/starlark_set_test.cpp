@@ -292,4 +292,23 @@ TEST(StarlarkSet, BinaryMinusWithNonSet) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'set' and 'tuple'");
 }
 
+TEST(StarlarkSet, Len) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_set set_1;
+  starlark_set set_2;
+  error_handler error_callback;
+
+  set_2.add(&zero, error_callback);
+  set_2.add(&one, error_callback);
+  set_2.add(&two, error_callback);
+  set_2.add(&three, error_callback);
+
+  EXPECT_EQ(0, set_1.len(error_callback));
+  EXPECT_EQ(4, set_2.len(error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 }  // namespace

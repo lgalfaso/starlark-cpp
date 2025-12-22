@@ -23,6 +23,7 @@ using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_string;
 using ::starlark::testing::error_handler;
+using ::testing::IsEmpty;
 using ::testing::SizeIs;
 
 namespace {
@@ -245,6 +246,29 @@ TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'dict' and 'list'");
+}
+
+TEST(StarlarkDictionary, Len) {
+  starlark_dictionary dict_1;
+  starlark_dictionary dict_2;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_string s_zero("zero");
+  starlark_string s_one("one");
+  starlark_string s_two("two");
+  starlark_string s_three("three");
+  error_handler error_callback;
+
+  dict_2.insert(&zero, &s_zero, error_callback);
+  dict_2.insert(&one, &s_one, error_callback);
+  dict_2.insert(&two, &s_two, error_callback);
+  dict_2.insert(&three, &s_three, error_callback);
+
+  EXPECT_EQ(0, dict_1.len(error_callback));
+  EXPECT_EQ(4, dict_2.len(error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 }  // namespace

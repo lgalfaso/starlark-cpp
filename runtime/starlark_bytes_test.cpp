@@ -329,4 +329,12 @@ TEST(StarlarkBytes, BinaryStarTooBig) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
 }
 
+TEST(StarlarkBytes, Len) {
+  error_handler error_callback;
+
+  EXPECT_EQ(0, starlark_bytes("").len(error_callback));
+  EXPECT_EQ(3, starlark_bytes("abc").len(error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 }  // namespace
