@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "runtime/starlark_numeric.hpp"
+
 using ::google::protobuf::Arena;
 
 namespace starlark {
@@ -79,6 +81,22 @@ starlark_obj* starlark_function::call(
     error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   return nullptr;
+}
+
+starlark_obj* starlark_len(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!named_args.empty()) {
+    error_callback.add_error("TypeError: len() takes no keyword arguments");
+    return nullptr;
+  }
+  if (pos_args.size() != 1) {
+    error_callback.add_error(std::format("TypeError: len() takes exactly one argument ({} given)", pos_args.size()));
+    return nullptr;
+  }
+  auto result = pos_args.front()->len(error_callback);
+  if (result < 0) {
+    return nullptr;
+  }
+  return create_integer(result, arena);
 }
 
 }  // namespace runtime

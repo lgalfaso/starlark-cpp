@@ -44,6 +44,8 @@ class starlark_built_in_function : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 };
 
+starlark_obj* starlark_len(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+
 }  // namespace runtime
 }  // namespace starlark
 

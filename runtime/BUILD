@@ -523,6 +523,7 @@ cc_library(
     hdrs = ["starlark_function.hpp"],
     deps = [
         ":starlark_object",
+        ":starlark_numeric",
     ],
 )
 
@@ -532,6 +533,7 @@ cc_test(
     srcs = ["starlark_function_test.cpp"],
     deps = [
         ":starlark_function",
+        ":starlark_numeric_impl",
         ":starlark_testing",
         "@googletest//:gtest_main",
     ],
