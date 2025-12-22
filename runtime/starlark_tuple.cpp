@@ -91,6 +91,10 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
   }
 }
 
+int64_t starlark_tuple::len(error_fn& error_callback) const {
+  return values.size();
+}
+
 bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
   switch (action) {
     case printer_action::kPrintTop: {

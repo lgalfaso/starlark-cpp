@@ -24,6 +24,10 @@ std::string_view starlark_bytes::type() const {
   return "bytes";
 }
 
+int64_t starlark_bytes::len(error_fn& error_callback) const {
+  return value.size();
+}
+
 bool starlark_bytes::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
   std::string result = "b";

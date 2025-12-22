@@ -21,6 +21,7 @@ class starlark_dictionary : public starlark_obj {
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   bool insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback);
   starlark_obj* binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  int64_t len(error_fn& error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

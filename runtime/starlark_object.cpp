@@ -289,6 +289,11 @@ starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, Arena& are
   return nullptr;
 }
 
+int64_t starlark_obj::len(error_fn& error_callback) const {
+  error_callback.add_error(std::format("TypeError: object of type '{}' has no len()", type()));
+  return -1;
+}
+
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
   error_callback.add_error(std::format("TypeError: '{}' not supported between instances of '{}' and '{}'", op, type(), other->type()));
   comp.add_task(order_comparator::pending_task{

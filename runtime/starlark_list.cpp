@@ -24,6 +24,10 @@ std::string_view starlark_list::type() const {
   return "list";
 }
 
+int64_t starlark_list::len(error_fn& error_callback) const {
+  return values.size();
+}
+
 bool starlark_list::inner_repr(printer& print, printer_action action) const {
   switch (action) {
     case printer_action::kPrintTop: {

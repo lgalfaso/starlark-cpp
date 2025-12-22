@@ -125,6 +125,8 @@ class starlark_obj {
   virtual starlark_obj* binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
   virtual starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
 
+  virtual int64_t len(error_fn& error_callback) const;
+
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;
   bool freezed = false;

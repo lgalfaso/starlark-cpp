@@ -31,6 +31,10 @@ std::string starlark_string::str() const {
   return value;
 }
 
+int64_t starlark_string::len(error_fn& error_callback) const {
+  return value.size();
+}
+
 bool starlark_string::inner_repr(printer& print, printer_action action) const {
   // TODO(lmirelmann): The spec mandates that we always use double quotes.
   assert(action == printer_action::kPrintTop);

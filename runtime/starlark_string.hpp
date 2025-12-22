@@ -23,6 +23,7 @@ class starlark_string : public starlark_obj {
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  int64_t len(error_fn& error_callback) const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

@@ -14,6 +14,10 @@ std::string_view starlark_dictionary::type() const {
   return "dict";
 }
 
+int64_t starlark_dictionary::len(error_fn& error_callback) const {
+  return values.size();
+}
+
 bool starlark_dictionary::inner_repr(printer& print, printer_action action) const {
   switch (action) {
     case printer_action::kPrintTop: {
