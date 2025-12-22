@@ -61,8 +61,6 @@ TEST(StarlarkNone, Truthy) {
 }
 
 TEST(StarlarkNone, Equals) {
-  Arena arena;
-
   EXPECT_TRUE(starlark_none().equals(starlark_none()));
   EXPECT_FALSE(starlark_none().equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_bool(false)));
