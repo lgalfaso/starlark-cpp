@@ -13,6 +13,7 @@ cc_library(
         "//runtime:starlark_bytes",
         "//runtime:starlark_dictionary",
         "//runtime:starlark_float",
+        "//runtime:starlark_function",
         "//runtime:starlark_integer",
         "//runtime:starlark_list",
         "//runtime:starlark_none",

@@ -25,6 +25,7 @@ using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
 using ::starlark::interpreter::frame;
 using ::starlark::interpreter::interpreter;
+using ::starlark::logging::logger;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_bytes;
@@ -42,18 +43,31 @@ using ::testing::SizeIs;
 
 namespace {
 
+std::string print_logs(logger& logging) {
+  std::string result;
+  for (const auto& entry : logging) {
+    result += entry.ShortDebugString();
+    result += "\n";
+  }
+  return result;
+}
+
 TEST(Interpreter, InvalidProgram) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = [
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
 }
 
 TEST(Interpreter, Primitives) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = [0]
 b = 1
@@ -64,7 +78,7 @@ f = 1.25
 g = "abc"
 h = b"def"
 i = (1, 2, 3, 4)
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(9));
 
@@ -101,10 +115,12 @@ i = (1, 2, 3, 4)
 TEST(Interpreter, UseBeforeAssignment) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = b
 b = []
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
   // TODO(lmirelmann): Check the error.
 }
@@ -112,9 +128,11 @@ b = []
 TEST(Interpreter, NoDuplicateKeysInDictionaryLiterals) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = {'a': 1, 'a': 2}
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
   // TODO(lmirelmann): Check the error.
 }
@@ -122,6 +140,8 @@ a = {'a': 1, 'a': 2}
 TEST(Interpreter, ShortCircuit) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = 0 and None
 b = 0 and 1
@@ -131,7 +151,7 @@ e = 0 or None
 f = 0 or 1
 g = 1 or None
 h = 1 or 2
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(8));
 
@@ -154,11 +174,13 @@ h = 1 or 2
 TEST(Interpreter, SimpleCompoundAssignment) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 () = []
 (a, b) = [0, 1]
 [c, d] = (2, 3)
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(4));
 
@@ -178,6 +200,8 @@ TEST(Interpreter, UnaryOperator) {
   // TODO(lmirelmann): Add tests for the other unary operators.
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = not True
 b = not False
@@ -189,7 +213,7 @@ g = -123456789012345678901234567890
 h = +123456789012345678901234567890
 i = ~-1
 j = ~123456789012345678901234567890
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(10));
 
@@ -216,12 +240,14 @@ j = ~123456789012345678901234567890
 TEST(Interpreter, BinaryEqualsOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = [] == []
 b = [] == False
 c = a != []
 d = b != False
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(4));
 
@@ -237,6 +263,8 @@ d = b != False
 TEST(Interpreter, BinaryLessThanOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a1 = False < True
 a2 = True < False
@@ -253,7 +281,7 @@ f1 = () < (1,)
 f2 = (1,) < ()
 g1 = [] < [1]
 g2 = [1] < []
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(15));
 
@@ -281,20 +309,24 @@ g2 = [1] < []
 TEST(Interpreter, BinaryLessThanOperatorUncomparable) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a1 = False < 1
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
 }
 
 TEST(Interpreter, BinaryLessThanOrEqualsOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = 0 <= 0
 b = 0 <= 1
 c = 1 <= 0
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(3));
 
@@ -310,11 +342,13 @@ c = 1 <= 0
 TEST(Interpreter, BinaryGreaterThanOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = 0 > 0
 b = 0 > 1
 c = 1 > 0
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(3));
 
@@ -330,11 +364,13 @@ c = 1 > 0
 TEST(Interpreter, BinaryGreaterThanOrEqualsOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = 0 >= 0
 b = 0 >= 1
 c = 1 >= 0
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(3));
 
@@ -350,6 +386,8 @@ c = 1 >= 0
 TEST(Interpreter, BinaryMembershipOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a01 = 1 in [1, 2, 3]
 a02 = 4 not in (1, 2, 3)
@@ -368,7 +406,7 @@ a10 = 97 in b"abc"
 a11 = 100 in b"abc"
 # a12 = 1 in set([1, 2, 3])
 # a13 = 1 in range(10)
-)starlark", arena);
+)starlark", arena, logging);
   // TODO(lmirelmann): Add the test for `range` and set.
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(12));
@@ -390,10 +428,12 @@ a11 = 100 in b"abc"
 TEST(Interpreter, BinaryShiftOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a01 = 1 << 10
 a02 = 0xff0000 >> 4
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(2));
 
@@ -405,10 +445,12 @@ a02 = 0xff0000 >> 4
 TEST(Interpreter, BinaryPipeOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a01 = 10 | 423
 a02 = {1: 'one'} | {2: 'two'}
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(2));
 
@@ -420,9 +462,11 @@ a02 = {1: 'one'} | {2: 'two'}
 TEST(Interpreter, BinaryAndOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a01 = 10 & 423
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(1));
 
@@ -433,9 +477,11 @@ a01 = 10 & 423
 TEST(Interpreter, BinaryHatOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a01 = 10 ^ 423
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(1));
 
@@ -446,9 +492,11 @@ a01 = 10 ^ 423
 TEST(Interpreter, BinaryPlusOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a01 = (1,2) + (3,4)
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(1));
 
@@ -459,9 +507,11 @@ a01 = (1,2) + (3,4)
 TEST(Interpreter, BinaryStarOperator) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a01 = (1,2) * 2
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(1));
 
@@ -474,11 +524,28 @@ a01 = (1,2) * 2
 TEST(Interpreter, NotPossibleToHaveUnhashableKeys) {
   interpreter runner;
   Arena arena;
+  logger logging;
+
   frame* result = runner.run(R"starlark(
 a = {[]: 1}
-)starlark", arena);
+)starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
   // TODO(lmirelmann): Check the error message.
+}
+
+TEST(Interpreter, Call) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = len([])
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(1));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "0");
 }
 
 }  // namespace

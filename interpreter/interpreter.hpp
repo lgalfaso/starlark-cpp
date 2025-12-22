@@ -10,6 +10,7 @@
 
 #include <google/protobuf/repeated_field.h>
 
+#include "logging/logging.hpp"
 #include "runtime/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
@@ -28,7 +29,8 @@ struct frame {
 class interpreter {
  public:
   interpreter();
-  frame* run(std::string_view starlark_program, google::protobuf::Arena& arena);
+  frame* run(std::string_view starlark_program, google::protobuf::Arena& arena,
+      starlark::logging::logger& logging);
 };
 
 }  // namespace interpreter

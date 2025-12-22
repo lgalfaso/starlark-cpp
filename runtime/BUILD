@@ -521,6 +521,7 @@ cc_library(
     name = "starlark_function",
     srcs = ["starlark_function.cpp"],
     hdrs = ["starlark_function.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":starlark_object",
         ":starlark_numeric",
