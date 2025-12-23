@@ -523,8 +523,9 @@ cc_library(
     hdrs = ["starlark_function.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        ":starlark_object",
+        ":starlark_bool",
         ":starlark_numeric",
+        ":starlark_object",
     ],
 )
 
@@ -534,6 +535,8 @@ cc_test(
     srcs = ["starlark_function_test.cpp"],
     deps = [
         ":starlark_function",
+        ":starlark_integer",
+        ":starlark_list",
         ":starlark_numeric_impl",
         ":starlark_testing",
         "@googletest//:gtest_main",

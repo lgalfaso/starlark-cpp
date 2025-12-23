@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_numeric.hpp"
 
 using ::google::protobuf::Arena;
@@ -83,20 +84,168 @@ starlark_obj* starlark_function::call(
   return nullptr;
 }
 
-starlark_obj* starlark_len(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+namespace {
+
+bool one_pos_arg(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback, std::string_view fn_name) {
   if (!named_args.empty()) {
-    error_callback.add_error("TypeError: len() takes no keyword arguments");
-    return nullptr;
+    error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", fn_name));
+    return false;
   }
   if (pos_args.size() != 1) {
-    error_callback.add_error(std::format("TypeError: len() takes exactly one argument ({} given)", pos_args.size()));
+    error_callback.add_error(std::format("TypeError: {}() takes exactly one argument ({} given)", fn_name, pos_args.size()));
+    return false;
+  }
+  return true;
+}
+
+}  // namespace
+
+starlark_obj* starlark_fn_abs(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "abs")) {
+    return nullptr;
+  }
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_all(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_bool(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "bool")) {
+    return nullptr;
+  }
+  // TODO(lmirelmann): Use the instance of bool from the context.
+  return Arena::Create<starlark_bool>(&arena, pos_args.front()->truthy());
+}
+
+starlark_obj* starlark_fn_bytes(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_dict(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_dir(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_enumerate(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_fail(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_float(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_getattr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_hasattr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_hash(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_int(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_len(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "len")) {
     return nullptr;
   }
   auto result = pos_args.front()->len(error_callback);
   if (result < 0) {
     return nullptr;
   }
+  // TODO(lmirelmann): Try to use the instance of the int from the context.
   return create_integer(result, arena);
+}
+
+starlark_obj* starlark_fn_list(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_max(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_min(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_print(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_range(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_repr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_reversed(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_set(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_sorted(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_str(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_tuple(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_type(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_zip(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
 }
 
 }  // namespace runtime
