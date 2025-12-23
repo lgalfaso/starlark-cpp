@@ -16,6 +16,7 @@ const std::string starlark_types::tuple_t = "tuple";
 const std::string starlark_types::dict_t = "dict";
 const std::string starlark_types::set_t = "set";
 const std::string starlark_types::function_t = "function";
+const std::string starlark_types::builtin_function_or_method_t = "builtin_function_or_method";
 const std::string starlark_types::range_t = "range";
 
 }  // namespace runtime

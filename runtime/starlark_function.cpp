@@ -20,7 +20,7 @@ starlark_built_in_function::starlark_built_in_function(fn* native_fn, const std:
   native_fn(native_fn), fn_name(fn_name) {}
 
 std::string_view starlark_built_in_function::type() const {
-  return "builtin_function_or_method";
+  return starlark_types::builtin_function_or_method_t;
 }
 
 bool starlark_built_in_function::inner_repr(printer& print, printer_action action) const {

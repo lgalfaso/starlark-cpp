@@ -20,6 +20,7 @@ struct starlark_types {
   const static std::string dict_t;
   const static std::string set_t;
   const static std::string function_t;
+  const static std::string builtin_function_or_method_t;
   const static std::string range_t;
 };
 
