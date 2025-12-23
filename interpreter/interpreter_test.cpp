@@ -538,6 +538,9 @@ TEST(Interpreter, Call) {
   Arena arena;
   logger logging;
 
+  // TODO(lmirelmann): Add tests for named arguments.
+  // TODO(lmirelmann): Add tests for variadic positional arguments.
+  // TODO(Lmirelmann): Add tests for variadic keyword arguments.
   frame* result = runner.run(R"starlark(
 a01 = len([])
 )starlark", arena, logging);
@@ -547,6 +550,50 @@ a01 = len([])
   ASSERT_THAT(result->elements, Not(Contains(nullptr)));
   EXPECT_EQ(result->elements[0]->str(), "0");
 }
+
+TEST(Interpreter, BuiltInFunctions) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  // TODO(lmirelmann): Test all the built-in functions.
+  frame* result = runner.run(R"starlark(
+# abs
+# all
+a02 = bool(1)
+# bytes
+# dict
+# dir
+# enumerate
+# fail
+# float
+# getattr
+# hasattr
+# hash
+# int
+a13 = len([])
+# list
+# max
+# min
+# print
+# range
+# repr
+# reversed
+# set
+# sorted
+# str
+# tuple
+# type
+# zip
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "True");
+  EXPECT_EQ(result->elements[1]->str(), "0");
+}
+
 
 }  // namespace
 
