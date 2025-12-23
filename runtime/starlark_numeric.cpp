@@ -8,6 +8,8 @@
 #include <limits>
 #include <string>
 
+#include "runtime/starlark_types.hpp"
+
 using ::starlark::bigint::number;
 
 namespace starlark {
@@ -242,7 +244,7 @@ int64_t starlark_mod(int64_t a, int64_t b) {
 }
 
 bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (other->type() != "float" && other->type() != "int") {
+  if (other->type() != starlark_types::float_t && other->type() != starlark_types::int_t) {
     return false;
   }
   const starlark_numeric& n_other = *static_cast<const starlark_numeric*>(other);
@@ -281,7 +283,7 @@ bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj*
 }
 
 void starlark_numeric::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
-  if (other->type() != "float" && other->type() != "int") {
+  if (other->type() != starlark_types::float_t && other->type() != starlark_types::int_t) {
     starlark_obj::inner_cmp(comp, other, op, error_callback);
     return;
   }

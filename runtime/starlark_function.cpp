@@ -9,6 +9,7 @@
 
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 
@@ -50,7 +51,7 @@ starlark_obj* starlark_built_in_function::call(
 }
 
 std::string_view starlark_function::type() const {
-  return "function";
+  return starlark_types::function_t;
 }
 
 bool starlark_function::inner_repr(printer& print, printer_action action) const {
@@ -105,14 +106,14 @@ starlark_obj* starlark_fn_abs(const std::vector<starlark_obj*>& pos_args, const 
     return nullptr;
   }
   auto* value = pos_args.front();
-  if (value->type() == "float") {
+  if (value->type() == starlark_types::float_t) {
     auto* n_value = static_cast<starlark_numeric*>(value);
     auto fvalue = n_value->as_float();
     if (std::signbit(fvalue)) {
       return create_float(std::abs(n_value->as_float()), arena);
     }
     return value;
-  } else if (value->type() == "int") {
+  } else if (value->type() == starlark_types::int_t) {
     auto* n_value = static_cast<starlark_numeric*>(value);
     if (n_value->numeric_type() == starlark_numeric_type::kInt64) {
       int64_t ivalue = n_value->as_int64();

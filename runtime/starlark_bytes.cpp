@@ -10,6 +10,7 @@
 #include "runtime/hex_encoder.hpp"
 #include "runtime/siphash.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -21,7 +22,7 @@ namespace runtime {
 starlark_bytes::starlark_bytes(std::string_view value) : value(value) {}
 
 std::string_view starlark_bytes::type() const {
-  return "bytes";
+  return starlark_types::bytes_t;
 }
 
 int64_t starlark_bytes::len(error_fn& error_callback) const {
@@ -54,11 +55,11 @@ bool starlark_bytes::truthy() const {
 }
 
 bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  if (other.type() != type() && other.type() != "int") {
+  if (other.type() != type() && other.type() != starlark_types::int_t) {
      error_callback.add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
     return false;
   }
-  if (other.type() == "int") {
+  if (other.type() == starlark_types::int_t) {
     const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
     if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
       auto other_value = n_other.as_int64();
@@ -97,7 +98,7 @@ starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& aren
 }
 
 starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "int") {
+  if (other.type() != starlark_types::int_t) {
     error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }

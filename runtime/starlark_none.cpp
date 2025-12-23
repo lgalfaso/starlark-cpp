@@ -6,11 +6,13 @@
 
 #include <string>
 
+#include "runtime/starlark_types.hpp"
+
 namespace starlark {
 namespace runtime {
 
 std::string_view starlark_none::type() const {
-  return "NoneType";
+  return starlark_types::none_t;
 }
 
 bool starlark_none::inner_repr(printer& print, printer_action action) const {

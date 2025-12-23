@@ -9,6 +9,7 @@
 #include "grammar/options.hpp"
 #include "runtime/hash.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -22,7 +23,7 @@ starlark_bigint::starlark_bigint(int64_t value) : value(from_int64(value)) {}
 starlark_bigint::starlark_bigint(const starlark::bigint::number& value) : value(value) {}
 
 std::string_view starlark_bigint::type() const {
-  return "int";
+  return starlark_types::int_t;
 }
 
 bool starlark_bigint::inner_repr(printer& print, printer_action action) const {
@@ -183,7 +184,7 @@ starlark_obj* starlark_bigint::binary_hat(const starlark_obj& other, Arena& aren
 }
 
 starlark_obj* starlark_bigint::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "float" && other.type() != type()) {
+  if (other.type() != starlark_types::float_t && other.type() != type()) {
     return starlark_obj::binary_plus(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
@@ -204,7 +205,7 @@ starlark_obj* starlark_bigint::binary_plus(const starlark_obj& other, Arena& are
 }
 
 starlark_obj* starlark_bigint::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "float" && other.type() != type()) {
+  if (other.type() != starlark_types::float_t && other.type() != type()) {
     return starlark_obj::binary_minus(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
@@ -225,10 +226,10 @@ starlark_obj* starlark_bigint::binary_minus(const starlark_obj& other, Arena& ar
 }
 
 starlark_obj* starlark_bigint::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() == "string" || other.type() == "bytes" || other.type() == "list" || other.type() == "tuple") {
+  if (other.type() == starlark_types::string_t || other.type() == starlark_types::bytes_t || other.type() == starlark_types::list_t || other.type() == starlark_types::tuple_t) {
     return other.binary_star(*this, arena, error_callback);
   }
-  if (other.type() != "float" && other.type() != type()) {
+  if (other.type() != starlark_types::float_t && other.type() != type()) {
     return starlark_obj::binary_star(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
@@ -249,7 +250,7 @@ starlark_obj* starlark_bigint::binary_star(const starlark_obj& other, Arena& are
 }
 
 starlark_obj* starlark_bigint::binary_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "float" && other.type() != type()) {
+  if (other.type() != starlark_types::float_t && other.type() != type()) {
     return starlark_obj::binary_slash(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
@@ -291,7 +292,7 @@ starlark_obj* starlark_bigint::binary_slash(const starlark_obj& other, Arena& ar
 }
 
 starlark_obj* starlark_bigint::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "float" && other.type() != type()) {
+  if (other.type() != starlark_types::float_t && other.type() != type()) {
     return starlark_obj::binary_slash_slash(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);
@@ -329,7 +330,7 @@ starlark_obj* starlark_bigint::binary_slash_slash(const starlark_obj& other, Are
 }
 
 starlark_obj* starlark_bigint::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "float" && other.type() != type()) {
+  if (other.type() != starlark_types::float_t && other.type() != type()) {
     return starlark_obj::binary_percent(other, arena, error_callback);
   }
   auto* n_other = static_cast<const starlark_numeric*>(&other);

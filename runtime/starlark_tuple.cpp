@@ -7,9 +7,10 @@
 #include <string>
 #include <vector>
 
+#include "grammar/options.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_integer.hpp"
-#include "grammar/options.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -23,7 +24,7 @@ starlark_tuple::starlark_tuple(int reserve_size) {
 }
 
 std::string_view starlark_tuple::type() const {
-  return "tuple";
+  return starlark_types::tuple_t;
 }
 
 starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
@@ -44,7 +45,7 @@ starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& aren
 }
 
 starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "int") {
+  if (other.type() != starlark_types::int_t) {
     error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }

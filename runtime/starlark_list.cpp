@@ -6,8 +6,9 @@
 #include <string>
 #include <vector>
 
-#include "runtime/starlark_integer.hpp"
 #include "grammar/options.hpp"
+#include "runtime/starlark_integer.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -21,7 +22,7 @@ starlark_list::starlark_list(std::size_t reserve_size) {
 }
 
 std::string_view starlark_list::type() const {
-  return "list";
+  return starlark_types::list_t;
 }
 
 int64_t starlark_list::len(error_fn& error_callback) const {
@@ -110,7 +111,7 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena
 }
 
 starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "int") {
+  if (other.type() != starlark_types::int_t) {
     error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }

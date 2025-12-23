@@ -26,6 +26,7 @@
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::google::protobuf::RepeatedPtrField;
@@ -54,6 +55,7 @@ using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::runtime::starlark_types;
 
 namespace starlark {
 namespace interpreter {
@@ -131,7 +133,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kAddToList: {
         assert(stack.size() > op_code.add_to_list().pos_in_stack());
         starlark_obj* candidate_list = stack[stack.size() - 1 - op_code.add_to_list().pos_in_stack()];
-        assert(candidate_list->type() == "list");
+        assert(candidate_list->type() == starlark_types::list_t);
         starlark_list* list = static_cast<starlark_list*>(candidate_list);
         assert(stack.size() >= op_code.add_to_list().number_of_elements());
         for (int i = 0; i < op_code.add_to_list().number_of_elements(); ++i) {
@@ -147,7 +149,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kAddToDictionary: {
         assert(stack.size() > op_code.add_to_dictionary().pos_in_stack());
         starlark_obj* candidate_dict = stack[stack.size() - 1 - op_code.add_to_dictionary().pos_in_stack()];
-        assert(candidate_dict->type() == "dict");
+        assert(candidate_dict->type() == starlark_types::dict_t);
         starlark_dictionary* dict = static_cast<starlark_dictionary*>(candidate_dict);
         assert(op_code.add_to_list().number_of_elements() < std::numeric_limits<decltype(op_code.add_to_list().number_of_elements())>::max() / 2);
         assert(stack.size() >= op_code.add_to_list().number_of_elements() * 2);

@@ -6,13 +6,15 @@
 
 #include <string>
 
+#include "runtime/starlark_types.hpp"
+
 namespace starlark {
 namespace runtime {
 
 starlark_bool::starlark_bool(bool value) : value(value) {}
 
 std::string_view starlark_bool::type() const {
-  return "bool";
+  return starlark_types::bool_t;
 }
 
 bool starlark_bool::inner_repr(printer& print, printer_action action) const {

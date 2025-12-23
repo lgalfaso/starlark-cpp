@@ -49,6 +49,13 @@ cc_library(
 )
 
 cc_library(
+    name = "starlark_types",
+    srcs = ["starlark_types.cpp"],
+    hdrs = ["starlark_types.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
     name = "starlark_object",
     srcs = ["starlark_object.cpp"],
     hdrs = ["starlark_object.hpp"],
@@ -66,6 +73,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":starlark_object",
+        ":starlark_types",
     ],
 )
 
@@ -101,6 +109,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":starlark_object",
+        ":starlark_types",
     ],
 )
 
@@ -134,6 +143,7 @@ cc_library(
     hdrs = ["starlark_numeric.hpp"],
     deps = [
         ":starlark_object",
+        ":starlark_types",
         "//bigint:number",
     ],
 )
@@ -172,6 +182,7 @@ cc_library(
         ":starlark_float",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_types",
         "//bigint:number",
         "//grammar:options",
     ],
@@ -213,6 +224,7 @@ cc_library(
         ":starlark_numeric",
         ":starlark_object",
         "//grammar:options",
+        ":starlark_types",
     ],
 )
 
@@ -249,6 +261,7 @@ cc_library(
     deps = [
         ":error_fn",
         ":starlark_object",
+        ":starlark_types",
         "//containers:linked_hash_map",
     ],
 )
@@ -280,6 +293,7 @@ cc_library(
         ":starlark_bigint",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_types",
         "//bigint:number",
         "//grammar:options",
     ],
@@ -331,6 +345,7 @@ cc_library(
         ":hash",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_types",
     ],
 )
 
@@ -367,6 +382,7 @@ cc_library(
     deps = [
         ":starlark_integer",
         ":starlark_object",
+        ":starlark_types",
     ],
 )
 
@@ -411,6 +427,7 @@ cc_library(
     hdrs = ["starlark_set.hpp"],
     deps = [
         ":starlark_object",
+        ":starlark_types",
         "//containers:linked_hash_set",
     ],
 )
@@ -441,6 +458,7 @@ cc_library(
         ":siphash",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_types",
         "//bigint:number",
         "//grammar:options",
         "//unicode:utf8_reader",
@@ -499,6 +517,7 @@ cc_library(
     deps = [
         ":starlark_list",
         ":starlark_object",
+        ":starlark_types",
     ],
 )
 
@@ -526,6 +545,7 @@ cc_library(
         ":starlark_bool",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_types",
     ],
 )
 

@@ -5,13 +5,15 @@
 #include <iterator>
 #include <string>
 
+#include "runtime/starlark_types.hpp"
+
 using ::google::protobuf::Arena;
 
 namespace starlark {
 namespace runtime {
 
 std::string_view starlark_set::type() const {
-  return "set";
+  return starlark_types::set_t;
 }
 
 int64_t starlark_set::len(error_fn& error_callback) const {

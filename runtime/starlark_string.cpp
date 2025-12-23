@@ -11,6 +11,7 @@
 #include "runtime/hex_encoder.hpp"
 #include "runtime/siphash.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_types.hpp"
 #include "unicode/utf8_reader.hpp"
 
 using ::google::protobuf::Arena;
@@ -24,7 +25,7 @@ namespace runtime {
 starlark_string::starlark_string(std::string_view value) : value(value) {}
 
 std::string_view starlark_string::type() const {
-  return "string";
+  return starlark_types::string_t;
 }
 
 std::string starlark_string::str() const {
@@ -90,7 +91,7 @@ starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& are
 }
 
 starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != "int") {
+  if (other.type() != starlark_types::int_t) {
     error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
     return nullptr;
   }

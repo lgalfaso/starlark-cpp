@@ -5,13 +5,15 @@
 #include <format>
 #include <string>
 
+#include "runtime/starlark_types.hpp"
+
 using ::google::protobuf::Arena;
 
 namespace starlark {
 namespace runtime {
 
 std::string_view starlark_dictionary::type() const {
-  return "dict";
+  return starlark_types::dict_t;
 }
 
 int64_t starlark_dictionary::len(error_fn& error_callback) const {
