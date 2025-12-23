@@ -16,6 +16,9 @@
 using ::google::protobuf::Arena;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
+using ::starlark::bigint::number;
+using ::starlark::runtime::create_float;
+using ::starlark::runtime::create_integer;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_function;
@@ -78,6 +81,111 @@ TEST_F(FnTest, Call) {
 }
 
 // TODO(lmirelmann): Check the error case.
+
+TEST(StarlarkAbs, Numeric) {
+  auto itest = [](auto&& value, std::string_view result) {
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    Arena arena;
+    error_handler error_callback;
+    pos_args.push_back(create_integer(std::forward<decltype(value)>(value), arena));
+
+    EXPECT_EQ(result, starlark_fn_abs(pos_args, named_args, arena, error_callback)->str());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  auto ftest = [](double value, std::string_view result) {
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    Arena arena;
+    error_handler error_callback;
+    pos_args.push_back(create_float(value, arena));
+
+    EXPECT_EQ(result, starlark_fn_abs(pos_args, named_args, arena, error_callback)->str());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  itest(std::numeric_limits<int64_t>::min(), "9223372036854775808");
+  itest(-1, "1");
+  itest(0, "0");
+  itest(1, "1");
+  itest(std::numeric_limits<int64_t>::max(), "9223372036854775807");
+  itest(number::minus_one << 64, "18446744073709551616");
+  itest(number(number::minus_one), "1");
+  itest(number(number::zero), "0");
+  itest(number(number::one), "1");
+  itest(number::one << 64, "18446744073709551616");
+  ftest(std::copysign(std::numeric_limits<double>::quiet_NaN(), -1), "nan");
+  ftest(std::numeric_limits<double>::quiet_NaN(), "nan");
+  ftest(-std::numeric_limits<double>::infinity(), "inf");
+  ftest(std::numeric_limits<double>::infinity(), "inf");
+  ftest(-std::numeric_limits<double>::max(), "1.7976931348623157e+308");
+  ftest(std::numeric_limits<double>::max(), "1.7976931348623157e+308");
+  ftest(-std::numeric_limits<double>::min(), "2.2250738585072014e-308");
+  ftest(std::numeric_limits<double>::min(), "2.2250738585072014e-308");
+  ftest(-1.0, "1.0");
+  ftest(std::copysign(0.0, -1), "0.0");
+  ftest(0.0, "0.0");
+  ftest(1.0, "1.0");
+}
+
+TEST(StarlarkAbs, List) {
+  starlark_list list;
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: bad operand type for abs(): 'list'", error_callback.messages[0]);
+}
+
+TEST(StarlarkAbs, NoPosArgs) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: abs() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkAbs, MultiplePosArgs) {
+  starlark_integer one(1);
+  starlark_list list;
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: abs() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkAbs, NamedArguments) {
+  starlark_integer one(1);
+  starlark_list list;
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: abs() takes no keyword arguments", error_callback.messages[0]);
+}
 
 TEST(StarlarkBool, List) {
   starlark_integer one(1);

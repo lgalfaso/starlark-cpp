@@ -177,7 +177,6 @@ class number {
   void shift(int pos);
 };
 
-
 inline number operator""_number(const char* input, std::size_t size) {
   return number::parse_hex(std::string_view(input, size));
 }

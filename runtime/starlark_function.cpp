@@ -104,8 +104,37 @@ starlark_obj* starlark_fn_abs(const std::vector<starlark_obj*>& pos_args, const 
   if (!one_pos_arg(pos_args, named_args, error_callback, "abs")) {
     return nullptr;
   }
-  // TODO(lmirelmann): Implement.
-  return nullptr;
+  auto* value = pos_args.front();
+  if (value->type() == "float") {
+    auto* n_value = static_cast<starlark_numeric*>(value);
+    auto fvalue = n_value->as_float();
+    if (std::signbit(fvalue)) {
+      return create_float(std::abs(n_value->as_float()), arena);
+    }
+    return value;
+  } else if (value->type() == "int") {
+    auto* n_value = static_cast<starlark_numeric*>(value);
+    if (n_value->numeric_type() == starlark_numeric_type::kInt64) {
+      int64_t ivalue = n_value->as_int64();
+      if (ivalue < 0) {
+        return value->unary_minus(arena, error_callback);
+      }
+      return value;
+    } else if (n_value->numeric_type() == starlark_numeric_type::kBigInt) {
+      const auto& bvalue = n_value->as_bigint();
+      if (bvalue.sign()) {
+        return value->unary_minus(arena, error_callback);
+      }
+      return value;
+    } else {
+      // Should not happen.
+      error_callback.add_error("TypeError: unknown numeric type");
+      return nullptr;
+    }
+  } else {
+    error_callback.add_error(std::format("TypeError: bad operand type for abs(): '{}'", value->type()));
+    return nullptr;
+  }
 }
 
 starlark_obj* starlark_fn_all(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

@@ -558,7 +558,7 @@ TEST(Interpreter, BuiltInFunctions) {
 
   // TODO(lmirelmann): Test all the built-in functions.
   frame* result = runner.run(R"starlark(
-# abs
+a00 = abs(-1)
 # all
 a02 = bool(1)
 # bytes
@@ -587,11 +587,12 @@ a13 = len([])
 # zip
 )starlark", arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
-  ASSERT_THAT(result->elements, SizeIs(2));
+  ASSERT_THAT(result->elements, SizeIs(3));
 
   ASSERT_THAT(result->elements, Not(Contains(nullptr)));
-  EXPECT_EQ(result->elements[0]->str(), "True");
-  EXPECT_EQ(result->elements[1]->str(), "0");
+  EXPECT_EQ(result->elements[0]->str(), "1");
+  EXPECT_EQ(result->elements[1]->str(), "True");
+  EXPECT_EQ(result->elements[2]->str(), "0");
 }
 
 
