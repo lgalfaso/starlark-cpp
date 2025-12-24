@@ -6,7 +6,7 @@ block {
   op_code { const_int { value: 1 } }
   op_code { const_int { value: 2 } }
   op_code { const_int { value: 3 } }
-  op_code { add_to_list { pos_in_stack: 3 number_of_elements: 3 } }
+  op_code { add_to_list { number_of_elements: 3 } }
   op_code { get_iterator { } }
   op_code { for_iterator { address: 17 } }         # 9
   op_code { store { frame: 1 pos_in_frame: 0 } }
@@ -22,7 +22,7 @@ block {
   op_code { const_int { value: 1 } }
   op_code { const_int { value: 2 } }
   op_code { const_int { value: 3 } }
-  op_code { add_to_list { pos_in_stack: 3 number_of_elements: 3 } }
+  op_code { add_to_list { number_of_elements: 3 } }
   op_code { get_iterator { } }
   op_code { for_iterator { address: 50 } }         # 24
   op_code { store { frame: 1 pos_in_frame: 0 } }
@@ -33,7 +33,7 @@ block {
   op_code { const_int { value: 4 } }
   op_code { const_int { value: 5 } }
   op_code { const_int { value: 6 } }
-  op_code { add_to_list { pos_in_stack: 3 number_of_elements: 3 } }
+  op_code { add_to_list { number_of_elements: 3 } }
   op_code { get_iterator { } }
   op_code { for_iterator { address: 43 } }         # 35
   op_code { store { frame: 1 pos_in_frame: 1 } }

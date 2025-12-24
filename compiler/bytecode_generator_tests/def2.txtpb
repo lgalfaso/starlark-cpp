@@ -15,7 +15,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_int { value: 1 } }
-  op_code { add_to_list { pos_in_stack: 1 number_of_elements: 1 } }
+  op_code { add_to_list { number_of_elements: 1 } }
   op_code { store { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { return { } }

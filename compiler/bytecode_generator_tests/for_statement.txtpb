@@ -6,7 +6,7 @@ block {
   op_code { const_int { value: 0 } }                                              #  4
   op_code { const_int { value: 1 } }                                              #  5
   op_code { const_int { value: 2 } }                                              #  6
-  op_code { add_to_list { pos_in_stack: 3 number_of_elements: 3 } }               #  7
+  op_code { add_to_list { number_of_elements: 3 } }                               #  7
   op_code { get_iterator {} }                                                     #  8
   op_code { for_iterator { address: 14 } }                                        #  9
   op_code { store { frame: 1 pos_in_frame: 0 } }                                  # 10
@@ -23,7 +23,7 @@ block {
   op_code { const_int { value: 2 } }                                              # 19
   op_code { const_int { value: 3 } }                                              # 20
   op_code { make_tuple { number_of_elements: 2 } }                                # 21
-  op_code { add_to_list { pos_in_stack: 2 number_of_elements: 2 } }               # 22
+  op_code { add_to_list { number_of_elements: 2 } }                               # 22
   op_code { get_iterator {} }                                                     # 23
   op_code { for_iterator { address: 31 } }                                        # 24
   op_code { unpack { number_of_elements: 2 } }                                    # 25
@@ -39,7 +39,7 @@ block {
   op_code { const_int { value: 0 } }                                              # 33
   op_code { const_int { value: 1 } }                                              # 34
   op_code { const_int { value: 2 } }                                              # 35
-  op_code { add_to_list { pos_in_stack: 3 number_of_elements: 3 } }               # 36
+  op_code { add_to_list { number_of_elements: 3 } }                               # 36
   op_code { get_iterator {} }                                                     # 37
   op_code { for_iterator { address: 44 } }                                        # 38
   op_code { load { frame: 1 pos_in_frame: 0 } }                                   # 39
@@ -56,7 +56,7 @@ block {
   op_code { const_int { value: 2 } }                                              # 49
   op_code { const_int { value: 3 } }                                              # 50
   op_code { make_tuple { number_of_elements: 2 } }                                # 51
-  op_code { add_to_list { pos_in_stack: 2 number_of_elements: 2 } }               # 52
+  op_code { add_to_list { number_of_elements: 2 } }                               # 52
   op_code { get_iterator { } }                                                    # 53
   op_code { for_iterator { address: 61 } }                                        # 54
   op_code { unpack { number_of_elements: 2 } }                                    # 55

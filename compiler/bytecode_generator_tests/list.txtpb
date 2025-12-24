@@ -6,18 +6,18 @@ block {
   op_code { pop {} }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_int { value: 0 } }
-  op_code { add_to_list { pos_in_stack: 1 number_of_elements: 1 } }
+  op_code { add_to_list { number_of_elements: 1 } }
   op_code { pop {} }
   op_code { make_list { reserve_size: 2 } }
   op_code { const_int { value: 1 } }
   op_code { const_int { value: 2 } }
-  op_code { add_to_list { pos_in_stack: 2 number_of_elements: 2 } }
+  op_code { add_to_list { number_of_elements: 2 } }
   op_code { pop {} }
   op_code { make_list { reserve_size: 3 } }
   op_code { const_int { value: 3 } }
   op_code { const_int { value: 4 } }
   op_code { const_int { value: 5 } }
-  op_code { add_to_list { pos_in_stack: 3 number_of_elements: 3 } }
+  op_code { add_to_list { number_of_elements: 3 } }
   op_code { pop {} }
   op_code { pop_frame {} }
   op_code { pop_frame {} }

@@ -162,16 +162,14 @@ message MakeList {
   uint32 reserve_size = 1;
 }
 message AddToList {
-  uint32 pos_in_stack = 1;
-  uint32 number_of_elements = 2;
+  uint32 number_of_elements = 1;
 }
 
 message MakeDictionary {
   uint32 reserve_size = 1;
 }
 message AddToDictionary {
-  uint32 pos_in_stack = 1;
-  uint32 number_of_elements = 2;
+  uint32 number_of_elements = 1;
 }
 
 message PosInFrame {

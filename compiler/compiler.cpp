@@ -379,7 +379,6 @@ void bytecode_generator::enter_list_expression(const ListExpr* list_expression) 
 void bytecode_generator::exit_list_expression(const ListExpr* list_expression) {
   if (list_expression->element_size() != 0) {
     auto* add_to_list = mutable_block()->add_op_code()->mutable_add_to_list();
-    add_to_list->set_pos_in_stack(list_expression->element_size());
     add_to_list->set_number_of_elements(list_expression->element_size());
   }
 }
@@ -395,7 +394,6 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
     auto* add_to_dict = mutable_block()->add_op_code()->mutable_add_to_dictionary();
-    add_to_dict->set_pos_in_stack(2 * dictionary_expression->entry_size());
     add_to_dict->set_number_of_elements(dictionary_expression->entry_size());
   }
 }
@@ -411,14 +409,7 @@ void bytecode_generator::enter_list_comprehension(const ListComp* list_comprehen
 }
 
 void bytecode_generator::exit_list_comprehension(const ListComp* list_comprehension) {
-  int number_for_clauses = 0;
-  for (const auto& clause : list_comprehension->clause()) {
-    if (clause.comp_clause_type_case() == CompClause::kForClause) {
-      number_for_clauses++;
-    }
-  }
   auto* add_to_list = mutable_block()->add_op_code()->mutable_add_to_list();
-  add_to_list->set_pos_in_stack(number_for_clauses + 1);
   add_to_list->set_number_of_elements(1);
   fix_comp_clause(list_comprehension->clause());
   comprehension_comp_clause.pop_back();
@@ -436,14 +427,7 @@ void bytecode_generator::enter_dictionary_comprehension(const DictComp* dictiona
 }
 
 void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {
-  int number_for_clauses = 0;
-  for (const auto& clause : dictionary_comprehension->clause()) {
-    if (clause.comp_clause_type_case() == CompClause::kForClause) {
-      number_for_clauses++;
-    }
-  }
   auto* add_to_dict = mutable_block()->add_op_code()->mutable_add_to_dictionary();
-  add_to_dict->set_pos_in_stack(number_for_clauses + 2);
   add_to_dict->set_number_of_elements(1);
   fix_comp_clause(dictionary_comprehension->clause());
   comprehension_comp_clause.pop_back();
@@ -734,8 +718,9 @@ void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& cla
   for (auto it = clauses.rbegin(); it != clauses.rend(); ++it) {
     const auto& clause = *it;
     if (clause.comp_clause_type_case() == CompClause::kForClause) {
-      mutable_block()->mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
-          ->mutable_for_iterator()->set_address(block().op_code_size());
+      auto begin_address = comprehension_comp_clause.back()[clauses_count - clause_pos - 1];
+      mutable_block()->add_op_code()->mutable_goto_()->set_address(begin_address);
+      mutable_block()->mutable_op_code(begin_address)->mutable_for_iterator()->set_address(block().op_code_size());
       mutable_block()->add_op_code()->mutable_end_iterator();
     } else {
       mutable_block()->mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])

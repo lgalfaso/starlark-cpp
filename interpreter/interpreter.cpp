@@ -129,8 +129,8 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.push_back(Arena::Create<starlark_list>(&arena, op_code.make_list().reserve_size()));
         break;
       case OpCode::kAddToList: {
-        assert(stack.size() > op_code.add_to_list().pos_in_stack());
-        starlark_obj* candidate_list = stack[stack.size() - 1 - op_code.add_to_list().pos_in_stack()];
+        assert(stack.size() > op_code.add_to_list().number_of_elements());
+        starlark_obj* candidate_list = stack[stack.size() - 1 - op_code.add_to_list().number_of_elements()];
         assert(candidate_list->type() == starlark_types::list_t);
         starlark_list* list = static_cast<starlark_list*>(candidate_list);
         assert(stack.size() >= op_code.add_to_list().number_of_elements());
@@ -145,8 +145,8 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.push_back(Arena::Create<starlark_dictionary>(&arena));
         break;
       case OpCode::kAddToDictionary: {
-        assert(stack.size() > op_code.add_to_dictionary().pos_in_stack());
-        starlark_obj* candidate_dict = stack[stack.size() - 1 - op_code.add_to_dictionary().pos_in_stack()];
+        assert(stack.size() > op_code.add_to_dictionary().number_of_elements() * 2);
+        starlark_obj* candidate_dict = stack[stack.size() - 1 - op_code.add_to_dictionary().number_of_elements() * 2];
         assert(candidate_dict->type() == starlark_types::dict_t);
         starlark_dictionary* dict = static_cast<starlark_dictionary*>(candidate_dict);
         assert(op_code.add_to_list().number_of_elements() < std::numeric_limits<decltype(op_code.add_to_list().number_of_elements())>::max() / 2);
