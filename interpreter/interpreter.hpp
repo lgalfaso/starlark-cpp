@@ -23,6 +23,7 @@ struct frame {
   frame* parent_frame;
   std::vector<starlark::runtime::starlark_obj*> elements;
   const google::protobuf::RepeatedPtrField<std::string>* names;
+  std::vector<starlark::runtime::starlark_iterator*> iterators;
 };
 
 class interpreter {

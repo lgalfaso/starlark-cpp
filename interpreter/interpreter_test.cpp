@@ -597,6 +597,21 @@ a13 = len([])
   EXPECT_EQ(result->elements[2]->str(), "0");
 }
 
+TEST(Interpreter, ListIterator) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = [x*x for x in [1,2,3,4]]
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(1));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "[1, 4, 9, 16]");
+}
+
 
 }  // namespace
 

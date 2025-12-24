@@ -427,15 +427,37 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.back() = stack.back()->call(pos_args, named_args, arena, error_callback);
         break;
       }
+      case OpCode::kGetIterator:
+        assert(!frame_stack.empty());
+        assert(!stack.empty());
+        frame_stack.back()->iterators.push_back(stack.back()->get_iterator(arena, error_callback));
+        stack.pop_back();
+        break;
+      case OpCode::kForIterator: {
+        assert(!frame_stack.empty());
+        assert(!frame_stack.back()->iterators.empty());
+        auto* it = frame_stack.back()->iterators.back();
+        if (it->has_next()) {
+          stack.push_back(it->next());
+        } else {
+          instruction_ptr = op_code.for_iterator().address();
+        }
+        break;
+      }
+      case OpCode::kEndIterator:
+        assert(!frame_stack.empty());
+        assert(!frame_stack.back()->iterators.empty());
+        frame_stack.back()->iterators.back()->end_iterator();
+        frame_stack.back()->iterators.pop_back();
+        break;
+      case OpCode::kGoto:
+        instruction_ptr = op_code.goto_().address();
+        break;
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
       case OpCode::kFail:
         return nullptr;
-      case OpCode::kGoto:
-      case OpCode::kGetIterator:
-      case OpCode::kForIterator:
-      case OpCode::kEndIterator:
       case OpCode::kAssignDotMember:
       case OpCode::kAssignIndexMember:
       case OpCode::kAssignSliceRange:
@@ -460,7 +482,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kSetDefaultValues:
       case OpCode::OP_CODE_NOT_SET:
         // TODO(lmirelmann): Implement the other instructions.
-        error_callback.add_error(std::format("Unknown op-code: {}", op_code.DebugString()));
+        error_callback.add_error(std::format("Unknown op-code: {}", op_code.ShortDebugString()));
         return nullptr;
     }
   }
