@@ -416,4 +416,28 @@ TEST(StarlarkTuple, Len) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkTuple, GetIterator) {
+  starlark_tuple tuple0;
+  starlark_tuple tuple1;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+  tuple1.add(&zero);
+  tuple1.add(&one);
+
+  auto* it0 = tuple0.get_iterator(arena, error_callback);
+  EXPECT_FALSE(it0->has_next());
+  it0->end_iterator();
+
+  auto* it1 = tuple1.get_iterator(arena, error_callback);
+  EXPECT_TRUE(it1->has_next());
+  EXPECT_TRUE(it1->next()->equals(zero));
+  EXPECT_TRUE(it1->has_next());
+  EXPECT_TRUE(it1->next()->equals(one));
+  EXPECT_FALSE(it1->has_next());
+  it1->end_iterator();
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 }  // namespace

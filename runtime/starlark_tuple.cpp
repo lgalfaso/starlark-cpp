@@ -200,6 +200,10 @@ bool starlark_tuple::binary_in(const starlark_obj& other, error_fn& error_callba
   return false;
 }
 
+starlark_iterator* starlark_tuple::get_iterator(Arena& arena, error_fn& error_callback) {
+  return Arena::Create<starlark_tuple_iterator>(&arena, this);
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_tuple::inner_hash() const {
   return std::span(values.begin(), values.end());
 }
@@ -214,6 +218,18 @@ starlark_tuple& starlark_tuple::add(starlark_obj* element) {
   values.push_back(element);
   return *this;
 }
+
+starlark_tuple::starlark_tuple_iterator::starlark_tuple_iterator(starlark_tuple* tuple) : tuple(tuple), it(tuple->values.begin()) {}
+
+bool starlark_tuple::starlark_tuple_iterator::has_next() const {
+  return it != tuple->values.end();
+}
+
+starlark_obj* starlark_tuple::starlark_tuple_iterator::next() {
+  return *it++;
+}
+
+void starlark_tuple::starlark_tuple_iterator::end_iterator() {}
 
 }  // namespace runtime
 }  // namespace starlark
