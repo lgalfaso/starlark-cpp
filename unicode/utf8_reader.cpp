@@ -31,9 +31,9 @@ const std::uint32_t utf8_reader::kReplacementCharacter;
 const std::uint32_t utf8_reader::kBomCharacter;
 const std::uint32_t utf8_reader::kMaxCodePoint;
 
-utf8_reader::utf8_reader(string_view input, bool strict) : input(input), strict(strict) {
+utf8_reader::utf8_reader(string_view input, bool strict, bool remove_boom) : input(input), strict(strict) {
   // If the source code starts with a BOM, then ignore it.
-  if (peek_code_point() == kBomCharacter) {
+  if (remove_boom && peek_code_point() == kBomCharacter) {
     skip_code_point();
   }
 }

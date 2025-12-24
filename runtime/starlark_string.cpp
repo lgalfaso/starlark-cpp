@@ -50,10 +50,16 @@ bool starlark_string::inner_repr(printer& print, printer_action action) const {
   } else {
     result += "\"";
   }
-  utf8_reader reader(value, false);
+  utf8_reader reader(value, false, false);
   while (reader.pending()) {
-    write_printable(reader.peek_code_point(), use_single_quote, /*allow_non_ascii_printable=*/ true, result);
-    reader.skip_code_point();
+    auto code_point = reader.peek_code_point();
+    if (code_point != utf8_reader::kReplacementCharacter) {
+      write_printable(reader.peek_code_point(), use_single_quote, /*allow_non_ascii_printable=*/ true, result);
+      reader.skip_code_point();
+    } else {
+      result += value[reader.pos()];
+      reader.skip();
+    }
   }
   if (use_single_quote) {
     result += "'";

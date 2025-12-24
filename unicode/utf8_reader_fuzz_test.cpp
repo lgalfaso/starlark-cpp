@@ -9,7 +9,7 @@ using starlark::unicode::utf8_reader;
 namespace {
 
 void Utf8ReaderFuzzing(const char* data, size_t size) {
-  utf8_reader reader(std::string_view(data, size), true);
+  utf8_reader reader(std::string_view(data, size), true, true);
   while (reader.pending()) {
     reader.peek_code_point();
     reader.skip_code_point();

@@ -71,6 +71,8 @@ TEST(StarlarkString, Repr) {
   EXPECT_EQ("'\\u0378'", starlark_string("\315\270").repr());
   EXPECT_EQ("'\\ud800'", starlark_string("\355\240\200").repr());
   EXPECT_EQ("'\\U000101c7'", starlark_string("\360\220\207\207").repr());
+  EXPECT_EQ("'\xf0'", starlark_string(std::string("🙂").substr(0, 1)).repr());
+  EXPECT_EQ("'\\ufeff'", starlark_string("\xef\xbb\xbf").repr());
 }
 
 TEST(StarlarkString, Truthy) {

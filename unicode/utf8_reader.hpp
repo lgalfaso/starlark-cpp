@@ -18,7 +18,7 @@ bool is_surrogate(std::uint32_t code_point);
 
 class utf8_reader {
  public:
-  explicit utf8_reader(std::string_view input, bool strict);
+  explicit utf8_reader(std::string_view input, bool strict, bool remove_bom);
   bool empty() const;
   std::size_t pending() const;
   std::size_t pos() const;

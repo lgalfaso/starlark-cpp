@@ -156,7 +156,7 @@ void sort_non_starters(std::vector<std::uint32_t>& code_points) {
 std::string to_nfc(std::string_view input) {
   std::vector<std::uint32_t> code_points;
   // This needs to be strict as we only have the tables for this version of Unicode.
-  utf8_reader reader(input, true);
+  utf8_reader reader(input, true, false);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
@@ -181,7 +181,7 @@ std::string to_nfc(std::string_view input) {
 
 std::string to_nfd(std::string_view input) {
   std::vector<std::uint32_t> code_points;
-  utf8_reader reader(input, true);
+  utf8_reader reader(input, true, false);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
@@ -206,7 +206,7 @@ std::string to_nfd(std::string_view input) {
 
 std::string to_nfkc(std::string_view input) {
   std::vector<std::uint32_t> code_points;
-  utf8_reader reader(input, true);
+  utf8_reader reader(input, true, false);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
@@ -231,7 +231,7 @@ std::string to_nfkc(std::string_view input) {
 
 std::string to_nfkd(std::string_view input) {
   std::vector<std::uint32_t> code_points;
-  utf8_reader reader(input, true);
+  utf8_reader reader(input, true, false);
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {

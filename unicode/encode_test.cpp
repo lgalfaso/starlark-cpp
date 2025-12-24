@@ -23,10 +23,8 @@ TEST(EncodeTest, AllCharacter) {
       EXPECT_EQ("\xef\xbf\xbd", encoded);
     } else if (0xd800 <= i && i <= 0xdfff) {  // Surrogates area
       EXPECT_EQ("", encoded);
-    } else if (i == 0xfeff) {  // BOM
-      EXPECT_EQ("\xef\xbb\xbf", encoded);
     } else {
-      EXPECT_EQ(i, utf8_reader(encoded, true).peek_code_point());
+      EXPECT_EQ(i, utf8_reader(encoded, true, false).peek_code_point());
     }
   }
 }
