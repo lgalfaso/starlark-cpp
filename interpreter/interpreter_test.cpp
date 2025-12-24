@@ -597,7 +597,7 @@ a13 = len([])
   EXPECT_EQ(result->elements[2]->str(), "0");
 }
 
-TEST(Interpreter, ListIterator) {
+TEST(Interpreter, ListComprehension) {
   interpreter runner;
   Arena arena;
   logger logging;
@@ -616,6 +616,24 @@ a03 = [x*y for x in [1,2,3,4] if x % 2 == 1 for y in [5, 6]]
   EXPECT_EQ(result->elements[2]->str(), "[5, 6, 15, 18]");
 }
 
+TEST(Interpreter, DictionaryComprehension) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = {x: x*x for x in [1,2,3,4]}
+a02 = {x: y for x in [1,2,3,4] for y in [5, 6]}
+a03 = {x: y for x in [1,2,3,4] if x % 2 == 1 for y in [5, 6]}
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(3));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "{1: 1, 2: 4, 3: 9, 4: 16}");
+  EXPECT_EQ(result->elements[1]->str(), "{1: 6, 2: 6, 3: 6, 4: 6}");
+  EXPECT_EQ(result->elements[2]->str(), "{1: 6, 3: 6}");
+}
 
 }  // namespace
 
