@@ -44,11 +44,11 @@ TEST(StarlarkDictionary, Str) {
   EXPECT_EQ("{}", starlark_dictionary().str());
   starlark_dictionary dict;
   dict.insert(&s1, &none, error_callback);
-  EXPECT_EQ("{'1': None}", dict.str());
+  EXPECT_EQ("{\"1\": None}", dict.str());
   dict.insert(&s2, &true_obj, error_callback);
-  EXPECT_EQ("{'1': None, '2': True}", dict.str());
+  EXPECT_EQ("{\"1\": None, \"2\": True}", dict.str());
   dict.insert(&s3, &one, error_callback);
-  EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict.str());
+  EXPECT_EQ("{\"1\": None, \"2\": True, \"3\": 1}", dict.str());
 }
 
 TEST(StarlarkDictionary, StrOrder) {
@@ -64,12 +64,12 @@ TEST(StarlarkDictionary, StrOrder) {
   dict_1.insert(&s1, &none, error_callback);
   dict_1.insert(&s2, &true_obj, error_callback);
   dict_1.insert(&s3, &one, error_callback);
-  EXPECT_EQ("{'1': None, '2': True, '3': 1}", dict_1.str());
+  EXPECT_EQ("{\"1\": None, \"2\": True, \"3\": 1}", dict_1.str());
   starlark_dictionary dict_2;
   dict_2.insert(&s3, &one, error_callback);
   dict_2.insert(&s1, &none, error_callback);
   dict_2.insert(&s2, &true_obj, error_callback);
-  EXPECT_EQ("{'3': 1, '1': None, '2': True}", dict_2.str());
+  EXPECT_EQ("{\"3\": 1, \"1\": None, \"2\": True}", dict_2.str());
 }
 
 TEST(StarlarkDictionary, StrContainsItself) {
@@ -87,7 +87,7 @@ TEST(StarlarkDictionary, StrContainsItself) {
   map.insert(&s2, &true_obj, error_callback);
   map.insert(&s3, &one, error_callback);
   map.insert(&s4, &map, error_callback);
-  EXPECT_EQ("{'1': None, '2': True, '3': 1, '4': {...}}", map.str());
+  EXPECT_EQ("{\"1\": None, \"2\": True, \"3\": 1, \"4\": {...}}", map.str());
 }
 
 TEST(StarlarkDictionary, Truthy) {
@@ -231,9 +231,9 @@ TEST(StarlarkDictionary, BinaryPipe) {
 
   auto* dict_3 = dict_1.binary_pipe(dict_2,  arena, error_callback);
   ASSERT_NE(dict_3, nullptr);
-  EXPECT_EQ(dict_3->str(), "{0: 'four', 1: 'one', 2: 'two', 3: 'three'}");
-  EXPECT_EQ(dict_1.str(), "{0: 'zero', 1: 'one'}");
-  EXPECT_EQ(dict_2.str(), "{0: 'four', 2: 'two', 3: 'three'}");
+  EXPECT_EQ(dict_3->str(), "{0: \"four\", 1: \"one\", 2: \"two\", 3: \"three\"}");
+  EXPECT_EQ(dict_1.str(), "{0: \"zero\", 1: \"one\"}");
+  EXPECT_EQ(dict_2.str(), "{0: \"four\", 2: \"two\", 3: \"three\"}");
 }
 
 TEST(StarlarkDictionary, BinaryPipeWithNonDict) {

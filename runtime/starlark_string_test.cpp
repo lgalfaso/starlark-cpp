@@ -60,19 +60,19 @@ TEST(StarlarkString, Str) {
 
 TEST(StarlarkString, Repr) {
   // TODO(lmirelmann): Would be nice to have a test that checks the encoding of all characters.
-  EXPECT_EQ("'abcdef'", starlark_string("abcdef").repr());
+  EXPECT_EQ("\"abcdef\"", starlark_string("abcdef").repr());
   EXPECT_EQ("\"'\"", starlark_string("'").repr());
-  EXPECT_EQ("'\\'\"'", starlark_string("'\"").repr());
-  EXPECT_EQ("'\\t\\r\\n'", starlark_string("\t\r\n").repr());
-  EXPECT_EQ("'\\x01\\x02\\x7f'", starlark_string("\001\002\177").repr());
-  EXPECT_EQ("'\\x90'", starlark_string("\302\220").repr());
-  EXPECT_EQ("'\xC3\xA0'", starlark_string("\303\240").repr());
-  EXPECT_EQ("'\xC8\xB4'", starlark_string("\310\264").repr());
-  EXPECT_EQ("'\\u0378'", starlark_string("\315\270").repr());
-  EXPECT_EQ("'\\ud800'", starlark_string("\355\240\200").repr());
-  EXPECT_EQ("'\\U000101c7'", starlark_string("\360\220\207\207").repr());
-  EXPECT_EQ("'\xf0'", starlark_string(std::string("🙂").substr(0, 1)).repr());
-  EXPECT_EQ("'\\ufeff'", starlark_string("\xef\xbb\xbf").repr());
+  EXPECT_EQ("\"'\\\"\"", starlark_string("'\"").repr());
+  EXPECT_EQ("\"\\t\\r\\n\"", starlark_string("\t\r\n").repr());
+  EXPECT_EQ("\"\\x01\\x02\\x7f\"", starlark_string("\001\002\177").repr());
+  EXPECT_EQ("\"\\x90\"", starlark_string("\302\220").repr());
+  EXPECT_EQ("\"\xC3\xA0\"", starlark_string("\303\240").repr());
+  EXPECT_EQ("\"\xC8\xB4\"", starlark_string("\310\264").repr());
+  EXPECT_EQ("\"\\u0378\"", starlark_string("\315\270").repr());
+  EXPECT_EQ("\"\\ud800\"", starlark_string("\355\240\200").repr());
+  EXPECT_EQ("\"\\U000101c7\"", starlark_string("\360\220\207\207").repr());
+  EXPECT_EQ("\"\xf0\"", starlark_string(std::string("🙂").substr(0, 1)).repr());
+  EXPECT_EQ("\"\\ufeff\"", starlark_string("\xef\xbb\xbf").repr());
 }
 
 TEST(StarlarkString, Truthy) {

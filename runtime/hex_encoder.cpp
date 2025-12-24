@@ -20,8 +20,8 @@ static const char hex[] = "0123456789abcdef";
 }  // namespace
 
 
-void write_printable(uint64_t codepoint, bool use_single_quote, bool allow_non_ascii_printable, std::string& output) {
-  if (codepoint == '\\' || (use_single_quote && codepoint == '\'')) {
+void write_printable(uint64_t codepoint, bool allow_non_ascii_printable, std::string& output) {
+  if (codepoint == '\\' || codepoint == '"') {
     output += '\\';
     utf8_encode_code_point(codepoint, output, false);
   } else if (codepoint == '\t') {

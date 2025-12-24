@@ -10,7 +10,7 @@
 namespace starlark {
 namespace runtime {
 
-void write_printable(uint64_t codepoint, bool use_single_quote, bool allow_non_ascii_printable, std::string& output);
+void write_printable(uint64_t codepoint, bool allow_non_ascii_printable, std::string& output);
 
 }  // namespace runtime
 }  // namespace starlark

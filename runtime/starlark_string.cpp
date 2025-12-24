@@ -37,35 +37,24 @@ int64_t starlark_string::len(error_fn& error_callback) const {
 }
 
 bool starlark_string::inner_repr(printer& print, printer_action action) const {
-  // TODO(lmirelmann): The spec mandates that we always use double quotes.
   assert(action == printer_action::kPrintTop);
   // TODO(lmirelmann): If this function were to be executed a lot and were to become
   // a performance issue, then there are a few things that can be optimized:
   // - The check for `use_single_quote` can be done in one pass
   // - It should be possible to check whether the original value can be used just adding quotes
-  std::string result;
-  bool use_single_quote = !value.contains('\'') || value.contains('"');
-  if (use_single_quote) {
-    result += "'";
-  } else {
-    result += "\"";
-  }
+  std::string result = "\"";
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
     auto code_point = reader.peek_code_point();
     if (code_point != utf8_reader::kReplacementCharacter) {
-      write_printable(reader.peek_code_point(), use_single_quote, /*allow_non_ascii_printable=*/ true, result);
+      write_printable(reader.peek_code_point(), /*allow_non_ascii_printable=*/ true, result);
       reader.skip_code_point();
     } else {
       result += value[reader.pos()];
       reader.skip();
     }
   }
-  if (use_single_quote) {
-    result += "'";
-  } else {
-    result += "\"";
-  }
+  result += "\"";
   print.append(result);
   return false;
 }

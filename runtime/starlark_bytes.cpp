@@ -31,21 +31,11 @@ int64_t starlark_bytes::len(error_fn& error_callback) const {
 
 bool starlark_bytes::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
-  std::string result = "b";
-  bool use_single_quote = !value.contains('\'') || value.contains('"');
-  if (use_single_quote) {
-    result += "'";
-  } else {
-    result += "\"";
-  }
+  std::string result = "b\"";
   for (unsigned char c : value) {
-    write_printable(c, use_single_quote, /*allow_non_ascii_printable=*/ false, result);
+    write_printable(c, /*allow_non_ascii_printable=*/ false, result);
   }
-  if (use_single_quote) {
-    result += "'";
-  } else {
-    result += "\"";
-  }
+  result += "\"";
   print.append(result);
   return false;
 }

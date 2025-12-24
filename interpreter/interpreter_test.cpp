@@ -456,7 +456,7 @@ a02 = {1: 'one'} | {2: 'two'}
 
   ASSERT_THAT(result->elements, Not(Contains(nullptr)));
   EXPECT_TRUE(starlark_integer(10 | 423).equals(*result->elements[0]));
-  EXPECT_EQ(result->elements[1]->str(), "{1: 'one', 2: 'two'}");
+  EXPECT_EQ(result->elements[1]->str(), "{1: \"one\", 2: \"two\"}");
 }
 
 TEST(Interpreter, BinaryAndOperator) {

@@ -55,11 +55,11 @@ TEST(StarlarkBytes, Type) {
 
 TEST(StarlarkBytes, Str) {
   EXPECT_EQ("b\"'\"", starlark_bytes("'").str());
-  EXPECT_EQ("b'\"'", starlark_bytes("\"").str());
-  EXPECT_EQ("b'\\'\"'", starlark_bytes("'\"").str());
-  EXPECT_EQ("b\'\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\t\\n\\x0b\\x0c\\r\\x0e\\x0f"
+  EXPECT_EQ("b\"\\\"\"", starlark_bytes("\"").str());
+  EXPECT_EQ("b\"'\\\"\"", starlark_bytes("'\"").str());
+  EXPECT_EQ("b\"\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\t\\n\\x0b\\x0c\\r\\x0e\\x0f"
             "\\x10\\x11\\x12\\x13\\x14\\x15\\x16\\x17\\x18\\x19\\x1a\\x1b\\x1c\\x1d\\x1e\\x1f"
-            " !\"#$%&\\\'()*+,-./0123456789:;<=>?"
+            " !\\\"#$%&\'()*+,-./0123456789:;<=>?"
             "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_"
             "`abcdefghijklmnopqrstuvwxyz{|}~\\x7f"
             "\\x80\\x81\\x82\\x83\\x84\\x85\\x86\\x87\\x88\\x89\\x8a\\x8b\\x8c\\x8d\\x8e\\x8f"
@@ -69,7 +69,7 @@ TEST(StarlarkBytes, Str) {
             "\\xc0\\xc1\\xc2\\xc3\\xc4\\xc5\\xc6\\xc7\\xc8\\xc9\\xca\\xcb\\xcc\\xcd\\xce\\xcf"
             "\\xd0\\xd1\\xd2\\xd3\\xd4\\xd5\\xd6\\xd7\\xd8\\xd9\\xda\\xdb\\xdc\\xdd\\xde\\xdf"
             "\\xe0\\xe1\\xe2\\xe3\\xe4\\xe5\\xe6\\xe7\\xe8\\xe9\\xea\\xeb\\xec\\xed\\xee\\xef"
-            "\\xf0\\xf1\\xf2\\xf3\\xf4\\xf5\\xf6\\xf7\\xf8\\xf9\\xfa\\xfb\\xfc\\xfd\\xfe\\xff\'",
+            "\\xf0\\xf1\\xf2\\xf3\\xf4\\xf5\\xf6\\xf7\\xf8\\xf9\\xfa\\xfb\\xfc\\xfd\\xfe\\xff\"",
       starlark_bytes(std::string(
           "\000\001\002\003\004\005\006\007\010\011\012\013\014\015\016\017"
           "\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037"
@@ -232,7 +232,7 @@ TEST(StarlarkBytes, BinaryPlus) {
   auto* result = bytes_1.binary_plus(bytes_2, arena, error_callback);
 
   ASSERT_NE(result, nullptr);
-  EXPECT_EQ(result->str(), "b'abcdef'");
+  EXPECT_EQ(result->str(), "b\"abcdef\"");
 }
 
 TEST(StarlarkBytes, BinaryPlusNotList) {
@@ -265,15 +265,15 @@ TEST(StarlarkBytes, BinaryStar) {
   auto* result_5 = bytes0.binary_star(big, arena, error_callback);
 
   ASSERT_NE(result_1, nullptr);
-  EXPECT_EQ(result_1->str(), "b'abcabc'");
+  EXPECT_EQ(result_1->str(), "b\"abcabc\"");
   ASSERT_NE(result_2, nullptr);
-  EXPECT_EQ(result_2->str(), "b'abcabcabc'");
+  EXPECT_EQ(result_2->str(), "b\"abcabcabc\"");
   ASSERT_NE(result_3, nullptr);
-  EXPECT_EQ(result_3->str(), "b''");
+  EXPECT_EQ(result_3->str(), "b\"\"");
   ASSERT_NE(result_4, nullptr);
-  EXPECT_EQ(result_4->str(), "b''");
+  EXPECT_EQ(result_4->str(), "b\"\"");
   ASSERT_NE(result_5, nullptr);
-  EXPECT_EQ(result_5->str(), "b''");
+  EXPECT_EQ(result_5->str(), "b\"\"");
 }
 
 TEST(StarlarkBytes, BinaryStarReverse) {
@@ -294,15 +294,15 @@ TEST(StarlarkBytes, BinaryStarReverse) {
   auto* result_5 = big.binary_star(bytes0, arena, error_callback);
 
   ASSERT_NE(result_1, nullptr);
-  EXPECT_EQ(result_1->str(), "b'abcabc'");
+  EXPECT_EQ(result_1->str(), "b\"abcabc\"");
   ASSERT_NE(result_2, nullptr);
-  EXPECT_EQ(result_2->str(), "b'abcabcabc'");
+  EXPECT_EQ(result_2->str(), "b\"abcabcabc\"");
   ASSERT_NE(result_3, nullptr);
-  EXPECT_EQ(result_3->str(), "b''");
+  EXPECT_EQ(result_3->str(), "b\"\"");
   ASSERT_NE(result_4, nullptr);
-  EXPECT_EQ(result_4->str(), "b''");
+  EXPECT_EQ(result_4->str(), "b\"\"");
   ASSERT_NE(result_5, nullptr);
-  EXPECT_EQ(result_5->str(), "b''");
+  EXPECT_EQ(result_5->str(), "b\"\"");
 }
 
 TEST(StarlarkBytes, BinaryStarNotInt) {
