@@ -16,6 +16,10 @@ template<typename Key, typename Value, typename Hash, typename KeyEqual>
 class linked_hash_map {
  public:
   typedef std::pair<const Key, Value> value_type;
+  typedef std::list<std::pair<const Key, Value>>::iterator iterator;
+  typedef std::list<std::pair<const Key, Value>>::const_iterator const_iterator;
+  typedef std::list<std::pair<const Key, Value>>::reverse_iterator reverse_iterator;
+  typedef std::list<std::pair<const Key, Value>>::const_reverse_iterator const_reverse_iterator;
 
   linked_hash_map() {}
 
@@ -36,35 +40,35 @@ class linked_hash_map {
     order.clear();
   }
 
-  auto begin() {
+  iterator begin() {
     return order.begin();
   }
 
-  auto end() {
+  iterator end() {
     return order.end();
   }
 
-  auto begin() const {
+  const_iterator begin() const {
     return order.begin();
   }
 
-  auto end() const {
+  const_iterator end() const {
     return order.end();
   }
 
-  auto rbegin() {
+  reverse_iterator rbegin() {
     return order.rbegin();
   }
 
-  auto rend() {
+  reverse_iterator rend() {
     return order.rend();
   }
 
-  auto rbegin() const {
+  const_reverse_iterator rbegin() const {
     return order.rbegin();
   }
 
-  auto rend() const {
+  const_reverse_iterator rend() const {
     return order.rend();
   }
 
