@@ -311,4 +311,44 @@ TEST(StarlarkSet, Len) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkSet, GetIterator) {
+  starlark_set set0;
+  starlark_set set1;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+  set1.add(&zero, error_callback);
+  set1.add(&one, error_callback);
+
+  auto* it0 = set0.get_iterator(arena, error_callback);
+  EXPECT_FALSE(it0->has_next());
+  it0->end_iterator();
+
+  auto* it1 = set1.get_iterator(arena, error_callback);
+  EXPECT_TRUE(it1->has_next());
+  EXPECT_TRUE(it1->next()->equals(zero));
+  EXPECT_TRUE(it1->has_next());
+  EXPECT_TRUE(it1->next()->equals(one));
+  EXPECT_FALSE(it1->has_next());
+  it1->end_iterator();
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkSet, MutationWhileIterating) {
+  starlark_set set;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  [[maybe_unused]] auto* it = set.get_iterator(arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  set.add(&zero, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
 }  // namespace

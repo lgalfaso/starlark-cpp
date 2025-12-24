@@ -131,6 +131,10 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena
   return result;
 }
 
+starlark_iterator* starlark_set::get_iterator(Arena& arena, error_fn& error_callback) {
+  return Arena::Create<starlark_set_iterator>(&arena, this);
+}
+
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
@@ -160,6 +164,10 @@ void starlark_set::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 }
 
 bool starlark_set::add(starlark_obj* element, error_fn& error_callback) {
+  if (iterators_count) {
+    error_callback.add_error("Error in append: set value is temporarily immutable due to active for-loop iteration");
+    return false;
+  }
   if (freezed) {
     // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
     error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
@@ -170,6 +178,22 @@ bool starlark_set::add(starlark_obj* element, error_fn& error_callback) {
     return false;
   }
   return values.insert(element).second;
+}
+
+starlark_set::starlark_set_iterator::starlark_set_iterator(starlark_set* set) : set(set), it(set->values.begin()) {
+  set->iterators_count++;
+}
+
+bool starlark_set::starlark_set_iterator::has_next() const {
+  return it != set->values.end();
+}
+
+starlark_obj* starlark_set::starlark_set_iterator::next() {
+  return *it++;
+}
+
+void starlark_set::starlark_set_iterator::end_iterator() {
+  set->iterators_count--;
 }
 
 }  // namespace runtime
