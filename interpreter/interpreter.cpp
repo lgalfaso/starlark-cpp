@@ -152,12 +152,12 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         assert(op_code.add_to_list().number_of_elements() < std::numeric_limits<decltype(op_code.add_to_list().number_of_elements())>::max() / 2);
         assert(stack.size() >= op_code.add_to_list().number_of_elements() * 2);
         for (int i = 0; i < op_code.add_to_dictionary().number_of_elements(); ++i) {
-          if (!dict->insert(stack[stack.size() - 2 * op_code.add_to_dictionary().number_of_elements() + 2 * i],
-                            stack[stack.size() - 2 * op_code.add_to_dictionary().number_of_elements() + 2 * i + 1], error_callback) &&
+          auto* key = stack[stack.size() - 2 * op_code.add_to_dictionary().number_of_elements() + 2 * i];
+          if (!dict->insert(key, stack[stack.size() - 2 * op_code.add_to_dictionary().number_of_elements() + 2 * i + 1], error_callback) &&
               op_code.add_to_dictionary().number_of_elements() > 1) {
             // This makes use of the fact that dictionary comprehensions always add elements one at a time and
             // that dictionary literals add all the elements in one go.
-            // TODO(lmirelmann): Report the error.
+            error_callback.add_error(std::format("Error: dictionary expression has duplicate key: {}", key->repr()));
             return nullptr;
           }
         }

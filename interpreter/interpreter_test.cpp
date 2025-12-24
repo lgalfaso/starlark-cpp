@@ -124,7 +124,6 @@ b = []
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ("UnboundLocalError: cannot access local variable 'b' where it is not associated with a value", logging.begin()->message());
-  // TODO(lmirelmann): Check the error.
 }
 
 TEST(Interpreter, NoDuplicateKeysInDictionaryLiterals) {
@@ -136,7 +135,8 @@ TEST(Interpreter, NoDuplicateKeysInDictionaryLiterals) {
 a = {'a': 1, 'a': 2}
 )starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
-  // TODO(lmirelmann): Check the error.
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ("Error: dictionary expression has duplicate key: \"a\"", logging.begin()->message());
 }
 
 TEST(Interpreter, ShortCircuit) {
@@ -199,7 +199,6 @@ TEST(Interpreter, SimpleCompoundAssignment) {
 }
 
 TEST(Interpreter, UnaryOperator) {
-  // TODO(lmirelmann): Add tests for the other unary operators.
   interpreter runner;
   Arena arena;
   logger logging;
@@ -409,7 +408,7 @@ a11 = 100 in b"abc"
 # a12 = 1 in set([1, 2, 3])
 # a13 = 1 in range(10)
 )starlark", arena, logging);
-  // TODO(lmirelmann): Add the test for `range` and set.
+  // TODO(lmirelmann): Add the test for `range` and `set`.
   ASSERT_NE(nullptr, result);
   ASSERT_THAT(result->elements, SizeIs(12));
 
@@ -532,7 +531,8 @@ TEST(Interpreter, NotPossibleToHaveUnhashableKeys) {
 a = {[]: 1}
 )starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
-  // TODO(lmirelmann): Check the error message.
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", logging.begin()->message());
 }
 
 TEST(Interpreter, Call) {
