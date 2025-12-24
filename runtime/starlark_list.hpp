@@ -24,6 +24,19 @@ class starlark_list : public starlark_obj {
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   int64_t len(error_fn& error_callback) const override;
+  starlark_iterator* get_iterator(google::protobuf::Arena& arena, error_fn& error_callback) override;
+
+  class starlark_list_iterator : public starlark_iterator {
+   public:
+    starlark_list_iterator(starlark_list* list);
+    bool has_next() const override;
+    starlark_obj* next() override;
+    void end_iterator() override;
+
+   private:
+    starlark_list* list;
+    std::vector<starlark_obj*>::iterator it;
+  };
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
@@ -34,6 +47,7 @@ class starlark_list : public starlark_obj {
 
  private:
   std::vector<starlark_obj*> values;
+  int iterators_count = 0;
 };
 
 }  // namespace runtime

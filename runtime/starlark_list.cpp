@@ -158,6 +158,10 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
   }
 }
 
+starlark_iterator* starlark_list::get_iterator(Arena& arena, error_fn& error_callback) {
+  return Arena::Create<starlark_list_iterator>(&arena, this);
+}
+
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
@@ -207,6 +211,10 @@ void starlark_list::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 }
 
 void starlark_list::add(starlark_obj* element, error_fn& error_callback) {
+  if (iterators_count) {
+    error_callback.add_error("Error in append: list value is temporarily immutable due to active for-loop iteration");
+    return;
+  }
   if (freezed) {
     // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
     error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
@@ -214,6 +222,24 @@ void starlark_list::add(starlark_obj* element, error_fn& error_callback) {
   }
   // TODO(lmirelmann): Check that this does not go over the maximum number of elements.
   values.push_back(element);
+}
+
+starlark_list::starlark_list_iterator::starlark_list_iterator(starlark_list* list) : list(list), it(list->values.begin()) {
+  list->iterators_count++;
+}
+
+bool starlark_list::starlark_list_iterator::has_next() const {
+  return it != list->values.end();
+}
+
+starlark_obj* starlark_list::starlark_list_iterator::next() {
+  auto* result = *it;
+  ++it;
+  return result;
+}
+
+void starlark_list::starlark_list_iterator::end_iterator() {
+  list->iterators_count--;
 }
 
 }  // namespace runtime

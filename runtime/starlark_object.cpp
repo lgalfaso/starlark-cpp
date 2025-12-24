@@ -91,6 +91,8 @@ int order_comparator::run(std::string_view op, error_fn& error_callback) {
   return 0;
 }
 
+starlark_iterator::~starlark_iterator() {}
+
 starlark_obj::~starlark_obj() {}
 
 std::string starlark_obj::str() const {
@@ -292,6 +294,11 @@ starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, Arena& are
 int64_t starlark_obj::len(error_fn& error_callback) const {
   error_callback.add_error(std::format("TypeError: object of type '{}' has no len()", type()));
   return -1;
+}
+
+starlark_iterator* starlark_obj::get_iterator(Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(std::format("TypeError: '{}' object is not iterable", type()));
+  return nullptr;
 }
 
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {

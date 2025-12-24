@@ -1921,4 +1921,13 @@ TEST(StarlarkInteger, Len) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
 }
 
+TEST(StarlarkInteger, GetIterator) {
+  Arena arena;
+  error_handler error_callback;
+
+  EXPECT_EQ(nullptr, starlark_integer(0).get_iterator(arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+}
+
 }  // namespace

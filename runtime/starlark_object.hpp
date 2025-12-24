@@ -95,6 +95,14 @@ class order_comparator {
   std::vector<pending_task> tasks;
 };
 
+class starlark_iterator {
+ public:
+  virtual ~starlark_iterator();
+  virtual bool has_next() const = 0;
+  virtual starlark_obj* next() = 0;
+  virtual void end_iterator() = 0;
+};
+
 class starlark_obj {
  public:
   virtual ~starlark_obj();
@@ -126,6 +134,7 @@ class starlark_obj {
   virtual starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
 
   virtual int64_t len(error_fn& error_callback) const;
+  virtual starlark_iterator* get_iterator(google::protobuf::Arena& arena, error_fn& error_callback);
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;
