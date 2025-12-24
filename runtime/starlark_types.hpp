@@ -3,25 +3,23 @@
 #ifndef RUNTIME_STARLARK_TYPES_HPP_
 #define RUNTIME_STARLARK_TYPES_HPP_
 
-#include <string>
-
 namespace starlark {
 namespace runtime {
 
 struct starlark_types {
-  const static std::string none_t;
-  const static std::string bool_t;
-  const static std::string int_t;
-  const static std::string float_t;
-  const static std::string string_t;
-  const static std::string bytes_t;
-  const static std::string list_t;
-  const static std::string tuple_t;
-  const static std::string dict_t;
-  const static std::string set_t;
-  const static std::string function_t;
-  const static std::string builtin_function_or_method_t;
-  const static std::string range_t;
+  static const char none_t[];
+  static const char bool_t[];
+  static const char int_t[];
+  static const char float_t[];
+  static const char string_t[];
+  static const char bytes_t[];
+  static const char list_t[];
+  static const char tuple_t[];
+  static const char dict_t[];
+  static const char set_t[];
+  static const char function_t[];
+  static const char builtin_function_or_method_t[];
+  static const char range_t[];
 };
 
 }  // namespace runtime

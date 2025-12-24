@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 
 #include <limits>
+#include <utility>
 
 #include "runtime/starlark_numeric.hpp"
 

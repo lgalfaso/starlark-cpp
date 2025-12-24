@@ -3,13 +3,12 @@
 #ifndef INTERPRETER_INTERPRETER_HPP_
 #define INTERPRETER_INTERPRETER_HPP_
 
-#include <google/protobuf/arena.h>
-
+#include <string>
 #include <string_view>
 #include <vector>
 
-#include <google/protobuf/repeated_field.h>
-
+#include "google/protobuf/arena.h"
+#include "google/protobuf/repeated_field.h"
 #include "logging/logging.hpp"
 #include "runtime/starlark_object.hpp"
 
