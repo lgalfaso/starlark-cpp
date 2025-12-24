@@ -233,9 +233,7 @@ bool starlark_list::starlark_list_iterator::has_next() const {
 }
 
 starlark_obj* starlark_list::starlark_list_iterator::next() {
-  auto* result = *it;
-  ++it;
-  return result;
+  return *it++;
 }
 
 void starlark_list::starlark_list_iterator::end_iterator() {

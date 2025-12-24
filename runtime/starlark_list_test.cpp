@@ -517,4 +517,21 @@ TEST(StarlarkList, GetIterator) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkList, MutationWhileIterating) {
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+
+  [[maybe_unused]] auto* it = list.get_iterator(arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  list.add(&zero, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+
 }  // namespace
