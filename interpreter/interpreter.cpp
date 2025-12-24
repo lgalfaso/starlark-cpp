@@ -412,8 +412,6 @@ std::cerr << "Error: Required symbol " << symbol << " not avaible in the global 
             (op_code.call().has_variadic_positional_argument() ? 1 : 0) +
             (op_code.call().has_variadic_named_argument() ? 1 : 0);
         assert(stack.size() >= args_count + 1);
-        // TODO(lmirelmann): Implement.
-        // virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
         /*
           int32 positional_arguments_count = 1;
           int32 named_arguments_count = 2;
