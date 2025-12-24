@@ -604,12 +604,16 @@ TEST(Interpreter, ListIterator) {
 
   frame* result = runner.run(R"starlark(
 a01 = [x*x for x in [1,2,3,4]]
+a02 = [x*y for x in [1,2,3,4] for y in [5, 6]]
+a03 = [x*y for x in [1,2,3,4] if x % 2 == 1 for y in [5, 6]]
 )starlark", arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
-  ASSERT_THAT(result->elements, SizeIs(1));
+  ASSERT_THAT(result->elements, SizeIs(3));
 
   ASSERT_THAT(result->elements, Not(Contains(nullptr)));
   EXPECT_EQ(result->elements[0]->str(), "[1, 4, 9, 16]");
+  EXPECT_EQ(result->elements[1]->str(), "[5, 6, 10, 12, 15, 18, 20, 24]");
+  EXPECT_EQ(result->elements[2]->str(), "[5, 6, 15, 18]");
 }
 
 
