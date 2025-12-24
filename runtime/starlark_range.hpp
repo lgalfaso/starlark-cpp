@@ -21,6 +21,7 @@ class starlark_range : public starlark_obj {
   void set_step(const starlark_obj* value);
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   int64_t len(error_fn& error_callback) const override;
+  starlark_iterator* get_iterator(google::protobuf::Arena& arena, error_fn& error_callback) override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

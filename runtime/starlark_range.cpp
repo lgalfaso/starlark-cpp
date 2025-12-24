@@ -53,6 +53,11 @@ bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callba
   return false;
 }
 
+starlark_iterator* starlark_range::get_iterator(google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
 }  // namespace runtime
 }  // namespace starlark
 
