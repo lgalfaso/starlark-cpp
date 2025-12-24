@@ -533,5 +533,4 @@ TEST(StarlarkList, MutationWhileIterating) {
   EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
-
 }  // namespace
