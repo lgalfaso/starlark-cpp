@@ -90,6 +90,10 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena&
   return result;
 }
 
+starlark_iterator* starlark_dictionary::get_iterator(Arena& arena, error_fn& error_callback) {
+  return Arena::Create<starlark_dictionary_iterator>(&arena, this);
+}
+
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
@@ -124,6 +128,10 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
 }
 
 bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback) {
+  if (iterators_count) {
+    error_callback.add_error("Error in append: dictionary value is temporarily immutable due to active for-loop iteration");
+    return false;
+  }
   if (freezed) {
     // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
     error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
@@ -135,6 +143,22 @@ bool starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_f
   }
   auto [it, result] = values.insert(key, value);
   return result;
+}
+
+starlark_dictionary::starlark_dictionary_iterator::starlark_dictionary_iterator(starlark_dictionary* dictionary) : dictionary(dictionary), it(dictionary->values.begin()) {
+  dictionary->iterators_count++;
+}
+
+bool starlark_dictionary::starlark_dictionary_iterator::has_next() const {
+  return it != dictionary->values.end();
+}
+
+starlark_obj* starlark_dictionary::starlark_dictionary_iterator::next() {
+  return (it++)->first;
+}
+
+void starlark_dictionary::starlark_dictionary_iterator::end_iterator() {
+  dictionary->iterators_count--;
 }
 
 }  // namespace runtime

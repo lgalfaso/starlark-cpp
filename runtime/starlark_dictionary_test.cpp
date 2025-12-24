@@ -271,4 +271,47 @@ TEST(StarlarkDictionary, Len) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkDictionary, GetIterator) {
+  starlark_dictionary dictionary0;
+  starlark_dictionary dictionary1;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0");
+  starlark_string s_one("key1");
+  Arena arena;
+  error_handler error_callback;
+  dictionary1.insert(&s_zero, &zero, error_callback);
+  dictionary1.insert(&s_one, &one, error_callback);
+
+  auto* it0 = dictionary0.get_iterator(arena, error_callback);
+  EXPECT_FALSE(it0->has_next());
+  it0->end_iterator();
+
+  auto* it1 = dictionary1.get_iterator(arena, error_callback);
+  EXPECT_TRUE(it1->has_next());
+  EXPECT_TRUE(it1->next()->equals(s_zero));
+  EXPECT_TRUE(it1->has_next());
+  EXPECT_TRUE(it1->next()->equals(s_one));
+  EXPECT_FALSE(it1->has_next());
+  it1->end_iterator();
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, MutationWhileIterating) {
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0");
+  starlark_string s_one("key1");
+  Arena arena;
+  error_handler error_callback;
+  dictionary.insert(&s_zero, &zero, error_callback);
+
+  [[maybe_unused]] auto* it = dictionary.get_iterator(arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  dictionary.insert(&s_one, &one, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: dictionary value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
 }  // namespace
