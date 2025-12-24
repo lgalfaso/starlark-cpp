@@ -2,8 +2,6 @@
 
 #include "interpreter/interpreter.hpp"
 
-#include <iostream>
-
 #include <functional>
 #include <limits>
 #include <map>
@@ -190,9 +188,8 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         auto* value = frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->elements[op_code.load().pos_in_frame()];
         if (value == nullptr) {
           const auto& name = frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->names->Get(op_code.load().pos_in_frame());
-          // TODO(lmirelmann): This error should go to the logger.
-std::cerr << "UnboundLocalError: cannot access local variable '" << name << "' where it is not associated with a value\n";
-          return nullptr;
+          error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));
+          break;
         }
         stack.push_back(value);
         break;
@@ -232,7 +229,7 @@ std::cerr << "UnboundLocalError: cannot access local variable '" << name << "' w
             for (const auto& symbol : op_code.create_frame().symbol()) {
               auto pos = global_context.find(symbol);
               if (pos == global_context.end()) {
-std::cerr << "Error: Required symbol " << symbol << " not avaible in the global context" << std::endl;
+                error_callback.add_error(std::format("Error: Required symbol {} not avaible in the global context", symbol));
                 return nullptr;
               } else {
                 global_frame->elements[count] = pos->second;
@@ -463,8 +460,7 @@ std::cerr << "Error: Required symbol " << symbol << " not avaible in the global 
       case OpCode::kSetDefaultValues:
       case OpCode::OP_CODE_NOT_SET:
         // TODO(lmirelmann): Implement the other instructions.
-        // TODO(lmirelmann): Log the error, but for this, we would need to know what the position of the operation is.
-std::cerr << "Unknown op-code: " << op_code.op_code_case() << "\n";
+        error_callback.add_error(std::format("Unknown op-code: {}", op_code.DebugString()));
         return nullptr;
     }
   }

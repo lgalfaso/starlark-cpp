@@ -122,6 +122,8 @@ a = b
 b = []
 )starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ("UnboundLocalError: cannot access local variable 'b' where it is not associated with a value", logging.begin()->message());
   // TODO(lmirelmann): Check the error.
 }
 
