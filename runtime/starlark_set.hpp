@@ -30,7 +30,7 @@ class starlark_set : public starlark_obj {
 
   class starlark_set_iterator : public starlark_iterator {
    public:
-    starlark_set_iterator(starlark_set* set);
+    explicit starlark_set_iterator(starlark_set* set);
     bool has_next() const override;
     starlark_obj* next() override;
     void end_iterator() override;

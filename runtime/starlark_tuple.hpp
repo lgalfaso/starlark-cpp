@@ -28,7 +28,7 @@ class starlark_tuple : public starlark_obj {
 
   class starlark_tuple_iterator : public starlark_iterator {
    public:
-    starlark_tuple_iterator(starlark_tuple* tuple);
+    explicit starlark_tuple_iterator(starlark_tuple* tuple);
     bool has_next() const override;
     starlark_obj* next() override;
     void end_iterator() override;

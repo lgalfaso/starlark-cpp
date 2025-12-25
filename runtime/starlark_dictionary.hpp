@@ -26,7 +26,7 @@ class starlark_dictionary : public starlark_obj {
 
   class starlark_dictionary_iterator : public starlark_iterator {
    public:
-    starlark_dictionary_iterator(starlark_dictionary* dictionary);
+    explicit starlark_dictionary_iterator(starlark_dictionary* dictionary);
     bool has_next() const override;
     starlark_obj* next() override;
     void end_iterator() override;
