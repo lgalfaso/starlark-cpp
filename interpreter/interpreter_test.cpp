@@ -632,8 +632,9 @@ TEST(Interpreter, BuiltInFunctions) {
   // TODO(lmirelmann): Test all the built-in functions.
   frame* result = runner.run(R"starlark(
 a00 = abs(-1)
+# any
 # all
-a02 = bool(1)
+a03 = bool(1)
 # bytes
 # dict
 # dir
@@ -644,8 +645,8 @@ a02 = bool(1)
 # hasattr
 # hash
 # int
-a13 = len([])
-a14 = list((1, 2))
+a14 = len([])
+a15 = list((1, 2))
 # max
 # min
 # print

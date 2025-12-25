@@ -156,6 +156,11 @@ starlark_obj* starlark_fn_all(const std::vector<starlark_obj*>& pos_args, const 
   return nullptr;
 }
 
+starlark_obj* starlark_fn_any(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
 starlark_obj* starlark_fn_bool(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, "bool")) {
     return nullptr;
