@@ -152,13 +152,37 @@ starlark_obj* starlark_fn_abs(const std::vector<starlark_obj*>& pos_args, const 
 }
 
 starlark_obj* starlark_fn_all(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "all")) {
+    return nullptr;
+  }
+  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  bool result = true;
+  while (result && it->has_next()) {
+    result = it->next()->truthy();
+  }
+  it->end_iterator();
+  // TODO(lmirelmann): Use the instance of bool from the context.
+  return Arena::Create<starlark_bool>(&arena, result);
 }
 
 starlark_obj* starlark_fn_any(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "any")) {
+    return nullptr;
+  }
+  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  bool result = false;
+  while (!result && it->has_next()) {
+    result = it->next()->truthy();
+  }
+  it->end_iterator();
+  // TODO(lmirelmann): Use the instance of bool from the context.
+  return Arena::Create<starlark_bool>(&arena, result);
 }
 
 starlark_obj* starlark_fn_bool(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

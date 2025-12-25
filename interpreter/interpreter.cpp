@@ -45,6 +45,8 @@ using ::starlark::runtime::starlark_bytes;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_fn_abs;
+using ::starlark::runtime::starlark_fn_all;
+using ::starlark::runtime::starlark_fn_any;
 using ::starlark::runtime::starlark_fn_bool;
 using ::starlark::runtime::starlark_fn_len;
 using ::starlark::runtime::starlark_fn_list;
@@ -512,6 +514,8 @@ frame* interpreter::run(std::string_view starlark_code, Arena& arena, logger& lo
   global_context["False"] = Arena::Create<starlark_bool>(&arena, false);
   global_context["None"] = Arena::Create<starlark_none>(&arena);
   global_context["abs"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_abs, "abs");
+  global_context["all"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_all, "all");
+  global_context["any"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_any, "any");
   global_context["bool"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_bool, "bool");
   global_context["len"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_len, "len");
   global_context["list"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_list, "list");
