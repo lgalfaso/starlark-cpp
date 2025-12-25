@@ -38,6 +38,7 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
 using ::testing::Contains;
+using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::SizeIs;
 
@@ -61,6 +62,27 @@ TEST(Interpreter, InvalidProgram) {
 a = [
 )starlark", arena, logging);
   ASSERT_EQ(nullptr, result);
+}
+
+TEST(Interpreter, ExpressionStatements) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+[0]
+1
+0x1234567890abcdefabcdef
+None
+{'a': 2}
+1.25
+"abc"
+b"def"
+(1, 2, 3, 4)
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, IsEmpty());
+  ASSERT_THAT(logging, IsEmpty());
 }
 
 TEST(Interpreter, Primitives) {
