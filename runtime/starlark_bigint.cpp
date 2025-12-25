@@ -44,8 +44,7 @@ starlark_obj* starlark_bigint::unary_minus(Arena& arena, error_fn& error_callbac
 }
 
 starlark_obj* starlark_bigint::unary_tilde(Arena& arena, error_fn& error_callback) const {
-  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
-  return create_integer(-(value + number::one), arena);
+  return create_integer(~value, arena);
 }
 
 starlark_obj* starlark_bigint::binary_lshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
