@@ -62,8 +62,6 @@ namespace interpreter {
 namespace {
 
 frame* create_frame(Arena& arena, std::size_t size, frame* parent_frame, const RepeatedPtrField<std::string>* names) {
-  // TODO(lmirelmann): Maybe the frame should allocate the vector using the arena.
-  // TODO(lmirelmann): If we were to use our own arena, then we could allocate the elements in the same structure.
   frame* result = Arena::Create<frame>(&arena, size, names);
   result->parent_frame = parent_frame;
   return result;
@@ -142,7 +140,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       }
       case OpCode::kMakeDictionary:
-        // TODO(lmirelmann): The reserve size is ignored.
+        // Note: The reserve size is not used.
         stack.push_back(Arena::Create<starlark_dictionary>(&arena));
         break;
       case OpCode::kAddToDictionary: {
@@ -499,6 +497,7 @@ interpreter::interpreter() {}
 
 // TODO(lmirelmann): There has to be a way to add entries to the global context.
 // TODO(lmirelmann): There has to be a way to define the parsing options.
+// TODO(lmirelmann): There has to be a way to define the runtime options.
 frame* interpreter::run(std::string_view starlark_code, Arena& arena, logger& logging) {
   std::set<std::string, std::less<>> binding;
   class compiler star_compiler(binding);
