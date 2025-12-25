@@ -505,6 +505,23 @@ a01 = (1,2) + (3,4)
   EXPECT_EQ(result->elements[0]->str(), "(1, 2, 3, 4)");
 }
 
+TEST(Interpreter, BinaryMinusOperator) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = 3 - 5
+a02 = 4 - 5.0
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "-2");
+  EXPECT_EQ(result->elements[1]->str(), "-1.0");
+}
+
 TEST(Interpreter, BinaryStarOperator) {
   interpreter runner;
   Arena arena;
@@ -520,7 +537,39 @@ a01 = (1,2) * 2
   EXPECT_EQ(result->elements[0]->str(), "(1, 2, 1, 2)");
 }
 
-// TODO(lmirelmann): Add tests for the other binary operators.
+TEST(Interpreter, BinarySlashOperator) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = 1 / 2
+a02 = 3.0 / 2
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr))) << print_logs(logging);
+  EXPECT_EQ(result->elements[0]->str(), "0.5");
+  EXPECT_EQ(result->elements[1]->str(), "1.5");
+}
+
+TEST(Interpreter, BinarySlashSlashOperator) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = 5 // 2
+a02 = 3.0 // 2
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr))) << print_logs(logging);
+  EXPECT_EQ(result->elements[0]->str(), "2");
+  EXPECT_EQ(result->elements[1]->str(), "1.0");
+}
 
 TEST(Interpreter, NotPossibleToHaveUnhashableKeys) {
   interpreter runner;
