@@ -645,7 +645,7 @@ a02 = bool(1)
 # hash
 # int
 a13 = len([])
-# list
+a14 = list((1, 2))
 # max
 # min
 # print
@@ -660,12 +660,13 @@ a13 = len([])
 # zip
 )starlark", arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
-  ASSERT_THAT(result->elements, SizeIs(3));
+  ASSERT_THAT(result->elements, SizeIs(4));
 
   ASSERT_THAT(result->elements, Not(Contains(nullptr)));
   EXPECT_EQ(result->elements[0]->str(), "1");
   EXPECT_EQ(result->elements[1]->str(), "True");
   EXPECT_EQ(result->elements[2]->str(), "0");
+  EXPECT_EQ(result->elements[3]->str(), "[1, 2]");
 }
 
 TEST(Interpreter, ListComprehension) {

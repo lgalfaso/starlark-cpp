@@ -549,6 +549,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":starlark_bool",
+        ":starlark_list",
         ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
@@ -565,6 +566,7 @@ cc_test(
         ":starlark_list",
         ":starlark_numeric_impl",
         ":starlark_testing",
+        ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
 )

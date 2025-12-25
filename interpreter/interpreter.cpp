@@ -47,6 +47,7 @@ using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_fn_abs;
 using ::starlark::runtime::starlark_fn_bool;
 using ::starlark::runtime::starlark_fn_len;
+using ::starlark::runtime::starlark_fn_list;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
@@ -514,6 +515,7 @@ frame* interpreter::run(std::string_view starlark_code, Arena& arena, logger& lo
   global_context["abs"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_abs, "abs");
   global_context["bool"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_bool, "bool");
   global_context["len"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_len, "len");
+  global_context["list"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_list, "list");
   return run_program(starlark_program, global_context, arena, logging);
 }
 

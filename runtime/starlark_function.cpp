@@ -9,6 +9,7 @@
 
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_list.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -94,6 +95,18 @@ bool one_pos_arg(const std::vector<starlark_obj*>& pos_args, const std::map<std:
   }
   if (pos_args.size() != 1) {
     error_callback.add_error(std::format("TypeError: {}() takes exactly one argument ({} given)", fn_name, pos_args.size()));
+    return false;
+  }
+  return true;
+}
+
+bool zero_or_one_pos_arg(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback, std::string_view fn_name) {
+  if (!named_args.empty()) {
+    error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", fn_name));
+    return false;
+  }
+  if (pos_args.size() > 1) {
+    error_callback.add_error(std::format("TypeError: {} expected at most 1 argument, got {}", fn_name, pos_args.size()));
     return false;
   }
   return true;
@@ -209,13 +222,26 @@ starlark_obj* starlark_fn_len(const std::vector<starlark_obj*>& pos_args, const 
   if (result < 0) {
     return nullptr;
   }
-  // TODO(lmirelmann): Try to use the instance of the int from the context.
   return create_integer(result, arena);
 }
 
 starlark_obj* starlark_fn_list(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "list")) {
+    return nullptr;
+  }
+  if (pos_args.empty()) {
+    return Arena::Create<starlark_list>(&arena, 0);
+  }
+  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_list>(&arena, pos_args.front()->len(error_callback));
+  while (it->has_next()) {
+    result->add(it->next(), error_callback);
+  }
+  it->end_iterator();
+  return result;
 }
 
 starlark_obj* starlark_fn_max(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
