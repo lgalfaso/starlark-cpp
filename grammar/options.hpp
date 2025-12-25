@@ -53,10 +53,6 @@ struct options {
 
 extern const std::set<std::string> predeclared_symbols;
 
-int64_t log2_max_bigint();
-int64_t max_sequence_size();
-int64_t max_string_length();
-
 }  // namespace grammar
 }  // namespace starlark
 

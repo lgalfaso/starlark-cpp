@@ -17,6 +17,12 @@ cc_library(
 )
 
 cc_library(
+    name = "options",
+    srcs = ["options.cpp"],
+    hdrs = ["options.hpp"],
+)
+
+cc_library(
     name = "siphash",
     srcs = ["siphash.cpp"],
     hdrs = ["siphash.hpp"],
@@ -179,12 +185,12 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":hash",
+        ":options",
         ":starlark_float",
         ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
         "//bigint:number",
-        "//grammar:options",
     ],
 )
 
@@ -220,10 +226,10 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":hex_encoder",
+        ":options",
         ":siphash",
         ":starlark_numeric",
         ":starlark_object",
-        "//grammar:options",
         ":starlark_types",
     ],
 )
@@ -290,12 +296,12 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":hash",
+        ":options",
         ":starlark_bigint",
         ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
         "//bigint:number",
-        "//grammar:options",
     ],
 )
 
@@ -455,12 +461,12 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":hex_encoder",
+        ":options",
         ":siphash",
         ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
         "//bigint:number",
-        "//grammar:options",
         "//unicode:utf8_reader",
     ],
 )

@@ -7,8 +7,8 @@
 #include <string>
 
 #include "bigint/number.hpp"
-#include "grammar/options.hpp"
 #include "runtime/hex_encoder.hpp"
+#include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
@@ -16,7 +16,6 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::grammar::max_string_length;
 using ::starlark::unicode::utf8_reader;
 
 namespace starlark {

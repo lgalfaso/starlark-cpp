@@ -6,13 +6,12 @@
 #include <string>
 #include <vector>
 
-#include "grammar/options.hpp"
+#include "runtime/options.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::grammar::max_sequence_size;
 
 namespace starlark {
 namespace runtime {

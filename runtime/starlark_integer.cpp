@@ -9,14 +9,13 @@
 #include <limits>
 #include <string>
 
-#include "grammar/options.hpp"
 #include "runtime/hash.hpp"
+#include "runtime/options.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::grammar::log2_max_bigint;
 
 namespace starlark {
 namespace runtime {
