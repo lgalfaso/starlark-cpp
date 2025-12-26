@@ -326,6 +326,7 @@ TEST(StarlarkTuple, BinaryStar) {
   auto* result_2 = tuple.binary_star(three, arena, error_callback);
   auto* result_3 = tuple.binary_star(minus_two, arena, error_callback);
   auto* result_4 = tuple.binary_star(minus_one, arena, error_callback);
+  auto* result_5 = tuple0.binary_star(two, arena, error_callback);
 
   ASSERT_NE(result_0, nullptr);
   EXPECT_EQ(result_0->str(), "()");
@@ -337,6 +338,8 @@ TEST(StarlarkTuple, BinaryStar) {
   EXPECT_EQ(result_3->str(), "()");
   ASSERT_NE(result_4, nullptr);
   EXPECT_EQ(result_4->str(), "()");
+  ASSERT_NE(result_5, nullptr);
+  EXPECT_EQ(result_5->str(), "()");
 }
 
 TEST(StarlarkTuple, BinaryStarReverse) {

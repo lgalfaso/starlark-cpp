@@ -11,24 +11,10 @@
 namespace starlark {
 namespace runtime {
 
-enum class starlark_numeric_type {
-  kInt64,
-  kBigInt,
-  kFloat
-};
-
-class starlark_numeric : public starlark_obj {
- public:
-  virtual starlark_numeric_type numeric_type() const = 0;
-  virtual int64_t as_int64() const;
-  virtual const starlark::bigint::number& as_bigint() const;
-  virtual double as_float() const;
-
- protected:
-  bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
-  void inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const override;
-};
-
+bool equals_fb(double lhs, const starlark::bigint::number& rhs);
+bool equals_ib(int64_t lhs, const starlark::bigint::number& rhs);
+int cmp_fb(double lhs, const starlark::bigint::number& rhs);
+int cmp_ib(int64_t lhs, const starlark::bigint::number& rhs);
 starlark::bigint::number from_int64(int64_t value);
 double to_double(const starlark::bigint::number& value);
 double starlark_fmod(double a, double b);

@@ -11,8 +11,8 @@
 #include <variant>
 #include <vector>
 
+#include "bigint/number.hpp"
 #include "google/protobuf/arena.h"
-
 #include "runtime/error_fn.hpp"
 
 #pragma GCC visibility push(default)
@@ -103,6 +103,13 @@ class starlark_iterator {
   virtual void end_iterator() = 0;
 };
 
+enum class starlark_numeric_type {
+  kInt64,
+  kBigInt,
+  kFloat,
+  kNotNumeric
+};
+
 class starlark_obj {
  public:
   virtual ~starlark_obj();
@@ -135,6 +142,11 @@ class starlark_obj {
 
   virtual int64_t len(error_fn& error_callback) const;
   virtual starlark_iterator* get_iterator(google::protobuf::Arena& arena, error_fn& error_callback);
+
+  virtual starlark_numeric_type numeric_type() const;
+  virtual int64_t as_int64() const;
+  virtual const starlark::bigint::number& as_bigint() const;
+  virtual double as_float() const;
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;

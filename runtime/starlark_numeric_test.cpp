@@ -12,7 +12,6 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::runtime::create_integer;
-using ::starlark::runtime::starlark_numeric;
 using ::starlark::runtime::starlark_numeric_type;
 using ::starlark::runtime::to_double;
 
@@ -34,7 +33,7 @@ TEST(ToDouble, FromBigInt) {
 TEST(CreateIntegerFromBigInt, Downgrades) {
   auto test = [](starlark_numeric_type numeric_type, number&& value) {
     Arena arena;
-    EXPECT_EQ(numeric_type, static_cast<starlark_numeric*>(create_integer(std::move(value), arena))->numeric_type());
+    EXPECT_EQ(numeric_type, create_integer(std::move(value), arena)->numeric_type());
   };
   test(starlark_numeric_type::kBigInt, (number::minus_one << 63) - number::one);
   test(starlark_numeric_type::kInt64, number::minus_one << 63);

@@ -9,6 +9,7 @@
 #include <vector>
 
 using ::google::protobuf::Arena;
+using ::starlark::bigint::number;
 
 namespace starlark {
 namespace runtime {
@@ -299,6 +300,22 @@ int64_t starlark_obj::len(error_fn& error_callback) const {
 starlark_iterator* starlark_obj::get_iterator(Arena& arena, error_fn& error_callback) {
   error_callback.add_error(std::format("TypeError: '{}' object is not iterable", type()));
   return nullptr;
+}
+
+int64_t starlark_obj::as_int64() const {
+  return 0;
+}
+
+const number& starlark_obj::as_bigint() const {
+  return number::zero;
+}
+
+double starlark_obj::as_float() const {
+  return 0;
+}
+
+starlark_numeric_type starlark_obj::numeric_type() const {
+  return starlark_numeric_type::kNotNumeric;
 }
 
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {

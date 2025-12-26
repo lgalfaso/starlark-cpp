@@ -33,76 +33,127 @@ starlark_obj* starlark_float::unary_minus(Arena& arena, error_fn& error_callback
 }
 
 starlark_obj* starlark_float::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t && other.type() != type()) {
-    return starlark_obj::binary_plus(other, arena, error_callback);
-  }
-  auto* n_other = static_cast<const starlark_numeric*>(&other);
-  switch (n_other->numeric_type()) {
+  switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
-      return create_float(value + n_other->as_float(), arena);
+      return create_float(value + other.as_float(), arena);
     case starlark_numeric_type::kInt64:
-      return create_float(value + n_other->as_int64(), arena);
+      return create_float(value + other.as_int64(), arena);
     case starlark_numeric_type::kBigInt: {
-      auto fother = to_double(n_other->as_bigint());
+      auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
         error_callback.add_error("OverflowError: int too large to convert to float");
         return nullptr;
       }
       return create_float(value + fother, arena);
     }
+    default:
+      return starlark_obj::binary_plus(other, arena, error_callback);
+  }
+}
+
+void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
+  switch (other->numeric_type()) {
+    case starlark_numeric_type::kFloat: {
+      if (std::isnan(as_float())) {
+        if (!std::isnan(other->as_float())) {
+          comp.add_task(order_comparator::pending_task{
+              .type = order_comparator::pending_task_type::kGreaterThan,
+          });
+        }
+        break;
+      }
+      if (std::isnan(other->as_float())) {
+        comp.add_task(order_comparator::pending_task{
+            .type = order_comparator::pending_task_type::kLessThan,
+        });
+        break;
+      }
+      auto r = as_float() <=> other->as_float();
+      if (r != 0) {
+        comp.add_task(order_comparator::pending_task{
+            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
+        });
+      }
+      break;
+    }
+    case starlark_numeric_type::kInt64: {
+      if (std::isnan(as_float())) {
+        comp.add_task(order_comparator::pending_task{
+            .type = order_comparator::pending_task_type::kGreaterThan,
+        });
+        break;
+      }
+      auto r = as_float() <=> other->as_int64();
+      if (r != 0) {
+        comp.add_task(order_comparator::pending_task{
+            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
+        });
+      }
+      break;
+    }
+    case starlark_numeric_type::kBigInt: {
+      if (std::isnan(as_float())) {
+        comp.add_task(order_comparator::pending_task{
+            .type = order_comparator::pending_task_type::kGreaterThan,
+        });
+        break;
+      }
+      auto r = cmp_fb(as_float(), other->as_bigint());
+      if (r != 0) {
+        comp.add_task(order_comparator::pending_task{
+            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
+        });
+      }
+      break;
+    }
+    default:
+      starlark_obj::inner_cmp(comp, other, op, error_callback);
+      break;
   }
 }
 
 starlark_obj* starlark_float::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t && other.type() != type()) {
-    return starlark_obj::binary_minus(other, arena, error_callback);
-  }
-  auto* n_other = static_cast<const starlark_numeric*>(&other);
-  switch (n_other->numeric_type()) {
+  switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
-      return create_float(value - n_other->as_float(), arena);
+      return create_float(value - other.as_float(), arena);
     case starlark_numeric_type::kInt64:
-      return create_float(value - n_other->as_int64(), arena);
+      return create_float(value - other.as_int64(), arena);
     case starlark_numeric_type::kBigInt: {
-      auto fother = to_double(n_other->as_bigint());
+      auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
         error_callback.add_error("OverflowError: int too large to convert to float");
         return nullptr;
       }
       return create_float(value - fother, arena);
     }
+    default:
+      return starlark_obj::binary_minus(other, arena, error_callback);
   }
 }
 
 starlark_obj* starlark_float::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t && other.type() != type()) {
-    return starlark_obj::binary_star(other, arena, error_callback);
-  }
-  auto* n_other = static_cast<const starlark_numeric*>(&other);
-  switch (n_other->numeric_type()) {
+  switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
-      return create_float(value * n_other->as_float(), arena);
+      return create_float(value * other.as_float(), arena);
     case starlark_numeric_type::kInt64:
-      return create_float(value * n_other->as_int64(), arena);
+      return create_float(value * other.as_int64(), arena);
     case starlark_numeric_type::kBigInt: {
-      auto fother = to_double(n_other->as_bigint());
+      auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
         error_callback.add_error("OverflowError: int too large to convert to float");
         return nullptr;
       }
       return create_float(value * fother, arena);
     }
+    default:
+      return starlark_obj::binary_star(other, arena, error_callback);
   }
 }
 
 starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t && other.type() != type()) {
-    return starlark_obj::binary_slash(other, arena, error_callback);
-  }
-  auto* n_other = static_cast<const starlark_numeric*>(&other);
-  switch (n_other->numeric_type()) {
+  switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
-      auto fother = n_other->as_float();
+      auto fother = other.as_float();
       if (fother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -110,7 +161,7 @@ starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& are
       return create_float(value / fother, arena);
     }
     case starlark_numeric_type::kInt64: {
-      auto iother = n_other->as_int64();
+      auto iother = other.as_int64();
       if (iother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -118,7 +169,7 @@ starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& are
       return create_float(value / iother, arena);
     }
     case starlark_numeric_type::kBigInt: {
-      auto fother = to_double(n_other->as_bigint());
+      auto fother = to_double(other.as_bigint());
       if (fother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -129,17 +180,15 @@ starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& are
       }
       return create_float(value / fother, arena);
     }
+    default:
+      return starlark_obj::binary_slash(other, arena, error_callback);
   }
 }
 
 starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t && other.type() != type()) {
-    return starlark_obj::binary_slash_slash(other, arena, error_callback);
-  }
-  auto* n_other = static_cast<const starlark_numeric*>(&other);
-  switch (n_other->numeric_type()) {
+  switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
-      auto fother = n_other->as_float();
+      auto fother = other.as_float();
       if (fother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -147,7 +196,7 @@ starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Aren
       return create_float(std::floor(value / fother), arena);
     }
     case starlark_numeric_type::kInt64: {
-      auto iother = n_other->as_int64();
+      auto iother = other.as_int64();
       if (iother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -155,7 +204,7 @@ starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Aren
       return create_float(std::floor(value / iother), arena);
     }
     case starlark_numeric_type::kBigInt: {
-    auto fother = to_double(n_other->as_bigint());
+      auto fother = to_double(other.as_bigint());
       if (fother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -166,17 +215,15 @@ starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Aren
       }
       return create_float(std::floor(value / fother), arena);
     }
+    default:
+      return starlark_obj::binary_slash_slash(other, arena, error_callback);
   }
 }
 
 starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t && other.type() != type()) {
-    return starlark_obj::binary_percent(other, arena, error_callback);
-  }
-  auto* n_other = static_cast<const starlark_numeric*>(&other);
-  switch (n_other->numeric_type()) {
+  switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
-      auto fother = n_other->as_float();
+      auto fother = other.as_float();
       if (fother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -184,7 +231,7 @@ starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& a
       return create_float(starlark_fmod(value, fother), arena);
     }
     case starlark_numeric_type::kInt64: {
-      auto iother = n_other->as_int64();
+      auto iother = other.as_int64();
       if (iother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -192,7 +239,7 @@ starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& a
       return create_float(starlark_fmod(value, iother), arena);
     }
     case starlark_numeric_type::kBigInt: {
-      auto fother = to_double(n_other->as_bigint());
+      auto fother = to_double(other.as_bigint());
       if (fother == 0) {
         error_callback.add_error("ZeroDivisionError: division by zero");
         return nullptr;
@@ -203,6 +250,8 @@ starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& a
       }
       return create_float(starlark_fmod(value, fother), arena);
     }
+    default:
+      return starlark_obj::binary_percent(other, arena, error_callback);
   }
 }
 
@@ -242,6 +291,22 @@ bool starlark_float::inner_repr(printer& print, printer_action action) const {
   }
   print.append(result);
   return false;
+}
+
+bool starlark_float::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
+  switch (other->numeric_type()) {
+    case starlark_numeric_type::kFloat:
+      if (std::isnan(as_float()) && std::isnan(other->as_float())) {
+        return true;
+      }
+      return as_float() == other->as_float();
+    case starlark_numeric_type::kInt64:
+      return as_float() == other->as_int64();
+    case starlark_numeric_type::kBigInt:
+      return equals_fb(as_float(), other->as_bigint());
+    default:
+      return false;
+  }
 }
 
 bool starlark_float::truthy() const {

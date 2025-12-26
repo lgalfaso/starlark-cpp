@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "runtime/starlark_bool.hpp"
-#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_list.hpp"
+#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -119,35 +119,31 @@ starlark_obj* starlark_fn_abs(const std::vector<starlark_obj*>& pos_args, const 
     return nullptr;
   }
   auto* value = pos_args.front();
-  if (value->type() == starlark_types::float_t) {
-    auto* n_value = static_cast<starlark_numeric*>(value);
-    auto fvalue = n_value->as_float();
-    if (std::signbit(fvalue)) {
-      return create_float(std::abs(n_value->as_float()), arena);
+  switch (value->numeric_type()) {
+    case starlark_numeric_type::kFloat: {
+      auto fvalue = value->as_float();
+      if (std::signbit(fvalue)) {
+        return create_float(std::abs(value->as_float()), arena);
+      }
+      return value;
     }
-    return value;
-  } else if (value->type() == starlark_types::int_t) {
-    auto* n_value = static_cast<starlark_numeric*>(value);
-    if (n_value->numeric_type() == starlark_numeric_type::kInt64) {
-      int64_t ivalue = n_value->as_int64();
+    case starlark_numeric_type::kInt64: {
+      int64_t ivalue = value->as_int64();
       if (ivalue < 0) {
         return value->unary_minus(arena, error_callback);
       }
       return value;
-    } else if (n_value->numeric_type() == starlark_numeric_type::kBigInt) {
-      const auto& bvalue = n_value->as_bigint();
+    }
+    case starlark_numeric_type::kBigInt: {
+      const auto& bvalue = value->as_bigint();
       if (bvalue.sign()) {
         return value->unary_minus(arena, error_callback);
       }
       return value;
-    } else {
-      // Should not happen.
-      error_callback.add_error("TypeError: unknown numeric type");
-      return nullptr;
     }
-  } else {
-    error_callback.add_error(std::format("TypeError: bad operand type for abs(): '{}'", value->type()));
-    return nullptr;
+    default:
+      error_callback.add_error(std::format("TypeError: bad operand type for abs(): '{}'", value->type()));
+      return nullptr;
   }
 }
 

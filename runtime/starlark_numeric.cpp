@@ -15,8 +15,6 @@ using ::starlark::bigint::number;
 namespace starlark {
 namespace runtime {
 
-namespace {
-
 bool equals_fb(double lhs, const number& rhs) {
   if (!std::isfinite(lhs)) {
     return false;
@@ -172,8 +170,6 @@ int cmp_ib(int64_t lhs, const number& rhs) {
   return 0;
 }
 
-}  // namespace
-
 number from_int64(int64_t value) {
   number result(value);
   if (value < 0) {
@@ -241,150 +237,6 @@ int64_t starlark_mod(int64_t a, int64_t b) {
     return result + b;
   }
   return result;
-}
-
-bool starlark_numeric::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (other->type() != starlark_types::float_t && other->type() != starlark_types::int_t) {
-    return false;
-  }
-  const starlark_numeric& n_other = *static_cast<const starlark_numeric*>(other);
-  switch (numeric_type()) {
-    case starlark_numeric_type::kFloat:
-      switch (n_other.numeric_type()) {
-        case starlark_numeric_type::kFloat:
-          if (std::isnan(as_float()) && std::isnan(n_other.as_float())) {
-            return true;
-          }
-          return as_float() == n_other.as_float();
-        case starlark_numeric_type::kInt64:
-          return as_float() == n_other.as_int64();
-        case starlark_numeric_type::kBigInt:
-          return equals_fb(as_float(), n_other.as_bigint());
-      }
-    case starlark_numeric_type::kInt64:
-      switch (n_other.numeric_type()) {
-        case starlark_numeric_type::kFloat:
-          return as_int64() == n_other.as_float();
-        case starlark_numeric_type::kInt64:
-          return as_int64() == n_other.as_int64();
-        case starlark_numeric_type::kBigInt:
-          return equals_ib(as_int64(), n_other.as_bigint());
-      }
-    case starlark_numeric_type::kBigInt:
-      switch (n_other.numeric_type()) {
-        case starlark_numeric_type::kFloat:
-          return equals_fb(n_other.as_float(), as_bigint());
-        case starlark_numeric_type::kInt64:
-          return equals_ib(n_other.as_int64(), as_bigint());
-        case starlark_numeric_type::kBigInt:
-          return as_bigint() == n_other.as_bigint();
-      }
-  }
-}
-
-void starlark_numeric::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
-  if (other->type() != starlark_types::float_t && other->type() != starlark_types::int_t) {
-    starlark_obj::inner_cmp(comp, other, op, error_callback);
-    return;
-  }
-  const starlark_numeric& n_other = *static_cast<const starlark_numeric*>(other);
-  if (numeric_type() == starlark_numeric_type::kFloat && std::isnan(as_float())) {
-    if (n_other.numeric_type() == starlark_numeric_type::kFloat && !std::isnan(n_other.as_float())) {
-      comp.add_task(order_comparator::pending_task{
-          .type = order_comparator::pending_task_type::kGreaterThan,
-      });
-    }
-    return;
-  }
-  if (n_other.numeric_type() == starlark_numeric_type::kFloat && std::isnan(n_other.as_float())) {
-    comp.add_task(order_comparator::pending_task{
-        .type = order_comparator::pending_task_type::kLessThan,
-    });
-    return;
-  }
-
-  if (numeric_type() == starlark_numeric_type::kFloat) {
-    if (n_other.numeric_type() == starlark_numeric_type::kFloat) {
-      auto r = as_float() <=> n_other.as_float();
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    } else if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
-      auto r = as_float() <=> n_other.as_int64();
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    } else {
-      auto r = cmp_fb(as_float(), n_other.as_bigint());
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    }
-  } else if (numeric_type() == starlark_numeric_type::kInt64) {
-    if (n_other.numeric_type() == starlark_numeric_type::kFloat) {
-      auto r = as_int64() <=> n_other.as_float();
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    } else if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
-      auto r = as_int64() <=> n_other.as_int64();
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    } else {
-      auto r = cmp_ib(as_int64(), n_other.as_bigint());
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    }
-  } else {
-    if (n_other.numeric_type() == starlark_numeric_type::kFloat) {
-      auto r = cmp_fb(n_other.as_float(), as_bigint());
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r > 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    } else if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
-      auto r = cmp_ib(n_other.as_int64(), as_bigint());
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r > 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    } else {
-      auto r = as_bigint().cmp(n_other.as_bigint());
-      if (r != 0) {
-        comp.add_task(order_comparator::pending_task{
-            .type = r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan,
-        });
-      }
-    }
-  }
-}
-
-int64_t starlark_numeric::as_int64() const {
-  return 0;
-}
-
-const number& starlark_numeric::as_bigint() const {
-  return number::zero;
-}
-
-double starlark_numeric::as_float() const {
-  return 0;
 }
 
 }  // namespace runtime

@@ -264,6 +264,7 @@ TEST(StarlarkString, BinaryStar) {
   auto* result_3 = str.binary_star(minus_two, arena, error_callback);
   auto* result_4 = str.binary_star(minus_one, arena, error_callback);
   auto* result_5 = str0.binary_star(big, arena, error_callback);
+  auto* result_6 = str0.binary_star(two, arena, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "abcabc");
@@ -275,6 +276,8 @@ TEST(StarlarkString, BinaryStar) {
   EXPECT_EQ(result_4->str(), "");
   ASSERT_NE(result_5, nullptr);
   EXPECT_EQ(result_5->str(), "");
+  ASSERT_NE(result_6, nullptr);
+  EXPECT_EQ(result_6->str(), "");
 }
 
 TEST(StarlarkString, BinaryStarReverse) {

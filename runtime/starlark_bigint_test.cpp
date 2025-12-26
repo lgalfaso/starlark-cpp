@@ -16,6 +16,7 @@
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
+#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_range.hpp"
 #include "runtime/starlark_set.hpp"
@@ -26,6 +27,7 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::bigint::parse_number;
 using ::starlark::runtime::from_int64;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -43,7 +45,10 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
+using ::testing::Eq;
+using ::testing::Gt;
 using ::testing::IsEmpty;
+using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
@@ -96,6 +101,8 @@ TEST(StarlarkBigInt, Equals) {
   EXPECT_FALSE(starlark_bigint(0).equals(starlark_float(-std::numeric_limits<double>::infinity())));
   EXPECT_FALSE(starlark_bigint(1).equals(starlark_float(16)));
   EXPECT_FALSE(starlark_bigint((starlark::bigint::number::one << 64) + starlark::bigint::number::one).equals(starlark_integer(1)));
+
+  EXPECT_FALSE(starlark_bigint(0).equals(starlark_bool(false)));
 }
 
 TEST(StarlarkBigint, Hash) {
@@ -115,6 +122,101 @@ TEST(StarlarkBigint, Hash) {
   EXPECT_EQ(0x8ec055467e5d2f0, starlark_bigint(starlark::bigint::number::parse_hex("372878134297382479432178392575395348243795483974539854732983475489237589437843728974327985437895798134591087473415034758305861048365874361502763")).hash());
 }
 
+TEST(StarlarkBigint, OrderVsBigInt) {
+  error_handler error_callback;
+
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_bigint(-2), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_bigint(-1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_bigint(0), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_bigint(-1), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_bigint(0), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_bigint(0), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_bigint(1), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_bigint(1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_bigint(2), "cmp", error_callback), Eq(0));
+
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_bigint(number::one << 64), "cmp", error_callback), Lt(0));
+}
+
+TEST(StarlarkBigint, OrderVsFloat) {
+  error_handler error_callback;
+
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_float(-2), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_float(-1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_float(0), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-2).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_float(-1), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_float(0), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(0), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_float(0), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_float(1), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_float(0), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_float(1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(2).cmp(starlark_float(2), "cmp", error_callback), Eq(0));
+
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(-std::numeric_limits<double>::infinity()), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(std::numeric_limits<double>::infinity()), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(0).cmp(starlark_float(NAN), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(-1).cmp(starlark_float(-1.25), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(1).cmp(starlark_float(1.25), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(parse_number("100100000000000007629769841091887003294964970946560", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(parse_number("100000000000000006629769841091887003294964970946560", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Lt(0));
+
+  EXPECT_THAT(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946559", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Lt(0));
+  EXPECT_EQ(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946560", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), 0);
+  EXPECT_THAT(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946561", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Gt(0));
+}
+
+TEST(StarlarkBigint, OrderVsBool) {
+  error_handler error_callback;
+  starlark_bool obj_true(true);
+
+  EXPECT_THAT(starlark_bigint(1).cmp(obj_true, "<", error_callback), Eq(0));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
+}
+
 TEST(StarlarkBigint, ShiftZero) {
   Arena arena;
   error_handler error_callback;
@@ -122,7 +224,13 @@ TEST(StarlarkBigint, ShiftZero) {
   auto* result = starlark_bigint(0).binary_lshift(starlark_integer(1l << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
+  result = starlark_bigint(0).binary_lshift(starlark_bigint(number::one), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
   result = starlark_bigint(0).binary_rshift(starlark_integer(1l << 62), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+  result = starlark_bigint(0).binary_rshift(starlark_bigint(number::one << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 }
@@ -534,13 +642,30 @@ TEST(StarlarkBigint, BinarySlashError) {
 
 TEST(StarlarkBigint, BinarySlashOverflowError) {
   starlark_bigint big(number::one << 1200);
-  starlark_float f1(1.0);
-  Arena arena;
-  error_handler error_callback;
+  {
+    Arena arena;
+    error_handler error_callback;
 
-  big.binary_slash(f1, arena, error_callback);
-  ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+    big.binary_slash(starlark_float(1.0), arena, error_callback);
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  }
+  {
+    Arena arena;
+    error_handler error_callback;
+
+    big.binary_slash(starlark_integer(1), arena, error_callback);
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  }
+  {
+    Arena arena;
+    error_handler error_callback;
+
+    big.binary_slash(starlark_bigint(1), arena, error_callback);
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  }
 }
 
 TEST(StarlarkBigint, BinarySlashOverflowDenominatorError) {

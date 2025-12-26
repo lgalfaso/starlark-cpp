@@ -407,6 +407,7 @@ TEST(StarlarkList, BinaryStar) {
   auto* result_3 = list0.binary_star(three, arena, error_callback);
   auto* result_4 = list1.binary_star(minus_one, arena, error_callback);
   auto* result_5 = list1.binary_star(minus_two, arena, error_callback);
+  auto* result_6 = list0.binary_star(two, arena, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "[0, 1, 0, 1]");
@@ -418,6 +419,8 @@ TEST(StarlarkList, BinaryStar) {
   EXPECT_EQ(result_4->str(), "[]");
   ASSERT_NE(result_5, nullptr);
   EXPECT_EQ(result_5->str(), "[]");
+  ASSERT_NE(result_6, nullptr);
+  EXPECT_EQ(result_6->str(), "[]");
 }
 
 TEST(StarlarkList, BinaryStarReverse) {

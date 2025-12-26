@@ -44,50 +44,49 @@ starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& aren
 }
 
 starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t) {
-    error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
-    return nullptr;
-  }
-  if (values.empty()) {
-    return Arena::Create<starlark_tuple>(&arena);
-  }
-  const starlark_numeric* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto value = n_other->as_int64();
-    if (value <= 0) {
-      return Arena::Create<starlark_tuple>(&arena);
-    }
-    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-    auto* result = Arena::Create<starlark_tuple>(&arena);
-    for (int64_t i = 0; i < value; ++i) {
-      for (auto& key : values) {
-        result->add(key);
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      if (values.empty()) {
+        return Arena::Create<starlark_tuple>(&arena);
       }
+      auto value = other.as_int64();
+      if (value <= 0) {
+        return Arena::Create<starlark_tuple>(&arena);
+      }
+      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      auto* result = Arena::Create<starlark_tuple>(&arena);
+      for (int64_t i = 0; i < value; ++i) {
+        for (auto& key : values) {
+          result->add(key);
+        }
+      }
+      return result;
     }
-    return result;
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    const auto& value = n_other->as_bigint();
-    if (value <= number::zero) {
-      return Arena::Create<starlark_tuple>(&arena);
+    case starlark_numeric_type::kBigInt: {
+      if (values.empty()) {
+        return Arena::Create<starlark_tuple>(&arena);
+      }
+      const auto& value = other.as_bigint();
+      if (value <= number::zero) {
+        return Arena::Create<starlark_tuple>(&arena);
+      }
+      if (value.bit_size() >= 63) {
+        error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
+        return nullptr;
+      }
+      int64_t int_value = value.at(0);
+      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      auto* result = Arena::Create<starlark_tuple>(&arena);
+      for (int64_t i = 0; i < int_value; ++i) {
+        for (auto& key : values) {
+          result->add(key);
+        }
+      }
+      return result;
     }
-    if (value.bit_size() >= 63) {
-      error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
+    default:
+      error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
       return nullptr;
-    }
-    int64_t int_value = value.at(0);
-    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-    auto* result = Arena::Create<starlark_tuple>(&arena);
-    for (int64_t i = 0; i < int_value; ++i) {
-      for (auto& key : values) {
-        result->add(key);
-      }
-    }
-    return result;
-  } else {
-    // Should not happen.
-    assert(false);
-    error_callback.add_error("TypeError: unknown numeric type");
-    return nullptr;
   }
 }
 
@@ -138,14 +137,14 @@ bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* o
   if (type() != other->type()) {
     return false;
   }
-  const starlark_tuple* n_other = reinterpret_cast<const starlark_tuple*>(other);
-  if (values.size() != n_other->values.size()) {
+  const starlark_tuple* t_other = reinterpret_cast<const starlark_tuple*>(other);
+  if (values.size() != t_other->values.size()) {
     return false;
   }
   for (int i = 0; i < values.size(); ++i) {
     comp.add_task(equals_comparator::pending_task{
       .lhs = values[i],
-      .rhs = n_other->values[i],
+      .rhs = t_other->values[i],
     });
   }
   return true;

@@ -142,6 +142,8 @@ TEST(StarlarkFloat, Equals) {
   EXPECT_TRUE(starlark_float(-0.0).equals(starlark_float(0.0)));
   // Starlark mandates that `NaN == NaN`.
   EXPECT_TRUE(starlark_float(NAN).equals(starlark_float(NAN)));
+
+  EXPECT_FALSE(starlark_float(0).equals(starlark_bool(false)));
 }
 
 TEST(StarlarkFloat, EqualsVsBigInt) {
@@ -174,45 +176,46 @@ TEST(StarlarkFloat, OrderWithBigInt) {
 
   EXPECT_THAT(starlark_float(-std::numeric_limits<double>::infinity()).cmp(starlark_bigint(number::zero), "cmp", error_callback), Lt(0));
   EXPECT_THAT(starlark_float(std::numeric_limits<double>::infinity()).cmp(starlark_bigint(number::zero), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(number::zero), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(number::zero), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(0).cmp(starlark_bigint(-number::one), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(0).cmp(starlark_bigint(number::one), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(NAN).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(0), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(0).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(0).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(-number::one), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(number::one), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(-number::one), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(number::one), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(-1), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(1), "cmp", error_callback), Eq(0));
 
 
-  EXPECT_THAT(starlark_float(0).cmp(starlark_bigint(parse_number("0", nullptr)), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(0).cmp(starlark_bigint(0), "cmp", error_callback), Eq(0));
 
-  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(-2), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(-1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(-2).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(-1), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(-1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(1), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(parse_number("-2", nullptr)), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(parse_number("-1", nullptr)), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(parse_number("1", nullptr)), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(parse_number("2", nullptr)), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(2).cmp(starlark_bigint(2), "cmp", error_callback), Eq(0));
 
 
   EXPECT_THAT(starlark_float(1e50).cmp(starlark_bigint(parse_number("100100000000000007629769841091887003294964970946560", nullptr)), "cmp", error_callback), Lt(0));
   EXPECT_THAT(starlark_float(1e50).cmp(starlark_bigint(parse_number("100000000000000006629769841091887003294964970946560", nullptr)), "cmp", error_callback), Gt(0));
 
-  EXPECT_THAT(starlark_float(-1.25).cmp(starlark_bigint(-number::one), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_float(1.25).cmp(starlark_bigint(number::one), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(-1.25).cmp(starlark_bigint(-1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(1.25).cmp(starlark_bigint(1), "cmp", error_callback), Gt(0));
 
   EXPECT_THAT(starlark_float(1e50).cmp(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946559", nullptr)), "cmp", error_callback), Gt(0));
   EXPECT_EQ(starlark_float(1e50).cmp(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946560", nullptr)), "cmp", error_callback), 0);

@@ -68,6 +68,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
+        "//bigint:number",
         "@protobuf",
     ],
 )
@@ -228,7 +229,6 @@ cc_library(
         ":hex_encoder",
         ":options",
         ":siphash",
-        ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
     ],
@@ -463,7 +463,6 @@ cc_library(
         ":hex_encoder",
         ":options",
         ":siphash",
-        ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
         "//bigint:number",

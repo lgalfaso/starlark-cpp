@@ -199,6 +199,12 @@ TEST(StarlarkBytes, BinaryInErrors) {
   }
   {
     error_handler error_callback;
+    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_float(0), error_callback));
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'float'");
+  }
+  {
+    error_handler error_callback;
     EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
@@ -263,6 +269,7 @@ TEST(StarlarkBytes, BinaryStar) {
   auto* result_3 = bytes.binary_star(minus_two, arena, error_callback);
   auto* result_4 = bytes.binary_star(minus_one, arena, error_callback);
   auto* result_5 = bytes0.binary_star(big, arena, error_callback);
+  auto* result_6 = bytes0.binary_star(two, arena, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "b\"abcabc\"");
@@ -274,6 +281,8 @@ TEST(StarlarkBytes, BinaryStar) {
   EXPECT_EQ(result_4->str(), "b\"\"");
   ASSERT_NE(result_5, nullptr);
   EXPECT_EQ(result_5->str(), "b\"\"");
+  ASSERT_NE(result_6, nullptr);
+  EXPECT_EQ(result_6->str(), "b\"\"");
 }
 
 TEST(StarlarkBytes, BinaryStarReverse) {

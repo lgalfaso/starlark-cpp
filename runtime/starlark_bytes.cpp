@@ -9,7 +9,6 @@
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
-#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -44,34 +43,35 @@ bool starlark_bytes::truthy() const {
 }
 
 bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  if (other.type() != type() && other.type() != starlark_types::int_t) {
-     error_callback.add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
-    return false;
-  }
-  if (other.type() == starlark_types::int_t) {
-    const starlark_numeric& n_other = static_cast<const starlark_numeric&>(other);
-    if (n_other.numeric_type() == starlark_numeric_type::kInt64) {
-      auto other_value = n_other.as_int64();
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      auto other_value = other.as_int64();
       if (other_value < 0 || 255 < other_value) {
         error_callback.add_error("ValueError: byte must be in range(0, 256)");
         return false;
       }
-      return value.contains(static_cast<char>(n_other.as_int64()));
+      return value.contains(static_cast<char>(other.as_int64()));
     }
-    if (n_other.numeric_type() == starlark_numeric_type::kBigInt) {
-      auto& other_value = n_other.as_bigint();
+    case starlark_numeric_type::kBigInt: {
+      auto& other_value = other.as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
         error_callback.add_error("ValueError: byte must be in range(0, 256)");
         return false;
       }
       return value.contains(static_cast<char>(other_value.at(0)));
     }
-    // Should never happen.
-    return false;
+    case starlark_numeric_type::kNotNumeric: {
+      if (other.type() != type()) {
+        error_callback.add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
+        return false;
+      }
+      const starlark_bytes& s_other = static_cast<const starlark_bytes&>(other);
+      return value.contains(s_other.value);
+    }
+    default:
+     error_callback.add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
+     return false;
   }
-
-  const starlark_bytes& s_other = static_cast<const starlark_bytes&>(other);
-  return value.contains(s_other.value);
 }
 
 starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
@@ -87,46 +87,45 @@ starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& aren
 }
 
 starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  if (other.type() != starlark_types::int_t) {
-    error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
-    return nullptr;
-  }
-  if (value.empty()) {
-    return Arena::Create<starlark_bytes>(&arena, "");
-  }
-  const starlark_numeric* n_other = static_cast<const starlark_numeric*>(&other);
-  if (n_other->numeric_type() == starlark_numeric_type::kInt64) {
-    auto multiplier = n_other->as_int64();
-    if (multiplier <= 0) {
-      return Arena::Create<starlark_bytes>(&arena, "");
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      if (value.empty()) {
+        return Arena::Create<starlark_bytes>(&arena, "");
+      }
+      auto multiplier = other.as_int64();
+      if (multiplier <= 0) {
+        return Arena::Create<starlark_bytes>(&arena, "");
+      }
+      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      auto* result = Arena::Create<starlark_bytes>(&arena, value);
+      for (int64_t i = 1; i < multiplier; ++i) {
+        result->value += value;
+      }
+      return result;
     }
-    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-    auto* result = Arena::Create<starlark_bytes>(&arena, value);
-    for (int64_t i = 1; i < multiplier; ++i) {
-      result->value += value;
+    case starlark_numeric_type::kBigInt: {
+      if (value.empty()) {
+        return Arena::Create<starlark_bytes>(&arena, "");
+      }
+      const auto& multiplier = other.as_bigint();
+      if (multiplier <= number::zero) {
+        return Arena::Create<starlark_bytes>(&arena, "");
+      }
+      if (multiplier.bit_size() >= 63) {
+        error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
+        return nullptr;
+      }
+      int64_t int_value = multiplier.at(0);
+      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      auto* result = Arena::Create<starlark_bytes>(&arena, value);
+      for (int64_t i = 1; i < int_value; ++i) {
+        result->value += value;
+      }
+      return result;
     }
-    return result;
-  } else if (n_other->numeric_type() == starlark_numeric_type::kBigInt) {
-    const auto& multiplier = n_other->as_bigint();
-    if (multiplier <= number::zero) {
-      return Arena::Create<starlark_bytes>(&arena, "");
-    }
-    if (multiplier.bit_size() >= 63) {
-      error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
+    default:
+      error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
       return nullptr;
-    }
-    int64_t int_value = multiplier.at(0);
-    // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-    auto* result = Arena::Create<starlark_bytes>(&arena, value);
-    for (int64_t i = 1; i < int_value; ++i) {
-      result->value += value;
-    }
-    return result;
-  } else {
-    // Should not happen.
-    assert(false);
-    error_callback.add_error("TypeError: unknown numeric type");
-    return nullptr;
   }
 }
 
