@@ -82,16 +82,17 @@ class order_comparator {
     kGreaterThan,
     kFail,
   };
+  void add_task(pending_task_type task_type);
+  void add_task(const starlark_obj* lhs, const starlark_obj* rhs);
+  int run(std::string_view op, error_fn& error_callback);
+
+ private:
   struct pending_task {
     const pending_task_type type;
     const starlark_obj* lhs = nullptr;
     const starlark_obj* rhs = nullptr;
   };
 
-  void add_task(pending_task&& task);
-  int run(std::string_view op, error_fn& error_callback);
-
- private:
   std::vector<pending_task> tasks;
 };
 

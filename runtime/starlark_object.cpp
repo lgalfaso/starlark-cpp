@@ -69,8 +69,18 @@ bool equals_comparator::pending_task_equals_to::operator()(const pending_task& l
          (lhs.lhs == rhs.rhs && lhs.rhs == rhs.lhs);
 }
 
-void order_comparator::add_task(pending_task&& task) {
-  tasks.emplace_back(std::move(task));
+void order_comparator::add_task(pending_task_type task_type) {
+  tasks.emplace_back(order_comparator::pending_task{
+      .type = task_type,
+  });
+}
+
+void order_comparator::add_task(const starlark_obj* lhs, const starlark_obj* rhs) {
+  tasks.emplace_back(order_comparator::pending_task{
+      .type = order_comparator::pending_task_type::kEvaluate,
+      .lhs = lhs,
+      .rhs = rhs,
+  });
 }
 
 int order_comparator::run(std::string_view op, error_fn& error_callback) {
@@ -121,11 +131,7 @@ bool starlark_obj::equals(const starlark_obj& other) const {
 
 int starlark_obj::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
   order_comparator cmp;
-  cmp.add_task(order_comparator::pending_task{
-    .type = order_comparator::pending_task_type::kEvaluate,
-    .lhs = this,
-    .rhs = &other,
-  });
+  cmp.add_task(this, &other);
   return cmp.run(op, error_callback);
 }
 
@@ -320,9 +326,7 @@ starlark_numeric_type starlark_obj::numeric_type() const {
 
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
   error_callback.add_error(std::format("TypeError: '{}' not supported between instances of '{}' and '{}'", op, type(), other->type()));
-  comp.add_task(order_comparator::pending_task{
-    .type = order_comparator::pending_task_type::kFail,
-  });
+  comp.add_task(order_comparator::pending_task_type::kFail);
 }
 
 void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {

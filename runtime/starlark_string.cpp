@@ -144,9 +144,7 @@ void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* othe
   }
   auto result = value <=> static_cast<const starlark_string*>(other)->value;
   if (result != 0) {
-    comp.add_task(order_comparator::pending_task{
-      .type = result > 0 ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan,
-    });
+    comp.add_task(result > 0 ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan);
   }
 }
 

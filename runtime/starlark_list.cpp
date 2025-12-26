@@ -184,16 +184,10 @@ void starlark_list::inner_cmp(order_comparator& comp, const starlark_obj* other,
   }
   const auto* l_other = static_cast<const starlark_list*>(other);
   if (values.size() != l_other->values.size()) {
-    comp.add_task(order_comparator::pending_task{
-      .type = values.size() > l_other->values.size() ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan,
-    });
+    comp.add_task(values.size() > l_other->values.size() ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan);
   }
   for (int i = std::min(values.size(), l_other->values.size()) - 1; i >= 0; --i) {
-    comp.add_task(order_comparator::pending_task{
-      .type = order_comparator::pending_task_type::kEvaluate,
-      .lhs = values[i],
-      .rhs = l_other->values[i],
-    });
+    comp.add_task(values[i], l_other->values[i]);
   }
 }
 

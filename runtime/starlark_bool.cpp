@@ -43,9 +43,7 @@ void starlark_bool::inner_cmp(order_comparator& comp, const starlark_obj* other,
   }
   bool other_truth = other->truthy();
   if (value != other_truth) {
-    comp.add_task(order_comparator::pending_task{
-      .type = value ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan,
-    });
+    comp.add_task(value ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan);
   }
 }
 
