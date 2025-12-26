@@ -113,6 +113,7 @@ enum class starlark_numeric_type {
 
 class starlark_obj {
  public:
+  starlark_obj();
   virtual ~starlark_obj();
   virtual std::string_view type() const = 0;
   virtual std::string str() const;
@@ -151,7 +152,7 @@ class starlark_obj {
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;
-  bool freezed = false;
+  bool freezed;
 
   virtual bool inner_repr(printer& print, printer_action action) const = 0;
   virtual bool inner_equals(equals_comparator& comp, const starlark_obj* other) const = 0;

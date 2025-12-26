@@ -14,6 +14,7 @@ namespace runtime {
 
 class starlark_range : public starlark_obj {
  public:
+  starlark_range();
   std::string_view type() const override;
   bool truthy() const override;
   void set_start(const starlark_obj* value);
@@ -28,9 +29,9 @@ class starlark_range : public starlark_obj {
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
-  uint64_t start = 0;
+  uint64_t start;
   uint64_t end;
-  uint64_t step = 1;
+  uint64_t step;
   uint64_t last;
 };
 

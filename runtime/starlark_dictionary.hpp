@@ -16,6 +16,7 @@ namespace runtime {
 
 class starlark_dictionary : public starlark_obj {
  public:
+  starlark_dictionary();
   std::string_view type() const override;
   bool truthy() const override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
@@ -44,7 +45,7 @@ class starlark_dictionary : public starlark_obj {
 
  private:
   starlark::cnt::linked_hash_map<starlark_obj*, starlark_obj*, starlark_hash_op, starlark_equals_to> values;
-  int iterators_count = 0;
+  int iterators_count;
 };
 
 }  // namespace runtime

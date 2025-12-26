@@ -12,6 +12,8 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
+starlark_set::starlark_set() : iterators_count(0) {}
+
 std::string_view starlark_set::type() const {
   return starlark_types::set_t;
 }

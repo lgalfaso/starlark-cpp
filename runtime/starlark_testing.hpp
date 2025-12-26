@@ -4,6 +4,7 @@
 #define RUNTIME_STARLARK_TESTING_HPP_
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "runtime/error_fn.hpp"
@@ -12,9 +13,7 @@ namespace starlark {
 namespace testing {
 
 struct error_handler : public starlark::runtime::error_fn {
-  void add_error(std::string_view error_msg) override {
-    messages.push_back(std::string(error_msg));
-  }
+  void add_error(std::string_view error_msg) override;
 
   std::vector<std::string> messages;
 };

@@ -7,6 +7,8 @@
 namespace starlark {
 namespace runtime {
 
+starlark_range::starlark_range() : start(0), step(1) {}
+
 std::string_view starlark_range::type() const {
   return "range";
 }

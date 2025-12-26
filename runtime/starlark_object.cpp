@@ -104,6 +104,8 @@ int order_comparator::run(std::string_view op, error_fn& error_callback) {
 
 starlark_iterator::~starlark_iterator() {}
 
+starlark_obj::starlark_obj() : freezed(false) {}
+
 starlark_obj::~starlark_obj() {}
 
 std::string starlark_obj::str() const {

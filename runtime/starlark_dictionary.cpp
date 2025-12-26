@@ -12,6 +12,8 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
+starlark_dictionary::starlark_dictionary() : iterators_count(0) {}
+
 std::string_view starlark_dictionary::type() const {
   return starlark_types::dict_t;
 }

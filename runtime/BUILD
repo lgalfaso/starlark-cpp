@@ -48,6 +48,7 @@ cc_library(
     name = "starlark_testing",
     testonly = True,
     hdrs = ["starlark_testing.hpp"],
+    srcs = ["starlark_testing.cpp"],
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",

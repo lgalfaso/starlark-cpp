@@ -16,6 +16,7 @@ namespace runtime {
 
 class starlark_set : public starlark_obj {
  public:
+  starlark_set();
   std::string_view type() const override;
   bool truthy() const override;
   bool add(starlark_obj* element, error_fn& error_callback);
@@ -48,7 +49,7 @@ class starlark_set : public starlark_obj {
 
  private:
   starlark::cnt::linked_hash_set<starlark_obj*, starlark_hash_op, starlark_equals_to> values;
-  int iterators_count = 0;
+  int iterators_count;
 };
 
 }  // namespace runtime
