@@ -9,27 +9,35 @@
 #include <utility>
 #include <vector>
 
+#include "runtime/starlark_bigint.hpp"
+#include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_none.hpp"
+#include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
-using ::testing::IsEmpty;
-using ::testing::SizeIs;
 using ::starlark::bigint::number;
 using ::starlark::runtime::create_float;
 using ::starlark::runtime::create_integer;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_built_in_function;
+using ::starlark::runtime::starlark_bytes;
 using ::starlark::runtime::starlark_function;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
+using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
+using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
+using ::testing::IsEmpty;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -437,6 +445,181 @@ TEST(StarlarkBool, NamedArguments) {
   EXPECT_EQ(nullptr, starlark_fn_bool(pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bool() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, FromBytesOrString) {
+  Arena arena;
+  error_handler error_callback;
+
+  {
+    starlark_string str("abc");
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&str);
+
+    auto* result = starlark_fn_bytes(pos_args, named_args, arena, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->repr(), "b\"abc\"");
+  }
+  {
+    starlark_bytes bytes("def");
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&bytes);
+
+    auto* result = starlark_fn_bytes(pos_args, named_args, arena, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->repr(), "b\"def\"");
+  }
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBytes, FromStringInvalidUnicodeSequence) {
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_string str("abc\xf0\x{f1}def");
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  auto* result = starlark_fn_bytes(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "b\"abc\\xef\\xbf\\xbd\\xef\\xbf\\xbddef\"");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBytes, List) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer max_minus_one(254);
+  starlark_bigint max_byte(255);
+  starlark_list list1;
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args1;
+  std::map<std::string, starlark_obj*> named_args1;
+  pos_args1.push_back(&list1);
+
+  starlark_list list2;
+  list2.add(&zero, error_callback);
+  list2.add(&one, error_callback);
+  list2.add(&max_minus_one, error_callback);
+  list2.add(&max_byte, error_callback);
+  std::vector<starlark_obj*> pos_args2;
+  std::map<std::string, starlark_obj*> named_args2;
+  pos_args2.push_back(&list2);
+
+  auto* result1 = starlark_fn_bytes(pos_args1, named_args1, arena, error_callback);
+  auto* result2 = starlark_fn_bytes(pos_args2, named_args2, arena, error_callback);
+  ASSERT_NE(nullptr, result1);
+  EXPECT_EQ("b\"\"", result1->str());
+  ASSERT_NE(nullptr, result2) << error_callback.messages.front();
+  EXPECT_EQ("b\"\\x00\\x01\\xfe\\xff\"", result2->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBytes, OutOfRange) {
+  starlark_integer iminus_one(-1);
+  starlark_bigint bminus_one(-1);
+  starlark_integer imax_plus_one(256);
+  starlark_bigint bmax_plus_one(256);
+  starlark_bigint big(number::one << 64);
+
+  auto test = [](starlark_obj* value) {
+    Arena arena;
+    error_handler error_callback;
+    starlark_list list;
+    list.add(value, error_callback);
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&list);
+
+    EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback)) << value->str();
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ("ValueError: bytes must be in range(0, 256)", error_callback.messages[0]);
+  };
+  test(&iminus_one);
+  test(&bminus_one);
+  test(&imax_plus_one);
+  test(&bmax_plus_one);
+  test(&big);
+}
+
+TEST(StarlarkBytes, NoPosArgs) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: bytes() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, ListWithNone) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_none none;
+  list.add(&none, error_callback);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'NoneType' object cannot be interpreted as an integer", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, None) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_none none;
+  pos_args.push_back(&none);
+
+  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: cannot convert 'NoneType' object to bytes", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, MultiplePosArgs) {
+  starlark_bytes bytes("def");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&bytes);
+  pos_args.push_back(&bytes);
+
+  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: bytes() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, NamedArguments) {
+  starlark_bytes bytes("def");
+  starlark_integer one(1);
+  starlark_list list;
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&bytes);
+  named_args["1"] = &one;
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: bytes() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, List) {

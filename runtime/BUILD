@@ -549,10 +549,13 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":starlark_bool",
+        ":starlark_bytes",
         ":starlark_list",
         ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
+        "//unicode:encode",
+        "//unicode:utf8_reader",
     ],
 )
 
@@ -561,10 +564,13 @@ cc_test(
     size = "small",
     srcs = ["starlark_function_test.cpp"],
     deps = [
+        ":starlark_bytes",
         ":starlark_function",
         ":starlark_integer",
         ":starlark_list",
+        ":starlark_none",
         ":starlark_numeric_impl",
+        ":starlark_string",
         ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",

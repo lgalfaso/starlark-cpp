@@ -635,7 +635,7 @@ a00 = abs(-1)
 a01 = any([True, False])
 a02 = all([True, False])
 a03 = bool(1)
-# bytes
+a04 = bytes("abc")
 # dict
 # dir
 # enumerate
@@ -661,15 +661,16 @@ a15 = list((1, 2))
 # zip
 )starlark", arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
-  ASSERT_THAT(result->elements, SizeIs(6));
+  ASSERT_THAT(result->elements, SizeIs(7));
 
   ASSERT_THAT(result->elements, Not(Contains(nullptr)));
   EXPECT_EQ(result->elements[0]->str(), "1");
   EXPECT_EQ(result->elements[1]->str(), "True");
   EXPECT_EQ(result->elements[2]->str(), "False");
   EXPECT_EQ(result->elements[3]->str(), "True");
-  EXPECT_EQ(result->elements[4]->str(), "0");
-  EXPECT_EQ(result->elements[5]->str(), "[1, 2]");
+  EXPECT_EQ(result->elements[4]->str(), "b\"abc\"");
+  EXPECT_EQ(result->elements[5]->str(), "0");
+  EXPECT_EQ(result->elements[6]->str(), "[1, 2]");
 }
 
 TEST(Interpreter, ListComprehension) {

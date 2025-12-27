@@ -8,11 +8,16 @@
 #include <vector>
 
 #include "runtime/starlark_bool.hpp"
+#include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
+#include "unicode/encode.hpp"
+#include "unicode/utf8_reader.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::unicode::utf8_encode_code_point;
+using ::starlark::unicode::utf8_reader;
 
 namespace starlark {
 namespace runtime {
@@ -190,8 +195,56 @@ starlark_obj* starlark_fn_bool(const std::vector<starlark_obj*>& pos_args, const
 }
 
 starlark_obj* starlark_fn_bytes(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  return nullptr;
+  // TODO(lmirelmann): The Python version of `bytes` can take zero arguments and returns `b''`. It is not clear whether this is desired in this case.
+  if (!one_pos_arg(pos_args, named_args, error_callback, "bytes")) {
+    return nullptr;
+  }
+  if (pos_args.front()->type() == starlark_types::bytes_t) {
+    return pos_args[0];
+  }
+  if (pos_args.front()->type() == starlark_types::string_t) {
+    std::string result;
+    utf8_reader reader(pos_args.front()->str(), false, false);
+    while (reader.pending()) {
+      utf8_encode_code_point(reader.peek_code_point(), result, false);
+      reader.skip_code_point();
+    }
+    return Arena::Create<starlark_bytes>(&arena, result);
+  }
+  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  if (it == nullptr) {
+    error_callback.replace_last_error(std::format("TypeError: cannot convert '{}' object to bytes", pos_args.front()->type()));
+    return nullptr;
+  }
+  std::string result;
+  while (it->has_next()) {
+    auto value = it->next();
+    switch (value->numeric_type()) {
+      case starlark_numeric_type::kInt64: {
+        auto ivalue = value->as_int64();
+        if (ivalue < 0 || 255 < ivalue) {
+          error_callback.add_error("ValueError: bytes must be in range(0, 256)");
+          return nullptr;
+        }
+        result += static_cast<char>(ivalue);
+        break;
+      }
+      case starlark_numeric_type::kBigInt: {
+        const auto& bvalue = value->as_bigint();
+        if (bvalue.sign() || bvalue.bit_size() > 8) {
+          error_callback.add_error("ValueError: bytes must be in range(0, 256)");
+          return nullptr;
+        }
+        result += static_cast<char>(bvalue.at(0));
+        break;
+      }
+      default:
+        error_callback.add_error(std::format("TypeError: '{}' object cannot be interpreted as an integer", value->type()));
+        return nullptr;
+    }
+  }
+  it->end_iterator();
+  return Arena::Create<starlark_bytes>(&arena, result);
 }
 
 starlark_obj* starlark_fn_dict(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
