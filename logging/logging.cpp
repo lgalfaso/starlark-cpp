@@ -59,11 +59,17 @@ std::vector<LogEntry>::size_type logger::size() const {
   return entries.size();
 }
 
+void logger::drop_last_error(LogLevel level) {
+  if (!entries.empty() && entries.back().level() == level) {
+    entries.pop_back();
+  }
+}
+
 logger_wrap::logger_wrap(logger& delegate) : inner_logger(delegate),
   state(log_report{.debug = 0, .info = 0, .warning = 0, .error = 0, .fatal = 0}) {
 }
 
-void logger_wrap::log(starlark::logging::LogLevel level, std::string_view message, std::string_view module, const starlark::logging::Position& pos) {
+void logger_wrap::log(LogLevel level, std::string_view message, std::string_view module, const starlark::logging::Position& pos) {
   switch (level) {
     case LogLevel::LOG_LEVEL_DEBUG:
       state.debug++;
@@ -84,6 +90,39 @@ void logger_wrap::log(starlark::logging::LogLevel level, std::string_view messag
       break;
   }
   inner_logger.log(level, message, module, pos);
+}
+
+void logger_wrap::drop_last_error(LogLevel level) {
+  switch (level) {
+    case LogLevel::LOG_LEVEL_DEBUG:
+      if (state.debug) {
+        state.debug--;
+      }
+      break;
+    case LogLevel::LOG_LEVEL_INFO:
+      if (state.info) {
+        state.info--;
+      }
+      break;
+    case LogLevel::LOG_LEVEL_WARNING:
+      if (state.warning) {
+        state.warning--;
+      }
+      break;
+    case LogLevel::LOG_LEVEL_ERROR:
+      if (state.error) {
+        state.error--;
+      }
+      break;
+    case LogLevel::LOG_LEVEL_FATAL:
+      if (state.fatal) {
+        state.fatal--;
+      }
+      break;
+    default:
+      break;
+  }
+  inner_logger.drop_last_error(level);
 }
 
 logger_wrap::log_report logger_wrap::report() {

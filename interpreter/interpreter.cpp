@@ -82,6 +82,11 @@ class error_handler : public error_fn {
     instruction_ptr = instruction_ptr_value;
   }
 
+  void replace_last_error(std::string_view error_msg) override {
+    log.drop_last_error(starlark::logging::LogLevel::LOG_LEVEL_ERROR);
+    add_error(error_msg);
+  }
+
  private:
   int& block_ptr;
   int& instruction_ptr;
