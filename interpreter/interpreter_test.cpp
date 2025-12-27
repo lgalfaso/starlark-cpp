@@ -710,5 +710,24 @@ a03 = {x: y for x in [1,2,3,4] if x % 2 == 1 for y in [5, 6]}
   EXPECT_EQ(result->elements[2]->str(), "{1: 6, 3: 6}");
 }
 
+TEST(Interpreter, ExampleFloatingPointFromSpec) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+big = (1<<53)+1
+a01 = (big + 0.0) == big
+a02 = (big + 0.0) - big
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(3));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "False");
+  EXPECT_EQ(result->elements[1]->str(), "0.0");
+  EXPECT_EQ(result->elements[2]->str(), "9007199254740993");
+}
+
 }  // namespace
 

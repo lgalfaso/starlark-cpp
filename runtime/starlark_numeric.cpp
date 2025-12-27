@@ -15,6 +15,43 @@ using ::starlark::bigint::number;
 namespace starlark {
 namespace runtime {
 
+bool equals_fi(double lhs, int64_t rhs) {
+  if (!std::isfinite(lhs)) {
+    return false;
+  }
+  if (rhs == 0) {
+    return lhs == 0;
+  }
+  if (lhs == 0) {
+    return false;
+  }
+  if ((lhs < 0) ^ (rhs < 0)) {
+    return false;
+  }
+  if (lhs < 0) {
+    lhs = -lhs;
+  }
+  uint64_t urhs = rhs < 0 ? static_cast<uint64_t>(-rhs) : rhs;
+  int e;
+  double norm = std::frexp(lhs, &e);
+  double integral = std::ldexp(norm, std::numeric_limits<double>::digits);
+  e -= std::numeric_limits<double>::digits;
+  int64_t mantissa = static_cast<int64_t>(integral);
+  {
+     int countr = std::countr_zero<uint64_t>(mantissa);
+     mantissa >>= countr;
+     e += countr;
+  }
+  if (e < 0) {
+    return false;
+  }
+  if (std::countr_zero(urhs) != e ||
+      64 - std::countl_zero(urhs) != e + 64 - std::countl_zero<uint64_t>(mantissa)) {
+    return false;
+  }
+  return mantissa == (urhs >> e);
+}
+
 bool equals_fb(double lhs, const number& rhs) {
   if (!std::isfinite(lhs)) {
     return false;
@@ -70,6 +107,76 @@ bool equals_ib(int64_t lhs, const number& rhs) {
     lhs = -lhs;
   }
   return rhs.at(0) == lhs;
+}
+
+int cmp_fi(double lhs, int64_t rhs) {
+  // Simple cases when `lhs` is infinite, there is a difference in sign or one of the inputs is zero.
+  if (!std::isfinite(lhs)) {
+    return lhs > 0 ? 1 : -1;
+  }
+  if (rhs == 0) {
+    if (lhs != 0) {
+      return lhs > 0 ? 1 : -1;
+    }
+    return 0;
+  }
+  if (lhs == 0) {
+    return rhs < 0 ? 1 : -1;
+  }
+
+  if ((lhs < 0) ^ (rhs < 0)) {
+    return rhs < 0 ? 1 : -1;
+  }
+  if (lhs < 0) {
+    lhs = -lhs;
+  }
+  uint64_t urhs = rhs < 0 ? static_cast<uint64_t>(-rhs) : rhs;
+
+  // Split `lhs` in a mantissa, an exponent for the integral part and a flag stating whether
+  // there is a factional part after the integral part.
+  int e;
+  double norm = std::frexp(lhs, &e);
+  double integral = std::ldexp(norm, std::numeric_limits<double>::digits);
+  e -= std::numeric_limits<double>::digits;
+  int64_t mantissa = static_cast<int64_t>(integral);
+  {
+    int countr = std::countr_zero<uint64_t>(mantissa);
+    mantissa >>= countr;
+    e += countr;
+  }
+  bool has_fraction = false;
+  if (e < 0) {
+    has_fraction = true;
+    mantissa >>= (-e);
+    e = std::countr_zero<uint64_t>(mantissa);
+    mantissa >>= e;
+  }
+
+  // Check if there is a difference in the bit size.
+  int lhs_bit_size = e + 64 - std::countl_zero<uint64_t>(mantissa);
+  int rhs_bit_size = 64 - std::countl_zero(urhs);
+  if (rhs_bit_size != lhs_bit_size) {
+    return (rhs_bit_size > lhs_bit_size) ^ (rhs < 0) ? -1 : 1;
+  }
+
+  // Check if there is a difference in the high bits.
+  auto rhs_high_bits = (urhs >> e);
+  if (mantissa != rhs_high_bits) {
+    return (rhs_high_bits > mantissa) ^ (rhs < 0) ? -1 : 1;
+  }
+
+  // Check if there is a difference in the integral part after the high bits.
+  if (std::countr_zero(urhs) != e) {
+    return (rhs < 0) ? 1 : -1;
+  }
+
+  // Check if there is a difference in the fractional part.
+  if (has_fraction) {
+    return (rhs < 0) ? -1 : 1;
+  }
+
+  // The numbers are equal.
+  return 0;
 }
 
 int cmp_fb(double lhs, const number& rhs) {

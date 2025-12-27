@@ -97,6 +97,12 @@ TEST(StarlarkInteger, Equals) {
   EXPECT_FALSE(starlark_integer(0).equals(starlark_string("")));
 }
 
+TEST(StarlarkInteger, EqualsExact) {
+  EXPECT_FALSE(starlark_integer((1L<<53)+1).equals(starlark_float((1L<<53)+1)));
+  EXPECT_TRUE(starlark_integer(std::numeric_limits<int64_t>::min()).equals(starlark_float(std::numeric_limits<int64_t>::min())));
+  EXPECT_FALSE(starlark_integer(std::numeric_limits<int64_t>::max()).equals(starlark_float(std::numeric_limits<int64_t>::max())));
+}
+
 TEST(StarlarkInteger, Hash) {
   EXPECT_EQ(0, starlark_integer(0).hash());
   EXPECT_EQ(1, starlark_integer(1).hash());
@@ -218,6 +224,15 @@ TEST(StarlarkBigint, OrderVsFloat) {
 
   EXPECT_THAT(starlark_integer(-1).cmp(starlark_float(-1.25), "cmp", error_callback), Gt(0));
   EXPECT_THAT(starlark_integer(1).cmp(starlark_float(1.25), "cmp", error_callback), Lt(0));
+}
+
+TEST(StarlarkInteger, OrderExact) {
+  error_handler error_callback;
+
+  EXPECT_THAT(starlark_integer((1L<<53)+1).cmp(starlark_float((1L<<53)+1), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_integer(std::numeric_limits<int64_t>::min()).cmp(starlark_float(std::numeric_limits<int64_t>::min()), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_integer(std::numeric_limits<int64_t>::max()).cmp(starlark_float(std::numeric_limits<int64_t>::max()), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkInteger, ShiftZero) {

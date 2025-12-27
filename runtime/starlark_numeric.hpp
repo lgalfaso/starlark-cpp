@@ -12,8 +12,10 @@ namespace starlark {
 namespace runtime {
 
 bool equals_fb(double lhs, const starlark::bigint::number& rhs);
+bool equals_fi(double lhs, int64_t rhs);
 bool equals_ib(int64_t lhs, const starlark::bigint::number& rhs);
 int cmp_fb(double lhs, const starlark::bigint::number& rhs);
+int cmp_fi(double lhs, int64_t rhs);
 int cmp_ib(int64_t lhs, const starlark::bigint::number& rhs);
 starlark::bigint::number from_int64(int64_t value);
 double to_double(const starlark::bigint::number& value);

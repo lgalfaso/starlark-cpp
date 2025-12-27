@@ -45,6 +45,7 @@ using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
 using ::testing::Eq;
 using ::testing::Gt;
+using ::testing::IsEmpty;
 using ::testing::Lt;
 using ::testing::SizeIs;
 
@@ -138,12 +139,24 @@ TEST(StarlarkFloat, Equals) {
   EXPECT_FALSE(starlark_float(1).equals(starlark_bigint(-1)));
   EXPECT_FALSE(starlark_float(1).equals(starlark_float(-1)));
 
+  EXPECT_FALSE(starlark_float(1.1).equals(starlark_integer(1)));
   EXPECT_FALSE(starlark_float(1.1).equals(starlark_bigint(1)));
   EXPECT_TRUE(starlark_float(-0.0).equals(starlark_float(0.0)));
   // Starlark mandates that `NaN == NaN`.
   EXPECT_TRUE(starlark_float(NAN).equals(starlark_float(NAN)));
 
   EXPECT_FALSE(starlark_float(0).equals(starlark_bool(false)));
+}
+
+TEST(StarlarkFloat, EqualsExact) {
+  EXPECT_FALSE(starlark_float((1L<<53)+1).equals(starlark_integer((1L<<53)+1)));
+  EXPECT_FALSE(starlark_float((1L<<53)+1).equals(starlark_bigint((1L<<53)+1)));
+  EXPECT_TRUE(starlark_float(std::numeric_limits<int64_t>::min()).equals(starlark_integer(std::numeric_limits<int64_t>::min())));
+  EXPECT_TRUE(starlark_float(std::numeric_limits<int64_t>::min()).equals(starlark_bigint(std::numeric_limits<int64_t>::min())));
+  EXPECT_FALSE(starlark_float(std::numeric_limits<int64_t>::max()).equals(starlark_integer(std::numeric_limits<int64_t>::max())));
+  EXPECT_FALSE(starlark_float(std::numeric_limits<int64_t>::max()).equals(starlark_bigint(std::numeric_limits<int64_t>::max())));
+  EXPECT_FALSE(starlark_float(std::numeric_limits<double>::infinity()).equals(starlark_integer(std::numeric_limits<int64_t>::max())));
+  EXPECT_FALSE(starlark_float(std::numeric_limits<double>::infinity()).equals(starlark_bigint(number::one << 2000)));
 }
 
 TEST(StarlarkFloat, EqualsVsBigInt) {
@@ -212,6 +225,9 @@ TEST(StarlarkFloat, OrderVsInteger) {
 
   EXPECT_THAT(starlark_float(-1.25).cmp(starlark_integer(-1), "cmp", error_callback), Lt(0));
   EXPECT_THAT(starlark_float(1.25).cmp(starlark_integer(1), "cmp", error_callback), Gt(0));
+
+  EXPECT_THAT(starlark_float((1L << 53) + 1).cmp(starlark_integer((1L << 53) + 1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float((1L << 53) + (1L << 49) + 1).cmp(starlark_integer((1L << 53) + (1L << 50) + 1), "cmp", error_callback), Lt(0));
 }
 
 TEST(StarlarkFloat, OrderVsBigInt) {
@@ -272,6 +288,18 @@ TEST(StarlarkFloat, OrderVsBool) {
   EXPECT_THAT(starlark_float(1).cmp(obj_true, "<", error_callback), Eq(0));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'float' and 'bool'");
+}
+
+TEST(StarlarkFloat, OrderExact) {
+  error_handler error_callback;
+
+  EXPECT_THAT(starlark_float((1L<<53)+1).cmp(starlark_integer((1L<<53)+1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float((1L<<53)+1).cmp(starlark_bigint((1L<<53)+1), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_float(std::numeric_limits<int64_t>::min()).cmp(starlark_integer(std::numeric_limits<int64_t>::min()), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(std::numeric_limits<int64_t>::min()).cmp(starlark_bigint(std::numeric_limits<int64_t>::min()), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_float(std::numeric_limits<int64_t>::max()).cmp(starlark_integer(std::numeric_limits<int64_t>::max()), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_float(std::numeric_limits<int64_t>::max()).cmp(starlark_bigint(std::numeric_limits<int64_t>::max()), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkFloat, BinaryPlus) {

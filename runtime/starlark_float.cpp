@@ -75,7 +75,7 @@ void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other
         comp.add_task(order_comparator::pending_task_type::kGreaterThan);
         break;
       }
-      auto r = as_float() <=> other->as_int64();
+      auto r = cmp_fi(as_float(), other->as_int64());
       if (r != 0) {
         comp.add_task(r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan);
       }
@@ -287,7 +287,7 @@ bool starlark_float::inner_equals(equals_comparator& comp, const starlark_obj* o
       }
       return as_float() == other->as_float();
     case starlark_numeric_type::kInt64:
-      return as_float() == other->as_int64();
+      return equals_fi(as_float(), other->as_int64());
     case starlark_numeric_type::kBigInt:
       return equals_fb(as_float(), other->as_bigint());
     default:

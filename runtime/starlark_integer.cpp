@@ -35,7 +35,7 @@ bool starlark_integer::inner_repr(printer& print, printer_action action) const {
 bool starlark_integer::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   switch (other->numeric_type()) {
     case starlark_numeric_type::kFloat:
-      return as_int64() == other->as_float();
+      return equals_fi(other->as_float(), as_int64());
     case starlark_numeric_type::kInt64:
       return as_int64() == other->as_int64();
     case starlark_numeric_type::kBigInt:
@@ -52,9 +52,9 @@ void starlark_integer::inner_cmp(order_comparator& comp, const starlark_obj* oth
         comp.add_task(order_comparator::pending_task_type::kLessThan);
         break;
       }
-      auto r = as_int64() <=> other->as_float();
+      auto r = cmp_fi(other->as_float(), as_int64());
       if (r != 0) {
-        comp.add_task(r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan);
+        comp.add_task(r > 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan);
       }
       break;
     }
