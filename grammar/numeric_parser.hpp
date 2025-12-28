@@ -13,7 +13,7 @@
 namespace starlark {
 namespace grammar {
 
-std::optional<std::string> read_number(unicode::utf8_reader& input);
+std::optional<std::string> read_number(unicode::utf8_reader& input, bool allow_binary_literals);
 
 }  // namespace grammar
 }  // namespace starlark

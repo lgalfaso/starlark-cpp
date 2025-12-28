@@ -15,7 +15,13 @@ namespace {
 
 void check(std::string_view input, std::optional<std::string> expected, int expected_pos) {
   utf8_reader s(input, true, false);
-  EXPECT_EQ(read_number(s), expected);
+  EXPECT_EQ(read_number(s, false), expected);
+  EXPECT_EQ(s.pos(), expected_pos);
+}
+
+void check_with_binary(std::string_view input, std::optional<std::string> expected, int expected_pos) {
+  utf8_reader s(input, true, false);
+  EXPECT_EQ(read_number(s, true), expected);
   EXPECT_EQ(s.pos(), expected_pos);
 }
 
@@ -39,6 +45,18 @@ TEST(NumericParser, Octal) {
   check("0o", {}, 2);
   check("0o8", {}, 3);
   check("0o08", {}, 4);
+}
+
+TEST(NumericParser, Binary) {
+  check("0b10101001", {}, 10);
+  check("0B10101001", {}, 10);
+  check_with_binary("0b10101001", "0b10101001", 10);
+  check_with_binary("0B10101001", "0b10101001", 10);
+  check_with_binary("0b0", "0", 3);
+  check_with_binary("0b0 - 4", "0", 3);
+  check_with_binary("0b", {}, 2);
+  check_with_binary("0b2", {}, 3);
+  check_with_binary("0b02", {}, 4);
 }
 
 TEST(NumericParser, Integer) {

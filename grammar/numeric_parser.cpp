@@ -45,7 +45,7 @@ std::optional<std::string> read_number_over(std::string_view chars, utf8_reader&
 }  // namespace
 
 
-std::optional<std::string> read_number(utf8_reader& input) {
+std::optional<std::string> read_number(utf8_reader& input, bool allow_binary_literals) {
   std::string result;
 
   if (input.capture("0x") || input.capture("0X")) {
@@ -66,6 +66,15 @@ std::optional<std::string> read_number(utf8_reader& input) {
       return "0";
     }
     result = "0" + number.value();
+  } else if (input.capture("0b") || input.capture("0B")) {
+    auto number = read_number_over("01", input);
+    if (!allow_binary_literals || !number) {
+      return {};
+    }
+    if (number.value() == "0") {
+      return "0";
+    }
+    result = "0b" + number.value();
   } else {
     bool found_dot = false;
     bool found_e = false;

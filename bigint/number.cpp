@@ -913,6 +913,12 @@ number parse_number(std::string_view input, const char** end_ptr) {
     mul = 1;
     shift = 4;
     limit = 16;
+  } else if (input.starts_with("0b")) {
+    input.remove_prefix(2);
+    base = 2;
+    mul = 1;
+    shift = 1;
+    limit = 64;
   } else if (input.starts_with("0")) {
     input.remove_prefix(1);
     base = 8;

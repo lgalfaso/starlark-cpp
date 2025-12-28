@@ -49,6 +49,9 @@ struct options {
 
   // Whether to allow a top-level `if` statements.
   bool allow_top_level_if = false;
+
+  // Whether to allow binary number literals.
+  bool allow_binary_integer_literals = false;
 };
 
 extern const std::set<std::string> predeclared_symbols;

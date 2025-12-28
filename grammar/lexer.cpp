@@ -343,7 +343,7 @@ void lexer::read_operator(char first_char) {
 
 void lexer::read_numeric() {
   auto start = get_position();
-  auto optional_value = read_number(source_code);
+  auto optional_value = read_number(source_code, opts.allow_binary_integer_literals);
   if (!optional_value.has_value()) {
     add_error("Unable to parse numeric value", start);
     auto end = get_position();
