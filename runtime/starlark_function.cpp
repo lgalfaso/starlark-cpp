@@ -247,6 +247,11 @@ starlark_obj* starlark_fn_bytes(const std::vector<starlark_obj*>& pos_args, cons
   return Arena::Create<starlark_bytes>(&arena, result);
 }
 
+starlark_obj* starlark_fn_chr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
 starlark_obj* starlark_fn_dict(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   return nullptr;
@@ -328,6 +333,11 @@ starlark_obj* starlark_fn_max(const std::vector<starlark_obj*>& pos_args, const 
 }
 
 starlark_obj* starlark_fn_min(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_ord(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   return nullptr;
 }

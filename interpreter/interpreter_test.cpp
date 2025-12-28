@@ -636,6 +636,7 @@ a01 = any([True, False])
 a02 = all([True, False])
 a03 = bool(1)
 a04 = bytes("abc")
+# chr
 # dict
 # dir
 # enumerate
@@ -645,10 +646,11 @@ a04 = bytes("abc")
 # hasattr
 # hash
 # int
-a14 = len([])
-a15 = list((1, 2))
+a15 = len([])
+a16 = list((1, 2))
 # max
 # min
+# ord
 # print
 # range
 # repr
