@@ -319,6 +319,10 @@ starlark_obj* starlark_obj::index(const starlark_obj& other, Arena& arena, error
   return nullptr;
 }
 
+void starlark_obj::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
+  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+}
+
 int64_t starlark_obj::as_int64() const {
   return 0;
 }

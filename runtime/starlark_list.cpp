@@ -168,6 +168,23 @@ starlark_obj* starlark_list::index(const starlark_obj& other, Arena& arena, erro
   return values[idx];
 }
 
+void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
+  if (iterators_count) {
+    error_callback.add_error("Error in append: list value is temporarily immutable due to active for-loop iteration");
+    return;
+  }
+  if (freezed) {
+    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    return;
+  }
+  auto iidx = inner_index(idx, values.size(), error_callback);
+  if (iidx < 0) {
+    return;
+  }
+  values[iidx] = &element;
+}
+
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;

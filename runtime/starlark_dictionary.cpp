@@ -105,6 +105,23 @@ starlark_obj* starlark_dictionary::index(const starlark_obj& other, Arena& arena
   return result->second;
 }
 
+void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
+  if (iterators_count) {
+    error_callback.add_error("Error in append: dictionary value is temporarily immutable due to active for-loop iteration");
+    return;
+  }
+  if (freezed) {
+    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    return;
+  }
+  if (idx.hash() == -1) {
+    error_callback.add_error(std::format("TypeError: cannot use '{}' as a dict key (unhashable type: '{}')", idx.type(), idx.type()));
+    return;
+  }
+  values.insert(&const_cast<starlark_obj&>(idx), &element);
+}
+
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;

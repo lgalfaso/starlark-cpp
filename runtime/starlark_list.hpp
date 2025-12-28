@@ -26,6 +26,7 @@ class starlark_list : public starlark_obj {
   int64_t len(error_fn& error_callback) const override;
   starlark_iterator* get_iterator(google::protobuf::Arena& arena, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  virtual void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
 
   class starlark_list_iterator : public starlark_iterator {
    public:

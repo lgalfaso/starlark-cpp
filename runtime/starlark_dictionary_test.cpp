@@ -301,7 +301,7 @@ TEST(StarlarkDictionary, GetIterator) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkDictionary, MutationWhileIterating) {
+TEST(StarlarkDictionary, MutationWhileIterating1) {
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -346,6 +346,74 @@ TEST(StarlarkDictionary, KeyError) {
   EXPECT_EQ(nullptr, dictionary.index(s_one, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("KeyError: \"key1\"", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, IndexAssign) {
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_string s_zero("key0");
+  starlark_string s_one("key1");
+  starlark_string s_two("key2");
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  dictionary.index_assign(s_two, two, error_callback);
+  dictionary.index_assign(s_zero, three, error_callback);
+  EXPECT_EQ("{\"key0\": 3, \"key1\": 1, \"key2\": 2}", dictionary.str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, MutationWhileIterating2) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_string s_zero("key0");
+  starlark_string s_one("key1");
+  starlark_string s_two("key2");
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  [[maybe_unused]] auto* it = dictionary.get_iterator(arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  dictionary.index_assign(s_two, two, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: dictionary value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, IndexAssignWithFreeze) {
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_string s_zero("key0");
+  starlark_string s_one("key1");
+  starlark_string s_two("key2");
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  dictionary.freeze();
+  dictionary.index_assign(s_two, two, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
+}
+
+TEST(StarlarkDictionary, IndexAssignUsingUnhashableKey) {
+  starlark_dictionary dict;
+  starlark_list list;
+  starlark_none none;
+  error_handler error_callback;
+
+  dict.index_assign(list, none, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
 }
 
 }  // namespace

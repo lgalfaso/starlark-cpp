@@ -526,7 +526,7 @@ TEST(StarlarkList, GetIterator) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkList, MutationWhileIterating) {
+TEST(StarlarkList, MutationWhileIterating1) {
   starlark_list list;
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -661,6 +661,85 @@ TEST(StarlarkList, IndexNotInt) {
   EXPECT_EQ(nullptr, list.index(starlark_float(1), arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: list indices must be integers or slices, not 'float'", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexAssign) {
+  error_handler error_callback;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  list.index_assign(starlark_integer(-3), three, error_callback);
+  list.index_assign(starlark_integer(1), four, error_callback);
+  EXPECT_EQ("[3, 4, 2]", list.str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkList, IndexAssignOutOfRange1) {
+  error_handler error_callback;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  list.index_assign(starlark_integer(-4), three, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexAssignOutOfRange2) {
+  error_handler error_callback;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  list.index_assign(starlark_integer(4), three, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, MutationWhileIterating2) {
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+
+  [[maybe_unused]] auto* it = list.get_iterator(arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  list.index_assign(zero, one, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexAssignWithFreeze) {
+  error_handler error_callback;
+  starlark_integer one(1);
+  starlark_list list;
+  list.add(&one, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  list.freeze();
+  list.index_assign(starlark_integer(0), one, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
 }
 
 }  // namespace

@@ -467,13 +467,23 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.back() = stack.back()->index(*index, arena, error_callback);
         break;
       }
+      case OpCode::kAssignIndexMember: {
+        assert(stack.size() >= 3);
+        auto* index = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->index_assign(*index, *element, error_callback);
+        break;
+      }
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
       case OpCode::kFail:
         return nullptr;
       case OpCode::kAssignDotMember:
-      case OpCode::kAssignIndexMember:
       case OpCode::kAssignSliceRange:
       case OpCode::kPlusAssign:
       case OpCode::kMinusAssign:

@@ -749,5 +749,25 @@ a02 = a01[2]
   EXPECT_EQ(result->elements[1]->str(), "3");
 }
 
+TEST(Interpreter, IndexMemberAssignment) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = [1, 2, 3, 4]
+a01[2] = 100
+a02 = {'a': 1, 'b': 2}
+a02['b'] = 100
+a02['c'] = 101
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "[1, 2, 100, 4]");
+  EXPECT_EQ(result->elements[1]->str(), "{\"a\": 1, \"b\": 100, \"c\": 101}");
+}
+
 }  // namespace
 
