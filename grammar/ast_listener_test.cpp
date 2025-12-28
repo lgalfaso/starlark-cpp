@@ -16,6 +16,7 @@
 #include "third-party/defer.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::ast::AssignStmt;
 using ::starlark::ast::File;
 using ::starlark::ast::SliceExpr;
 using ::starlark::grammar::parser;
@@ -280,11 +281,11 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT DotExpression\n";
   }
 
-  void enter_dot_expression_for_assignment(const starlark::ast::DotExpr* dot_expression) override {
+  void enter_dot_expression_for_assignment(const starlark::ast::DotExpr* dot_expression, AssignStmt::AssignOperator op) override {
     output += "ENTER DotExpressionForAssignment\n";
   }
 
-  void exit_dot_expression_for_assignment(const starlark::ast::DotExpr* dot_expression) override {
+  void exit_dot_expression_for_assignment(const starlark::ast::DotExpr* dot_expression, AssignStmt::AssignOperator op) override {
     output += "EXIT DotExpressionForAssignment\n";
   }
 
@@ -322,7 +323,7 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     }
   }
 
-  void enter_slice_expression_for_assignment(const starlark::ast::SliceExpr* slice_expression) override {
+  void enter_slice_expression_for_assignment(const starlark::ast::SliceExpr* slice_expression, AssignStmt::AssignOperator op) override {
     switch (slice_expression->slice_type_case()) {
       case SliceExpr::kIndex:
         output += "ENTER SliceIndexExpressionForAssignment\n";
@@ -335,7 +336,7 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     }
   }
 
-  void exit_slice_expression_for_assignment(const starlark::ast::SliceExpr* slice_expression) override {
+  void exit_slice_expression_for_assignment(const starlark::ast::SliceExpr* slice_expression, AssignStmt::AssignOperator op) override {
     switch (slice_expression->slice_type_case()) {
       case SliceExpr::kIndex:
         output += "EXIT SliceIndexExpressionForAssignment\n";
@@ -356,11 +357,11 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT Identifier\n";
   }
 
-  void enter_identifier_for_assignment(const starlark::ast::Identifier* identifier) override {
+  void enter_identifier_for_assignment(const starlark::ast::Identifier* identifier, AssignStmt::AssignOperator op) override {
     output += "ENTER IdentifierForAssignment(" + starlark::grammar::quoted(identifier->name()) + ")\n";
   }
 
-  void exit_identifier_for_assignment(const starlark::ast::Identifier* identifier) override {
+  void exit_identifier_for_assignment(const starlark::ast::Identifier* identifier, AssignStmt::AssignOperator op) override {
     output += "EXIT IdentifierForAssignment\n";
   }
 
@@ -416,20 +417,12 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "ENTER ListExpression\n";
   }
 
-  void mid_list_expression(const starlark::ast::ListExpr* list_expression) override {
-    output += "MID ListExpression\n";
-  }
-
   void exit_list_expression(const starlark::ast::ListExpr* list_expression) override {
     output += "EXIT ListExpression\n";
   }
 
   void enter_list_expression_for_assignment(const starlark::ast::ListExpr* list_expression) override {
     output += "ENTER ListExpressionForAssignment\n";
-  }
-
-  void mid_list_expression_for_assignment(const starlark::ast::ListExpr* list_expression) override {
-    output += "MID ListExpressionForAssignment\n";
   }
 
   void exit_list_expression_for_assignment(const starlark::ast::ListExpr* list_expression) override {
@@ -446,10 +439,6 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
 
   void enter_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {
     output += "ENTER DictionaryExpression\n";
-  }
-
-  void mid_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {
-    output += "MID DictionaryExpression\n";
   }
 
   void exit_dictionary_expression(const starlark::ast::DictExpr* dictionary_expression) override {

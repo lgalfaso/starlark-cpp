@@ -73,14 +73,14 @@ class bytecode_generator : public ast_listener_base {
   void enter_string_value(std::string_view string_value) override;
   void enter_bytes_value(std::string_view bytes_value) override;
   void enter_identifier(const Identifier* identifier) override;
-  void enter_identifier_for_assignment(const Identifier* identifier) override;
+  void enter_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) override;
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_dot_expression(const DotExpr* dot_expression) override;
-  void exit_dot_expression_for_assignment(const DotExpr* dot_expression) override;
+  void exit_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) override;
   void exit_slice_expression(const SliceExpr* slice_expression) override;
-  void exit_slice_expression_for_assignment(const SliceExpr* slice_expression) override;
+  void exit_slice_expression_for_assignment(const SliceExpr* slice_expression, AssignStmt::AssignOperator op) override;
 
   void exit_tuple(const Tuple* tuple) override;
   void enter_tuple_for_assignment(const Tuple* tuple) override;
@@ -114,8 +114,6 @@ class bytecode_generator : public ast_listener_base {
   void exit_call_expression(const CallExpr* call_expression) override;
   void enter_argument(const Argument* argument) override;
   void exit_argument(const Argument* argument) override;
-
-  void exit_assign_statement(const AssignStmt* assign_statement) override;
 
   void exit_return_statement(const ReturnStmt* return_statement) override;
 
@@ -220,10 +218,83 @@ void bytecode_generator::enter_identifier(const Identifier* identifier) {
   id_op->set_pos_in_frame(identifier->pos_in_frame());
 }
 
-void bytecode_generator::enter_identifier_for_assignment(const Identifier* identifier) {
-  auto* id_op = mutable_block()->add_op_code()->mutable_store();
-  id_op->set_frame(identifier->frame());
-  id_op->set_pos_in_frame(identifier->pos_in_frame());
+void bytecode_generator::enter_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {
+  switch (op) {
+    case AssignStmt::EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_store();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::PLUS_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_plus_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::MINUS_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_minus_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::STAR_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_star_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::SLASH_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_slash_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::SLASH_SLASH_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_slash_slash_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::PERCENT_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_percent_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::AMPERSAND_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_ampersand_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::PIPE_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_pipe_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::HAT_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_hat_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::LESS_LESS_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_less_less_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    case AssignStmt::GREATER_GREATER_EQUALS: {
+      auto* id_op = mutable_block()->add_op_code()->mutable_greater_greater_assign();
+      id_op->set_frame(identifier->frame());
+      id_op->set_pos_in_frame(identifier->pos_in_frame());
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression) {
@@ -334,8 +405,59 @@ void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
   mutable_block()->add_op_code()->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
 }
 
-void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_expression) {
-  mutable_block()->add_op_code()->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) {
+  switch (op) {
+    case AssignStmt::EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::PLUS_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_plus_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::MINUS_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_minus_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::STAR_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_star_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::SLASH_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_slash_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::SLASH_SLASH_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_slash_slash_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::PERCENT_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_percent_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::AMPERSAND_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_ampersand_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::PIPE_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_pipe_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::HAT_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_hat_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::LESS_LESS_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_less_less_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    case AssignStmt::GREATER_GREATER_EQUALS: {
+      mutable_block()->add_op_code()->mutable_assign_dot_member_greater_greater_equals()->set_member(dot_expression->identifier().nfkc_name());
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression) {
@@ -351,13 +473,116 @@ void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression
   }
 }
 
-void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* slice_expression) {
+void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* slice_expression, AssignStmt::AssignOperator op) {
+  // TODO(lmirelmann): This should be a different operation depending on the op.
   switch (slice_expression->slice_type_case()) {
     case SliceExpr::kIndex:
-      mutable_block()->add_op_code()->mutable_assign_index_member();
+      switch (op) {
+        case AssignStmt::EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member();
+          break;
+        }
+        case AssignStmt::PLUS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_plus_equals();
+          break;
+        }
+        case AssignStmt::MINUS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_minus_equals();
+          break;
+        }
+        case AssignStmt::STAR_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_star_equals();
+          break;
+        }
+        case AssignStmt::SLASH_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_slash_equals();
+          break;
+        }
+        case AssignStmt::SLASH_SLASH_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_slash_slash_equals();
+          break;
+        }
+        case AssignStmt::PERCENT_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_percent_equals();
+          break;
+        }
+        case AssignStmt::AMPERSAND_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_ampersand_equals();
+          break;
+        }
+        case AssignStmt::PIPE_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_pipe_equals();
+          break;
+        }
+        case AssignStmt::HAT_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_hat_equals();
+          break;
+        }
+        case AssignStmt::LESS_LESS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_less_less_equals();
+          break;
+        }
+        case AssignStmt::GREATER_GREATER_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_index_member_greater_greater_equals();
+          break;
+        }
+        default:
+          break;
+      }
       break;
     case SliceExpr::kSlice:
-      mutable_block()->add_op_code()->mutable_assign_slice_range();
+      switch (op) {
+        case AssignStmt::EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range();
+          break;
+        }
+        case AssignStmt::PLUS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_plus_equals();
+          break;
+        }
+        case AssignStmt::MINUS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_minus_equals();
+          break;
+        }
+        case AssignStmt::STAR_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_star_equals();
+          break;
+        }
+        case AssignStmt::SLASH_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_slash_equals();
+          break;
+        }
+        case AssignStmt::SLASH_SLASH_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_slash_slash_equals();
+          break;
+        }
+        case AssignStmt::PERCENT_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_percent_equals();
+          break;
+        }
+        case AssignStmt::AMPERSAND_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_ampersand_equals();
+          break;
+        }
+        case AssignStmt::PIPE_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_pipe_equals();
+          break;
+        }
+        case AssignStmt::HAT_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_hat_equals();
+          break;
+        }
+        case AssignStmt::LESS_LESS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_less_less_equals();
+          break;
+        }
+        case AssignStmt::GREATER_GREATER_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_slice_range_greater_greater_equals();
+          break;
+        }
+        default:
+          break;
+      }
       break;
     default:
       break;
@@ -576,49 +801,6 @@ void bytecode_generator::enter_argument(const Argument* argument) {
 void bytecode_generator::exit_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
     mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
-  }
-}
-
-void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statement) {
-  switch (assign_statement->op()) {
-    case AssignStmt::EQUALS:
-      // No-op.
-      break;
-    case AssignStmt::PLUS_EQUALS:
-      mutable_block()->add_op_code()->mutable_plus_assign();
-      break;
-    case AssignStmt::MINUS_EQUALS:
-      mutable_block()->add_op_code()->mutable_minus_assign();
-      break;
-    case AssignStmt::STAR_EQUALS:
-      mutable_block()->add_op_code()->mutable_star_assign();
-      break;
-    case AssignStmt::SLASH_EQUALS:
-      mutable_block()->add_op_code()->mutable_slash_assign();
-      break;
-    case AssignStmt::SLASH_SLASH_EQUALS:
-      mutable_block()->add_op_code()->mutable_slash_slash_assign();
-      break;
-    case AssignStmt::PERCENT_EQUALS:
-      mutable_block()->add_op_code()->mutable_percent_assign();
-      break;
-    case AssignStmt::AMPERSAND_EQUALS:
-      mutable_block()->add_op_code()->mutable_ampersand_assign();
-      break;
-    case AssignStmt::PIPE_EQUALS:
-      mutable_block()->add_op_code()->mutable_pipe_assign();
-      break;
-    case AssignStmt::HAT_EQUALS:
-      mutable_block()->add_op_code()->mutable_hat_assign();
-      break;
-    case AssignStmt::LESS_LESS_EQUALS:
-      mutable_block()->add_op_code()->mutable_less_less_assign();
-      break;
-    case AssignStmt::GREATER_GREATER_EQUALS:
-      mutable_block()->add_op_code()->mutable_greater_greater_assign();
-      break;
-    default:
-      break;
   }
 }
 

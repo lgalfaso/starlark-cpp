@@ -12,7 +12,7 @@ message Block {
 }
 
 message OpCode {
-  // next_id: 72
+  // next_id: 106
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -69,25 +69,60 @@ message OpCode {
     EndIterator end_iterator = 42;
 
     Unpack unpack = 70;
-    DotMember assign_dot_member = 43;
-    IndexMember assign_index_member = 68;
-    SliceRange assign_slice_range = 69;
-    Assign plus_assign= 44;
-    Assign minus_assign = 45;
-    Assign star_assign = 46;
-    Assign slash_assign = 47;
-    Assign slash_slash_assign = 48;
-    Assign percent_assign = 49;
-    Assign ampersand_assign = 50;
-    Assign pipe_assign = 51;
-    Assign hat_assign = 52;
-    Assign less_less_assign = 53;
-    Assign greater_greater_assign = 54;
-
+    PosInFrame plus_assign = 44;
+    PosInFrame minus_assign = 45;
+    PosInFrame star_assign = 46;
+    PosInFrame slash_assign = 47;
+    PosInFrame slash_slash_assign = 48;
+    PosInFrame percent_assign = 49;
+    PosInFrame ampersand_assign = 50;
+    PosInFrame pipe_assign = 51;
+    PosInFrame hat_assign = 52;
+    PosInFrame less_less_assign = 53;
+    PosInFrame greater_greater_assign = 54;
 
     DotMember dot_member = 55;
+    DotMember assign_dot_member = 43;
+    DotMember assign_dot_member_plus_equals = 73;
+    DotMember assign_dot_member_minus_equals = 74;
+    DotMember assign_dot_member_star_equals = 75;
+    DotMember assign_dot_member_slash_equals = 76;
+    DotMember assign_dot_member_slash_slash_equals = 77;
+    DotMember assign_dot_member_percent_equals = 78;
+    DotMember assign_dot_member_ampersand_equals = 79;
+    DotMember assign_dot_member_pipe_equals = 80;
+    DotMember assign_dot_member_hat_equals = 81;
+    DotMember assign_dot_member_less_less_equals = 82;
+    DotMember assign_dot_member_greater_greater_equals = 83;
+
     IndexMember index_member = 60;
+    IndexMember assign_index_member = 68;
+    IndexMember assign_index_member_plus_equals = 84;
+    IndexMember assign_index_member_minus_equals = 85;
+    IndexMember assign_index_member_star_equals = 86;
+    IndexMember assign_index_member_slash_equals = 87;
+    IndexMember assign_index_member_slash_slash_equals = 88;
+    IndexMember assign_index_member_percent_equals = 89;
+    IndexMember assign_index_member_ampersand_equals = 90;
+    IndexMember assign_index_member_pipe_equals = 91;
+    IndexMember assign_index_member_hat_equals = 92;
+    IndexMember assign_index_member_less_less_equals = 93;
+    IndexMember assign_index_member_greater_greater_equals = 94;
+
     SliceRange slice_range = 61;
+    SliceRange assign_slice_range = 69;
+    SliceRange assign_slice_range_plus_equals = 95;
+    SliceRange assign_slice_range_minus_equals = 96;
+    SliceRange assign_slice_range_star_equals = 97;
+    SliceRange assign_slice_range_slash_equals = 98;
+    SliceRange assign_slice_range_slash_slash_equals = 99;
+    SliceRange assign_slice_range_percent_equals = 100;
+    SliceRange assign_slice_range_ampersand_equals = 101;
+    SliceRange assign_slice_range_pipe_equals = 102;
+    SliceRange assign_slice_range_hat_equals = 103;
+    SliceRange assign_slice_range_less_less_equals = 104;
+    SliceRange assign_slice_range_greater_greater_equals = 105;
+
     Call call = 56;
     LoadModule load_module = 57;
     Return return = 62;
@@ -186,8 +221,6 @@ message EndIterator {}
 message Unpack {
   uint32 number_of_elements = 1;
 }
-
-message Assign {}
 
 message DotMember {
   string member = 1;

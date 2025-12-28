@@ -1,0 +1,60 @@
+block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "x" } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
+  op_code { make_list { reserve_size: 0 } }
+  op_code { store { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 12 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 0 } }
+  op_code { assign_index_member { } }
+  op_code { const_int { value: 13 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 1 } }
+  op_code { assign_index_member_plus_equals { } }
+  op_code { const_int { value: 14 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 2 } }
+  op_code { assign_index_member_minus_equals { } }
+  op_code { const_int { value: 15 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 3 } }
+  op_code { assign_index_member_slash_equals { } }
+  op_code { const_int { value: 16 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 4 } }
+  op_code { assign_index_member_slash_slash_equals { } }
+  op_code { const_int { value: 17 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 5 } }
+  op_code { assign_index_member_percent_equals { } }
+  op_code { const_int { value: 18 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 6 } }
+  op_code { assign_index_member_ampersand_equals { } }
+  op_code { const_int { value: 19 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 7 } }
+  op_code { assign_index_member_pipe_equals { } }
+  op_code { const_int { value: 20 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 8 } }
+  op_code { assign_index_member_hat_equals { } }
+  op_code { const_int { value: 21 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 9 } }
+  op_code { assign_index_member_greater_greater_equals { } }
+  op_code { const_int { value: 22 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 10 } }
+  op_code { assign_index_member_less_less_equals { } }
+  op_code { const_int { value: 23 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 11 } }
+  op_code { assign_index_member_star_equals { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { end { } }
+}
+

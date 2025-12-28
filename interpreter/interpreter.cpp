@@ -503,6 +503,40 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kReturn:
       case OpCode::kMakeFunction:
       case OpCode::kSetDefaultValues:
+      case OpCode::kAssignDotMemberPlusEquals:
+      case OpCode::kAssignDotMemberMinusEquals:
+      case OpCode::kAssignDotMemberStarEquals:
+      case OpCode::kAssignDotMemberSlashEquals:
+      case OpCode::kAssignDotMemberSlashSlashEquals:
+      case OpCode::kAssignDotMemberPercentEquals:
+      case OpCode::kAssignDotMemberAmpersandEquals:
+      case OpCode::kAssignDotMemberPipeEquals:
+      case OpCode::kAssignDotMemberHatEquals:
+      case OpCode::kAssignDotMemberLessLessEquals:
+      case OpCode::kAssignDotMemberGreaterGreaterEquals:
+      case OpCode::kAssignIndexMemberPlusEquals:
+      case OpCode::kAssignIndexMemberMinusEquals:
+      case OpCode::kAssignIndexMemberStarEquals:
+      case OpCode::kAssignIndexMemberSlashEquals:
+      case OpCode::kAssignIndexMemberSlashSlashEquals:
+      case OpCode::kAssignIndexMemberPercentEquals:
+      case OpCode::kAssignIndexMemberAmpersandEquals:
+      case OpCode::kAssignIndexMemberPipeEquals:
+      case OpCode::kAssignIndexMemberHatEquals:
+      case OpCode::kAssignIndexMemberLessLessEquals:
+      case OpCode::kAssignIndexMemberGreaterGreaterEquals:
+      case OpCode::kAssignSliceRangePlusEquals:
+      case OpCode::kAssignSliceRangeMinusEquals:
+      case OpCode::kAssignSliceRangeStarEquals:
+      case OpCode::kAssignSliceRangeSlashEquals:
+      case OpCode::kAssignSliceRangeSlashSlashEquals:
+      case OpCode::kAssignSliceRangePercentEquals:
+      case OpCode::kAssignSliceRangeAmpersandEquals:
+      case OpCode::kAssignSliceRangePipeEquals:
+      case OpCode::kAssignSliceRangeHatEquals:
+      case OpCode::kAssignSliceRangeLessLessEquals:
+      case OpCode::kAssignSliceRangeGreaterGreaterEquals:
+
       case OpCode::OP_CODE_NOT_SET:
         // TODO(lmirelmann): Implement the other instructions.
         error_callback.add_error(std::format("Unknown op-code: {}", op_code.ShortDebugString()));

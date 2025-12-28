@@ -44,7 +44,6 @@ ENTER Expression
 ENTER IntValue(4)
 EXIT IntValue
 EXIT Expression
-MID ListExpression
 ENTER Expression
 ENTER IntValue(5)
 EXIT IntValue
@@ -57,7 +56,6 @@ ENTER Expression
 ENTER IdentifierForAssignment("c")
 EXIT IdentifierForAssignment
 EXIT Expression
-MID ListExpressionForAssignment
 ENTER Expression
 ENTER IdentifierForAssignment("d")
 EXIT IdentifierForAssignment

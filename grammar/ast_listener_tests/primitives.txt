@@ -47,7 +47,6 @@ ENTER Expression
 ENTER IntValue(1)
 EXIT IntValue
 EXIT Expression
-MID ListExpression
 ENTER Expression
 ENTER IntValue(2)
 EXIT IntValue

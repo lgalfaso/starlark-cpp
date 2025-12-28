@@ -140,7 +140,7 @@ struct message {
   };
   message_type type;
   message_type_op op = message_type_op::kExit;
-  bool for_assignment = false;
+  AssignStmt::AssignOperator for_assignment = AssignStmt::UNKNOWN;
 };
 
 void ast_listener_base::enter_file(const File* starlark_file) {}
@@ -202,18 +202,18 @@ void ast_listener_base::enter_for_in_expression(const Expression* expression) {}
 void ast_listener_base::exit_for_in_expression(const Expression* expression) {}
 void ast_listener_base::enter_dot_expression(const DotExpr* dot_expression) {}
 void ast_listener_base::exit_dot_expression(const DotExpr* dot_expression) {}
-void ast_listener_base::enter_dot_expression_for_assignment(const DotExpr* dot_expression) {}
-void ast_listener_base::exit_dot_expression_for_assignment(const DotExpr* dot_expression) {}
+void ast_listener_base::enter_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) {}
+void ast_listener_base::exit_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) {}
 void ast_listener_base::enter_call_expression(const CallExpr* call_expression) {}
 void ast_listener_base::exit_call_expression(const CallExpr* call_expression) {}
 void ast_listener_base::enter_slice_expression(const SliceExpr* slice_expression) {}
 void ast_listener_base::exit_slice_expression(const SliceExpr* slice_expression) {}
-void ast_listener_base::enter_slice_expression_for_assignment(const SliceExpr* slice_expression) {}
-void ast_listener_base::exit_slice_expression_for_assignment(const SliceExpr* slice_expression) {}
+void ast_listener_base::enter_slice_expression_for_assignment(const SliceExpr* slice_expression, AssignStmt::AssignOperator op) {}
+void ast_listener_base::exit_slice_expression_for_assignment(const SliceExpr* slice_expression, AssignStmt::AssignOperator op) {}
 void ast_listener_base::enter_identifier(const Identifier* identifier) {}
 void ast_listener_base::exit_identifier(const Identifier* identifier) {}
-void ast_listener_base::enter_identifier_for_assignment(const Identifier* identifier) {}
-void ast_listener_base::exit_identifier_for_assignment(const Identifier* identifier) {}
+void ast_listener_base::enter_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {}
+void ast_listener_base::exit_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {}
 void ast_listener_base::enter_none_value() {}
 void ast_listener_base::exit_none_value() {}
 void ast_listener_base::enter_int_value(std::int64_t int_value) {}
@@ -228,14 +228,11 @@ void ast_listener_base::enter_bytes_value(std::string_view bytes_value) {}
 void ast_listener_base::exit_bytes_value(std::string_view bytes_value) {}
 void ast_listener_base::enter_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::exit_list_expression(const ListExpr* list_expression) {}
-void ast_listener_base::mid_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::enter_list_expression_for_assignment(const ListExpr* list_expression) {}
 void ast_listener_base::exit_list_expression_for_assignment(const ListExpr* list_expression) {}
-void ast_listener_base::mid_list_expression_for_assignment(const ListExpr* list_expression) {}
 void ast_listener_base::enter_list_comprehension(const ListComp* list_comprehension) {}
 void ast_listener_base::exit_list_comprehension(const ListComp* list_comprehension) {}
 void ast_listener_base::enter_dictionary_expression(const DictExpr* dictionary_expression) {}
-void ast_listener_base::mid_dictionary_expression(const DictExpr* dictionary_expression) {}
 void ast_listener_base::exit_dictionary_expression(const DictExpr* dictionary_expression) {}
 void ast_listener_base::enter_dictionary_comprehension(const DictComp* dictionary_comprehension) {}
 void ast_listener_base::exit_dictionary_comprehension(const DictComp* dictionary_comprehension) {}
@@ -465,7 +462,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
             .expression = top.for_loop_variables,
             .type = message_type::kExpression,
             .op = message_type_op::kEnter,
-            .for_assignment = true,
+            .for_assignment = AssignStmt::EQUALS,
           });
           break;
         case message_type::kForInExpression:
@@ -491,7 +488,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
             .expression = &top.assign_statement->lhs(),
             .type = message_type::kExpression,
             .op = message_type_op::kEnter,
-            .for_assignment = top.assign_statement->op() == AssignStmt::EQUALS,
+            .for_assignment = top.assign_statement->op(),
           });
           to_process.push_back(message{
             .expression = &top.assign_statement->rhs(),
@@ -694,10 +691,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           }
           break;
         case message_type::kTuple:
-          if (top.for_assignment) {
+          if (top.for_assignment == AssignStmt::EQUALS) {
             listener.enter_tuple_for_assignment(top.tuple);
-          } else {
+          } else if (top.for_assignment == AssignStmt::UNKNOWN) {
             listener.enter_tuple(top.tuple);
+          } else {
+            // 'tuple' is an illegal expression for augmented assignment.
+            assert(false);
           }
           for (auto it = top.tuple->value().rbegin(); it != top.tuple->value().rend(); ++it) {
             to_process.push_back(message{
@@ -784,8 +784,8 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           }
           break;
         case message_type::kDotExpression:
-          if (top.for_assignment) {
-            listener.enter_dot_expression_for_assignment(top.dot_expression);
+          if (top.for_assignment != AssignStmt::UNKNOWN) {
+            listener.enter_dot_expression_for_assignment(top.dot_expression, top.for_assignment);
           } else {
             listener.enter_dot_expression(top.dot_expression);
           }
@@ -811,8 +811,8 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           });
           break;
         case message_type::kSliceExpression:
-          if (top.for_assignment) {
-            listener.enter_slice_expression_for_assignment(top.slice_expression);
+          if (top.for_assignment != AssignStmt::UNKNOWN) {
+            listener.enter_slice_expression_for_assignment(top.slice_expression, top.for_assignment);
           } else {
             listener.enter_slice_expression(top.slice_expression);
           }
@@ -872,8 +872,8 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           });
           break;
         case message_type::kIdentifier:
-          if (top.for_assignment) {
-            listener.enter_identifier_for_assignment(top.identifier);
+          if (top.for_assignment != AssignStmt::UNKNOWN) {
+            listener.enter_identifier_for_assignment(top.identifier, top.for_assignment);
           } else {
             listener.enter_identifier(top.identifier);
           }
@@ -897,20 +897,15 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.enter_bytes_value(top.bytes_value);
           break;
         case message_type::kListExpression:
-          if (top.for_assignment) {
+          if (top.for_assignment == AssignStmt::EQUALS) {
             listener.enter_list_expression_for_assignment(top.list_expression);
-          } else {
+          } else if (top.for_assignment == AssignStmt::UNKNOWN) {
             listener.enter_list_expression(top.list_expression);
+          } else {
+            // 'list' is an illegal expression for augmented assignment.
+            assert(false);
           }
           for (auto it = top.list_expression->element().rbegin(); it != top.list_expression->element().rend(); ++it) {
-            if (it != top.list_expression->element().rbegin()) {
-              to_process.push_back(message{
-                .list_expression = top.list_expression,
-                .type = message_type::kListExpression,
-                .op = message_type_op::kMid,
-                .for_assignment = top.for_assignment,
-              });
-            }
             to_process.push_back(message{
               .expression = &*it,
               .type = message_type::kExpression,
@@ -937,13 +932,6 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
         case message_type::kDictionaryExpression:
           listener.enter_dictionary_expression(top.dictionary_expression);
           for (auto it = top.dictionary_expression->entry().rbegin(); it != top.dictionary_expression->entry().rend(); ++it) {
-            if (it != top.dictionary_expression->entry().rbegin()) {
-              to_process.push_back(message{
-                .dictionary_expression = top.dictionary_expression,
-                .type = message_type::kDictionaryExpression,
-                .op = message_type_op::kMid,
-              });
-            }
             to_process.push_back(message{
               .map_entry = &*it,
               .type = message_type::kMapEntry,
@@ -1090,10 +1078,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.exit_expression(top.expression);
           break;
         case message_type::kTuple:
-          if (top.for_assignment) {
+          if (top.for_assignment == AssignStmt::EQUALS) {
             listener.exit_tuple_for_assignment(top.tuple);
-          } else {
+          } else if (top.for_assignment == AssignStmt::UNKNOWN) {
             listener.exit_tuple(top.tuple);
+          } else {
+            // 'tuple' is an illegal expression for augmented assignment.
+            assert(false);
           }
           break;
         case message_type::kIfExpression:
@@ -1109,8 +1100,8 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.exit_lambda_expression(top.lambda_expression);
           break;
         case message_type::kDotExpression:
-          if (top.for_assignment) {
-            listener.exit_dot_expression_for_assignment(top.dot_expression);
+          if (top.for_assignment != AssignStmt::UNKNOWN) {
+            listener.exit_dot_expression_for_assignment(top.dot_expression, top.for_assignment);
           } else {
             listener.exit_dot_expression(top.dot_expression);
           }
@@ -1119,15 +1110,15 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.exit_call_expression(top.call_expression);
           break;
         case message_type::kSliceExpression:
-          if (top.for_assignment) {
-            listener.exit_slice_expression_for_assignment(top.slice_expression);
+          if (top.for_assignment != AssignStmt::UNKNOWN) {
+            listener.exit_slice_expression_for_assignment(top.slice_expression, top.for_assignment);
           } else {
             listener.exit_slice_expression(top.slice_expression);
           }
           break;
         case message_type::kIdentifier:
-          if (top.for_assignment) {
-            listener.exit_identifier_for_assignment(top.identifier);
+          if (top.for_assignment != AssignStmt::UNKNOWN) {
+            listener.exit_identifier_for_assignment(top.identifier, top.for_assignment);
           } else {
             listener.exit_identifier(top.identifier);
           }
@@ -1151,10 +1142,13 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           listener.exit_bytes_value(top.bytes_value);
           break;
         case message_type::kListExpression:
-          if (top.for_assignment) {
+          if (top.for_assignment == AssignStmt::EQUALS) {
             listener.exit_list_expression_for_assignment(top.list_expression);
-          } else {
+          } else if (top.for_assignment == AssignStmt::UNKNOWN) {
             listener.exit_list_expression(top.list_expression);
+          } else {
+            // 'list' is an illegal expression for augmented assignment.
+            assert(false);
           }
           break;
         case message_type::kListComprehension:
@@ -1183,16 +1177,6 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
       switch (top.type) {
         case message_type::kBinaryExpression:
           listener.mid_binary_expression(top.binary_expression);
-          break;
-        case message_type::kListExpression:
-          if (top.for_assignment) {
-            listener.mid_list_expression_for_assignment(top.list_expression);
-          } else {
-            listener.mid_list_expression(top.list_expression);
-          }
-          break;
-        case message_type::kDictionaryExpression:
-          listener.mid_dictionary_expression(top.dictionary_expression);
           break;
         case message_type::kIfExpression:
           listener.mid_if_expression(top.if_expression);
