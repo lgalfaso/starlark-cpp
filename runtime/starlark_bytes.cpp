@@ -23,6 +23,10 @@ std::string_view starlark_bytes::type() const {
   return starlark_types::bytes_t;
 }
 
+bool starlark_bytes::primitive() const {
+  return true;
+}
+
 int64_t starlark_bytes::len(error_fn& error_callback) const {
   return value.size();
 }

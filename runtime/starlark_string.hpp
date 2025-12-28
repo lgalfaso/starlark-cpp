@@ -17,6 +17,7 @@ class starlark_string : public starlark_obj {
  public:
   explicit starlark_string(std::string_view value);
   std::string_view type() const override;
+  bool primitive() const override;
   std::string str() const override;
   bool truthy() const override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;

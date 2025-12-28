@@ -58,6 +58,10 @@ TEST(StarlarkInteger, Type) {
   EXPECT_EQ("int", starlark_integer(1).type());
 }
 
+TEST(StarlarkInteger, Primitve) {
+  EXPECT_TRUE(starlark_integer(1).primitive());
+}
+
 TEST(StarlarkInteger, Str) {
   EXPECT_EQ("1234", starlark_integer(1234).str());
   EXPECT_EQ("-1234", starlark_integer(-1234).str());

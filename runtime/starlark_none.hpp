@@ -16,6 +16,7 @@ class starlark_none : public starlark_obj {
  public:
   std::string_view type() const override;
   bool truthy() const override;
+  bool primitive() const override;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

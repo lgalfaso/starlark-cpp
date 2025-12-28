@@ -14,6 +14,10 @@ TEST(StarlarkRange, Type) {
   EXPECT_EQ("range", starlark_range().type());
 }
 
+TEST(StarlarkRange, Primitve) {
+  EXPECT_FALSE(starlark_range().primitive());
+}
+
 TEST(StarlarkRange, Truthy) {
   // TODO(lmirelmann): Implement
 }

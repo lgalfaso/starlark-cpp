@@ -119,6 +119,7 @@ class starlark_obj {
   virtual std::string str() const;
   std::string repr() const;
   virtual bool truthy() const = 0;
+  virtual bool primitive() const;
   bool equals(const starlark_obj& other) const;
   int cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;

@@ -57,6 +57,10 @@ TEST(StarlarkBigInt, Type) {
   EXPECT_EQ("int", starlark_bigint(1).type());
 }
 
+TEST(StarlarkBigInt, Primitve) {
+  EXPECT_TRUE(starlark_bigint(1).primitive());
+}
+
 TEST(StarlarkBigInt, Str) {
   EXPECT_EQ("-9223372036854775808", starlark_bigint(std::numeric_limits<int64_t>::min()).str());
   EXPECT_EQ("-9223372036854775807", starlark_bigint(std::numeric_limits<int64_t>::min() + 1).str());

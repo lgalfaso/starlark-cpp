@@ -26,6 +26,10 @@ std::string_view starlark_integer::type() const {
   return starlark_types::int_t;
 }
 
+bool starlark_integer::primitive() const {
+  return true;
+}
+
 bool starlark_integer::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
   print.append(std::to_string(value));

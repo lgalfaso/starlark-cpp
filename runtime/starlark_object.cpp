@@ -122,6 +122,10 @@ std::string starlark_obj::repr() const {
   return print.value();
 }
 
+bool starlark_obj::primitive() const {
+  return false;
+}
+
 bool starlark_obj::equals(const starlark_obj& other) const {
   equals_comparator cmp;
   cmp.add_task(equals_comparator::pending_task{

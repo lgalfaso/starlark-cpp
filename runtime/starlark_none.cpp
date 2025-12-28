@@ -15,6 +15,10 @@ std::string_view starlark_none::type() const {
   return starlark_types::none_t;
 }
 
+bool starlark_none::primitive() const {
+  return true;
+}
+
 bool starlark_none::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
   print.append("None");

@@ -39,6 +39,10 @@ TEST(StarlarkList, Type) {
   EXPECT_EQ("list", starlark_list().type());
 }
 
+TEST(StarlarkList, Primitve) {
+  EXPECT_FALSE(starlark_list().primitive());
+}
+
 TEST(StarlarkList, Str) {
   starlark_none none;
   starlark_bool true_obj(true);

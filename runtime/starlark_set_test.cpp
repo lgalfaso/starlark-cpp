@@ -30,6 +30,10 @@ TEST(StarlarkSet, Type) {
   EXPECT_EQ("set", starlark_set().type());
 }
 
+TEST(StarlarkSet, Primitve) {
+  EXPECT_FALSE(starlark_set().primitive());
+}
+
 TEST(StarlarkSet, Str) {
   starlark_none none;
   starlark_bool true_obj(true);

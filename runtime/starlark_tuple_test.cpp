@@ -37,6 +37,10 @@ TEST(StarlarkTuple, Type) {
   EXPECT_EQ("tuple", starlark_tuple().type());
 }
 
+TEST(StarlarkTuple, Primitve) {
+  EXPECT_FALSE(starlark_tuple().primitive());
+}
+
 TEST(StarlarkTuple, Str) {
   starlark_none none;
   starlark_bool true_obj(true);

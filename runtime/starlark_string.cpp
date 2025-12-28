@@ -26,6 +26,10 @@ std::string_view starlark_string::type() const {
   return starlark_types::string_t;
 }
 
+bool starlark_string::primitive() const {
+  return true;
+}
+
 std::string starlark_string::str() const {
   return value;
 }

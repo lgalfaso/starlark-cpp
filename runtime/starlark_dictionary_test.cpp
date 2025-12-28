@@ -32,6 +32,10 @@ TEST(StarlarkDictionary, Type) {
   EXPECT_EQ("dict", starlark_dictionary().type());
 }
 
+TEST(StarlarkDictionary, Primitve) {
+  EXPECT_FALSE(starlark_dictionary().primitive());
+}
+
 TEST(StarlarkDictionary, Str) {
   starlark_string s1("1");
   starlark_string s2("2");

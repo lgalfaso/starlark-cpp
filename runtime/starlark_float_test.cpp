@@ -55,6 +55,10 @@ TEST(StarlarkFloat, Type) {
   EXPECT_EQ("float", starlark_float(1).type());
 }
 
+TEST(StarlarkFloat, Primitve) {
+  EXPECT_TRUE(starlark_float(1).primitive());
+}
+
 TEST(StarlarkFloat, Str) {
   // Follow Python results as much as possible.
   EXPECT_EQ("0.0", starlark_float(0.0).str());

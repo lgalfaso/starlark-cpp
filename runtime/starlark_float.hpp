@@ -17,6 +17,7 @@ class starlark_float : public starlark_obj {
   explicit starlark_float(double value);
   std::string_view type() const override;
   bool truthy() const override;
+  bool primitive() const override;
   starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* unary_minus(google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;

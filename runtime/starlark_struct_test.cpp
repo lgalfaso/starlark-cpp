@@ -18,4 +18,8 @@ TEST(StarlarkStruct, Truthy) {
   EXPECT_TRUE(starlark_struct().truthy());
 }
 
+TEST(StarlarkStruct, Primitive) {
+  EXPECT_FALSE(starlark_struct().primitive());
+}
+
 }  // namespace

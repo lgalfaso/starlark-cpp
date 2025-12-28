@@ -52,6 +52,10 @@ TEST(StarlarkNone, Type) {
   EXPECT_EQ("NoneType", starlark_none{}.type());
 }
 
+TEST(StarlarkNone, Primitive) {
+  EXPECT_TRUE(starlark_none{}.primitive());
+}
+
 TEST(StarlarkNone, Str) {
   EXPECT_EQ("None", starlark_none{}.str());
 }

@@ -56,6 +56,10 @@ TEST(StarlarkBool, Type) {
   EXPECT_EQ("bool", starlark_bool(true).type());
 }
 
+TEST(StarlarkBool, Primitive) {
+  EXPECT_TRUE(starlark_bool(true).primitive());
+}
+
 TEST(StarlarkBool, Str) {
   EXPECT_EQ("False", starlark_bool(false).str());
   EXPECT_EQ("True", starlark_bool(true).str());

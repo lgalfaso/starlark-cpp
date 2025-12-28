@@ -53,6 +53,10 @@ TEST(StarlarkBytes, Type) {
   EXPECT_EQ("bytes", starlark_bytes("").type());
 }
 
+TEST(StarlarkBytes, Primitve) {
+  EXPECT_TRUE(starlark_bytes("").primitive());
+}
+
 TEST(StarlarkBytes, Str) {
   EXPECT_EQ("b\"'\"", starlark_bytes("'").str());
   EXPECT_EQ("b\"\\\"\"", starlark_bytes("\"").str());

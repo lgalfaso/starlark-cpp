@@ -17,6 +17,10 @@ std::string_view starlark_bool::type() const {
   return starlark_types::bool_t;
 }
 
+bool starlark_bool::primitive() const {
+  return true;
+}
+
 bool starlark_bool::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
   if (value) {

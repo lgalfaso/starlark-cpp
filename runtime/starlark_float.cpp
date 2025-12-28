@@ -24,6 +24,10 @@ std::string_view starlark_float::type() const {
   return starlark_types::float_t;
 }
 
+bool starlark_float::primitive() const {
+  return true;
+}
+
 starlark_obj* starlark_float::unary_plus(Arena& arena, error_fn& error_callback) const {
   return const_cast<starlark_float*>(this);
 }

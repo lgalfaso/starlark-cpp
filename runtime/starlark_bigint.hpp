@@ -19,6 +19,7 @@ class starlark_bigint : public starlark_obj {
   explicit starlark_bigint(const starlark::bigint::number& value);
   std::string_view type() const override;
   bool truthy() const override;
+  bool primitive() const override;
   starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* unary_minus(google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* unary_tilde(google::protobuf::Arena& arena, error_fn& error_callback) const override;

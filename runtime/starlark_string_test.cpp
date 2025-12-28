@@ -53,6 +53,10 @@ TEST(StarlarkString, Type) {
   EXPECT_EQ("string", starlark_string("").type());
 }
 
+TEST(StarlarkString, Primitve) {
+  EXPECT_TRUE(starlark_string("").primitive());
+}
+
 TEST(StarlarkString, Str) {
   EXPECT_EQ("abcdef", starlark_string("abcdef").str());
   EXPECT_EQ("fedcba", starlark_string("fedcba").str());
