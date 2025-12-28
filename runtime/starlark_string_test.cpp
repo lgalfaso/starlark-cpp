@@ -341,4 +341,38 @@ TEST(StarlarkString, Len) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkString, Index) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_string str("abc");
+
+  EXPECT_EQ(str.index(starlark_integer(-3), arena, error_callback)->repr(), "\"a\"");
+  EXPECT_EQ(str.index(starlark_integer(-2), arena, error_callback)->repr(), "\"b\"");
+  EXPECT_EQ(str.index(starlark_integer(-1), arena, error_callback)->repr(), "\"c\"");
+  EXPECT_EQ(str.index(starlark_integer(0), arena, error_callback)->repr(), "\"a\"");
+  EXPECT_EQ(str.index(starlark_integer(1), arena, error_callback)->repr(), "\"b\"");
+  EXPECT_EQ(str.index(starlark_integer(2), arena, error_callback)->repr(), "\"c\"");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkString, IndexOutOfRange1) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_string str("abc");
+
+  EXPECT_EQ(nullptr, str.index(starlark_integer(-4), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: string index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkString, IndexOutOfRange2) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_string str("abc");
+
+  EXPECT_EQ(nullptr, str.index(starlark_integer(3), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: string index out of range", error_callback.messages[0]);
+}
+
 }  // namespace

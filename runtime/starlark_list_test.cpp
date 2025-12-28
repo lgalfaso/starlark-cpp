@@ -9,6 +9,7 @@
 
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
+#include "runtime/starlark_float.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
@@ -19,6 +20,7 @@ using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
@@ -534,6 +536,127 @@ TEST(StarlarkList, MutationWhileIterating) {
   list.add(&zero, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, Index) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  EXPECT_EQ(list.index(starlark_integer(-3), arena, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_bigint(-3), arena, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_integer(-2), arena, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_bigint(-2), arena, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_integer(-1), arena, error_callback)->repr(), "2");
+  EXPECT_EQ(list.index(starlark_integer(0), arena, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_bigint(0), arena, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_integer(1), arena, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_bigint(1), arena, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_integer(2), arena, error_callback)->repr(), "2");
+  EXPECT_EQ(list.index(starlark_bigint(2), arena, error_callback)->repr(), "2");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkList, IndexOutOfRange1) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  EXPECT_EQ(nullptr, list.index(starlark_integer(-4), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexOutOfRange2) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  EXPECT_EQ(nullptr, list.index(starlark_integer(3), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexOutOfRange3) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  EXPECT_EQ(nullptr, list.index(starlark_bigint(-4), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexOutOfRange4) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  EXPECT_EQ(nullptr, list.index(starlark_bigint(3), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexOutOfRange5) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  EXPECT_EQ(nullptr, list.index(starlark_bigint(number::one << 64), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkList, IndexNotInt) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_list list;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  list.add(&zero, error_callback);
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+
+  EXPECT_EQ(nullptr, list.index(starlark_float(1), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: list indices must be integers or slices, not 'float'", error_callback.messages[0]);
 }
 
 }  // namespace

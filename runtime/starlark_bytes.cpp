@@ -129,6 +129,14 @@ starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& aren
   }
 }
 
+starlark_obj* starlark_bytes::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  auto idx = inner_index(other, value.size(), error_callback);
+  if (idx < 0) {
+    return nullptr;
+  }
+  return Arena::Create<starlark_bytes>(&arena, value.substr(idx, 1));
+}
+
 bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
       value == (static_cast<const starlark_bytes*>(other))->value;

@@ -346,4 +346,38 @@ TEST(StarlarkBytes, Len) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkBytes, Index) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_bytes bytes("abc");
+
+  EXPECT_EQ(bytes.index(starlark_integer(-3), arena, error_callback)->repr(), "b\"a\"");
+  EXPECT_EQ(bytes.index(starlark_integer(-2), arena, error_callback)->repr(), "b\"b\"");
+  EXPECT_EQ(bytes.index(starlark_integer(-1), arena, error_callback)->repr(), "b\"c\"");
+  EXPECT_EQ(bytes.index(starlark_integer(0), arena, error_callback)->repr(), "b\"a\"");
+  EXPECT_EQ(bytes.index(starlark_integer(1), arena, error_callback)->repr(), "b\"b\"");
+  EXPECT_EQ(bytes.index(starlark_integer(2), arena, error_callback)->repr(), "b\"c\"");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBytes, IndexOutOfRange1) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_bytes bytes("abc");
+
+  EXPECT_EQ(nullptr, bytes.index(starlark_integer(-4), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: bytes index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, IndexOutOfRange2) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_bytes bytes("abc");
+
+  EXPECT_EQ(nullptr, bytes.index(starlark_integer(3), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: bytes index out of range", error_callback.messages[0]);
+}
+
 }  // namespace

@@ -460,6 +460,13 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kGoto:
         instruction_ptr = op_code.goto_().address();
         break;
+      case OpCode::kIndexMember: {
+        assert(stack.size() >= 2);
+        auto* index = stack.back();
+        stack.pop_back();
+        stack.back() = stack.back()->index(*index, arena, error_callback);
+        break;
+      }
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
@@ -482,7 +489,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kDotMember:
       case OpCode::kLoadModule:
       case OpCode::kConstNone:
-      case OpCode::kIndexMember:
       case OpCode::kSliceRange:
       case OpCode::kReturn:
       case OpCode::kMakeFunction:

@@ -73,7 +73,7 @@ bool starlark_dictionary::truthy() const {
 }
 
 bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`
+  // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`.
   return values.contains(&const_cast<starlark_obj&>(other));
 }
 
@@ -82,7 +82,7 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena&
     return starlark_obj::binary_pipe(other, arena, error_callback);
   }
   auto* result = Arena::Create<starlark_dictionary>(&arena);
-  for (auto& [key, value] : values) {
+  for (const auto& [key, value] : values) {
     result->insert(key, value, error_callback);
   }
   const starlark_dictionary* d_other = static_cast<const starlark_dictionary*>(&other);
@@ -94,6 +94,15 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena&
 
 starlark_iterator* starlark_dictionary::get_iterator(Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_dictionary_iterator>(&arena, this);
+}
+
+starlark_obj* starlark_dictionary::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  auto result = values.find(&const_cast<starlark_obj&>(other));
+  if (result == values.end()) {
+    error_callback.add_error(std::format("KeyError: {}", other.repr()));
+    return nullptr;
+  }
+  return result->second;
 }
 
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {

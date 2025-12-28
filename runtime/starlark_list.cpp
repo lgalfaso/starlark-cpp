@@ -160,6 +160,14 @@ starlark_iterator* starlark_list::get_iterator(Arena& arena, error_fn& error_cal
   return Arena::Create<starlark_list_iterator>(&arena, this);
 }
 
+starlark_obj* starlark_list::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  auto idx = inner_index(other, values.size(), error_callback);
+  if (idx < 0) {
+    return nullptr;
+  }
+  return values[idx];
+}
+
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;

@@ -443,4 +443,56 @@ TEST(StarlarkTuple, GetIterator) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkTuple, Index) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_tuple tuple;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  tuple.add(&zero);
+  tuple.add(&one);
+  tuple.add(&two);
+
+  EXPECT_EQ(tuple.index(starlark_integer(-3), arena, error_callback)->repr(), "0");
+  EXPECT_EQ(tuple.index(starlark_integer(-2), arena, error_callback)->repr(), "1");
+  EXPECT_EQ(tuple.index(starlark_integer(-1), arena, error_callback)->repr(), "2");
+  EXPECT_EQ(tuple.index(starlark_integer(0), arena, error_callback)->repr(), "0");
+  EXPECT_EQ(tuple.index(starlark_integer(1), arena, error_callback)->repr(), "1");
+  EXPECT_EQ(tuple.index(starlark_integer(2), arena, error_callback)->repr(), "2");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkTuple, IndexOutOfRange1) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_tuple tuple;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  tuple.add(&zero);
+  tuple.add(&one);
+  tuple.add(&two);
+
+  EXPECT_EQ(nullptr, tuple.index(starlark_integer(-4), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: tuple index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkTuple, IndexOutOfRange2) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_tuple tuple;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  tuple.add(&zero);
+  tuple.add(&one);
+  tuple.add(&two);
+
+  EXPECT_EQ(nullptr, tuple.index(starlark_integer(3), arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("IndexError: tuple index out of range", error_callback.messages[0]);
+}
+
 }  // namespace

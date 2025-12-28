@@ -1994,4 +1994,14 @@ TEST(StarlarkInteger, GetIterator) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
 }
 
+TEST(StarlarkInteger, Index) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_integer zero(0);
+
+  EXPECT_EQ(nullptr, zero.index(zero, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'int' object is not subscriptable", error_callback.messages[0]);
+}
+
 }  // namespace

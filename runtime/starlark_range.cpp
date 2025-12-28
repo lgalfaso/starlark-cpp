@@ -4,6 +4,8 @@
 
 #include <string>
 
+using ::google::protobuf::Arena;
+
 namespace starlark {
 namespace runtime {
 
@@ -55,8 +57,14 @@ bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callba
   return false;
 }
 
-starlark_iterator* starlark_range::get_iterator(google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_iterator* starlark_range::get_iterator(Arena& arena, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
+  return nullptr;
+}
+
+starlark_obj* starlark_range::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
   return nullptr;
 }
 

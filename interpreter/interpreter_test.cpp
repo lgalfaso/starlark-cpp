@@ -732,5 +732,22 @@ a02 = (big + 0.0) - big
   EXPECT_EQ(result->elements[2]->str(), "9007199254740993");
 }
 
+TEST(Interpreter, IndexMember) {
+  interpreter runner;
+  Arena arena;
+  logger logging;
+
+  frame* result = runner.run(R"starlark(
+a01 = [1, 2, 3, 4]
+a02 = a01[2]
+)starlark", arena, logging);
+  ASSERT_NE(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(result->elements, SizeIs(2));
+
+  ASSERT_THAT(result->elements, Not(Contains(nullptr)));
+  EXPECT_EQ(result->elements[0]->str(), "[1, 2, 3, 4]");
+  EXPECT_EQ(result->elements[1]->str(), "3");
+}
+
 }  // namespace
 

@@ -132,6 +132,14 @@ starlark_obj* starlark_string::binary_percent(const starlark_obj& other, Arena& 
   return nullptr;
 }
 
+starlark_obj* starlark_string::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  auto idx = inner_index(other, value.size(), error_callback);
+  if (idx < 0) {
+    return nullptr;
+  }
+  return Arena::Create<starlark_string>(&arena, value.substr(idx, 1));
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->str();

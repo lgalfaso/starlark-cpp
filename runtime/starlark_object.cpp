@@ -310,6 +310,11 @@ starlark_iterator* starlark_obj::get_iterator(Arena& arena, error_fn& error_call
   return nullptr;
 }
 
+starlark_obj* starlark_obj::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  error_callback.add_error(std::format("TypeError: '{}' object is not subscriptable", type()));
+  return nullptr;
+}
+
 int64_t starlark_obj::as_int64() const {
   return 0;
 }
@@ -333,6 +338,41 @@ void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, 
 
 void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   return;
+}
+
+int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      auto idx = other.as_int64();
+      if (idx < 0) {
+        idx += obj_len;
+      }
+      if (idx < 0 || obj_len <= idx) {
+        error_callback.add_error(std::format("IndexError: {} index out of range", type()));
+        return -1;
+      }
+      return idx;
+    }
+    case starlark_numeric_type::kBigInt: {
+      const auto& idx = other.as_bigint();
+      if (idx.bit_size() > 63) {
+        error_callback.add_error(std::format("IndexError: {} index out of range", type()));
+        return -1;
+      }
+      auto iidx = idx.at(0);
+      if (idx.sign()) {
+        iidx = obj_len - iidx;
+      }
+      if (iidx < 0 || obj_len <= iidx) {
+        error_callback.add_error(std::format("IndexError: {} index out of range", type()));
+        return -1;
+      }
+      return iidx;
+    }
+    default:
+      error_callback.add_error(std::format("TypeError: {} indices must be integers or slices, not '{}'", type(), other.type()));
+      return -1;
+  }
 }
 
 size_t starlark_hash_op::operator()(const starlark_obj* value) const {

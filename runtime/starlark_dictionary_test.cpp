@@ -314,4 +314,34 @@ TEST(StarlarkDictionary, MutationWhileIterating) {
   EXPECT_EQ("Error in append: dictionary value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
+TEST(StarlarkDictionary, Index) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0");
+  starlark_string s_one("key1");
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  EXPECT_EQ(dictionary.index(s_zero, arena, error_callback)->repr(), "0");
+  EXPECT_EQ(dictionary.index(s_one, arena, error_callback)->repr(), "1");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, KeyError) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_string s_zero("key0");
+  starlark_string s_one("key1");
+  dictionary.insert(&s_zero, &zero, error_callback);
+
+  EXPECT_EQ(nullptr, dictionary.index(s_one, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("KeyError: \"key1\"", error_callback.messages[0]);
+}
+
 }  // namespace

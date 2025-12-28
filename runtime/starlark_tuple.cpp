@@ -196,6 +196,14 @@ starlark_iterator* starlark_tuple::get_iterator(Arena& arena, error_fn& error_ca
   return Arena::Create<starlark_tuple_iterator>(&arena, this);
 }
 
+starlark_obj* starlark_tuple::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  auto idx = inner_index(other, values.size(), error_callback);
+  if (idx < 0) {
+    return nullptr;
+  }
+  return values[idx];
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_tuple::inner_hash() const {
   return std::span(values.begin(), values.end());
 }
