@@ -25,22 +25,31 @@ cc_library(
     ],
 )
 
-cc_test(
-    name = "interpreter_test",
-    srcs = ["interpreter_test.cpp"],
-    deps = [
-        ":interpreter",
-        "//runtime:starlark_bigint",
-        "//runtime:starlark_bool",
-        "//runtime:starlark_bytes",
-        "//runtime:starlark_dictionary",
-        "//runtime:starlark_float",
-        "//runtime:starlark_integer",
-        "//runtime:starlark_list",
-        "//runtime:starlark_none",
-        "//runtime:starlark_string",
-        "//runtime:starlark_testing",
-        "//runtime:starlark_tuple",
-        "@googletest//:gtest_main",
-    ],
-)
+[
+    cc_test(
+        name = "interpreter_test_" + f.replace("/", "_"),
+        srcs = ["interpreter_test.cpp"],
+        args = [
+            "$(location " + f + ")",
+        ],
+        data = [
+            f,
+        ],
+        deps = [
+            ":interpreter",
+            "//runtime:starlark_bigint",
+            "//runtime:starlark_bool",
+            "//runtime:starlark_bytes",
+            "//runtime:starlark_dictionary",
+            "//runtime:starlark_float",
+            "//runtime:starlark_integer",
+            "//runtime:starlark_list",
+            "//runtime:starlark_none",
+            "//runtime:starlark_string",
+            "//runtime:starlark_testing",
+            "//runtime:starlark_tuple",
+            "@googletest//:gtest_main",
+        ],
+    ) for f in glob(["interpreter_tests/*.star"])
+]
+

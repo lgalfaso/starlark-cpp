@@ -3,8 +3,10 @@
 #ifndef INTERPRETER_INTERPRETER_HPP_
 #define INTERPRETER_INTERPRETER_HPP_
 
+#include <map>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "google/protobuf/arena.h"
@@ -29,7 +31,9 @@ struct frame {
 class interpreter {
  public:
   interpreter();
-  frame* run(std::string_view starlark_program, google::protobuf::Arena& arena,
+  frame* run(std::string_view starlark_program,
+      const std::map<std::string, starlark::runtime::starlark_obj*, std::less<>>& custom_binding,
+      google::protobuf::Arena& arena,
       starlark::logging::logger& logging);
 };
 

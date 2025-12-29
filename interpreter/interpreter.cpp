@@ -427,7 +427,12 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         for (int i = 0; i < op_code.call().positional_arguments_count(); ++i) {
           pos_args.push_back(stack[stack.size() - args_count + i]);
         }
-        // TODO(lmirelmann): Get the k/v arguments.
+        for (int i = 0; i < op_code.call().named_arguments_count(); ++i) {
+          auto* key = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i];
+          auto* value = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i + 1];
+          assert(key->type() == starlark_types::string_t);
+          named_args[key->str()] = value;
+        }
         // TODO(lmirelmann): Get the variadic arguments.
         // TODO(lmirelmann): Get the named variadic arguments.
         stack.resize(stack.size() - args_count, nullptr);
@@ -556,8 +561,13 @@ interpreter::interpreter() {}
 // TODO(lmirelmann): There has to be a way to add entries to the global context.
 // TODO(lmirelmann): There has to be a way to define the parsing options.
 // TODO(lmirelmann): There has to be a way to define the runtime options.
-frame* interpreter::run(std::string_view starlark_code, Arena& arena, logger& logging) {
+frame* interpreter::run(std::string_view starlark_code,
+                        const std::map<std::string, starlark_obj*, std::less<>>& custom_binding,
+                        Arena& arena, logger& logging) {
   std::set<std::string, std::less<>> binding;
+  for (const auto& [key, value] : custom_binding) {
+    binding.insert(key);
+  }
   class compiler star_compiler(binding);
   Program* starlark_program = star_compiler.compile(starlark_code, options{}, logging, arena);
   if (starlark_program == nullptr) {
@@ -576,6 +586,9 @@ frame* interpreter::run(std::string_view starlark_code, Arena& arena, logger& lo
   global_context["bytes"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_bytes, "bytes");
   global_context["len"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_len, "len");
   global_context["list"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_list, "list");
+  for (const auto& kv : custom_binding) {
+    global_context.insert(kv);
+  }
   return run_program(starlark_program, global_context, arena, logging);
 }
 
