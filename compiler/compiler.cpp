@@ -113,7 +113,6 @@ class bytecode_generator : public ast_listener_base {
 
   void exit_call_expression(const CallExpr* call_expression) override;
   void enter_argument(const Argument* argument) override;
-  void exit_argument(const Argument* argument) override;
 
   void exit_return_statement(const ReturnStmt* return_statement) override;
 
@@ -795,12 +794,6 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
 void bytecode_generator::enter_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
     mutable_block()->add_op_code()->mutable_const_string()->set_value(argument->named_argument().identifier().nfkc_name());
-  }
-}
-
-void bytecode_generator::exit_argument(const Argument* argument) {
-  if (argument->argument_type_case() == Argument::kNamedArgument) {
-    mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(2);
   }
 }
 

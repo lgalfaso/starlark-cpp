@@ -28,17 +28,14 @@ block {
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { const_string { value: "end" } }
   op_code { const_string { value: "\n" } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 2 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
@@ -46,7 +43,6 @@ block {
   op_code { const_string { value: "g" } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
@@ -54,10 +50,8 @@ block {
   op_code { const_string { value: "h" } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { const_string { value: "end" } }
   op_code { const_string { value: "\n" } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 2 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
@@ -74,7 +68,6 @@ block {
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }
@@ -82,7 +75,6 @@ block {
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
   op_code { add_to_list { number_of_elements: 1 } }
@@ -92,11 +84,9 @@ block {
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string { value: "end" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }
@@ -108,7 +98,6 @@ block {
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
@@ -116,14 +105,12 @@ block {
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string { value: "end" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
@@ -136,7 +123,6 @@ block {
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
@@ -145,11 +131,9 @@ block {
   op_code { const_string { value: "l" } }
   op_code { const_string { value: "end" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }
@@ -158,7 +142,6 @@ block {
   op_code { const_string { value: "m" } }
   op_code { const_string { value: "end" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
   op_code { add_to_list { number_of_elements: 1 } }
@@ -169,14 +152,12 @@ block {
   op_code { const_string { value: "n" } }
   op_code { const_string { value: "end" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
@@ -192,7 +173,6 @@ block {
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string { value: "sep" } }
   op_code { const_string { value: " " } }
-  op_code { make_tuple { number_of_elements: 2 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }
