@@ -69,17 +69,17 @@ message OpCode {
     EndIterator end_iterator = 42;
 
     Unpack unpack = 70;
-    PosInFrame plus_assign = 44;
-    PosInFrame minus_assign = 45;
-    PosInFrame star_assign = 46;
-    PosInFrame slash_assign = 47;
-    PosInFrame slash_slash_assign = 48;
-    PosInFrame percent_assign = 49;
-    PosInFrame ampersand_assign = 50;
-    PosInFrame pipe_assign = 51;
-    PosInFrame hat_assign = 52;
-    PosInFrame less_less_assign = 53;
-    PosInFrame greater_greater_assign = 54;
+    PosInFrame assign_plus_equals = 44;
+    PosInFrame assign_minus_equals = 45;
+    PosInFrame assign_star_equals = 46;
+    PosInFrame assign_slash_equals = 47;
+    PosInFrame assign_slash_slash_equals = 48;
+    PosInFrame assign_percent_equals = 49;
+    PosInFrame assign_ampersand_equals = 50;
+    PosInFrame assign_pipe_equals = 51;
+    PosInFrame assign_hat_equals = 52;
+    PosInFrame assign_less_less_equals = 53;
+    PosInFrame assign_greater_greater_equals = 54;
 
     DotMember dot_member = 55;
     DotMember assign_dot_member = 43;

@@ -485,17 +485,17 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         return nullptr;
       case OpCode::kAssignDotMember:
       case OpCode::kAssignSliceRange:
-      case OpCode::kPlusAssign:
-      case OpCode::kMinusAssign:
-      case OpCode::kStarAssign:
-      case OpCode::kSlashAssign:
-      case OpCode::kSlashSlashAssign:
-      case OpCode::kPercentAssign:
-      case OpCode::kAmpersandAssign:
-      case OpCode::kPipeAssign:
-      case OpCode::kHatAssign:
-      case OpCode::kLessLessAssign:
-      case OpCode::kGreaterGreaterAssign:
+      case OpCode::kAssignPlusEquals:
+      case OpCode::kAssignMinusEquals:
+      case OpCode::kAssignStarEquals:
+      case OpCode::kAssignSlashEquals:
+      case OpCode::kAssignSlashSlashEquals:
+      case OpCode::kAssignPercentEquals:
+      case OpCode::kAssignAmpersandEquals:
+      case OpCode::kAssignPipeEquals:
+      case OpCode::kAssignHatEquals:
+      case OpCode::kAssignLessLessEquals:
+      case OpCode::kAssignGreaterGreaterEquals:
       case OpCode::kDotMember:
       case OpCode::kLoadModule:
       case OpCode::kConstNone:

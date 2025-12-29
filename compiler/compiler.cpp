@@ -227,67 +227,67 @@ void bytecode_generator::enter_identifier_for_assignment(const Identifier* ident
       break;
     }
     case AssignStmt::PLUS_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_plus_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_plus_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::MINUS_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_minus_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_minus_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::STAR_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_star_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_star_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::SLASH_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_slash_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::SLASH_SLASH_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_slash_slash_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_slash_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::PERCENT_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_percent_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_percent_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::AMPERSAND_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_ampersand_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_ampersand_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::PIPE_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_pipe_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_pipe_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::HAT_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_hat_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_hat_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::LESS_LESS_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_less_less_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_less_less_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
     }
     case AssignStmt::GREATER_GREATER_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_greater_greater_assign();
+      auto* id_op = mutable_block()->add_op_code()->mutable_assign_greater_greater_equals();
       id_op->set_frame(identifier->frame());
       id_op->set_pos_in_frame(identifier->pos_in_frame());
       break;
