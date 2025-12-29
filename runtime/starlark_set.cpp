@@ -198,6 +198,27 @@ void starlark_set::starlark_set_iterator::end_iterator() {
   set->iterators_count--;
 }
 
+/*
+TODO(lmirelmann): Implement the following methods:
+
+add
+clear
+difference
+difference_update
+discard
+intersection
+intersection_update
+isdisjoint
+issubset
+issuperset
+pop
+remove
+symmetric_difference
+symmetric_difference_update
+union
+update
+*/
+
 }  // namespace runtime
 }  // namespace starlark
 

@@ -257,6 +257,18 @@ void starlark_list::starlark_list_iterator::end_iterator() {
   list->iterators_count--;
 }
 
+/*
+TODO(lmirelmann): Implement the following methods:
+
+append
+clear
+extend
+index
+insert
+pop
+remove
+*/
+
 }  // namespace runtime
 }  // namespace starlark
 

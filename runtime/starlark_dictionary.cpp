@@ -189,6 +189,20 @@ void starlark_dictionary::starlark_dictionary_iterator::end_iterator() {
   dictionary->iterators_count--;
 }
 
+/*
+TODO(lmirelmann): Implement the following methods:
+
+clear
+get
+items
+keys
+pop
+popitem
+setdefault
+update
+values
+*/
+
 }  // namespace runtime
 }  // namespace starlark
 

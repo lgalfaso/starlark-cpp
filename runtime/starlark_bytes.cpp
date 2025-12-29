@@ -164,6 +164,19 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::inner_hash() c
   return static_cast<int64_t>(siphash(value.data(), value.length(), 0x0001020304050607, 0x08090a0b0c0d0e0f));
 }
 
+/*
+TODO(lmirelmann): It is unclear what methods are needed.
+
+Python defines the following:
+'capitalize', 'center', 'count', 'decode', 'endswith', 'expandtabs', 'find', 'fromhex', 'hex', 'index', 'isalnum', 'isalpha', 'isascii', 'isdigit', 'islower', 'isspace', 'istitle', 'isupper', 'join', 'ljust', 'lower', 'lstrip', 'maketrans', 'partition', 'removeprefix', 'removesuffix', 'replace', 'rfind', 'rindex', 'rjust', 'rpartition', 'rsplit', 'rstrip', 'split', 'splitlines', 'startswith', 'strip', 'swapcase', 'title', 'translate', 'upper', 'zfill'
+
+
+The starlark spec PR (https://github.com/bazelbuild/starlark/issues/112) states:
+- the following string methods would have byte-string counterparts: [count endswith find index join lstrip partition replace rfind rindex rpartition rsplit rstrip split startswith strip]. This set excludes methods related to textual concepts such as letter vs number, or upper case vs lower. We should perhaps start with a smaller set.
+- the elems method would iterate over the 1-byte substrings, and elem_ords would iterate over the numeric byte values.
+
+*/
+
 }  // namespace runtime
 }  // namespace starlark
 

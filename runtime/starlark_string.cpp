@@ -167,6 +167,46 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() 
   return static_cast<int64_t>(siphash(value.data(), value.length(), 0x0001020304050607, 0x08090a0b0c0d0e0f));
 }
 
+/*
+TODO: Implement the following methods:
+
+capitalize
+codepoint_ords
+codepoints
+count
+elem_ords
+elems
+endswith
+find
+format
+index
+isalnum
+isalpha
+isdigit
+islower
+isspace
+istitle
+isupper
+join
+lower
+lstrip
+partition
+replace
+removeprefix
+removesuffix
+rfind
+rindex
+rpartition
+rsplit
+rstrip
+split
+splitlines
+startswith
+strip
+title
+upper
+*/
+
 }  // namespace runtime
 }  // namespace starlark
 
