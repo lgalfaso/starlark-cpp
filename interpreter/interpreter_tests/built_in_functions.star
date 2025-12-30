@@ -3,8 +3,8 @@ assert_eq(any([True, False]), True)
 assert_eq(all([True, False]), False)
 assert_eq(bool(1), True)
 assert_eq(bytes("abc"), b"abc")
+assert_eq(chr(1), "\x01")
 # TODO(lmirelmann): Add tests for the other built-in functions once they are available.
-# chr
 # dict
 # dir
 # enumerate
