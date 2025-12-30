@@ -473,7 +473,6 @@ void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression
 }
 
 void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* slice_expression, AssignStmt::AssignOperator op) {
-  // TODO(lmirelmann): This should be a different operation depending on the op.
   switch (slice_expression->slice_type_case()) {
     case SliceExpr::kIndex:
       switch (op) {
