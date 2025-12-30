@@ -558,7 +558,6 @@ frame::frame(std::size_t size, const RepeatedPtrField<std::string>* names) : ele
 // TODO(lmirelmann): There has to be a way to define the loader.
 interpreter::interpreter() {}
 
-// TODO(lmirelmann): There has to be a way to add entries to the global context.
 // TODO(lmirelmann): There has to be a way to define the parsing options.
 // TODO(lmirelmann): There has to be a way to define the runtime options.
 frame* interpreter::run(std::string_view starlark_code,
