@@ -9,6 +9,7 @@
 
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
+#include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_string.hpp"
@@ -286,9 +287,73 @@ starlark_obj* starlark_fn_chr(const std::vector<starlark_obj*>& pos_args, const 
 }
 
 starlark_obj* starlark_fn_dict(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (pos_args.size() > 1) {
+    error_callback.add_error(std::format("TypeError: {} expected at most 1 argument, got {}", "dict", pos_args.size()));
+    return nullptr;
+  }
+  starlark_dictionary* result = Arena::Create<starlark_dictionary>(&arena);
+  if (!pos_args.empty()) {
+    auto* pos_value = pos_args.front();
+    // This is a special case. This should be extended to understand any mapping, but at the moment only `dictionary` implements it.
+    if (pos_value->type() == starlark_types::dict_t) {
+      auto* it = pos_value->get_iterator(true, arena, error_callback);
+      assert(it != nullptr);
+      while (it->has_next()) {
+        auto* key = it->next();
+        assert(key != nullptr);
+        auto* value = pos_value->index(*key, arena, error_callback);
+        assert(value != nullptr);
+        if (result->insert(key, value, error_callback).second) {
+          // Should not happen as `pos_value` is already a dictionary.
+          return nullptr;
+        }
+      }
+      it->end_iterator();
+    } else {
+      int pos = 0;
+      auto* it = pos_value->get_iterator(true, arena, error_callback);
+      if (it == nullptr) {
+        return nullptr;
+      }
+      while (it->has_next()) {
+        auto* kv = it->next();
+        assert(kv != nullptr);
+        auto* it2 = kv->get_iterator(true, arena, error_callback);
+        if (it2 == nullptr) {
+          return nullptr;
+        }
+        if (!it2->has_next()) {
+          error_callback.add_error(std::format("ValueError: dictionary update sequence element #{} has length 0; 2 is required", pos));
+          return nullptr;
+        }
+        auto* key = it2->next();
+        assert(key != nullptr);
+        if (!it2->has_next()) {
+          error_callback.add_error(std::format("ValueError: dictionary update sequence element #{} has length 1; 2 is required", pos));
+          return nullptr;
+        }
+        auto* value = it2->next();
+        assert(value != nullptr);
+        if (it2->has_next()) {
+          error_callback.add_error(std::format("ValueError: dictionary update sequence element #{} has length {}; 2 is required", pos, kv->len(error_callback)));
+          return nullptr;
+        }
+        if (result->insert(key, value, error_callback).second) {
+          return nullptr;
+        }
+        it2->end_iterator();
+        pos++;
+      }
+      it->end_iterator();
+    }
+  }
+  for (auto& [key, value] : named_args) {
+    if (result->insert(Arena::Create<starlark_string>(&arena, key), value, error_callback).second) {
+      // Should not happen.
+      return nullptr;
+    }
+  }
+  return result;
 }
 
 starlark_obj* starlark_fn_dir(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

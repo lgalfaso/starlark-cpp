@@ -550,6 +550,7 @@ cc_library(
     deps = [
         ":starlark_bool",
         ":starlark_bytes",
+        ":starlark_dictionary",
         ":starlark_list",
         ":starlark_numeric",
         ":starlark_object",

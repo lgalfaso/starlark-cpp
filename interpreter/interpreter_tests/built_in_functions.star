@@ -4,6 +4,11 @@ assert_eq(all([True, False]), False)
 assert_eq(bool(1), True)
 assert_eq(bytes("abc"), b"abc")
 assert_eq(chr(1), "\x01")
+assert_eq(dict(), {})
+assert_eq(dict({}), {})
+assert_eq(dict({'a': 1}), {'a': 1})
+assert_eq(dict({'a': 1}, b = 2), {'a': 1, 'b': 2})
+assert_eq(dict([('a', 1), ('b', 2)]), {'a': 1, 'b': 2})
 # TODO(lmirelmann): Add tests for the other built-in functions once they are available.
 # dict
 # dir

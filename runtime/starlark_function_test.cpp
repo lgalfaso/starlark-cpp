@@ -11,6 +11,7 @@
 
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bytes.hpp"
+#include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_float.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_integer.hpp"
@@ -31,6 +32,7 @@ using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_function;
 using ::starlark::runtime::starlark_integer;
@@ -746,6 +748,220 @@ TEST(StarlarkChr, NamedArguments) {
   EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: chr() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkDict, Empty) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "{}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDict, FromDict) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_dictionary dict;
+  starlark_none none;
+  starlark_integer one(1);
+  dict.insert(&none, &none, error_callback);
+  pos_args.push_back(&dict);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "{None: None}");
+  // Check that this is a copy.
+  dict.insert(&none, &one, error_callback);
+  EXPECT_EQ(result->repr(), "{None: None}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDict, FromIterable) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_tuple tuple;
+  starlark_none none;
+  starlark_integer one(1);
+  tuple.add(&none);
+  tuple.add(&one);
+  list.add(&tuple, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "{None: 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDict, FromNamedArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_integer one(1);
+  starlark_integer two(2);
+  named_args["one"] = &one;
+  named_args["two"] = &two;
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "{\"one\": 1, \"two\": 2}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDict, FromInteger) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_integer one(1);
+  pos_args.push_back(&one);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+}
+
+TEST(StarlarkDict, FromNonIterable) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_integer one(1);
+  list.add(&one, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+}
+
+TEST(StarlarkDict, FromNonHashable) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list1;
+  starlark_list list2;
+  starlark_tuple tuple;
+  starlark_integer one(1);
+  tuple.add(&list2);
+  tuple.add(&one);
+  list1.add(&tuple, error_callback);
+  pos_args.push_back(&list1);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'list' as a dict key (unhashable type: 'list')");
+}
+
+TEST(StarlarkDict, MultiplePositionalArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: dict expected at most 1 argument, got 2");
+}
+
+TEST(StarlarkDict, FromIterableWithWrongNumberOfElements1) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_tuple tuple1;
+  starlark_tuple tuple2;
+  starlark_none none;
+  starlark_integer one(1);
+  tuple1.add(&none);
+  tuple1.add(&one);
+  list.add(&tuple1, error_callback);
+  list.add(&tuple2, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 0; 2 is required");
+}
+
+TEST(StarlarkDict, FromIterableWithWrongNumberOfElements2) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_tuple tuple1;
+  starlark_tuple tuple2;
+  starlark_none none;
+  starlark_integer one(1);
+  tuple1.add(&none);
+  tuple1.add(&one);
+  tuple2.add(&none);
+  list.add(&tuple1, error_callback);
+  list.add(&tuple2, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 1; 2 is required");
+}
+
+TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_tuple tuple1;
+  starlark_tuple tuple2;
+  starlark_none none;
+  starlark_integer one(1);
+  tuple1.add(&none);
+  tuple1.add(&one);
+  tuple2.add(&none);
+  tuple2.add(&none);
+  tuple2.add(&none);
+  list.add(&tuple1, error_callback);
+  list.add(&tuple2, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
 }
 
 TEST(StarlarkLen, List) {
