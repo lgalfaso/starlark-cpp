@@ -24,6 +24,7 @@ using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_string;
 using ::starlark::testing::error_handler;
 using ::testing::IsEmpty;
+using ::testing::Pair;
 using ::testing::SizeIs;
 
 namespace {
@@ -173,7 +174,7 @@ TEST(StarlarkDictionary, InsertingUsingUnhashableKey) {
   starlark_none none;
   error_handler error_callback;
 
-  EXPECT_FALSE(dict.insert(&list, &none, error_callback));
+  EXPECT_THAT(dict.insert(&list, &none, error_callback), Pair(false, true));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
 }
@@ -184,9 +185,9 @@ TEST(StarlarkDictionary, InsertReturnValue) {
   starlark_integer zero(0);
   error_handler error_callback;
 
-  EXPECT_TRUE(dict.insert(&none, &none, error_callback));
-  EXPECT_FALSE(dict.insert(&none, &none, error_callback));
-  EXPECT_FALSE(dict.insert(&none, &zero, error_callback));
+  EXPECT_THAT(dict.insert(&none, &none, error_callback), Pair(true, false));
+  EXPECT_THAT(dict.insert(&none, &none, error_callback), Pair(false, false));
+  EXPECT_THAT(dict.insert(&none, &zero, error_callback), Pair(false, false));
 }
 
 TEST(StarlarkDictionary, Freeze) {
@@ -195,9 +196,9 @@ TEST(StarlarkDictionary, Freeze) {
   starlark_none none;
   error_handler error_callback;
 
-  EXPECT_TRUE(dict1.insert(&none, &dict2, error_callback));
+  EXPECT_THAT(dict1.insert(&none, &dict2, error_callback), Pair(true, false));
   dict1.freeze();
-  EXPECT_FALSE(dict2.insert(&none, &none, error_callback));
+  EXPECT_THAT(dict2.insert(&none, &none, error_callback), Pair(false, true));
 }
 
 TEST(StarlarkDictionary, InsertFreezed) {
@@ -207,9 +208,9 @@ TEST(StarlarkDictionary, InsertFreezed) {
 
   dict.freeze();
 
-  EXPECT_FALSE(dict.insert(&none, &none, error_callback));
+  EXPECT_THAT(dict.insert(&none, &none, error_callback), Pair(false, true));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
+  EXPECT_THAT(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
 }
 
 TEST(StarlarkDictionary, BinaryPipe) {
