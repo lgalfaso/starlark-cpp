@@ -106,11 +106,6 @@ class error_handler : public error_fn {
     instruction_ptr = instruction_ptr_value;
   }
 
-  void replace_last_error(std::string_view error_msg) override {
-    log.drop_last_error(starlark::logging::LogLevel::LOG_LEVEL_ERROR);
-    add_error(error_msg);
-  }
-
  private:
   int& block_ptr;
   int& instruction_ptr;
@@ -465,7 +460,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kGetIterator:
         assert(!frame_stack.empty());
         assert(!stack.empty());
-        frame_stack.back()->iterators.push_back(stack.back()->get_iterator(arena, error_callback));
+        frame_stack.back()->iterators.push_back(stack.back()->get_iterator(true, arena, error_callback));
         stack.pop_back();
         break;
       case OpCode::kForIterator: {

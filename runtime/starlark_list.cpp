@@ -156,7 +156,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
   }
 }
 
-starlark_iterator* starlark_list::get_iterator(Arena& arena, error_fn& error_callback) {
+starlark_iterator* starlark_list::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_list_iterator>(&arena, this);
 }
 

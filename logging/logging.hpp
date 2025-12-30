@@ -24,7 +24,6 @@ class logger {
   std::vector<starlark::logging::LogEntry>::const_iterator end() const;
   bool empty() const;
   std::vector<starlark::logging::LogEntry>::size_type size() const;
-  virtual void drop_last_error(starlark::logging::LogLevel level);
 
  private:
   std::vector<starlark::logging::LogEntry> entries;
@@ -43,7 +42,6 @@ class logger_wrap : public logger {
 
   explicit logger_wrap(logger&);
   void log(starlark::logging::LogLevel level, std::string_view message, std::string_view module, const starlark::logging::Position& pos) override;
-  void drop_last_error(starlark::logging::LogLevel level) override;
   log_report report();
 
  private:

@@ -433,11 +433,11 @@ TEST(StarlarkTuple, GetIterator) {
   tuple1.add(&zero);
   tuple1.add(&one);
 
-  auto* it0 = tuple0.get_iterator(arena, error_callback);
+  auto* it0 = tuple0.get_iterator(true, arena, error_callback);
   EXPECT_FALSE(it0->has_next());
   it0->end_iterator();
 
-  auto* it1 = tuple1.get_iterator(arena, error_callback);
+  auto* it1 = tuple1.get_iterator(true, arena, error_callback);
   EXPECT_TRUE(it1->has_next());
   EXPECT_TRUE(it1->next()->equals(zero));
   EXPECT_TRUE(it1->has_next());

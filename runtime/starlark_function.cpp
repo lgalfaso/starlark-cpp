@@ -157,7 +157,7 @@ starlark_obj* starlark_fn_all(const std::vector<starlark_obj*>& pos_args, const 
   if (!one_pos_arg(pos_args, named_args, error_callback, "all")) {
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  auto* it = pos_args.front()->get_iterator(true, arena, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -174,7 +174,7 @@ starlark_obj* starlark_fn_any(const std::vector<starlark_obj*>& pos_args, const 
   if (!one_pos_arg(pos_args, named_args, error_callback, "any")) {
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  auto* it = pos_args.front()->get_iterator(true, arena, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -212,9 +212,9 @@ starlark_obj* starlark_fn_bytes(const std::vector<starlark_obj*>& pos_args, cons
     }
     return Arena::Create<starlark_bytes>(&arena, result);
   }
-  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  auto* it = pos_args.front()->get_iterator(false, arena, error_callback);
   if (it == nullptr) {
-    error_callback.replace_last_error(std::format("TypeError: cannot convert '{}' object to bytes", pos_args.front()->type()));
+    error_callback.add_error(std::format("TypeError: cannot convert '{}' object to bytes", pos_args.front()->type()));
     return nullptr;
   }
   std::string result;
@@ -357,7 +357,7 @@ starlark_obj* starlark_fn_list(const std::vector<starlark_obj*>& pos_args, const
   if (pos_args.empty()) {
     return Arena::Create<starlark_list>(&arena, 0);
   }
-  auto* it = pos_args.front()->get_iterator(arena, error_callback);
+  auto* it = pos_args.front()->get_iterator(true, arena, error_callback);
   if (it == nullptr) {
     return nullptr;
   }

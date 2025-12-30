@@ -325,11 +325,11 @@ TEST(StarlarkSet, GetIterator) {
   set1.add(&zero, error_callback);
   set1.add(&one, error_callback);
 
-  auto* it0 = set0.get_iterator(arena, error_callback);
+  auto* it0 = set0.get_iterator(true, arena, error_callback);
   EXPECT_FALSE(it0->has_next());
   it0->end_iterator();
 
-  auto* it1 = set1.get_iterator(arena, error_callback);
+  auto* it1 = set1.get_iterator(true, arena, error_callback);
   EXPECT_TRUE(it1->has_next());
   EXPECT_TRUE(it1->next()->equals(zero));
   EXPECT_TRUE(it1->has_next());
@@ -348,7 +348,7 @@ TEST(StarlarkSet, MutationWhileIterating) {
   set.add(&zero, error_callback);
   set.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = set.get_iterator(arena, error_callback);
+  [[maybe_unused]] auto* it = set.get_iterator(true, arena, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   set.add(&zero, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));

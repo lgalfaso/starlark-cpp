@@ -19,7 +19,6 @@ namespace runtime {
 class error_fn {
  public:
   virtual void add_error(std::string_view error_msg) = 0;
-  virtual void replace_last_error(std::string_view error_msg) = 0;
 };
 
 }  // namespace runtime

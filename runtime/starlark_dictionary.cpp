@@ -92,7 +92,7 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena&
   return result;
 }
 
-starlark_iterator* starlark_dictionary::get_iterator(Arena& arena, error_fn& error_callback) {
+starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_dictionary_iterator>(&arena, this);
 }
 

@@ -512,11 +512,11 @@ TEST(StarlarkList, GetIterator) {
   list1.add(&zero, error_callback);
   list1.add(&one, error_callback);
 
-  auto* it0 = list0.get_iterator(arena, error_callback);
+  auto* it0 = list0.get_iterator(true, arena, error_callback);
   EXPECT_FALSE(it0->has_next());
   it0->end_iterator();
 
-  auto* it1 = list1.get_iterator(arena, error_callback);
+  auto* it1 = list1.get_iterator(true, arena, error_callback);
   EXPECT_TRUE(it1->has_next());
   EXPECT_TRUE(it1->next()->equals(zero));
   EXPECT_TRUE(it1->has_next());
@@ -535,7 +535,7 @@ TEST(StarlarkList, MutationWhileIterating1) {
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.add(&zero, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -722,7 +722,7 @@ TEST(StarlarkList, MutationWhileIterating2) {
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.index_assign(zero, one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));

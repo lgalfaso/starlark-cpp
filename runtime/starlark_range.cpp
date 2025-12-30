@@ -54,11 +54,13 @@ void starlark_range::set_step(const starlark_obj* value) {
 
 bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
   return false;
 }
 
-starlark_iterator* starlark_range::get_iterator(Arena& arena, error_fn& error_callback) {
+starlark_iterator* starlark_range::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
   return nullptr;
 }
 

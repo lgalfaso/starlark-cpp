@@ -192,7 +192,7 @@ bool starlark_tuple::binary_in(const starlark_obj& other, error_fn& error_callba
   return false;
 }
 
-starlark_iterator* starlark_tuple::get_iterator(Arena& arena, error_fn& error_callback) {
+starlark_iterator* starlark_tuple::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_tuple_iterator>(&arena, this);
 }
 

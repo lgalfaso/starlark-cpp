@@ -133,7 +133,7 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena
   return result;
 }
 
-starlark_iterator* starlark_set::get_iterator(Arena& arena, error_fn& error_callback) {
+starlark_iterator* starlark_set::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_set_iterator>(&arena, this);
 }
 

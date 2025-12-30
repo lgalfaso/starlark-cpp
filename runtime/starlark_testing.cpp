@@ -12,13 +12,6 @@ void error_handler::add_error(std::string_view error_msg) {
   messages.push_back(std::string(error_msg));
 }
 
-void error_handler::replace_last_error(std::string_view error_msg) {
-  if (!messages.empty()) {
-    messages.pop_back();
-  }
-  messages.push_back(std::string(error_msg));
-}
-
 }  // namespace testing
 }  // namespace starlark
 

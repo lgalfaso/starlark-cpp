@@ -287,11 +287,11 @@ TEST(StarlarkDictionary, GetIterator) {
   dictionary1.insert(&s_zero, &zero, error_callback);
   dictionary1.insert(&s_one, &one, error_callback);
 
-  auto* it0 = dictionary0.get_iterator(arena, error_callback);
+  auto* it0 = dictionary0.get_iterator(true, arena, error_callback);
   EXPECT_FALSE(it0->has_next());
   it0->end_iterator();
 
-  auto* it1 = dictionary1.get_iterator(arena, error_callback);
+  auto* it1 = dictionary1.get_iterator(true, arena, error_callback);
   EXPECT_TRUE(it1->has_next());
   EXPECT_TRUE(it1->next()->equals(s_zero));
   EXPECT_TRUE(it1->has_next());
@@ -311,7 +311,7 @@ TEST(StarlarkDictionary, MutationWhileIterating1) {
   error_handler error_callback;
   dictionary.insert(&s_zero, &zero, error_callback);
 
-  [[maybe_unused]] auto* it = dictionary.get_iterator(arena, error_callback);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.insert(&s_one, &one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -380,7 +380,7 @@ TEST(StarlarkDictionary, MutationWhileIterating2) {
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 
-  [[maybe_unused]] auto* it = dictionary.get_iterator(arena, error_callback);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.index_assign(s_two, two, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));

@@ -309,8 +309,10 @@ int64_t starlark_obj::len(error_fn& error_callback) const {
   return -1;
 }
 
-starlark_iterator* starlark_obj::get_iterator(Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object is not iterable", type()));
+starlark_iterator* starlark_obj::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
+  if (produce_error) {
+    error_callback.add_error(std::format("TypeError: '{}' object is not iterable", type()));
+  }
   return nullptr;
 }
 

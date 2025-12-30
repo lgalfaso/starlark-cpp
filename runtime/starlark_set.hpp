@@ -27,7 +27,7 @@ class starlark_set : public starlark_obj {
   starlark_obj* binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   int64_t len(error_fn& error_callback) const override;
-  starlark_iterator* get_iterator(google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback) override;
 
   class starlark_set_iterator : public starlark_iterator {
    public:
