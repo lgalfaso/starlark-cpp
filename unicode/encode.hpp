@@ -9,7 +9,7 @@
 namespace starlark {
 namespace unicode {
 
-void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict);
+void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict, bool encode_surrogate);
 
 }  // namespace unicode
 }  // namespace starlark

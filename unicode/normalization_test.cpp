@@ -87,7 +87,7 @@ std::vector<test_case> read_file(const char* file) {
 std::string utf8_encode(const std::vector<std::uint32_t>& code_points) {
   std::string result;
   for (auto c : code_points) {
-    utf8_encode_code_point(c, result, true);
+    utf8_encode_code_point(c, result, true, false);
   }
   return result;
 }

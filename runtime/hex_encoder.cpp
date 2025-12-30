@@ -23,7 +23,7 @@ static const char hex[] = "0123456789abcdef";
 void write_printable(uint64_t codepoint, bool allow_non_ascii_printable, std::string& output) {
   if (codepoint == '\\' || codepoint == '"') {
     output += '\\';
-    utf8_encode_code_point(codepoint, output, false);
+    utf8_encode_code_point(codepoint, output, false, false);
   } else if (codepoint == '\t') {
     output += "\\t";
   } else if (codepoint == '\n') {
@@ -35,9 +35,9 @@ void write_printable(uint64_t codepoint, bool allow_non_ascii_printable, std::st
     output += hex[(codepoint >> 4) & 0xf];
     output += hex[codepoint & 0xf];
   } else if (codepoint <= 0x7f) {
-    utf8_encode_code_point(codepoint, output, false);
+    utf8_encode_code_point(codepoint, output, false, false);
   } else if (allow_non_ascii_printable && is_printable(codepoint)) {
-    utf8_encode_code_point(codepoint, output, false);
+    utf8_encode_code_point(codepoint, output, false, false);
   } else if (codepoint <= 0xff) {
     output += "\\x";
     output += hex[(codepoint >> 4) & 0xf];

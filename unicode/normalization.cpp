@@ -174,7 +174,7 @@ std::string to_nfc(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfc_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result, true);
+    utf8_encode_code_point(c, result, true, false);
   }
   return result;
 }
@@ -199,7 +199,7 @@ std::string to_nfd(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfd_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result, true);
+    utf8_encode_code_point(c, result, true, false);
   }
   return result;
 }
@@ -224,7 +224,7 @@ std::string to_nfkc(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfkc_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result, true);
+    utf8_encode_code_point(c, result, true, false);
   }
   return result;
 }
@@ -249,7 +249,7 @@ std::string to_nfkd(std::string_view input) {
   std::vector<std::uint32_t> result_cp = to_nfkd_x(code_points);
   std::string result;
   for (auto c : result_cp) {
-    utf8_encode_code_point(c, result, true);
+    utf8_encode_code_point(c, result, true, false);
   }
   return result;
 }

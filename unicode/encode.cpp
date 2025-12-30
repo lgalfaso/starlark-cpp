@@ -10,7 +10,7 @@
 namespace starlark {
 namespace unicode {
 
-void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict) {
+void utf8_encode_code_point(std::uint32_t character, std::string& output, bool strict, bool encode_surrogate) {
   if ((strict && !ucd::is_assigned(character)) || !is_in_range(character)) {
     character = utf8_reader::kReplacementCharacter;
   }
@@ -19,7 +19,7 @@ void utf8_encode_code_point(std::uint32_t character, std::string& output, bool s
   } else if (character <= 0x7ff) {
     output += ('\xc0' | static_cast<char>(character >> 6));
     output += ('\x80' | static_cast<char>(character & 0x3f));
-  } else if (is_surrogate(character)) {
+  } else if (!encode_surrogate && is_surrogate(character)) {
     // No-op. Characters in this block will not be encoded.
   } else if (character <= 0xffff) {
     output += ('\xe0' | static_cast<char>(character >> 12));

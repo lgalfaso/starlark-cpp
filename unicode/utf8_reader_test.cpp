@@ -410,7 +410,7 @@ TEST(UTF8Reader, AllCharacters) {
   auto do_checks = [&source](int code_point, int length) {
     utf8_reader reader(std::string_view(source, 3 + length), true, true);
     std::string encoded;
-    utf8_encode_code_point(code_point, encoded, true);
+    utf8_encode_code_point(code_point, encoded, true, false);
     if (reader.peek_code_point() != code_point ||
         (code_point == utf8_reader::kReplacementCharacter && length != 3)) {
       EXPECT_EQ(reader.peek_code_point(), 0xFFFD);

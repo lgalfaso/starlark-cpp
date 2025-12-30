@@ -567,7 +567,7 @@ void lexer::read_string() {
           source_code.skip();
         } else {
           auto start = get_position();
-          utf8_encode_code_point(ch, result, false);
+          utf8_encode_code_point(ch, result, false, false);
           source_code.skip_code_point();
 
           auto end_pos = source_code.pos();
@@ -643,7 +643,7 @@ bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_val
     if (unicode::is_surrogate(int_value) || !unicode::is_in_range(int_value)) {
       error = true;
     }
-    utf8_encode_code_point(int_value, result, false);
+    utf8_encode_code_point(int_value, result, false, false);
   } else {
     result += static_cast<char>(int_value & 0xff);
   }
@@ -659,7 +659,7 @@ std::string lexer::read_identifier_or_keyword() {
     auto ch = source_code.peek_code_point();
     if ((first && (ch == '_' || ucd::is_XID_Start(ch))) ||
         (!first && ucd::is_XID_Continue(ch))) {
-      utf8_encode_code_point(ch, result, false);
+      utf8_encode_code_point(ch, result, false, false);
       source_code.skip_code_point();
     } else {
       break;

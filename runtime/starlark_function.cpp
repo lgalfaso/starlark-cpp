@@ -206,7 +206,7 @@ starlark_obj* starlark_fn_bytes(const std::vector<starlark_obj*>& pos_args, cons
     std::string result;
     utf8_reader reader(pos_args.front()->str(), false, false);
     while (reader.pending()) {
-      utf8_encode_code_point(reader.peek_code_point(), result, false);
+      utf8_encode_code_point(reader.peek_code_point(), result, false, true);
       reader.skip_code_point();
     }
     return Arena::Create<starlark_bytes>(&arena, result);
