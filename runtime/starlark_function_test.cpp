@@ -11,14 +11,17 @@
 
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bytes.hpp"
+#include "runtime/starlark_float.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
-#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_none.hpp"
+#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
+#include "runtime/starlark_types.hpp"
+#include "unicode/utf8_reader.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -28,6 +31,7 @@ using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_function;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
@@ -35,9 +39,11 @@ using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
+using starlark::unicode::utf8_reader;
 
 namespace {
 
@@ -625,6 +631,121 @@ TEST(StarlarkBytes, NamedArguments) {
   EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bytes() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkChr, FromInt) {
+  Arena arena;
+  error_handler error_callback;
+
+  for (int i = 0; i <= 0x10FFFF; ++i) {
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    starlark_integer value(i);
+    pos_args.push_back(&value);
+
+    auto* result = starlark_fn_chr(pos_args, named_args, arena, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_EQ(starlark_types::string_t, result->type());
+    EXPECT_EQ(i, utf8_reader(result->str(), false, false).peek_code_point());
+  }
+  for (int i = 0; i <= 0x10FFFF; ++i) {
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    starlark_bigint value(i);
+    pos_args.push_back(&value);
+
+    auto* result = starlark_fn_chr(pos_args, named_args, arena, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_EQ(starlark_types::string_t, result->type());
+    EXPECT_EQ(i, utf8_reader(result->str(), false, false).peek_code_point());
+  }
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkChr, FromFloat) {
+  starlark_float one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'float' object cannot be interpreted as an integer", error_callback.messages[0]);
+}
+
+TEST(StarlarkChr, OutOfRange1) {
+  starlark_integer value(-1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+}
+
+TEST(StarlarkChr, OutOfRange2) {
+  starlark_bigint value(-1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+}
+
+TEST(StarlarkChr, OutOfRange3) {
+  starlark_integer value(0x110000);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+}
+
+TEST(StarlarkChr, OutOfRange4) {
+  starlark_bigint value(0x110000);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+}
+
+TEST(StarlarkChr, NamedArguments) {
+  starlark_bytes bytes("def");
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  named_args["1"] = &bytes;
+
+  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: chr() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, List) {

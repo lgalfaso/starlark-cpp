@@ -553,6 +553,7 @@ cc_library(
         ":starlark_list",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_string",
         ":starlark_types",
         "//unicode:encode",
         "//unicode:utf8_reader",

@@ -11,6 +11,7 @@
 #include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_string.hpp"
 #include "runtime/starlark_types.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
@@ -248,8 +249,40 @@ starlark_obj* starlark_fn_bytes(const std::vector<starlark_obj*>& pos_args, cons
 }
 
 starlark_obj* starlark_fn_chr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "chr")) {
+    return nullptr;
+  }
+  std::string result;
+  auto* value = pos_args.front();
+  switch (value->numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      auto ivalue = value->as_int64();
+      if (ivalue < 0 || 0x10ffff < ivalue) {
+        error_callback.add_error("ValueError: Unicode code point must be in range(0, 0x110000)");
+        return nullptr;
+      }
+      utf8_encode_code_point(ivalue, result, false, true);
+      break;
+    }
+    case starlark_numeric_type::kBigInt: {
+      const auto& bvalue = value->as_bigint();
+      if (bvalue.sign() || bvalue.bit_size() > 21) {
+        error_callback.add_error("ValueError: Unicode code point must be in range(0, 0x110000)");
+        return nullptr;
+      }
+      auto ivalue = bvalue.at(0);
+      if (0x10ffff < ivalue) {
+        error_callback.add_error("ValueError: Unicode code point must be in range(0, 0x110000)");
+        return nullptr;
+      }
+      utf8_encode_code_point(ivalue, result, false, true);
+      break;
+    }
+    default:
+      error_callback.add_error(std::format("TypeError: '{}' object cannot be interpreted as an integer", value->type()));
+      return nullptr;
+  }
+  return Arena::Create<starlark_string>(&arena, result);
 }
 
 starlark_obj* starlark_fn_dict(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
