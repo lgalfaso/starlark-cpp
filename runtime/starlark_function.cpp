@@ -369,8 +369,16 @@ starlark_obj* starlark_fn_enumerate(const std::vector<starlark_obj*>& pos_args, 
 }
 
 starlark_obj* starlark_fn_fail(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
+  if (!named_args.empty()) {
+    error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", "fail"));
+    return nullptr;
+  }
+  std::string message = "Error:";
+  for (const auto& entry : pos_args) {
+    message += " ";
+    message += entry->str();
+  }
+  error_callback.add_error(message);
   return nullptr;
 }
 

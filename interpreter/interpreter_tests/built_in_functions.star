@@ -13,7 +13,7 @@ assert_eq(dict([('a', 1), ('b', 2)]), {'a': 1, 'b': 2})
 # dict
 # dir
 # enumerate
-# fail
+assert_fail("fail('Some message')", error_message = "Error: Some message")
 # float
 # getattr
 # hasattr

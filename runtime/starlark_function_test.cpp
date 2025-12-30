@@ -964,6 +964,39 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
   EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
 }
 
+TEST(StarlarkFail, Message) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_string str("some error message");
+  starlark_list list;
+  starlark_integer one(1);
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&list);
+  pos_args.push_back(&one);
+
+  auto* result = starlark_fn_fail(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "Error: some error message [] 1");
+}
+
+TEST(StarlarkFail, NamedArgs) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_integer one(1);
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+
+  EXPECT_EQ(nullptr, starlark_fn_fail(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: fail() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkLen, List) {
   starlark_integer one(1);
   starlark_list list1;
