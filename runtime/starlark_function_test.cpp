@@ -1454,7 +1454,6 @@ TEST(StarlarkList, NoPosArgs) {
 }
 
 TEST(StarlarkList, MultiplePosArgs) {
-  starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
@@ -1483,6 +1482,133 @@ TEST(StarlarkList, NamedArguments) {
   EXPECT_EQ(nullptr, starlark_fn_list(pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: list() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, FromString) {
+  starlark_string str("😃");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ("128515", starlark_fn_ord(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkOrd, FromBytes) {
+  starlark_bytes bytes("\xFF");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&bytes);
+
+  EXPECT_EQ("255", starlark_fn_ord(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkOrd, ShortString) {
+  starlark_string str("");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() expected a character, but string of length 0 found", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, LongString) {
+  starlark_string str("ab");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() expected a character, but string of length 2 found", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, ShortBytes) {
+  starlark_bytes bytes("");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&bytes);
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() expected a character, but bytes of length 0 found", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, LongBytes) {
+  starlark_bytes bytes("ab");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&bytes);
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() expected a character, but bytes of length 2 found", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, List) {
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() expected bytes of length 1 or string with one character, but 'list' found", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, MultiplePosArgs) {
+  starlark_bytes bytes("\xFF");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&bytes);
+  pos_args.push_back(&bytes);
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, NamedArguments) {
+  starlark_integer one(1);
+  starlark_bytes bytes("\xFF");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&bytes);
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() takes no keyword arguments", error_callback.messages[0]);
 }
 
 }  // namespace

@@ -529,9 +529,33 @@ starlark_obj* starlark_fn_min(const std::vector<starlark_obj*>& pos_args, const 
 }
 
 starlark_obj* starlark_fn_ord(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "ord")) {
+    return nullptr;
+  }
+  auto* value = pos_args.front();
+  if (value->type() == starlark_types::string_t) {
+    utf8_reader reader(value->as_string(), false, false);
+    if (!reader.pending()) {
+      error_callback.add_error(std::format("TypeError: ord() expected a character, but {} of length {} found", value->type(), value->len(false, error_callback)));
+      return nullptr;
+    }
+    auto result = reader.peek_code_point();
+    reader.skip_code_point();
+    if (reader.pending()) {
+      error_callback.add_error(std::format("TypeError: ord() expected a character, but {} of length {} found", value->type(), value->len(false, error_callback)));
+      return nullptr;
+    }
+    return create_integer(result, arena);
+  } else if (value->type() == starlark_types::bytes_t) {
+    if (value->len(false, error_callback) != 1) {
+      error_callback.add_error(std::format("TypeError: ord() expected a character, but {} of length {} found", value->type(), value->len(false, error_callback)));
+      return nullptr;
+    }
+    return create_integer(static_cast<unsigned char>(value->as_string()[0]), arena);
+  } else {
+    error_callback.add_error(std::format("TypeError: ord() expected bytes of length 1 or string with one character, but '{}' found", value->type()));
+    return nullptr;
+  }
 }
 
 starlark_obj* starlark_fn_print(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
