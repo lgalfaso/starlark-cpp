@@ -310,8 +310,8 @@ TEST(StarlarkSet, Len) {
   set_2.add(&two, error_callback);
   set_2.add(&three, error_callback);
 
-  EXPECT_EQ(0, set_1.len(error_callback));
-  EXPECT_EQ(4, set_2.len(error_callback));
+  EXPECT_EQ(0, set_1.len(true, error_callback));
+  EXPECT_EQ(4, set_2.len(true, error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

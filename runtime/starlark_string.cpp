@@ -34,7 +34,7 @@ std::string starlark_string::str() const {
   return value;
 }
 
-int64_t starlark_string::len(error_fn& error_callback) const {
+int64_t starlark_string::len(bool produce_error, error_fn& error_callback) const {
   return value.size();
 }
 

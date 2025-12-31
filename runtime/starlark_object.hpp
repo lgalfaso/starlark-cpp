@@ -143,7 +143,7 @@ class starlark_obj {
   virtual starlark_obj* binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
   virtual starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
 
-  virtual int64_t len(error_fn& error_callback) const;
+  virtual int64_t len(bool produce_error, error_fn& error_callback) const;
   virtual starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback);
   virtual starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
   virtual void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback);

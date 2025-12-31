@@ -340,8 +340,8 @@ TEST(StarlarkString, BinaryStarTooBig) {
 TEST(StarlarkString, Len) {
   error_handler error_callback;
 
-  EXPECT_EQ(0, starlark_string("").len(error_callback));
-  EXPECT_EQ(3, starlark_string("abc").len(error_callback));
+  EXPECT_EQ(0, starlark_string("").len(true, error_callback));
+  EXPECT_EQ(3, starlark_string("abc").len(true, error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

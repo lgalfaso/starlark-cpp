@@ -335,7 +335,7 @@ starlark_obj* starlark_fn_dict(const std::vector<starlark_obj*>& pos_args, const
         auto* value = it2->next();
         assert(value != nullptr);
         if (it2->has_next()) {
-          error_callback.add_error(std::format("ValueError: dictionary update sequence element #{} has length {}; 2 is required", pos, kv->len(error_callback)));
+          error_callback.add_error(std::format("ValueError: dictionary update sequence element #{} has length {}; 2 is required", pos, kv->len(false, error_callback)));
           return nullptr;
         }
         if (result->insert(key, value, error_callback).second) {
@@ -416,7 +416,7 @@ starlark_obj* starlark_fn_len(const std::vector<starlark_obj*>& pos_args, const 
   if (!one_pos_arg(pos_args, named_args, error_callback, "len")) {
     return nullptr;
   }
-  auto result = pos_args.front()->len(error_callback);
+  auto result = pos_args.front()->len(true, error_callback);
   if (result < 0) {
     return nullptr;
   }
@@ -434,7 +434,7 @@ starlark_obj* starlark_fn_list(const std::vector<starlark_obj*>& pos_args, const
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&arena, pos_args.front()->len(error_callback));
+  auto* result = Arena::Create<starlark_list>(&arena, std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
   while (it->has_next()) {
     result->add(it->next(), error_callback);
   }

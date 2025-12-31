@@ -15,9 +15,10 @@ std::string_view starlark_range::type() const {
   return "range";
 }
 
-int64_t starlark_range::len(error_fn& error_callback) const {
+int64_t starlark_range::len(bool produce_error, error_fn& error_callback) const {
   // TODO(lmirelmann): Implement.
-  return 0;
+  error_callback.add_error("Unimplemented");
+  return -1;
 }
 
 bool starlark_range::inner_repr(printer& print, printer_action action) const {

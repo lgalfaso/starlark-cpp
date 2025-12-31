@@ -304,8 +304,10 @@ starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, Arena& are
   return nullptr;
 }
 
-int64_t starlark_obj::len(error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: object of type '{}' has no len()", type()));
+int64_t starlark_obj::len(bool produce_error, error_fn& error_callback) const {
+  if (produce_error) {
+    error_callback.add_error(std::format("TypeError: object of type '{}' has no len()", type()));
+  }
   return -1;
 }
 

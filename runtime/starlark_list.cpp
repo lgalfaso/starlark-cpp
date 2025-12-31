@@ -24,7 +24,7 @@ std::string_view starlark_list::type() const {
   return starlark_types::list_t;
 }
 
-int64_t starlark_list::len(error_fn& error_callback) const {
+int64_t starlark_list::len(bool produce_error, error_fn& error_callback) const {
   return values.size();
 }
 

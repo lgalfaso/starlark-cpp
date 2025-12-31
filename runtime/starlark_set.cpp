@@ -18,7 +18,7 @@ std::string_view starlark_set::type() const {
   return starlark_types::set_t;
 }
 
-int64_t starlark_set::len(error_fn& error_callback) const {
+int64_t starlark_set::len(bool produce_error, error_fn& error_callback) const {
   return values.size();
 }
 

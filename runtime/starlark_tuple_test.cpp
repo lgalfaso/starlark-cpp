@@ -418,8 +418,8 @@ TEST(StarlarkTuple, Len) {
   tuple_2.add(&two);
   tuple_2.add(&three);
 
-  EXPECT_EQ(0, tuple_1.len(error_callback));
-  EXPECT_EQ(4, tuple_2.len(error_callback));
+  EXPECT_EQ(0, tuple_1.len(true, error_callback));
+  EXPECT_EQ(4, tuple_2.len(true, error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

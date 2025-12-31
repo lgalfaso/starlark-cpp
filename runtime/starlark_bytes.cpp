@@ -27,7 +27,7 @@ bool starlark_bytes::primitive() const {
   return true;
 }
 
-int64_t starlark_bytes::len(error_fn& error_callback) const {
+int64_t starlark_bytes::len(bool produce_error, error_fn& error_callback) const {
   return value.size();
 }
 

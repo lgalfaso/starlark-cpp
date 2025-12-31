@@ -18,7 +18,7 @@ std::string_view starlark_dictionary::type() const {
   return starlark_types::dict_t;
 }
 
-int64_t starlark_dictionary::len(error_fn& error_callback) const {
+int64_t starlark_dictionary::len(bool produce_error, error_fn& error_callback) const {
   return values.size();
 }
 

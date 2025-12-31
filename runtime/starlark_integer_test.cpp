@@ -1984,7 +1984,7 @@ TEST(StarlarkInteger, BinaryPercentOverflow) {
 TEST(StarlarkInteger, Len) {
   error_handler error_callback;
 
-  EXPECT_THAT(starlark_integer(0).len(error_callback), Lt(0));
+  EXPECT_THAT(starlark_integer(0).len(true, error_callback), Lt(0));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
 }
