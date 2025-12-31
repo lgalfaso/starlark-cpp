@@ -555,6 +555,7 @@ cc_library(
         ":starlark_numeric",
         ":starlark_object",
         ":starlark_string",
+        ":starlark_tuple",
         ":starlark_types",
         "//unicode:encode",
         "//unicode:utf8_reader",

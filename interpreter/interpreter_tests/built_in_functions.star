@@ -10,9 +10,9 @@ assert_eq(dict({'a': 1}), {'a': 1})
 assert_eq(dict({'a': 1}, b = 2), {'a': 1, 'b': 2})
 assert_eq(dict([('a', 1), ('b', 2)]), {'a': 1, 'b': 2})
 # TODO(lmirelmann): Add tests for the other built-in functions once they are available.
-# dict
 # dir
-# enumerate
+assert_eq(enumerate(['a', 'b', 'c']), [(0, 'a'), (1, 'b'), (2, 'c')])
+assert_eq(enumerate(['a', 'b', 'c'], start = 100), [(100, 'a'), (101, 'b'), (102, 'c')])
 assert_fail("fail('Some message')", error_message = "Error: Some message")
 # float
 # getattr

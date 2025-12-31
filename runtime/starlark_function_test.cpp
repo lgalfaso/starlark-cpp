@@ -964,6 +964,146 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
   EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
 }
 
+TEST(StarlarkEnumerate, FromIterable) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_string s_one("one");
+  starlark_string s_two("two");
+  starlark_string s_three("three");
+  list.add(&s_one, error_callback);
+  list.add(&s_two, error_callback);
+  list.add(&s_three, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(0, \"one\"), (1, \"two\"), (2, \"three\")]");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkEnumerate, FromIterableWithStart) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_string s_one("one");
+  starlark_string s_two("two");
+  starlark_string s_three("three");
+  list.add(&s_one, error_callback);
+  list.add(&s_two, error_callback);
+  list.add(&s_three, error_callback);
+  pos_args.push_back(&list);
+  starlark_integer start(100);
+  named_args["start"] = &start;
+
+  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(100, \"one\"), (101, \"two\"), (102, \"three\")]");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkEnumerate, InvalidStart) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_string s_one("one");
+  starlark_string s_two("two");
+  starlark_string s_three("three");
+  list.add(&s_one, error_callback);
+  list.add(&s_two, error_callback);
+  list.add(&s_three, error_callback);
+  pos_args.push_back(&list);
+  starlark_string start("100");
+  named_args["start"] = &start;
+
+  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string).");
+}
+
+TEST(StarlarkEnumerate, InvalidNamedArgument) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_string s_one("one");
+  starlark_string s_two("two");
+  starlark_string s_three("three");
+  list.add(&s_one, error_callback);
+  list.add(&s_two, error_callback);
+  list.add(&s_three, error_callback);
+  pos_args.push_back(&list);
+  starlark_string end("100");
+  named_args["end"] = &end;
+
+  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'end'.");
+}
+
+TEST(StarlarkEnumerate, TooFewPosArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() takes exactly one argument (0 given)");
+}
+
+TEST(StarlarkEnumerate, TooManyPosArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_list list;
+  starlark_string s_one("one");
+  starlark_string s_two("two");
+  starlark_string s_three("three");
+  list.add(&s_one, error_callback);
+  list.add(&s_two, error_callback);
+  list.add(&s_three, error_callback);
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() takes exactly one argument (2 given)");
+}
+
+TEST(StarlarkEnumerate, NotIterable) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  starlark_string s_one("one");
+  pos_args.push_back(&s_one);
+
+  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'string' object is not iterable");
+}
+
 TEST(StarlarkFail, Message) {
   Arena arena;
   error_handler error_callback;

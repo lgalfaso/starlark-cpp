@@ -13,6 +13,7 @@
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_string.hpp"
+#include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
@@ -363,9 +364,42 @@ starlark_obj* starlark_fn_dir(const std::vector<starlark_obj*>& pos_args, const 
 }
 
 starlark_obj* starlark_fn_enumerate(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  starlark_obj* start = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "start") {
+      assert(value != nullptr);
+      if (value->type() != starlark_types::int_t) {
+        error_callback.add_error(std::format("TypeError: parameter 'start' cannot be interpreted as an integer ({}).", value->type()));
+        return nullptr;
+      }
+      start = value;
+    } else {
+      error_callback.add_error(std::format("Unknown named argument '{}'.", key));
+      return nullptr;
+    }
+  }
+  if (pos_args.size() != 1) {
+    error_callback.add_error(std::format("TypeError: {}() takes exactly one argument ({} given)", "enumerate", pos_args.size()));
+    return nullptr;
+  }
+  auto* it = pos_args.front()->get_iterator(true, arena, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_list>(&arena, std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
+  if (start == nullptr) {
+    start = create_integer(0, arena);
+  }
+  auto* one = create_integer(1, arena);
+  while (it->has_next()) {
+    auto* tuple = Arena::Create<starlark_tuple>(&arena);
+    tuple->add(start);
+    tuple->add(it->next());
+    result->add(tuple, error_callback);
+    start = start->binary_plus(*one, arena, error_callback);
+  }
+  it->end_iterator();
+  return result;
 }
 
 starlark_obj* starlark_fn_fail(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
