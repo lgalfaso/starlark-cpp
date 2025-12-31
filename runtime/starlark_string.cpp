@@ -144,9 +144,13 @@ starlark_obj* starlark_string::index(const starlark_obj& other, Arena& arena, er
   return Arena::Create<starlark_string>(&arena, value.substr(idx, 1));
 }
 
+std::string_view starlark_string::as_string() const {
+  return value;
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
-         value == other->str();
+         value == other->as_string();
 }
 
 void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {

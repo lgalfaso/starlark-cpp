@@ -152,6 +152,7 @@ class starlark_obj {
   virtual int64_t as_int64() const;
   virtual const starlark::bigint::number& as_bigint() const;
   virtual double as_float() const;
+  virtual std::string_view as_string() const;
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;

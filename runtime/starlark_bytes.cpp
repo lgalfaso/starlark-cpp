@@ -141,6 +141,10 @@ starlark_obj* starlark_bytes::index(const starlark_obj& other, Arena& arena, err
   return Arena::Create<starlark_bytes>(&arena, value.substr(idx, 1));
 }
 
+std::string_view starlark_bytes::as_string() const {
+  return value;
+}
+
 bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
       value == (static_cast<const starlark_bytes*>(other))->value;

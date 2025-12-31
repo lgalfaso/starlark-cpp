@@ -339,6 +339,10 @@ double starlark_obj::as_float() const {
   return 0;
 }
 
+std::string_view starlark_obj::as_string() const {
+  return "";
+}
+
 starlark_numeric_type starlark_obj::numeric_type() const {
   return starlark_numeric_type::kNotNumeric;
 }

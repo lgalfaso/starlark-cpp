@@ -449,7 +449,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
           auto* key = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i];
           auto* value = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i + 1];
           assert(key->type() == starlark_types::string_t);
-          named_args[key->str()] = value;
+          named_args.emplace(key->as_string(), value);
         }
         // TODO(lmirelmann): Get the variadic arguments.
         // TODO(lmirelmann): Get the named variadic arguments.

@@ -207,7 +207,7 @@ starlark_obj* starlark_fn_bytes(const std::vector<starlark_obj*>& pos_args, cons
   }
   if (pos_args.front()->type() == starlark_types::string_t) {
     std::string result;
-    utf8_reader reader(pos_args.front()->str(), false, false);
+    utf8_reader reader(pos_args.front()->as_string(), false, false);
     while (reader.pending()) {
       utf8_encode_code_point(reader.peek_code_point(), result, false, true);
       reader.skip_code_point();
@@ -436,10 +436,10 @@ starlark_obj* starlark_fn_float(const std::vector<starlark_obj*>& pos_args, cons
     }
     case starlark_numeric_type::kNotNumeric:
       if (value->type() == starlark_types::string_t) {
-        auto svalue = value->str();
+        auto svalue = value->as_string();
         errno = 0;
         char* end;
-        double double_value = std::strtod(svalue.c_str(), &end);
+        double double_value = std::strtod(svalue.data(), &end);
         if (end != &svalue.back() + 1) {
           error_callback.add_error(std::format("ValueError: could not convert string to float: '{}'", svalue));
           return nullptr;
