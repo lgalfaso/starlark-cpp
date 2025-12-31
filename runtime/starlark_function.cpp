@@ -417,9 +417,49 @@ starlark_obj* starlark_fn_fail(const std::vector<starlark_obj*>& pos_args, const
 }
 
 starlark_obj* starlark_fn_float(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "float")) {
+    return nullptr;
+  }
+  auto* value = pos_args.front();
+  switch (value->numeric_type()) {
+    case starlark_numeric_type::kFloat:
+      return value;
+    case starlark_numeric_type::kInt64:
+      return create_float(value->as_int64(), arena);
+    case starlark_numeric_type::kBigInt: {
+      auto fvalue = to_double(value->as_bigint());
+      if (std::isinf(fvalue)) {
+        error_callback.add_error("OverflowError: int too large to convert to float");
+        return nullptr;
+      }
+      return create_float(fvalue, arena);
+    }
+    case starlark_numeric_type::kNotNumeric:
+      if (value->type() == starlark_types::string_t) {
+        auto svalue = value->str();
+        errno = 0;
+        char* end;
+        double double_value = std::strtod(svalue.c_str(), &end);
+        if (end != &svalue.back() + 1) {
+          error_callback.add_error(std::format("ValueError: could not convert string to float: '{}'", svalue));
+          return nullptr;
+        }
+        if (errno != 0) {
+          error_callback.add_error("OverflowError: floating-point number too large");
+          return nullptr;
+        }
+        return create_float(double_value, arena);
+      } else if (value->type() == starlark_types::bool_t) {
+        if (value->truthy()) {
+          return create_float(1.0, arena);
+        } else {
+          return create_float(0.0, arena);
+        }
+      } else {
+        error_callback.add_error(std::format("TypeError: float() argument must be a string or a real number, not '{}'", value->type()));
+        return nullptr;
+      }
+  }
 }
 
 starlark_obj* starlark_fn_getattr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

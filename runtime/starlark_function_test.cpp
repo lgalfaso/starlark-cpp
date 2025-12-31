@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "runtime/starlark_bigint.hpp"
+#include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_float.hpp"
@@ -30,6 +31,7 @@ using ::starlark::runtime::create_float;
 using ::starlark::runtime::create_integer;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
+using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_bytes;
 using ::starlark::runtime::starlark_dictionary;
@@ -1137,6 +1139,194 @@ TEST(StarlarkFail, NamedArgs) {
   EXPECT_EQ("TypeError: fail() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkFloat, FromFloat) {
+  auto test = [](double fvalue, std::string_view repr) {
+    starlark_float value(fvalue);
+    Arena arena;
+    error_handler error_callback;
+
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&value);
+
+    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test(1.25, "1.25");
+  test(std::numeric_limits<double>::infinity(), "inf");
+  test(-std::numeric_limits<double>::infinity(), "-inf");
+  test(std::numeric_limits<double>::quiet_NaN(), "nan");
+}
+
+TEST(StarlarkFloat, FromInteger) {
+  auto test = [](int64_t ivalue, std::string_view repr) {
+    starlark_integer value(ivalue);
+    Arena arena;
+    error_handler error_callback;
+
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&value);
+
+    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test(1, "1.0");
+  test(std::numeric_limits<int64_t>::max(), "9.2233720368547758e+18");
+  test(std::numeric_limits<int64_t>::min(), "-9.2233720368547758e+18");
+}
+
+TEST(StarlarkFloat, FromBigint) {
+  auto test = [](int64_t ivalue, std::string_view repr) {
+    starlark_bigint value(ivalue);
+    Arena arena;
+    error_handler error_callback;
+
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&value);
+
+    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test(1, "1.0");
+  test(std::numeric_limits<int64_t>::max(), "9.2233720368547758e+18");
+  test(std::numeric_limits<int64_t>::min(), "-9.2233720368547758e+18");
+}
+
+TEST(StarlarkFloat, FromString) {
+  auto test = [](std::string_view svalue, std::string_view repr) {
+    starlark_string value(svalue);
+    Arena arena;
+    error_handler error_callback;
+
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&value);
+
+    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("1", "1.0");
+  test("-1", "-1.0");
+  test("1e308", "1e+308");
+  test("Infinity", "inf");
+  test("-Infinity", "-inf");
+  test("NaN", "nan");
+}
+
+TEST(StarlarkFloat, FromBool) {
+  auto test = [](bool bvalue, std::string_view repr) {
+    starlark_bool value(bvalue);
+    Arena arena;
+    error_handler error_callback;
+
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&value);
+
+    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test(false, "0.0");
+  test(true, "1.0");
+}
+
+TEST(StarlarkFloat, FromList) {
+  starlark_list value(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: float() argument must be a string or a real number, not 'list'");
+}
+
+TEST(StarlarkFloat, BigintOverflow) {
+  starlark_bigint value(number::one << 2000);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+}
+
+TEST(StarlarkFloat, StringOverflow) {
+  starlark_string value("2e308");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: floating-point number too large");
+}
+
+TEST(StarlarkFloat, InvalidString) {
+  starlark_string value("1a");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: could not convert string to float: '1a'");
+}
+
+TEST(StarlarkFloat, MultiplePosArgs) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_float(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: float() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkFloat, NamedArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_float(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: float() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkLen, List) {
   starlark_integer one(1);
   starlark_list list1(0);
@@ -1185,7 +1375,6 @@ TEST(StarlarkLen, NoPosArgs) {
 }
 
 TEST(StarlarkLen, MultiplePosArgs) {
-  starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;

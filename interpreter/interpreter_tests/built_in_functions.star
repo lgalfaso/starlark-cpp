@@ -14,6 +14,11 @@ assert_eq(dict([('a', 1), ('b', 2)]), {'a': 1, 'b': 2})
 assert_eq(enumerate(['a', 'b', 'c']), [(0, 'a'), (1, 'b'), (2, 'c')])
 assert_eq(enumerate(['a', 'b', 'c'], start = 100), [(100, 'a'), (101, 'b'), (102, 'c')])
 assert_fail("fail('Some message')", error_message = "Error: Some message")
+assert_eq(float(0.0), 0.0)
+assert_eq(float(1), 1.0)
+assert_eq(float("Inf"), 1e308*10)
+assert_eq(float("-Inf"), -1e308*10)
+assert_fail("float('2e308')", error_message = "OverflowError: floating-point number too large")
 # float
 # getattr
 # hasattr
