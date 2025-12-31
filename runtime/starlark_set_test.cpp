@@ -178,7 +178,7 @@ TEST(StarlarkSet, BinaryPipe) {
 
 TEST(StarlarkSet, BinaryPipeWithNonSet) {
   starlark_set set;
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -214,7 +214,7 @@ TEST(StarlarkSet, BinaryAnd) {
 
 TEST(StarlarkSet, BinaryAndWithNonSet) {
   starlark_set set;
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -250,7 +250,7 @@ TEST(StarlarkSet, BinaryHat) {
 
 TEST(StarlarkSet, BinaryHatWithNonSet) {
   starlark_set set;
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -286,7 +286,7 @@ TEST(StarlarkSet, BinaryMinus) {
 
 TEST(StarlarkSet, BinaryMinusWithNonSet) {
   starlark_set set;
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 

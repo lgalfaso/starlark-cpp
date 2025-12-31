@@ -392,7 +392,7 @@ starlark_obj* starlark_fn_enumerate(const std::vector<starlark_obj*>& pos_args, 
   }
   auto* one = create_integer(1, arena);
   while (it->has_next()) {
-    auto* tuple = Arena::Create<starlark_tuple>(&arena);
+    auto* tuple = Arena::Create<starlark_tuple>(&arena, 2);
     tuple->add(start);
     tuple->add(it->next());
     result->add(tuple, error_callback);

@@ -170,7 +170,7 @@ TEST(StarlarkDictionary, Hash) {
 
 TEST(StarlarkDictionary, InsertingUsingUnhashableKey) {
   starlark_dictionary dict;
-  starlark_list list;
+  starlark_list list(0);
   starlark_none none;
   error_handler error_callback;
 
@@ -243,7 +243,7 @@ TEST(StarlarkDictionary, BinaryPipe) {
 
 TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
   starlark_dictionary dict;
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -408,7 +408,7 @@ TEST(StarlarkDictionary, IndexAssignWithFreeze) {
 
 TEST(StarlarkDictionary, IndexAssignUsingUnhashableKey) {
   starlark_dictionary dict;
-  starlark_list list;
+  starlark_list list(0);
   starlark_none none;
   error_handler error_callback;
 

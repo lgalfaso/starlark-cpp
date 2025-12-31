@@ -155,7 +155,7 @@ TEST(StarlarkAbs, Numeric) {
 }
 
 TEST(StarlarkAbs, List) {
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -182,7 +182,7 @@ TEST(StarlarkAbs, NoPosArgs) {
 
 TEST(StarlarkAbs, MultiplePosArgs) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -198,7 +198,7 @@ TEST(StarlarkAbs, MultiplePosArgs) {
 
 TEST(StarlarkAbs, NamedArguments) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -218,18 +218,18 @@ TEST(StarlarkAll, List) {
   Arena arena;
   error_handler error_callback;
 
-  starlark_list list1;
+  starlark_list list1(0);
   std::vector<starlark_obj*> pos_args1;
   std::map<std::string, starlark_obj*> named_args1;
   pos_args1.push_back(&list1);
 
-  starlark_list list2;
+  starlark_list list2(0);
   list2.add(&one, error_callback);
   std::vector<starlark_obj*> pos_args2;
   std::map<std::string, starlark_obj*> named_args2;
   pos_args2.push_back(&list2);
 
-  starlark_list list3;
+  starlark_list list3(0);
   list3.add(&zero, error_callback);
   list3.add(&one, error_callback);
   std::vector<starlark_obj*> pos_args3;
@@ -270,7 +270,7 @@ TEST(StarlarkAll, NoPosArgs) {
 
 TEST(StarlarkAll, MultiplePosArgs) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -286,7 +286,7 @@ TEST(StarlarkAll, MultiplePosArgs) {
 
 TEST(StarlarkAll, NamedArguments) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -306,25 +306,25 @@ TEST(StarlarkAny, List) {
   Arena arena;
   error_handler error_callback;
 
-  starlark_list list1;
+  starlark_list list1(0);
   std::vector<starlark_obj*> pos_args1;
   std::map<std::string, starlark_obj*> named_args1;
   pos_args1.push_back(&list1);
 
-  starlark_list list2;
+  starlark_list list2(0);
   list2.add(&one, error_callback);
   std::vector<starlark_obj*> pos_args2;
   std::map<std::string, starlark_obj*> named_args2;
   pos_args2.push_back(&list2);
 
-  starlark_list list3;
+  starlark_list list3(0);
   list3.add(&zero, error_callback);
   list3.add(&one, error_callback);
   std::vector<starlark_obj*> pos_args3;
   std::map<std::string, starlark_obj*> named_args3;
   pos_args3.push_back(&list3);
 
-  starlark_list list4;
+  starlark_list list4(0);
   list4.add(&zero, error_callback);
   std::vector<starlark_obj*> pos_args4;
   std::map<std::string, starlark_obj*> named_args4;
@@ -365,7 +365,7 @@ TEST(StarlarkAny, NoPosArgs) {
 
 TEST(StarlarkAny, MultiplePosArgs) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -381,7 +381,7 @@ TEST(StarlarkAny, MultiplePosArgs) {
 
 TEST(StarlarkAny, NamedArguments) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -397,7 +397,7 @@ TEST(StarlarkAny, NamedArguments) {
 
 TEST(StarlarkBool, List) {
   starlark_integer one(1);
-  starlark_list list1;
+  starlark_list list1(0);
   Arena arena;
   error_handler error_callback;
 
@@ -405,7 +405,7 @@ TEST(StarlarkBool, List) {
   std::map<std::string, starlark_obj*> named_args1;
   pos_args1.push_back(&list1);
 
-  starlark_list list2;
+  starlark_list list2(0);
   list2.add(&one, error_callback);
   std::vector<starlark_obj*> pos_args2;
   std::map<std::string, starlark_obj*> named_args2;
@@ -430,7 +430,7 @@ TEST(StarlarkBool, NoPosArgs) {
 
 TEST(StarlarkBool, MultiplePosArgs) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -446,7 +446,7 @@ TEST(StarlarkBool, MultiplePosArgs) {
 
 TEST(StarlarkBool, NamedArguments) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -507,7 +507,7 @@ TEST(StarlarkBytes, List) {
   starlark_integer one(1);
   starlark_integer max_minus_one(254);
   starlark_bigint max_byte(255);
-  starlark_list list1;
+  starlark_list list1(0);
   Arena arena;
   error_handler error_callback;
 
@@ -515,7 +515,7 @@ TEST(StarlarkBytes, List) {
   std::map<std::string, starlark_obj*> named_args1;
   pos_args1.push_back(&list1);
 
-  starlark_list list2;
+  starlark_list list2(0);
   list2.add(&zero, error_callback);
   list2.add(&one, error_callback);
   list2.add(&max_minus_one, error_callback);
@@ -543,7 +543,7 @@ TEST(StarlarkBytes, OutOfRange) {
   auto test = [](starlark_obj* value) {
     Arena arena;
     error_handler error_callback;
-    starlark_list list;
+    starlark_list list(0);
     list.add(value, error_callback);
     std::vector<starlark_obj*> pos_args;
     std::map<std::string, starlark_obj*> named_args;
@@ -578,7 +578,7 @@ TEST(StarlarkBytes, ListWithNone) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   starlark_none none;
   list.add(&none, error_callback);
   pos_args.push_back(&list);
@@ -620,7 +620,7 @@ TEST(StarlarkBytes, MultiplePosArgs) {
 TEST(StarlarkBytes, NamedArguments) {
   starlark_bytes bytes("def");
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -790,8 +790,8 @@ TEST(StarlarkDict, FromIterable) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
-  starlark_tuple tuple;
+  starlark_list list(0);
+  starlark_tuple tuple(0);
   starlark_none none;
   starlark_integer one(1);
   tuple.add(&none);
@@ -843,7 +843,7 @@ TEST(StarlarkDict, FromNonIterable) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer one(1);
   list.add(&one, error_callback);
   pos_args.push_back(&list);
@@ -860,9 +860,9 @@ TEST(StarlarkDict, FromNonHashable) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list1;
-  starlark_list list2;
-  starlark_tuple tuple;
+  starlark_list list1(0);
+  starlark_list list2(0);
+  starlark_tuple tuple(0);
   starlark_integer one(1);
   tuple.add(&list2);
   tuple.add(&one);
@@ -881,7 +881,7 @@ TEST(StarlarkDict, MultiplePositionalArguments) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
@@ -897,9 +897,9 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements1) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
-  starlark_tuple tuple1;
-  starlark_tuple tuple2;
+  starlark_list list(0);
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
   starlark_none none;
   starlark_integer one(1);
   tuple1.add(&none);
@@ -920,9 +920,9 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements2) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
-  starlark_tuple tuple1;
-  starlark_tuple tuple2;
+  starlark_list list(0);
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
   starlark_none none;
   starlark_integer one(1);
   tuple1.add(&none);
@@ -944,9 +944,9 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
-  starlark_tuple tuple1;
-  starlark_tuple tuple2;
+  starlark_list list(0);
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
   starlark_none none;
   starlark_integer one(1);
   tuple1.add(&none);
@@ -970,7 +970,7 @@ TEST(StarlarkEnumerate, FromIterable) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
@@ -991,7 +991,7 @@ TEST(StarlarkEnumerate, FromIterableWithStart) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
@@ -1014,7 +1014,7 @@ TEST(StarlarkEnumerate, InvalidStart) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
@@ -1037,7 +1037,7 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
@@ -1073,7 +1073,7 @@ TEST(StarlarkEnumerate, TooManyPosArguments) {
 
   std::vector<starlark_obj*> pos_args;
   std::map<std::string, starlark_obj*> named_args;
-  starlark_list list;
+  starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
@@ -1108,7 +1108,7 @@ TEST(StarlarkFail, Message) {
   Arena arena;
   error_handler error_callback;
   starlark_string str("some error message");
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer one(1);
 
   std::vector<starlark_obj*> pos_args;
@@ -1139,7 +1139,7 @@ TEST(StarlarkFail, NamedArgs) {
 
 TEST(StarlarkLen, List) {
   starlark_integer one(1);
-  starlark_list list1;
+  starlark_list list1(0);
   Arena arena;
   error_handler error_callback;
 
@@ -1147,7 +1147,7 @@ TEST(StarlarkLen, List) {
   std::map<std::string, starlark_obj*> named_args1;
   pos_args1.push_back(&list1);
 
-  starlark_list list2;
+  starlark_list list2(0);
   list2.add(&one, error_callback);
   std::vector<starlark_obj*> pos_args2;
   std::map<std::string, starlark_obj*> named_args2;
@@ -1186,7 +1186,7 @@ TEST(StarlarkLen, NoPosArgs) {
 
 TEST(StarlarkLen, MultiplePosArgs) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -1202,7 +1202,7 @@ TEST(StarlarkLen, MultiplePosArgs) {
 
 TEST(StarlarkLen, NamedArguments) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -1219,7 +1219,7 @@ TEST(StarlarkLen, NamedArguments) {
 TEST(StarlarkList, Tuple) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_tuple tuple1;
+  starlark_tuple tuple1(0);
   Arena arena;
   error_handler error_callback;
 
@@ -1227,7 +1227,7 @@ TEST(StarlarkList, Tuple) {
   std::map<std::string, starlark_obj*> named_args1;
   pos_args1.push_back(&tuple1);
 
-  starlark_tuple tuple2;
+  starlark_tuple tuple2(0);
   tuple2.add(&zero);
   tuple2.add(&one);
   std::vector<starlark_obj*> pos_args2;
@@ -1266,7 +1266,7 @@ TEST(StarlarkList, NoPosArgs) {
 
 TEST(StarlarkList, MultiplePosArgs) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
@@ -1282,7 +1282,7 @@ TEST(StarlarkList, MultiplePosArgs) {
 
 TEST(StarlarkList, NamedArguments) {
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 

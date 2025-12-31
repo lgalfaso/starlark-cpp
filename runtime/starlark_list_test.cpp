@@ -36,18 +36,18 @@ using ::testing::SizeIs;
 namespace {
 
 TEST(StarlarkList, Type) {
-  EXPECT_EQ("list", starlark_list().type());
+  EXPECT_EQ("list", starlark_list(0).type());
 }
 
 TEST(StarlarkList, Primitve) {
-  EXPECT_FALSE(starlark_list().primitive());
+  EXPECT_FALSE(starlark_list(0).primitive());
 }
 
 TEST(StarlarkList, Str) {
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   error_handler error_callback;
 
   EXPECT_EQ("[]", list.str());
@@ -61,7 +61,7 @@ TEST(StarlarkList, Str) {
 
 TEST(StarlarkList, StrRecursion) {
   // Bazel prints `[1, [1, ..., 1], 1]`, Python prints `[1, [...], 1]`.
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer one(1);
   error_handler error_callback;
 
@@ -73,7 +73,7 @@ TEST(StarlarkList, StrRecursion) {
 
 TEST(StarlarkList, Truthy) {
   starlark_none none;
-  starlark_list list;
+  starlark_list list(0);
   error_handler error_callback;
 
   EXPECT_FALSE(list.truthy());
@@ -84,11 +84,11 @@ TEST(StarlarkList, Truthy) {
 TEST(StarlarkList, Equals) {
   starlark_none none;
   starlark_integer one(1);
-  starlark_list list1;
-  starlark_list list2;
-  starlark_list list3;
-  starlark_list list4;
-  starlark_list list5;
+  starlark_list list1(0);
+  starlark_list list2(0);
+  starlark_list list3(0);
+  starlark_list list4(0);
+  starlark_list list5(0);
   error_handler error_callback;
 
   list2.add(&none, error_callback);
@@ -130,8 +130,8 @@ TEST(StarlarkList, Equals) {
 }
 
 TEST(StarlarkList, EqualsRecursion) {
-  starlark_list list_a;
-  starlark_list list_b;
+  starlark_list list_a(0);
+  starlark_list list_b(0);
   error_handler error_callback;
 
   list_a.add(&list_b, error_callback);
@@ -140,19 +140,19 @@ TEST(StarlarkList, EqualsRecursion) {
 }
 
 TEST(StarlarkList, HashWhenNotFreezed) {
-  starlark_list list_a;
+  starlark_list list_a(0);
   EXPECT_EQ(-1, list_a.hash());
 }
 
 TEST(StarlarkList, HashWhenFreezed) {
-  starlark_list list_a;
+  starlark_list list_a(0);
   list_a.freeze();
   EXPECT_EQ(-1, list_a.hash());
 }
 
 TEST(StarlarkList, HashRecursion) {
-  starlark_list list_a;
-  starlark_list list_b;
+  starlark_list list_a(0);
+  starlark_list list_b(0);
   error_handler error_callback;
 
   list_a.add(&list_b, error_callback);
@@ -161,8 +161,8 @@ TEST(StarlarkList, HashRecursion) {
 }
 
 TEST(StarlarkList, HashRecursionFreezed) {
-  starlark_list list_a;
-  starlark_list list_b;
+  starlark_list list_a(0);
+  starlark_list list_b(0);
   error_handler error_callback;
 
   list_a.add(&list_b, error_callback);
@@ -174,7 +174,7 @@ TEST(StarlarkList, HashRecursionFreezed) {
 TEST(StarlarkList, Unpack) {
   starlark_none none;
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   std::vector<starlark_obj*> stack;
   error_handler error_callback;
 
@@ -197,7 +197,7 @@ TEST(StarlarkList, Unpack) {
 TEST(StarlarkList, UnpackError) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   error_handler error_callback;
 
   list.add(&zero, error_callback);
@@ -225,17 +225,17 @@ TEST(StarlarkList, UnpackError) {
 TEST(StarlarkList, Order) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_list list1;
-  starlark_list list2;
+  starlark_list list1(0);
+  starlark_list list2(0);
   error_handler error_callback;
 
   list2.add(&zero, error_callback);
-  starlark_list list3;
+  starlark_list list3(0);
   list3.add(&zero, error_callback);
   list3.add(&one, error_callback);
-  starlark_list list4;
+  starlark_list list4(0);
   list4.add(&one, error_callback);
-  starlark_list list5;
+  starlark_list list5(0);
   list5.add(&one, error_callback);
   list5.add(&zero, error_callback);
 
@@ -273,7 +273,7 @@ TEST(StarlarkList, Order) {
 TEST(StarlarkList, OrderError) {
   error_handler error_callback;
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
 
   EXPECT_FALSE(list.cmp(one, "<", error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -283,7 +283,7 @@ TEST(StarlarkList, OrderError) {
 TEST(StarlarkList, AddWithFreeze) {
   error_handler error_callback;
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   list.add(&one, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
@@ -296,7 +296,7 @@ TEST(StarlarkList, AddWithFreeze) {
 TEST(StarlarkList, AddWithMultipleFreeze) {
   error_handler error_callback;
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   list.add(&one, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
@@ -310,7 +310,7 @@ TEST(StarlarkList, AddWithMultipleFreeze) {
 TEST(StarlarkList, Membership) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   error_handler error_callback;
 
   list.add(&zero, error_callback);
@@ -322,7 +322,7 @@ TEST(StarlarkList, Membership) {
 
 TEST(StarlarkList, Call) {
   error_handler error_callback;
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
 
   list.call({}, {}, arena, error_callback);
@@ -333,7 +333,7 @@ TEST(StarlarkList, Call) {
 
 TEST(StarlarkList, UnaryPlus) {
   error_handler error_callback;
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
 
   list.unary_plus(arena, error_callback);
@@ -344,7 +344,7 @@ TEST(StarlarkList, UnaryPlus) {
 
 TEST(StarlarkList, UnaryMinus) {
   error_handler error_callback;
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
 
   list.unary_minus(arena, error_callback);
@@ -355,7 +355,7 @@ TEST(StarlarkList, UnaryMinus) {
 
 TEST(StarlarkList, UnaryTilde) {
   error_handler error_callback;
-  starlark_list list;
+  starlark_list list(0);
   Arena arena;
 
   list.unary_tilde(arena, error_callback);
@@ -367,8 +367,8 @@ TEST(StarlarkList, UnaryTilde) {
 TEST(StarlarkList, BinaryPlus) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_list list_1;
-  starlark_list list_2;
+  starlark_list list_1(0);
+  starlark_list list_2(0);
   error_handler error_callback;
 
   list_1.add(&zero, error_callback);
@@ -382,8 +382,8 @@ TEST(StarlarkList, BinaryPlus) {
 }
 
 TEST(StarlarkList, BinaryPlusNotList) {
-  starlark_list list;
-  starlark_tuple tuple;
+  starlark_list list(0);
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -400,8 +400,8 @@ TEST(StarlarkList, BinaryStar) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_list list0;
-  starlark_list list1;
+  starlark_list list0(0);
+  starlark_list list1(0);
   error_handler error_callback;
 
   list1.add(&zero, error_callback);
@@ -436,8 +436,8 @@ TEST(StarlarkList, BinaryStarReverse) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_list list0;
-  starlark_list list1;
+  starlark_list list0(0);
+  starlark_list list1(0);
   error_handler error_callback;
 
   list1.add(&zero, error_callback);
@@ -463,8 +463,8 @@ TEST(StarlarkList, BinaryStarReverse) {
 }
 
 TEST(StarlarkList, BinaryStarNotInt) {
-  starlark_list list;
-  starlark_tuple tuple;
+  starlark_list list(0);
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -475,7 +475,7 @@ TEST(StarlarkList, BinaryStarNotInt) {
 }
 
 TEST(StarlarkList, BinaryStarTooBig) {
-  starlark_list list;
+  starlark_list list(0);
   starlark_bigint big(number::one << 64);
   Arena arena;
   error_handler error_callback;
@@ -490,8 +490,8 @@ TEST(StarlarkList, BinaryStarTooBig) {
 TEST(StarlarkList, Len) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_list list0;
-  starlark_list list1;
+  starlark_list list0(0);
+  starlark_list list1(0);
   error_handler error_callback;
 
   list1.add(&zero, error_callback);
@@ -503,8 +503,8 @@ TEST(StarlarkList, Len) {
 }
 
 TEST(StarlarkList, GetIterator) {
-  starlark_list list0;
-  starlark_list list1;
+  starlark_list list0(0);
+  starlark_list list1(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
@@ -527,7 +527,7 @@ TEST(StarlarkList, GetIterator) {
 }
 
 TEST(StarlarkList, MutationWhileIterating1) {
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
@@ -545,7 +545,7 @@ TEST(StarlarkList, MutationWhileIterating1) {
 TEST(StarlarkList, Index) {
   error_handler error_callback;
   Arena arena;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -570,7 +570,7 @@ TEST(StarlarkList, Index) {
 TEST(StarlarkList, IndexOutOfRange1) {
   error_handler error_callback;
   Arena arena;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -586,7 +586,7 @@ TEST(StarlarkList, IndexOutOfRange1) {
 TEST(StarlarkList, IndexOutOfRange2) {
   error_handler error_callback;
   Arena arena;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -602,7 +602,7 @@ TEST(StarlarkList, IndexOutOfRange2) {
 TEST(StarlarkList, IndexOutOfRange3) {
   error_handler error_callback;
   Arena arena;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -618,7 +618,7 @@ TEST(StarlarkList, IndexOutOfRange3) {
 TEST(StarlarkList, IndexOutOfRange4) {
   error_handler error_callback;
   Arena arena;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -634,7 +634,7 @@ TEST(StarlarkList, IndexOutOfRange4) {
 TEST(StarlarkList, IndexOutOfRange5) {
   error_handler error_callback;
   Arena arena;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -650,7 +650,7 @@ TEST(StarlarkList, IndexOutOfRange5) {
 TEST(StarlarkList, IndexNotInt) {
   error_handler error_callback;
   Arena arena;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -665,7 +665,7 @@ TEST(StarlarkList, IndexNotInt) {
 
 TEST(StarlarkList, IndexAssign) {
   error_handler error_callback;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -683,7 +683,7 @@ TEST(StarlarkList, IndexAssign) {
 
 TEST(StarlarkList, IndexAssignOutOfRange1) {
   error_handler error_callback;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -699,7 +699,7 @@ TEST(StarlarkList, IndexAssignOutOfRange1) {
 
 TEST(StarlarkList, IndexAssignOutOfRange2) {
   error_handler error_callback;
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -714,7 +714,7 @@ TEST(StarlarkList, IndexAssignOutOfRange2) {
 }
 
 TEST(StarlarkList, MutationWhileIterating2) {
-  starlark_list list;
+  starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
@@ -732,7 +732,7 @@ TEST(StarlarkList, MutationWhileIterating2) {
 TEST(StarlarkList, IndexAssignWithFreeze) {
   error_handler error_callback;
   starlark_integer one(1);
-  starlark_list list;
+  starlark_list list(0);
   list.add(&one, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 

@@ -34,21 +34,21 @@ using ::testing::SizeIs;
 namespace {
 
 TEST(StarlarkTuple, Type) {
-  EXPECT_EQ("tuple", starlark_tuple().type());
+  EXPECT_EQ("tuple", starlark_tuple(0).type());
 }
 
 TEST(StarlarkTuple, Primitve) {
-  EXPECT_FALSE(starlark_tuple().primitive());
+  EXPECT_FALSE(starlark_tuple(0).primitive());
 }
 
 TEST(StarlarkTuple, Str) {
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
-  EXPECT_EQ("()", starlark_tuple().str());
-  EXPECT_EQ("(None,)", starlark_tuple().add(&none).str());
-  EXPECT_EQ("(None, True)", starlark_tuple().add(&none).add(&true_obj).str());
-  EXPECT_EQ("(None, True, 1)", starlark_tuple().add(&none).add(&true_obj).add(&one).str());
+  EXPECT_EQ("()", starlark_tuple(0).str());
+  EXPECT_EQ("(None,)", starlark_tuple(0).add(&none).str());
+  EXPECT_EQ("(None, True)", starlark_tuple(0).add(&none).add(&true_obj).str());
+  EXPECT_EQ("(None, True, 1)", starlark_tuple(0).add(&none).add(&true_obj).add(&one).str());
 }
 
 TEST(StarlarkTuple, StrRecursion) {
@@ -58,49 +58,49 @@ TEST(StarlarkTuple, StrRecursion) {
   //   a[0].append(a)
   // In the example above, the result should be that `str(a) == '([(...)],)'`.
   // This test is equivalent.
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   tuple.add(&tuple);
   EXPECT_EQ("((...),)", tuple.str());
 }
 
 TEST(StarlarkTuple, Truthy) {
   starlark_none none;
-  EXPECT_FALSE(starlark_tuple().truthy());
-  EXPECT_TRUE(starlark_tuple().add(&none).truthy());
+  EXPECT_FALSE(starlark_tuple(0).truthy());
+  EXPECT_TRUE(starlark_tuple(0).add(&none).truthy());
 }
 
 TEST(StarlarkTuple, Equals) {
   starlark_none none;
   starlark_integer one(1);
-  EXPECT_FALSE(starlark_tuple().equals(none));
-  EXPECT_TRUE(starlark_tuple().equals(starlark_tuple()));
-  EXPECT_FALSE(starlark_tuple().add(&none).equals(starlark_tuple()));
-  EXPECT_FALSE(starlark_tuple().add(&one).equals(starlark_tuple()));
-  EXPECT_FALSE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple()));
-  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple()));
+  EXPECT_FALSE(starlark_tuple(0).equals(none));
+  EXPECT_TRUE(starlark_tuple(0).equals(starlark_tuple(0)));
+  EXPECT_FALSE(starlark_tuple(0).add(&none).equals(starlark_tuple(0)));
+  EXPECT_FALSE(starlark_tuple(0).add(&one).equals(starlark_tuple(0)));
+  EXPECT_FALSE(starlark_tuple(0).add(&none).add(&one).equals(starlark_tuple(0)));
+  EXPECT_FALSE(starlark_tuple(0).add(&one).add(&none).equals(starlark_tuple(0)));
 
-  EXPECT_FALSE(starlark_tuple().equals(starlark_tuple().add(&none)));
-  EXPECT_TRUE(starlark_tuple().add(&none).equals(starlark_tuple().add(&none)));
-  EXPECT_FALSE(starlark_tuple().add(&one).equals(starlark_tuple().add(&none)));
-  EXPECT_FALSE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple().add(&none)));
-  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple().add(&none)));
+  EXPECT_FALSE(starlark_tuple(0).equals(starlark_tuple(0).add(&none)));
+  EXPECT_TRUE(starlark_tuple(0).add(&none).equals(starlark_tuple(0).add(&none)));
+  EXPECT_FALSE(starlark_tuple(0).add(&one).equals(starlark_tuple(0).add(&none)));
+  EXPECT_FALSE(starlark_tuple(0).add(&none).add(&one).equals(starlark_tuple(0).add(&none)));
+  EXPECT_FALSE(starlark_tuple(0).add(&one).add(&none).equals(starlark_tuple(0).add(&none)));
 
-  EXPECT_FALSE(starlark_tuple().equals(starlark_tuple().add(&one)));
-  EXPECT_FALSE(starlark_tuple().add(&none).equals(starlark_tuple().add(&one)));
-  EXPECT_TRUE(starlark_tuple().add(&one).equals(starlark_tuple().add(&one)));
-  EXPECT_FALSE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple().add(&one)));
-  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple().add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).equals(starlark_tuple(0).add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).add(&none).equals(starlark_tuple(0).add(&one)));
+  EXPECT_TRUE(starlark_tuple(0).add(&one).equals(starlark_tuple(0).add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).add(&none).add(&one).equals(starlark_tuple(0).add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).add(&one).add(&none).equals(starlark_tuple(0).add(&one)));
 
-  EXPECT_FALSE(starlark_tuple().equals(starlark_tuple().add(&none).add(&one)));
-  EXPECT_FALSE(starlark_tuple().add(&none).equals(starlark_tuple().add(&none).add(&one)));
-  EXPECT_FALSE(starlark_tuple().add(&one).equals(starlark_tuple().add(&none).add(&one)));
-  EXPECT_TRUE(starlark_tuple().add(&none).add(&one).equals(starlark_tuple().add(&none).add(&one)));
-  EXPECT_FALSE(starlark_tuple().add(&one).add(&none).equals(starlark_tuple().add(&none).add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).equals(starlark_tuple(0).add(&none).add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).add(&none).equals(starlark_tuple(0).add(&none).add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).add(&one).equals(starlark_tuple(0).add(&none).add(&one)));
+  EXPECT_TRUE(starlark_tuple(0).add(&none).add(&one).equals(starlark_tuple(0).add(&none).add(&one)));
+  EXPECT_FALSE(starlark_tuple(0).add(&one).add(&none).equals(starlark_tuple(0).add(&none).add(&one)));
 }
 
 TEST(StarlarkTuple, EqualsRecursion) {
-  starlark_tuple tuple_a;
-  starlark_tuple tuple_b;
+  starlark_tuple tuple_a(0);
+  starlark_tuple tuple_b(0);
   tuple_a.add(&tuple_b);
   tuple_b.add(&tuple_a);
   EXPECT_TRUE(tuple_a.equals(tuple_b));
@@ -110,30 +110,30 @@ TEST(StarlarkTuple, Hash) {
   starlark_none none;
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_tuple tuple;
-  starlark_list list;
-  EXPECT_EQ(5740354900026072187, starlark_tuple().hash());
-  EXPECT_EQ(-8753497827991233192, starlark_tuple().add(&zero).hash());
-  EXPECT_EQ(-8458139203682520985, starlark_tuple().add(&zero).add(&zero).hash());
-  EXPECT_EQ(-6644214454873602895, starlark_tuple().add(&one).hash());
-  EXPECT_EQ(9181102132670838864, starlark_tuple().add(&none).hash());
-  EXPECT_EQ(-5486347211504344842, starlark_tuple().add(&tuple).hash());
-  EXPECT_EQ(-1, starlark_tuple().add(&list).hash());
+  starlark_tuple tuple(0);
+  starlark_list list(0);
+  EXPECT_EQ(5740354900026072187, starlark_tuple(0).hash());
+  EXPECT_EQ(-8753497827991233192, starlark_tuple(0).add(&zero).hash());
+  EXPECT_EQ(-8458139203682520985, starlark_tuple(0).add(&zero).add(&zero).hash());
+  EXPECT_EQ(-6644214454873602895, starlark_tuple(0).add(&one).hash());
+  EXPECT_EQ(9181102132670838864, starlark_tuple(0).add(&none).hash());
+  EXPECT_EQ(-5486347211504344842, starlark_tuple(0).add(&tuple).hash());
+  EXPECT_EQ(-1, starlark_tuple(0).add(&list).hash());
 }
 
 TEST(StarlarkTuple, DeepHash) {
   std::vector<starlark_tuple> all_tuples;
   all_tuples.reserve(100);
-  all_tuples.emplace_back();
+  all_tuples.emplace_back(0);
   for (int i = 0; i < 20; ++i) {
-    all_tuples.emplace_back();
+    all_tuples.emplace_back(0);
     for (int j = 0; j < 3; ++j) {
       all_tuples.back().add(&*++all_tuples.rbegin());
     }
   }
   EXPECT_EQ(5945621570837202953, all_tuples.back().hash());
   for (int i = 0; i < 20; ++i) {
-    all_tuples.emplace_back();
+    all_tuples.emplace_back(0);
     for (int j = 0; j < 3; ++j) {
       all_tuples.back().add(&*++all_tuples.rbegin());
     }
@@ -144,8 +144,8 @@ TEST(StarlarkTuple, DeepHash) {
 TEST(StarlarkTuple, HashRecursion) {
   // In theory, this construction is not possible. This test is designed to
   // check whether we are able to detect and handle this pathological case.
-  starlark_tuple tuple1;
-  starlark_tuple tuple2;
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
   tuple1.add(&tuple2);
   tuple2.add(&tuple1);
   EXPECT_EQ(-5827241394322601009, tuple1.hash());
@@ -154,7 +154,7 @@ TEST(StarlarkTuple, HashRecursion) {
 TEST(StarlarkTuple, Unpack) {
   starlark_none none;
   starlark_integer one(1);
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   std::vector<starlark_obj*> stack;
   error_handler error_callback;
 
@@ -177,7 +177,7 @@ TEST(StarlarkTuple, Unpack) {
 TEST(StarlarkTuple, UnpackError) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   tuple.add(&zero);
   tuple.add(&one);
   {
@@ -203,15 +203,15 @@ TEST(StarlarkTuple, UnpackError) {
 TEST(StarlarkTuple, Order) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_tuple tuple1;
-  starlark_tuple tuple2;
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
   tuple2.add(&zero);
-  starlark_tuple tuple3;
+  starlark_tuple tuple3(0);
   tuple3.add(&zero);
   tuple3.add(&one);
-  starlark_tuple tuple4;
+  starlark_tuple tuple4(0);
   tuple4.add(&one);
-  starlark_tuple tuple5;
+  starlark_tuple tuple5(0);
   tuple5.add(&one);
   tuple5.add(&zero);
   error_handler error_callback;
@@ -250,7 +250,7 @@ TEST(StarlarkTuple, Order) {
 TEST(StarlarkTuple, OrderError) {
   error_handler error_callback;
   starlark_integer one(1);
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
 
   EXPECT_FALSE(tuple.cmp(one, "<", error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -260,7 +260,7 @@ TEST(StarlarkTuple, OrderError) {
 TEST(StarlarkTuple, Membership) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   tuple.add(&zero);
   error_handler error_callback;
 
@@ -272,8 +272,8 @@ TEST(StarlarkTuple, Membership) {
 TEST(StarlarkTuple, Freeze) {
   error_handler error_callback;
   starlark_integer one(1);
-  starlark_list list;
-  starlark_tuple tuple;
+  starlark_list list(0);
+  starlark_tuple tuple(0);
 
   tuple.add(&list);
   tuple.freeze();
@@ -285,8 +285,8 @@ TEST(StarlarkTuple, Freeze) {
 TEST(StarlarkTuple, BinaryPlus) {
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_tuple tuple_1;
-  starlark_tuple tuple_2;
+  starlark_tuple tuple_1(0);
+  starlark_tuple tuple_2(0);
   tuple_1.add(&zero);
   tuple_2.add(&one);
   Arena arena;
@@ -299,8 +299,8 @@ TEST(StarlarkTuple, BinaryPlus) {
 }
 
 TEST(StarlarkTuple, BinaryPlusNotList) {
-  starlark_list list;
-  starlark_tuple tuple;
+  starlark_list list(0);
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -318,8 +318,8 @@ TEST(StarlarkTuple, BinaryStar) {
   starlark_integer two(2);
   starlark_bigint three(3);
   starlark_bigint big(number::one << 64);
-  starlark_tuple tuple;
-  starlark_tuple tuple0;
+  starlark_tuple tuple(0);
+  starlark_tuple tuple0(0);
   tuple.add(&zero);
   tuple.add(&one);
   Arena arena;
@@ -354,8 +354,8 @@ TEST(StarlarkTuple, BinaryStarReverse) {
   starlark_integer two(2);
   starlark_bigint three(3);
   starlark_bigint big(number::one << 64);
-  starlark_tuple tuple;
-  starlark_tuple tuple0;
+  starlark_tuple tuple(0);
+  starlark_tuple tuple0(0);
   tuple.add(&zero);
   tuple.add(&one);
   Arena arena;
@@ -380,8 +380,8 @@ TEST(StarlarkTuple, BinaryStarReverse) {
 }
 
 TEST(StarlarkTuple, BinaryStarNotInt) {
-  starlark_list list;
-  starlark_tuple tuple;
+  starlark_list list(0);
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -392,7 +392,7 @@ TEST(StarlarkTuple, BinaryStarNotInt) {
 }
 
 TEST(StarlarkTuple, BinaryStarTooBig) {
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   starlark_bigint big(number::one << 64);
   Arena arena;
   error_handler error_callback;
@@ -409,8 +409,8 @@ TEST(StarlarkTuple, Len) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_integer three(3);
-  starlark_tuple tuple_1;
-  starlark_tuple tuple_2;
+  starlark_tuple tuple_1(0);
+  starlark_tuple tuple_2(0);
   error_handler error_callback;
 
   tuple_2.add(&zero);
@@ -424,8 +424,8 @@ TEST(StarlarkTuple, Len) {
 }
 
 TEST(StarlarkTuple, GetIterator) {
-  starlark_tuple tuple0;
-  starlark_tuple tuple1;
+  starlark_tuple tuple0(0);
+  starlark_tuple tuple1(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
@@ -450,7 +450,7 @@ TEST(StarlarkTuple, GetIterator) {
 TEST(StarlarkTuple, Index) {
   error_handler error_callback;
   Arena arena;
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -470,7 +470,7 @@ TEST(StarlarkTuple, Index) {
 TEST(StarlarkTuple, IndexOutOfRange1) {
   error_handler error_callback;
   Arena arena;
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
@@ -486,7 +486,7 @@ TEST(StarlarkTuple, IndexOutOfRange1) {
 TEST(StarlarkTuple, IndexOutOfRange2) {
   error_handler error_callback;
   Arena arena;
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);

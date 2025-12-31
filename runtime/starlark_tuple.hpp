@@ -15,7 +15,7 @@ namespace runtime {
 
 class starlark_tuple : public starlark_obj {
  public:
-  explicit starlark_tuple(int reserve_size = 0);
+  explicit starlark_tuple(std::size_t reserve_size);
   std::string_view type() const override;
   starlark_tuple& add(starlark_obj* element);
   bool truthy() const override;

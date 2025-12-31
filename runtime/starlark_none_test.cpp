@@ -74,12 +74,12 @@ TEST(StarlarkNone, Equals) {
   EXPECT_FALSE(starlark_none().equals(starlark_float(0.0)));
   EXPECT_FALSE(starlark_none().equals(starlark_function()));
   EXPECT_FALSE(starlark_none().equals(starlark_integer(0)));
-  EXPECT_FALSE(starlark_none().equals(starlark_list()));
+  EXPECT_FALSE(starlark_none().equals(starlark_list(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_range()));
   EXPECT_FALSE(starlark_none().equals(starlark_set()));
   EXPECT_FALSE(starlark_none().equals(starlark_string("")));
   EXPECT_FALSE(starlark_none().equals(starlark_struct()));
-  EXPECT_FALSE(starlark_none().equals(starlark_tuple()));
+  EXPECT_FALSE(starlark_none().equals(starlark_tuple(0)));
 }
 
 TEST(StarlarkNone, Hash) {

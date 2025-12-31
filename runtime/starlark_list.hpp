@@ -15,7 +15,7 @@ namespace runtime {
 
 class starlark_list : public starlark_obj {
  public:
-  explicit starlark_list(std::size_t reserve_size = 0);
+  explicit starlark_list(std::size_t reserve_size);
   std::string_view type() const override;
   void add(starlark_obj* element, error_fn& error_callback);
   bool truthy() const override;

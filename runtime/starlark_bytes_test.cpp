@@ -112,12 +112,12 @@ TEST(StarlarkBytes, Equals) {
   EXPECT_FALSE(starlark_bytes("").equals(starlark_float(0.0)));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_function()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_integer(0)));
-  EXPECT_FALSE(starlark_bytes("").equals(starlark_list()));
+  EXPECT_FALSE(starlark_bytes("").equals(starlark_list(0)));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_none()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_range()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_set()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_struct()));
-  EXPECT_FALSE(starlark_bytes("").equals(starlark_tuple()));
+  EXPECT_FALSE(starlark_bytes("").equals(starlark_tuple(0)));
 
   EXPECT_FALSE(starlark_bytes("0").equals(starlark_integer(0)));
 }
@@ -247,7 +247,7 @@ TEST(StarlarkBytes, BinaryPlus) {
 
 TEST(StarlarkBytes, BinaryPlusNotList) {
   starlark_bytes bytes("abc");
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 
@@ -320,7 +320,7 @@ TEST(StarlarkBytes, BinaryStarReverse) {
 
 TEST(StarlarkBytes, BinaryStarNotInt) {
   starlark_bytes bytes("abc");
-  starlark_tuple tuple;
+  starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
 

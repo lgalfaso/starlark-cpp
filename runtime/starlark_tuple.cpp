@@ -18,7 +18,7 @@ using ::starlark::bigint::number;
 namespace starlark {
 namespace runtime {
 
-starlark_tuple::starlark_tuple(int reserve_size) {
+starlark_tuple::starlark_tuple(std::size_t reserve_size) {
   values.reserve(reserve_size);
 }
 
@@ -32,12 +32,12 @@ starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& aren
     return nullptr;
   }
   // TODO(lmirelmann): Check the result size.
-  auto* result = Arena::Create<starlark_tuple>(&arena);
+  const starlark_tuple& t_other = static_cast<const starlark_tuple&>(other);
+  auto* result = Arena::Create<starlark_tuple>(&arena, values.size() + t_other.values.size());
   for (auto& key : values) {
     result->add(key);
   }
-  const starlark_tuple* t_other = static_cast<const starlark_tuple*>(&other);
-  for (auto& key : t_other->values) {
+  for (auto& key : t_other.values) {
     result->add(key);
   }
   return result;
@@ -47,14 +47,14 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
       if (values.empty()) {
-        return Arena::Create<starlark_tuple>(&arena);
+        return Arena::Create<starlark_tuple>(&arena, 0);
       }
       auto value = other.as_int64();
       if (value <= 0) {
-        return Arena::Create<starlark_tuple>(&arena);
+        return Arena::Create<starlark_tuple>(&arena, 0);
       }
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_tuple>(&arena);
+      auto* result = Arena::Create<starlark_tuple>(&arena, value * values.size());
       for (int64_t i = 0; i < value; ++i) {
         for (auto& key : values) {
           result->add(key);
@@ -64,11 +64,11 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
     }
     case starlark_numeric_type::kBigInt: {
       if (values.empty()) {
-        return Arena::Create<starlark_tuple>(&arena);
+        return Arena::Create<starlark_tuple>(&arena, 0);
       }
       const auto& value = other.as_bigint();
       if (value <= number::zero) {
-        return Arena::Create<starlark_tuple>(&arena);
+        return Arena::Create<starlark_tuple>(&arena, 0);
       }
       if (value.bit_size() >= 63) {
         error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
@@ -76,7 +76,7 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
       }
       int64_t int_value = value.at(0);
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_tuple>(&arena);
+      auto* result = Arena::Create<starlark_tuple>(&arena, int_value * values.size());
       for (int64_t i = 0; i < int_value; ++i) {
         for (auto& key : values) {
           result->add(key);
