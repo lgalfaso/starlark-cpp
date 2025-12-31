@@ -248,6 +248,7 @@ TEST(LexerTest, Float) {
   check("1234567890.0", "FLOAT(1234567890.000000):1,1:1,13 NEWLINE:1,13:1,13 EOF:1,13:1,13");
   check(".1234", "FLOAT(0.123400):1,1:1,6 NEWLINE:1,6:1,6 EOF:1,6:1,6");
   checkErrors("2e308", "ILLEGAL(\"2e308\"):1,1:1,6 NEWLINE:1,6:1,6 EOF:1,6:1,6", {"Unable to parse numeric value:1,1"});
+  checkErrors("-2e308", "MINUS:1,1:1,2 ILLEGAL(\"2e308\"):1,2:1,7 NEWLINE:1,7:1,7 EOF:1,7:1,7", {"Unable to parse numeric value:1,2"});
 }
 
 TEST(LexerTest, Identifier) {
