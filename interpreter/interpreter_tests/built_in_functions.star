@@ -21,7 +21,7 @@ assert_eq(float("Inf"), 1e308*10)
 assert_eq(float("-Inf"), -1e308*10)
 # getattr
 # hasattr
-# hash
+assert_eq(hash("abc"), 6041520446639342335)
 # int
 assert_eq(len([]), 0)
 assert_eq(list((1, 2)), [1, 2])

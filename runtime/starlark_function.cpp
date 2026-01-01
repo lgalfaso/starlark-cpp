@@ -475,9 +475,16 @@ starlark_obj* starlark_fn_hasattr(const std::vector<starlark_obj*>& pos_args, co
 }
 
 starlark_obj* starlark_fn_hash(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "hash")) {
+    return nullptr;
+  }
+  auto* value = pos_args.front();
+  if (value->type() == starlark_types::string_t || value->type() == starlark_types::bytes_t) {
+    return create_integer(value->hash(), arena);
+  } else {
+    error_callback.add_error(std::format("TypeError: in call to hash(), got value of type '{}', want 'string' or 'bytes'", value->type()));
+    return nullptr;
+  }
 }
 
 starlark_obj* starlark_fn_int(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

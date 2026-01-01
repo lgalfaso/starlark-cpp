@@ -1327,6 +1327,98 @@ TEST(StarlarkFloat, NamedArguments) {
   EXPECT_EQ("TypeError: float() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkHash, String) {
+  starlark_string str1("");
+  starlark_string str2("abc");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args1;
+  std::map<std::string, starlark_obj*> named_args1;
+  pos_args1.push_back(&str1);
+  std::vector<starlark_obj*> pos_args2;
+  std::map<std::string, starlark_obj*> named_args2;
+  pos_args2.push_back(&str2);
+
+  EXPECT_EQ("0", starlark_fn_hash(pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("6041520446639342335", starlark_fn_hash(pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkHash, Bytes) {
+  starlark_bytes bytes1("");
+  starlark_bytes bytes2("abc");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args1;
+  std::map<std::string, starlark_obj*> named_args1;
+  pos_args1.push_back(&bytes1);
+  std::vector<starlark_obj*> pos_args2;
+  std::map<std::string, starlark_obj*> named_args2;
+  pos_args2.push_back(&bytes2);
+
+  EXPECT_EQ("0", starlark_fn_hash(pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("-8236155743588961689", starlark_fn_hash(pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkHash, Bool) {
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&true_obj);
+
+  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: in call to hash(), got value of type 'bool', want 'string' or 'bytes'", error_callback.messages[0]);
+}
+
+TEST(StarlarkHash, NoPosArgs) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: hash() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkHash, MultiplePosArgs) {
+  starlark_string str("");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: hash() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkHash, NamedArguments) {
+  starlark_string str("");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &str;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: hash() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkLen, List) {
   starlark_integer one(1);
   starlark_list list1(0);
