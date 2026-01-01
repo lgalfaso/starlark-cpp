@@ -139,7 +139,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       case OpCode::kConstBigInt:
         stack.push_back(Arena::Create<starlark_bigint>(&arena,
-            parse_number(op_code.const_big_int().value(), nullptr)));
+            parse_number(op_code.const_big_int().value(), nullptr, 0)));
         break;
       case OpCode::kConstFloat:
         stack.push_back(Arena::Create<starlark_float>(&arena, op_code.const_float().value()));

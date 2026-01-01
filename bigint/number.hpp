@@ -182,7 +182,8 @@ inline number operator""_number(const char* input, std::size_t size) {
 }
 
 starlark::bigint::number parse_number(std::string_view input,
-                                      const char** end_ptr);
+                                      const char** end_ptr,
+                                      int base);
 
 }  // namespace bigint
 }  // namespace starlark

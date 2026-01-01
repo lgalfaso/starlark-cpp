@@ -983,6 +983,41 @@ TEST(Number, ToString) {
       "0mexapnfs3gqe2pdnw4ma3v1r6xvu28je4iffo0uovutxb55h3fwtfy1wclh96fr"
       "r90hkhqlt", p.to_string(36));
   EXPECT_EQ("-1", number(1).neg().to_string(10));
+  EXPECT_EQ(p, parse_number(p.to_string(2), nullptr, 2));
+  EXPECT_EQ(p, parse_number(p.to_string(3), nullptr, 3));
+  EXPECT_EQ(p, parse_number(p.to_string(4), nullptr, 4));
+  EXPECT_EQ(p, parse_number(p.to_string(5), nullptr, 5));
+  EXPECT_EQ(p, parse_number(p.to_string(6), nullptr, 6));
+  EXPECT_EQ(p, parse_number(p.to_string(7), nullptr, 7));
+  EXPECT_EQ(p, parse_number(p.to_string(8), nullptr, 8));
+  EXPECT_EQ(p, parse_number(p.to_string(9), nullptr, 9));
+  EXPECT_EQ(p, parse_number(p.to_string(10), nullptr, 10));
+  EXPECT_EQ(p, parse_number(p.to_string(11), nullptr, 11));
+  EXPECT_EQ(p, parse_number(p.to_string(12), nullptr, 12));
+  EXPECT_EQ(p, parse_number(p.to_string(13), nullptr, 13));
+  EXPECT_EQ(p, parse_number(p.to_string(14), nullptr, 14));
+  EXPECT_EQ(p, parse_number(p.to_string(15), nullptr, 15));
+  EXPECT_EQ(p, parse_number(p.to_string(16), nullptr, 16));
+  EXPECT_EQ(p, parse_number(p.to_string(17), nullptr, 17));
+  EXPECT_EQ(p, parse_number(p.to_string(18), nullptr, 18));
+  EXPECT_EQ(p, parse_number(p.to_string(19), nullptr, 19));
+  EXPECT_EQ(p, parse_number(p.to_string(20), nullptr, 20));
+  EXPECT_EQ(p, parse_number(p.to_string(21), nullptr, 21));
+  EXPECT_EQ(p, parse_number(p.to_string(22), nullptr, 22));
+  EXPECT_EQ(p, parse_number(p.to_string(23), nullptr, 23));
+  EXPECT_EQ(p, parse_number(p.to_string(24), nullptr, 24));
+  EXPECT_EQ(p, parse_number(p.to_string(25), nullptr, 25));
+  EXPECT_EQ(p, parse_number(p.to_string(26), nullptr, 26));
+  EXPECT_EQ(p, parse_number(p.to_string(27), nullptr, 27));
+  EXPECT_EQ(p, parse_number(p.to_string(28), nullptr, 28));
+  EXPECT_EQ(p, parse_number(p.to_string(29), nullptr, 29));
+  EXPECT_EQ(p, parse_number(p.to_string(30), nullptr, 30));
+  EXPECT_EQ(p, parse_number(p.to_string(31), nullptr, 31));
+  EXPECT_EQ(p, parse_number(p.to_string(32), nullptr, 32));
+  EXPECT_EQ(p, parse_number(p.to_string(33), nullptr, 33));
+  EXPECT_EQ(p, parse_number(p.to_string(34), nullptr, 34));
+  EXPECT_EQ(p, parse_number(p.to_string(35), nullptr, 35));
+  EXPECT_EQ(p, parse_number(p.to_string(36), nullptr, 36));
 }
 
 TEST(Number, DivisionUnits) {
@@ -1277,22 +1312,26 @@ TEST(Number, ModPow) {
 }
 
 TEST(Number, ParseNumber) {
+  std::string zero = "0";
+  const char* end;
+  EXPECT_EQ(number::zero, parse_number(zero, &end, 0));
+  EXPECT_EQ(&*zero.end(), end);
   EXPECT_EQ("1234567890abcdefabcdef"_number,
-            parse_number("0x1234567890abcdefABCDEFG", nullptr));
+            parse_number("0x1234567890abcdefABCDEFG", nullptr, 0));
   EXPECT_EQ("1234567890abcdefabcdef"_number,
-            parse_number("0x1234567890abcdefABCDEF!", nullptr));
+            parse_number("0x1234567890abcdefABCDEF!", nullptr, 0));
   EXPECT_EQ("499602d2"_number,
-            parse_number("1234567890abcdefABCDEFG", nullptr));
+            parse_number("1234567890abcdefABCDEFG", nullptr, 0));
   EXPECT_EQ("aa952952952894a5129489534a5"_number,
-            parse_number("0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101", nullptr));
-  EXPECT_EQ(number::minus_one, parse_number("-1", nullptr));
-  EXPECT_EQ(number::minus_one, parse_number("-0x1", nullptr));
+            parse_number("0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101", nullptr, 0));
+  EXPECT_EQ(number::minus_one, parse_number("-1", nullptr, 0));
+  EXPECT_EQ(number::minus_one, parse_number("-0x1", nullptr, 0));
   EXPECT_EQ("99999999999999999999999999999999999999999999999999999999999999999999999999999999",
-            parse_number("99999999999999999999999999999999999999999999999999999999999999999999999999999999", nullptr).to_string(10));
+            parse_number("99999999999999999999999999999999999999999999999999999999999999999999999999999999", nullptr, 0).to_string(10));
   EXPECT_EQ("77777777777777777777777777777777777777777777777777777777777777777777777777777777",
-            parse_number("077777777777777777777777777777777777777777777777777777777777777777777777777777777", nullptr).to_string(8));
+            parse_number("077777777777777777777777777777777777777777777777777777777777777777777777777777777", nullptr, 0).to_string(8));
   EXPECT_EQ("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", nullptr).to_string(16));
+            parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", nullptr, 0).to_string(16));
 }
 
 }  // namespace

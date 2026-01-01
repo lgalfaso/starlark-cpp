@@ -896,41 +896,133 @@ number& number::pow_mod(const number& power, const number& modulus) {
   return *this;
 }
 
-number parse_number(std::string_view input, const char** end_ptr) {
-  int base;
+namespace {
+
+std::tuple<int, int, int> get_multipliers(int base) {
+  switch (base) {
+    case 2:
+      return std::make_tuple(1, 1, 64);
+    case 3:
+      return std::make_tuple(3, 0, 40);
+    case 4:
+      return std::make_tuple(1, 2, 32);
+    case 5:
+      return std::make_tuple(5, 0, 27);
+    case 6:
+      return std::make_tuple(3, 1, 24);
+    case 7:
+      return std::make_tuple(7, 0, 22);
+    case 8:
+      return std::make_tuple(1, 3, 21);
+    case 9:
+      return std::make_tuple(9, 0, 20);
+    case 10:
+      return std::make_tuple(5, 1, 19);
+    case 11:
+      return std::make_tuple(11, 0, 18);
+    case 12:
+      return std::make_tuple(3, 2, 17);
+    case 13:
+      return std::make_tuple(13, 0, 17);
+    case 14:
+      return std::make_tuple(7, 1, 16);
+    case 15:
+      return std::make_tuple(15, 0, 16);
+    case 16:
+      return std::make_tuple(1, 4, 16);
+    case 17:
+      return std::make_tuple(17, 0, 15);
+    case 18:
+      return std::make_tuple(9, 1, 15);
+    case 19:
+      return std::make_tuple(19, 0, 15);
+    case 20:
+      return std::make_tuple(5, 2, 14);
+    case 21:
+      return std::make_tuple(21, 0, 14);
+    case 22:
+      return std::make_tuple(11, 1, 14);
+    case 23:
+      return std::make_tuple(23, 0, 14);
+    case 24:
+      return std::make_tuple(3, 3, 13);
+    case 25:
+      return std::make_tuple(25, 0, 13);
+    case 26:
+      return std::make_tuple(13, 1, 13);
+    case 27:
+      return std::make_tuple(27, 0, 13);
+    case 28:
+      return std::make_tuple(7, 2, 13);
+    case 29:
+      return std::make_tuple(29, 0, 13);
+    case 30:
+      return std::make_tuple(15, 1, 13);
+    case 31:
+      return std::make_tuple(31, 0, 12);
+    case 32:
+      return std::make_tuple(1, 5, 12);
+    case 33:
+      return std::make_tuple(33, 0, 12);
+    case 34:
+      return std::make_tuple(17, 1, 12);
+    case 35:
+      return std::make_tuple(35, 0, 12);
+    case 36:
+      return std::make_tuple(9, 2, 12);
+    default:
+      return std::make_tuple(base, 0, 1);
+  }
+}
+
+}  // namespace
+
+number parse_number(std::string_view input, const char** end_ptr, int base) {
   std::size_t pos = 0;
   bool neg = false;
   if (input.starts_with("-")) {
     input.remove_prefix(1);
     neg = true;
   }
+  if (input.starts_with("0x")) {
+    if (base != 0 && base != 16) {
+      if (end_ptr != nullptr) {
+        *end_ptr = &input[0];
+      }
+      return number::zero;
+    }
+    input.remove_prefix(2);
+    base = 16;
+  } else if (input.starts_with("0b")) {
+    if (base != 0 && base != 2) {
+      if (end_ptr != nullptr) {
+        *end_ptr = &input[0];
+      }
+      return number::zero;
+    }
+    input.remove_prefix(2);
+    base = 2;
+  } else if (input.starts_with("0")) {
+    if (base != 0 && base != 8) {
+      if (end_ptr != nullptr) {
+        *end_ptr = &input[0];
+      }
+      return number::zero;
+    }
+    base = 8;
+  } else if (base == 0) {
+    base = 10;
+  }
+  if (input.empty()) {
+    if (end_ptr != nullptr) {
+      *end_ptr = &input[0];
+    }
+    return number::zero;
+  }
   int mul;
   int shift;
   int limit;
-  if (input.starts_with("0x")) {
-    input.remove_prefix(2);
-    base = 16;
-    mul = 1;
-    shift = 4;
-    limit = 16;
-  } else if (input.starts_with("0b")) {
-    input.remove_prefix(2);
-    base = 2;
-    mul = 1;
-    shift = 1;
-    limit = 64;
-  } else if (input.starts_with("0")) {
-    input.remove_prefix(1);
-    base = 8;
-    mul = 1;
-    shift = 3;
-    limit = 21;
-  } else {
-    base = 10;
-    mul = 5;
-    shift = 1;
-    limit = 19;
-  }
+  std::tie(mul, shift, limit) = get_multipliers(base);
   number result;
   int loops = 0;
   uint64_t add_cache = 0;

@@ -363,7 +363,7 @@ void lexer::read_numeric() {
     current = token{token_type::kFloat, start, get_position(), double_value};
   } else {
     const char* end;
-    starlark::bigint::number int_value = parse_number(value, &end);
+    starlark::bigint::number int_value = parse_number(value, &end, 0);
     // At this stage, we do not care about the size of the bigint. This is a runtime concern.
     if (end != &value.back() + 1) {
       add_error("Unable to parse numeric value", start);

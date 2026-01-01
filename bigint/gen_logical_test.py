@@ -18,7 +18,7 @@ def makeBinaryTest(testName, operator, fn):
   for a in nums:
     result.append("TEST(Number, %s%d) {" % (testName, block))
     for b in nums:
-      result.append("  EXPECT_EQ(parse_number(\"%s\", nullptr), parse_number(\"%s\", nullptr).%s(parse_number(\"%s\", nullptr)));" % (hex(fn(a,b)), hex(a), operator, hex(b)))
+      result.append("  EXPECT_EQ(parse_number(\"%s\", nullptr, 0), parse_number(\"%s\", nullptr, 0).%s(parse_number(\"%s\", nullptr, 0)));" % (hex(fn(a,b)), hex(a), operator, hex(b)))
     result.append("}")
     result.append("")
     block = block + 1
@@ -29,7 +29,7 @@ def makeUnaryTest(testName, operator, fn):
   result.append("TEST(Number, %s) {" % testName)
   nums = numbers(3, 2)
   for a in nums:
-    result.append("  EXPECT_EQ(parse_number(\"%s\", nullptr), parse_number(\"%s\", nullptr).%s());" % (hex(fn(a)), hex(a), operator))
+    result.append("  EXPECT_EQ(parse_number(\"%s\", nullptr, 0), parse_number(\"%s\", nullptr, 0).%s());" % (hex(fn(a)), hex(a), operator))
   result.append("}")
   result.append("")
   return "\n".join(result)

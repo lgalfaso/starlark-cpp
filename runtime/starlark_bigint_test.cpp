@@ -238,12 +238,12 @@ TEST(StarlarkBigint, OrderVsFloat) {
   EXPECT_THAT(starlark_bigint(-1).cmp(starlark_float(-1.25), "cmp", error_callback), Gt(0));
   EXPECT_THAT(starlark_bigint(1).cmp(starlark_float(1.25), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_bigint(parse_number("100100000000000007629769841091887003294964970946560", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_bigint(parse_number("100000000000000006629769841091887003294964970946560", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_bigint(parse_number("100100000000000007629769841091887003294964970946560", nullptr, 0)).cmp(starlark_float(1e50), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(parse_number("100000000000000006629769841091887003294964970946560", nullptr, 0)).cmp(starlark_float(1e50), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946559", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Lt(0));
-  EXPECT_EQ(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946560", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), 0);
-  EXPECT_THAT(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946561", nullptr)).cmp(starlark_float(1e50), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946559", nullptr, 0)).cmp(starlark_float(1e50), "cmp", error_callback), Lt(0));
+  EXPECT_EQ(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946560", nullptr, 0)).cmp(starlark_float(1e50), "cmp", error_callback), 0);
+  EXPECT_THAT(starlark_bigint(parse_number("100000000000000007629769841091887003294964970946561", nullptr, 0)).cmp(starlark_float(1e50), "cmp", error_callback), Gt(0));
 }
 
 TEST(StarlarkBigint, OrderVsBool) {
