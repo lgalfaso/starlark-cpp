@@ -26,11 +26,11 @@ void check_with_binary(std::string_view input, std::optional<std::string> expect
 }
 
 TEST(NumericParser, Hex) {
-  check("0x0123456789abcdef", "0x123456789abcdef", 18);
-  check("0X0123456789abcdef", "0x123456789abcdef", 18);
-  check("0x0123456789abcdefABCDEF", "0x123456789abcdefABCDEF", 24);
-  check("0x0123456789abcdef or 1", "0x123456789abcdef", 18);
-  check("0x0123456789abcdefor1", "0x123456789abcdef", 18);
+  check("0x0123456789abcdef", "0x0123456789abcdef", 18);
+  check("0X0123456789abcdef", "0x0123456789abcdef", 18);
+  check("0x0123456789abcdefABCDEF", "0x0123456789abcdefABCDEF", 24);
+  check("0x0123456789abcdef or 1", "0x0123456789abcdef", 18);
+  check("0x0123456789abcdefor1", "0x0123456789abcdef", 18);
   check("0x0", "0", 3);
   check("0x0 - 4", "0", 3);
   check("0x", {}, 2);
@@ -38,8 +38,8 @@ TEST(NumericParser, Hex) {
 }
 
 TEST(NumericParser, Octal) {
-  check("0o01234567", "01234567", 10);
-  check("0O01234567", "01234567", 10);
+  check("0o01234567", "0o01234567", 10);
+  check("0O01234567", "0o01234567", 10);
   check("0o0", "0", 3);
   check("0o0 - 4", "0", 3);
   check("0o", {}, 2);
@@ -63,7 +63,7 @@ TEST(NumericParser, Integer) {
   check("1234 - 4321", "1234", 4);
   check("0 - 4321", "0", 1);
   check("0", "0", 1);
-  check("0123456789", "123456789", 10);
+  check("0123456789", "0123456789", 10);
 }
 
 TEST(NumericParser, Float) {

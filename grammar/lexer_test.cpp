@@ -228,7 +228,7 @@ man = []  # Another comment.
 TEST(LexerTest, Integer) {
   check("1", "INT(1):1,1:1,2 NEWLINE:1,2:1,2 EOF:1,2:1,2");
   check("1234567890", "INT(1234567890):1,1:1,11 NEWLINE:1,11:1,11 EOF:1,11:1,11");
-  check("01234567890", "INT(1234567890):1,1:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12");
+  checkErrors("01234567890", "ILLEGAL(\"01234567890\"):1,1:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12", {"Unable to parse numeric value:1,1"});
   check("0o1234567", "INT(342391):1,1:1,10 NEWLINE:1,10:1,10 EOF:1,10:1,10");
   check("0O1234567", "INT(342391):1,1:1,10 NEWLINE:1,10:1,10 EOF:1,10:1,10");
   checkErrors("0o18", "ILLEGAL(\"0o18\"):1,1:1,5 NEWLINE:1,5:1,5 EOF:1,5:1,5", { "Unable to parse numeric value:1,1" });

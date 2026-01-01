@@ -981,34 +981,36 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
   std::size_t pos = 0;
   bool neg = false;
   if (input.starts_with("-")) {
-    input.remove_prefix(1);
+    pos += 1;
     neg = true;
   }
-  if (input.starts_with("0x")) {
+  auto prefix = input.substr(pos, 2);
+  if (prefix == "0x" || prefix == "0X") {
     if (base != 0 && base != 16) {
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
       return number::zero;
     }
-    input.remove_prefix(2);
+    pos += 2;
     base = 16;
-  } else if (input.starts_with("0b")) {
+  } else if (prefix == "0b" || prefix == "0B") {
     if (base != 0 && base != 2) {
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
       return number::zero;
     }
-    input.remove_prefix(2);
+    pos += 2;
     base = 2;
-  } else if (input.starts_with("0")) {
+  } else if (prefix == "0o" || prefix == "0O") {
     if (base != 0 && base != 8) {
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
       return number::zero;
     }
+    pos += 2;
     base = 8;
   } else if (base == 0) {
     base = 10;
@@ -1018,6 +1020,23 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
       *end_ptr = &input[0];
     }
     return number::zero;
+  }
+  if (input[pos] == '0') {
+    while (pos < input.length() && input[pos] == '0') {
+      pos += 1;
+    }
+    if (pos == input.length()) {
+      if (end_ptr != nullptr) {
+        *end_ptr = &input[pos];
+      }
+      return number::zero;
+    } else if (base == 10) {
+      // In base 10, do not allow leading zeros unless it is all zeros.
+      if (end_ptr != nullptr) {
+        *end_ptr = &input[0];
+      }
+      return number::zero;
+    }
   }
   int mul;
   int shift;
