@@ -165,7 +165,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::inner_hash() c
   if (value.length() == 0) {
     return 0;
   }
-  return static_cast<int64_t>(siphash(value.data(), value.length(), 0x0001020304050607, 0x08090a0b0c0d0e0f));
+  return static_cast<int64_t>(siphash(value.data(), value.length(), 0xA4093822299F31D0, 0x082EFA98EC4E6C89));
 }
 
 /*
