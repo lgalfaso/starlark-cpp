@@ -1419,6 +1419,303 @@ TEST(StarlarkHash, NamedArguments) {
   EXPECT_EQ("TypeError: hash() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkInt, FromInt) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ("1", starlark_fn_int(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkInt, FromIntWithBase) {
+  starlark_integer one(1);
+  starlark_integer two(2);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&two);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromFloat) {
+  starlark_float value(1e70);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  EXPECT_EQ("10000000000000000725314363815292351261583744096465219555182101554790400", starlark_fn_int(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkInt, FromFloatInfinity) {
+  starlark_float value(std::numeric_limits<double>::infinity());
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("OverflowError: cannot convert float infinity to integer", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromFloatNaN) {
+  starlark_float value(std::numeric_limits<double>::quiet_NaN());
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: cannot convert float NaN to integer", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromFloatWithBase) {
+  starlark_float value(1e70);
+  starlark_integer two(2);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+  pos_args.push_back(&two);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromBool) {
+  starlark_bool true_value(true);
+  starlark_bool false_value(false);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args1;
+  std::map<std::string, starlark_obj*> named_args1;
+  pos_args1.push_back(&true_value);
+  std::vector<starlark_obj*> pos_args2;
+  std::map<std::string, starlark_obj*> named_args2;
+  pos_args2.push_back(&false_value);
+
+  EXPECT_EQ("1", starlark_fn_int(pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("0", starlark_fn_int(pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkInt, FromBoolWithBase) {
+  starlark_bool value(true);
+  starlark_integer two(2);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&value);
+  pos_args.push_back(&two);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromString) {
+  auto test = [](std::string value, std::string_view expected) {
+    Arena arena;
+    error_handler error_callback;
+
+    starlark_string str(value);
+    std::vector<starlark_obj*> pos_args;
+    std::map<std::string, starlark_obj*> named_args;
+    pos_args.push_back(&str);
+
+   auto* result = starlark_fn_int(pos_args, named_args, arena, error_callback);
+   ASSERT_NE(nullptr, result);
+   EXPECT_EQ(result->str(), expected);
+  };
+
+  test("-0123", "-123");
+  test("-123", "-123");
+  test("0", "0");
+  test("123", "123");
+  test("0123", "123");
+}
+
+TEST(StarlarkInt, FromStringWithBase) {
+  auto test = [](std::string value, int base, std::string_view expected) {
+    Arena arena;
+    error_handler error_callback;
+
+    starlark_string str(value);
+    starlark_integer ibase(base);
+    starlark_bigint bbase(base);
+    std::vector<starlark_obj*> pos_args1;
+    std::map<std::string, starlark_obj*> named_args1;
+    std::vector<starlark_obj*> pos_args2;
+    std::map<std::string, starlark_obj*> named_args2;
+    pos_args1.push_back(&str);
+    pos_args1.push_back(&ibase);
+    pos_args2.push_back(&str);
+    pos_args2.push_back(&bbase);
+
+   auto* result1 = starlark_fn_int(pos_args1, named_args1, arena, error_callback);
+   auto* result2 = starlark_fn_int(pos_args2, named_args2, arena, error_callback);
+   ASSERT_NE(nullptr, result1);
+   ASSERT_NE(nullptr, result2);
+
+   EXPECT_EQ(result1->str(), expected);
+   EXPECT_EQ(result2->str(), expected);
+  };
+
+  test("123", 10, "123");
+  test("123", 0, "123");
+  test("0123", 10, "123");
+  test("0x123", 16, "291");
+  test("123", 16, "291");
+  test("0x123", 0, "291");
+  test("0o123", 8, "83");
+  test("123", 8, "83");
+  test("0o123", 0, "83");
+  test("0b101", 2, "5");
+  test("101", 2, "5");
+  test("0b101", 0, "5");
+}
+
+template <typename T>
+void test_invalid_base(int base) {
+  starlark_string str("1");
+  T ibase(base);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&ibase);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: int() base must be >= 2 and <= 36, or 0", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromStringInvalidBase) {
+  test_invalid_base<starlark_integer>(-1);
+  test_invalid_base<starlark_bigint>(-1);
+  test_invalid_base<starlark_integer>(1);
+  test_invalid_base<starlark_bigint>(1);
+  test_invalid_base<starlark_integer>(37);
+  test_invalid_base<starlark_bigint>(37);
+  test_invalid_base<starlark_integer>(100);
+  test_invalid_base<starlark_bigint>(100);
+}
+
+TEST(StarlarkInt, FromStringBaseNotInt) {
+  starlark_string str("1");
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'list' object cannot be interpreted as an integer", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromStringNotAbleToParseInFull) {
+  starlark_string str("123abc");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: invalid literal for int() with base 10: '123abc'", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromList) {
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() argument must be a string, int, bool or a real number, not 'list'", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, TooFewPosArgs) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() takes one or two argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, TooManyPosArgs) {
+  starlark_string str("");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&str);
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() takes one or two argument (3 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, NamedArguments) {
+  starlark_string str("1");
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &str;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkLen, List) {
   starlark_integer one(1);
   starlark_list list1(0);

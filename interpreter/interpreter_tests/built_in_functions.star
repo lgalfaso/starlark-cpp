@@ -9,8 +9,7 @@ assert_eq(dict({}), {})
 assert_eq(dict({'a': 1}), {'a': 1})
 assert_eq(dict({'a': 1}, b = 2), {'a': 1, 'b': 2})
 assert_eq(dict([('a', 1), ('b', 2)]), {'a': 1, 'b': 2})
-# TODO(lmirelmann): Add tests for the other built-in functions once they are available.
-# dir
+# TODO(lmirelmann): dir
 assert_eq(enumerate(['a', 'b', 'c']), [(0, 'a'), (1, 'b'), (2, 'c')])
 assert_eq(enumerate(['a', 'b', 'c'], start = 100), [(100, 'a'), (101, 'b'), (102, 'c')])
 assert_fail("fail('Some message')", error_message = "Error: Some message")
@@ -19,25 +18,26 @@ assert_eq(float(0.0), 0.0)
 assert_eq(float(1), 1.0)
 assert_eq(float("Inf"), 1e308*10)
 assert_eq(float("-Inf"), -1e308*10)
-# getattr
-# hasattr
+# TODO(lmirelmann): getattr
+# TODO(lmirelmann): hasattr
 assert_eq(hash("abc"), 6041520446639342335)
-# int
+assert_eq(int("0123", 10), 123)
+assert_eq(int("0123"), 123)
+assert_fail('int("0123", 0)', error_message = "ValueError: invalid literal for int() with base 0: '0123'")
 assert_eq(len([]), 0)
 assert_eq(list((1, 2)), [1, 2])
-# max
-# min
+# TODO(lmirelmann): max
+# TODO(lmirelmann): min
 assert_eq(ord(b'\xff'), 255)
 assert_eq(ord("😃"), 128515)
-# ord
-# print
-# range
-# repr
-# reversed
-# set
-# sorted
-# str
-# tuple
-# type
-# zip
+# TODO(lmirelmann): print
+# TODO(lmirelmann): range
+# TODO(lmirelmann): repr
+# TODO(lmirelmann): reversed
+# TODO(lmirelmann): set
+# TODO(lmirelmann): sorted
+# TODO(lmirelmann): str
+# TODO(lmirelmann): tuple
+# TODO(lmirelmann): type
+# TODO(lmirelmann): zip
 

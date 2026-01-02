@@ -19,6 +19,7 @@
 #include "unicode/utf8_reader.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::bigint::parse_number;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 
@@ -488,9 +489,87 @@ starlark_obj* starlark_fn_hash(const std::vector<starlark_obj*>& pos_args, const
 }
 
 starlark_obj* starlark_fn_int(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!named_args.empty()) {
+    error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", "int"));
+    return nullptr;
+  }
+  if (pos_args.size() != 1 && pos_args.size() != 2) {
+    error_callback.add_error(std::format("TypeError: {}() takes one or two argument ({} given)", "int", pos_args.size()));
+    return nullptr;
+  }
+  auto* value = pos_args.front();
+  if (value->type() == starlark_types::int_t) {
+    if (pos_args.size() == 2) {
+      error_callback.add_error("TypeError: int() can't convert non-string with explicit base");
+      return nullptr;
+    }
+    return value;
+  } else if (value->type() == starlark_types::float_t) {
+    if (pos_args.size() == 2) {
+      error_callback.add_error("TypeError: int() can't convert non-string with explicit base");
+      return nullptr;
+    }
+    auto fvalue = value->as_float();
+    if (!std::isfinite(fvalue)) {
+      if (std::isinf(fvalue)) {
+        error_callback.add_error("OverflowError: cannot convert float infinity to integer");
+      } else {
+        error_callback.add_error("ValueError: cannot convert float NaN to integer");
+      }
+      return nullptr;
+    }
+    return create_integer_from_float(fvalue, arena);
+  } else if (value->type() == starlark_types::bool_t) {
+    if (pos_args.size() == 2) {
+      error_callback.add_error("TypeError: int() can't convert non-string with explicit base");
+      return nullptr;
+    }
+    return create_integer(value->truthy() ? 1 : 0, arena);
+  } else if (value->type() == starlark_types::string_t) {
+    int base = 10;
+    if (pos_args.size() == 2) {
+      auto* base_param = pos_args[1];
+      switch (base_param->numeric_type()) {
+        case starlark_numeric_type::kInt64: {
+          auto ibase = base_param->as_int64();
+          if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
+            error_callback.add_error("ValueError: int() base must be >= 2 and <= 36, or 0");
+            return nullptr;
+          }
+          base = ibase;
+          break;
+        }
+        case starlark_numeric_type::kBigInt: {
+          const auto& bbase = base_param->as_bigint();
+          if (bbase.sign() || bbase.length() > 1) {
+            error_callback.add_error("ValueError: int() base must be >= 2 and <= 36, or 0");
+            return nullptr;
+          }
+          auto ibase = bbase.at(0);
+          if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
+            error_callback.add_error("ValueError: int() base must be >= 2 and <= 36, or 0");
+            return nullptr;
+          }
+          base = ibase;
+          break;
+        }
+        default:
+          error_callback.add_error(std::format("TypeError: '{}' object cannot be interpreted as an integer", base_param->type()));
+          return nullptr;
+      }
+    }
+    auto svalue = value->as_string();
+    const char* end;
+    auto result = parse_number(svalue, &end, base);
+    if (end != (&svalue.back() + 1)) {
+      error_callback.add_error(std::format("ValueError: invalid literal for int() with base {}: '{}'", base, svalue));
+      return nullptr;
+    }
+    return create_integer(std::move(result), arena);
+  } else {
+    error_callback.add_error(std::format("TypeError: int() argument must be a string, int, bool or a real number, not '{}'", value->type()));
+    return nullptr;
+  }
 }
 
 starlark_obj* starlark_fn_len(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
