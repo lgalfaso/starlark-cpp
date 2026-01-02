@@ -1012,8 +1012,6 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
     }
     pos += 2;
     base = 8;
-  } else if (base == 0) {
-    base = 10;
   }
   if (input.empty()) {
     if (end_ptr != nullptr) {
@@ -1030,13 +1028,16 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
         *end_ptr = &input[pos];
       }
       return number::zero;
-    } else if (base == 10) {
+    } else if (base == 0) {
       // In base 10, do not allow leading zeros unless it is all zeros.
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
       return number::zero;
     }
+  }
+  if (base == 0) {
+    base = 10;
   }
   int mul;
   int shift;

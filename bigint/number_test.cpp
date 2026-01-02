@@ -1316,6 +1316,12 @@ TEST(Number, ParseNumber) {
   const char* end;
   EXPECT_EQ(number::zero, parse_number(zero, &end, 0));
   EXPECT_EQ(&*zero.end(), end);
+  std::string non_zero = "0327";
+  EXPECT_EQ("327", parse_number(non_zero, &end, 10).to_string(10));
+  EXPECT_EQ(&*non_zero.end(), end);
+  EXPECT_EQ("0", parse_number(non_zero, &end, 0).to_string(10));
+  EXPECT_EQ(&*non_zero.begin(), end);
+
   EXPECT_EQ("1234567890abcdefabcdef"_number,
             parse_number("0x1234567890abcdefABCDEFG", nullptr, 0));
   EXPECT_EQ("1234567890abcdefabcdef"_number,
