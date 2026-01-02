@@ -147,9 +147,14 @@ int cmp_fi(double lhs, int64_t rhs) {
   bool has_fraction = false;
   if (e < 0) {
     has_fraction = true;
-    mantissa >>= (-e);
-    e = std::countr_zero<uint64_t>(mantissa);
-    mantissa >>= e;
+    if (e < -63) {
+      mantissa = 0;
+      e = 0;
+    } else {
+      mantissa >>= (-e);
+      e = std::countr_zero<uint64_t>(mantissa);
+      mantissa >>= e;
+    }
   }
 
   // Check if there is a difference in the bit size.
@@ -216,9 +221,14 @@ int cmp_fb(double lhs, const number& rhs) {
   bool has_fraction = false;
   if (e < 0) {
     has_fraction = true;
-    mantissa >>= (-e);
-    e = std::countr_zero<uint64_t>(mantissa);
-    mantissa >>= e;
+    if (e < -63) {
+      mantissa = 0;
+      e = 0;
+    } else {
+      mantissa >>= (-e);
+      e = std::countr_zero<uint64_t>(mantissa);
+      mantissa >>= e;
+    }
   }
 
   // Check if there is a difference in the bit size.

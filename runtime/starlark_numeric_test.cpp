@@ -11,12 +11,30 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::runtime::cmp_fb;
+using ::starlark::runtime::cmp_fi;
 using ::starlark::runtime::create_integer;
 using ::starlark::runtime::create_integer_from_float;
 using ::starlark::runtime::starlark_numeric_type;
 using ::starlark::runtime::to_double;
+using ::testing::Gt;
+using ::testing::Lt;
 
 namespace {
+
+TEST(CmpFi, HardCases) {
+  EXPECT_THAT(cmp_fi(0x1.0000000000000p-64, 1), Lt(0));
+  EXPECT_THAT(cmp_fi(0x1.0000000000000p-64, 0), Gt(0));
+  EXPECT_THAT(cmp_fi(-0x1.0000000000000p-64, 0), Lt(0));
+  EXPECT_THAT(cmp_fi(-0x1.0000000000000p-64, -1), Gt(0));
+}
+
+TEST(CmpFb, HardCases) {
+  EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::one), Lt(0));
+  EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::zero), Gt(0));
+  EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::zero), Lt(0));
+  EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::minus_one), Gt(0));
+}
 
 TEST(ToDouble, FromBigInt) {
   EXPECT_EQ(0.0, to_double(number::zero));
