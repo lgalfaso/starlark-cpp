@@ -35,6 +35,48 @@ starlark_obj* create_integer(number&& value, Arena& arena) {
   return Arena::Create<starlark_bigint>(&arena, std::move(value));
 }
 
+starlark_obj* create_integer_from_float(double value, Arena& arena) {
+  if (!std::isfinite(value)) {
+    return nullptr;
+  }
+  if (value == 0) {
+    return create_integer(0, arena);
+  }
+  bool neg = false;
+  if (value < 0) {
+    value = -value;
+    neg = true;
+  }
+  int e;
+  double norm = std::frexp(value, &e);
+  double integral = std::ldexp(norm, std::numeric_limits<double>::digits);
+  e -= std::numeric_limits<double>::digits;
+  int64_t mantissa = static_cast<int64_t>(integral);
+  {
+     int countr = std::countr_zero<uint64_t>(mantissa);
+     mantissa >>= countr;
+     e += countr;
+  }
+  if (e < 0) {
+    mantissa >>= (-e);
+    e = std::countr_zero<uint64_t>(mantissa);
+    mantissa >>= e;
+  }
+  if (e < std::countl_zero<uint64_t>(mantissa)) {
+    // Fits into an int64_t.
+    mantissa <<= e;
+    if (neg) {
+      mantissa = -mantissa;
+    }
+    return create_integer(mantissa, arena);
+  } else {
+    if (neg) {
+      mantissa = -mantissa;
+    }
+    return create_integer(from_int64(mantissa) << e, arena);
+  }
+}
+
 starlark_obj* create_float(double value, Arena& arena) {
   return Arena::Create<starlark_float>(&arena, value);
 }
