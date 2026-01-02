@@ -15,6 +15,7 @@ using ::starlark::runtime::cmp_fb;
 using ::starlark::runtime::cmp_fi;
 using ::starlark::runtime::create_integer;
 using ::starlark::runtime::create_integer_from_float;
+using ::starlark::runtime::equals_fi;
 using ::starlark::runtime::starlark_numeric_type;
 using ::starlark::runtime::to_double;
 using ::testing::Gt;
@@ -34,6 +35,11 @@ TEST(CmpFb, HardCases) {
   EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::zero), Gt(0));
   EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::zero), Lt(0));
   EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::minus_one), Gt(0));
+}
+
+TEST(EqualsFi, HardCases) {
+  EXPECT_TRUE(equals_fi(2.0, 2));
+  EXPECT_FALSE(equals_fi(0x1.0000000000000p-64, 0));
 }
 
 TEST(ToDouble, FromBigInt) {
