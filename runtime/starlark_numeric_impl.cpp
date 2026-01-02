@@ -58,9 +58,14 @@ starlark_obj* create_integer_from_float(double value, Arena& arena) {
      e += countr;
   }
   if (e < 0) {
-    mantissa >>= (-e);
-    e = std::countr_zero<uint64_t>(mantissa);
-    mantissa >>= e;
+    if (e < -63) {
+      mantissa = 0;
+      e = 0;
+    } else {
+      mantissa >>= (-e);
+      e = std::countr_zero<uint64_t>(mantissa);
+      mantissa >>= e;
+    }
   }
   if (e < std::countl_zero<uint64_t>(mantissa)) {
     // Fits into an int64_t.

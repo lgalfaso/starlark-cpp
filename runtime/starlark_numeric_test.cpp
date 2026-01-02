@@ -64,6 +64,16 @@ TEST(CreateIntegerFromBigInt, Downgrades) {
   test(starlark_numeric_type::kBigInt, number::one << 63);
 }
 
+TEST(CreateIntegerFromFloat, SpecialCases) {
+  Arena arena;
+  EXPECT_EQ(nullptr, create_integer_from_float(std::numeric_limits<double>::infinity(), arena));
+  EXPECT_EQ("0", create_integer_from_float(0, arena)->str());
+  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-1, arena)->str());
+  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-1, arena)->str());
+  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-64, arena)->str());
+  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-64, arena)->str());
+}
+
 TEST(CreateIntegerFromFloat, PowersOfTen) {
   auto test = [](double value, std::string_view expected) {
     Arena arena;
