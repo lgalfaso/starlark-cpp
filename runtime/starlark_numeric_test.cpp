@@ -24,6 +24,7 @@ using ::testing::Lt;
 namespace {
 
 TEST(CmpFi, HardCases) {
+  EXPECT_THAT(cmp_fi(0.5, 1), Lt(0));
   EXPECT_THAT(cmp_fi(0x1.0000000000000p-64, 1), Lt(0));
   EXPECT_THAT(cmp_fi(0x1.0000000000000p-64, 0), Gt(0));
   EXPECT_THAT(cmp_fi(-0x1.0000000000000p-64, 0), Lt(0));
@@ -31,6 +32,7 @@ TEST(CmpFi, HardCases) {
 }
 
 TEST(CmpFb, HardCases) {
+  EXPECT_THAT(cmp_fb(0.5, number::one), Lt(0));
   EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::one), Lt(0));
   EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::zero), Gt(0));
   EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::zero), Lt(0));

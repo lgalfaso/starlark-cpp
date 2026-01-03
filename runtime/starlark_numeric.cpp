@@ -152,8 +152,12 @@ int cmp_fi(double lhs, int64_t rhs) {
       e = 0;
     } else {
       mantissa >>= (-e);
-      e = std::countr_zero<uint64_t>(mantissa);
-      mantissa >>= e;
+      if (mantissa == 0) {
+        e = 0;
+      } else {
+        e = std::countr_zero<uint64_t>(mantissa);
+        mantissa >>= e;
+      }
     }
   }
 
@@ -226,8 +230,12 @@ int cmp_fb(double lhs, const number& rhs) {
       e = 0;
     } else {
       mantissa >>= (-e);
-      e = std::countr_zero<uint64_t>(mantissa);
-      mantissa >>= e;
+      if (mantissa == 0) {
+        e = 0;
+      } else {
+        e = std::countr_zero<uint64_t>(mantissa);
+        mantissa >>= e;
+      }
     }
   }
 
