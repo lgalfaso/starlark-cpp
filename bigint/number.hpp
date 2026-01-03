@@ -144,6 +144,8 @@ class number {
   number& logical_and(const number& other);
   number& logical_xor(const number& other);
   number& logical_not();
+  bool fits_in_int64() const;
+  int64_t as_int64() const;
 
  private:
   static void normalize(values_type* a);

@@ -22,15 +22,8 @@ starlark_obj* create_integer(std::int64_t value, Arena& arena) {
 
 starlark_obj* create_integer(number&& value, Arena& arena) {
   // Check whether we can downgrade.
-  if (value.length() <= 1) {
-    auto v = value.at(0);
-    if (value.sign()) {
-      if (v <= static_cast<uint64_t>(std::numeric_limits<int64_t>::min())) {
-        return create_integer(-v, arena);
-      }
-    } else if (v <= std::numeric_limits<int64_t>::max()) {
-      return create_integer(v, arena);
-    }
+  if (value.fits_in_int64()) {
+    return create_integer(value.as_int64(), arena);
   }
   return Arena::Create<starlark_bigint>(&arena, std::move(value));
 }

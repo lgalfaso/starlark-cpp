@@ -1249,6 +1249,28 @@ number& number::logical_not() {
   return *this;
 }
 
+bool number::fits_in_int64() const {
+  if (length() != 1) {
+    return values_.empty();
+  }
+  if (sign()) {
+    return values_[0] <= static_cast<nbase>(std::numeric_limits<int64_t>::min());
+  } else {
+    return values_[0] <= std::numeric_limits<int64_t>::max();
+  }
+}
+
+int64_t number::as_int64() const {
+  if (length() != 1) {
+    return 0;
+  }
+  if (sign()) {
+    return -values_[0];
+  } else {
+    return values_[0];
+  }
+}
+
 number& number::operator|=(const number& other) {
   return this->logical_or(other);
 }

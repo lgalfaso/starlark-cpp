@@ -3,7 +3,6 @@
 #include "runtime/starlark_range.hpp"
 
 #include <format>
-#include <limits>
 #include <string>
 
 #include "runtime/starlark_numeric.hpp"
@@ -91,23 +90,10 @@ bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callba
       return check(other.as_int64());
     case starlark_numeric_type::kBigInt: {
       const auto& bvalue = other.as_bigint();
-      if (bvalue.length() > 1) {
+      if (!bvalue.fits_in_int64()) {
         return false;
       }
-      auto uvalue = bvalue.at(0);
-      if (bvalue.sign()) {
-        if (uvalue <= static_cast<uint64_t>(std::numeric_limits<int64_t>::min())) {
-          return check(-uvalue);
-        } else {
-          return false;
-        }
-      } else {
-        if (uvalue <= std::numeric_limits<int64_t>::max()) {
-          return check(uvalue);
-        } else {
-          return false;
-        }
-      }
+      return check(bvalue.as_int64());
     }
     case starlark_numeric_type::kFloat: {
       // Note: There is a dicrepancy between the spec and Bazel. The spec states:
