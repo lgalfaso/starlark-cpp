@@ -100,7 +100,7 @@ TEST(StarlarkString, Equals) {
   EXPECT_FALSE(starlark_string("").equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_string("").equals(starlark_list(0)));
   EXPECT_FALSE(starlark_string("").equals(starlark_none()));
-  EXPECT_FALSE(starlark_string("").equals(starlark_range()));
+  EXPECT_FALSE(starlark_string("").equals(starlark_range(0, 1, 1)));
   EXPECT_FALSE(starlark_string("").equals(starlark_set()));
   EXPECT_FALSE(starlark_string("").equals(starlark_struct()));
   EXPECT_FALSE(starlark_string("").equals(starlark_tuple(0)));

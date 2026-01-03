@@ -14,26 +14,37 @@ namespace runtime {
 
 class starlark_range : public starlark_obj {
  public:
-  starlark_range();
+  starlark_range(int64_t start, int64_t end, int64_t step);
   std::string_view type() const override;
   bool truthy() const override;
-  void set_start(const starlark_obj* value);
-  void set_end(const starlark_obj* value);
-  void set_step(const starlark_obj* value);
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+
+  class starlark_range_iterator : public starlark_iterator {
+   public:
+    starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, google::protobuf::Arena& arena);
+    bool has_next() const override;
+    starlark_obj* next() override;
+    void end_iterator() override;
+
+   private:
+    int64_t current_pos;
+    const int64_t step;
+    int64_t remaining;
+    google::protobuf::Arena& arena;
+  };
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
-  uint64_t start;
-  uint64_t end;
-  uint64_t step;
-  uint64_t last;
+  const int64_t start;
+  const int64_t end;
+  const int64_t step;
+  const int64_t len_;
 };
 
 }  // namespace runtime

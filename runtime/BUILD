@@ -414,7 +414,9 @@ cc_library(
     srcs = ["starlark_range.cpp"],
     hdrs = ["starlark_range.hpp"],
     deps = [
+        ":starlark_numeric",
         ":starlark_object",
+        ":starlark_types",
     ],
 )
 
@@ -423,7 +425,10 @@ cc_test(
     size = "small",
     srcs = ["starlark_range_test.cpp"],
     deps = [
+        ":starlark_none",
+        ":starlark_numeric_impl",
         ":starlark_range",
+        ":starlark_testing",
         "@googletest//:gtest_main",
     ],
 )

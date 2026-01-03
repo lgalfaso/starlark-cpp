@@ -75,7 +75,7 @@ TEST(StarlarkNone, Equals) {
   EXPECT_FALSE(starlark_none().equals(starlark_function()));
   EXPECT_FALSE(starlark_none().equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_list(0)));
-  EXPECT_FALSE(starlark_none().equals(starlark_range()));
+  EXPECT_FALSE(starlark_none().equals(starlark_range(0, 0, 1)));
   EXPECT_FALSE(starlark_none().equals(starlark_set()));
   EXPECT_FALSE(starlark_none().equals(starlark_string("")));
   EXPECT_FALSE(starlark_none().equals(starlark_struct()));

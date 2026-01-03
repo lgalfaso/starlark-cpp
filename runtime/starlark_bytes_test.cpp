@@ -114,7 +114,7 @@ TEST(StarlarkBytes, Equals) {
   EXPECT_FALSE(starlark_bytes("").equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_list(0)));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_none()));
-  EXPECT_FALSE(starlark_bytes("").equals(starlark_range()));
+  EXPECT_FALSE(starlark_bytes("").equals(starlark_range(0, 1, 1)));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_set()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_struct()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_tuple(0)));

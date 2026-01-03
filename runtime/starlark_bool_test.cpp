@@ -85,7 +85,7 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(false).equals(starlark_function()));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_list(0)));
-  EXPECT_FALSE(starlark_bool(false).equals(starlark_range()));
+  EXPECT_FALSE(starlark_bool(false).equals(starlark_range(0, 1, 1)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_set()));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_string("")));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_struct()));
@@ -100,7 +100,7 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(true).equals(starlark_function()));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_list(0)));
-  EXPECT_FALSE(starlark_bool(true).equals(starlark_range()));
+  EXPECT_FALSE(starlark_bool(true).equals(starlark_range(0, 1, 1)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_set()));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_string("")));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_struct()));
