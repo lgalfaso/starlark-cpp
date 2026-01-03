@@ -1246,7 +1246,7 @@ TEST(StarlarkFloat, FromList) {
   std::map<std::string, starlark_obj*> named_args;
   pos_args.push_back(&value);
 
-  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: float() argument must be a string or a real number, not 'list'");
@@ -1261,7 +1261,7 @@ TEST(StarlarkFloat, BigintOverflow) {
   std::map<std::string, starlark_obj*> named_args;
   pos_args.push_back(&value);
 
-  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
@@ -1276,7 +1276,7 @@ TEST(StarlarkFloat, StringOverflow) {
   std::map<std::string, starlark_obj*> named_args;
   pos_args.push_back(&value);
 
-  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: floating-point number too large");
@@ -1291,7 +1291,7 @@ TEST(StarlarkFloat, InvalidString) {
   std::map<std::string, starlark_obj*> named_args;
   pos_args.push_back(&value);
 
-  auto* result =starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: could not convert string to float: '1a'");
@@ -1549,9 +1549,9 @@ TEST(StarlarkInt, FromString) {
     std::map<std::string, starlark_obj*> named_args;
     pos_args.push_back(&str);
 
-   auto* result = starlark_fn_int(pos_args, named_args, arena, error_callback);
-   ASSERT_NE(nullptr, result);
-   EXPECT_EQ(result->str(), expected);
+    auto* result = starlark_fn_int(pos_args, named_args, arena, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
   };
 
   test("-0123", "-123");
@@ -1578,13 +1578,13 @@ TEST(StarlarkInt, FromStringWithBase) {
     pos_args2.push_back(&str);
     pos_args2.push_back(&bbase);
 
-   auto* result1 = starlark_fn_int(pos_args1, named_args1, arena, error_callback);
-   auto* result2 = starlark_fn_int(pos_args2, named_args2, arena, error_callback);
-   ASSERT_NE(nullptr, result1);
-   ASSERT_NE(nullptr, result2);
+    auto* result1 = starlark_fn_int(pos_args1, named_args1, arena, error_callback);
+    auto* result2 = starlark_fn_int(pos_args2, named_args2, arena, error_callback);
+    ASSERT_NE(nullptr, result1);
+    ASSERT_NE(nullptr, result2);
 
-   EXPECT_EQ(result1->str(), expected);
-   EXPECT_EQ(result2->str(), expected);
+    EXPECT_EQ(result1->str(), expected);
+    EXPECT_EQ(result2->str(), expected);
   };
 
   test("123", 10, "123");

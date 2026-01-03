@@ -3,6 +3,7 @@
 #include "runtime/starlark_range.hpp"
 
 #include <format>
+#include <limits>
 #include <string>
 
 #include "runtime/starlark_numeric.hpp"
@@ -19,9 +20,9 @@ int64_t calculate_len(int64_t start, int64_t end, int64_t step) {
   assert(step != 0);
   if (step > 0 && start < end) {
     return (end - 1 - start) / step + 1;
-  } else if (step < 0 && start > end)
+  } else if (step < 0 && start > end) {
     return (start - 1 - end) / -step + 1;
-  else {
+  } else {
     return 0;
   }
 }
@@ -165,7 +166,7 @@ starlark_obj* starlark_range::starlark_range_iterator::next() {
 }
 
 void starlark_range::starlark_range_iterator::end_iterator() {}
- 
+
 }  // namespace runtime
 }  // namespace starlark
 

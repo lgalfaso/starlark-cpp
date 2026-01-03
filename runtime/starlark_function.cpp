@@ -2,9 +2,11 @@
 
 #include "runtime/starlark_function.hpp"
 
+#include <algorithm>
 #include <format>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "runtime/starlark_bool.hpp"

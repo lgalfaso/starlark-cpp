@@ -7,7 +7,10 @@
 #include <gtest/gtest.h>
 
 #include <format>
+#include <functional>
+#include <map>
 #include <string>
+#include <vector>
 
 #include "bigint/number.hpp"
 #include "interpreter/interpreter.hpp"
