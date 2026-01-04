@@ -3,6 +3,7 @@
 #include "runtime/starlark_range.hpp"
 
 #include <format>
+#include <limits>
 #include <string>
 
 #include "runtime/starlark_numeric.hpp"
