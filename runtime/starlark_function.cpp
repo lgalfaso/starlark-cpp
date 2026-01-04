@@ -731,9 +731,10 @@ starlark_obj* starlark_fn_range(const std::vector<starlark_obj*>& pos_args, cons
 }
 
 starlark_obj* starlark_fn_repr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "repr")) {
+    return nullptr;
+  }
+  return Arena::Create<starlark_string>(&arena, pos_args.front()->repr());
 }
 
 starlark_obj* starlark_fn_reversed(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
@@ -755,9 +756,10 @@ starlark_obj* starlark_fn_sorted(const std::vector<starlark_obj*>& pos_args, con
 }
 
 starlark_obj* starlark_fn_str(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "str")) {
+    return nullptr;
+  }
+  return Arena::Create<starlark_string>(&arena, pos_args.front()->str());
 }
 
 starlark_obj* starlark_fn_tuple(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
@@ -767,9 +769,10 @@ starlark_obj* starlark_fn_tuple(const std::vector<starlark_obj*>& pos_args, cons
 }
 
 starlark_obj* starlark_fn_type(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "type")) {
+    return nullptr;
+  }
+  return Arena::Create<starlark_string>(&arena, pos_args.front()->type());
 }
 
 starlark_obj* starlark_fn_zip(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

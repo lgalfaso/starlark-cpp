@@ -2211,4 +2211,172 @@ TEST(StarlarkRange, NamedArguments) {
   EXPECT_EQ("TypeError: range() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkRepr, String) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_string str("abc");
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  auto* result = starlark_fn_repr(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->as_string(), "\"abc\"");
+}
+
+TEST(StarlarkRepr, TooFewPosArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_repr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: repr() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkRepr, TooManyPosArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_repr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: repr() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkRepr, NamedArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_repr(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: repr() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkStr, String) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_string str("abc");
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  auto* result = starlark_fn_str(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->as_string(), "abc");
+}
+
+TEST(StarlarkStr, TooFewPosArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_str(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: str() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkStr, TooManyPosArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_str(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: str() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkStr, NamedArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_str(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: str() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkType, String) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_string str("abc");
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  auto* result = starlark_fn_type(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->as_string(), "string");
+}
+
+TEST(StarlarkType, TooFewPosArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_type(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: type() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkType, TooManyPosArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_type(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: type() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkType, NamedArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_type(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: type() takes no keyword arguments", error_callback.messages[0]);
+}
+
 }  // namespace
