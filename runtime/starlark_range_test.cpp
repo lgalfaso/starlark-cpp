@@ -21,7 +21,9 @@ using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_range;
 using ::starlark::testing::error_handler;
+using ::testing::Ge;
 using ::testing::IsEmpty;
+using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
@@ -105,6 +107,30 @@ TEST(StarlarkRange, Len) {
   test(101, 0, -10, 11);
   test(100, 0, 1000, 0);
   test(100, 0, -1000, 1);
+}
+
+TEST(StarlarkRange, LenHardCases) {
+  auto test = [](int64_t start, int64_t end, int64_t step, bool valid) {
+    error_handler error_callback;
+    starlark_range range(start, end, step);
+
+    if (valid) {
+      EXPECT_THAT(range.len(true, error_callback), Ge(0));
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    } else {
+      EXPECT_THAT(range.len(true, error_callback), Lt(0));
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    }
+  };
+
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), -2, true);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), -1, true);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, false);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 2, true);
+  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), -2, true);
+  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), -1, false);
+  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), 1, true);
+  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), 2, true);
 }
 
 TEST(StarlarkRange, Equals) {

@@ -14,6 +14,7 @@
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_range.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
@@ -99,9 +100,32 @@ starlark_obj* starlark_function::call(
 
 namespace {
 
-bool one_pos_arg(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback, std::string_view fn_name) {
+bool no_named_args(const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback, std::string_view fn_name) {
   if (!named_args.empty()) {
     error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", fn_name));
+    return false;
+  }
+  return true;
+}
+
+bool min_args(const std::vector<starlark_obj*>& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min) {
+  if (pos_args.size() < expected_min) {
+    error_callback.add_error(std::format("TypeError: {} expected at least {} argument, got {}", fn_name, expected_min, pos_args.size()));
+    return false;
+  }
+  return true;
+}
+
+bool max_args(const std::vector<starlark_obj*>& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max) {
+  if (pos_args.size() > expected_max) {
+    error_callback.add_error(std::format("TypeError: {} expected at most {} argument, got {}", fn_name, expected_max, pos_args.size()));
+    return false;
+  }
+  return true;
+}
+
+bool one_pos_arg(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback, std::string_view fn_name) {
+  if (!no_named_args(named_args, error_callback, fn_name)) {
     return false;
   }
   if (pos_args.size() != 1) {
@@ -112,15 +136,8 @@ bool one_pos_arg(const std::vector<starlark_obj*>& pos_args, const std::map<std:
 }
 
 bool zero_or_one_pos_arg(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, error_fn& error_callback, std::string_view fn_name) {
-  if (!named_args.empty()) {
-    error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", fn_name));
-    return false;
-  }
-  if (pos_args.size() > 1) {
-    error_callback.add_error(std::format("TypeError: {} expected at most 1 argument, got {}", fn_name, pos_args.size()));
-    return false;
-  }
-  return true;
+  return no_named_args(named_args, error_callback, fn_name) &&
+         max_args(pos_args, error_callback, fn_name, 1);
 }
 
 }  // namespace
@@ -291,8 +308,7 @@ starlark_obj* starlark_fn_chr(const std::vector<starlark_obj*>& pos_args, const 
 }
 
 starlark_obj* starlark_fn_dict(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  if (pos_args.size() > 1) {
-    error_callback.add_error(std::format("TypeError: {} expected at most 1 argument, got {}", "dict", pos_args.size()));
+  if (!max_args(pos_args, error_callback, "dict", 1)) {
     return nullptr;
   }
   starlark_dictionary* result = Arena::Create<starlark_dictionary>(&arena);
@@ -406,8 +422,7 @@ starlark_obj* starlark_fn_enumerate(const std::vector<starlark_obj*>& pos_args, 
 }
 
 starlark_obj* starlark_fn_fail(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  if (!named_args.empty()) {
-    error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", "fail"));
+  if (!no_named_args(named_args, error_callback, "fail")) {
     return nullptr;
   }
   std::string message = "Error:";
@@ -491,8 +506,7 @@ starlark_obj* starlark_fn_hash(const std::vector<starlark_obj*>& pos_args, const
 }
 
 starlark_obj* starlark_fn_int(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  if (!named_args.empty()) {
-    error_callback.add_error(std::format("TypeError: {}() takes no keyword arguments", "int"));
+  if (!no_named_args(named_args, error_callback, "int")) {
     return nullptr;
   }
   if (pos_args.size() != 1 && pos_args.size() != 2) {
@@ -653,9 +667,67 @@ starlark_obj* starlark_fn_print(const std::vector<starlark_obj*>& pos_args, cons
 }
 
 starlark_obj* starlark_fn_range(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "range") ||
+      !min_args(pos_args, error_callback, "range", 1) ||
+      !max_args(pos_args, error_callback, "range", 3)) {
+    return nullptr;
+  }
+
+  auto read_int64 = [](starlark_obj* value, int64_t& output, error_fn& error_callback) -> bool {
+    switch (value->numeric_type()) {
+    case starlark_numeric_type::kInt64:
+      output = value->as_int64();
+      return true;
+    case starlark_numeric_type::kBigInt: {
+      const auto& bvalue = value->as_bigint();
+      if (!bvalue.fits_in_int64()) {
+        error_callback.add_error("OverflowError: int too large to convert to int64");
+        return false;
+      }
+      output = bvalue.as_int64();
+      return true;
+    }
+    default:
+      error_callback.add_error(std::format("TypeError: '{}' object cannot be interpreted as an integer", value->type()));
+      return false;
+    }
+  };
+
+  int64_t start = 0;
+  int64_t end;
+  int64_t step = 1;
+  switch (pos_args.size()) {
+    case 1:
+      if (!read_int64(pos_args[0], end, error_callback)) {
+        return nullptr;
+      }
+      break;
+    case 2:
+      if (!read_int64(pos_args[0], start, error_callback) ||
+          !read_int64(pos_args[1], end, error_callback)) {
+        return nullptr;
+      }
+      break;
+    case 3:
+      if (!read_int64(pos_args[0], start, error_callback) ||
+          !read_int64(pos_args[1], end, error_callback) ||
+          !read_int64(pos_args[2], step, error_callback)) {
+        return nullptr;
+      }
+      if (step == 0) {
+        error_callback.add_error("ValueError: range() arg 3 must not be zero");
+        return nullptr;
+      }
+      break;
+  }
+
+
+  auto* result = Arena::Create<starlark_range>(&arena, start, end, step);
+  if (result->len(false, error_callback) < 0) {
+    error_callback.add_error("OverflowError: int too large to convert to int64");
+    return nullptr;
+  }
+  return result;
 }
 
 starlark_obj* starlark_fn_repr(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

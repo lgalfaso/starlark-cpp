@@ -2000,4 +2000,215 @@ TEST(StarlarkOrd, NamedArguments) {
   EXPECT_EQ("TypeError: ord() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkRange, OneArgument) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "range(1)");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkRange, OneArgumentBigInt) {
+  starlark_bigint big(100);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&big);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "range(100)");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkRange, OneArgumentBigIntTooBig) {
+  starlark_bigint big(number::one << 63);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&big);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to int64");
+}
+
+TEST(StarlarkRange, OneInvalidArgument) {
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
+}
+
+TEST(StarlarkRange, TwoArguments) {
+  starlark_integer one(1);
+  starlark_integer ten(10);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&ten);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "range(1, 10)");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkRange, TwoInvalidArguments) {
+  starlark_integer one(1);
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
+}
+
+TEST(StarlarkRange, TwoArgumentsOverflow) {
+  starlark_integer minus_one(-1);
+  starlark_integer max_int64(std::numeric_limits<int64_t>::max());
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&minus_one);
+  pos_args.push_back(&max_int64);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to int64");
+}
+
+TEST(StarlarkRange, ThreeArguments) {
+  starlark_integer one(1);
+  starlark_integer ten(10);
+  starlark_integer minus_one(-1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&ten);
+  pos_args.push_back(&minus_one);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "range(1, 10, -1)");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkRange, ThreeInvalidArguments) {
+  starlark_integer one(1);
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
+}
+
+TEST(StarlarkRange, ZeroStep) {
+  starlark_integer one(1);
+  starlark_integer ten(10);
+  starlark_integer zero(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&ten);
+  pos_args.push_back(&zero);
+
+  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: range() arg 3 must not be zero");
+}
+
+TEST(StarlarkRange, TooFewPosArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_range(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: range expected at least 1 argument, got 0", error_callback.messages[0]);
+}
+
+TEST(StarlarkRange, TooManyPosArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_range(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: range expected at most 3 argument, got 4", error_callback.messages[0]);
+}
+
+TEST(StarlarkRange, NamedArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_range(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: range() takes no keyword arguments", error_callback.messages[0]);
+}
+
 }  // namespace

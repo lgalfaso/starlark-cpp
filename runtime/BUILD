@@ -553,17 +553,18 @@ cc_library(
     hdrs = ["starlark_function.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//unicode:encode",
+        "//unicode:utf8_reader",
         ":starlark_bool",
         ":starlark_bytes",
         ":starlark_dictionary",
         ":starlark_list",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_range",
         ":starlark_string",
         ":starlark_tuple",
         ":starlark_types",
-        "//unicode:encode",
-        "//unicode:utf8_reader",
     ],
 )
 
