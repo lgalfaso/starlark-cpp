@@ -19,7 +19,7 @@ class starlark_set : public starlark_obj {
   starlark_set();
   std::string_view type() const override;
   bool truthy() const override;
-  bool add(starlark_obj* element, error_fn& error_callback);
+  std::pair<bool, bool> add(starlark_obj* element, error_fn& error_callback);
   bool contains(starlark_obj* obj) const;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;

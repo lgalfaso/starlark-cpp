@@ -165,21 +165,21 @@ void starlark_set::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   }
 }
 
-bool starlark_set::add(starlark_obj* element, error_fn& error_callback) {
+std::pair<bool, bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
   if (iterators_count) {
     error_callback.add_error("Error in append: set value is temporarily immutable due to active for-loop iteration");
-    return false;
+    return std::make_pair(false, true);
   }
   if (freezed) {
     // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
     error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
-    return false;
+    return std::make_pair(false, true);
   }
   if (element->hash() == -1) {
     error_callback.add_error(std::format("TypeError: cannot use '{}' as a set element (unhashable type: '{}')", element->type(), element->type()));
-    return false;
+    return std::make_pair(false, true);
   }
-  return values.insert(element).second;
+  return std::make_pair(values.insert(element).second, false);
 }
 
 starlark_set::starlark_set_iterator::starlark_set_iterator(starlark_set* set) : set(set), it(set->values.begin()) {
