@@ -33,12 +33,12 @@ assert_eq(ord("😃"), 128515)
 # TODO(lmirelmann): print
 assert_eq(list(range(3, 8, 2)), [3, 5, 7])
 # TODO(lmirelmann): range
-# TODO(lmirelmann): repr
+assert_eq(repr([1, 2]), "[1, 2]")
 # TODO(lmirelmann): reversed
 # TODO(lmirelmann): set
 # TODO(lmirelmann): sorted
-# TODO(lmirelmann): str
-# TODO(lmirelmann): tuple
-# TODO(lmirelmann): type
+assert_eq(str("abc"), 'abc')
+assert_eq(tuple(range(3)), (0, 1, 2))
+assert_eq(type([]), 'list')
 # TODO(lmirelmann): zip
 

@@ -769,9 +769,23 @@ starlark_obj* starlark_fn_str(const std::vector<starlark_obj*>& pos_args, const 
 }
 
 starlark_obj* starlark_fn_tuple(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "tuple")) {
+    return nullptr;
+  }
+  if (pos_args.empty()) {
+    return Arena::Create<starlark_tuple>(&arena, 0);
+  }
+
+  auto* it = pos_args.front()->get_iterator(true, arena, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_tuple>(&arena, std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
+  while (it->has_next()) {
+    result->add(it->next());
+  }
+  it->end_iterator();
+  return result;
 }
 
 starlark_obj* starlark_fn_type(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
