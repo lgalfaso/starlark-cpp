@@ -2356,7 +2356,7 @@ TEST(StarlarkType, NoArguments) {
   EXPECT_EQ(result->repr(), "()");
 }
 
-TEST(StarlarkType, OneArguments) {
+TEST(StarlarkTuple, OneArguments) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_list list(3);
