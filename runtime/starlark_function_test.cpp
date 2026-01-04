@@ -2288,6 +2288,100 @@ TEST(StarlarkRepr, NamedArguments) {
   EXPECT_EQ("TypeError: repr() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkSet, NoArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  auto* result = starlark_fn_set(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "set()");
+}
+
+TEST(StarlarkSet, OneArguments) {
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_list list(3);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+  list.add(&one, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_set(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "set([1, 2])");
+}
+
+TEST(StarlarkSet, ElementNotHashable) {
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_list list(3);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  list.add(&one, error_callback);
+  list.add(&two, error_callback);
+  list.add(&list, error_callback);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: cannot use 'list' as a set element (unhashable type: 'list')", error_callback.messages[0]);
+}
+
+TEST(StarlarkSet, String) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_string str("abc");
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
+}
+
+TEST(StarlarkSet, TooManyPosArguments) {
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: set expected at most 1 argument, got 2", error_callback.messages[0]);
+}
+
+TEST(StarlarkSet, NamedArguments) {
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &list;
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: set() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkStr, String) {
   Arena arena;
   error_handler error_callback;

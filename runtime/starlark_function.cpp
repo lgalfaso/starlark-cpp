@@ -16,6 +16,7 @@
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_range.hpp"
+#include "runtime/starlark_set.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
@@ -750,9 +751,25 @@ starlark_obj* starlark_fn_reversed(const std::vector<starlark_obj*>& pos_args, c
 }
 
 starlark_obj* starlark_fn_set(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "set")) {
+    return nullptr;
+  }
+  if (pos_args.empty()) {
+    return Arena::Create<starlark_set>(&arena);
+  }
+
+  auto* it = pos_args.front()->get_iterator(true, arena, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_set>(&arena);
+  while (it->has_next()) {
+    if (result->add(it->next(), error_callback).second) {
+      return nullptr;
+    }
+  }
+  it->end_iterator();
+  return result;
 }
 
 starlark_obj* starlark_fn_sorted(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

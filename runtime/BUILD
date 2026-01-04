@@ -562,6 +562,7 @@ cc_library(
         ":starlark_numeric",
         ":starlark_object",
         ":starlark_range",
+        ":starlark_set",
         ":starlark_string",
         ":starlark_tuple",
         ":starlark_types",
