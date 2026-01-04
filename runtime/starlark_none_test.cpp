@@ -20,7 +20,6 @@
 #include "runtime/starlark_range.hpp"
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_string.hpp"
-#include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
@@ -39,7 +38,6 @@ using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
-using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
 
 namespace {
@@ -78,7 +76,6 @@ TEST(StarlarkNone, Equals) {
   EXPECT_FALSE(starlark_none().equals(starlark_range(0, 0, 1)));
   EXPECT_FALSE(starlark_none().equals(starlark_set()));
   EXPECT_FALSE(starlark_none().equals(starlark_string("")));
-  EXPECT_FALSE(starlark_none().equals(starlark_struct()));
   EXPECT_FALSE(starlark_none().equals(starlark_tuple(0)));
 }
 

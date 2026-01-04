@@ -20,7 +20,6 @@
 #include "runtime/starlark_range.hpp"
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_string.hpp"
-#include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
@@ -40,7 +39,6 @@ using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
-using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
 using ::testing::Eq;

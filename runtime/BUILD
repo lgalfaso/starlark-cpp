@@ -103,7 +103,6 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
-        ":starlark_struct",
         ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
@@ -139,7 +138,6 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
-        ":starlark_struct",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],
@@ -214,7 +212,6 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
-        ":starlark_struct",
         ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
@@ -253,7 +250,6 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
-        ":starlark_struct",
         ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
@@ -324,7 +320,6 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
-        ":starlark_struct",
         ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
@@ -374,7 +369,6 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
-        ":starlark_struct",
         ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
@@ -494,28 +488,8 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
-        ":starlark_struct",
         ":starlark_testing",
         ":starlark_tuple",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "starlark_struct",
-    srcs = ["starlark_struct.cpp"],
-    hdrs = ["starlark_struct.hpp"],
-    deps = [
-        ":starlark_object",
-    ],
-)
-
-cc_test(
-    name = "starlark_struct_test",
-    size = "small",
-    srcs = ["starlark_struct_test.cpp"],
-    deps = [
-        ":starlark_struct",
         "@googletest//:gtest_main",
     ],
 )

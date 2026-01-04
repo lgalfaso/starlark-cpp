@@ -19,7 +19,6 @@
 #include "runtime/starlark_range.hpp"
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_string.hpp"
-#include "runtime/starlark_struct.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
@@ -38,7 +37,6 @@ using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
-using ::starlark::runtime::starlark_struct;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
 using ::testing::Eq;
@@ -116,7 +114,6 @@ TEST(StarlarkBytes, Equals) {
   EXPECT_FALSE(starlark_bytes("").equals(starlark_none()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_range(0, 1, 1)));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_set()));
-  EXPECT_FALSE(starlark_bytes("").equals(starlark_struct()));
   EXPECT_FALSE(starlark_bytes("").equals(starlark_tuple(0)));
 
   EXPECT_FALSE(starlark_bytes("0").equals(starlark_integer(0)));
