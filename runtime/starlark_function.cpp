@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "runtime/siphash.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_dictionary.hpp"
@@ -46,13 +47,18 @@ bool starlark_built_in_function::truthy() const {
 }
 
 bool starlark_built_in_function::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  // TODO(lmirelmann): Implement.
-  return false;
+  if (other->type() != starlark_types::builtin_function_or_method_t) {
+    return false;
+  }
+  const starlark_built_in_function* fother = static_cast<const starlark_built_in_function*>(other);
+  return fn_name == fother->fn_name && native_fn == fother->native_fn;
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_built_in_function::inner_hash() const {
-  // TODO(lmirelmann): Implement.
-  return 0;
+  if (fn_name.length() == 0) {
+    return 0;
+  }
+  return static_cast<int64_t>(siphash(fn_name.data(), fn_name.length(), 0x452821E638D01377, 0xBE5466CF34E90C6C));
 }
 
 starlark_obj* starlark_built_in_function::call(

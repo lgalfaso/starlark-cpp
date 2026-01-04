@@ -65,6 +65,13 @@ starlark_obj* base_fn(const std::vector<starlark_obj*>& pos_args, const std::map
   return nullptr;
 }
 
+starlark_obj* base2_fn(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, Arena& arena, error_fn& error_callback) {
+  if (fn_mock != nullptr) {
+    return fn_mock->Call(pos_args, named_args, arena, error_callback);
+  }
+  return nullptr;
+}
+
 class FnTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -94,6 +101,20 @@ TEST(StarlarkFunction, Truthy) {
 
 TEST(StarlarkFunction, Str) {
   EXPECT_EQ("<built-in function fn_name>", starlark_built_in_function(base_fn, "fn_name").str());
+}
+
+TEST(StarlarkFunction, Hash) {
+  EXPECT_EQ(0, starlark_built_in_function(base_fn, "").hash());
+  EXPECT_EQ(-5056436948751091085, starlark_built_in_function(base_fn, "fn_name").hash());
+  EXPECT_EQ(-342786463226536281, starlark_built_in_function(base_fn, "some_fn").hash());
+}
+
+TEST(StarlarkFunction, Equals) {
+  EXPECT_TRUE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base2_fn, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base_fn, "another_name")));
+  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base2_fn, "another_name")));
+  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_list(0)));
 }
 
 TEST_F(FnTest, Call) {
