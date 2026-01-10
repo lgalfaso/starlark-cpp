@@ -124,6 +124,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
     return nullptr;
   }
   // TODO(lmirelmann): This should go into a structure that keeps some of the constants.
+  starlark_obj* none = global_context["None"];
   starlark_obj* bool_true = global_context["True"];
   starlark_obj* bool_false = global_context["False"];
   starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
@@ -134,6 +135,9 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
     auto& op_code = starlark_program->block(block_ptr).op_code(instruction_ptr);
     instruction_ptr++;
     switch (op_code.op_code_case()) {
+      case OpCode::kConstNone:
+        stack.push_back(none);
+        break;
       case OpCode::kConstInt:
         stack.push_back(Arena::Create<starlark_integer>(&arena, op_code.const_int().value()));
         break;
@@ -501,13 +505,192 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         container->index_assign(*index, *element, error_callback);
         break;
       }
+      case OpCode::kAssignSliceRange: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangePlusEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_plus_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeMinusEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_minus_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeStarEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_star_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeSlashEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_slash_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeSlashSlashEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_slash_slash_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangePercentEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_percent_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeAmpersandEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_ampersand_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangePipeEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_pipe_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeHatEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_hat_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeLessLessEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_less_less_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+      case OpCode::kAssignSliceRangeGreaterGreaterEquals: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_greater_greater_equals_assign(*start, *stop, *stride, *element, error_callback);
+        break;
+      }
+
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
       case OpCode::kFail:
         return nullptr;
-      case OpCode::kAssignDotMember:
-      case OpCode::kAssignSliceRange:
       case OpCode::kAssignPlusEquals:
       case OpCode::kAssignMinusEquals:
       case OpCode::kAssignStarEquals:
@@ -521,11 +704,11 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kAssignGreaterGreaterEquals:
       case OpCode::kDotMember:
       case OpCode::kLoadModule:
-      case OpCode::kConstNone:
       case OpCode::kSliceRange:
       case OpCode::kReturn:
       case OpCode::kMakeFunction:
       case OpCode::kSetDefaultValues:
+      case OpCode::kAssignDotMember:
       case OpCode::kAssignDotMemberPlusEquals:
       case OpCode::kAssignDotMemberMinusEquals:
       case OpCode::kAssignDotMemberStarEquals:
@@ -548,17 +731,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kAssignIndexMemberHatEquals:
       case OpCode::kAssignIndexMemberLessLessEquals:
       case OpCode::kAssignIndexMemberGreaterGreaterEquals:
-      case OpCode::kAssignSliceRangePlusEquals:
-      case OpCode::kAssignSliceRangeMinusEquals:
-      case OpCode::kAssignSliceRangeStarEquals:
-      case OpCode::kAssignSliceRangeSlashEquals:
-      case OpCode::kAssignSliceRangeSlashSlashEquals:
-      case OpCode::kAssignSliceRangePercentEquals:
-      case OpCode::kAssignSliceRangeAmpersandEquals:
-      case OpCode::kAssignSliceRangePipeEquals:
-      case OpCode::kAssignSliceRangeHatEquals:
-      case OpCode::kAssignSliceRangeLessLessEquals:
-      case OpCode::kAssignSliceRangeGreaterGreaterEquals:
 
       case OpCode::OP_CODE_NOT_SET:
         // TODO(lmirelmann): Implement the other instructions.
