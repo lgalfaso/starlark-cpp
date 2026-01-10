@@ -256,17 +256,18 @@ TEST(StarlarkBigint, OrderVsBool) {
 TEST(StarlarkBigint, ShiftZero) {
   Arena arena;
   error_handler error_callback;
+  starlark_bigint zero(0);
 
-  auto* result = starlark_bigint(0).binary_lshift(starlark_integer(1l << 62), arena, error_callback);
+  auto* result = zero.binary_lshift(starlark_integer(1l << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = starlark_bigint(0).binary_lshift(starlark_bigint(number::one), arena, error_callback);
+  result = zero.binary_lshift(starlark_bigint(number::one), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = starlark_bigint(0).binary_rshift(starlark_integer(1l << 62), arena, error_callback);
+  result = zero.binary_rshift(starlark_integer(1l << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = starlark_bigint(0).binary_rshift(starlark_bigint(number::one << 62), arena, error_callback);
+  result = zero.binary_rshift(starlark_bigint(number::one << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 }

@@ -240,17 +240,18 @@ TEST(StarlarkInteger, OrderExact) {
 TEST(StarlarkInteger, ShiftZero) {
   Arena arena;
   error_handler error_callback;
+  starlark_integer zero(0);
 
-  auto* result = starlark_integer(0).binary_lshift(starlark_integer(1l << 62), arena, error_callback);
+  auto* result = zero.binary_lshift(starlark_integer(1l << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = starlark_integer(0).binary_lshift(starlark_bigint(1l << 62), arena, error_callback);
+  result = zero.binary_lshift(starlark_bigint(1l << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = starlark_integer(0).binary_rshift(starlark_integer(1l << 62), arena, error_callback);
+  result = zero.binary_rshift(starlark_integer(1l << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = starlark_integer(0).binary_rshift(starlark_bigint(1l << 62), arena, error_callback);
+  result = zero.binary_rshift(starlark_bigint(1l << 62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 }
@@ -258,28 +259,30 @@ TEST(StarlarkInteger, ShiftZero) {
 TEST(StarlarkInteger, LShift) {
   Arena arena;
   error_handler error_callback;
+  starlark_integer one(1);
+  starlark_integer minus_eleven(-11);
 
-  auto* result = starlark_integer(1).binary_lshift(starlark_integer(3), arena, error_callback);
+  auto* result = one.binary_lshift(starlark_integer(3), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1 << 3).equals(*result));
 
-  result = starlark_integer(-11).binary_lshift(starlark_integer(10), arena, error_callback);
+  result = minus_eleven.binary_lshift(starlark_integer(10), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(-11264).equals(*result));
 
-  result = starlark_integer(1).binary_lshift(starlark_integer(100), arena, error_callback);
+  result = one.binary_lshift(starlark_integer(100), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one << 100).equals(*result));
 
-  result = starlark_integer(1).binary_lshift(starlark_integer(1 << 28), arena, error_callback);
+  result = one.binary_lshift(starlark_integer(1 << 28), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one << (1 << 28)).equals(*result));
 
-  result = starlark_integer(1).binary_lshift(starlark_bigint(62), arena, error_callback);
+  result = one.binary_lshift(starlark_bigint(62), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1L << 62).equals(*result));
 
-  result = starlark_integer(1).binary_lshift(starlark_bigint(63), arena, error_callback);
+  result = one.binary_lshift(starlark_bigint(63), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one << 63).equals(*result));
 }
