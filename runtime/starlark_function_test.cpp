@@ -1425,6 +1425,94 @@ TEST(StarlarkFloat, NamedArguments) {
   EXPECT_EQ("TypeError: float() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkHasattr, CheckAttribute) {
+  auto test = [](starlark_obj& element, std::string_view attr, bool expected) {
+    starlark_string attribute(attr);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    Arena arena;
+    error_handler error_callback;
+
+    pos_args.push_back(&element);
+    pos_args.push_back(&attribute);
+
+    auto* result = starlark_fn_hasattr(nullptr, pos_args, named_args, arena, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->truthy(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  starlark_string str("");
+  test(str, "count", true);
+  test(str, "coun", false);
+  test(str, "zzz", false);
+  test(str, "", false);
+}
+
+TEST(StarlarkHasattr, WrongAttributeType) {
+  starlark_string str("");
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: attribute name must be string, not 'int'", error_callback.messages[0]);
+}
+
+TEST(StarlarkHasattr, TooFewPosArgs) {
+  starlark_string str("");
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: hasattr expected 2 arguments, got 1", error_callback.messages[0]);
+}
+
+TEST(StarlarkHasattr, TooManyPosArgs) {
+  starlark_string str("");
+  starlark_string attr("count");
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&attr);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: hasattr expected 2 arguments, got 3", error_callback.messages[0]);
+}
+
+TEST(StarlarkHasattr, NamedArguments) {
+  std::string s_one("1");
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: hasattr() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkHash, String) {
   starlark_string str1("");
   starlark_string str2("abc");

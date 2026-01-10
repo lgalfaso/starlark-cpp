@@ -21,7 +21,7 @@ assert_eq(float(1), 1.0)
 assert_eq(float("Inf"), 1e308*10)
 assert_eq(float("-Inf"), -1e308*10)
 # TODO(lmirelmann): getattr
-# TODO(lmirelmann): hasattr
+assert_eq(hasattr(b'', "elems"), True)
 assert_eq(hash("abc"), 6041520446639342335)
 assert_eq(int("0123", 10), 123)
 assert_eq(int("0123"), 123)
@@ -37,7 +37,6 @@ assert_eq(list(range(3, 8, 2)), [3, 5, 7])
 assert_eq(repr([1, 2]), "[1, 2]")
 # TODO(lmirelmann): reversed
 assert_eq(repr(set([1, 2, 3])), "set([1, 2, 3])")
-# TODO(lmirelmann): set
 # TODO(lmirelmann): sorted
 assert_eq(str("abc"), 'abc')
 assert_eq(tuple(range(3)), (0, 1, 2))

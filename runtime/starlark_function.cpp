@@ -155,6 +155,17 @@ bool one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::n
   return true;
 }
 
+bool n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name) {
+  if (!no_named_args(named_args, error_callback, fn_name)) {
+    return false;
+  }
+  if (pos_args.size() != pos_args_count) {
+    error_callback.add_error(std::format("TypeError: {} expected {} arguments, got {}", fn_name, pos_args_count, pos_args.size()));
+    return false;
+  }
+  return true;
+}
+
 bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
   return no_named_args(named_args, error_callback, fn_name) &&
          max_args(pos_args, error_callback, fn_name, 1);
@@ -514,9 +525,22 @@ starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::po
 }
 
 starlark_obj* starlark_fn_hasattr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!n_pos_args(pos_args, named_args, 2, error_callback, "hasattr")) {
+    return nullptr;
+  }
+  auto* attr = pos_args.back();
+  if (attr->type() != starlark_types::string_t) {
+    error_callback.add_error(std::format("TypeError: attribute name must be string, not '{}'", attr->type()));
+    return nullptr;
+  }
+  const auto& attributes = pos_args.front()->dir();
+  auto it = std::lower_bound(attributes.begin(), attributes.end(), attr->as_string());
+  if (it == attributes.end() || *it != attr->as_string()) {
+    // TODO(lmirelmann): Use the value from the context.
+    return Arena::Create<starlark_bool>(&arena, false);
+  }
+  // TODO(lmirelmann): Use the value from the context.
+  return Arena::Create<starlark_bool>(&arena, true);
 }
 
 starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
