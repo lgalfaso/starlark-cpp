@@ -898,6 +898,9 @@ number& number::pow_mod(const number& power, const number& modulus) {
 
 namespace {
 
+// For a given base, return a tuple `result` such that:
+// `base == get<0>(result) * (1 << get<1>(result))`
+// `1 <= get<2>(result) && get<2>(result) <= 64/log2(base)`
 std::tuple<int, int, int> get_multipliers(int base) {
   switch (base) {
     case 2:
