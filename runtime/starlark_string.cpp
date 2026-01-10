@@ -82,8 +82,8 @@ starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& are
   }
   // TODO(lmirelmann): Check that the value length would not go over the limit.
   auto* result = Arena::Create<starlark_string>(&arena, value);
-  const starlark_string* b_other = static_cast<const starlark_string*>(&other);
-  result->value += b_other->value;
+  const starlark_string& b_other = static_cast<const starlark_string&>(other);
+  result->value += b_other.value;
   return result;
 }
 

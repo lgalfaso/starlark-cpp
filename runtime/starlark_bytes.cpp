@@ -85,8 +85,8 @@ starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& aren
   }
   // TODO(lmirelmann): Check that the value length would not go over the limit.
   auto* result = Arena::Create<starlark_bytes>(&arena, value);
-  const starlark_bytes* b_other = static_cast<const starlark_bytes*>(&other);
-  result->value += b_other->value;
+  const starlark_bytes& b_other = static_cast<const starlark_bytes&>(other);
+  result->value += b_other.value;
   return result;
 }
 

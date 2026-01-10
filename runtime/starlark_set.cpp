@@ -76,9 +76,9 @@ starlark_obj* starlark_set::binary_and(const starlark_obj& other, Arena& arena, 
     return starlark_obj::binary_and(other, arena, error_callback);
   }
   auto* result = Arena::Create<starlark_set>(&arena);
-  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
-    if (s_other->contains(key)) {
+    if (s_other.contains(key)) {
       result->add(key, error_callback);
     }
   }
@@ -93,8 +93,8 @@ starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, Arena& arena,
   for (auto& key : values) {
     result->add(key, error_callback);
   }
-  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
-  for (auto& key : s_other->values) {
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
+  for (auto& key : s_other.values) {
     result->add(key, error_callback);
   }
   return result;
@@ -105,13 +105,13 @@ starlark_obj* starlark_set::binary_hat(const starlark_obj& other, Arena& arena, 
     return starlark_obj::binary_hat(other, arena, error_callback);
   }
   auto* result = Arena::Create<starlark_set>(&arena);
-  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
-    if (!s_other->values.contains(key)) {
+    if (!s_other.values.contains(key)) {
       result->add(key, error_callback);
     }
   }
-  for (auto& key : s_other->values) {
+  for (auto& key : s_other.values) {
     if (!values.contains(key)) {
       result->add(key, error_callback);
     }
@@ -124,9 +124,9 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena
     return starlark_obj::binary_minus(other, arena, error_callback);
   }
   auto* result = Arena::Create<starlark_set>(&arena);
-  const starlark_set* s_other = static_cast<const starlark_set*>(&other);
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
-    if (!s_other->values.contains(key)) {
+    if (!s_other.values.contains(key)) {
       result->add(key, error_callback);
     }
   }
@@ -141,7 +141,7 @@ bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* oth
   if (type() != other->type()) {
     return false;
   }
-  const starlark_set* n_other = reinterpret_cast<const starlark_set*>(other);
+  const starlark_set* n_other = static_cast<const starlark_set*>(other);
   if (values.size() != n_other->values.size()) {
     return false;
   }
