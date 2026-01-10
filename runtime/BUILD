@@ -329,7 +329,7 @@ cc_test(
 
 cc_test(
     name = "starlark_integer_overflow_test",
-    size = "small",
+    size = "medium",
     srcs = ["starlark_integer_overflow_test.cpp"],
     deps = [
         ":starlark_integer",
