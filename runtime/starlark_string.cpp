@@ -20,6 +20,45 @@ using ::starlark::unicode::utf8_reader;
 namespace starlark {
 namespace runtime {
 
+const std::vector<std::string> starlark_string::attributes {
+  // Keep sorted.
+  "capitalize",
+  "codepoint_ords",
+  "codepoints",
+  "count",
+  "elem_ords",
+  "elems",
+  "endswith",
+  "find",
+  "format",
+  "index",
+  "isalnum",
+  "isalpha",
+  "isdigit",
+  "islower",
+  "isspace",
+  "istitle",
+  "isupper",
+  "join",
+  "lower",
+  "lstrip",
+  "partition",
+  "replace",
+  "removeprefix",
+  "removesuffix",
+  "rfind",
+  "rindex",
+  "rpartition",
+  "rsplit",
+  "rstrip",
+  "split",
+  "splitlines",
+  "startswith",
+  "strip",
+  "title",
+  "upper",
+};
+
 starlark_string::starlark_string(std::string_view value) : value(value) {}
 
 std::string_view starlark_string::type() const {
@@ -28,6 +67,10 @@ std::string_view starlark_string::type() const {
 
 bool starlark_string::primitive() const {
   return true;
+}
+
+const std::vector<std::string>& starlark_string::dir() const {
+  return attributes;
 }
 
 std::string starlark_string::str() const {
@@ -170,46 +213,6 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() 
   }
   return static_cast<int64_t>(siphash(value.data(), value.length(), 0x243F6A8885A308D3, 0x13198A2E03707344));
 }
-
-/*
-TODO: Implement the following methods:
-
-capitalize
-codepoint_ords
-codepoints
-count
-elem_ords
-elems
-endswith
-find
-format
-index
-isalnum
-isalpha
-isdigit
-islower
-isspace
-istitle
-isupper
-join
-lower
-lstrip
-partition
-replace
-removeprefix
-removesuffix
-rfind
-rindex
-rpartition
-rsplit
-rstrip
-split
-splitlines
-startswith
-strip
-title
-upper
-*/
 
 }  // namespace runtime
 }  // namespace starlark

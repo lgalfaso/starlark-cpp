@@ -20,6 +20,7 @@ class starlark_dictionary : public starlark_obj {
   starlark_dictionary();
   std::string_view type() const override;
   bool truthy() const override;
+  const std::vector<std::string>& dir() const override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   std::pair<bool, bool> insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback);
   starlark_obj* binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
@@ -47,6 +48,8 @@ class starlark_dictionary : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
+  static const std::vector<std::string> attributes;
+
   starlark::cnt::linked_hash_map<starlark_obj*, starlark_obj*, starlark_hash_op, starlark_equals_to> values;
   int iterators_count;
 };

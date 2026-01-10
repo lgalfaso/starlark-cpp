@@ -13,10 +13,34 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
+const std::vector<std::string> starlark_set::attributes {
+  // Keep sorted.
+  "add",
+  "clear",
+  "difference",
+  "difference_update",
+  "discard",
+  "intersection",
+  "intersection_update",
+  "isdisjoint",
+  "issubset",
+  "issuperset",
+  "pop",
+  "remove",
+  "symmetric_difference",
+  "symmetric_difference_update",
+  "union",
+  "update",
+};
+
 starlark_set::starlark_set() : iterators_count(0) {}
 
 std::string_view starlark_set::type() const {
   return starlark_types::set_t;
+}
+
+const std::vector<std::string>& starlark_set::dir() const {
+  return attributes;
 }
 
 int64_t starlark_set::len(bool produce_error, error_fn& error_callback) const {
@@ -198,27 +222,6 @@ starlark_obj* starlark_set::starlark_set_iterator::next() {
 void starlark_set::starlark_set_iterator::end_iterator() {
   set->iterators_count--;
 }
-
-/*
-TODO(lmirelmann): Implement the following methods:
-
-add
-clear
-difference
-difference_update
-discard
-intersection
-intersection_update
-isdisjoint
-issubset
-issuperset
-pop
-remove
-symmetric_difference
-symmetric_difference_update
-union
-update
-*/
 
 }  // namespace runtime
 }  // namespace starlark

@@ -997,6 +997,68 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
   EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
 }
 
+TEST(StarlarkDir, ReturnsTheAttributes) {
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dir(nullptr, pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "[\"append\", \"clear\", \"extend\", \"index\", \"insert\", \"pop\", \"remove\"]");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDir, TooFewPosArgs) {
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  auto* result = starlark_fn_dir(nullptr, pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: dir() takes exactly one argument (0 given)");
+}
+
+TEST(StarlarkDir, TooManyPosArgs) {
+  Arena arena;
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_dir(nullptr, pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: dir() takes exactly one argument (2 given)");
+}
+
+TEST(StarlarkDir, NamedArguments) {
+  Arena arena;
+  error_handler error_callback;
+  std::string s_one("one");
+  starlark_integer one(1);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  pos_args.push_back(&list);
+  named_args.insert(s_one, &one);
+
+  auto* result = starlark_fn_dir(nullptr, pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: dir() takes no keyword arguments");
+}
+
 TEST(StarlarkEnumerate, FromIterable) {
   Arena arena;
   error_handler error_callback;

@@ -397,9 +397,16 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "dir")) {
+    return nullptr;
+  }
+  const auto& attributes = pos_args.front()->dir();
+  auto* result = Arena::Create<starlark_list>(&arena, attributes.size());
+  for (const auto& attribute : attributes) {
+    // TODO(lmirelmann): This recreates the strings for every call. This can be quite wasteful. Given that this method is not called a lot, then maybe this is ok.
+    result->add(Arena::Create<starlark_string>(&arena, attribute), error_callback);
+  }
+  return result;
 }
 
 starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

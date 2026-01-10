@@ -19,6 +19,7 @@ class starlark_list : public starlark_obj {
   std::string_view type() const override;
   void add(starlark_obj* element, error_fn& error_callback);
   bool truthy() const override;
+  const std::vector<std::string>& dir() const override;
   void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
@@ -48,6 +49,8 @@ class starlark_list : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
+  static const std::vector<std::string> attributes;
+
   std::vector<starlark_obj*> values;
   int iterators_count = 0;
 };

@@ -132,6 +132,7 @@ class starlark_obj {
   std::string repr() const;
   virtual bool truthy() const = 0;
   virtual bool primitive() const;
+  virtual const std::vector<std::string>& dir() const;
   bool equals(const starlark_obj& other) const;
   int cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;
@@ -189,6 +190,9 @@ class starlark_obj {
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
   int64_t inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
+
+ private:
+  static const std::vector<std::string> attributes;
 
   friend class printer;
   friend class equals_comparator;

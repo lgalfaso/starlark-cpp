@@ -104,6 +104,8 @@ int order_comparator::run(std::string_view op, error_fn& error_callback) {
 
 starlark_iterator::~starlark_iterator() {}
 
+const std::vector<std::string> starlark_obj::attributes;
+
 starlark_obj::starlark_obj() : freezed(false) {}
 
 starlark_obj::~starlark_obj() {}
@@ -124,6 +126,10 @@ std::string starlark_obj::repr() const {
 
 bool starlark_obj::primitive() const {
   return false;
+}
+
+const std::vector<std::string>& starlark_obj::dir() const {
+  return attributes;
 }
 
 bool starlark_obj::equals(const starlark_obj& other) const {

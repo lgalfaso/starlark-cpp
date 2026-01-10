@@ -13,10 +13,27 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
+const std::vector<std::string> starlark_dictionary::attributes {
+  // Keep sorted.
+  "clear",
+  "get",
+  "items",
+  "keys",
+  "pop",
+  "popitem",
+  "setdefault",
+  "update",
+  "values",
+};
+
 starlark_dictionary::starlark_dictionary() : iterators_count(0) {}
 
 std::string_view starlark_dictionary::type() const {
   return starlark_types::dict_t;
+}
+
+const std::vector<std::string>& starlark_dictionary::dir() const {
+  return attributes;
 }
 
 int64_t starlark_dictionary::len(bool produce_error, error_fn& error_callback) const {
@@ -189,20 +206,6 @@ starlark_obj* starlark_dictionary::starlark_dictionary_iterator::next() {
 void starlark_dictionary::starlark_dictionary_iterator::end_iterator() {
   dictionary->iterators_count--;
 }
-
-/*
-TODO(lmirelmann): Implement the following methods:
-
-clear
-get
-items
-keys
-pop
-popitem
-setdefault
-update
-values
-*/
 
 }  // namespace runtime
 }  // namespace starlark

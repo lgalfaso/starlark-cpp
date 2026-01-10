@@ -16,12 +16,27 @@ using ::starlark::bigint::number;
 namespace starlark {
 namespace runtime {
 
+const std::vector<std::string> starlark_list::attributes {
+  // Keep sorted.
+  "append",
+  "clear",
+  "extend",
+  "index",
+  "insert",
+  "pop",
+  "remove",
+};
+
 starlark_list::starlark_list(std::size_t reserve_size) {
   values.reserve(reserve_size);
 }
 
 std::string_view starlark_list::type() const {
   return starlark_types::list_t;
+}
+
+const std::vector<std::string>& starlark_list::dir() const {
+  return attributes;
 }
 
 int64_t starlark_list::len(bool produce_error, error_fn& error_callback) const {
@@ -256,18 +271,6 @@ starlark_obj* starlark_list::starlark_list_iterator::next() {
 void starlark_list::starlark_list_iterator::end_iterator() {
   list->iterators_count--;
 }
-
-/*
-TODO(lmirelmann): Implement the following methods:
-
-append
-clear
-extend
-index
-insert
-pop
-remove
-*/
 
 }  // namespace runtime
 }  // namespace starlark

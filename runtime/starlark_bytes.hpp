@@ -18,6 +18,7 @@ class starlark_bytes : public starlark_obj {
   std::string_view type() const override;
   bool primitive() const override;
   bool truthy() const override;
+  const std::vector<std::string>& dir() const override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
@@ -32,6 +33,8 @@ class starlark_bytes : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
+  static const std::vector<std::string> attributes;
+
   std::string value;
 };
 
