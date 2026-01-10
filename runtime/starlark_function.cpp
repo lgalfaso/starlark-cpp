@@ -813,9 +813,44 @@ starlark_obj* starlark_fn_type(const std::vector<starlark_obj*>& pos_args, const
 }
 
 starlark_obj* starlark_fn_zip(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  auto all_available = [](const std::vector<starlark_iterator*>& its) -> bool {
+    for (const auto* it : its) {
+      if (!it->has_next()) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  if (!no_named_args(named_args, error_callback, "zip")) {
+    return nullptr;
+  }
+  if (pos_args.empty()) {
+    return Arena::Create<starlark_list>(&arena, 0);
+  }
+  auto len = std::numeric_limits<int64_t>::max();
+  std::vector<starlark_iterator*> its;
+  its.reserve(pos_args.size());
+  for (auto* element : pos_args) {
+    auto* it = element->get_iterator(true, arena, error_callback);
+    if (it == nullptr) {
+      return nullptr;
+    }
+    its.push_back(it);
+    len = std::min<int64_t>(len, element->len(false, error_callback));
+  }
+  starlark_list* result = Arena::Create<starlark_list>(&arena, std::max<int64_t>(0, len));
+  while (all_available(its)) {
+    auto* tuple = Arena::Create<starlark_tuple>(&arena, its.size());
+    for (auto* it : its) {
+      tuple->add(it->next());
+    }
+    result->add(tuple, error_callback);
+  }
+  for (auto* it : its) {
+    it->end_iterator();
+  }
+  return result;
 }
 
 }  // namespace runtime

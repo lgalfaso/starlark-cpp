@@ -40,5 +40,5 @@ assert_eq(repr(set([1, 2, 3])), "set([1, 2, 3])")
 assert_eq(str("abc"), 'abc')
 assert_eq(tuple(range(3)), (0, 1, 2))
 assert_eq(type([]), 'list')
-# TODO(lmirelmann): zip
+assert_eq(zip(range(100), range(3, 5)), [(0, 3), (1, 4)])
 

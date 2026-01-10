@@ -19,6 +19,7 @@
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_range.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
@@ -41,6 +42,7 @@ using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
+using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
@@ -2567,6 +2569,95 @@ TEST(StarlarkType, NamedArguments) {
   EXPECT_EQ(nullptr, starlark_fn_type(pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: type() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkZip, NoArguments) {
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+
+  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[]");
+}
+
+TEST(StarlarkZip, OneArgument) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_range range(0, 3, 1);
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&range);
+
+  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(0,), (1,), (2,)]");
+}
+
+TEST(StarlarkZip, TwoArgument) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_range range1(0, 3, 1);
+  starlark_range range2(100, 200, 1);
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&range1);
+  pos_args.push_back(&range2);
+
+  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(0, 100), (1, 101), (2, 102)]");
+}
+
+TEST(StarlarkZip, ThreeArgument) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_range range1(0, 3, 1);
+  starlark_range range2(100, 200, 1);
+  starlark_range range3(1000, 1002, 1);
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&range1);
+  pos_args.push_back(&range2);
+  pos_args.push_back(&range3);
+
+  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(0, 100, 1000), (1, 101, 1001)]");
+}
+
+TEST(StarlarkZip, NonIterable) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_string str("abc");
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  pos_args.push_back(&str);
+
+  EXPECT_EQ(nullptr, starlark_fn_zip(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
+}
+
+TEST(StarlarkZip, NamedArguments) {
+  starlark_integer one(1);
+  Arena arena;
+  error_handler error_callback;
+
+  std::vector<starlark_obj*> pos_args;
+  std::map<std::string, starlark_obj*> named_args;
+  named_args["1"] = &one;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_zip(pos_args, named_args, arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: zip() takes no keyword arguments", error_callback.messages[0]);
 }
 
 }  // namespace
