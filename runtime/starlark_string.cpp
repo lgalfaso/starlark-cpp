@@ -40,10 +40,10 @@ int64_t starlark_string::len(bool produce_error, error_fn& error_callback) const
 
 bool starlark_string::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
-  // TODO(lmirelmann): If this function were to be executed a lot and were to become
-  // a performance issue, then there are a few things that can be optimized:
-  // - The check for `use_single_quote` can be done in one pass
-  // - It should be possible to check whether the original value can be used just adding quotes
+  // TODO(lmirelmann): If this function were to be executed a lot, then there are a
+  // few things that can we can try:
+  // - Check whether the original value can be used just adding quotes
+  // - Keep the value of `result` in a mutable field
   std::string result = "\"";
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
