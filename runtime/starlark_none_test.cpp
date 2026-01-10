@@ -42,7 +42,7 @@ using ::starlark::runtime::starlark_tuple;
 
 namespace {
 
-starlark_obj* base_fn(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*> &, Arena& arena, error_fn& error_callback) {
+starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, Arena& arena, error_fn& error_callback) {
   return nullptr;
 }
 
@@ -67,7 +67,7 @@ TEST(StarlarkNone, Equals) {
   EXPECT_FALSE(starlark_none().equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_bool(false)));
   EXPECT_FALSE(starlark_none().equals(starlark_bytes("")));
-  EXPECT_FALSE(starlark_none().equals(starlark_built_in_function(base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_none().equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_none().equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_none().equals(starlark_float(0.0)));
   EXPECT_FALSE(starlark_none().equals(starlark_function()));

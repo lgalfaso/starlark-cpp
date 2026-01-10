@@ -9,6 +9,7 @@ assert_eq(dict({}), {})
 assert_eq(dict({'a': 1}), {'a': 1})
 assert_eq(dict({'a': 1}, b = 2), {'a': 1, 'b': 2})
 assert_eq(dict([('a', 1), ('b', 2)]), {'a': 1, 'b': 2})
+assert_eq(str(dict(one = 1, two = 2, three = 3, four = 4)), '{"one": 1, "two": 2, "three": 3, "four": 4}')
 # TODO(lmirelmann): dir
 assert_eq(enumerate(['a', 'b', 'c']), [(0, 'a'), (1, 'b'), (2, 'c')])
 assert_eq(enumerate(['a', 'b', 'c'], start = 100), [(100, 'a'), (101, 'b'), (102, 'c')])

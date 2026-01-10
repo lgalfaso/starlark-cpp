@@ -42,7 +42,7 @@ std::string print_logs(logger& logging) {
   return result;
 }
 
-starlark_obj* assert_eq_fn(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
   if (!named_args.empty()) {
     error_callback.add_error("assert_eq does not take any named arguments.");
     return nullptr;
@@ -68,7 +68,7 @@ starlark_obj* assert_eq_fn(const std::vector<starlark_obj*>& pos_args, const std
   return Arena::Create<starlark_none>(&arena);
 }
 
-starlark_obj* assert_fail_fn(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
   starlark_obj* error = nullptr;
   for (auto& [key, value] : named_args) {
     if (key == "error_message") {
@@ -140,8 +140,8 @@ TEST(Interpreter, TestCase) {
   logger logging;
   Arena arena;
   std::map<std::string, starlark_obj*, std::less<>> custom_binding;
-  custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, assert_eq_fn, "assert_eq");
-  custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, assert_fail_fn, "assert_fail");
+  custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
+  custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
 
   frame* result = runner.run(starlark_code, custom_binding, arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);

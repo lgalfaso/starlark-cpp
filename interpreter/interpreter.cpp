@@ -444,8 +444,8 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
           bool has_variadic_positional_argument = 3;
           bool has_variadic_named_argument = 4;
         */
-        std::vector<starlark_obj*> pos_args;
-        std::map<std::string, starlark_obj*> named_args;
+        starlark_obj::pos_args_t pos_args;
+        starlark_obj::named_args_t named_args;
         for (int i = 0; i < op_code.call().positional_arguments_count(); ++i) {
           pos_args.push_back(stack[stack.size() - args_count + i]);
         }
@@ -453,7 +453,8 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
           auto* key = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i];
           auto* value = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i + 1];
           assert(key->type() == starlark_types::string_t);
-          named_args.emplace(key->as_string(), value);
+          // TODO(lmirelmann): Avoid the generation of starlark_string.
+          named_args.insert(key->as_string(), value);
         }
         // TODO(lmirelmann): Get the variadic arguments.
         // TODO(lmirelmann): Get the named variadic arguments.
@@ -768,36 +769,36 @@ frame* interpreter::run(std::string_view starlark_code,
   global_context["True"] = Arena::Create<starlark_bool>(&arena, true);
   global_context["False"] = Arena::Create<starlark_bool>(&arena, false);
   global_context["None"] = Arena::Create<starlark_none>(&arena);
-  global_context["abs"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_abs, "abs");
-  global_context["all"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_all, "all");
-  global_context["any"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_any, "any");
-  global_context["bool"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_bool, "bool");
-  global_context["bytes"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_bytes, "bytes");
-  global_context["chr"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_chr, "chr");
-  global_context["dict"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_dict, "dict");
-  global_context["dir"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_dir, "dir");
-  global_context["enumerate"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_enumerate, "enumerate");
-  global_context["fail"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_fail, "fail");
-  global_context["float"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_float, "float");
-  global_context["getattr"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_getattr, "getattr");
-  global_context["hasattr"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_hasattr, "hasattr");
-  global_context["hash"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_hash, "hash");
-  global_context["int"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_int, "int");
-  global_context["len"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_len, "len");
-  global_context["list"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_list, "list");
-  global_context["max"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_max, "max");
-  global_context["min"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_min, "min");
-  global_context["ord"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_ord, "ord");
-  global_context["print"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_print, "print");
-  global_context["range"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_range, "range");
-  global_context["repr"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_repr, "repr");
-  global_context["reversed"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_reversed, "reversed");
-  global_context["set"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_set, "set");
-  global_context["sorted"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_sorted, "sorted");
-  global_context["str"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_str, "str");
-  global_context["tuple"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_tuple, "tuple");
-  global_context["type"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_type, "type");
-  global_context["zip"] = Arena::Create<starlark_built_in_function>(&arena, starlark_fn_zip, "zip");
+  global_context["abs"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_abs, "abs");
+  global_context["all"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_all, "all");
+  global_context["any"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_any, "any");
+  global_context["bool"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_bool, "bool");
+  global_context["bytes"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_bytes, "bytes");
+  global_context["chr"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_chr, "chr");
+  global_context["dict"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_dict, "dict");
+  global_context["dir"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_dir, "dir");
+  global_context["enumerate"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_enumerate, "enumerate");
+  global_context["fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_fail, "fail");
+  global_context["float"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_float, "float");
+  global_context["getattr"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_getattr, "getattr");
+  global_context["hasattr"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_hasattr, "hasattr");
+  global_context["hash"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_hash, "hash");
+  global_context["int"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_int, "int");
+  global_context["len"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_len, "len");
+  global_context["list"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_list, "list");
+  global_context["max"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_max, "max");
+  global_context["min"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_min, "min");
+  global_context["ord"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_ord, "ord");
+  global_context["print"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_print, "print");
+  global_context["range"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_range, "range");
+  global_context["repr"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_repr, "repr");
+  global_context["reversed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_reversed, "reversed");
+  global_context["set"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_set, "set");
+  global_context["sorted"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_sorted, "sorted");
+  global_context["str"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_str, "str");
+  global_context["tuple"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_tuple, "tuple");
+  global_context["type"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_type, "type");
+  global_context["zip"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_zip, "zip");
   for (const auto& kv : custom_binding) {
     global_context.insert(kv);
   }

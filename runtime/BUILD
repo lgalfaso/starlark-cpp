@@ -70,6 +70,7 @@ cc_library(
     deps = [
         ":error_fn",
         "//bigint:number",
+        "//containers:linked_hash_map",
         "@protobuf",
     ],
 )

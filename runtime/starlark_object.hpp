@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "bigint/number.hpp"
+#include "containers/linked_hash_map.hpp"
 #include "google/protobuf/arena.h"
 #include "runtime/error_fn.hpp"
 
@@ -111,8 +112,19 @@ enum class starlark_numeric_type {
   kNotNumeric
 };
 
+struct starlark_hash_op {
+  size_t operator()(const starlark_obj* value) const;
+};
+
+struct starlark_equals_to {
+  bool operator()(const starlark_obj* lhs, const starlark_obj* rhs) const;
+};
+
 class starlark_obj {
  public:
+  typedef std::vector<starlark_obj*> pos_args_t;
+  typedef starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>> named_args_t;
+
   starlark_obj();
   virtual ~starlark_obj();
   virtual std::string_view type() const = 0;
@@ -124,7 +136,7 @@ class starlark_obj {
   int cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;
   void freeze();
-  virtual starlark_obj* call(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+  virtual starlark_obj* call(const pos_args_t& pos_args, const named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
   virtual void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback);
 
   virtual starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn& error_callback) const;
@@ -181,14 +193,6 @@ class starlark_obj {
   friend class printer;
   friend class equals_comparator;
   friend class order_comparator;
-};
-
-struct starlark_hash_op {
-  size_t operator()(const starlark_obj* value) const;
-};
-
-struct starlark_equals_to {
-  bool operator()(const starlark_obj* lhs, const starlark_obj* rhs) const;
 };
 
 int64_t starlark_hash(std::span<int64_t> values);

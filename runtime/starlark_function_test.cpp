@@ -55,21 +55,21 @@ namespace {
 
 class Fn {
  public:
-  MOCK_METHOD(starlark_obj*, Call, (const std::vector<starlark_obj*>&, (const std::map<std::string, starlark_obj*>&), Arena&, error_fn&));
+  MOCK_METHOD(starlark_obj*, Call, (starlark_obj* this_obj, const starlark_obj::pos_args_t&, const starlark_obj::named_args_t&, Arena&, error_fn&));
 };
 
 static Fn* fn_mock = nullptr;
 
-starlark_obj* base_fn(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, Arena& arena, error_fn& error_callback) {
+starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, Arena& arena, error_fn& error_callback) {
   if (fn_mock != nullptr) {
-    return fn_mock->Call(pos_args, named_args, arena, error_callback);
+    return fn_mock->Call(this_obj, pos_args, named_args, arena, error_callback);
   }
   return nullptr;
 }
 
-starlark_obj* base2_fn(const std::vector<starlark_obj*>& pos_args, const std::map<std::string, starlark_obj*>& named_args, Arena& arena, error_fn& error_callback) {
+starlark_obj* base2_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, Arena& arena, error_fn& error_callback) {
   if (fn_mock != nullptr) {
-    return fn_mock->Call(pos_args, named_args, arena, error_callback);
+    return fn_mock->Call(this_obj, pos_args, named_args, arena, error_callback);
   }
   return nullptr;
 }
@@ -88,43 +88,43 @@ class FnTest : public ::testing::Test {
 
 TEST(StarlarkFunction, Type) {
   EXPECT_EQ("function", starlark_function().type());
-  EXPECT_EQ("builtin_function_or_method", starlark_built_in_function(base_fn, "fn_name").type());
+  EXPECT_EQ("builtin_function_or_method", starlark_built_in_function(nullptr, base_fn, "fn_name").type());
 }
 
 TEST(StarlarkFunction, Primitve) {
   EXPECT_FALSE(starlark_function().primitive());
-  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").primitive());
+  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").primitive());
 }
 
 TEST(StarlarkFunction, Truthy) {
   EXPECT_TRUE(starlark_function().truthy());
-  EXPECT_TRUE(starlark_built_in_function(base_fn, "fn_name").truthy());
+  EXPECT_TRUE(starlark_built_in_function(nullptr, base_fn, "fn_name").truthy());
 }
 
 TEST(StarlarkFunction, Str) {
-  EXPECT_EQ("<built-in function fn_name>", starlark_built_in_function(base_fn, "fn_name").str());
+  EXPECT_EQ("<built-in function fn_name>", starlark_built_in_function(nullptr, base_fn, "fn_name").str());
 }
 
 TEST(StarlarkFunction, Hash) {
-  EXPECT_EQ(0, starlark_built_in_function(base_fn, "").hash());
-  EXPECT_EQ(-5056436948751091085, starlark_built_in_function(base_fn, "fn_name").hash());
-  EXPECT_EQ(-342786463226536281, starlark_built_in_function(base_fn, "some_fn").hash());
+  EXPECT_EQ(0, starlark_built_in_function(nullptr, base_fn, "").hash());
+  EXPECT_EQ(-5056436948751091085, starlark_built_in_function(nullptr, base_fn, "fn_name").hash());
+  EXPECT_EQ(-342786463226536281, starlark_built_in_function(nullptr, base_fn, "some_fn").hash());
 }
 
 TEST(StarlarkFunction, Equals) {
-  EXPECT_TRUE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base_fn, "fn_name")));
-  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base2_fn, "fn_name")));
-  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base_fn, "another_name")));
-  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_built_in_function(base2_fn, "another_name")));
-  EXPECT_FALSE(starlark_built_in_function(base_fn, "fn_name").equals(starlark_list(0)));
+  EXPECT_TRUE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base2_fn, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "another_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base2_fn, "another_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_list(0)));
 }
 
 TEST_F(FnTest, Call) {
-  starlark_built_in_function fn(base_fn, "fn_name");
+  starlark_built_in_function fn(nullptr, base_fn, "fn_name");
   Arena arena;
   error_handler error_callback;
 
-  EXPECT_CALL(*fn_mock, Call(testing::_, testing::_, testing::_, testing::_))
+  EXPECT_CALL(*fn_mock, Call(testing::_, testing::_, testing::_, testing::_, testing::_))
       .WillOnce(testing::Return(nullptr));
   fn.call({}, {}, arena, error_callback);
   // TODO(lmirelmann): Check the return value.
@@ -134,24 +134,24 @@ TEST_F(FnTest, Call) {
 
 TEST(StarlarkAbs, Numeric) {
   auto itest = [](auto&& value, std::string_view result) {
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     Arena arena;
     error_handler error_callback;
     pos_args.push_back(create_integer(std::forward<decltype(value)>(value), arena));
 
-    EXPECT_EQ(result, starlark_fn_abs(pos_args, named_args, arena, error_callback)->str());
+    EXPECT_EQ(result, starlark_fn_abs(nullptr, pos_args, named_args, arena, error_callback)->str());
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
   auto ftest = [](double value, std::string_view result) {
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     Arena arena;
     error_handler error_callback;
     pos_args.push_back(create_float(value, arena));
 
-    EXPECT_EQ(result, starlark_fn_abs(pos_args, named_args, arena, error_callback)->str());
+    EXPECT_EQ(result, starlark_fn_abs(nullptr, pos_args, named_args, arena, error_callback)->str());
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
@@ -184,11 +184,11 @@ TEST(StarlarkAbs, List) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bad operand type for abs(): 'list'", error_callback.messages[0]);
 }
@@ -197,10 +197,10 @@ TEST(StarlarkAbs, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: abs() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -211,28 +211,29 @@ TEST(StarlarkAbs, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: abs() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAbs, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_abs(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: abs() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -244,26 +245,26 @@ TEST(StarlarkAll, List) {
   error_handler error_callback;
 
   starlark_list list1(0);
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
   list2.add(&one, error_callback);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
 
   starlark_list list3(0);
   list3.add(&zero, error_callback);
   list3.add(&one, error_callback);
-  std::vector<starlark_obj*> pos_args3;
-  std::map<std::string, starlark_obj*> named_args3;
+  starlark_obj::pos_args_t pos_args3;
+  starlark_obj::named_args_t named_args3;
   pos_args3.push_back(&list3);
 
-  EXPECT_EQ("True", starlark_fn_all(pos_args1, named_args1, arena, error_callback)->str());
-  EXPECT_EQ("True", starlark_fn_all(pos_args2, named_args2, arena, error_callback)->str());
-  EXPECT_EQ("False", starlark_fn_all(pos_args3, named_args3, arena, error_callback)->str());
+  EXPECT_EQ("True", starlark_fn_all(nullptr, pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("True", starlark_fn_all(nullptr, pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("False", starlark_fn_all(nullptr, pos_args3, named_args3, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -272,11 +273,11 @@ TEST(StarlarkAll, Integer) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_all(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
 }
@@ -285,10 +286,10 @@ TEST(StarlarkAll, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_all(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: all() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -299,28 +300,29 @@ TEST(StarlarkAll, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_all(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: all() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAll, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_all(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: all() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -332,33 +334,33 @@ TEST(StarlarkAny, List) {
   error_handler error_callback;
 
   starlark_list list1(0);
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
   list2.add(&one, error_callback);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
 
   starlark_list list3(0);
   list3.add(&zero, error_callback);
   list3.add(&one, error_callback);
-  std::vector<starlark_obj*> pos_args3;
-  std::map<std::string, starlark_obj*> named_args3;
+  starlark_obj::pos_args_t pos_args3;
+  starlark_obj::named_args_t named_args3;
   pos_args3.push_back(&list3);
 
   starlark_list list4(0);
   list4.add(&zero, error_callback);
-  std::vector<starlark_obj*> pos_args4;
-  std::map<std::string, starlark_obj*> named_args4;
+  starlark_obj::pos_args_t pos_args4;
+  starlark_obj::named_args_t named_args4;
   pos_args4.push_back(&list4);
 
-  EXPECT_EQ("False", starlark_fn_any(pos_args1, named_args1, arena, error_callback)->str());
-  EXPECT_EQ("True", starlark_fn_any(pos_args2, named_args2, arena, error_callback)->str());
-  EXPECT_EQ("True", starlark_fn_any(pos_args3, named_args3, arena, error_callback)->str());
-  EXPECT_EQ("False", starlark_fn_any(pos_args4, named_args4, arena, error_callback)->str());
+  EXPECT_EQ("False", starlark_fn_any(nullptr, pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("True", starlark_fn_any(nullptr, pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("True", starlark_fn_any(nullptr, pos_args3, named_args3, arena, error_callback)->str());
+  EXPECT_EQ("False", starlark_fn_any(nullptr, pos_args4, named_args4, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -367,11 +369,11 @@ TEST(StarlarkAny, Integer) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_any(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
 }
@@ -380,10 +382,10 @@ TEST(StarlarkAny, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_any(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: any() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -394,28 +396,29 @@ TEST(StarlarkAny, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_any(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: any() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAny, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_all(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: all() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -426,18 +429,18 @@ TEST(StarlarkBool, List) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
   list2.add(&one, error_callback);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
 
-  EXPECT_EQ("True", starlark_fn_bool(pos_args2, named_args2, arena, error_callback)->str());
-  EXPECT_EQ("False", starlark_fn_bool(pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("True", starlark_fn_bool(nullptr, pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("False", starlark_fn_bool(nullptr, pos_args1, named_args1, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -445,10 +448,10 @@ TEST(StarlarkBool, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_bool(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bool() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -459,28 +462,29 @@ TEST(StarlarkBool, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_bool(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bool() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkBool, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_bool(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bool() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -491,21 +495,21 @@ TEST(StarlarkBytes, FromBytesOrString) {
 
   {
     starlark_string str("abc");
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&str);
 
-    auto* result = starlark_fn_bytes(pos_args, named_args, arena, error_callback);
+    auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->repr(), "b\"abc\"");
   }
   {
     starlark_bytes bytes("def");
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&bytes);
 
-    auto* result = starlark_fn_bytes(pos_args, named_args, arena, error_callback);
+    auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->repr(), "b\"def\"");
   }
@@ -517,11 +521,11 @@ TEST(StarlarkBytes, FromStringInvalidUnicodeSequence) {
   error_handler error_callback;
 
   starlark_string str("abc\xf0\x{f1}def");
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  auto* result = starlark_fn_bytes(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "b\"abc\\xef\\xbf\\xbd\\xef\\xbf\\xbddef\"");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -536,8 +540,8 @@ TEST(StarlarkBytes, List) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
@@ -545,12 +549,12 @@ TEST(StarlarkBytes, List) {
   list2.add(&one, error_callback);
   list2.add(&max_minus_one, error_callback);
   list2.add(&max_byte, error_callback);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
 
-  auto* result1 = starlark_fn_bytes(pos_args1, named_args1, arena, error_callback);
-  auto* result2 = starlark_fn_bytes(pos_args2, named_args2, arena, error_callback);
+  auto* result1 = starlark_fn_bytes(nullptr, pos_args1, named_args1, arena, error_callback);
+  auto* result2 = starlark_fn_bytes(nullptr, pos_args2, named_args2, arena, error_callback);
   ASSERT_NE(nullptr, result1);
   EXPECT_EQ("b\"\"", result1->str());
   ASSERT_NE(nullptr, result2) << error_callback.messages.front();
@@ -570,11 +574,11 @@ TEST(StarlarkBytes, OutOfRange) {
     error_handler error_callback;
     starlark_list list(0);
     list.add(value, error_callback);
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&list);
 
-    EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback)) << value->str();
+    EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback)) << value->str();
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ("ValueError: bytes must be in range(0, 256)", error_callback.messages[0]);
   };
@@ -589,10 +593,10 @@ TEST(StarlarkBytes, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bytes() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -601,14 +605,14 @@ TEST(StarlarkBytes, ListWithNone) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_none none;
   list.add(&none, error_callback);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'NoneType' object cannot be interpreted as an integer", error_callback.messages[0]);
 }
@@ -617,12 +621,12 @@ TEST(StarlarkBytes, None) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_none none;
   pos_args.push_back(&none);
 
-  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: cannot convert 'NoneType' object to bytes", error_callback.messages[0]);
 }
@@ -632,30 +636,31 @@ TEST(StarlarkBytes, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&bytes);
   pos_args.push_back(&bytes);
 
-  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bytes() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, NamedArguments) {
   starlark_bytes bytes("def");
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&bytes);
-  named_args["1"] = &one;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_bytes(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: bytes() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -665,23 +670,23 @@ TEST(StarlarkChr, FromInt) {
   error_handler error_callback;
 
   for (int i = 0; i <= 0x10FFFF; ++i) {
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     starlark_integer value(i);
     pos_args.push_back(&value);
 
-    auto* result = starlark_fn_chr(pos_args, named_args, arena, error_callback);
+    auto* result = starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback);
     ASSERT_NE(nullptr, result);
     ASSERT_EQ(starlark_types::string_t, result->type());
     EXPECT_EQ(i, utf8_reader(result->str(), false, false).peek_code_point());
   }
   for (int i = 0; i <= 0x10FFFF; ++i) {
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     starlark_bigint value(i);
     pos_args.push_back(&value);
 
-    auto* result = starlark_fn_chr(pos_args, named_args, arena, error_callback);
+    auto* result = starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback);
     ASSERT_NE(nullptr, result);
     ASSERT_EQ(starlark_types::string_t, result->type());
     EXPECT_EQ(i, utf8_reader(result->str(), false, false).peek_code_point());
@@ -694,11 +699,11 @@ TEST(StarlarkChr, FromFloat) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'float' object cannot be interpreted as an integer", error_callback.messages[0]);
 }
@@ -708,11 +713,11 @@ TEST(StarlarkChr, OutOfRange1) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
@@ -722,11 +727,11 @@ TEST(StarlarkChr, OutOfRange2) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
@@ -736,11 +741,11 @@ TEST(StarlarkChr, OutOfRange3) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
@@ -750,27 +755,28 @@ TEST(StarlarkChr, OutOfRange4) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, NamedArguments) {
   starlark_bytes bytes("def");
+  std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
-  named_args["1"] = &bytes;
+  named_args.insert(s_one, &one);
 
-  EXPECT_EQ(nullptr, starlark_fn_chr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: chr() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -779,10 +785,10 @@ TEST(StarlarkDict, Empty) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "{}");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -792,15 +798,15 @@ TEST(StarlarkDict, FromDict) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_dictionary dict;
   starlark_none none;
   starlark_integer one(1);
   dict.insert(&none, &none, error_callback);
   pos_args.push_back(&dict);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "{None: None}");
   // Check that this is a copy.
@@ -813,8 +819,8 @@ TEST(StarlarkDict, FromIterable) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_tuple tuple(0);
   starlark_none none;
@@ -824,7 +830,7 @@ TEST(StarlarkDict, FromIterable) {
   list.add(&tuple, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "{None: 1}");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -833,15 +839,17 @@ TEST(StarlarkDict, FromIterable) {
 TEST(StarlarkDict, FromNamedArguments) {
   Arena arena;
   error_handler error_callback;
+  std::string s_one("one");
+  std::string s_two("two");
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_integer one(1);
   starlark_integer two(2);
-  named_args["one"] = &one;
-  named_args["two"] = &two;
+  named_args.insert(s_one, &one);
+  named_args.insert(s_two, &two);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "{\"one\": 1, \"two\": 2}");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -851,12 +859,12 @@ TEST(StarlarkDict, FromInteger) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_integer one(1);
   pos_args.push_back(&one);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
@@ -866,14 +874,14 @@ TEST(StarlarkDict, FromNonIterable) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_integer one(1);
   list.add(&one, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
@@ -883,8 +891,8 @@ TEST(StarlarkDict, FromNonHashable) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list1(0);
   starlark_list list2(0);
   starlark_tuple tuple(0);
@@ -894,7 +902,7 @@ TEST(StarlarkDict, FromNonHashable) {
   list1.add(&tuple, error_callback);
   pos_args.push_back(&list1);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'list' as a dict key (unhashable type: 'list')");
@@ -904,13 +912,13 @@ TEST(StarlarkDict, MultiplePositionalArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: dict expected at most 1 argument, got 2");
@@ -920,8 +928,8 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements1) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_tuple tuple1(0);
   starlark_tuple tuple2(0);
@@ -933,7 +941,7 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements1) {
   list.add(&tuple2, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 0; 2 is required");
@@ -943,8 +951,8 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements2) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_tuple tuple1(0);
   starlark_tuple tuple2(0);
@@ -957,7 +965,7 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements2) {
   list.add(&tuple2, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 1; 2 is required");
@@ -967,8 +975,8 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_tuple tuple1(0);
   starlark_tuple tuple2(0);
@@ -983,7 +991,7 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
   list.add(&tuple2, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_dict(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_dict(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
@@ -993,8 +1001,8 @@ TEST(StarlarkEnumerate, FromIterable) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
@@ -1004,7 +1012,7 @@ TEST(StarlarkEnumerate, FromIterable) {
   list.add(&s_three, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "[(0, \"one\"), (1, \"two\"), (2, \"three\")]");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -1014,9 +1022,10 @@ TEST(StarlarkEnumerate, FromIterableWithStart) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
+  std::string s_start("start");
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
@@ -1025,9 +1034,9 @@ TEST(StarlarkEnumerate, FromIterableWithStart) {
   list.add(&s_three, error_callback);
   pos_args.push_back(&list);
   starlark_integer start(100);
-  named_args["start"] = &start;
+  named_args.insert(s_start, &start);
 
-  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "[(100, \"one\"), (101, \"two\"), (102, \"three\")]");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -1037,9 +1046,10 @@ TEST(StarlarkEnumerate, InvalidStart) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
+  std::string s_start("start");
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
@@ -1048,9 +1058,9 @@ TEST(StarlarkEnumerate, InvalidStart) {
   list.add(&s_three, error_callback);
   pos_args.push_back(&list);
   starlark_string start("100");
-  named_args["start"] = &start;
+  named_args.insert(s_start, &start);
 
-  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string).");
@@ -1060,20 +1070,21 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
   starlark_string s_three("three");
+  std::string s_end("end");
   list.add(&s_one, error_callback);
   list.add(&s_two, error_callback);
   list.add(&s_three, error_callback);
   pos_args.push_back(&list);
   starlark_string end("100");
-  named_args["end"] = &end;
+  named_args.insert(s_end, &end);
 
-  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'end'.");
@@ -1083,10 +1094,10 @@ TEST(StarlarkEnumerate, TooFewPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() takes exactly one argument (0 given)");
@@ -1096,8 +1107,8 @@ TEST(StarlarkEnumerate, TooManyPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_string s_one("one");
   starlark_string s_two("two");
@@ -1108,7 +1119,7 @@ TEST(StarlarkEnumerate, TooManyPosArguments) {
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() takes exactly one argument (2 given)");
@@ -1118,12 +1129,12 @@ TEST(StarlarkEnumerate, NotIterable) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   starlark_string s_one("one");
   pos_args.push_back(&s_one);
 
-  auto* result = starlark_fn_enumerate(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'string' object is not iterable");
@@ -1136,13 +1147,13 @@ TEST(StarlarkFail, Message) {
   starlark_list list(0);
   starlark_integer one(1);
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
   pos_args.push_back(&list);
   pos_args.push_back(&one);
 
-  auto* result = starlark_fn_fail(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_fail(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "Error: some error message [] 1");
@@ -1151,13 +1162,14 @@ TEST(StarlarkFail, Message) {
 TEST(StarlarkFail, NamedArgs) {
   Arena arena;
   error_handler error_callback;
+  std::string s_one("1");
   starlark_integer one(1);
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
 
-  EXPECT_EQ(nullptr, starlark_fn_fail(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_fail(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: fail() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -1168,11 +1180,11 @@ TEST(StarlarkFloat, FromFloat) {
     Arena arena;
     error_handler error_callback;
 
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&value);
 
-    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_EQ(repr, starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback)->repr());
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
@@ -1188,11 +1200,11 @@ TEST(StarlarkFloat, FromInteger) {
     Arena arena;
     error_handler error_callback;
 
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&value);
 
-    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_EQ(repr, starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback)->repr());
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
@@ -1207,11 +1219,11 @@ TEST(StarlarkFloat, FromBigint) {
     Arena arena;
     error_handler error_callback;
 
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&value);
 
-    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_EQ(repr, starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback)->repr());
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
@@ -1226,11 +1238,11 @@ TEST(StarlarkFloat, FromString) {
     Arena arena;
     error_handler error_callback;
 
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&value);
 
-    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_EQ(repr, starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback)->repr());
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
@@ -1248,11 +1260,11 @@ TEST(StarlarkFloat, FromBool) {
     Arena arena;
     error_handler error_callback;
 
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&value);
 
-    EXPECT_EQ(repr, starlark_fn_float(pos_args, named_args, arena, error_callback)->repr());
+    EXPECT_EQ(repr, starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback)->repr());
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
@@ -1265,11 +1277,11 @@ TEST(StarlarkFloat, FromList) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: float() argument must be a string or a real number, not 'list'");
@@ -1280,11 +1292,11 @@ TEST(StarlarkFloat, BigintOverflow) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
@@ -1295,11 +1307,11 @@ TEST(StarlarkFloat, StringOverflow) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: floating-point number too large");
@@ -1310,11 +1322,11 @@ TEST(StarlarkFloat, InvalidString) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  auto* result = starlark_fn_float(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: could not convert string to float: '1a'");
@@ -1325,27 +1337,28 @@ TEST(StarlarkFloat, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_float(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: float() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkFloat, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_float(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_float(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: float() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -1356,15 +1369,15 @@ TEST(StarlarkHash, String) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&str1);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&str2);
 
-  EXPECT_EQ("0", starlark_fn_hash(pos_args1, named_args1, arena, error_callback)->str());
-  EXPECT_EQ("6041520446639342335", starlark_fn_hash(pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("0", starlark_fn_hash(nullptr, pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("6041520446639342335", starlark_fn_hash(nullptr, pos_args2, named_args2, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1374,15 +1387,15 @@ TEST(StarlarkHash, Bytes) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&bytes1);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&bytes2);
 
-  EXPECT_EQ("0", starlark_fn_hash(pos_args1, named_args1, arena, error_callback)->str());
-  EXPECT_EQ("-8236155743588961689", starlark_fn_hash(pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("0", starlark_fn_hash(nullptr, pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("-8236155743588961689", starlark_fn_hash(nullptr, pos_args2, named_args2, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1391,11 +1404,11 @@ TEST(StarlarkHash, Bool) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&true_obj);
 
-  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: in call to hash(), got value of type 'bool', want 'string' or 'bytes'", error_callback.messages[0]);
 }
@@ -1404,10 +1417,10 @@ TEST(StarlarkHash, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: hash() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -1417,27 +1430,28 @@ TEST(StarlarkHash, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: hash() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkHash, NamedArguments) {
+  std::string s_one("1");
   starlark_string str("");
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &str;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &str);
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_hash(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: hash() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -1447,11 +1461,11 @@ TEST(StarlarkInt, FromInt) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
 
-  EXPECT_EQ("1", starlark_fn_int(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_EQ("1", starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1461,12 +1475,12 @@ TEST(StarlarkInt, FromIntWithBase) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&two);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
 }
@@ -1476,11 +1490,11 @@ TEST(StarlarkInt, FromFloat) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  EXPECT_EQ("10000000000000000725314363815292351261583744096465219555182101554790400", starlark_fn_int(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_EQ("10000000000000000725314363815292351261583744096465219555182101554790400", starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1489,11 +1503,11 @@ TEST(StarlarkInt, FromFloatInfinity) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("OverflowError: cannot convert float infinity to integer", error_callback.messages[0]);
 }
@@ -1503,11 +1517,11 @@ TEST(StarlarkInt, FromFloatNaN) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("ValueError: cannot convert float NaN to integer", error_callback.messages[0]);
 }
@@ -1518,12 +1532,12 @@ TEST(StarlarkInt, FromFloatWithBase) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
   pos_args.push_back(&two);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
 }
@@ -1534,15 +1548,15 @@ TEST(StarlarkInt, FromBool) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&true_value);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&false_value);
 
-  EXPECT_EQ("1", starlark_fn_int(pos_args1, named_args1, arena, error_callback)->str());
-  EXPECT_EQ("0", starlark_fn_int(pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("1", starlark_fn_int(nullptr, pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("0", starlark_fn_int(nullptr, pos_args2, named_args2, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1552,12 +1566,12 @@ TEST(StarlarkInt, FromBoolWithBase) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
   pos_args.push_back(&two);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
 }
@@ -1568,11 +1582,11 @@ TEST(StarlarkInt, FromString) {
     error_handler error_callback;
 
     starlark_string str(value);
-    std::vector<starlark_obj*> pos_args;
-    std::map<std::string, starlark_obj*> named_args;
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
     pos_args.push_back(&str);
 
-    auto* result = starlark_fn_int(pos_args, named_args, arena, error_callback);
+    auto* result = starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), expected);
   };
@@ -1592,17 +1606,17 @@ TEST(StarlarkInt, FromStringWithBase) {
     starlark_string str(value);
     starlark_integer ibase(base);
     starlark_bigint bbase(base);
-    std::vector<starlark_obj*> pos_args1;
-    std::map<std::string, starlark_obj*> named_args1;
-    std::vector<starlark_obj*> pos_args2;
-    std::map<std::string, starlark_obj*> named_args2;
+    starlark_obj::pos_args_t pos_args1;
+    starlark_obj::named_args_t named_args1;
+    starlark_obj::pos_args_t pos_args2;
+    starlark_obj::named_args_t named_args2;
     pos_args1.push_back(&str);
     pos_args1.push_back(&ibase);
     pos_args2.push_back(&str);
     pos_args2.push_back(&bbase);
 
-    auto* result1 = starlark_fn_int(pos_args1, named_args1, arena, error_callback);
-    auto* result2 = starlark_fn_int(pos_args2, named_args2, arena, error_callback);
+    auto* result1 = starlark_fn_int(nullptr, pos_args1, named_args1, arena, error_callback);
+    auto* result2 = starlark_fn_int(nullptr, pos_args2, named_args2, arena, error_callback);
     ASSERT_NE(nullptr, result1);
     ASSERT_NE(nullptr, result2);
 
@@ -1631,12 +1645,12 @@ void test_invalid_base(int base) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
   pos_args.push_back(&ibase);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("ValueError: int() base must be >= 2 and <= 36, or 0", error_callback.messages[0]);
 }
@@ -1658,12 +1672,12 @@ TEST(StarlarkInt, FromStringBaseNotInt) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'list' object cannot be interpreted as an integer", error_callback.messages[0]);
 }
@@ -1673,11 +1687,11 @@ TEST(StarlarkInt, FromStringNotAbleToParseInFull) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("ValueError: invalid literal for int() with base 10: '123abc'", error_callback.messages[0]);
 }
@@ -1687,11 +1701,11 @@ TEST(StarlarkInt, FromList) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: int() argument must be a string, int, bool or a real number, not 'list'", error_callback.messages[0]);
 }
@@ -1700,10 +1714,10 @@ TEST(StarlarkInt, TooFewPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: int() takes one or two argument (0 given)", error_callback.messages[0]);
 }
@@ -1713,28 +1727,29 @@ TEST(StarlarkInt, TooManyPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
   pos_args.push_back(&str);
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: int() takes one or two argument (3 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, NamedArguments) {
+  std::string s_one("1");
   starlark_string str("1");
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &str;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &str);
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_int(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: int() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -1745,18 +1760,18 @@ TEST(StarlarkLen, List) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
   list2.add(&one, error_callback);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
 
-  EXPECT_EQ("1", starlark_fn_len(pos_args2, named_args2, arena, error_callback)->str());
-  EXPECT_EQ("0", starlark_fn_len(pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("1", starlark_fn_len(nullptr, pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("0", starlark_fn_len(nullptr, pos_args1, named_args1, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1765,11 +1780,11 @@ TEST(StarlarkLen, Integer) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_len(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: object of type 'int' has no len()", error_callback.messages[0]);
 }
@@ -1778,10 +1793,10 @@ TEST(StarlarkLen, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_len(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: len() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -1791,28 +1806,29 @@ TEST(StarlarkLen, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_len(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: len() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_len(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: len() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -1824,19 +1840,19 @@ TEST(StarlarkList, Tuple) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args1;
-  std::map<std::string, starlark_obj*> named_args1;
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
   pos_args1.push_back(&tuple1);
 
   starlark_tuple tuple2(0);
   tuple2.add(&zero);
   tuple2.add(&one);
-  std::vector<starlark_obj*> pos_args2;
-  std::map<std::string, starlark_obj*> named_args2;
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&tuple2);
 
-  EXPECT_EQ("[]", starlark_fn_list(pos_args1, named_args1, arena, error_callback)->str());
-  EXPECT_EQ("[0, 1]", starlark_fn_list(pos_args2, named_args2, arena, error_callback)->str());
+  EXPECT_EQ("[]", starlark_fn_list(nullptr, pos_args1, named_args1, arena, error_callback)->str());
+  EXPECT_EQ("[0, 1]", starlark_fn_list(nullptr, pos_args2, named_args2, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1845,11 +1861,11 @@ TEST(StarlarkList, Integer) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_list(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_list(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
 }
@@ -1858,10 +1874,10 @@ TEST(StarlarkList, NoPosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ("[]", starlark_fn_list(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_EQ("[]", starlark_fn_list(nullptr, pos_args, named_args, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1870,28 +1886,29 @@ TEST(StarlarkList, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_list(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_list(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: list expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_list(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_list(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: list() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -1901,11 +1918,11 @@ TEST(StarlarkOrd, FromString) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  EXPECT_EQ("128515", starlark_fn_ord(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_EQ("128515", starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1914,11 +1931,11 @@ TEST(StarlarkOrd, FromBytes) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&bytes);
 
-  EXPECT_EQ("255", starlark_fn_ord(pos_args, named_args, arena, error_callback)->str());
+  EXPECT_EQ("255", starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1927,11 +1944,11 @@ TEST(StarlarkOrd, ShortString) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() expected a character, but string of length 0 found", error_callback.messages[0]);
 }
@@ -1941,11 +1958,11 @@ TEST(StarlarkOrd, LongString) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() expected a character, but string of length 2 found", error_callback.messages[0]);
 }
@@ -1955,11 +1972,11 @@ TEST(StarlarkOrd, ShortBytes) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&bytes);
 
-  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() expected a character, but bytes of length 0 found", error_callback.messages[0]);
 }
@@ -1969,11 +1986,11 @@ TEST(StarlarkOrd, LongBytes) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&bytes);
 
-  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() expected a character, but bytes of length 2 found", error_callback.messages[0]);
 }
@@ -1983,11 +2000,11 @@ TEST(StarlarkOrd, List) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() expected bytes of length 1 or string with one character, but 'list' found", error_callback.messages[0]);
 }
@@ -1997,28 +2014,29 @@ TEST(StarlarkOrd, MultiplePosArgs) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&bytes);
   pos_args.push_back(&bytes);
 
-  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   starlark_bytes bytes("\xFF");
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&bytes);
 
-  EXPECT_EQ(nullptr, starlark_fn_ord(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -2028,11 +2046,11 @@ TEST(StarlarkRange, OneArgument) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->str(), "range(1)");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2043,11 +2061,11 @@ TEST(StarlarkRange, OneArgumentBigInt) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&big);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->str(), "range(100)");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2058,11 +2076,11 @@ TEST(StarlarkRange, OneArgumentBigIntTooBig) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&big);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to int64");
@@ -2073,11 +2091,11 @@ TEST(StarlarkRange, OneInvalidArgument) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
@@ -2089,12 +2107,12 @@ TEST(StarlarkRange, TwoArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&ten);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->str(), "range(1, 10)");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2106,12 +2124,12 @@ TEST(StarlarkRange, TwoInvalidArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
@@ -2123,12 +2141,12 @@ TEST(StarlarkRange, TwoArgumentsOverflow) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&minus_one);
   pos_args.push_back(&max_int64);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to int64");
@@ -2141,13 +2159,13 @@ TEST(StarlarkRange, ThreeArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&ten);
   pos_args.push_back(&minus_one);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->str(), "range(1, 10, -1)");
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2159,13 +2177,13 @@ TEST(StarlarkRange, ThreeInvalidArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
@@ -2178,13 +2196,13 @@ TEST(StarlarkRange, ZeroStep) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&ten);
   pos_args.push_back(&zero);
 
-  auto* result = starlark_fn_range(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: range() arg 3 must not be zero");
@@ -2194,10 +2212,10 @@ TEST(StarlarkRange, TooFewPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_range(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: range expected at least 1 argument, got 0", error_callback.messages[0]);
 }
@@ -2207,29 +2225,30 @@ TEST(StarlarkRange, TooManyPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
   pos_args.push_back(&one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_range(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: range expected at most 3 argument, got 4", error_callback.messages[0]);
 }
 
 TEST(StarlarkRange, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_range(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_range(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: range() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -2239,11 +2258,11 @@ TEST(StarlarkRepr, String) {
   error_handler error_callback;
   starlark_string str("abc");
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  auto* result = starlark_fn_repr(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_repr(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->as_string(), "\"abc\"");
 }
@@ -2252,10 +2271,10 @@ TEST(StarlarkRepr, TooFewPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_repr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_repr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: repr() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -2265,27 +2284,28 @@ TEST(StarlarkRepr, TooManyPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_repr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_repr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: repr() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkRepr, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_repr(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_repr(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: repr() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -2294,10 +2314,10 @@ TEST(StarlarkSet, NoArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  auto* result = starlark_fn_set(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_set(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "set()");
 }
@@ -2309,14 +2329,14 @@ TEST(StarlarkSet, OneArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   list.add(&one, error_callback);
   list.add(&two, error_callback);
   list.add(&one, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_set(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_set(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "set([1, 2])");
 }
@@ -2328,14 +2348,14 @@ TEST(StarlarkSet, ElementNotHashable) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   list.add(&one, error_callback);
   list.add(&two, error_callback);
   list.add(&list, error_callback);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: cannot use 'list' as a set element (unhashable type: 'list')", error_callback.messages[0]);
 }
@@ -2345,11 +2365,11 @@ TEST(StarlarkSet, String) {
   error_handler error_callback;
   starlark_string str("abc");
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
 }
@@ -2359,27 +2379,28 @@ TEST(StarlarkSet, TooManyPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: set expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, NamedArguments) {
+  std::string s_one("1");
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &list;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_set(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: set() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -2389,11 +2410,11 @@ TEST(StarlarkStr, String) {
   error_handler error_callback;
   starlark_string str("abc");
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  auto* result = starlark_fn_str(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_str(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->as_string(), "abc");
 }
@@ -2402,10 +2423,10 @@ TEST(StarlarkStr, TooFewPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_str(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: str() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -2415,39 +2436,40 @@ TEST(StarlarkStr, TooManyPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_str(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: str() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkStr, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_str(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: str() takes no keyword arguments", error_callback.messages[0]);
 }
 
-TEST(StarlarkType, NoArguments) {
+TEST(StarlarkTuple, NoArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  auto* result = starlark_fn_tuple(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_tuple(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "()");
 }
@@ -2459,14 +2481,14 @@ TEST(StarlarkTuple, OneArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   list.add(&one, error_callback);
   list.add(&two, error_callback);
   list.add(&one, error_callback);
   pos_args.push_back(&list);
 
-  auto* result = starlark_fn_tuple(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_tuple(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "(1, 2, 1)");
 }
@@ -2476,11 +2498,11 @@ TEST(StarlarkTuple, String) {
   error_handler error_callback;
   starlark_string str("abc");
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_tuple(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_tuple(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
 }
@@ -2490,27 +2512,28 @@ TEST(StarlarkTuple, TooManyPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_tuple(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_tuple(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: tuple expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, NamedArguments) {
+  std::string s_one("1");
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &list;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &list);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_tuple(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_tuple(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: tuple() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -2520,11 +2543,11 @@ TEST(StarlarkType, String) {
   error_handler error_callback;
   starlark_string str("abc");
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  auto* result = starlark_fn_type(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_type(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->as_string(), "string");
 }
@@ -2533,10 +2556,10 @@ TEST(StarlarkType, TooFewPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_type(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_type(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: type() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
@@ -2546,27 +2569,28 @@ TEST(StarlarkType, TooManyPosArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_type(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_type(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: type() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkType, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_type(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_type(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: type() takes no keyword arguments", error_callback.messages[0]);
 }
@@ -2575,10 +2599,10 @@ TEST(StarlarkZip, NoArguments) {
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
 
-  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_zip(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "[]");
 }
@@ -2588,11 +2612,11 @@ TEST(StarlarkZip, OneArgument) {
   error_handler error_callback;
   starlark_range range(0, 3, 1);
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&range);
 
-  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_zip(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "[(0,), (1,), (2,)]");
 }
@@ -2603,12 +2627,12 @@ TEST(StarlarkZip, TwoArgument) {
   starlark_range range1(0, 3, 1);
   starlark_range range2(100, 200, 1);
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&range1);
   pos_args.push_back(&range2);
 
-  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_zip(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "[(0, 100), (1, 101), (2, 102)]");
 }
@@ -2620,13 +2644,13 @@ TEST(StarlarkZip, ThreeArgument) {
   starlark_range range2(100, 200, 1);
   starlark_range range3(1000, 1002, 1);
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&range1);
   pos_args.push_back(&range2);
   pos_args.push_back(&range3);
 
-  auto* result = starlark_fn_zip(pos_args, named_args, arena, error_callback);
+  auto* result = starlark_fn_zip(nullptr, pos_args, named_args, arena, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->repr(), "[(0, 100, 1000), (1, 101, 1001)]");
 }
@@ -2636,26 +2660,27 @@ TEST(StarlarkZip, NonIterable) {
   error_handler error_callback;
   starlark_string str("abc");
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
 
-  EXPECT_EQ(nullptr, starlark_fn_zip(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_zip(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkZip, NamedArguments) {
+  std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
 
-  std::vector<starlark_obj*> pos_args;
-  std::map<std::string, starlark_obj*> named_args;
-  named_args["1"] = &one;
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
   pos_args.push_back(&one);
 
-  EXPECT_EQ(nullptr, starlark_fn_zip(pos_args, named_args, arena, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_zip(nullptr, pos_args, named_args, arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: zip() takes no keyword arguments", error_callback.messages[0]);
 }

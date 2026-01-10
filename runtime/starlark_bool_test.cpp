@@ -46,7 +46,7 @@ using ::testing::Lt;
 
 namespace {
 
-starlark_obj* base_fn(const std::vector<starlark_obj*>&, const std::map<std::string, starlark_obj*>&, Arena&, error_fn&) {
+starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, Arena&, error_fn&) {
   return nullptr;
 }
 
@@ -77,7 +77,7 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(false).equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_none()));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_bytes("")));
-  EXPECT_FALSE(starlark_bool(false).equals(starlark_built_in_function(base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_bool(false).equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_float(0.0)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_function()));
@@ -91,7 +91,7 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(true).equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_none()));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_bytes("")));
-  EXPECT_FALSE(starlark_bool(true).equals(starlark_built_in_function(base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_bool(true).equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_float(0.0)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_function()));
