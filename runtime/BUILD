@@ -17,6 +17,22 @@ cc_library(
 )
 
 cc_library(
+    name = "levenshtein",
+    srcs = ["levenshtein.cpp"],
+    hdrs = ["levenshtein.hpp"],
+)
+
+cc_test(
+    name = "levenshtein_test",
+    size = "small",
+    srcs = ["levenshtein_test.cpp"],
+    deps = [
+        ":levenshtein",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "options",
     srcs = ["options.cpp"],
     hdrs = ["options.hpp"],
