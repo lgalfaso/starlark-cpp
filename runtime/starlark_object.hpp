@@ -3,6 +3,7 @@
 #ifndef RUNTIME_STARLARK_OBJECT_HPP_
 #define RUNTIME_STARLARK_OBJECT_HPP_
 
+#include <functional>
 #include <map>
 #include <span>
 #include <string>
@@ -124,6 +125,7 @@ class starlark_obj {
  public:
   typedef std::vector<starlark_obj*> pos_args_t;
   typedef starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>> named_args_t;
+  typedef starlark_obj* (fn)(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 
   starlark_obj();
   virtual ~starlark_obj();
@@ -133,6 +135,7 @@ class starlark_obj {
   virtual bool truthy() const = 0;
   virtual bool primitive() const;
   virtual const std::vector<std::string>& dir() const;
+  virtual const std::map<std::string, fn*, std::less<>>& methods_meta() const;
   bool equals(const starlark_obj& other) const;
   int cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;
@@ -179,6 +182,7 @@ class starlark_obj {
   virtual const starlark::bigint::number& as_bigint() const;
   virtual double as_float() const;
   virtual std::string_view as_string() const;
+  virtual starlark_obj* get_attr(bool produce_error, std::string_view attribute, google::protobuf::Arena& arena, error_fn& error_callback);
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;
@@ -192,6 +196,7 @@ class starlark_obj {
   int64_t inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
 
  private:
+  static const std::map<std::string, fn*, std::less<>> method_refs;
   static const std::vector<std::string> attributes;
 
   friend class printer;
@@ -200,6 +205,7 @@ class starlark_obj {
 };
 
 int64_t starlark_hash(std::span<int64_t> values);
+starlark_obj* create_function(google::protobuf::Arena &arena, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
 
 }  // namespace runtime
 }  // namespace starlark

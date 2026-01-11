@@ -28,9 +28,7 @@ class starlark_function : public starlark_obj {
 
 class starlark_built_in_function : public starlark_obj {
  public:
-  typedef starlark_obj* (fn)(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-
-  starlark_built_in_function(starlark_obj* this_obj, fn* native_fn, const std::string& fn_name);
+  starlark_built_in_function(starlark_obj* this_obj, fn* native_fn, std::string_view fn_name);
   std::string_view type() const override;
   bool truthy() const override;
   starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) override;

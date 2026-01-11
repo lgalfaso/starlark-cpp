@@ -85,6 +85,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
+        ":levenshtein",
         "//bigint:number",
         "//containers:linked_hash_map",
         "@protobuf",
@@ -113,6 +114,7 @@ cc_test(
         ":starlark_dictionary",
         ":starlark_float",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -148,6 +150,7 @@ cc_test(
         ":starlark_dictionary",
         ":starlark_float",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -189,6 +192,7 @@ cc_test(
     size = "small",
     srcs = ["starlark_numeric_test.cpp"],
     deps = [
+        ":starlark_function_builder_impl",
         ":starlark_numeric",
         ":starlark_numeric_impl",
         "@googletest//:gtest_main",
@@ -222,6 +226,7 @@ cc_test(
         ":starlark_dictionary",
         ":starlark_float",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -260,6 +265,7 @@ cc_test(
         ":starlark_dictionary",
         ":starlark_float",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -293,6 +299,7 @@ cc_test(
     deps = [
         ":starlark_bool",
         ":starlark_dictionary",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -330,6 +337,7 @@ cc_test(
         ":starlark_dictionary",
         ":starlark_float",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -348,6 +356,7 @@ cc_test(
     size = "medium",
     srcs = ["starlark_integer_overflow_test.cpp"],
     deps = [
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_numeric_impl",
         ":starlark_testing",
@@ -379,6 +388,7 @@ cc_test(
         ":starlark_dictionary",
         ":starlark_float",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -410,6 +420,7 @@ cc_test(
     srcs = ["starlark_list_test.cpp"],
     deps = [
         ":starlark_bool",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -436,6 +447,7 @@ cc_test(
     size = "small",
     srcs = ["starlark_range_test.cpp"],
     deps = [
+        ":starlark_function_builder_impl",
         ":starlark_none",
         ":starlark_numeric_impl",
         ":starlark_range",
@@ -461,6 +473,7 @@ cc_test(
     srcs = ["starlark_set_test.cpp"],
     deps = [
         ":starlark_bool",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_none",
         ":starlark_numeric_impl",
@@ -480,6 +493,7 @@ cc_library(
         ":hex_encoder",
         ":options",
         ":siphash",
+        ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
         "//bigint:number",
@@ -498,6 +512,7 @@ cc_test(
         ":starlark_dictionary",
         ":starlark_float",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -529,6 +544,7 @@ cc_test(
     srcs = ["starlark_tuple_test.cpp"],
     deps = [
         ":starlark_bool",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_none",
         ":starlark_numeric_impl",
@@ -567,6 +583,7 @@ cc_test(
     deps = [
         ":starlark_bytes",
         ":starlark_function",
+        ":starlark_function_builder_impl",
         ":starlark_integer",
         ":starlark_list",
         ":starlark_none",
@@ -578,12 +595,23 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "starlark_function_builder_impl",
+    srcs = ["starlark_function_builder_impl.cpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":starlark_function",
+    ],
+)
+
+
 cc_test(
     name = "float_hash_test",
     size = "small",
     srcs = ["float_hash_test.cpp"],
     deps = [
         ":starlark_float",
+        ":starlark_function_builder_impl",
         ":starlark_numeric_impl",
         "@googletest//:gtest_main",
     ],

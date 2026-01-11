@@ -4,7 +4,10 @@
 
 #include <cassert>
 
+#include <functional>
+#include <map>
 #include <string>
+#include <vector>
 
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
@@ -16,6 +19,24 @@ using ::starlark::bigint::number;
 
 namespace starlark {
 namespace runtime {
+
+starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_rindex(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_rpartition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 
 /*
   Note: It is unclear what methods are needed. This is following
@@ -29,26 +50,34 @@ namespace runtime {
     - The elems method would iterate over the 1-byte substrings, and elem_ords would
       iterate over the numeric byte values.
 */
-const std::vector<std::string> starlark_bytes::attributes {
-  // Keep sorted.
-  "count",
-  "elems",
-  "endswith",
-  "find",
-  "index",
-  "join",
-  "lstrip",
-  "partition",
-  "replace",
-  "rfind",
-  "rindex",
-  "rpartition",
-  "rsplit",
-  "rstrip",
-  "split",
-  "startswith",
-  "strip",
+const std::map<std::string, starlark_obj::fn*, std::less<>> starlark_bytes::method_refs {
+  {"count", starlark_bytes_fn_count},
+  {"elems", starlark_bytes_fn_elems},
+  {"endswith", starlark_bytes_fn_endswith},
+  {"find", starlark_bytes_fn_find},
+  {"index", starlark_bytes_fn_index},
+  {"join", starlark_bytes_fn_join},
+  {"lstrip", starlark_bytes_fn_lstrip},
+  {"partition", starlark_bytes_fn_partition},
+  {"replace", starlark_bytes_fn_replace},
+  {"rfind", starlark_bytes_fn_rfind},
+  {"rindex", starlark_bytes_fn_rindex},
+  {"rpartition", starlark_bytes_fn_rpartition},
+  {"rsplit", starlark_bytes_fn_rsplit},
+  {"rstrip", starlark_bytes_fn_rstrip},
+  {"split", starlark_bytes_fn_split},
+  {"startswith", starlark_bytes_fn_startswith},
+  {"strip", starlark_bytes_fn_strip},
 };
+
+const std::vector<std::string> starlark_bytes::attributes = ([]() {
+    std::vector<std::string> result;
+    result.reserve(starlark_bytes::method_refs.size());
+    for (const auto& [k, v] : starlark_bytes::method_refs) {
+      result.push_back(k);
+    }
+    return result;
+  })();
 
 starlark_bytes::starlark_bytes(std::string_view value) : value(value) {}
 
@@ -62,6 +91,10 @@ bool starlark_bytes::primitive() const {
 
 const std::vector<std::string>& starlark_bytes::dir() const {
   return attributes;
+}
+
+const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_bytes::methods_meta() const {
+  return method_refs;
 }
 
 int64_t starlark_bytes::len(bool produce_error, error_fn& error_callback) const {
@@ -203,6 +236,108 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::inner_hash() c
     return 0;
   }
   return static_cast<int64_t>(siphash(value.data(), value.length(), 0xA4093822299F31D0, 0x082EFA98EC4E6C89));
+}
+
+starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_rindex(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_rpartition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
 }
 
 }  // namespace runtime

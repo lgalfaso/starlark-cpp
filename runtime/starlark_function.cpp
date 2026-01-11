@@ -32,7 +32,7 @@ using ::starlark::unicode::utf8_reader;
 namespace starlark {
 namespace runtime {
 
-starlark_built_in_function::starlark_built_in_function(starlark_obj* this_obj, fn* native_fn, const std::string& fn_name) :
+starlark_built_in_function::starlark_built_in_function(starlark_obj* this_obj, fn* native_fn, std::string_view fn_name) :
   this_obj(this_obj), native_fn(native_fn), fn_name(fn_name) {}
 
 std::string_view starlark_built_in_function::type() const {

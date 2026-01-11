@@ -3,10 +3,13 @@
 #include "runtime/starlark_object.hpp"
 
 #include <bit>
+#include <functional>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "runtime/levenshtein.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -106,6 +109,8 @@ starlark_iterator::~starlark_iterator() {}
 
 const std::vector<std::string> starlark_obj::attributes;
 
+const std::map<std::string, starlark_obj::fn*, std::less<>> starlark_obj::method_refs;
+
 starlark_obj::starlark_obj() : freezed(false) {}
 
 starlark_obj::~starlark_obj() {}
@@ -130,6 +135,10 @@ bool starlark_obj::primitive() const {
 
 const std::vector<std::string>& starlark_obj::dir() const {
   return attributes;
+}
+
+const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_obj::methods_meta() const {
+  return method_refs;
 }
 
 bool starlark_obj::equals(const starlark_obj& other) const {
@@ -396,6 +405,24 @@ double starlark_obj::as_float() const {
 
 std::string_view starlark_obj::as_string() const {
   return "";
+}
+
+starlark_obj* starlark_obj::get_attr(bool produce_error, std::string_view attribute, Arena& arena, error_fn& error_callback) {
+  auto& method_fns = methods_meta();
+  auto it = method_fns.find(attribute);
+  if (it == method_fns.end()) {
+    if (produce_error) {
+      auto& attributes = dir();
+      auto candidate = levenshtein(attribute, attributes);
+      if (candidate < 0) {
+        error_callback.add_error(std::format("AttributeError: '{}' object has no attribute '{}'", type(), attribute));
+      } else {
+        error_callback.add_error(std::format("AttributeError: '{}' object has no attribute '{}'. Did you mean: '{}'?", type(), attribute, attributes[candidate]));
+      }
+    }
+    return nullptr;
+  }
+  return create_function(arena, this, it->second, attribute);
 }
 
 starlark_numeric_type starlark_obj::numeric_type() const {

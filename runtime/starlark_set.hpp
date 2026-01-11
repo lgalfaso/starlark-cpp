@@ -3,6 +3,8 @@
 #ifndef RUNTIME_STARLARK_SET_HPP_
 #define RUNTIME_STARLARK_SET_HPP_
 
+#include <functional>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -21,6 +23,7 @@ class starlark_set : public starlark_obj {
   std::string_view type() const override;
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
+  const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
   std::pair<bool, bool> add(starlark_obj* element, error_fn& error_callback);
   bool contains(starlark_obj* obj) const;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
@@ -50,6 +53,7 @@ class starlark_set : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
+  static const std::map<std::string, fn*, std::less<>> method_refs;
   static const std::vector<std::string> attributes;
 
   starlark::cnt::linked_hash_set<starlark_obj*, starlark_hash_op, starlark_equals_to> values;

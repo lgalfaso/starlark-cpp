@@ -742,4 +742,24 @@ TEST(StarlarkList, IndexAssignWithFreeze) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
 }
 
+TEST(StarlarkList, GetAttrError) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_list list(0);
+
+  EXPECT_EQ(nullptr, list.get_attr(true, "count", arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
+}
+
+TEST(StarlarkList, GetAttrErrorWithSuggestion) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_list list(0);
+
+  EXPECT_EQ(nullptr, list.get_attr(true, "appen", arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
+}
+
 }  // namespace

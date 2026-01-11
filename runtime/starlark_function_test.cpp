@@ -1438,7 +1438,7 @@ TEST(StarlarkHasattr, CheckAttribute) {
 
     auto* result = starlark_fn_hasattr(nullptr, pos_args, named_args, arena, error_callback);
     ASSERT_NE(nullptr, result);
-    EXPECT_EQ(result->truthy(), expected);
+    EXPECT_EQ(result->truthy(), expected) << "Key: '" << attr << "'";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 

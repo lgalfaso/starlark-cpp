@@ -3,6 +3,8 @@
 #include "runtime/starlark_list.hpp"
 
 #include <algorithm>
+#include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -16,16 +18,32 @@ using ::starlark::bigint::number;
 namespace starlark {
 namespace runtime {
 
-const std::vector<std::string> starlark_list::attributes {
-  // Keep sorted.
-  "append",
-  "clear",
-  "extend",
-  "index",
-  "insert",
-  "pop",
-  "remove",
+starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_list_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_list_fn_extend(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_list_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_list_fn_insert(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_list_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_list_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+
+const std::map<std::string, starlark_obj::fn*, std::less<>> starlark_list::method_refs {
+  {"append", starlark_list_fn_append},
+  {"clear", starlark_list_fn_clear},
+  {"extend", starlark_list_fn_extend},
+  {"index", starlark_list_fn_index},
+  {"insert", starlark_list_fn_insert},
+  {"pop", starlark_list_fn_pop},
+  {"remove", starlark_list_fn_remove},
 };
+
+const std::vector<std::string> starlark_list::attributes = ([]() {
+    std::vector<std::string> result;
+    result.reserve(starlark_list::method_refs.size());
+    for (const auto& [k, v] : starlark_list::method_refs) {
+      result.push_back(k);
+    }
+    return result;
+  })();
 
 starlark_list::starlark_list(std::size_t reserve_size) {
   values.reserve(reserve_size);
@@ -37,6 +55,10 @@ std::string_view starlark_list::type() const {
 
 const std::vector<std::string>& starlark_list::dir() const {
   return attributes;
+}
+
+const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_list::methods_meta() const {
+  return method_refs;
 }
 
 int64_t starlark_list::len(bool produce_error, error_fn& error_callback) const {
@@ -270,6 +292,48 @@ starlark_obj* starlark_list::starlark_list_iterator::next() {
 
 void starlark_list::starlark_list_iterator::end_iterator() {
   list->iterators_count--;
+}
+
+starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_list_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_list_fn_extend(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_list_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_list_fn_insert(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_list_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
+}
+
+starlark_obj* starlark_list_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
+  return nullptr;
 }
 
 }  // namespace runtime

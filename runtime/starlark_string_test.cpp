@@ -34,11 +34,13 @@ using ::starlark::runtime::starlark_function;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
+using ::testing::Contains;
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::IsEmpty;
@@ -374,6 +376,27 @@ TEST(StarlarkString, IndexOutOfRange2) {
   EXPECT_EQ(nullptr, str.index(starlark_integer(3), arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: string index out of range", error_callback.messages[0]);
+}
+
+TEST(StarlarkString, Dir) {
+  starlark_string str("abc");
+
+  EXPECT_THAT(str.dir(), Contains("capitalize"));
+}
+
+TEST(StarlarkString, Count) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_string str("abc");
+
+  auto* result = str.get_attr(true, "count", arena, error_callback);
+  ASSERT_NE(nullptr, result) << error_callback.messages[0];
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* value = result->call(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, value);
+  EXPECT_EQ(value->str(), "3");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 }  // namespace
