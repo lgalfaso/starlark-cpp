@@ -518,7 +518,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangePlusEquals: {
@@ -533,7 +533,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_plus_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_plus_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeMinusEquals: {
@@ -548,7 +548,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_minus_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_minus_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeStarEquals: {
@@ -563,7 +563,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_star_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_star_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeSlashEquals: {
@@ -578,7 +578,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_slash_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_slash_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeSlashSlashEquals: {
@@ -593,7 +593,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_slash_slash_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_slash_slash_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangePercentEquals: {
@@ -608,7 +608,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_percent_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_percent_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeAmpersandEquals: {
@@ -623,7 +623,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_ampersand_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_ampersand_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangePipeEquals: {
@@ -638,7 +638,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_pipe_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_pipe_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeHatEquals: {
@@ -653,7 +653,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_hat_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_hat_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeLessLessEquals: {
@@ -668,7 +668,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_less_less_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_less_less_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
       case OpCode::kAssignSliceRangeGreaterGreaterEquals: {
@@ -683,7 +683,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();
         auto* element = stack.back();
         stack.pop_back();
-        container->slice_range_greater_greater_equals_assign(*start, *stop, *stride, *element, error_callback);
+        container->slice_range_greater_greater_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
         break;
       }
 
