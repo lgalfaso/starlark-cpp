@@ -61,6 +61,12 @@ cc_library(
 )
 
 cc_library(
+    name = "error_messages",
+    srcs = ["error_messages.cpp"],
+    hdrs = ["error_messages.hpp"],
+)
+
+cc_library(
     name = "starlark_testing",
     testonly = True,
     hdrs = ["starlark_testing.hpp"],
@@ -85,6 +91,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
+        ":error_messages",
         ":levenshtein",
         "//bigint:number",
         "//containers:linked_hash_map",
@@ -205,6 +212,7 @@ cc_library(
     hdrs = ["starlark_bigint.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":error_messages",
         ":hash",
         ":options",
         ":starlark_float",
@@ -246,6 +254,7 @@ cc_library(
     hdrs = ["starlark_bytes.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":error_messages",
         ":hex_encoder",
         ":options",
         ":siphash",
@@ -286,6 +295,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
+        ":error_messages",
         ":starlark_object",
         ":starlark_types",
         "//containers:linked_hash_map",
@@ -316,6 +326,7 @@ cc_library(
     hdrs = ["starlark_integer.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":error_messages",
         ":hash",
         ":options",
         ":starlark_bigint",
@@ -370,6 +381,7 @@ cc_library(
     hdrs = ["starlark_float.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":error_messages",
         ":hash",
         ":starlark_numeric",
         ":starlark_object",
@@ -408,6 +420,7 @@ cc_library(
     hdrs = ["starlark_list.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":error_messages",
         ":starlark_integer",
         ":starlark_object",
         ":starlark_types",
@@ -461,6 +474,7 @@ cc_library(
     srcs = ["starlark_set.cpp"],
     hdrs = ["starlark_set.hpp"],
     deps = [
+        ":error_messages",
         ":starlark_object",
         ":starlark_types",
         "//containers:linked_hash_set",
@@ -490,6 +504,7 @@ cc_library(
     hdrs = ["starlark_string.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":error_messages",
         ":hex_encoder",
         ":options",
         ":siphash",
@@ -532,6 +547,7 @@ cc_library(
     hdrs = ["starlark_tuple.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":error_messages",
         ":starlark_list",
         ":starlark_object",
         ":starlark_types",
@@ -560,8 +576,7 @@ cc_library(
     hdrs = ["starlark_function.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        "//unicode:encode",
-        "//unicode:utf8_reader",
+        ":error_messages",
         ":starlark_bool",
         ":starlark_bytes",
         ":starlark_dictionary",
@@ -573,6 +588,8 @@ cc_library(
         ":starlark_string",
         ":starlark_tuple",
         ":starlark_types",
+        "//unicode:encode",
+        "//unicode:utf8_reader",
     ],
 )
 

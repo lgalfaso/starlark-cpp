@@ -316,7 +316,7 @@ TEST(StarlarkDictionary, MutationWhileIterating1) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.insert(&s_one, &one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: dictionary value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Index) {
@@ -385,7 +385,7 @@ TEST(StarlarkDictionary, MutationWhileIterating2) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.index_assign(s_two, two, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: dictionary value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, IndexAssignWithFreeze) {

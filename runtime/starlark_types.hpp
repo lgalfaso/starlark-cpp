@@ -20,6 +20,9 @@ struct starlark_types {
   static const char function_t[];
   static const char builtin_function_or_method_t[];
   static const char range_t[];
+
+  // Synthetic types
+  static const char int64[];
 };
 
 }  // namespace runtime

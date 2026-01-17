@@ -18,6 +18,7 @@ const char starlark_types::set_t[] = "set";
 const char starlark_types::function_t[] = "function";
 const char starlark_types::builtin_function_or_method_t[] = "builtin_function_or_method";
 const char starlark_types::range_t[] = "range";
+const char starlark_types::int64[] = "int64";
 
 }  // namespace runtime
 }  // namespace starlark

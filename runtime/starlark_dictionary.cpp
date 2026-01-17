@@ -2,13 +2,13 @@
 
 #include "runtime/starlark_dictionary.hpp"
 
-#include <format>
 #include <functional>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -142,7 +142,7 @@ starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, Arena& 
 starlark_obj* starlark_dictionary::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   auto result = values.find(&const_cast<starlark_obj&>(other));
   if (result == values.end()) {
-    error_callback.add_error(std::format("KeyError: {}", other.repr()));
+    error_callback.add_error(error_dictionary_key_not_found(other.repr()));
     return nullptr;
   }
   return result->second;
@@ -150,16 +150,16 @@ starlark_obj* starlark_dictionary::index(const starlark_obj& other, Arena& arena
 
 void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
   if (iterators_count) {
-    error_callback.add_error("Error in append: dictionary value is temporarily immutable due to active for-loop iteration");
+    error_callback.add_error(error_append_in_loop(type()));
     return;
   }
   if (freezed) {
     // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    error_callback.add_error(error_mutate_frozen_value(type()));
     return;
   }
   if (idx.hash() == -1) {
-    error_callback.add_error(std::format("TypeError: cannot use '{}' as a dict key (unhashable type: '{}')", idx.type(), idx.type()));
+    error_callback.add_error(error_unhashable_key(type(), idx.type()));
     return;
   }
   values.insert(&const_cast<starlark_obj&>(idx), &element);
@@ -200,16 +200,15 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
 
 std::pair<bool, bool> starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback) {
   if (iterators_count) {
-    error_callback.add_error("Error in append: dictionary value is temporarily immutable due to active for-loop iteration");
+    error_callback.add_error(error_append_in_loop(type()));
     return std::make_pair(false, true);
   }
   if (freezed) {
-    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    error_callback.add_error(error_mutate_frozen_value(type()));
     return std::make_pair(false, true);
   }
   if (key->hash() == -1) {
-    error_callback.add_error(std::format("TypeError: cannot use '{}' as a dict key (unhashable type: '{}')", key->type(), key->type()));
+    error_callback.add_error(error_unhashable_key(type(), key->type()));
     return std::make_pair(false, true);
   }
   auto [it, result] = values.insert(key, value);

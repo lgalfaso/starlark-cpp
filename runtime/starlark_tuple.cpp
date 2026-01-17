@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_integer.hpp"
@@ -28,7 +29,7 @@ std::string_view starlark_tuple::type() const {
 
 starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    error_callback.add_error(std::format("TypeError: can only concatenate tuple (not \"{}\") to tuple", other.type()));
+    error_callback.add_error(error_no_concat(type(), other.type(), type()));
     return nullptr;
   }
   // TODO(lmirelmann): Check the result size.
@@ -71,7 +72,7 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
         return Arena::Create<starlark_tuple>(&arena, 0);
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
+        error_callback.add_error(error_max_sequence_length(max_sequence_size()));
         return nullptr;
       }
       int64_t int_value = value.at(0);
@@ -85,7 +86,7 @@ starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& aren
       return result;
     }
     default:
-      error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
+      error_callback.add_error(error_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }
@@ -171,9 +172,9 @@ bool starlark_tuple::truthy() const {
 void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) {
   if (number_of_elements != values.size()) {
     if (values.size() < number_of_elements) {
-      error_callback.add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      error_callback.add_error(error_unpack_too_few(values.size(), number_of_elements));
     } else {
-      error_callback.add_error(std::format("ValueError: too many values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      error_callback.add_error(error_unpack_too_many(values.size(), number_of_elements));
     }
     return;
   }

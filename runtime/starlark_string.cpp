@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "bigint/number.hpp"
+#include "runtime/error_messages.hpp"
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
@@ -162,7 +163,7 @@ bool starlark_string::truthy() const {
 
 bool starlark_string::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   if (other.type() != type()) {
-    error_callback.add_error(std::format("TypeError: 'in <string>' requires string as left operand, not {}", other.type()));
+    error_callback.add_error(error_in_element(type(), other.type(), type()));
     return false;
   }
 
@@ -172,7 +173,7 @@ bool starlark_string::binary_in(const starlark_obj& other, error_fn& error_callb
 
 starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    error_callback.add_error(std::format("TypeError: can't concat {} to string", other.type()));
+    error_callback.add_error(error_no_concat(type(), other.type()));
     return nullptr;
   }
   // TODO(lmirelmann): Check that the value length would not go over the limit.
@@ -208,7 +209,7 @@ starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& are
         return Arena::Create<starlark_string>(&arena, "");
       }
       if (multiplier.bit_size() >= 63) {
-        error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
+        error_callback.add_error(error_max_sequence_length(max_string_length()));
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);
@@ -220,7 +221,7 @@ starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& are
       return result;
     }
     default:
-      error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
+      error_callback.add_error(error_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }

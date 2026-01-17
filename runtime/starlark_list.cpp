@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_types.hpp"
@@ -107,9 +108,9 @@ bool starlark_list::truthy() const {
 void starlark_list::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) {
   if (number_of_elements != values.size()) {
     if (values.size() < number_of_elements) {
-      error_callback.add_error(std::format("ValueError: not enough values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      error_callback.add_error(error_unpack_too_few(values.size(), number_of_elements));
     } else {
-      error_callback.add_error(std::format("ValueError: too many values to unpack (expected {}, got {})", number_of_elements, values.size()));
+      error_callback.add_error(error_unpack_too_many(values.size(), number_of_elements));
     }
     return;
   }
@@ -129,7 +130,7 @@ bool starlark_list::binary_in(const starlark_obj& other, error_fn& error_callbac
 
 starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    error_callback.add_error(std::format("TypeError: can only concatenate list (not \"{}\") to list", other.type()));
+    error_callback.add_error(error_no_concat(type(), other.type(), type()));
     return nullptr;
   }
   const starlark_list& l_other = static_cast<const starlark_list&>(other);
@@ -174,7 +175,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
         return Arena::Create<starlark_list>(&arena, 0);
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_sequence_size()));
+        error_callback.add_error(error_max_sequence_length(max_sequence_size()));
         return nullptr;
       }
       int64_t int_value = value.at(0);
@@ -188,7 +189,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
       return result;
     }
     default:
-      error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
+      error_callback.add_error(error_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }
@@ -207,12 +208,11 @@ starlark_obj* starlark_list::index(const starlark_obj& other, Arena& arena, erro
 
 void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
   if (iterators_count) {
-    error_callback.add_error("Error in append: list value is temporarily immutable due to active for-loop iteration");
+    error_callback.add_error(error_append_in_loop(type()));
     return;
   }
   if (freezed) {
-    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    error_callback.add_error(error_mutate_frozen_value(type()));
     return;
   }
   auto iidx = inner_index(idx, values.size(), error_callback);
@@ -266,12 +266,11 @@ void starlark_list::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 
 void starlark_list::add(starlark_obj* element, error_fn& error_callback) {
   if (iterators_count) {
-    error_callback.add_error("Error in append: list value is temporarily immutable due to active for-loop iteration");
+    error_callback.add_error(error_append_in_loop(type()));
     return;
   }
   if (freezed) {
-    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-    error_callback.add_error(std::format("TypeError: trying to mutate a frozen {} value", type()));
+    error_callback.add_error(error_mutate_frozen_value(type()));
     return;
   }
   // TODO(lmirelmann): Check that this does not go over the maximum number of elements.

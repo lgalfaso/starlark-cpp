@@ -5,10 +5,10 @@
 #include <cassert>
 
 #include <bit>
-#include <format>
 #include <limits>
 #include <string>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/hash.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
@@ -45,7 +45,7 @@ starlark_obj* starlark_float::binary_plus(const starlark_obj& other, Arena& aren
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
-        error_callback.add_error("OverflowError: int too large to convert to float");
+        error_callback.add_error(error_overflow(other.type(), type()));
         return nullptr;
       }
       return create_float(value + fother, arena);
@@ -111,7 +111,7 @@ starlark_obj* starlark_float::binary_minus(const starlark_obj& other, Arena& are
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
-        error_callback.add_error("OverflowError: int too large to convert to float");
+        error_callback.add_error(error_overflow(other.type(), type()));
         return nullptr;
       }
       return create_float(value - fother, arena);
@@ -130,7 +130,7 @@ starlark_obj* starlark_float::binary_star(const starlark_obj& other, Arena& aren
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
-        error_callback.add_error("OverflowError: int too large to convert to float");
+        error_callback.add_error(error_overflow(other.type(), type()));
         return nullptr;
       }
       return create_float(value * fother, arena);
@@ -145,7 +145,7 @@ starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& are
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(value / fother, arena);
@@ -153,7 +153,7 @@ starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& are
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(value / iother, arena);
@@ -161,11 +161,11 @@ starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& are
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       if (std::isinf(fother)) {
-        error_callback.add_error("OverflowError: int too large to convert to float");
+        error_callback.add_error(error_overflow(other.type(), type()));
         return nullptr;
       }
       return create_float(value / fother, arena);
@@ -180,7 +180,7 @@ starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Aren
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(std::floor(value / fother), arena);
@@ -188,7 +188,7 @@ starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Aren
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(std::floor(value / iother), arena);
@@ -196,11 +196,11 @@ starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Aren
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       if (std::isinf(fother)) {
-        error_callback.add_error("OverflowError: int too large to convert to float");
+        error_callback.add_error(error_overflow(other.type(), type()));
         return nullptr;
       }
       return create_float(std::floor(value / fother), arena);
@@ -215,7 +215,7 @@ starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& a
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(starlark_fmod(value, fother), arena);
@@ -223,7 +223,7 @@ starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& a
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(starlark_fmod(value, iother), arena);
@@ -231,11 +231,11 @@ starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& a
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       if (std::isinf(fother)) {
-        error_callback.add_error("OverflowError: int too large to convert to float");
+        error_callback.add_error(error_overflow(other.type(), type()));
         return nullptr;
       }
       return create_float(starlark_fmod(value, fother), arena);

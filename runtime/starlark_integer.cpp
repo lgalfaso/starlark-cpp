@@ -5,10 +5,10 @@
 #include <cassert>
 
 #include <bit>
-#include <format>
 #include <limits>
 #include <string>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/hash.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_numeric.hpp"
@@ -112,7 +112,7 @@ starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, Arena& 
       }
       auto shift = other.as_int64();
       if (shift < 0) {
-        error_callback.add_error("ValueError: negative shift count");
+        error_callback.add_error(error_negative_shift());
         return nullptr;
       }
       // Check whether it will fit in an int64_t.
@@ -121,7 +121,7 @@ starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, Arena& 
         return create_integer(value << shift, arena);
       } else {
         if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(shift) + 64 - left_shift_space) {
-          error_callback.add_error("OverflowError: too many digits in integer");
+          error_callback.add_error(error_overflow_too_many_digits());
           return nullptr;
         }
         return create_integer(from_int64(value) << shift, arena);
@@ -133,11 +133,11 @@ starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, Arena& 
       }
       const auto& shift = other.as_bigint();
       if (shift.sign()) {
-        error_callback.add_error("ValueError: negative shift count");
+        error_callback.add_error(error_negative_shift());
         return nullptr;
       }
       if (shift.length() > 1) {
-        error_callback.add_error("OverflowError: too many digits in integer");
+        error_callback.add_error(error_overflow_too_many_digits());
         return nullptr;
       }
       auto int_shift = shift.at(0);
@@ -146,7 +146,7 @@ starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, Arena& 
         return create_integer(value << int_shift, arena);
       } else {
         if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(int_shift) + 64 - left_shift_space) {
-          error_callback.add_error("OverflowError: too many digits in integer");
+          error_callback.add_error(error_overflow_too_many_digits());
           return nullptr;
         }
         return create_integer(from_int64(value) << int_shift, arena);
@@ -165,7 +165,7 @@ starlark_obj* starlark_integer::binary_rshift(const starlark_obj& other, Arena& 
       }
       auto shift = other.as_int64();
       if (shift < 0) {
-        error_callback.add_error("ValueError: negative shift count");
+        error_callback.add_error(error_negative_shift());
         return nullptr;
       }
       if (shift >= 64) {
@@ -179,7 +179,7 @@ starlark_obj* starlark_integer::binary_rshift(const starlark_obj& other, Arena& 
       }
       const auto& shift = other.as_bigint();
       if (shift.sign()) {
-        error_callback.add_error("ValueError: negative shift count");
+        error_callback.add_error(error_negative_shift());
         return nullptr;
       }
       if (shift.length() > 1) {
@@ -313,7 +313,7 @@ starlark_obj* starlark_integer::binary_slash(const starlark_obj& other, Arena& a
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(value / fother, arena);
@@ -321,7 +321,7 @@ starlark_obj* starlark_integer::binary_slash(const starlark_obj& other, Arena& a
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(static_cast<double>(value) / iother, arena);
@@ -329,13 +329,13 @@ starlark_obj* starlark_integer::binary_slash(const starlark_obj& other, Arena& a
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       // This is a difference between Python and the Starlark implementation in Bazel. Python is
       // happy to return `0` if the integer is too large. Bazel throws an error.
       if (std::isinf(fother)) {
-        error_callback.add_error("OverflowError: int too large to convert to float");
+        error_callback.add_error(error_overflow(type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(value / fother, arena);
@@ -350,7 +350,7 @@ starlark_obj* starlark_integer::binary_slash_slash(const starlark_obj& other, Ar
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(std::floor(value / fother), arena);
@@ -358,7 +358,7 @@ starlark_obj* starlark_integer::binary_slash_slash(const starlark_obj& other, Ar
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       // Handle the overflow.
@@ -370,7 +370,7 @@ starlark_obj* starlark_integer::binary_slash_slash(const starlark_obj& other, Ar
     case starlark_numeric_type::kBigInt: {
       auto bother = other.as_bigint();
       if (bother == number::zero) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_div(from_int64(value), bother), arena);
@@ -385,7 +385,7 @@ starlark_obj* starlark_integer::binary_percent(const starlark_obj& other, Arena&
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_float(starlark_fmod(value, fother), arena);
@@ -393,7 +393,7 @@ starlark_obj* starlark_integer::binary_percent(const starlark_obj& other, Arena&
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       if (value == std::numeric_limits<int64_t>::min() && iother == -1) {
@@ -404,7 +404,7 @@ starlark_obj* starlark_integer::binary_percent(const starlark_obj& other, Arena&
     case starlark_numeric_type::kBigInt: {
       auto bother = other.as_bigint();
       if (bother == number::zero) {
-        error_callback.add_error("ZeroDivisionError: division by zero");
+        error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_mod(from_int64(value), bother), arena);

@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
@@ -121,7 +122,7 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
     case starlark_numeric_type::kInt64: {
       auto other_value = other.as_int64();
       if (other_value < 0 || 255 < other_value) {
-        error_callback.add_error("ValueError: byte must be in range(0, 256)");
+        error_callback.add_error(error_byte_in_range());
         return false;
       }
       return value.contains(static_cast<char>(other.as_int64()));
@@ -129,28 +130,28 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
     case starlark_numeric_type::kBigInt: {
       auto& other_value = other.as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
-        error_callback.add_error("ValueError: byte must be in range(0, 256)");
+        error_callback.add_error(error_byte_in_range());
         return false;
       }
       return value.contains(static_cast<char>(other_value.at(0)));
     }
     case starlark_numeric_type::kNotNumeric: {
       if (other.type() != type()) {
-        error_callback.add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
+        error_callback.add_error(error_like_required(type(), other.type()));
         return false;
       }
       const starlark_bytes& s_other = static_cast<const starlark_bytes&>(other);
       return value.contains(s_other.value);
     }
     default:
-     error_callback.add_error(std::format("TypeError: a bytes-like object is required, not '{}'", other.type()));
+     error_callback.add_error(error_like_required(type(), other.type()));
      return false;
   }
 }
 
 starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   if (other.type() != type()) {
-    error_callback.add_error(std::format("TypeError: can't concat {} to bytes", other.type()));
+    error_callback.add_error(error_no_concat(type(), other.type()));
     return nullptr;
   }
   // TODO(lmirelmann): Check that the value length would not go over the limit.
@@ -186,7 +187,7 @@ starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& aren
         return Arena::Create<starlark_bytes>(&arena, "");
       }
       if (multiplier.bit_size() >= 63) {
-        error_callback.add_error(std::format("TypeError: sequences must be at most {} elements", max_string_length()));
+        error_callback.add_error(error_max_sequence_length(max_string_length()));
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);
@@ -198,7 +199,7 @@ starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& aren
       return result;
     }
     default:
-      error_callback.add_error(std::format("TypeError: can't multiply sequence by non-int of type '{}'", other.type()));
+      error_callback.add_error(error_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }

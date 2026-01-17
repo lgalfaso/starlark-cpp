@@ -14,6 +14,39 @@
 namespace starlark {
 namespace runtime {
 
+struct starlark_built_in_functions {
+  static const char abs_f[];
+  static const char all_f[];
+  static const char any_f[];
+  static const char bool_f[];
+  static const char bytes_f[];
+  static const char chr_f[];
+  static const char dict_f[];
+  static const char dir_f[];
+  static const char enumerate_f[];
+  static const char fail_f[];
+  static const char float_f[];
+  static const char getattr_f[];
+  static const char hasattr_f[];
+  static const char hash_f[];
+  static const char int_f[];
+  static const char len_f[];
+  static const char list_f[];
+  static const char max_f[];
+  static const char min_f[];
+  static const char ord_f[];
+  static const char print_f[];
+  static const char range_f[];
+  static const char repr_f[];
+  static const char reversed_f[];
+  static const char set_f[];
+  static const char sorted_f[];
+  static const char str_f[];
+  static const char tuple_f[];
+  static const char type_f[];
+  static const char zip_f[];
+};
+
 class starlark_function : public starlark_obj {
  public:
   std::string_view type() const override;

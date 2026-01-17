@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/levenshtein.hpp"
 
 using ::google::protobuf::Arena;
@@ -236,158 +237,158 @@ void starlark_obj::freeze() {
 }
 
 starlark_obj* starlark_obj::call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object is not callable", type()));
+  error_callback.add_error(error_not_callable(type()));
   return nullptr;
 }
 
 void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: cannot unpack non-iterable {} object", type()));
+  error_callback.add_error(error_unpackable(type()));
 }
 
 starlark_obj* starlark_obj::unary_plus(Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: bad operand type for unary +: '{}'", type()));
+  error_callback.add_error(error_bad_operand_unary("+", type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::unary_minus(Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: bad operand type for unary -: '{}'", type()));
+  error_callback.add_error(error_bad_operand_unary("-", type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::unary_tilde(Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: bad operand type for unary ~: '{}'", type()));
+  error_callback.add_error(error_bad_operand_unary("~", type()));
   return nullptr;
 }
 
 bool starlark_obj::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: argument of type '{}' is not a container or iterable", type()));
+  error_callback.add_error(error_argument_uniterable(type()));
   return false;
 }
 
 starlark_obj* starlark_obj::binary_lshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for <<: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("<<", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_rshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for >>: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary(">>", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_and(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for &: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("&", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for |: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("|", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_hat(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for ^: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("^", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for +: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("+", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for -: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("-", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for *: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("*", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for /: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("/", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for //: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("//", type(), other.type()));
   return nullptr;
 }
 
 starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: unsupported operand type(s) for %: '{}' and '{}'", type(), other.type()));
+  error_callback.add_error(error_bad_operand_binary("%", type(), other.type()));
   return nullptr;
 }
 
 int64_t starlark_obj::len(bool produce_error, error_fn& error_callback) const {
   if (produce_error) {
-    error_callback.add_error(std::format("TypeError: object of type '{}' has no len()", type()));
+    error_callback.add_error(error_no_method(type(), "len"));
   }
   return -1;
 }
 
 starlark_iterator* starlark_obj::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   if (produce_error) {
-    error_callback.add_error(std::format("TypeError: '{}' object is not iterable", type()));
+    error_callback.add_error(error_uniterable(type()));
   }
   return nullptr;
 }
 
 starlark_obj* starlark_obj::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: '{}' object is not subscriptable", type()));
+  error_callback.add_error(error_unsubscriptable(type()));
   return nullptr;
 }
 
 void starlark_obj::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_star_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_slash_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_percent_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_ampersand_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_pipe_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_hat_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 void starlark_obj::slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
-  error_callback.add_error(std::format("TypeError: '{}' object does not support item assignment", type()));
+  error_callback.add_error(error_no_item_assignment(type()));
 }
 
 int64_t starlark_obj::as_int64() const {
@@ -414,9 +415,9 @@ starlark_obj* starlark_obj::get_attr(bool produce_error, std::string_view attrib
       auto& attributes = dir();
       auto candidate = levenshtein(attribute, attributes);
       if (candidate < 0) {
-        error_callback.add_error(std::format("AttributeError: '{}' object has no attribute '{}'", type(), attribute));
+        error_callback.add_error(error_no_attribute(type(), attribute));
       } else {
-        error_callback.add_error(std::format("AttributeError: '{}' object has no attribute '{}'. Did you mean: '{}'?", type(), attribute, attributes[candidate]));
+        error_callback.add_error(error_no_attribute(type(), attribute, attributes[candidate]));
       }
     }
     return nullptr;
@@ -429,7 +430,7 @@ starlark_numeric_type starlark_obj::numeric_type() const {
 }
 
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
-  error_callback.add_error(std::format("TypeError: '{}' not supported between instances of '{}' and '{}'", op, type(), other->type()));
+  error_callback.add_error(error_incomparable(op, type(), other->type()));
   comp.add_task(order_comparator::pending_task_type::kFail);
 }
 
@@ -445,7 +446,7 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
         idx += obj_len;
       }
       if (idx < 0 || obj_len <= idx) {
-        error_callback.add_error(std::format("IndexError: {} index out of range", type()));
+        error_callback.add_error(error_index_out_of_range(type()));
         return -1;
       }
       return idx;
@@ -453,7 +454,7 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
     case starlark_numeric_type::kBigInt: {
       const auto& idx = other.as_bigint();
       if (idx.bit_size() > 63) {
-        error_callback.add_error(std::format("IndexError: {} index out of range", type()));
+        error_callback.add_error(error_index_out_of_range(type()));
         return -1;
       }
       auto iidx = idx.at(0);
@@ -461,13 +462,13 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
         iidx = obj_len - iidx;
       }
       if (iidx < 0 || obj_len <= iidx) {
-        error_callback.add_error(std::format("IndexError: {} index out of range", type()));
+        error_callback.add_error(error_index_out_of_range(type()));
         return -1;
       }
       return iidx;
     }
     default:
-      error_callback.add_error(std::format("TypeError: {} indices must be integers or slices, not '{}'", type(), other.type()));
+      error_callback.add_error(error_index_integer_or_slice(type(), other.type()));
       return -1;
   }
 }
