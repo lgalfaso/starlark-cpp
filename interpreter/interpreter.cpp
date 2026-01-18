@@ -541,9 +541,9 @@ frame::frame(std::size_t size, const RepeatedPtrField<std::string>* names) : ele
 // TODO(lmirelmann): There has to be a way to define the loader.
 interpreter::interpreter() {}
 
-// TODO(lmirelmann): There has to be a way to define the parsing options.
 // TODO(lmirelmann): There has to be a way to define the runtime options.
 frame* interpreter::run(std::string_view starlark_code,
+                        const options& grammar_options,
                         const std::map<std::string, starlark_obj*, std::less<>>& custom_binding,
                         Arena& arena, logger& logging) {
   std::set<std::string, std::less<>> binding;
@@ -551,12 +551,11 @@ frame* interpreter::run(std::string_view starlark_code,
     binding.insert(key);
   }
   class compiler star_compiler(binding);
-  Program* starlark_program = star_compiler.compile(starlark_code, options{}, logging, arena);
+  Program* starlark_program = star_compiler.compile(starlark_code, grammar_options, logging, arena);
   if (starlark_program == nullptr) {
     return nullptr;
   }
 
-  // TODO(lmirelmann): Add the other elements from the binding.
   std::map<std::string, starlark_obj*, std::less<>> global_context;
   global_context["True"] = Arena::Create<starlark_bool>(&arena, true);
   global_context["False"] = Arena::Create<starlark_bool>(&arena, false);
