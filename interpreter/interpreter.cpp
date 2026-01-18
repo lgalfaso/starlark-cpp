@@ -356,83 +356,26 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.back() = sequence->binary_in(*stack.back(), error_callback) ? bool_false : bool_true;
         break;
       }
-      case OpCode::kBinaryLessThanLessThan: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_lshift(*shift, arena, error_callback);
-        break;
+#define BINARY_OP(op, method)                                                              \
+      case op: {                                                                           \
+        assert(stack.size() >= 2);                                                         \
+        starlark_obj* other = stack.back();                                                \
+        stack.pop_back();                                                                  \
+        stack.back() = stack.back()->method(*other, arena, error_callback);                \
+        break;                                                                             \
       }
-      case OpCode::kBinaryGreaterThanGreaterThan: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_rshift(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinaryPipe: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_pipe(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinaryHat: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_hat(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinaryAmpersand: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_and(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinaryMinus: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_minus(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinaryPlus: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_plus(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinaryStar: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_star(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinaryPercent: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_percent(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinarySlash: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_slash(*shift, arena, error_callback);
-        break;
-      }
-      case OpCode::kBinarySlashSlash: {
-        assert(stack.size() >= 2);
-        starlark_obj* shift = stack.back();
-        stack.pop_back();
-        stack.back() = stack.back()->binary_slash_slash(*shift, arena, error_callback);
-        break;
-      }
+      BINARY_OP(OpCode::kBinaryLessThanLessThan, binary_lshift)
+      BINARY_OP(OpCode::kBinaryGreaterThanGreaterThan, binary_rshift)
+      BINARY_OP(OpCode::kBinaryPipe, binary_pipe)
+      BINARY_OP(OpCode::kBinaryHat, binary_hat)
+      BINARY_OP(OpCode::kBinaryAmpersand, binary_and)
+      BINARY_OP(OpCode::kBinaryMinus, binary_minus)
+      BINARY_OP(OpCode::kBinaryPlus, binary_plus)
+      BINARY_OP(OpCode::kBinaryStar, binary_star)
+      BINARY_OP(OpCode::kBinaryPercent, binary_percent)
+      BINARY_OP(OpCode::kBinarySlash, binary_slash)
+      BINARY_OP(OpCode::kBinarySlashSlash, binary_slash_slash)
+#undef BINARY_OP
       case OpCode::kCall: {
         int args_count = op_code.call().positional_arguments_count() +
             2 * op_code.call().named_arguments_count() +
@@ -507,187 +450,35 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         container->index_assign(*index, *element, error_callback);
         break;
       }
-      case OpCode::kAssignSliceRange: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
+#define ASSIGN_RANGE(op, method)                                                                           \
+      case op: {                                                                                           \
+        assert(stack.size() >= 5);                                                                         \
+        auto* stride = stack.back();                                                                       \
+        stack.pop_back();                                                                                  \
+        auto* stop = stack.back();                                                                         \
+        stack.pop_back();                                                                                  \
+        auto* start = stack.back();                                                                        \
+        stack.pop_back();                                                                                  \
+        auto* container = stack.back();                                                                    \
+        stack.pop_back();                                                                                  \
+        auto* element = stack.back();                                                                      \
+        stack.pop_back();                                                                                  \
+        container->method(*start, *stop, *stride, *element, arena, error_callback);                        \
+        break;                                                                                             \
       }
-      case OpCode::kAssignSliceRangePlusEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_plus_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeMinusEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_minus_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeStarEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_star_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeSlashEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_slash_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeSlashSlashEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_slash_slash_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangePercentEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_percent_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeAmpersandEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_ampersand_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangePipeEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_pipe_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeHatEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_hat_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeLessLessEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_less_less_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-      case OpCode::kAssignSliceRangeGreaterGreaterEquals: {
-        assert(stack.size() >= 5);
-        auto* stride = stack.back();
-        stack.pop_back();
-        auto* stop = stack.back();
-        stack.pop_back();
-        auto* start = stack.back();
-        stack.pop_back();
-        auto* container = stack.back();
-        stack.pop_back();
-        auto* element = stack.back();
-        stack.pop_back();
-        container->slice_range_greater_greater_equals_assign(*start, *stop, *stride, *element, arena, error_callback);
-        break;
-      }
-
+      ASSIGN_RANGE(OpCode::kAssignSliceRange, slice_range_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangePlusEquals, slice_range_plus_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeMinusEquals, slice_range_minus_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeStarEquals, slice_range_star_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeSlashEquals, slice_range_slash_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeSlashSlashEquals, slice_range_slash_slash_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangePercentEquals, slice_range_percent_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeAmpersandEquals, slice_range_ampersand_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangePipeEquals, slice_range_pipe_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeHatEquals, slice_range_hat_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeLessLessEquals, slice_range_less_less_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeGreaterGreaterEquals, slice_range_greater_greater_equals_assign)
+#undef ASSIGN_RANGE
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
