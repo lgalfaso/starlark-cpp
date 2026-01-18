@@ -26,6 +26,7 @@ using ::starlark::testing::error_handler;
 using ::testing::IsEmpty;
 using ::testing::Pair;
 using ::testing::SizeIs;
+using ::std::literals::string_view_literals::operator""sv;
 
 namespace {
 
@@ -38,9 +39,9 @@ TEST(StarlarkDictionary, Primitve) {
 }
 
 TEST(StarlarkDictionary, Str) {
-  starlark_string s1("1");
-  starlark_string s2("2");
-  starlark_string s3("3");
+  starlark_string s1("1"sv);
+  starlark_string s2("2"sv);
+  starlark_string s3("3"sv);
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
@@ -57,9 +58,9 @@ TEST(StarlarkDictionary, Str) {
 }
 
 TEST(StarlarkDictionary, StrOrder) {
-  starlark_string s1("1");
-  starlark_string s2("2");
-  starlark_string s3("3");
+  starlark_string s1("1"sv);
+  starlark_string s2("2"sv);
+  starlark_string s3("3"sv);
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
@@ -78,10 +79,10 @@ TEST(StarlarkDictionary, StrOrder) {
 }
 
 TEST(StarlarkDictionary, StrContainsItself) {
-  starlark_string s1("1");
-  starlark_string s2("2");
-  starlark_string s3("3");
-  starlark_string s4("4");
+  starlark_string s1("1"sv);
+  starlark_string s2("2"sv);
+  starlark_string s3("3"sv);
+  starlark_string s4("4"sv);
   starlark_none none;
   starlark_bool true_obj(true);
   starlark_integer one(1);
@@ -218,11 +219,11 @@ TEST(StarlarkDictionary, BinaryPipe) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_integer three(3);
-  starlark_string s_zero("zero");
-  starlark_string s_one("one");
-  starlark_string s_two("two");
-  starlark_string s_three("three");
-  starlark_string s_four("four");
+  starlark_string s_zero("zero"sv);
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  starlark_string s_four("four"sv);
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;
   Arena arena;
@@ -260,10 +261,10 @@ TEST(StarlarkDictionary, Len) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_integer three(3);
-  starlark_string s_zero("zero");
-  starlark_string s_one("one");
-  starlark_string s_two("two");
-  starlark_string s_three("three");
+  starlark_string s_zero("zero"sv);
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
   error_handler error_callback;
 
   dict_2.insert(&zero, &s_zero, error_callback);
@@ -281,8 +282,8 @@ TEST(StarlarkDictionary, GetIterator) {
   starlark_dictionary dictionary1;
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_string s_zero("key0");
-  starlark_string s_one("key1");
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
   Arena arena;
   error_handler error_callback;
   dictionary1.insert(&s_zero, &zero, error_callback);
@@ -306,8 +307,8 @@ TEST(StarlarkDictionary, MutationWhileIterating1) {
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_string s_zero("key0");
-  starlark_string s_one("key1");
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
   Arena arena;
   error_handler error_callback;
   dictionary.insert(&s_zero, &zero, error_callback);
@@ -325,8 +326,8 @@ TEST(StarlarkDictionary, Index) {
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
-  starlark_string s_zero("key0");
-  starlark_string s_one("key1");
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 
@@ -340,8 +341,8 @@ TEST(StarlarkDictionary, KeyError) {
   Arena arena;
   starlark_dictionary dictionary;
   starlark_integer zero(0);
-  starlark_string s_zero("key0");
-  starlark_string s_one("key1");
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
   dictionary.insert(&s_zero, &zero, error_callback);
 
   EXPECT_EQ(nullptr, dictionary.index(s_one, arena, error_callback));
@@ -356,9 +357,9 @@ TEST(StarlarkDictionary, IndexAssign) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_integer three(3);
-  starlark_string s_zero("key0");
-  starlark_string s_one("key1");
-  starlark_string s_two("key2");
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 
@@ -375,9 +376,9 @@ TEST(StarlarkDictionary, MutationWhileIterating2) {
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
-  starlark_string s_zero("key0");
-  starlark_string s_one("key1");
-  starlark_string s_two("key2");
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 
@@ -394,9 +395,9 @@ TEST(StarlarkDictionary, IndexAssignWithFreeze) {
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_integer two(2);
-  starlark_string s_zero("key0");
-  starlark_string s_one("key1");
-  starlark_string s_two("key2");
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 

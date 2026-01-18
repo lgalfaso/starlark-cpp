@@ -43,6 +43,7 @@ using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
+using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::IsEmpty;
@@ -96,7 +97,7 @@ TEST(StarlarkInteger, Equals) {
   EXPECT_TRUE(starlark_integer(std::numeric_limits<int64_t>::min()).equals(starlark_bigint(min_int64)));
   EXPECT_TRUE(starlark_integer(std::numeric_limits<int64_t>::min() + 1).equals(starlark_bigint(min_int64 + starlark::bigint::number::one)));
 
-  EXPECT_FALSE(starlark_integer(0).equals(starlark_string("")));
+  EXPECT_FALSE(starlark_integer(0).equals(starlark_string(""sv)));
 }
 
 TEST(StarlarkInteger, EqualsExact) {

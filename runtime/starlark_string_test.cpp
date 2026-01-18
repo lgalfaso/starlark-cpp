@@ -40,6 +40,7 @@ using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
+using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Contains;
 using ::testing::Eq;
 using ::testing::Gt;
@@ -50,186 +51,186 @@ using ::testing::SizeIs;
 namespace {
 
 TEST(StarlarkString, Type) {
-  EXPECT_EQ("string", starlark_string("").type());
+  EXPECT_EQ("string", starlark_string(""sv).type());
 }
 
 TEST(StarlarkString, Primitve) {
-  EXPECT_TRUE(starlark_string("").primitive());
+  EXPECT_TRUE(starlark_string(""sv).primitive());
 }
 
 TEST(StarlarkString, Str) {
-  EXPECT_EQ("abcdef", starlark_string("abcdef").str());
-  EXPECT_EQ("fedcba", starlark_string("fedcba").str());
+  EXPECT_EQ("abcdef", starlark_string("abcdef"sv).str());
+  EXPECT_EQ("fedcba", starlark_string("fedcba"sv).str());
 }
 
 TEST(StarlarkString, Repr) {
   // TODO(lmirelmann): Would be nice to have a test that checks the encoding of all characters.
-  EXPECT_EQ("\"abcdef\"", starlark_string("abcdef").repr());
-  EXPECT_EQ("\"'\"", starlark_string("'").repr());
-  EXPECT_EQ("\"'\\\"\"", starlark_string("'\"").repr());
-  EXPECT_EQ("\"\\t\\r\\n\"", starlark_string("\t\r\n").repr());
-  EXPECT_EQ("\"\\x01\\x02\\x7f\"", starlark_string("\001\002\177").repr());
-  EXPECT_EQ("\"\\x90\"", starlark_string("\302\220").repr());
-  EXPECT_EQ("\"\xC3\xA0\"", starlark_string("\303\240").repr());
-  EXPECT_EQ("\"\xC8\xB4\"", starlark_string("\310\264").repr());
-  EXPECT_EQ("\"\\u0378\"", starlark_string("\315\270").repr());
-  EXPECT_EQ("\"\\ud800\"", starlark_string("\355\240\200").repr());
-  EXPECT_EQ("\"\\U000101c7\"", starlark_string("\360\220\207\207").repr());
-  EXPECT_EQ("\"\xf0\"", starlark_string(std::string("🙂").substr(0, 1)).repr());
-  EXPECT_EQ("\"\\ufeff\"", starlark_string("\xef\xbb\xbf").repr());
+  EXPECT_EQ("\"abcdef\"", starlark_string("abcdef"sv).repr());
+  EXPECT_EQ("\"'\"", starlark_string("'"sv).repr());
+  EXPECT_EQ("\"'\\\"\"", starlark_string("'\""sv).repr());
+  EXPECT_EQ("\"\\t\\r\\n\"", starlark_string("\t\r\n"sv).repr());
+  EXPECT_EQ("\"\\x01\\x02\\x7f\"", starlark_string("\001\002\177"sv).repr());
+  EXPECT_EQ("\"\\x90\"", starlark_string("\302\220"sv).repr());
+  EXPECT_EQ("\"\xC3\xA0\"", starlark_string("\303\240"sv).repr());
+  EXPECT_EQ("\"\xC8\xB4\"", starlark_string("\310\264"sv).repr());
+  EXPECT_EQ("\"\\u0378\"", starlark_string("\315\270"sv).repr());
+  EXPECT_EQ("\"\\ud800\"", starlark_string("\355\240\200"sv).repr());
+  EXPECT_EQ("\"\\U000101c7\"", starlark_string("\360\220\207\207"sv).repr());
+  EXPECT_EQ("\"\xf0\"", starlark_string(std::string("🙂"sv).substr(0, 1)).repr());
+  EXPECT_EQ("\"\\ufeff\"", starlark_string("\xef\xbb\xbf"sv).repr());
 }
 
 TEST(StarlarkString, Truthy) {
-  EXPECT_FALSE(starlark_string("").truthy());
-  EXPECT_TRUE(starlark_string("a").truthy());
+  EXPECT_FALSE(starlark_string(""sv).truthy());
+  EXPECT_TRUE(starlark_string("a"sv).truthy());
 }
 
 TEST(StarlarkString, Equals) {
-  EXPECT_TRUE(starlark_string("").equals(starlark_string("")));
-  EXPECT_TRUE(starlark_string("a").equals(starlark_string("a")));
-  EXPECT_FALSE(starlark_string("").equals(starlark_string("a")));
+  EXPECT_TRUE(starlark_string(""sv).equals(starlark_string(""sv)));
+  EXPECT_TRUE(starlark_string("a"sv).equals(starlark_string("a"sv)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_string("a"sv)));
   // This is the NFKC decomposition.
-  EXPECT_FALSE(starlark_string("\u03C9\u0301").equals(starlark_string("\u03CE")));
+  EXPECT_FALSE(starlark_string("\u03C9\u0301"sv).equals(starlark_string("\u03CE"sv)));
 
-  EXPECT_FALSE(starlark_string("").equals(starlark_bigint(0)));
-  EXPECT_FALSE(starlark_string("").equals(starlark_bool(false)));
-  EXPECT_FALSE(starlark_string("").equals(starlark_bytes("")));
-  EXPECT_FALSE(starlark_string("").equals(starlark_dictionary()));
-  EXPECT_FALSE(starlark_string("").equals(starlark_float(0.0)));
-  EXPECT_FALSE(starlark_string("").equals(starlark_function()));
-  EXPECT_FALSE(starlark_string("").equals(starlark_integer(0)));
-  EXPECT_FALSE(starlark_string("").equals(starlark_list(0)));
-  EXPECT_FALSE(starlark_string("").equals(starlark_none()));
-  EXPECT_FALSE(starlark_string("").equals(starlark_range(0, 1, 1)));
-  EXPECT_FALSE(starlark_string("").equals(starlark_set()));
-  EXPECT_FALSE(starlark_string("").equals(starlark_tuple(0)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_bigint(0)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_bool(false)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_bytes(""sv)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_dictionary()));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_float(0.0)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_function()));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_integer(0)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_list(0)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_none()));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_range(0, 1, 1)));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_set()));
+  EXPECT_FALSE(starlark_string(""sv).equals(starlark_tuple(0)));
 
-  EXPECT_FALSE(starlark_string("0").equals(starlark_integer(0)));
+  EXPECT_FALSE(starlark_string("0"sv).equals(starlark_integer(0)));
 }
 
 TEST(StarlarkString, Hash) {
-  EXPECT_EQ(0, starlark_string("").hash());
+  EXPECT_EQ(0, starlark_string(""sv).hash());
   EXPECT_EQ(0x539375b79c9167a6, starlark_string(std::string("\000", 1)).hash());
-  EXPECT_EQ(0x19ac88fb2429e222, starlark_string("a").hash());
-  EXPECT_EQ(0x12d48511de046bbc, starlark_string("ab").hash());
-  EXPECT_EQ(0x53d7cad63d3282ff, starlark_string("abc").hash());
-  EXPECT_EQ(0x92981e87e70229, starlark_string("abcd").hash());
-  EXPECT_EQ(0xabac8f555b5e912, starlark_string("abcde").hash());
-  EXPECT_EQ(0x63667dc70d4dbf89, starlark_string("abcdef").hash());
-  EXPECT_EQ(0x3539f9b81c64a336, starlark_string("abcdefg").hash());
-  EXPECT_EQ(-0x7f95eee8bc7b632d, starlark_string("abcdefgh").hash());
-  EXPECT_EQ(-0x642099e9fba65ad0, starlark_string("abcdefghi").hash());
-  EXPECT_EQ(-0x669943fc9f1993d5, starlark_string("abcdefghij").hash());
-  EXPECT_EQ(0x5e5235ef5071d1c8, starlark_string("abcdefghijk").hash());
-  EXPECT_EQ(-0x574fd3e31dd1b6c0, starlark_string("abcdefghijkl").hash());
-  EXPECT_EQ(0x348e1f9d6e3c67a9, starlark_string("abcdefghijklm").hash());
-  EXPECT_EQ(0x4b59cf75df0ea525, starlark_string("abcdefghijklmn").hash());
-  EXPECT_EQ(0x7c0d99416b677716, starlark_string("abcdefghijklmno").hash());
-  EXPECT_EQ(0x651dcfdc9b304273, starlark_string("abcdefghijklmnop").hash());
-  EXPECT_EQ(-0x706278fdd6f9101, starlark_string("abcdefghijklmnopq").hash());
-  EXPECT_EQ(0x310a2e3dd291e1a6, starlark_string("abcdefghijklmnopqr").hash());
-  EXPECT_EQ(0x76e0c0d29cc59331, starlark_string("abcdefghijklmnopqrs").hash());
-  EXPECT_EQ(-0x89ec229ad3ce95e, starlark_string("abcdefghijklmnopqrst").hash());
-  EXPECT_EQ(-0x3421666900cc950, starlark_string("abcdefghijklmnopqrstu").hash());
-  EXPECT_EQ(0x7be37d6337827631, starlark_string("abcdefghijklmnopqrstuv").hash());
-  EXPECT_EQ(-0xd93501f3830d3c5, starlark_string("abcdefghijklmnopqrstuvw").hash());
-  EXPECT_EQ(-0x1ec56e52deeb2ed9, starlark_string("abcdefghijklmnopqrstuvwx").hash());
-  EXPECT_EQ(0x2928ab0caeae7b0d, starlark_string("abcdefghijklmnopqrstuvwxy").hash());
-  EXPECT_EQ(0x732f1d3705b6dfa3, starlark_string("abcdefghijklmnopqrstuvwxyz").hash());
-  EXPECT_EQ(-0x3d305c344304b1, starlark_string("abcdefghijklmnopqrstuvwxyz0").hash());
-  EXPECT_EQ(-0x4bbc24288075d499, starlark_string("abcdefghijklmnopqrstuvwxyz01").hash());
-  EXPECT_EQ(0x630596a3267cd0f9, starlark_string("abcdefghijklmnopqrstuvwxyz012").hash());
-  EXPECT_EQ(-0x7176a79e04f34841, starlark_string("abcdefghijklmnopqrstuvwxyz0123").hash());
-  EXPECT_EQ(0x7b3b18b2511d145a, starlark_string("abcdefghijklmnopqrstuvwxyz01234").hash());
-  EXPECT_EQ(-0x116d8bb10196190f, starlark_string("abcdefghijklmnopqrstuvwxyz012345").hash());
-  EXPECT_EQ(-0x7a27473192c1723a, starlark_string("abcdefghijklmnopqrstuvwxyz0123456").hash());
-  EXPECT_EQ(0x731309efc4441b64, starlark_string("abcdefghijklmnopqrstuvwxyz01234567").hash());
-  EXPECT_EQ(-0x41044b627d75b155, starlark_string("abcdefghijklmnopqrstuvwxyz012345678").hash());
-  EXPECT_EQ(-0x38976cda9bea7d32, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789").hash());
-  EXPECT_EQ(0x6079104dbaf33098, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@").hash());
-  EXPECT_EQ(-0x6f9048eb54a00388, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@!").hash());
+  EXPECT_EQ(0x19ac88fb2429e222, starlark_string("a"sv).hash());
+  EXPECT_EQ(0x12d48511de046bbc, starlark_string("ab"sv).hash());
+  EXPECT_EQ(0x53d7cad63d3282ff, starlark_string("abc"sv).hash());
+  EXPECT_EQ(0x92981e87e70229, starlark_string("abcd"sv).hash());
+  EXPECT_EQ(0xabac8f555b5e912, starlark_string("abcde"sv).hash());
+  EXPECT_EQ(0x63667dc70d4dbf89, starlark_string("abcdef"sv).hash());
+  EXPECT_EQ(0x3539f9b81c64a336, starlark_string("abcdefg"sv).hash());
+  EXPECT_EQ(-0x7f95eee8bc7b632d, starlark_string("abcdefgh"sv).hash());
+  EXPECT_EQ(-0x642099e9fba65ad0, starlark_string("abcdefghi"sv).hash());
+  EXPECT_EQ(-0x669943fc9f1993d5, starlark_string("abcdefghij"sv).hash());
+  EXPECT_EQ(0x5e5235ef5071d1c8, starlark_string("abcdefghijk"sv).hash());
+  EXPECT_EQ(-0x574fd3e31dd1b6c0, starlark_string("abcdefghijkl"sv).hash());
+  EXPECT_EQ(0x348e1f9d6e3c67a9, starlark_string("abcdefghijklm"sv).hash());
+  EXPECT_EQ(0x4b59cf75df0ea525, starlark_string("abcdefghijklmn"sv).hash());
+  EXPECT_EQ(0x7c0d99416b677716, starlark_string("abcdefghijklmno"sv).hash());
+  EXPECT_EQ(0x651dcfdc9b304273, starlark_string("abcdefghijklmnop"sv).hash());
+  EXPECT_EQ(-0x706278fdd6f9101, starlark_string("abcdefghijklmnopq"sv).hash());
+  EXPECT_EQ(0x310a2e3dd291e1a6, starlark_string("abcdefghijklmnopqr"sv).hash());
+  EXPECT_EQ(0x76e0c0d29cc59331, starlark_string("abcdefghijklmnopqrs"sv).hash());
+  EXPECT_EQ(-0x89ec229ad3ce95e, starlark_string("abcdefghijklmnopqrst"sv).hash());
+  EXPECT_EQ(-0x3421666900cc950, starlark_string("abcdefghijklmnopqrstu"sv).hash());
+  EXPECT_EQ(0x7be37d6337827631, starlark_string("abcdefghijklmnopqrstuv"sv).hash());
+  EXPECT_EQ(-0xd93501f3830d3c5, starlark_string("abcdefghijklmnopqrstuvw"sv).hash());
+  EXPECT_EQ(-0x1ec56e52deeb2ed9, starlark_string("abcdefghijklmnopqrstuvwx"sv).hash());
+  EXPECT_EQ(0x2928ab0caeae7b0d, starlark_string("abcdefghijklmnopqrstuvwxy"sv).hash());
+  EXPECT_EQ(0x732f1d3705b6dfa3, starlark_string("abcdefghijklmnopqrstuvwxyz"sv).hash());
+  EXPECT_EQ(-0x3d305c344304b1, starlark_string("abcdefghijklmnopqrstuvwxyz0"sv).hash());
+  EXPECT_EQ(-0x4bbc24288075d499, starlark_string("abcdefghijklmnopqrstuvwxyz01"sv).hash());
+  EXPECT_EQ(0x630596a3267cd0f9, starlark_string("abcdefghijklmnopqrstuvwxyz012"sv).hash());
+  EXPECT_EQ(-0x7176a79e04f34841, starlark_string("abcdefghijklmnopqrstuvwxyz0123"sv).hash());
+  EXPECT_EQ(0x7b3b18b2511d145a, starlark_string("abcdefghijklmnopqrstuvwxyz01234"sv).hash());
+  EXPECT_EQ(-0x116d8bb10196190f, starlark_string("abcdefghijklmnopqrstuvwxyz012345"sv).hash());
+  EXPECT_EQ(-0x7a27473192c1723a, starlark_string("abcdefghijklmnopqrstuvwxyz0123456"sv).hash());
+  EXPECT_EQ(0x731309efc4441b64, starlark_string("abcdefghijklmnopqrstuvwxyz01234567"sv).hash());
+  EXPECT_EQ(-0x41044b627d75b155, starlark_string("abcdefghijklmnopqrstuvwxyz012345678"sv).hash());
+  EXPECT_EQ(-0x38976cda9bea7d32, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789"sv).hash());
+  EXPECT_EQ(0x6079104dbaf33098, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@"sv).hash());
+  EXPECT_EQ(-0x6f9048eb54a00388, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@!"sv).hash());
 }
 
 TEST(StarlarkString, Order) {
   error_handler error_callback;
 
-  EXPECT_THAT(starlark_string("").cmp(starlark_string(""), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_string("").cmp(starlark_string("a"), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_string("a").cmp(starlark_string("a"), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_string("a").cmp(starlark_string(""), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_string("a").cmp(starlark_string("b"), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_string("b").cmp(starlark_string("a"), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_string(""sv).cmp(starlark_string(""sv), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_string(""sv).cmp(starlark_string("a"sv), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_string("a"sv).cmp(starlark_string("a"sv), "cmp", error_callback), Eq(0));
+  EXPECT_THAT(starlark_string("a"sv).cmp(starlark_string(""sv), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(starlark_string("a"sv).cmp(starlark_string("b"sv), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_string("b"sv).cmp(starlark_string("a"sv), "cmp", error_callback), Gt(0));
 }
 
 TEST(StarlarkString, OrderErrors) {
   error_handler error_callback;
-  EXPECT_FALSE(starlark_string("").cmp(starlark_bytes(""), "<", error_callback));
+  EXPECT_FALSE(starlark_string(""sv).cmp(starlark_bytes(""sv), "<", error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'string' and 'bytes'");
 }
 
 TEST(StarlarkString, BinaryIn) {
   error_handler error_callback;
-  EXPECT_TRUE(starlark_string("").binary_in(starlark_string(""), error_callback));
-  EXPECT_TRUE(starlark_string("a").binary_in(starlark_string(""), error_callback));
-  EXPECT_FALSE(starlark_string("a").binary_in(starlark_string("b"), error_callback));
+  EXPECT_TRUE(starlark_string(""sv).binary_in(starlark_string(""sv), error_callback));
+  EXPECT_TRUE(starlark_string("a"sv).binary_in(starlark_string(""sv), error_callback));
+  EXPECT_FALSE(starlark_string("a"sv).binary_in(starlark_string("b"sv), error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkString, BinaryInErrors) {
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_string("a").binary_in(starlark_integer('b'), error_callback));
+    EXPECT_FALSE(starlark_string("a"sv).binary_in(starlark_integer('b'), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_string("a").binary_in(starlark_integer('a'), error_callback));
+    EXPECT_FALSE(starlark_string("a"sv).binary_in(starlark_integer('a'), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_string("a").binary_in(starlark_bigint('a'), error_callback));
+    EXPECT_FALSE(starlark_string("a"sv).binary_in(starlark_bigint('a'), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_string(""), error_callback));
+    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_string(""sv), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'string'");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(-1), error_callback));
+    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_integer(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_integer(256), error_callback));
+    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_integer(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(-1), error_callback));
+    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_bigint(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes("").binary_in(starlark_bigint(256), error_callback));
+    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_bigint(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
   }
 }
 
 TEST(StarlarkString, BinaryPlus) {
-  starlark_string str_1("abc");
-  starlark_string str_2("def");
+  starlark_string str_1("abc"sv);
+  starlark_string str_2("def"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -240,7 +241,7 @@ TEST(StarlarkString, BinaryPlus) {
 }
 
 TEST(StarlarkString, BinaryPlusNotList) {
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
@@ -257,8 +258,8 @@ TEST(StarlarkString, BinaryStar) {
   starlark_integer two(2);
   starlark_bigint three(3);
   starlark_bigint big(number::one << 64);
-  starlark_string str0("");
-  starlark_string str("abc");
+  starlark_string str0(""sv);
+  starlark_string str("abc"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -289,8 +290,8 @@ TEST(StarlarkString, BinaryStarReverse) {
   starlark_integer two(2);
   starlark_bigint three(3);
   starlark_bigint big(number::one << 64);
-  starlark_string str0("");
-  starlark_string str("abc");
+  starlark_string str0(""sv);
+  starlark_string str("abc"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -313,7 +314,7 @@ TEST(StarlarkString, BinaryStarReverse) {
 }
 
 TEST(StarlarkString, BinaryStarNotInt) {
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
   error_handler error_callback;
@@ -325,7 +326,7 @@ TEST(StarlarkString, BinaryStarNotInt) {
 }
 
 TEST(StarlarkString, BinaryStarTooBig) {
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
   starlark_bigint big(number::one << 64);
   Arena arena;
   error_handler error_callback;
@@ -339,15 +340,15 @@ TEST(StarlarkString, BinaryStarTooBig) {
 TEST(StarlarkString, Len) {
   error_handler error_callback;
 
-  EXPECT_EQ(0, starlark_string("").len(true, error_callback));
-  EXPECT_EQ(3, starlark_string("abc").len(true, error_callback));
+  EXPECT_EQ(0, starlark_string(""sv).len(true, error_callback));
+  EXPECT_EQ(3, starlark_string("abc"sv).len(true, error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkString, Index) {
   error_handler error_callback;
   Arena arena;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   EXPECT_EQ(str.index(starlark_integer(-3), arena, error_callback)->repr(), "\"a\"");
   EXPECT_EQ(str.index(starlark_integer(-2), arena, error_callback)->repr(), "\"b\"");
@@ -361,7 +362,7 @@ TEST(StarlarkString, Index) {
 TEST(StarlarkString, IndexOutOfRange1) {
   error_handler error_callback;
   Arena arena;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   EXPECT_EQ(nullptr, str.index(starlark_integer(-4), arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -371,7 +372,7 @@ TEST(StarlarkString, IndexOutOfRange1) {
 TEST(StarlarkString, IndexOutOfRange2) {
   error_handler error_callback;
   Arena arena;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   EXPECT_EQ(nullptr, str.index(starlark_integer(3), arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -379,7 +380,7 @@ TEST(StarlarkString, IndexOutOfRange2) {
 }
 
 TEST(StarlarkString, Dir) {
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   EXPECT_THAT(str.dir(), Contains("capitalize"));
 }
@@ -387,7 +388,7 @@ TEST(StarlarkString, Dir) {
 TEST(StarlarkString, Count) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   auto* result = str.get_attr(true, "count", arena, error_callback);
   ASSERT_NE(nullptr, result) << error_callback.messages[0];

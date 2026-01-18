@@ -41,6 +41,7 @@ using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
+using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Gt;
 using ::testing::Lt;
 
@@ -76,7 +77,7 @@ TEST(StarlarkBool, Equals) {
 
   EXPECT_FALSE(starlark_bool(false).equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_none()));
-  EXPECT_FALSE(starlark_bool(false).equals(starlark_bytes("")));
+  EXPECT_FALSE(starlark_bool(false).equals(starlark_bytes(""sv)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_float(0.0)));
@@ -85,12 +86,12 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(false).equals(starlark_list(0)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_range(0, 1, 1)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_set()));
-  EXPECT_FALSE(starlark_bool(false).equals(starlark_string("")));
+  EXPECT_FALSE(starlark_bool(false).equals(starlark_string(""sv)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_tuple(0)));
 
   EXPECT_FALSE(starlark_bool(true).equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_none()));
-  EXPECT_FALSE(starlark_bool(true).equals(starlark_bytes("")));
+  EXPECT_FALSE(starlark_bool(true).equals(starlark_bytes(""sv)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_float(0.0)));
@@ -99,7 +100,7 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(true).equals(starlark_list(0)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_range(0, 1, 1)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_set()));
-  EXPECT_FALSE(starlark_bool(true).equals(starlark_string("")));
+  EXPECT_FALSE(starlark_bool(true).equals(starlark_string(""sv)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_tuple(0)));
 }
 

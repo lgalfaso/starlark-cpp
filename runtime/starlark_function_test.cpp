@@ -47,6 +47,7 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
+using ::std::literals::string_view_literals::operator""sv;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
 using starlark::unicode::utf8_reader;
@@ -494,7 +495,7 @@ TEST(StarlarkBytes, FromBytesOrString) {
   error_handler error_callback;
 
   {
-    starlark_string str("abc");
+    starlark_string str("abc"sv);
     starlark_obj::pos_args_t pos_args;
     starlark_obj::named_args_t named_args;
     pos_args.push_back(&str);
@@ -504,7 +505,7 @@ TEST(StarlarkBytes, FromBytesOrString) {
     EXPECT_EQ(result->repr(), "b\"abc\"");
   }
   {
-    starlark_bytes bytes("def");
+    starlark_bytes bytes("def"sv);
     starlark_obj::pos_args_t pos_args;
     starlark_obj::named_args_t named_args;
     pos_args.push_back(&bytes);
@@ -520,7 +521,7 @@ TEST(StarlarkBytes, FromStringInvalidUnicodeSequence) {
   Arena arena;
   error_handler error_callback;
 
-  starlark_string str("abc\xf0\x{f1}def");
+  starlark_string str("abc\xf0\x{f1}def"sv);
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
@@ -632,7 +633,7 @@ TEST(StarlarkBytes, None) {
 }
 
 TEST(StarlarkBytes, MultiplePosArgs) {
-  starlark_bytes bytes("def");
+  starlark_bytes bytes("def"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -647,7 +648,7 @@ TEST(StarlarkBytes, MultiplePosArgs) {
 }
 
 TEST(StarlarkBytes, NamedArguments) {
-  starlark_bytes bytes("def");
+  starlark_bytes bytes("def"sv);
   std::string s_one("1");
   starlark_integer one(1);
   starlark_list list(0);
@@ -765,7 +766,7 @@ TEST(StarlarkChr, OutOfRange4) {
 }
 
 TEST(StarlarkChr, NamedArguments) {
-  starlark_bytes bytes("def");
+  starlark_bytes bytes("def"sv);
   std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
@@ -1066,9 +1067,9 @@ TEST(StarlarkEnumerate, FromIterable) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
-  starlark_string s_one("one");
-  starlark_string s_two("two");
-  starlark_string s_three("three");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
   list.add(&s_one, error_callback);
   list.add(&s_two, error_callback);
   list.add(&s_three, error_callback);
@@ -1088,9 +1089,9 @@ TEST(StarlarkEnumerate, FromIterableWithStart) {
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
   std::string s_start("start");
-  starlark_string s_one("one");
-  starlark_string s_two("two");
-  starlark_string s_three("three");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
   list.add(&s_one, error_callback);
   list.add(&s_two, error_callback);
   list.add(&s_three, error_callback);
@@ -1112,14 +1113,14 @@ TEST(StarlarkEnumerate, InvalidStart) {
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
   std::string s_start("start");
-  starlark_string s_one("one");
-  starlark_string s_two("two");
-  starlark_string s_three("three");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
   list.add(&s_one, error_callback);
   list.add(&s_two, error_callback);
   list.add(&s_three, error_callback);
   pos_args.push_back(&list);
-  starlark_string start("100");
+  starlark_string start("100"sv);
   named_args.insert(s_start, &start);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
@@ -1135,15 +1136,15 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
-  starlark_string s_one("one");
-  starlark_string s_two("two");
-  starlark_string s_three("three");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
   std::string s_end("end");
   list.add(&s_one, error_callback);
   list.add(&s_two, error_callback);
   list.add(&s_three, error_callback);
   pos_args.push_back(&list);
-  starlark_string end("100");
+  starlark_string end("100"sv);
   named_args.insert(s_end, &end);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
@@ -1172,9 +1173,9 @@ TEST(StarlarkEnumerate, TooManyPosArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
-  starlark_string s_one("one");
-  starlark_string s_two("two");
-  starlark_string s_three("three");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
   list.add(&s_one, error_callback);
   list.add(&s_two, error_callback);
   list.add(&s_three, error_callback);
@@ -1193,7 +1194,7 @@ TEST(StarlarkEnumerate, NotIterable) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  starlark_string s_one("one");
+  starlark_string s_one("one"sv);
   pos_args.push_back(&s_one);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, arena, error_callback);
@@ -1205,7 +1206,7 @@ TEST(StarlarkEnumerate, NotIterable) {
 TEST(StarlarkFail, Message) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("some error message");
+  starlark_string str("some error message"sv);
   starlark_list list(0);
   starlark_integer one(1);
 
@@ -1365,7 +1366,7 @@ TEST(StarlarkFloat, BigintOverflow) {
 }
 
 TEST(StarlarkFloat, StringOverflow) {
-  starlark_string value("2e308");
+  starlark_string value("2e308"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1380,7 +1381,7 @@ TEST(StarlarkFloat, StringOverflow) {
 }
 
 TEST(StarlarkFloat, InvalidString) {
-  starlark_string value("1a");
+  starlark_string value("1a"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1442,7 +1443,7 @@ TEST(StarlarkHasattr, CheckAttribute) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-  starlark_string str("");
+  starlark_string str(""sv);
   test(str, "count", true);
   test(str, "coun", false);
   test(str, "zzz", false);
@@ -1450,7 +1451,7 @@ TEST(StarlarkHasattr, CheckAttribute) {
 }
 
 TEST(StarlarkHasattr, WrongAttributeType) {
-  starlark_string str("");
+  starlark_string str(""sv);
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
@@ -1466,7 +1467,7 @@ TEST(StarlarkHasattr, WrongAttributeType) {
 }
 
 TEST(StarlarkHasattr, TooFewPosArgs) {
-  starlark_string str("");
+  starlark_string str(""sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1480,8 +1481,8 @@ TEST(StarlarkHasattr, TooFewPosArgs) {
 }
 
 TEST(StarlarkHasattr, TooManyPosArgs) {
-  starlark_string str("");
-  starlark_string attr("count");
+  starlark_string str(""sv);
+  starlark_string attr("count"sv);
   starlark_integer one(1);
   Arena arena;
   error_handler error_callback;
@@ -1514,8 +1515,8 @@ TEST(StarlarkHasattr, NamedArguments) {
 }
 
 TEST(StarlarkHash, String) {
-  starlark_string str1("");
-  starlark_string str2("abc");
+  starlark_string str1(""sv);
+  starlark_string str2("abc"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1532,8 +1533,8 @@ TEST(StarlarkHash, String) {
 }
 
 TEST(StarlarkHash, Bytes) {
-  starlark_bytes bytes1("");
-  starlark_bytes bytes2("abc");
+  starlark_bytes bytes1(""sv);
+  starlark_bytes bytes2("abc"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1576,7 +1577,7 @@ TEST(StarlarkHash, NoPosArgs) {
 }
 
 TEST(StarlarkHash, MultiplePosArgs) {
-  starlark_string str("");
+  starlark_string str(""sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1592,7 +1593,7 @@ TEST(StarlarkHash, MultiplePosArgs) {
 
 TEST(StarlarkHash, NamedArguments) {
   std::string s_one("1");
-  starlark_string str("");
+  starlark_string str(""sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1790,7 +1791,7 @@ TEST(StarlarkInt, FromStringWithBase) {
 
 template <typename T>
 void test_invalid_base(int base) {
-  starlark_string str("1");
+  starlark_string str("1"sv);
   T ibase(base);
   Arena arena;
   error_handler error_callback;
@@ -1817,7 +1818,7 @@ TEST(StarlarkInt, FromStringInvalidBase) {
 }
 
 TEST(StarlarkInt, FromStringBaseNotInt) {
-  starlark_string str("1");
+  starlark_string str("1"sv);
   starlark_list list(0);
   Arena arena;
   error_handler error_callback;
@@ -1833,7 +1834,7 @@ TEST(StarlarkInt, FromStringBaseNotInt) {
 }
 
 TEST(StarlarkInt, FromStringNotAbleToParseInFull) {
-  starlark_string str("123abc");
+  starlark_string str("123abc"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1873,7 +1874,7 @@ TEST(StarlarkInt, TooFewPosArgs) {
 }
 
 TEST(StarlarkInt, TooManyPosArgs) {
-  starlark_string str("");
+  starlark_string str(""sv);
   Arena arena;
   error_handler error_callback;
 
@@ -1890,7 +1891,7 @@ TEST(StarlarkInt, TooManyPosArgs) {
 
 TEST(StarlarkInt, NamedArguments) {
   std::string s_one("1");
-  starlark_string str("1");
+  starlark_string str("1"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2064,7 +2065,7 @@ TEST(StarlarkList, NamedArguments) {
 }
 
 TEST(StarlarkOrd, FromString) {
-  starlark_string str("😃");
+  starlark_string str("😃"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2077,7 +2078,7 @@ TEST(StarlarkOrd, FromString) {
 }
 
 TEST(StarlarkOrd, FromBytes) {
-  starlark_bytes bytes("\xFF");
+  starlark_bytes bytes("\xFF"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2090,7 +2091,7 @@ TEST(StarlarkOrd, FromBytes) {
 }
 
 TEST(StarlarkOrd, ShortString) {
-  starlark_string str("");
+  starlark_string str(""sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2104,7 +2105,7 @@ TEST(StarlarkOrd, ShortString) {
 }
 
 TEST(StarlarkOrd, LongString) {
-  starlark_string str("ab");
+  starlark_string str("ab"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2118,7 +2119,7 @@ TEST(StarlarkOrd, LongString) {
 }
 
 TEST(StarlarkOrd, ShortBytes) {
-  starlark_bytes bytes("");
+  starlark_bytes bytes(""sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2132,7 +2133,7 @@ TEST(StarlarkOrd, ShortBytes) {
 }
 
 TEST(StarlarkOrd, LongBytes) {
-  starlark_bytes bytes("ab");
+  starlark_bytes bytes("ab"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2160,7 +2161,7 @@ TEST(StarlarkOrd, List) {
 }
 
 TEST(StarlarkOrd, MultiplePosArgs) {
-  starlark_bytes bytes("\xFF");
+  starlark_bytes bytes("\xFF"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2177,7 +2178,7 @@ TEST(StarlarkOrd, MultiplePosArgs) {
 TEST(StarlarkOrd, NamedArguments) {
   std::string s_one("1");
   starlark_integer one(1);
-  starlark_bytes bytes("\xFF");
+  starlark_bytes bytes("\xFF"sv);
   Arena arena;
   error_handler error_callback;
 
@@ -2406,7 +2407,7 @@ TEST(StarlarkRange, NamedArguments) {
 TEST(StarlarkRepr, String) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
@@ -2513,7 +2514,7 @@ TEST(StarlarkSet, ElementNotHashable) {
 TEST(StarlarkSet, String) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
@@ -2558,7 +2559,7 @@ TEST(StarlarkSet, NamedArguments) {
 TEST(StarlarkStr, String) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
@@ -2646,7 +2647,7 @@ TEST(StarlarkTuple, OneArguments) {
 TEST(StarlarkTuple, String) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
@@ -2691,7 +2692,7 @@ TEST(StarlarkTuple, NamedArguments) {
 TEST(StarlarkType, String) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
@@ -2808,7 +2809,7 @@ TEST(StarlarkZip, ThreeArgument) {
 TEST(StarlarkZip, NonIterable) {
   Arena arena;
   error_handler error_callback;
-  starlark_string str("abc");
+  starlark_string str("abc"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;

@@ -39,6 +39,7 @@ using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
+using ::std::literals::string_view_literals::operator""sv;
 
 namespace {
 
@@ -66,7 +67,7 @@ TEST(StarlarkNone, Equals) {
   EXPECT_TRUE(starlark_none().equals(starlark_none()));
   EXPECT_FALSE(starlark_none().equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_bool(false)));
-  EXPECT_FALSE(starlark_none().equals(starlark_bytes("")));
+  EXPECT_FALSE(starlark_none().equals(starlark_bytes(""sv)));
   EXPECT_FALSE(starlark_none().equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_none().equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_none().equals(starlark_float(0.0)));
@@ -75,7 +76,7 @@ TEST(StarlarkNone, Equals) {
   EXPECT_FALSE(starlark_none().equals(starlark_list(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_range(0, 0, 1)));
   EXPECT_FALSE(starlark_none().equals(starlark_set()));
-  EXPECT_FALSE(starlark_none().equals(starlark_string("")));
+  EXPECT_FALSE(starlark_none().equals(starlark_string(""sv)));
   EXPECT_FALSE(starlark_none().equals(starlark_tuple(0)));
 }
 
