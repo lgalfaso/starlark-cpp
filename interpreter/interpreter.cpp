@@ -479,22 +479,40 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       ASSIGN_RANGE(OpCode::kAssignSliceRangeLessLessEquals, slice_range_less_less_equals_assign)
       ASSIGN_RANGE(OpCode::kAssignSliceRangeGreaterGreaterEquals, slice_range_greater_greater_equals_assign)
 #undef ASSIGN_RANGE
+#define COMPOUND_ASSIGN(op, op_method, method)                                                                                                                           \
+      case op: {                                                                                                                                                         \
+        assert(stack.size() >= 1);                                                                                                                                       \
+        assert(frame_stack.size() > op_code.op_method().frame());                                                                                                        \
+        assert(frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->elements.size() > op_code.op_method().pos_in_frame());                                 \
+        auto* value = frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()];                                   \
+        if (value == nullptr) {                                                                                                                                          \
+          const auto& name = frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->names->Get(op_code.op_method().pos_in_frame());                          \
+          error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));                   \
+          break;                                                                                                                                                         \
+        }                                                                                                                                                                \
+        auto* element = stack.back();                                                                                                                                    \
+        stack.pop_back();                                                                                                                                                \
+        auto* result = value->method(*element, arena, error_callback);                                                                                                   \
+        frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()] = result;                                        \
+        break;                                                                                                                                                           \
+      }
+      COMPOUND_ASSIGN(OpCode::kAssignPlusEquals, assign_plus_equals, plus_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignMinusEquals, assign_minus_equals, minus_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignStarEquals, assign_star_equals, star_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignSlashEquals, assign_slash_equals, slash_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignSlashSlashEquals, assign_slash_slash_equals, slash_slash_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignPercentEquals, assign_percent_equals, percent_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignAmpersandEquals, assign_ampersand_equals, ampersand_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignPipeEquals, assign_pipe_equals, pipe_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignHatEquals, assign_hat_equals, hat_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignLessLessEquals, assign_less_less_equals, less_less_equals_assign)
+      COMPOUND_ASSIGN(OpCode::kAssignGreaterGreaterEquals, assign_greater_greater_equals, greater_greater_equals_assign);
+#undef COMPOUND_ASSIGN
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
       case OpCode::kFail:
         return nullptr;
-      case OpCode::kAssignPlusEquals:
-      case OpCode::kAssignMinusEquals:
-      case OpCode::kAssignStarEquals:
-      case OpCode::kAssignSlashEquals:
-      case OpCode::kAssignSlashSlashEquals:
-      case OpCode::kAssignPercentEquals:
-      case OpCode::kAssignAmpersandEquals:
-      case OpCode::kAssignPipeEquals:
-      case OpCode::kAssignHatEquals:
-      case OpCode::kAssignLessLessEquals:
-      case OpCode::kAssignGreaterGreaterEquals:
       case OpCode::kDotMember:
       case OpCode::kLoadModule:
       case OpCode::kSliceRange:
