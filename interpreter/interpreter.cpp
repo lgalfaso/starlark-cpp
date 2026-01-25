@@ -506,8 +506,40 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       COMPOUND_ASSIGN(OpCode::kAssignPipeEquals, assign_pipe_equals, pipe_equals_assign)
       COMPOUND_ASSIGN(OpCode::kAssignHatEquals, assign_hat_equals, hat_equals_assign)
       COMPOUND_ASSIGN(OpCode::kAssignLessLessEquals, assign_less_less_equals, less_less_equals_assign)
-      COMPOUND_ASSIGN(OpCode::kAssignGreaterGreaterEquals, assign_greater_greater_equals, greater_greater_equals_assign);
+      COMPOUND_ASSIGN(OpCode::kAssignGreaterGreaterEquals, assign_greater_greater_equals, greater_greater_equals_assign)
 #undef COMPOUND_ASSIGN
+#define INDEX_ASSIGN(op, method)                                                                                                                                         \
+      case op: {                                                                                                                                                         \
+        assert(stack.size() >= 3);                                                                                                                                       \
+        auto* index = stack.back();                                                                                                                                      \
+        stack.pop_back();                                                                                                                                                \
+        auto* container = stack.back();                                                                                                                                  \
+        stack.pop_back();                                                                                                                                                \
+        auto* value = stack.back();                                                                                                                                      \
+        stack.pop_back();                                                                                                                                                \
+        auto* element = container->index(*index, arena, error_callback);                                                                                                 \
+        if (element == nullptr) {                                                                                                                                        \
+          break;                                                                                                                                                         \
+        }                                                                                                                                                                \
+        auto* result = element->method(*value, arena, error_callback);                                                                                                   \
+        if (result == nullptr) {                                                                                                                                         \
+          break;                                                                                                                                                         \
+        }                                                                                                                                                                \
+        container->index_assign(*index, *result, error_callback);                                                                                                        \
+        break;                                                                                                                                                           \
+      }
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberPlusEquals, plus_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberMinusEquals, minus_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberStarEquals, star_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberSlashEquals, slash_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberSlashSlashEquals, slash_slash_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberPercentEquals, percent_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberAmpersandEquals, ampersand_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberPipeEquals, pipe_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberHatEquals, hat_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberLessLessEquals, less_less_equals_assign)
+      INDEX_ASSIGN(OpCode::kAssignIndexMemberGreaterGreaterEquals, greater_greater_equals_assign)
+#undef INDEX_ASSIGN
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
@@ -531,17 +563,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kAssignDotMemberHatEquals:
       case OpCode::kAssignDotMemberLessLessEquals:
       case OpCode::kAssignDotMemberGreaterGreaterEquals:
-      case OpCode::kAssignIndexMemberPlusEquals:
-      case OpCode::kAssignIndexMemberMinusEquals:
-      case OpCode::kAssignIndexMemberStarEquals:
-      case OpCode::kAssignIndexMemberSlashEquals:
-      case OpCode::kAssignIndexMemberSlashSlashEquals:
-      case OpCode::kAssignIndexMemberPercentEquals:
-      case OpCode::kAssignIndexMemberAmpersandEquals:
-      case OpCode::kAssignIndexMemberPipeEquals:
-      case OpCode::kAssignIndexMemberHatEquals:
-      case OpCode::kAssignIndexMemberLessLessEquals:
-      case OpCode::kAssignIndexMemberGreaterGreaterEquals:
 
       case OpCode::OP_CODE_NOT_SET:
         // TODO(lmirelmann): Implement the other instructions.
