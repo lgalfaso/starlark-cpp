@@ -540,18 +540,29 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       INDEX_ASSIGN(OpCode::kAssignIndexMemberLessLessEquals, less_less_equals_assign)
       INDEX_ASSIGN(OpCode::kAssignIndexMemberGreaterGreaterEquals, greater_greater_equals_assign)
 #undef INDEX_ASSIGN
+      case OpCode::kDotMember:
+        assert(stack.size() >= 1);
+        stack.back() = stack.back()->dot(op_code.dot_member().member(), arena, error_callback);
+        break;
+      case OpCode::kAssignDotMember: {
+        assert(stack.size() >= 2);
+        auto* element = stack.back();
+        stack.pop_back();
+        auto* value = stack.back();
+        stack.pop_back();
+        element->dot_assign(op_code.assign_dot_member().member(), *value, error_callback);
+        break;
+      }
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
       case OpCode::kFail:
         return nullptr;
-      case OpCode::kDotMember:
       case OpCode::kLoadModule:
       case OpCode::kSliceRange:
       case OpCode::kReturn:
       case OpCode::kMakeFunction:
       case OpCode::kSetDefaultValues:
-      case OpCode::kAssignDotMember:
       case OpCode::kAssignDotMemberPlusEquals:
       case OpCode::kAssignDotMemberMinusEquals:
       case OpCode::kAssignDotMemberStarEquals:
