@@ -28,6 +28,7 @@ std::string error_bad_operand_binary(std::string_view op, std::string_view type1
 std::string error_no_method(std::string_view type, std::string_view method);
 std::string error_no_attribute(std::string_view type, std::string_view attribute);
 std::string error_no_attribute(std::string_view type, std::string_view attribute, std::string_view suggestion);
+std::string error_read_only_attribute(std::string_view type, std::string_view attribute);
 
 std::string error_convert(std::string_view from, std::string_view to);
 std::string error_convert_string(std::string_view to, std::string_view string_value);

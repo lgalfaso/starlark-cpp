@@ -174,6 +174,8 @@ class starlark_obj {
   virtual starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback);
   virtual starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
   virtual void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback);
+  virtual starlark_obj* dot(std::string_view field_name, google::protobuf::Arena& arena, error_fn& error_callback);
+  virtual void dot_assign(std::string_view field_name, starlark_obj& element, error_fn& error_callback);
 
   virtual void slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
   virtual void slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);

@@ -73,6 +73,10 @@ std::string error_no_attribute(std::string_view type, std::string_view attribute
   return std::format("AttributeError: '{}' object has no attribute '{}'. Did you mean: '{}'?", type, attribute, suggestion);
 }
 
+std::string error_read_only_attribute(std::string_view type, std::string_view attribute) {
+  return std::format("AttributeError: '{}' object attribute '{}' is read-only", type, attribute);
+}
+
 std::string error_convert(std::string_view from, std::string_view to) {
   return std::format("TypeError: cannot convert '{}' object to {}", from, to);
 }

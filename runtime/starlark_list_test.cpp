@@ -996,4 +996,61 @@ TEST(StarlarkList, GetAttrErrorWithSuggestion) {
   EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
 }
 
+TEST(StarlarkList, Dot) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_list list(0);
+
+  auto* result = list.dot("append", arena, error_callback);
+  EXPECT_NE(nullptr, result);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkList, DotError) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_list list(0);
+
+  EXPECT_EQ(nullptr, list.dot("count", arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
+}
+
+TEST(StarlarkList, DotErrorWithSuggestion) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_list list(0);
+
+  EXPECT_EQ(nullptr, list.dot("appen", arena, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
+}
+
+TEST(StarlarkList, DotAssigneadOnly) {
+  error_handler error_callback;
+  starlark_list list(0);
+
+  list.dot_assign("append", list, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object attribute 'append' is read-only");
+}
+
+TEST(StarlarkList, DotAssignError) {
+  error_handler error_callback;
+  starlark_list list(0);
+
+  list.dot_assign("count", list, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
+}
+
+TEST(StarlarkList, DotAssignErrorWithSuggestion) {
+  error_handler error_callback;
+  starlark_list list(0);
+
+  list.dot_assign("appen", list, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
+}
+
 }  // namespace

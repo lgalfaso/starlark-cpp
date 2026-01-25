@@ -398,6 +398,26 @@ void starlark_obj::index_assign(const starlark_obj& idx, starlark_obj& element, 
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
+starlark_obj* starlark_obj::dot(std::string_view field_name, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return get_attr(true, field_name, arena, error_callback);
+}
+
+void starlark_obj::dot_assign(std::string_view field_name, starlark_obj& element, error_fn& error_callback) {
+  auto& method_fns = methods_meta();
+  auto it = method_fns.find(field_name);
+  if (it == method_fns.end()) {
+    auto& attributes = dir();
+    auto candidate = levenshtein(field_name, attributes);
+    if (candidate < 0) {
+      error_callback.add_error(error_no_attribute(type(), field_name));
+    } else {
+      error_callback.add_error(error_no_attribute(type(), field_name, attributes[candidate]));
+    }
+  } else {
+    error_callback.add_error(error_read_only_attribute(type(), field_name));
+  }
+}
+
 void starlark_obj::slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
