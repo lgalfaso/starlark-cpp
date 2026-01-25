@@ -28,6 +28,7 @@ class starlark_dictionary : public starlark_obj {
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   std::pair<bool, bool> insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback);
   starlark_obj* binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_obj* pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
@@ -52,6 +53,8 @@ class starlark_dictionary : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
+  bool can_modify(error_fn& error_callback) const;
+
   static const std::map<std::string, fn*, std::less<>> method_refs;
   static const std::vector<std::string> attributes;
 

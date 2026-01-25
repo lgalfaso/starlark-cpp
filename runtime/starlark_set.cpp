@@ -191,6 +191,68 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena
   return result;
 }
 
+starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!can_modify(error_callback)) {
+    return nullptr;
+  }
+  if (other.type() != type()) {
+    return starlark_obj::minus_equals_assign(other, arena, error_callback);
+  }
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
+  for (auto& key : set_t(s_other.values)) {
+    values.erase(key);
+  }
+  return this;
+}
+
+starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!can_modify(error_callback)) {
+    return nullptr;
+  }
+  if (other.type() != type()) {
+    return starlark_obj::ampersand_equals_assign(other, arena, error_callback);
+  }
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
+  for (const auto& value : set_t(values)) {
+    if (!s_other.values.contains(value)) {
+      values.erase(value);
+    }
+  }
+  return this;
+}
+
+starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!can_modify(error_callback)) {
+    return nullptr;
+  }
+  if (other.type() != type()) {
+    return starlark_obj::pipe_equals_assign(other, arena, error_callback);
+  }
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
+  for (auto& key : s_other.values) {
+    values.insert(key);
+  }
+  return this;
+}
+
+starlark_obj* starlark_set::hat_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!can_modify(error_callback)) {
+    return nullptr;
+  }
+  if (other.type() != type()) {
+    return starlark_obj::hat_equals_assign(other, arena, error_callback);
+  }
+  const starlark_set& s_other = static_cast<const starlark_set&>(other);
+  for (const auto& value : set_t(s_other.values)) {
+    if (values.contains(value)) {
+      values.erase(value);
+    } else {
+      values.insert(value);
+    }
+  }
+  return this;
+}
+
 starlark_iterator* starlark_set::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_set_iterator>(&arena, this);
 }
@@ -224,13 +286,7 @@ void starlark_set::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 }
 
 std::pair<bool, bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
-  if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
-    return std::make_pair(false, true);
-  }
-  if (freezed) {
-    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-    error_callback.add_error(error_mutate_frozen_value(type()));
+  if (!can_modify(error_callback)) {
     return std::make_pair(false, true);
   }
   if (element->hash() == -1) {
@@ -254,6 +310,18 @@ starlark_obj* starlark_set::starlark_set_iterator::next() {
 
 void starlark_set::starlark_set_iterator::end_iterator() {
   set->iterators_count--;
+}
+
+bool starlark_set::can_modify(error_fn& error_callback) const {
+  if (iterators_count) {
+    error_callback.add_error(error_append_in_loop(type()));
+    return false;
+  }
+  if (freezed) {
+    error_callback.add_error(error_mutate_frozen_value(type()));
+    return false;
+  }
+  return true;
 }
 
 starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

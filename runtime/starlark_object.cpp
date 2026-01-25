@@ -265,6 +265,61 @@ bool starlark_obj::binary_in(const starlark_obj& other, error_fn& error_callback
   return false;
 }
 
+starlark_obj* starlark_obj::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("+=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("-=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("*=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("/=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::slash_slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("//=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("%=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::ampersand_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("&=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("|=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::hat_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("^=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::less_less_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary("<<=", type(), other.type()));
+  return nullptr;
+}
+
+starlark_obj* starlark_obj::greater_greater_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  error_callback.add_error(error_bad_operand_binary(">>=", type(), other.type()));
+  return nullptr;
+}
+
 starlark_obj* starlark_obj::binary_lshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("<<", type(), other.type()));
   return nullptr;

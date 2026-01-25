@@ -188,6 +188,75 @@ TEST(StarlarkSet, BinaryPipeWithNonSet) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'set' and 'tuple'");
 }
 
+TEST(StarlarkSet, PipeEqualsAssign) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_set set_1;
+  starlark_set set_2;
+  Arena arena;
+  error_handler error_callback;
+
+  set_1.add(&zero, error_callback);
+  set_1.add(&one, error_callback);
+  set_2.add(&zero, error_callback);
+  set_2.add(&two, error_callback);
+  set_2.add(&three, error_callback);
+
+  auto* set_3 = set_1.pipe_equals_assign(set_2,  arena, error_callback);
+  ASSERT_NE(set_3, nullptr);
+  EXPECT_EQ(set_3->str(), "set([0, 1, 2, 3])");
+  EXPECT_EQ(set_1.str(), "set([0, 1, 2, 3])");
+  EXPECT_EQ(set_2.str(), "set([0, 2, 3])");
+}
+
+TEST(StarlarkSet, PipeEqualsAssignSelf) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  auto* result = set.pipe_equals_assign(set,  arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "set([0, 1])");
+  EXPECT_EQ(set.str(), "set([0, 1])");
+}
+
+TEST(StarlarkSet, PipeEqualsAssignWhileIterating) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  [[maybe_unused]] auto* it = set.get_iterator(true, arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  auto* result = set.pipe_equals_assign(set,  arena, error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkSet, PipeEqualsAssignWithNonSet) {
+  starlark_set set;
+  starlark_tuple tuple(0);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = set.pipe_equals_assign(tuple, arena, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'set' and 'tuple'");
+}
+
 TEST(StarlarkSet, BinaryAnd) {
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -212,6 +281,24 @@ TEST(StarlarkSet, BinaryAnd) {
   EXPECT_EQ(set_2.str(), "set([3, 0, 2])");
 }
 
+TEST(StarlarkSet, AndEqualsAssignWhileIterating) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  [[maybe_unused]] auto* it = set.get_iterator(true, arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  auto* result = set.ampersand_equals_assign(set,  arena, error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
 TEST(StarlarkSet, BinaryAndWithNonSet) {
   starlark_set set;
   starlark_tuple tuple(0);
@@ -222,6 +309,58 @@ TEST(StarlarkSet, BinaryAndWithNonSet) {
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &: 'set' and 'tuple'");
+}
+
+TEST(StarlarkSet, AndEqualsAssign) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_set set_1;
+  starlark_set set_2;
+  Arena arena;
+  error_handler error_callback;
+
+  set_1.add(&zero, error_callback);
+  set_1.add(&one, error_callback);
+  set_1.add(&three, error_callback);
+  set_2.add(&three, error_callback);
+  set_2.add(&zero, error_callback);
+  set_2.add(&two, error_callback);
+
+  auto* set_3 = set_1.ampersand_equals_assign(set_2,  arena, error_callback);
+  ASSERT_NE(set_3, nullptr);
+  EXPECT_EQ(set_3->str(), "set([0, 3])");
+  EXPECT_EQ(set_1.str(), "set([0, 3])");
+  EXPECT_EQ(set_2.str(), "set([3, 0, 2])");
+}
+
+TEST(StarlarkSet, AndEqualsAssignSelf) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  auto* result = set.ampersand_equals_assign(set,  arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "set([0, 1])");
+  EXPECT_EQ(set.str(), "set([0, 1])");
+}
+
+TEST(StarlarkSet, AndEqualsAssignWithNonSet) {
+  starlark_set set;
+  starlark_tuple tuple(0);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = set.ampersand_equals_assign(tuple, arena, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &=: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, BinaryHat) {
@@ -260,6 +399,76 @@ TEST(StarlarkSet, BinaryHatWithNonSet) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'set' and 'tuple'");
 }
 
+TEST(StarlarkSet, HatEqualsAssign) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_set set_1;
+  starlark_set set_2;
+  Arena arena;
+  error_handler error_callback;
+
+  set_1.add(&zero, error_callback);
+  set_1.add(&one, error_callback);
+  set_1.add(&three, error_callback);
+  set_2.add(&three, error_callback);
+  set_2.add(&zero, error_callback);
+  set_2.add(&two, error_callback);
+
+  auto* set_3 = set_1.hat_equals_assign(set_2,  arena, error_callback);
+  ASSERT_NE(set_3, nullptr);
+  EXPECT_EQ(set_3->str(), "set([1, 2])");
+  EXPECT_EQ(set_1.str(), "set([1, 2])");
+  EXPECT_EQ(set_2.str(), "set([3, 0, 2])");
+}
+
+TEST(StarlarkSet, HatEqualsAssignSelf) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  auto* result = set.hat_equals_assign(set,  arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "set()");
+  EXPECT_EQ(set.str(), "set()");
+}
+
+TEST(StarlarkSet, HatEqualsAssignWhileIterating) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  [[maybe_unused]] auto* it = set.get_iterator(true, arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  auto* result = set.hat_equals_assign(set,  arena, error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkSet, HatEqualsAssignWithNonSet) {
+  starlark_set set;
+  starlark_tuple tuple(0);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = set.hat_equals_assign(tuple, arena, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^=: 'set' and 'tuple'");
+}
+
 TEST(StarlarkSet, BinaryMinus) {
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -294,6 +503,76 @@ TEST(StarlarkSet, BinaryMinusWithNonSet) {
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'set' and 'tuple'");
+}
+
+TEST(StarlarkSet, MinusEqualsAssign) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_set set_1;
+  starlark_set set_2;
+  Arena arena;
+  error_handler error_callback;
+
+  set_1.add(&zero, error_callback);
+  set_1.add(&one, error_callback);
+  set_1.add(&three, error_callback);
+  set_2.add(&three, error_callback);
+  set_2.add(&zero, error_callback);
+  set_2.add(&two, error_callback);
+
+  auto* set_3 = set_1.minus_equals_assign(set_2,  arena, error_callback);
+  ASSERT_NE(set_3, nullptr);
+  EXPECT_EQ(set_3->str(), "set([1])");
+  EXPECT_EQ(set_1.str(), "set([1])");
+  EXPECT_EQ(set_2.str(), "set([3, 0, 2])");
+}
+
+TEST(StarlarkSet, MinusEqualsAssignSelf) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  auto* result = set.minus_equals_assign(set,  arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "set()");
+  EXPECT_EQ(set.str(), "set()");
+}
+
+TEST(StarlarkSet, MinusEqualsAssignWhileIterating) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  Arena arena;
+  error_handler error_callback;
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+
+  [[maybe_unused]] auto* it = set.get_iterator(true, arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  auto* result = set.minus_equals_assign(set,  arena, error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkSet, MinusEqualsAssignWithNonSet) {
+  starlark_set set;
+  starlark_tuple tuple(0);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = set.minus_equals_assign(tuple, arena, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -=: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, Len) {

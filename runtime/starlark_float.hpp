@@ -26,6 +26,12 @@ class starlark_float : public starlark_obj {
   starlark_obj* binary_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_obj* plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* slash_slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
 
   starlark_numeric_type numeric_type() const override;
   double as_float() const override;

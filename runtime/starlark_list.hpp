@@ -27,6 +27,8 @@ class starlark_list : public starlark_obj {
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_obj* plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
@@ -52,6 +54,8 @@ class starlark_list : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
+  bool can_modify(error_fn& error_callback) const;
+
   static const std::map<std::string, fn*, std::less<>> method_refs;
   static const std::vector<std::string> attributes;
 

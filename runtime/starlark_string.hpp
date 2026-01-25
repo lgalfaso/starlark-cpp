@@ -18,6 +18,7 @@ namespace runtime {
 
 class starlark_string : public starlark_obj {
  public:
+  explicit starlark_string(std::string&& value);
   explicit starlark_string(std::string_view value);
   std::string_view type() const override;
   bool primitive() const override;
@@ -29,6 +30,9 @@ class starlark_string : public starlark_obj {
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_obj* plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   std::string_view as_string() const override;

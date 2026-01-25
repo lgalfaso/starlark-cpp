@@ -135,6 +135,20 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena&
   return result;
 }
 
+starlark_obj* starlark_dictionary::pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (!can_modify(error_callback)) {
+    return nullptr;
+  }
+  if (other.type() != type()) {
+    return starlark_obj::pipe_equals_assign(other, arena, error_callback);
+  }
+  const starlark_dictionary* d_other = static_cast<const starlark_dictionary*>(&other);
+  for (auto& [key, value] : d_other->values) {
+    insert(key, value, error_callback);
+  }
+  return this;
+}
+
 starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_dictionary_iterator>(&arena, this);
 }
@@ -149,13 +163,7 @@ starlark_obj* starlark_dictionary::index(const starlark_obj& other, Arena& arena
 }
 
 void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
-  if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
-    return;
-  }
-  if (freezed) {
-    // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-    error_callback.add_error(error_mutate_frozen_value(type()));
+  if (!can_modify(error_callback)) {
     return;
   }
   if (idx.hash() == -1) {
@@ -199,12 +207,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
 }
 
 std::pair<bool, bool> starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback) {
-  if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
-    return std::make_pair(false, true);
-  }
-  if (freezed) {
-    error_callback.add_error(error_mutate_frozen_value(type()));
+  if (!can_modify(error_callback)) {
     return std::make_pair(false, true);
   }
   if (key->hash() == -1) {
@@ -229,6 +232,18 @@ starlark_obj* starlark_dictionary::starlark_dictionary_iterator::next() {
 
 void starlark_dictionary::starlark_dictionary_iterator::end_iterator() {
   dictionary->iterators_count--;
+}
+
+bool starlark_dictionary::can_modify(error_fn& error_callback) const {
+  if (iterators_count) {
+    error_callback.add_error(error_append_in_loop(type()));
+    return false;
+  }
+  if (freezed) {
+    error_callback.add_error(error_mutate_frozen_value(type()));
+    return false;
+  }
+  return true;
 }
 
 starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

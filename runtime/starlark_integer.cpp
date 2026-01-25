@@ -1,4 +1,4 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2025-2026 Lucas Mirelmann
 
 #include "runtime/starlark_integer.hpp"
 
@@ -95,141 +95,16 @@ starlark_obj* starlark_integer::unary_minus(Arena& arena, error_fn& error_callba
     // Need to upgrade to bigint.
     return create_integer(number(static_cast<uint64_t>(value)), arena);
   }
-  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
   return create_integer(-value, arena);
 }
 
 starlark_obj* starlark_integer::unary_tilde(Arena& arena, error_fn& error_callback) const {
-  // TODO(lmirelmann): Figure out whether it is possible to reuse `this`.
   return create_integer(~value, arena);
 }
 
-starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
-      if (value == 0) {
-        return const_cast<starlark_integer*>(this);
-      }
-      auto shift = other.as_int64();
-      if (shift < 0) {
-        error_callback.add_error(error_negative_shift());
-        return nullptr;
-      }
-      // Check whether it will fit in an int64_t.
-      int left_shift_space = (value > 0 ? std::countl_zero<uint64_t>(value) : std::countl_one<uint64_t>(value));
-      if (shift < left_shift_space) {
-        return create_integer(value << shift, arena);
-      } else {
-        if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(shift) + 64 - left_shift_space) {
-          error_callback.add_error(error_overflow_too_many_digits());
-          return nullptr;
-        }
-        return create_integer(from_int64(value) << shift, arena);
-      }
-    }
-    case starlark_numeric_type::kBigInt: {
-      if (value == 0) {
-        return const_cast<starlark_integer*>(this);
-      }
-      const auto& shift = other.as_bigint();
-      if (shift.sign()) {
-        error_callback.add_error(error_negative_shift());
-        return nullptr;
-      }
-      if (shift.length() > 1) {
-        error_callback.add_error(error_overflow_too_many_digits());
-        return nullptr;
-      }
-      auto int_shift = shift.at(0);
-      int left_shift_space = (value > 0 ? std::countl_zero<uint64_t>(value) : std::countl_one<uint64_t>(value));
-      if (int_shift < left_shift_space) {
-        return create_integer(value << int_shift, arena);
-      } else {
-        if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(int_shift) + 64 - left_shift_space) {
-          error_callback.add_error(error_overflow_too_many_digits());
-          return nullptr;
-        }
-        return create_integer(from_int64(value) << int_shift, arena);
-      }
-    }
-    default:
-      return starlark_obj::binary_lshift(other, arena, error_callback);
-  }
-}
+namespace {
 
-starlark_obj* starlark_integer::binary_rshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
-      if (value == 0) {
-        return const_cast<starlark_integer*>(this);
-      }
-      auto shift = other.as_int64();
-      if (shift < 0) {
-        error_callback.add_error(error_negative_shift());
-        return nullptr;
-      }
-      if (shift >= 64) {
-        return create_integer(value >= 0 ? 0 : -1, arena);
-      }
-      return create_integer(value >> shift, arena);
-    }
-    case starlark_numeric_type::kBigInt: {
-      if (value == 0) {
-        return const_cast<starlark_integer*>(this);
-      }
-      const auto& shift = other.as_bigint();
-      if (shift.sign()) {
-        error_callback.add_error(error_negative_shift());
-        return nullptr;
-      }
-      if (shift.length() > 1) {
-        return create_integer(value >= 0 ? 0 : -1, arena);
-      }
-      auto int_shift = shift.at(0);
-      if (int_shift >= 64) {
-        return create_integer(value >= 0 ? 0 : -1, arena);
-      }
-      return create_integer(value >> int_shift, arena);
-    }
-    default:
-      return starlark_obj::binary_rshift(other, arena, error_callback);
-  }
-}
-
-starlark_obj* starlark_integer::binary_and(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64:
-      return create_integer(value & other.as_int64(), arena);
-    case starlark_numeric_type::kBigInt:
-      return create_integer(from_int64(value) & other.as_bigint(), arena);
-    default:
-      return starlark_obj::binary_and(other, arena, error_callback);
-  }
-}
-
-starlark_obj* starlark_integer::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64:
-      return create_integer(value | other.as_int64(), arena);
-    case starlark_numeric_type::kBigInt:
-      return create_integer(from_int64(value) | other.as_bigint(), arena);
-    default:
-      return starlark_obj::binary_pipe(other, arena, error_callback);
-  }
-}
-
-starlark_obj* starlark_integer::binary_hat(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64:
-      return create_integer(value ^ other.as_int64(), arena);
-    case starlark_numeric_type::kBigInt:
-      return create_integer(from_int64(value) ^ other.as_bigint(), arena);
-    default:
-      return starlark_obj::binary_hat(other, arena, error_callback);
-  }
-}
-
-starlark_obj* starlark_integer::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* plus_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
       return create_float(value + other.as_float(), arena);
@@ -252,11 +127,12 @@ starlark_obj* starlark_integer::binary_plus(const starlark_obj& other, Arena& ar
     case starlark_numeric_type::kBigInt:
       return create_integer(from_int64(value) + other.as_bigint(), arena);
     default:
-      return starlark_obj::binary_plus(other, arena, error_callback);
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
   }
 }
 
-starlark_obj* starlark_integer::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* minus_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
       return create_float(value - other.as_float(), arena);
@@ -272,13 +148,14 @@ starlark_obj* starlark_integer::binary_minus(const starlark_obj& other, Arena& a
     case starlark_numeric_type::kBigInt:
       return create_integer(from_int64(value) - other.as_bigint(), arena);
     default:
-      return starlark_obj::binary_minus(other, arena, error_callback);
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
   }
 }
 
-starlark_obj* starlark_integer::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* star_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   if (other.type() == starlark_types::string_t || other.type() == starlark_types::bytes_t || other.type() == starlark_types::list_t || other.type() == starlark_types::tuple_t) {
-    return other.binary_star(*this, arena, error_callback);
+    return other.binary_star(this_obj, arena, error_callback);
   }
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
@@ -304,11 +181,12 @@ starlark_obj* starlark_integer::binary_star(const starlark_obj& other, Arena& ar
     case starlark_numeric_type::kBigInt:
       return create_integer(from_int64(value) * other.as_bigint(), arena);
     default:
-      return starlark_obj::binary_star(other, arena, error_callback);
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
   }
 }
 
-starlark_obj* starlark_integer::binary_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* slash_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
@@ -335,17 +213,18 @@ starlark_obj* starlark_integer::binary_slash(const starlark_obj& other, Arena& a
       // This is a difference between Python and the Starlark implementation in Bazel. Python is
       // happy to return `0` if the integer is too large. Bazel throws an error.
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(type(), starlark_types::float_t));
+        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(value / fother, arena);
     }
     default:
-      return starlark_obj::binary_slash(other, arena, error_callback);
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
   }
 }
 
-starlark_obj* starlark_integer::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* slash_slash_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
@@ -376,11 +255,12 @@ starlark_obj* starlark_integer::binary_slash_slash(const starlark_obj& other, Ar
       return create_integer(starlark_div(from_int64(value), bother), arena);
     }
     default:
-      return starlark_obj::binary_slash_slash(other, arena, error_callback);
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
   }
 }
 
-starlark_obj* starlark_integer::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* percent_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
@@ -410,8 +290,229 @@ starlark_obj* starlark_integer::binary_percent(const starlark_obj& other, Arena&
       return create_integer(starlark_mod(from_int64(value), bother), arena);
     }
     default:
-      return starlark_obj::binary_percent(other, arena, error_callback);
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
   }
+}
+
+starlark_obj* and_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64:
+      return create_integer(value & other.as_int64(), arena);
+    case starlark_numeric_type::kBigInt:
+      return create_integer(from_int64(value) & other.as_bigint(), arena);
+    default:
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
+  }
+}
+
+starlark_obj* pipe_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64:
+      return create_integer(value | other.as_int64(), arena);
+    case starlark_numeric_type::kBigInt:
+      return create_integer(from_int64(value) | other.as_bigint(), arena);
+    default:
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
+  }
+}
+
+starlark_obj* hat_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64:
+      return create_integer(value ^ other.as_int64(), arena);
+    case starlark_numeric_type::kBigInt:
+      return create_integer(from_int64(value) ^ other.as_bigint(), arena);
+    default:
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
+  }
+}
+
+starlark_obj* less_less_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      if (value == 0) {
+        return const_cast<starlark_integer*>(&this_obj);
+      }
+      auto shift = other.as_int64();
+      if (shift < 0) {
+        error_callback.add_error(error_negative_shift());
+        return nullptr;
+      }
+      // Check whether it will fit in an int64_t.
+      int left_shift_space = (value > 0 ? std::countl_zero<uint64_t>(value) : std::countl_one<uint64_t>(value));
+      if (shift < left_shift_space) {
+        return create_integer(value << shift, arena);
+      } else {
+        if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(shift) + 64 - left_shift_space) {
+          error_callback.add_error(error_overflow_too_many_digits());
+          return nullptr;
+        }
+        return create_integer(from_int64(value) << shift, arena);
+      }
+    }
+    case starlark_numeric_type::kBigInt: {
+      if (value == 0) {
+        return const_cast<starlark_integer*>(&this_obj);
+      }
+      const auto& shift = other.as_bigint();
+      if (shift.sign()) {
+        error_callback.add_error(error_negative_shift());
+        return nullptr;
+      }
+      if (shift.length() > 1) {
+        error_callback.add_error(error_overflow_too_many_digits());
+        return nullptr;
+      }
+      auto int_shift = shift.at(0);
+      int left_shift_space = (value > 0 ? std::countl_zero<uint64_t>(value) : std::countl_one<uint64_t>(value));
+      if (int_shift < left_shift_space) {
+        return create_integer(value << int_shift, arena);
+      } else {
+        if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(int_shift) + 64 - left_shift_space) {
+          error_callback.add_error(error_overflow_too_many_digits());
+          return nullptr;
+        }
+        return create_integer(from_int64(value) << int_shift, arena);
+      }
+    }
+    default:
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
+  }
+}
+
+starlark_obj* greater_greater_op(int64_t value, const starlark_integer& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      if (value == 0) {
+        return const_cast<starlark_integer*>(&this_obj);
+      }
+      auto shift = other.as_int64();
+      if (shift < 0) {
+        error_callback.add_error(error_negative_shift());
+        return nullptr;
+      }
+      if (shift >= 64) {
+        return create_integer(value >= 0 ? 0 : -1, arena);
+      }
+      return create_integer(value >> shift, arena);
+    }
+    case starlark_numeric_type::kBigInt: {
+      if (value == 0) {
+        return const_cast<starlark_integer*>(&this_obj);
+      }
+      const auto& shift = other.as_bigint();
+      if (shift.sign()) {
+        error_callback.add_error(error_negative_shift());
+        return nullptr;
+      }
+      if (shift.length() > 1) {
+        return create_integer(value >= 0 ? 0 : -1, arena);
+      }
+      auto int_shift = shift.at(0);
+      if (int_shift >= 64) {
+        return create_integer(value >= 0 ? 0 : -1, arena);
+      }
+      return create_integer(value >> int_shift, arena);
+    }
+    default:
+      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      return nullptr;
+  }
+}
+
+}  // namespace
+
+starlark_obj* starlark_integer::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return plus_op(value, *this, other, "+", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return plus_op(value, *this, other, "+=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return minus_op(value, *this, other, "-", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return minus_op(value, *this, other, "-=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return star_op(value, *this, other, "*", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return star_op(value, *this, other, "*=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return slash_op(value, *this, other, "/", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return slash_op(value, *this, other, "/=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return slash_slash_op(value, *this, other, "//", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::slash_slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return slash_slash_op(value, *this, other, "//=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return percent_op(value, *this, other, "%", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return percent_op(value, *this, other, "%=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_and(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return and_op(value, *this, other, "&", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::ampersand_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return and_op(value, *this, other, "&=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return pipe_op(value, *this, other, "|", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return pipe_op(value, *this, other, "|=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_hat(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return hat_op(value, *this, other, "^", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::hat_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return hat_op(value, *this, other, "^=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_lshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return less_less_op(value, *this, other, "<<", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::less_less_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return less_less_op(value, *this, other, "<<=", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::binary_rshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+  return greater_greater_op(value, *this, other, ">>", arena, error_callback);
+}
+
+starlark_obj* starlark_integer::greater_greater_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  return greater_greater_op(value, *this, other, ">>=", arena, error_callback);
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash() const {

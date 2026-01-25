@@ -23,6 +23,12 @@ class linked_hash_set {
 
   linked_hash_set() {}
 
+  linked_hash_set(const linked_hash_set& other) {
+    for (const auto& value : other) {
+      insert(value);
+    }
+  }
+
   size_t size() const {
     return values.size();
   }

@@ -310,6 +310,34 @@ TEST(StarlarkTuple, BinaryPlusNotList) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate tuple (not \"list\") to tuple");
 }
 
+TEST(StarlarkTuple, PlusEqualsAssign) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_tuple tuple_1(0);
+  starlark_tuple tuple_2(0);
+  tuple_1.add(&zero);
+  tuple_2.add(&one);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = tuple_1.plus_equals_assign(tuple_2, arena, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "(0, 1)");
+}
+
+TEST(StarlarkTuple, PlusEqualsAssignNotList) {
+  starlark_list list(0);
+  starlark_tuple tuple(0);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = tuple.plus_equals_assign(list, arena, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate tuple (not \"list\") to tuple");
+}
+
 TEST(StarlarkTuple, BinaryStar) {
   starlark_bigint minus_two(-2);
   starlark_integer minus_one(-1);
@@ -402,6 +430,87 @@ TEST(StarlarkTuple, BinaryStarTooBig) {
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
+}
+
+TEST(StarlarkTuple, StarEqualsAssign) {
+  starlark_bigint minus_two(-2);
+  starlark_integer minus_one(-1);
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_bigint big(number::one << 64);
+  starlark_tuple tuple(0);
+  starlark_tuple tuple0(0);
+  tuple.add(&zero);
+  tuple.add(&one);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_0 = tuple0.star_equals_assign(big, arena, error_callback);
+  auto* result_1 = tuple.star_equals_assign(two, arena, error_callback);
+  auto* result_2 = tuple.star_equals_assign(three, arena, error_callback);
+  auto* result_3 = tuple.star_equals_assign(minus_two, arena, error_callback);
+  auto* result_4 = tuple.star_equals_assign(minus_one, arena, error_callback);
+  auto* result_5 = tuple0.star_equals_assign(two, arena, error_callback);
+
+  ASSERT_NE(result_0, nullptr);
+  EXPECT_EQ(result_0->str(), "()");
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "(0, 1, 0, 1)");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "(0, 1, 0, 1, 0, 1)");
+  ASSERT_NE(result_3, nullptr);
+  EXPECT_EQ(result_3->str(), "()");
+  ASSERT_NE(result_4, nullptr);
+  EXPECT_EQ(result_4->str(), "()");
+  ASSERT_NE(result_5, nullptr);
+  EXPECT_EQ(result_5->str(), "()");
+}
+
+TEST(StarlarkTuple, StarEqualsAssignReverse) {
+  starlark_bigint minus_two(-2);
+  starlark_integer minus_one(-1);
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_bigint three(3);
+  starlark_bigint big(number::one << 64);
+  starlark_tuple tuple(0);
+  starlark_tuple tuple0(0);
+  tuple.add(&zero);
+  tuple.add(&one);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result_0 = big.star_equals_assign(tuple0, arena, error_callback);
+  auto* result_1 = two.star_equals_assign(tuple, arena, error_callback);
+  auto* result_2 = three.star_equals_assign(tuple, arena, error_callback);
+  auto* result_3 = minus_two.star_equals_assign(tuple, arena, error_callback);
+  auto* result_4 = minus_one.star_equals_assign(tuple, arena, error_callback);
+
+  ASSERT_NE(result_0, nullptr);
+  EXPECT_EQ(result_0->str(), "()");
+  ASSERT_NE(result_1, nullptr);
+  EXPECT_EQ(result_1->str(), "(0, 1, 0, 1)");
+  ASSERT_NE(result_2, nullptr);
+  EXPECT_EQ(result_2->str(), "(0, 1, 0, 1, 0, 1)");
+  ASSERT_NE(result_3, nullptr);
+  EXPECT_EQ(result_3->str(), "()");
+  ASSERT_NE(result_4, nullptr);
+  EXPECT_EQ(result_4->str(), "()");
+}
+
+TEST(StarlarkTuple, StarEqualsAssignNotInt) {
+  starlark_list list(0);
+  starlark_tuple tuple(0);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = tuple.star_equals_assign(list, arena, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'list'");
 }
 
 TEST(StarlarkTuple, Len) {

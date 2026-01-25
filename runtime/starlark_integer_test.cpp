@@ -286,6 +286,30 @@ TEST(StarlarkInteger, LShift) {
   result = one.binary_lshift(starlark_bigint(63), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one << 63).equals(*result));
+
+  result = one.less_less_equals_assign(starlark_integer(3), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(1 << 3).equals(*result));
+
+  result = minus_eleven.less_less_equals_assign(starlark_integer(10), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(-11264).equals(*result));
+
+  result = one.less_less_equals_assign(starlark_integer(100), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(number::one << 100).equals(*result));
+
+  result = one.less_less_equals_assign(starlark_integer(1 << 28), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(number::one << (1 << 28)).equals(*result));
+
+  result = one.less_less_equals_assign(starlark_bigint(62), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(1L << 62).equals(*result));
+
+  result = one.less_less_equals_assign(starlark_bigint(63), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_bigint(number::one << 63).equals(*result));
 }
 
 TEST(StarlarkInteger, RShift) {
@@ -319,6 +343,34 @@ TEST(StarlarkInteger, RShift) {
   result = starlark_integer(20).binary_rshift(starlark_bigint(number::one), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(10).equals(*result));
+
+  result = starlark_integer(100).greater_greater_equals_assign(starlark_integer(3), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(100 >> 3).equals(*result));
+
+  result = starlark_integer(-11264).greater_greater_equals_assign(starlark_integer(10), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(-11).equals(*result));
+
+  result = starlark_integer(1).greater_greater_equals_assign(starlark_integer(64), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+
+  result = starlark_integer(-2).greater_greater_equals_assign(starlark_integer(64), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(-1).equals(*result));
+
+  result = starlark_integer(20).greater_greater_equals_assign(starlark_bigint(64), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+
+  result = starlark_integer(20).greater_greater_equals_assign(starlark_bigint(number::one << 64), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(0).equals(*result));
+
+  result = starlark_integer(20).greater_greater_equals_assign(starlark_bigint(number::one), arena, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_TRUE(starlark_integer(10).equals(*result));
 }
 
 TEST(StarlarkInteger, ShiftInvalidInput) {
@@ -331,10 +383,22 @@ TEST(StarlarkInteger, ShiftInvalidInput) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>: 'int' and 'float'");
   error_callback.messages.clear();
 
+  result = starlark_integer(100).greater_greater_equals_assign(starlark_float(3.0), arena, error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>=: 'int' and 'float'");
+  error_callback.messages.clear();
+
   result = starlark_integer(100).binary_lshift(starlark_float(3.0), arena, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<: 'int' and 'float'");
+  error_callback.messages.clear();
+
+  result = starlark_integer(100).less_less_equals_assign(starlark_float(3.0), arena, error_callback);
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<=: 'int' and 'float'");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_lshift(starlark_integer(-1), arena, error_callback);
@@ -432,6 +496,13 @@ TEST(StarlarkInteger, BinaryAnd) {
       r = starlark_integer(a).binary_and(starlark_bigint(from_int64(b)), arena, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a & b)));
+
+      r = starlark_integer(a).ampersand_equals_assign(starlark_integer(b), arena, error_callback);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a & b)));
+      r = starlark_integer(a).ampersand_equals_assign(starlark_bigint(from_int64(b)), arena, error_callback);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a & b)));
     }
   }
 }
@@ -445,6 +516,17 @@ TEST(StarlarkInteger, BinaryAndError) {
   zero.binary_and(float_zero, arena, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &: 'int' and 'float'");
+}
+
+TEST(StarlarkInteger, AndEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_float float_zero(0);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.ampersand_equals_assign(float_zero, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &=: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, BinaryOr) {
@@ -468,6 +550,13 @@ TEST(StarlarkInteger, BinaryOr) {
       r = starlark_integer(a).binary_pipe(starlark_bigint(from_int64(b)), arena, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a | b)));
+
+      r = starlark_integer(a).pipe_equals_assign(starlark_integer(b), arena, error_callback);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a | b)));
+      r = starlark_integer(a).pipe_equals_assign(starlark_bigint(from_int64(b)), arena, error_callback);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a | b)));
     }
   }
 }
@@ -481,6 +570,17 @@ TEST(StarlarkInteger, BinaryOrError) {
   zero.binary_pipe(float_zero, arena, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'int' and 'float'");
+}
+
+TEST(StarlarkInteger, OrEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_float float_zero(0);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.pipe_equals_assign(float_zero, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, BinaryXor) {
@@ -504,6 +604,13 @@ TEST(StarlarkInteger, BinaryXor) {
       r = starlark_integer(a).binary_hat(starlark_bigint(from_int64(b)), arena, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
+
+      r = starlark_integer(a).hat_equals_assign(starlark_integer(b), arena, error_callback);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
+      r = starlark_integer(a).hat_equals_assign(starlark_bigint(from_int64(b)), arena, error_callback);
+      ASSERT_NE(r, nullptr);
+      EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
     }
   }
 }
@@ -519,6 +626,17 @@ TEST(StarlarkInteger, BinaryXorError) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'int' and 'float'");
 }
 
+TEST(StarlarkInteger, XorEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_float float_zero(0);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.hat_equals_assign(float_zero, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^=: 'int' and 'float'");
+}
+
 TEST(StarlarkInteger, BinaryPlus) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
@@ -530,6 +648,26 @@ TEST(StarlarkInteger, BinaryPlus) {
   auto* result1 = i2.binary_plus(b1, arena, error_callback);
   auto* result2 = i2.binary_plus(i1, arena, error_callback);
   auto* result3 = i2.binary_plus(f1, arena, error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("20", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("19", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("17.0", result3->str());
+}
+
+TEST(StarlarkInteger, PlusEqualsAssign) {
+  starlark_float f1(1.0);
+  starlark_integer i1(3);
+  starlark_integer i2(16);
+  starlark_bigint b1(number::one << 2);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = i2.plus_equals_assign(b1, arena, error_callback);
+  auto* result2 = i2.plus_equals_assign(i1, arena, error_callback);
+  auto* result3 = i2.plus_equals_assign(f1, arena, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("20", result1->str());
@@ -695,6 +833,17 @@ TEST(StarlarkInteger, BinaryPlusError) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +: 'int' and 'bool'");
 }
 
+TEST(StarlarkInteger, PlusEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.plus_equals_assign(true_obj, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +=: 'int' and 'bool'");
+}
+
 TEST(StarlarkInteger, BinaryMinus) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
@@ -706,6 +855,26 @@ TEST(StarlarkInteger, BinaryMinus) {
   auto* result1 = i2.binary_minus(b1, arena, error_callback);
   auto* result2 = i2.binary_minus(i1, arena, error_callback);
   auto* result3 = i2.binary_minus(f1, arena, error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("12", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("13", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("15.0", result3->str());
+}
+
+TEST(StarlarkInteger, MinusEqualsAssign) {
+  starlark_float f1(1.0);
+  starlark_integer i1(3);
+  starlark_integer i2(16);
+  starlark_bigint b1(number::one << 2);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = i2.minus_equals_assign(b1, arena, error_callback);
+  auto* result2 = i2.minus_equals_assign(i1, arena, error_callback);
+  auto* result3 = i2.minus_equals_assign(f1, arena, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("12", result1->str());
@@ -863,6 +1032,48 @@ TEST(StarlarkInteger, BinaryMinusError) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'int' and 'bool'");
 }
 
+TEST(StarlarkInteger, MinusEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.minus_equals_assign(true_obj, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -=: 'int' and 'bool'");
+}
+
+TEST(StarlarkInteger, StarEqualsAssign) {
+  starlark_float f1(1.0);
+  starlark_integer i1(3);
+  starlark_integer i2(16);
+  starlark_bigint b1(number::one << 2);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = i2.star_equals_assign(b1, arena, error_callback);
+  auto* result2 = i2.star_equals_assign(i1, arena, error_callback);
+  auto* result3 = i2.star_equals_assign(f1, arena, error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("64", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("48", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("16.0", result3->str());
+}
+
+TEST(StarlarkInteger, StarEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.star_equals_assign(true_obj, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *=: 'int' and 'bool'");
+}
+
 TEST(StarlarkInteger, BinaryStar) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
@@ -892,6 +1103,37 @@ TEST(StarlarkInteger, BinaryStarError) {
   zero.binary_star(true_obj, arena, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *: 'int' and 'bool'");
+}
+
+TEST(StarlarkInteger, SlashEqualsAssign) {
+  starlark_float f1(1.0);
+  starlark_integer i1(3);
+  starlark_integer i2(16);
+  starlark_bigint b1(number::one << 2);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result1 = i2.slash_equals_assign(b1, arena, error_callback);
+  auto* result2 = i2.slash_equals_assign(i1, arena, error_callback);
+  auto* result3 = i2.slash_equals_assign(f1, arena, error_callback);
+
+  ASSERT_NE(result1, nullptr);
+  EXPECT_EQ("4.0", result1->str());
+  ASSERT_NE(result2, nullptr);
+  EXPECT_EQ("5.333333333333333", result2->str());
+  ASSERT_NE(result3, nullptr);
+  EXPECT_EQ("16.0", result3->str());
+}
+
+TEST(StarlarkInteger, SlashEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.slash_equals_assign(true_obj, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinarySlash) {
@@ -978,17 +1220,26 @@ TEST(StarlarkInteger, BinarySlashSlash) {
     Arena arena;
     error_handler error_callback;
 
-    auto* resultb = num.binary_slash_slash(denb, arena, error_callback);
-    auto* resulti = num.binary_slash_slash(deni, arena, error_callback);
-    auto* resultf = num.binary_slash_slash(denf, arena, error_callback);
+    auto* resultb1 = num.binary_slash_slash(denb, arena, error_callback);
+    auto* resulti1 = num.binary_slash_slash(deni, arena, error_callback);
+    auto* resultf1 = num.binary_slash_slash(denf, arena, error_callback);
+    auto* resultb2 = num.slash_slash_equals_assign(denb, arena, error_callback);
+    auto* resulti2 = num.slash_slash_equals_assign(deni, arena, error_callback);
+    auto* resultf2 = num.slash_slash_equals_assign(denf, arena, error_callback);
 
     EXPECT_THAT(error_callback.messages, SizeIs(0));
-    EXPECT_NE(resultb, nullptr);
-    EXPECT_NE(resulti, nullptr);
-    EXPECT_NE(resultf, nullptr);
-    EXPECT_EQ(r1, resultb->str()) << "Num: " << n << ", den: " << d;
-    EXPECT_EQ(r1, resulti->str()) << "Num: " << n << ", den: " << d;
-    EXPECT_EQ(r2, resultf->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_NE(resultb1, nullptr);
+    EXPECT_NE(resulti1, nullptr);
+    EXPECT_NE(resultf1, nullptr);
+    EXPECT_EQ(r1, resultb1->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r1, resulti1->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r2, resultf1->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_NE(resultb2, nullptr);
+    EXPECT_NE(resulti2, nullptr);
+    EXPECT_NE(resultf2, nullptr);
+    EXPECT_EQ(r1, resultb2->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r1, resulti2->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r2, resultf2->str()) << "Num: " << n << ", den: " << d;
   };
 
   /*
@@ -1432,6 +1683,17 @@ TEST(StarlarkInteger, BinarySlashSlashError) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'int' and 'bool'");
 }
 
+TEST(StarlarkInteger, SlashSlashEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.slash_slash_equals_assign(true_obj, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //=: 'int' and 'bool'");
+}
+
 TEST(StarlarkInteger, BinarySlashSlashZeroFloatError) {
   starlark_float f0(0.0);
   starlark_integer small(1);
@@ -1485,17 +1747,26 @@ TEST(StarlarkInteger, BinaryPercent) {
     Arena arena;
     error_handler error_callback;
 
-    auto* resultb = num.binary_percent(denb, arena, error_callback);
-    auto* resulti = num.binary_percent(deni, arena, error_callback);
-    auto* resultf = num.binary_percent(denf, arena, error_callback);
+    auto* resultb1 = num.binary_percent(denb, arena, error_callback);
+    auto* resulti1 = num.binary_percent(deni, arena, error_callback);
+    auto* resultf1 = num.binary_percent(denf, arena, error_callback);
+    auto* resultb2 = num.percent_equals_assign(denb, arena, error_callback);
+    auto* resulti2 = num.percent_equals_assign(deni, arena, error_callback);
+    auto* resultf2 = num.percent_equals_assign(denf, arena, error_callback);
 
     EXPECT_THAT(error_callback.messages, SizeIs(0));
-    EXPECT_NE(resultb, nullptr);
-    EXPECT_NE(resulti, nullptr);
-    EXPECT_NE(resultf, nullptr);
-    EXPECT_EQ(r1, resultb->str()) << "Num: " << n << ", den: " << d;
-    EXPECT_EQ(r1, resulti->str()) << "Num: " << n << ", den: " << d;
-    EXPECT_EQ(r2, resultf->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_NE(resultb1, nullptr);
+    EXPECT_NE(resulti1, nullptr);
+    EXPECT_NE(resultf1, nullptr);
+    EXPECT_EQ(r1, resultb1->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r1, resulti1->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r2, resultf1->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_NE(resultb2, nullptr);
+    EXPECT_NE(resulti2, nullptr);
+    EXPECT_NE(resultf2, nullptr);
+    EXPECT_EQ(r1, resultb2->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r1, resulti2->str()) << "Num: " << n << ", den: " << d;
+    EXPECT_EQ(r2, resultf2->str()) << "Num: " << n << ", den: " << d;
   };
 
   /*
@@ -1937,6 +2208,17 @@ TEST(StarlarkInteger, BinaryPercentError) {
   zero.binary_percent(true_obj, arena, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %: 'int' and 'bool'");
+}
+
+TEST(StarlarkInteger, PercentEqualsAssignError) {
+  starlark_integer zero(0);
+  starlark_bool true_obj(true);
+  Arena arena;
+  error_handler error_callback;
+
+  zero.percent_equals_assign(true_obj, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinaryPercentZeroFloatError) {

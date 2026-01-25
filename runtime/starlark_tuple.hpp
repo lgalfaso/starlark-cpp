@@ -23,6 +23,8 @@ class starlark_tuple : public starlark_obj {
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_obj* plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
@@ -48,6 +50,8 @@ class starlark_tuple : public starlark_obj {
 
  private:
   std::vector<starlark_obj*> values;
+
+  friend const std::vector<starlark_obj*>& inspect_tuple(const starlark_tuple& tuple);
 };
 
 }  // namespace runtime

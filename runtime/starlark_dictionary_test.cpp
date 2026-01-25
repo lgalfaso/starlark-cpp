@@ -254,6 +254,99 @@ TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'dict' and 'list'");
 }
 
+TEST(StarlarkDictionary, PipeEqualsAssign) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_string s_zero("zero"sv);
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  starlark_string s_four("four"sv);
+  starlark_dictionary dict_1;
+  starlark_dictionary dict_2;
+  Arena arena;
+  error_handler error_callback;
+
+  dict_1.insert(&zero, &s_zero, error_callback);
+  dict_1.insert(&one, &s_one, error_callback);
+  dict_2.insert(&zero, &s_four, error_callback);
+  dict_2.insert(&two, &s_two, error_callback);
+  dict_2.insert(&three, &s_three, error_callback);
+
+  auto* dict_3 = dict_1.pipe_equals_assign(dict_2,  arena, error_callback);
+  ASSERT_NE(dict_3, nullptr);
+  EXPECT_EQ(dict_3->str(), "{0: \"four\", 1: \"one\", 2: \"two\", 3: \"three\"}");
+  EXPECT_EQ(dict_1.str(), "{0: \"four\", 1: \"one\", 2: \"two\", 3: \"three\"}");
+  EXPECT_EQ(dict_2.str(), "{0: \"four\", 2: \"two\", 3: \"three\"}");
+}
+
+TEST(StarlarkDictionary, PipeEqualsAssignSelf) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("zero"sv);
+  starlark_string s_one("one"sv);
+  starlark_dictionary dict_1;
+  Arena arena;
+  error_handler error_callback;
+
+  dict_1.insert(&zero, &s_zero, error_callback);
+  dict_1.insert(&one, &s_one, error_callback);
+
+  auto* dict_3 = dict_1.pipe_equals_assign(dict_1,  arena, error_callback);
+  ASSERT_NE(dict_3, nullptr);
+  EXPECT_EQ(dict_3->str(), "{0: \"zero\", 1: \"one\"}");
+  EXPECT_EQ(dict_1.str(), "{0: \"zero\", 1: \"one\"}");
+}
+
+TEST(StarlarkDictionary, PipeEqualsAssignWithNonDict) {
+  starlark_dictionary dict;
+  starlark_list list(0);
+  Arena arena;
+  error_handler error_callback;
+
+  auto* result = dict.pipe_equals_assign(list, arena, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'dict' and 'list'");
+}
+
+TEST(StarlarkDictionary, PipeEqualsAssignWhileIterating) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  dictionary.pipe_equals_assign(dictionary, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, PipeEqualsAssigWithFreeze) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  dictionary.freeze();
+  dictionary.pipe_equals_assign(dictionary, arena, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
+}
+
 TEST(StarlarkDictionary, Len) {
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;

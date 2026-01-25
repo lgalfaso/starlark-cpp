@@ -194,6 +194,78 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
   }
 }
 
+starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  if (other.type() != type()) {
+    error_callback.add_error(error_no_concat(type(), other.type(), type()));
+    return nullptr;
+  }
+  if (!can_modify(error_callback)) {
+    return nullptr;
+  }
+  const starlark_list& l_other = static_cast<const starlark_list&>(other);
+  // TODO(lmirelmann): Check the result size.
+  // This needs to be able to handle the case `a += a`
+  for (int i = 0, e = l_other.values.size(); i < e; ++i) {
+    add(l_other.values[i], error_callback);
+  }
+  return this;
+}
+
+starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      if (!can_modify(error_callback)) {
+        return nullptr;
+      }
+      if (values.empty()) {
+        return this;
+      }
+      auto value = other.as_int64();
+      if (value <= 0) {
+        values.clear();
+        return this;
+      }
+      auto original_size = values.size();
+      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      for (int64_t i = 1; i < value; ++i) {
+        for (int j = 0; j < original_size; ++j) {
+          add(values[j], error_callback);
+        }
+      }
+      return this;
+    }
+    case starlark_numeric_type::kBigInt: {
+      if (!can_modify(error_callback)) {
+        return nullptr;
+      }
+      if (values.empty()) {
+        return this;
+      }
+      const auto& value = other.as_bigint();
+      if (value <= number::zero) {
+        values.clear();
+        return this;
+      }
+      if (value.bit_size() >= 63) {
+        error_callback.add_error(error_max_sequence_length(max_sequence_size()));
+        return nullptr;
+      }
+      int64_t int_value = value.at(0);
+      auto original_size = values.size();
+      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      for (int64_t i = 1; i < int_value; ++i) {
+        for (int j = 0; j < original_size; ++j) {
+          add(values[j], error_callback);
+        }
+      }
+      return this;
+    }
+    default:
+      error_callback.add_error(error_no_multiply_sequence(other.type()));
+      return nullptr;
+  }
+}
+
 starlark_iterator* starlark_list::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
   return Arena::Create<starlark_list_iterator>(&arena, this);
 }
@@ -207,12 +279,7 @@ starlark_obj* starlark_list::index(const starlark_obj& other, Arena& arena, erro
 }
 
 void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
-  if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
-    return;
-  }
-  if (freezed) {
-    error_callback.add_error(error_mutate_frozen_value(type()));
+  if (!can_modify(error_callback)) {
     return;
   }
   auto iidx = inner_index(idx, values.size(), error_callback);
@@ -265,12 +332,7 @@ void starlark_list::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 }
 
 void starlark_list::add(starlark_obj* element, error_fn& error_callback) {
-  if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
-    return;
-  }
-  if (freezed) {
-    error_callback.add_error(error_mutate_frozen_value(type()));
+  if (!can_modify(error_callback)) {
     return;
   }
   // TODO(lmirelmann): Check that this does not go over the maximum number of elements.
@@ -291,6 +353,18 @@ starlark_obj* starlark_list::starlark_list_iterator::next() {
 
 void starlark_list::starlark_list_iterator::end_iterator() {
   list->iterators_count--;
+}
+
+bool starlark_list::can_modify(error_fn& error_callback) const {
+  if (iterators_count) {
+    error_callback.add_error(error_append_in_loop(type()));
+    return false;
+  }
+  if (freezed) {
+    error_callback.add_error(error_mutate_frozen_value(type()));
+    return false;
+  }
+  return true;
 }
 
 starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
