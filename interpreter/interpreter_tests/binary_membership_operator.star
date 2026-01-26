@@ -14,7 +14,6 @@ assert_eq(b"nasty" in b"dynasty", True)
 assert_eq(97 in b"abc", True)
 assert_eq(100 in b"abc", False)
 
-# TODO(lmirelmann): Uncomment once `set` and `range` functions are implemented.
-# assert_eq(1 in set([1, 2, 3]), True)
-# assert_eq(1 in range(10), True)
+assert_eq(1 in set([1, 2, 3]), True)
+assert_eq(1 in range(10), True)
 
