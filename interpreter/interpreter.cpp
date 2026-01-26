@@ -450,35 +450,19 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         container->index_assign(*index, *element, error_callback);
         break;
       }
-#define ASSIGN_RANGE(op, method)                                                                           \
-      case op: {                                                                                           \
-        assert(stack.size() >= 5);                                                                         \
-        auto* stride = stack.back();                                                                       \
-        stack.pop_back();                                                                                  \
-        auto* stop = stack.back();                                                                         \
-        stack.pop_back();                                                                                  \
-        auto* start = stack.back();                                                                        \
-        stack.pop_back();                                                                                  \
-        auto* container = stack.back();                                                                    \
-        stack.pop_back();                                                                                  \
-        auto* element = stack.back();                                                                      \
-        stack.pop_back();                                                                                  \
-        container->method(*start, *stop, *stride, *element, arena, error_callback);                        \
-        break;                                                                                             \
+      case OpCode::kDotMember:
+        assert(stack.size() >= 1);
+        stack.back() = stack.back()->dot(op_code.dot_member().member(), arena, error_callback);
+        break;
+      case OpCode::kAssignDotMember: {
+        assert(stack.size() >= 2);
+        auto* element = stack.back();
+        stack.pop_back();
+        auto* value = stack.back();
+        stack.pop_back();
+        element->dot_assign(op_code.assign_dot_member().member(), *value, error_callback);
+        break;
       }
-      ASSIGN_RANGE(OpCode::kAssignSliceRange, slice_range_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangePlusEquals, slice_range_plus_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeMinusEquals, slice_range_minus_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeStarEquals, slice_range_star_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeSlashEquals, slice_range_slash_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeSlashSlashEquals, slice_range_slash_slash_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangePercentEquals, slice_range_percent_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeAmpersandEquals, slice_range_ampersand_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangePipeEquals, slice_range_pipe_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeHatEquals, slice_range_hat_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeLessLessEquals, slice_range_less_less_equals_assign)
-      ASSIGN_RANGE(OpCode::kAssignSliceRangeGreaterGreaterEquals, slice_range_greater_greater_equals_assign)
-#undef ASSIGN_RANGE
 #define COMPOUND_ASSIGN(op, op_method, method)                                                                                                                           \
       case op: {                                                                                                                                                         \
         assert(stack.size() >= 1);                                                                                                                                       \
@@ -540,19 +524,35 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       INDEX_ASSIGN(OpCode::kAssignIndexMemberLessLessEquals, less_less_equals_assign)
       INDEX_ASSIGN(OpCode::kAssignIndexMemberGreaterGreaterEquals, greater_greater_equals_assign)
 #undef INDEX_ASSIGN
-      case OpCode::kDotMember:
-        assert(stack.size() >= 1);
-        stack.back() = stack.back()->dot(op_code.dot_member().member(), arena, error_callback);
-        break;
-      case OpCode::kAssignDotMember: {
-        assert(stack.size() >= 2);
-        auto* element = stack.back();
-        stack.pop_back();
-        auto* value = stack.back();
-        stack.pop_back();
-        element->dot_assign(op_code.assign_dot_member().member(), *value, error_callback);
-        break;
+#define ASSIGN_RANGE(op, method)                                                                           \
+      case op: {                                                                                           \
+        assert(stack.size() >= 5);                                                                         \
+        auto* stride = stack.back();                                                                       \
+        stack.pop_back();                                                                                  \
+        auto* stop = stack.back();                                                                         \
+        stack.pop_back();                                                                                  \
+        auto* start = stack.back();                                                                        \
+        stack.pop_back();                                                                                  \
+        auto* container = stack.back();                                                                    \
+        stack.pop_back();                                                                                  \
+        auto* element = stack.back();                                                                      \
+        stack.pop_back();                                                                                  \
+        container->method(*start, *stop, *stride, *element, arena, error_callback);                        \
+        break;                                                                                             \
       }
+      ASSIGN_RANGE(OpCode::kAssignSliceRange, slice_range_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangePlusEquals, slice_range_plus_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeMinusEquals, slice_range_minus_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeStarEquals, slice_range_star_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeSlashEquals, slice_range_slash_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeSlashSlashEquals, slice_range_slash_slash_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangePercentEquals, slice_range_percent_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeAmpersandEquals, slice_range_ampersand_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangePipeEquals, slice_range_pipe_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeHatEquals, slice_range_hat_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeLessLessEquals, slice_range_less_less_equals_assign)
+      ASSIGN_RANGE(OpCode::kAssignSliceRangeGreaterGreaterEquals, slice_range_greater_greater_equals_assign)
+#undef ASSIGN_RANGE
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
