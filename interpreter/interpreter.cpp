@@ -524,21 +524,51 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       INDEX_ASSIGN(OpCode::kAssignIndexMemberLessLessEquals, less_less_equals_assign)
       INDEX_ASSIGN(OpCode::kAssignIndexMemberGreaterGreaterEquals, greater_greater_equals_assign)
 #undef INDEX_ASSIGN
-#define ASSIGN_RANGE(op, method)                                                                           \
-      case op: {                                                                                           \
-        assert(stack.size() >= 5);                                                                         \
-        auto* stride = stack.back();                                                                       \
-        stack.pop_back();                                                                                  \
-        auto* stop = stack.back();                                                                         \
-        stack.pop_back();                                                                                  \
-        auto* start = stack.back();                                                                        \
-        stack.pop_back();                                                                                  \
-        auto* container = stack.back();                                                                    \
-        stack.pop_back();                                                                                  \
-        auto* element = stack.back();                                                                      \
-        stack.pop_back();                                                                                  \
-        container->method(*start, *stop, *stride, *element, arena, error_callback);                        \
-        break;                                                                                             \
+#define DOT_ASSIGN(op, op_method, method)                                                                                                                                \
+      case op: {                                                                                                                                                         \
+        assert(stack.size() >= 2);                                                                                                                                       \
+        auto* element = stack.back();                                                                                                                                    \
+        stack.pop_back();                                                                                                                                                \
+        auto* field = element->dot(op_code.op_method().member(), arena, error_callback);                                                                                 \
+        if (field == nullptr) {                                                                                                                                          \
+          break;                                                                                                                                                         \
+        }                                                                                                                                                                \
+        auto* value = stack.back();                                                                                                                                      \
+        stack.pop_back();                                                                                                                                                \
+        auto* result = field->method(*value, arena, error_callback);                                                                                                     \
+        if (result == nullptr) {                                                                                                                                         \
+          break;                                                                                                                                                         \
+        }                                                                                                                                                                \
+        element->dot_assign(op_code.op_method().member(), *result, error_callback);                                                                                      \
+        break;                                                                                                                                                           \
+      }
+      DOT_ASSIGN(OpCode::kAssignDotMemberPlusEquals, assign_dot_member_plus_equals, plus_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberMinusEquals, assign_dot_member_minus_equals, minus_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberStarEquals, assign_dot_member_star_equals, star_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberSlashEquals, assign_dot_member_slash_equals, slash_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberSlashSlashEquals, assign_dot_member_slash_slash_equals, slash_slash_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberPercentEquals, assign_dot_member_percent_equals, percent_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberAmpersandEquals, assign_dot_member_ampersand_equals, ampersand_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberPipeEquals, assign_dot_member_pipe_equals, pipe_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberHatEquals, assign_dot_member_hat_equals, hat_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberLessLessEquals, assign_dot_member_less_less_equals, less_less_equals_assign)
+      DOT_ASSIGN(OpCode::kAssignDotMemberGreaterGreaterEquals, assign_dot_member_greater_greater_equals, greater_greater_equals_assign)
+#undef DOT_ASSIGN
+#define ASSIGN_RANGE(op, method)                                                                                                                                         \
+      case op: {                                                                                                                                                         \
+        assert(stack.size() >= 5);                                                                                                                                       \
+        auto* stride = stack.back();                                                                                                                                     \
+        stack.pop_back();                                                                                                                                                \
+        auto* stop = stack.back();                                                                                                                                       \
+        stack.pop_back();                                                                                                                                                \
+        auto* start = stack.back();                                                                                                                                      \
+        stack.pop_back();                                                                                                                                                \
+        auto* container = stack.back();                                                                                                                                  \
+        stack.pop_back();                                                                                                                                                \
+        auto* element = stack.back();                                                                                                                                    \
+        stack.pop_back();                                                                                                                                                \
+        container->method(*start, *stop, *stride, *element, arena, error_callback);                                                                                      \
+        break;                                                                                                                                                           \
       }
       ASSIGN_RANGE(OpCode::kAssignSliceRange, slice_range_assign)
       ASSIGN_RANGE(OpCode::kAssignSliceRangePlusEquals, slice_range_plus_equals_assign)
@@ -563,17 +593,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kReturn:
       case OpCode::kMakeFunction:
       case OpCode::kSetDefaultValues:
-      case OpCode::kAssignDotMemberPlusEquals:
-      case OpCode::kAssignDotMemberMinusEquals:
-      case OpCode::kAssignDotMemberStarEquals:
-      case OpCode::kAssignDotMemberSlashEquals:
-      case OpCode::kAssignDotMemberSlashSlashEquals:
-      case OpCode::kAssignDotMemberPercentEquals:
-      case OpCode::kAssignDotMemberAmpersandEquals:
-      case OpCode::kAssignDotMemberPipeEquals:
-      case OpCode::kAssignDotMemberHatEquals:
-      case OpCode::kAssignDotMemberLessLessEquals:
-      case OpCode::kAssignDotMemberGreaterGreaterEquals:
 
       case OpCode::OP_CODE_NOT_SET:
         // TODO(lmirelmann): Implement the other instructions.
