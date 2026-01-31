@@ -25,10 +25,10 @@ starlark::bigint::number starlark_mod(const starlark::bigint::number& a, const s
 int64_t starlark_div(int64_t a, int64_t b);
 int64_t starlark_mod(int64_t a, int64_t b);
 
-starlark_obj* create_integer(std::int64_t value, google::protobuf::Arena& arena);
-starlark_obj* create_integer(starlark::bigint::number&& value, google::protobuf::Arena& arena);
-starlark_obj* create_integer_from_float(double value, google::protobuf::Arena& arena);
-starlark_obj* create_float(double value, google::protobuf::Arena& arena);
+starlark_obj* create_integer(std::int64_t value, context& ctx);
+starlark_obj* create_integer(starlark::bigint::number&& value, context& ctx);
+starlark_obj* create_integer_from_float(double value, context& ctx);
+starlark_obj* create_float(double value, context& ctx);
 
 }  // namespace runtime
 }  // namespace starlark

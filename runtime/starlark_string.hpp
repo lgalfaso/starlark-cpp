@@ -27,14 +27,14 @@ class starlark_string : public starlark_obj {
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
-  starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
-  starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
-  starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
-  starlark_obj* plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
-  starlark_obj* star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
-  starlark_obj* percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+  starlark_obj* binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+  starlark_obj* binary_percent(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+  starlark_obj* plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
+  starlark_obj* star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
+  starlark_obj* percent_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
-  starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   std::string_view as_string() const override;
 
  protected:

@@ -27,6 +27,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
+using ::starlark::runtime::context;
 using ::starlark::runtime::from_int64;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -255,238 +256,244 @@ TEST(StarlarkBigint, OrderVsBool) {
 
 TEST(StarlarkBigint, ShiftZero) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_bigint zero(0);
 
-  auto* result = zero.binary_lshift(starlark_integer(1l << 62), arena, error_callback);
+  auto* result = zero.binary_lshift(starlark_integer(1l << 62), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = zero.binary_lshift(starlark_bigint(number::one()), arena, error_callback);
+  result = zero.binary_lshift(starlark_bigint(number::one()), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = zero.binary_rshift(starlark_integer(1l << 62), arena, error_callback);
+  result = zero.binary_rshift(starlark_integer(1l << 62), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
-  result = zero.binary_rshift(starlark_bigint(number::one() << 62), arena, error_callback);
+  result = zero.binary_rshift(starlark_bigint(number::one() << 62), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 }
 
 TEST(StarlarkBigint, LShift) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = starlark_bigint(1).binary_lshift(starlark_integer(3), arena, error_callback);
+  auto* result = starlark_bigint(1).binary_lshift(starlark_integer(3), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(1 << 3).equals(*result));
 
-  result = starlark_bigint(from_int64(-11)).binary_lshift(starlark_integer(10), arena, error_callback);
+  result = starlark_bigint(from_int64(-11)).binary_lshift(starlark_integer(10), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(from_int64(-11264)).equals(*result));
 
-  result = starlark_bigint(1).binary_lshift(starlark_integer(100), arena, error_callback);
+  result = starlark_bigint(1).binary_lshift(starlark_integer(100), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one() << 100).equals(*result));
 
-  result = starlark_bigint(1).binary_lshift(starlark_integer(1 << 28), arena, error_callback);
+  result = starlark_bigint(1).binary_lshift(starlark_integer(1 << 28), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one() << (1 << 28)).equals(*result));
 
-  result = starlark_bigint(1).binary_lshift(starlark_bigint(62), arena, error_callback);
+  result = starlark_bigint(1).binary_lshift(starlark_bigint(62), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1L << 62).equals(*result));
 
-  result = starlark_bigint(1).binary_lshift(starlark_bigint(63), arena, error_callback);
+  result = starlark_bigint(1).binary_lshift(starlark_bigint(63), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one() << 63).equals(*result));
 }
 
 TEST(StarlarkBigint, RShift) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = starlark_bigint(100).binary_rshift(starlark_integer(3), arena, error_callback);
+  auto* result = starlark_bigint(100).binary_rshift(starlark_integer(3), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(100 >> 3).equals(*result));
 
-  result = starlark_bigint(from_int64(-11264)).binary_rshift(starlark_integer(10), arena, error_callback);
+  result = starlark_bigint(from_int64(-11264)).binary_rshift(starlark_integer(10), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(-11).equals(*result));
 
-  result = starlark_bigint(1).binary_rshift(starlark_integer(64), arena, error_callback);
+  result = starlark_bigint(1).binary_rshift(starlark_integer(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_bigint(from_int64(-2)).binary_rshift(starlark_integer(64), arena, error_callback);
+  result = starlark_bigint(from_int64(-2)).binary_rshift(starlark_integer(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(-1).equals(*result));
 
-  result = starlark_bigint(20).binary_rshift(starlark_bigint(64), arena, error_callback);
+  result = starlark_bigint(20).binary_rshift(starlark_bigint(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_bigint(20).binary_rshift(starlark_bigint(number::one() << 64), arena, error_callback);
+  result = starlark_bigint(20).binary_rshift(starlark_bigint(number::one() << 64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_bigint(20).binary_rshift(starlark_bigint(number::one()), arena, error_callback);
+  result = starlark_bigint(20).binary_rshift(starlark_bigint(number::one()), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(10).equals(*result));
 
-  result = starlark_bigint(number::one() << 64).binary_rshift(starlark_integer(64), arena, error_callback);
+  result = starlark_bigint(number::one() << 64).binary_rshift(starlark_integer(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1).equals(*result));
-  result = starlark_bigint(number::one() << 64).binary_rshift(starlark_bigint(64), arena, error_callback);
+  result = starlark_bigint(number::one() << 64).binary_rshift(starlark_bigint(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1).equals(*result));
 }
 
 TEST(StarlarkBigint, LShiftEquals) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = starlark_bigint(1).less_less_equals_assign(starlark_integer(3), arena, error_callback);
+  auto* result = starlark_bigint(1).less_less_equals_assign(starlark_integer(3), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(1 << 3).equals(*result));
 
-  result = starlark_bigint(from_int64(-11)).less_less_equals_assign(starlark_integer(10), arena, error_callback);
+  result = starlark_bigint(from_int64(-11)).less_less_equals_assign(starlark_integer(10), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(from_int64(-11264)).equals(*result));
 
-  result = starlark_bigint(1).less_less_equals_assign(starlark_integer(100), arena, error_callback);
+  result = starlark_bigint(1).less_less_equals_assign(starlark_integer(100), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one() << 100).equals(*result));
 
-  result = starlark_bigint(1).less_less_equals_assign(starlark_integer(1 << 28), arena, error_callback);
+  result = starlark_bigint(1).less_less_equals_assign(starlark_integer(1 << 28), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one() << (1 << 28)).equals(*result));
 
-  result = starlark_bigint(1).less_less_equals_assign(starlark_bigint(62), arena, error_callback);
+  result = starlark_bigint(1).less_less_equals_assign(starlark_bigint(62), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1L << 62).equals(*result));
 
-  result = starlark_bigint(1).less_less_equals_assign(starlark_bigint(63), arena, error_callback);
+  result = starlark_bigint(1).less_less_equals_assign(starlark_bigint(63), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one() << 63).equals(*result));
 }
 
 TEST(StarlarkBigint, RShiftEquals) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = starlark_bigint(100).greater_greater_equals_assign(starlark_integer(3), arena, error_callback);
+  auto* result = starlark_bigint(100).greater_greater_equals_assign(starlark_integer(3), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(100 >> 3).equals(*result));
 
-  result = starlark_bigint(from_int64(-11264)).greater_greater_equals_assign(starlark_integer(10), arena, error_callback);
+  result = starlark_bigint(from_int64(-11264)).greater_greater_equals_assign(starlark_integer(10), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(-11).equals(*result));
 
-  result = starlark_bigint(1).greater_greater_equals_assign(starlark_integer(64), arena, error_callback);
+  result = starlark_bigint(1).greater_greater_equals_assign(starlark_integer(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_bigint(from_int64(-2)).greater_greater_equals_assign(starlark_integer(64), arena, error_callback);
+  result = starlark_bigint(from_int64(-2)).greater_greater_equals_assign(starlark_integer(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(-1).equals(*result));
 
-  result = starlark_bigint(20).greater_greater_equals_assign(starlark_bigint(64), arena, error_callback);
+  result = starlark_bigint(20).greater_greater_equals_assign(starlark_bigint(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_bigint(20).greater_greater_equals_assign(starlark_bigint(number::one() << 64), arena, error_callback);
+  result = starlark_bigint(20).greater_greater_equals_assign(starlark_bigint(number::one() << 64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_bigint(20).greater_greater_equals_assign(starlark_bigint(number::one()), arena, error_callback);
+  result = starlark_bigint(20).greater_greater_equals_assign(starlark_bigint(number::one()), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(10).equals(*result));
 
-  result = starlark_bigint(number::one() << 64).greater_greater_equals_assign(starlark_integer(64), arena, error_callback);
+  result = starlark_bigint(number::one() << 64).greater_greater_equals_assign(starlark_integer(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1).equals(*result));
-  result = starlark_bigint(number::one() << 64).binary_rshift(starlark_bigint(64), arena, error_callback);
+  result = starlark_bigint(number::one() << 64).binary_rshift(starlark_bigint(64), ctx, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(1).equals(*result));
 }
 
 TEST(StarlarkBigint, ShiftInvalidInput) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = starlark_bigint(100).binary_rshift(starlark_float(3.0), arena, error_callback);
+  auto* result = starlark_bigint(100).binary_rshift(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>: 'int' and 'float'");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_lshift(starlark_float(3.0), arena, error_callback);
+  result = starlark_bigint(100).binary_lshift(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<: 'int' and 'float'");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).greater_greater_equals_assign(starlark_float(3.0), arena, error_callback);
+  result = starlark_bigint(100).greater_greater_equals_assign(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>=: 'int' and 'float'");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).less_less_equals_assign(starlark_float(3.0), arena, error_callback);
+  result = starlark_bigint(100).less_less_equals_assign(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<=: 'int' and 'float'");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_lshift(starlark_integer(-1), arena, error_callback);
+  result = starlark_bigint(100).binary_lshift(starlark_integer(-1), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_rshift(starlark_integer(-1), arena, error_callback);
+  result = starlark_bigint(100).binary_rshift(starlark_integer(-1), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::minus_one()), arena, error_callback);
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::minus_one()), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_rshift(starlark_bigint(number::minus_one()), arena, error_callback);
+  result = starlark_bigint(100).binary_rshift(starlark_bigint(number::minus_one()), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
   error_callback.messages.clear();
 
-  result = starlark_bigint(1).binary_lshift(starlark_integer(1 << 29), arena, error_callback);
+  result = starlark_bigint(1).binary_lshift(starlark_integer(1 << 29), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
 
-  result = starlark_bigint(1).binary_lshift(starlark_integer(0x7fff'ffff'ffff'ffffL), arena, error_callback);
+  result = starlark_bigint(1).binary_lshift(starlark_integer(0x7fff'ffff'ffff'ffffL), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 100), arena, error_callback);
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 100), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 63), arena, error_callback);
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 63), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
 
-  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 62), arena, error_callback);
+  result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 62), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
@@ -504,21 +511,22 @@ TEST(StarlarkBigint, BinaryAnd) {
     std::numeric_limits<int64_t>::max(),
   };
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
   for (const auto a : values) {
     for (const auto b : values) {
-      auto* r = starlark_bigint(from_int64(a)).binary_and(starlark_integer(b), arena, error_callback);
+      auto* r = starlark_bigint(from_int64(a)).binary_and(starlark_integer(b), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a & b)));
-      r = starlark_bigint(from_int64(a)).binary_and(starlark_bigint(from_int64(b)), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).binary_and(starlark_bigint(from_int64(b)), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a & b)));
 
-      r = starlark_bigint(from_int64(a)).ampersand_equals_assign(starlark_integer(b), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).ampersand_equals_assign(starlark_integer(b), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a & b)));
-      r = starlark_bigint(from_int64(a)).ampersand_equals_assign(starlark_bigint(from_int64(b)), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).ampersand_equals_assign(starlark_bigint(from_int64(b)), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a & b)));
     }
@@ -529,9 +537,10 @@ TEST(StarlarkBigint, BinaryAndError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_and(float_zero, arena, error_callback);
+  zero.binary_and(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &: 'int' and 'float'");
 }
@@ -540,9 +549,10 @@ TEST(StarlarkBigint, AndEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.ampersand_equals_assign(float_zero, arena, error_callback);
+  zero.ampersand_equals_assign(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &=: 'int' and 'float'");
 }
@@ -558,21 +568,22 @@ TEST(StarlarkBigint, BinaryOr) {
     std::numeric_limits<int64_t>::max(),
   };
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
   for (const auto a : values) {
     for (const auto b : values) {
-      auto* r = starlark_bigint(from_int64(a)).binary_pipe(starlark_integer(b), arena, error_callback);
+      auto* r = starlark_bigint(from_int64(a)).binary_pipe(starlark_integer(b), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a | b)));
-      r = starlark_bigint(from_int64(a)).binary_pipe(starlark_bigint(from_int64(b)), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).binary_pipe(starlark_bigint(from_int64(b)), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a | b)));
 
-      r = starlark_bigint(from_int64(a)).pipe_equals_assign(starlark_integer(b), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).pipe_equals_assign(starlark_integer(b), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a | b)));
-      r = starlark_bigint(from_int64(a)).pipe_equals_assign(starlark_bigint(from_int64(b)), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).pipe_equals_assign(starlark_bigint(from_int64(b)), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a | b)));
     }
@@ -583,9 +594,10 @@ TEST(StarlarkBigint, BinaryOrError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_pipe(float_zero, arena, error_callback);
+  zero.binary_pipe(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'int' and 'float'");
 }
@@ -594,9 +606,10 @@ TEST(StarlarkBigint, OrEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.pipe_equals_assign(float_zero, arena, error_callback);
+  zero.pipe_equals_assign(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'int' and 'float'");
 }
@@ -612,21 +625,22 @@ TEST(StarlarkBigint, BinaryXor) {
     std::numeric_limits<int64_t>::max(),
   };
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
   for (const auto a : values) {
     for (const auto b : values) {
-      auto* r = starlark_bigint(from_int64(a)).binary_hat(starlark_integer(b), arena, error_callback);
+      auto* r = starlark_bigint(from_int64(a)).binary_hat(starlark_integer(b), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
-      r = starlark_bigint(from_int64(a)).binary_hat(starlark_bigint(from_int64(b)), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).binary_hat(starlark_bigint(from_int64(b)), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
 
-      r = starlark_bigint(from_int64(a)).hat_equals_assign(starlark_integer(b), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).hat_equals_assign(starlark_integer(b), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
-      r = starlark_bigint(from_int64(a)).hat_equals_assign(starlark_bigint(from_int64(b)), arena, error_callback);
+      r = starlark_bigint(from_int64(a)).hat_equals_assign(starlark_bigint(from_int64(b)), ctx, error_callback);
       ASSERT_NE(r, nullptr);
       EXPECT_TRUE(r->equals(starlark_integer(a ^ b)));
     }
@@ -637,9 +651,10 @@ TEST(StarlarkBigint, BinaryXorError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_hat(float_zero, arena, error_callback);
+  zero.binary_hat(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'int' and 'float'");
 }
@@ -648,9 +663,10 @@ TEST(StarlarkBigint, XorEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_float float_zero(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.hat_equals_assign(float_zero, arena, error_callback);
+  zero.hat_equals_assign(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^=: 'int' and 'float'");
 }
@@ -661,11 +677,12 @@ TEST(StarlarkBigint, BinaryPlus) {
   starlark_bigint b1(number::one() << 2);
   starlark_bigint b2(number::one() << 4);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.binary_plus(b2, arena, error_callback);
-  auto* result2 = b1.binary_plus(i1, arena, error_callback);
-  auto* result3 = b1.binary_plus(f1, arena, error_callback);
+  auto* result1 = b1.binary_plus(b2, ctx, error_callback);
+  auto* result2 = b1.binary_plus(i1, ctx, error_callback);
+  auto* result3 = b1.binary_plus(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("20", result1->str());
@@ -681,11 +698,12 @@ TEST(StarlarkBigint, PlusEqualsAssign) {
   starlark_bigint b1(number::one() << 2);
   starlark_bigint b2(number::one() << 4);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.plus_equals_assign(b2, arena, error_callback);
-  auto* result2 = b1.plus_equals_assign(i1, arena, error_callback);
-  auto* result3 = b1.plus_equals_assign(f1, arena, error_callback);
+  auto* result1 = b1.plus_equals_assign(b2, ctx, error_callback);
+  auto* result2 = b1.plus_equals_assign(i1, ctx, error_callback);
+  auto* result3 = b1.plus_equals_assign(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("20", result1->str());
@@ -699,9 +717,10 @@ TEST(StarlarkBigint, BinaryPlusError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_plus(true_obj, arena, error_callback);
+  zero.binary_plus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +: 'int' and 'bool'");
 }
@@ -710,9 +729,10 @@ TEST(StarlarkBigint, PlusEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.plus_equals_assign(true_obj, arena, error_callback);
+  zero.plus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +=: 'int' and 'bool'");
 }
@@ -721,9 +741,10 @@ TEST(StarlarkBigint, BinaryPlusOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  big.binary_plus(f1, arena, error_callback);
+  big.binary_plus(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -734,11 +755,12 @@ TEST(StarlarkBigint, BinaryMinus) {
   starlark_bigint b1(number::one() << 3);
   starlark_bigint b2(number::one() << 5);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.binary_minus(b2, arena, error_callback);
-  auto* result2 = b1.binary_minus(i1, arena, error_callback);
-  auto* result3 = b1.binary_minus(f1, arena, error_callback);
+  auto* result1 = b1.binary_minus(b2, ctx, error_callback);
+  auto* result2 = b1.binary_minus(i1, ctx, error_callback);
+  auto* result3 = b1.binary_minus(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("-24", result1->str());
@@ -752,9 +774,10 @@ TEST(StarlarkBigint, BinaryMinusError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_minus(true_obj, arena, error_callback);
+  zero.binary_minus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'int' and 'bool'");
 }
@@ -765,11 +788,12 @@ TEST(StarlarkBigint, MinusEqualsAssign) {
   starlark_bigint b1(number::one() << 3);
   starlark_bigint b2(number::one() << 5);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.minus_equals_assign(b2, arena, error_callback);
-  auto* result2 = b1.minus_equals_assign(i1, arena, error_callback);
-  auto* result3 = b1.minus_equals_assign(f1, arena, error_callback);
+  auto* result1 = b1.minus_equals_assign(b2, ctx, error_callback);
+  auto* result2 = b1.minus_equals_assign(i1, ctx, error_callback);
+  auto* result3 = b1.minus_equals_assign(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("-24", result1->str());
@@ -783,9 +807,10 @@ TEST(StarlarkBigint, MinusEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.minus_equals_assign(true_obj, arena, error_callback);
+  zero.minus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -=: 'int' and 'bool'");
 }
@@ -794,9 +819,10 @@ TEST(StarlarkBigint, BinaryMinusOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  big.binary_minus(f1, arena, error_callback);
+  big.binary_minus(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -807,11 +833,12 @@ TEST(StarlarkBigint, BinaryStar) {
   starlark_bigint b1(number::one() << 3);
   starlark_bigint b2(number::one() << 5);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.binary_star(b2, arena, error_callback);
-  auto* result2 = b1.binary_star(i1, arena, error_callback);
-  auto* result3 = b1.binary_star(f1, arena, error_callback);
+  auto* result1 = b1.binary_star(b2, ctx, error_callback);
+  auto* result2 = b1.binary_star(i1, ctx, error_callback);
+  auto* result3 = b1.binary_star(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("256", result1->str());
@@ -825,9 +852,10 @@ TEST(StarlarkBigint, BinaryStarError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_star(true_obj, arena, error_callback);
+  zero.binary_star(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *: 'int' and 'bool'");
 }
@@ -838,11 +866,12 @@ TEST(StarlarkBigint, StarEqualsAssign) {
   starlark_bigint b1(number::one() << 3);
   starlark_bigint b2(number::one() << 5);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.star_equals_assign(b2, arena, error_callback);
-  auto* result2 = b1.star_equals_assign(i1, arena, error_callback);
-  auto* result3 = b1.star_equals_assign(f1, arena, error_callback);
+  auto* result1 = b1.star_equals_assign(b2, ctx, error_callback);
+  auto* result2 = b1.star_equals_assign(i1, ctx, error_callback);
+  auto* result3 = b1.star_equals_assign(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("256", result1->str());
@@ -856,9 +885,10 @@ TEST(StarlarkBigint, StarEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.star_equals_assign(true_obj, arena, error_callback);
+  zero.star_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *=: 'int' and 'bool'");
 }
@@ -867,9 +897,10 @@ TEST(StarlarkBigint, BinaryStarOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  big.binary_star(f1, arena, error_callback);
+  big.binary_star(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -880,11 +911,12 @@ TEST(StarlarkBigint, BinarySlash) {
   starlark_bigint b1(number::one() << 3);
   starlark_bigint b2(number::one() << 5);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.binary_slash(b2, arena, error_callback);
-  auto* result2 = b1.binary_slash(i1, arena, error_callback);
-  auto* result3 = b1.binary_slash(f1, arena, error_callback);
+  auto* result1 = b1.binary_slash(b2, ctx, error_callback);
+  auto* result2 = b1.binary_slash(i1, ctx, error_callback);
+  auto* result3 = b1.binary_slash(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("0.25", result1->str());
@@ -898,9 +930,10 @@ TEST(StarlarkBigint, BinarySlashError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_slash(true_obj, arena, error_callback);
+  zero.binary_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /: 'int' and 'bool'");
 }
@@ -911,11 +944,12 @@ TEST(StarlarkBigint, SlashEqualsAssign) {
   starlark_bigint b1(number::one() << 3);
   starlark_bigint b2(number::one() << 5);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = b1.slash_equals_assign(b2, arena, error_callback);
-  auto* result2 = b1.slash_equals_assign(i1, arena, error_callback);
-  auto* result3 = b1.slash_equals_assign(f1, arena, error_callback);
+  auto* result1 = b1.slash_equals_assign(b2, ctx, error_callback);
+  auto* result2 = b1.slash_equals_assign(i1, ctx, error_callback);
+  auto* result3 = b1.slash_equals_assign(f1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("0.25", result1->str());
@@ -929,9 +963,10 @@ TEST(StarlarkBigint, SlashEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.slash_equals_assign(true_obj, arena, error_callback);
+  zero.slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /=: 'int' and 'bool'");
 }
@@ -940,25 +975,28 @@ TEST(StarlarkBigint, BinarySlashOverflowError) {
   starlark_bigint big(number::one() << 1200);
   {
     Arena arena;
+    context ctx(arena);
     error_handler error_callback;
 
-    big.binary_slash(starlark_float(1.0), arena, error_callback);
+    big.binary_slash(starlark_float(1.0), ctx, error_callback);
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
   }
   {
     Arena arena;
+    context ctx(arena);
     error_handler error_callback;
 
-    big.binary_slash(starlark_integer(1), arena, error_callback);
+    big.binary_slash(starlark_integer(1), ctx, error_callback);
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
   }
   {
     Arena arena;
+    context ctx(arena);
     error_handler error_callback;
 
-    big.binary_slash(starlark_bigint(1), arena, error_callback);
+    big.binary_slash(starlark_bigint(1), ctx, error_callback);
     ASSERT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
   }
@@ -968,9 +1006,10 @@ TEST(StarlarkBigint, BinarySlashOverflowDenominatorError) {
   starlark_bigint big(number::one() << 1200);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash(big, arena, error_callback);
+  small.binary_slash(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -979,9 +1018,10 @@ TEST(StarlarkBigint, BinarySlashZeroFloatError) {
   starlark_float f0(0.0);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash(f0, arena, error_callback);
+  small.binary_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -990,9 +1030,10 @@ TEST(StarlarkBigint, BinarySlashZeroIntError) {
   starlark_integer i0(0);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash(i0, arena, error_callback);
+  small.binary_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1001,9 +1042,10 @@ TEST(StarlarkBigint, BinarySlashZeroBigintError) {
   starlark_bigint b0(number::zero());
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash(b0, arena, error_callback);
+  small.binary_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1015,14 +1057,15 @@ TEST(StarlarkBigint, BinarySlashSlash) {
     starlark_integer deni(d);
     starlark_float denf(d);
     Arena arena;
+    context ctx(arena);
     error_handler error_callback;
 
-    auto* resultb1 = num.binary_slash_slash(denb, arena, error_callback);
-    auto* resulti1 = num.binary_slash_slash(deni, arena, error_callback);
-    auto* resultf1 = num.binary_slash_slash(denf, arena, error_callback);
-    auto* resultb2 = num.slash_slash_equals_assign(denb, arena, error_callback);
-    auto* resulti2 = num.slash_slash_equals_assign(deni, arena, error_callback);
-    auto* resultf2 = num.slash_slash_equals_assign(denf, arena, error_callback);
+    auto* resultb1 = num.binary_slash_slash(denb, ctx, error_callback);
+    auto* resulti1 = num.binary_slash_slash(deni, ctx, error_callback);
+    auto* resultf1 = num.binary_slash_slash(denf, ctx, error_callback);
+    auto* resultb2 = num.slash_slash_equals_assign(denb, ctx, error_callback);
+    auto* resulti2 = num.slash_slash_equals_assign(deni, ctx, error_callback);
+    auto* resultf2 = num.slash_slash_equals_assign(denf, ctx, error_callback);
 
     EXPECT_THAT(error_callback.messages, SizeIs(0));
     EXPECT_NE(resultb1, nullptr);
@@ -1473,9 +1516,10 @@ TEST(StarlarkBigint, BinarySlashSlashError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_slash_slash(true_obj, arena, error_callback);
+  zero.binary_slash_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'int' and 'bool'");
 }
@@ -1484,9 +1528,10 @@ TEST(StarlarkBigint, SlashSlashEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.slash_slash_equals_assign(true_obj, arena, error_callback);
+  zero.slash_slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //=: 'int' and 'bool'");
 }
@@ -1495,9 +1540,10 @@ TEST(StarlarkBigint, BinarySlashSlashOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  big.binary_slash_slash(f1, arena, error_callback);
+  big.binary_slash_slash(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -1506,9 +1552,10 @@ TEST(StarlarkBigint, BinarySlashSlashOverflowiDenominatorError) {
   starlark_bigint big(number::one() << 1200);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash_slash(big, arena, error_callback);
+  small.binary_slash_slash(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -1516,9 +1563,10 @@ TEST(StarlarkBigint, BinarySlashSlashZeroFloatError) {
   starlark_float f0(0.0);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash_slash(f0, arena, error_callback);
+  small.binary_slash_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1527,9 +1575,10 @@ TEST(StarlarkBigint, BinarySlashSlashZeroIntError) {
   starlark_integer i0(0);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash_slash(i0, arena, error_callback);
+  small.binary_slash_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1538,9 +1587,10 @@ TEST(StarlarkBigint, BinarySlashSlashZeroBigintError) {
   starlark_bigint b0(number::zero());
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_slash_slash(b0, arena, error_callback);
+  small.binary_slash_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1552,14 +1602,15 @@ TEST(StarlarkBigint, BinaryPercent) {
     starlark_integer deni(d);
     starlark_float denf(d);
     Arena arena;
+    context ctx(arena);
     error_handler error_callback;
 
-    auto* resultb1 = num.binary_percent(denb, arena, error_callback);
-    auto* resultb2 = num.percent_equals_assign(denb, arena, error_callback);
-    auto* resulti1 = num.binary_percent(deni, arena, error_callback);
-    auto* resulti2 = num.percent_equals_assign(deni, arena, error_callback);
-    auto* resultf1 = num.binary_percent(denf, arena, error_callback);
-    auto* resultf2 = num.percent_equals_assign(denf, arena, error_callback);
+    auto* resultb1 = num.binary_percent(denb, ctx, error_callback);
+    auto* resultb2 = num.percent_equals_assign(denb, ctx, error_callback);
+    auto* resulti1 = num.binary_percent(deni, ctx, error_callback);
+    auto* resulti2 = num.percent_equals_assign(deni, ctx, error_callback);
+    auto* resultf1 = num.binary_percent(denf, ctx, error_callback);
+    auto* resultf2 = num.percent_equals_assign(denf, ctx, error_callback);
 
     EXPECT_THAT(error_callback.messages, SizeIs(0));
     EXPECT_NE(resultb1, nullptr);
@@ -2010,9 +2061,10 @@ TEST(StarlarkBigint, BinaryPercentError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.binary_percent(true_obj, arena, error_callback);
+  zero.binary_percent(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %: 'int' and 'bool'");
 }
@@ -2021,9 +2073,10 @@ TEST(StarlarkBigint, PercentEqualsAssignError) {
   starlark_bigint zero(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  zero.percent_equals_assign(true_obj, arena, error_callback);
+  zero.percent_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %=: 'int' and 'bool'");
 }
@@ -2032,9 +2085,10 @@ TEST(StarlarkBigint, BinaryPercentOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  big.binary_percent(f1, arena, error_callback);
+  big.binary_percent(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -2043,9 +2097,10 @@ TEST(StarlarkBigint, BinaryPercentOverflowiDenominatorError) {
   starlark_bigint big(number::one() << 1200);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_percent(big, arena, error_callback);
+  small.binary_percent(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -2053,9 +2108,10 @@ TEST(StarlarkBigint, BinaryPercentZeroFloatError) {
   starlark_float f0(0.0);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_percent(f0, arena, error_callback);
+  small.binary_percent(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -2064,9 +2120,10 @@ TEST(StarlarkBigint, BinaryPercentZeroIntError) {
   starlark_integer i0(0);
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_percent(i0, arena, error_callback);
+  small.binary_percent(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -2075,9 +2132,10 @@ TEST(StarlarkBigint, BinaryPercentZeroBigintError) {
   starlark_bigint b0(number::zero());
   starlark_bigint small(number::one());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  small.binary_percent(b0, arena, error_callback);
+  small.binary_percent(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }

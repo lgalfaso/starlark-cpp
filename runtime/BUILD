@@ -105,6 +105,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":starlark_bool",
+        ":starlark_integer",
         ":starlark_none",
         ":starlark_numeric",
         ":starlark_object",

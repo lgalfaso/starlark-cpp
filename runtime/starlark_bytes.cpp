@@ -163,7 +163,7 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
 
 namespace {
 
-starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   if (other.type() != this_obj.type()) {
     error_callback.add_error(error_no_concat(this_obj.type(), other.type()));
     return nullptr;
@@ -171,14 +171,14 @@ starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other,
   // TODO(lmirelmann): Check that the value length would not go over the limit.
   std::string value{this_obj.as_string()};
   value += other.as_string();
-  return Arena::Create<starlark_bytes>(&arena, std::move(value));
+  return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(value));
 }
 
-starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
       if (this_obj.as_string().empty()) {
-        return Arena::Create<starlark_bytes>(&arena, std::string_view{});
+        return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
       auto multiplier = other.as_int64();
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
@@ -186,15 +186,15 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
       for (int64_t i = 0; i < multiplier; ++i) {
         result += this_obj.as_string();
       }
-      return Arena::Create<starlark_bytes>(&arena, std::move(result));
+      return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
     }
     case starlark_numeric_type::kBigInt: {
       if (this_obj.as_string().empty()) {
-        return Arena::Create<starlark_bytes>(&arena, std::string_view{});
+        return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
       const auto& multiplier = other.as_bigint();
       if (multiplier <= number::zero()) {
-        return Arena::Create<starlark_bytes>(&arena, std::string_view{});
+        return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
         error_callback.add_error(error_max_sequence_length(max_string_length()));
@@ -206,7 +206,7 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
       for (int64_t i = 0; i < int_value; ++i) {
         result += this_obj.as_string();
       }
-      return Arena::Create<starlark_bytes>(&arena, std::move(result));
+      return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
     }
     default:
       error_callback.add_error(error_no_multiply_sequence(other.type()));
@@ -216,28 +216,28 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
 
 }  // namespace
 
-starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return plus_op(*this, other, "+", arena, error_callback);
+starlark_obj* starlark_bytes::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return plus_op(*this, other, "+", ctx, error_callback);
 }
 
-starlark_obj* starlark_bytes::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return plus_op(*this, other, "+=", arena, error_callback);
+starlark_obj* starlark_bytes::plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return plus_op(*this, other, "+=", ctx, error_callback);
 }
 
-starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return star_op(*this, other, "*", arena, error_callback);
+starlark_obj* starlark_bytes::binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return star_op(*this, other, "*", ctx, error_callback);
 }
 
-starlark_obj* starlark_bytes::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return star_op(*this, other, "*=", arena, error_callback);
+starlark_obj* starlark_bytes::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return star_op(*this, other, "*=", ctx, error_callback);
 }
 
-starlark_obj* starlark_bytes::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_bytes::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, value.size(), error_callback);
   if (idx < 0) {
     return nullptr;
   }
-  return Arena::Create<starlark_bytes>(&arena, value.substr(idx, 1));
+  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(idx, 1));
 }
 
 std::string_view starlark_bytes::as_string() const {

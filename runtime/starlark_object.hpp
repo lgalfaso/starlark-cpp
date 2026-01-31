@@ -127,6 +127,7 @@ class context {
   starlark_obj* false_value() const;
   starlark_obj* true_value() const;
   starlark_obj* none_value() const;
+  starlark_obj* minus_one() const;
   starlark_obj* zero() const;
   starlark_obj* one() const;
   // TODO(lmirelmann): Do not expose the arena.
@@ -137,6 +138,7 @@ class context {
   starlark_obj* false_value_;
   starlark_obj* true_value_;
   starlark_obj* none_value_;
+  starlark_obj* minus_one_;
   starlark_obj* zero_;
   starlark_obj* one_;
 };
@@ -163,59 +165,59 @@ class starlark_obj {
   virtual starlark_obj* call(const pos_args_t& pos_args, const named_args_t& named_args, context& ctx, error_fn& error_callback);
   virtual void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback);
 
-  virtual starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* unary_minus(google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* unary_tilde(google::protobuf::Arena& arena, error_fn& error_callback) const;
+  virtual starlark_obj* unary_plus(context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* unary_minus(context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* unary_tilde(context& ctx, error_fn& error_callback) const;
   virtual bool binary_in(const starlark_obj& other, error_fn& error_callback) const;
-  virtual starlark_obj* plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* slash_slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* ampersand_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* hat_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* less_less_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* greater_greater_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_minus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_slash_slash(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_percent(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_and(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_pipe(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_hat(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_lshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
-  virtual starlark_obj* binary_rshift(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
+  virtual starlark_obj* plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* minus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* slash_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* slash_slash_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* percent_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* ampersand_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* hat_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* less_less_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* greater_greater_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_minus(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_slash(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_slash_slash(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_percent(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_and(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_pipe(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_hat(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_lshift(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
+  virtual starlark_obj* binary_rshift(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
 
   virtual int64_t len(bool produce_error, error_fn& error_callback) const;
-  virtual starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const;
+  virtual starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
   virtual void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback);
-  virtual starlark_obj* dot(std::string_view field_name, google::protobuf::Arena& arena, error_fn& error_callback);
+  virtual starlark_obj* dot(std::string_view field_name, context& ctx, error_fn& error_callback);
   virtual void dot_assign(std::string_view field_name, starlark_obj& element, error_fn& error_callback);
 
-  virtual void slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_star_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_slash_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_percent_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_ampersand_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_pipe_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_hat_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
-  virtual void slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, google::protobuf::Arena& arena, error_fn& error_callback);
+  virtual void slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_star_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_slash_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_percent_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_ampersand_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_pipe_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_hat_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
+  virtual void slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
 
   virtual starlark_numeric_type numeric_type() const;
   virtual int64_t as_int64() const;
   virtual const starlark::bigint::number& as_bigint() const;
   virtual double as_float() const;
   virtual std::string_view as_string() const;
-  virtual starlark_obj* get_attr(bool produce_error, std::string_view attribute, google::protobuf::Arena& arena, error_fn& error_callback);
+  virtual starlark_obj* get_attr(bool produce_error, std::string_view attribute, context& ctx, error_fn& error_callback);
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;
@@ -238,7 +240,7 @@ class starlark_obj {
 };
 
 int64_t starlark_hash(std::span<int64_t> values);
-starlark_obj* create_function(google::protobuf::Arena &arena, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
+starlark_obj* create_function(context& ctx, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
 
 bool no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
 bool min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min);

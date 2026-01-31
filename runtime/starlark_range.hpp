@@ -19,12 +19,12 @@ class starlark_range : public starlark_obj {
   bool truthy() const override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
-  starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback) override;
-  starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
+  starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
 
   class starlark_range_iterator : public starlark_iterator {
    public:
-    starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, google::protobuf::Arena& arena);
+    starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, context& ctx);
     bool has_next() const override;
     starlark_obj* next() override;
     void end_iterator() override;
@@ -33,7 +33,7 @@ class starlark_range : public starlark_obj {
     int64_t current_pos;
     const int64_t step;
     int64_t remaining;
-    google::protobuf::Arena& arena;
+    context& ctx;
   };
 
  protected:

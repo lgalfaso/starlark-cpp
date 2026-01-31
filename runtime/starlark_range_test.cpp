@@ -15,6 +15,7 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_float;
@@ -153,11 +154,12 @@ TEST(StarlarkRange, Equals) {
 TEST(StarlarkRange, Index) {
   auto test = [](int64_t start, int64_t end, int64_t step, int64_t idx, int64_t expected) {
     Arena arena;
+    context ctx(arena);
     error_handler error_callback;
     starlark_integer index(idx);
 
     starlark_range range(start, end, step);
-    auto* result = range.index(index, arena, error_callback);
+    auto* result = range.index(index, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_TRUE(result->equals(starlark_integer(expected)));
     EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -176,11 +178,12 @@ TEST(StarlarkRange, Index) {
 
 TEST(StarlarkRange, IndexOutOfRange) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_integer index(100);
 
   starlark_range range(0, 100, 1);
-  auto* result = range.index(index, arena, error_callback);
+  auto* result = range.index(index, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "IndexError: range index out of range");
@@ -301,13 +304,14 @@ TEST(StarlarkRange, GetIterator) {
   starlark_range range1(10, 20, 3);
   starlark_range range2(20, 10, -3);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* it0 = range0.get_iterator(true, arena, error_callback);
+  auto* it0 = range0.get_iterator(true, ctx, error_callback);
   EXPECT_FALSE(it0->has_next());
   it0->end_iterator();
 
-  auto* it1 = range1.get_iterator(true, arena, error_callback);
+  auto* it1 = range1.get_iterator(true, ctx, error_callback);
   EXPECT_TRUE(it1->has_next());
   EXPECT_EQ(it1->next()->str(), "10");
   EXPECT_TRUE(it1->has_next());
@@ -319,7 +323,7 @@ TEST(StarlarkRange, GetIterator) {
   EXPECT_FALSE(it1->has_next());
   it1->end_iterator();
 
-  auto* it2 = range2.get_iterator(true, arena, error_callback);
+  auto* it2 = range2.get_iterator(true, ctx, error_callback);
   EXPECT_TRUE(it2->has_next());
   EXPECT_EQ(it2->next()->str(), "20");
   EXPECT_TRUE(it2->has_next());

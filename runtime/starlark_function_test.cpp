@@ -142,7 +142,7 @@ TEST(StarlarkAbs, Numeric) {
     Arena arena;
     context ctx(arena);
     error_handler error_callback;
-    pos_args.push_back(create_integer(std::forward<decltype(value)>(value), arena));
+    pos_args.push_back(create_integer(std::forward<decltype(value)>(value), ctx));
 
     EXPECT_EQ(result, starlark_fn_abs(nullptr, pos_args, named_args, ctx, error_callback)->str());
     EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -154,7 +154,7 @@ TEST(StarlarkAbs, Numeric) {
     Arena arena;
     context ctx(arena);
     error_handler error_callback;
-    pos_args.push_back(create_float(value, arena));
+    pos_args.push_back(create_float(value, ctx));
 
     EXPECT_EQ(result, starlark_fn_abs(nullptr, pos_args, named_args, ctx, error_callback)->str());
     EXPECT_THAT(error_callback.messages, IsEmpty());

@@ -15,25 +15,25 @@ using ::starlark::bigint::number;
 namespace starlark {
 namespace runtime {
 
-starlark_obj* create_integer(std::int64_t value, Arena& arena) {
+starlark_obj* create_integer(std::int64_t value, context& ctx) {
   // TODO(lmirelmann): Use a cache of small integers.
-  return Arena::Create<starlark_integer>(&arena, value);
+  return Arena::Create<starlark_integer>(&ctx.arena(), value);
 }
 
-starlark_obj* create_integer(number&& value, Arena& arena) {
+starlark_obj* create_integer(number&& value, context& ctx) {
   // Check whether we can downgrade.
   if (value.fits_in_int64()) {
-    return create_integer(value.as_int64(), arena);
+    return create_integer(value.as_int64(), ctx);
   }
-  return Arena::Create<starlark_bigint>(&arena, std::move(value));
+  return Arena::Create<starlark_bigint>(&ctx.arena(), std::move(value));
 }
 
-starlark_obj* create_integer_from_float(double value, Arena& arena) {
+starlark_obj* create_integer_from_float(double value, context& ctx) {
   if (!std::isfinite(value)) {
     return nullptr;
   }
   if (value == 0) {
-    return create_integer(0, arena);
+    return ctx.zero();
   }
   bool neg = false;
   if (value < 0) {
@@ -66,17 +66,17 @@ starlark_obj* create_integer_from_float(double value, Arena& arena) {
     if (neg) {
       mantissa = -mantissa;
     }
-    return create_integer(mantissa, arena);
+    return create_integer(mantissa, ctx);
   } else {
     if (neg) {
       mantissa = -mantissa;
     }
-    return create_integer(from_int64(mantissa) << e, arena);
+    return create_integer(from_int64(mantissa) << e, ctx);
   }
 }
 
-starlark_obj* create_float(double value, Arena& arena) {
-  return Arena::Create<starlark_float>(&arena, value);
+starlark_obj* create_float(double value, context& ctx) {
+  return Arena::Create<starlark_float>(&ctx.arena(), value);
 }
 
 }  // namespace runtime

@@ -8,8 +8,8 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
-starlark_obj* create_function(Arena &arena, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name) {
-  return Arena::Create<starlark_built_in_function>(&arena, this_obj, native_fn, fn_name);
+starlark_obj* create_function(context& ctx, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name) {
+  return Arena::Create<starlark_built_in_function>(&ctx.arena(), this_obj, native_fn, fn_name);
 }
 
 }  // namespace runtime

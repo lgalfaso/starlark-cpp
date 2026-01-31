@@ -24,6 +24,7 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -235,9 +236,10 @@ TEST(StarlarkBytes, BinaryPlus) {
   starlark_bytes bytes_1("abc"sv);
   starlark_bytes bytes_2("def"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = bytes_1.binary_plus(bytes_2, arena, error_callback);
+  auto* result = bytes_1.binary_plus(bytes_2, ctx, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(result->str(), "b\"abcdef\"");
@@ -247,9 +249,10 @@ TEST(StarlarkBytes, BinaryPlusNotList) {
   starlark_bytes bytes("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = bytes.binary_plus(tuple, arena, error_callback);
+  auto* result = bytes.binary_plus(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to bytes");
@@ -259,9 +262,10 @@ TEST(StarlarkBytes, PlusEqualsAssign) {
   starlark_bytes bytes_1("abc"sv);
   starlark_bytes bytes_2("def"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = bytes_1.plus_equals_assign(bytes_2, arena, error_callback);
+  auto* result = bytes_1.plus_equals_assign(bytes_2, ctx, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(result->str(), "b\"abcdef\"");
@@ -271,9 +275,10 @@ TEST(StarlarkBytes, PlusEqualsAssignNotList) {
   starlark_bytes bytes("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = bytes.plus_equals_assign(tuple, arena, error_callback);
+  auto* result = bytes.plus_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to bytes");
@@ -288,14 +293,15 @@ TEST(StarlarkBytes, StarEqualsAssign) {
   starlark_bytes bytes0(""sv);
   starlark_bytes bytes("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = bytes.star_equals_assign(two, arena, error_callback);
-  auto* result_2 = bytes.star_equals_assign(three, arena, error_callback);
-  auto* result_3 = bytes.star_equals_assign(minus_two, arena, error_callback);
-  auto* result_4 = bytes.star_equals_assign(minus_one, arena, error_callback);
-  auto* result_5 = bytes0.star_equals_assign(big, arena, error_callback);
-  auto* result_6 = bytes0.star_equals_assign(two, arena, error_callback);
+  auto* result_1 = bytes.star_equals_assign(two, ctx, error_callback);
+  auto* result_2 = bytes.star_equals_assign(three, ctx, error_callback);
+  auto* result_3 = bytes.star_equals_assign(minus_two, ctx, error_callback);
+  auto* result_4 = bytes.star_equals_assign(minus_one, ctx, error_callback);
+  auto* result_5 = bytes0.star_equals_assign(big, ctx, error_callback);
+  auto* result_6 = bytes0.star_equals_assign(two, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "b\"abcabc\"");
@@ -320,13 +326,14 @@ TEST(StarlarkBytes, StarEqualsReverse) {
   starlark_bytes bytes0(""sv);
   starlark_bytes bytes("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = two.star_equals_assign(bytes, arena, error_callback);
-  auto* result_2 = three.star_equals_assign(bytes, arena, error_callback);
-  auto* result_3 = minus_two.star_equals_assign(bytes, arena, error_callback);
-  auto* result_4 = minus_one.star_equals_assign(bytes, arena, error_callback);
-  auto* result_5 = big.star_equals_assign(bytes0, arena, error_callback);
+  auto* result_1 = two.star_equals_assign(bytes, ctx, error_callback);
+  auto* result_2 = three.star_equals_assign(bytes, ctx, error_callback);
+  auto* result_3 = minus_two.star_equals_assign(bytes, ctx, error_callback);
+  auto* result_4 = minus_one.star_equals_assign(bytes, ctx, error_callback);
+  auto* result_5 = big.star_equals_assign(bytes0, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "b\"abcabc\"");
@@ -344,9 +351,10 @@ TEST(StarlarkBytes, StarEqualsNotInt) {
   starlark_bytes bytes("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = bytes.star_equals_assign(tuple, arena, error_callback);
+  auto* result = bytes.star_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
@@ -361,14 +369,15 @@ TEST(StarlarkBytes, BinaryStar) {
   starlark_bytes bytes0(""sv);
   starlark_bytes bytes("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = bytes.binary_star(two, arena, error_callback);
-  auto* result_2 = bytes.binary_star(three, arena, error_callback);
-  auto* result_3 = bytes.binary_star(minus_two, arena, error_callback);
-  auto* result_4 = bytes.binary_star(minus_one, arena, error_callback);
-  auto* result_5 = bytes0.binary_star(big, arena, error_callback);
-  auto* result_6 = bytes0.binary_star(two, arena, error_callback);
+  auto* result_1 = bytes.binary_star(two, ctx, error_callback);
+  auto* result_2 = bytes.binary_star(three, ctx, error_callback);
+  auto* result_3 = bytes.binary_star(minus_two, ctx, error_callback);
+  auto* result_4 = bytes.binary_star(minus_one, ctx, error_callback);
+  auto* result_5 = bytes0.binary_star(big, ctx, error_callback);
+  auto* result_6 = bytes0.binary_star(two, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "b\"abcabc\"");
@@ -393,13 +402,14 @@ TEST(StarlarkBytes, BinaryStarReverse) {
   starlark_bytes bytes0(""sv);
   starlark_bytes bytes("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = two.binary_star(bytes, arena, error_callback);
-  auto* result_2 = three.binary_star(bytes, arena, error_callback);
-  auto* result_3 = minus_two.binary_star(bytes, arena, error_callback);
-  auto* result_4 = minus_one.binary_star(bytes, arena, error_callback);
-  auto* result_5 = big.binary_star(bytes0, arena, error_callback);
+  auto* result_1 = two.binary_star(bytes, ctx, error_callback);
+  auto* result_2 = three.binary_star(bytes, ctx, error_callback);
+  auto* result_3 = minus_two.binary_star(bytes, ctx, error_callback);
+  auto* result_4 = minus_one.binary_star(bytes, ctx, error_callback);
+  auto* result_5 = big.binary_star(bytes0, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "b\"abcabc\"");
@@ -417,9 +427,10 @@ TEST(StarlarkBytes, BinaryStarNotInt) {
   starlark_bytes bytes("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = bytes.binary_star(tuple, arena, error_callback);
+  auto* result = bytes.binary_star(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
@@ -429,9 +440,10 @@ TEST(StarlarkBytes, BinaryStarTooBig) {
   starlark_bytes bytes("abc"sv);
   starlark_bigint big(number::one() << 64);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = bytes.binary_star(big, arena, error_callback);
+  auto* result = bytes.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
@@ -448,23 +460,25 @@ TEST(StarlarkBytes, Len) {
 TEST(StarlarkBytes, Index) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_bytes bytes("abc"sv);
 
-  EXPECT_EQ(bytes.index(starlark_integer(-3), arena, error_callback)->repr(), "b\"a\"");
-  EXPECT_EQ(bytes.index(starlark_integer(-2), arena, error_callback)->repr(), "b\"b\"");
-  EXPECT_EQ(bytes.index(starlark_integer(-1), arena, error_callback)->repr(), "b\"c\"");
-  EXPECT_EQ(bytes.index(starlark_integer(0), arena, error_callback)->repr(), "b\"a\"");
-  EXPECT_EQ(bytes.index(starlark_integer(1), arena, error_callback)->repr(), "b\"b\"");
-  EXPECT_EQ(bytes.index(starlark_integer(2), arena, error_callback)->repr(), "b\"c\"");
+  EXPECT_EQ(bytes.index(starlark_integer(-3), ctx, error_callback)->repr(), "b\"a\"");
+  EXPECT_EQ(bytes.index(starlark_integer(-2), ctx, error_callback)->repr(), "b\"b\"");
+  EXPECT_EQ(bytes.index(starlark_integer(-1), ctx, error_callback)->repr(), "b\"c\"");
+  EXPECT_EQ(bytes.index(starlark_integer(0), ctx, error_callback)->repr(), "b\"a\"");
+  EXPECT_EQ(bytes.index(starlark_integer(1), ctx, error_callback)->repr(), "b\"b\"");
+  EXPECT_EQ(bytes.index(starlark_integer(2), ctx, error_callback)->repr(), "b\"c\"");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBytes, IndexOutOfRange1) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_bytes bytes("abc"sv);
 
-  EXPECT_EQ(nullptr, bytes.index(starlark_integer(-4), arena, error_callback));
+  EXPECT_EQ(nullptr, bytes.index(starlark_integer(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: bytes index out of range", error_callback.messages[0]);
 }
@@ -472,9 +486,10 @@ TEST(StarlarkBytes, IndexOutOfRange1) {
 TEST(StarlarkBytes, IndexOutOfRange2) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_bytes bytes("abc"sv);
 
-  EXPECT_EQ(nullptr, bytes.index(starlark_integer(3), arena, error_callback));
+  EXPECT_EQ(nullptr, bytes.index(starlark_integer(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: bytes index out of range", error_callback.messages[0]);
 }

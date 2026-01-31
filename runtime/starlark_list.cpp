@@ -138,14 +138,14 @@ bool starlark_list::binary_in(const starlark_obj& other, error_fn& error_callbac
   return false;
 }
 
-starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_list::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   if (other.type() != type()) {
     error_callback.add_error(error_no_concat(type(), other.type(), type()));
     return nullptr;
   }
   const starlark_list& l_other = static_cast<const starlark_list&>(other);
   // TODO(lmirelmann): Check the result size.
-  auto* result = Arena::Create<starlark_list>(&arena, values.size() + l_other.values.size());
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values.size() + l_other.values.size());
   // TODO(lmirelmann): It should be possible to insert the entire thing using one call to `std::vector::insert`, but
   // this would slightly break the fact that `add` is the only one adding elements.
   for (auto& key : values) {
@@ -157,18 +157,18 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, Arena& arena
   return result;
 }
 
-starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
       if (values.empty()) {
-        return Arena::Create<starlark_list>(&arena, 0);
+        return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
       auto value = other.as_int64();
       if (value <= 0) {
-        return Arena::Create<starlark_list>(&arena, 0);
+        return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_list>(&arena, value * values.size());
+      auto* result = Arena::Create<starlark_list>(&ctx.arena(), value * values.size());
       for (int64_t i = 0; i < value; ++i) {
         for (auto& key : values) {
           result->add(key, error_callback);
@@ -178,11 +178,11 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
     }
     case starlark_numeric_type::kBigInt: {
       if (values.empty()) {
-        return Arena::Create<starlark_list>(&arena, 0);
+        return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
       const auto& value = other.as_bigint();
       if (value <= number::zero()) {
-        return Arena::Create<starlark_list>(&arena, 0);
+        return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
       if (value.bit_size() >= 63) {
         error_callback.add_error(error_max_sequence_length(max_sequence_size()));
@@ -190,7 +190,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
       }
       int64_t int_value = value.at(0);
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_list>(&arena, int_value * values.size());
+      auto* result = Arena::Create<starlark_list>(&ctx.arena(), int_value * values.size());
       for (int64_t i = 0; i < int_value; ++i) {
         for (auto& key : values) {
           result->add(key, error_callback);
@@ -204,7 +204,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, Arena& arena
   }
 }
 
-starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   if (other.type() != type()) {
     error_callback.add_error(error_no_concat(type(), other.type(), type()));
     return nullptr;
@@ -221,7 +221,7 @@ starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, googl
   return this;
 }
 
-starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
       if (!can_modify(error_callback)) {
@@ -276,11 +276,11 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, googl
   }
 }
 
-starlark_iterator* starlark_list::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
-  return Arena::Create<starlark_list_iterator>(&arena, this);
+starlark_iterator* starlark_list::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
+  return Arena::Create<starlark_list_iterator>(&ctx.arena(), this);
 }
 
-starlark_obj* starlark_list::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_list::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, values.size(), error_callback);
   if (idx < 0) {
     return nullptr;

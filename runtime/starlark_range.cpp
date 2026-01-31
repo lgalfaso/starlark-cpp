@@ -126,27 +126,27 @@ bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callba
   }
 }
 
-starlark_iterator* starlark_range::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
-  return Arena::Create<starlark_range_iterator>(&arena, start, step, len_, arena);
+starlark_iterator* starlark_range::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
+  return Arena::Create<starlark_range_iterator>(&ctx.arena(), start, step, len_, ctx);
 }
 
-starlark_obj* starlark_range::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_range::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, len_, error_callback);
   if (idx < 0) {
     return nullptr;
   }
-  return create_integer(start + idx * step, arena);
+  return create_integer(start + idx * step, ctx);
 }
 
-starlark_range::starlark_range_iterator::starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, Arena& arena)
-  : current_pos(current_pos), step(step), remaining(remaining), arena(arena) {}
+starlark_range::starlark_range_iterator::starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, context& ctx)
+  : current_pos(current_pos), step(step), remaining(remaining), ctx(ctx) {}
 
 bool starlark_range::starlark_range_iterator::has_next() const {
   return remaining > 0;
 }
 
 starlark_obj* starlark_range::starlark_range_iterator::next() {
-  auto* result = create_integer(current_pos, arena);
+  auto* result = create_integer(current_pos, ctx);
   current_pos += step;
   remaining--;
   return result;

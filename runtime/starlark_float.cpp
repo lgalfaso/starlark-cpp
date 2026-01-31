@@ -13,8 +13,6 @@
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
-using ::google::protobuf::Arena;
-
 namespace starlark {
 namespace runtime {
 
@@ -28,12 +26,12 @@ bool starlark_float::primitive() const {
   return true;
 }
 
-starlark_obj* starlark_float::unary_plus(Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_float::unary_plus(context& ctx, error_fn& error_callback) const {
   return const_cast<starlark_float*>(this);
 }
 
-starlark_obj* starlark_float::unary_minus(Arena& arena, error_fn& error_callback) const {
-  return create_float(-value, arena);
+starlark_obj* starlark_float::unary_minus(context& ctx, error_fn& error_callback) const {
+  return create_float(-value, ctx);
 }
 
 void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
@@ -85,19 +83,19 @@ void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other
 
 namespace {
 
-starlark_obj* plus_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* plus_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
-      return create_float(value + other.as_float(), arena);
+      return create_float(value + other.as_float(), ctx);
     case starlark_numeric_type::kInt64:
-      return create_float(value + other.as_int64(), arena);
+      return create_float(value + other.as_int64(), ctx);
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
         error_callback.add_error(error_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
-      return create_float(value + fother, arena);
+      return create_float(value + fother, ctx);
     }
     default:
       error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -105,19 +103,19 @@ starlark_obj* plus_op(double value, const starlark_float& this_obj, const starla
   }
 }
 
-starlark_obj* minus_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* minus_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
-      return create_float(value - other.as_float(), arena);
+      return create_float(value - other.as_float(), ctx);
     case starlark_numeric_type::kInt64:
-      return create_float(value - other.as_int64(), arena);
+      return create_float(value - other.as_int64(), ctx);
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
         error_callback.add_error(error_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
-      return create_float(value - fother, arena);
+      return create_float(value - fother, ctx);
     }
     default:
       error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -125,19 +123,19 @@ starlark_obj* minus_op(double value, const starlark_float& this_obj, const starl
   }
 }
 
-starlark_obj* star_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* star_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat:
-      return create_float(value * other.as_float(), arena);
+      return create_float(value * other.as_float(), ctx);
     case starlark_numeric_type::kInt64:
-      return create_float(value * other.as_int64(), arena);
+      return create_float(value * other.as_int64(), ctx);
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
         error_callback.add_error(error_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
-      return create_float(value * fother, arena);
+      return create_float(value * fother, ctx);
     }
     default:
       error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -145,7 +143,7 @@ starlark_obj* star_op(double value, const starlark_float& this_obj, const starla
   }
 }
 
-starlark_obj* slash_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* slash_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
@@ -153,7 +151,7 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
-      return create_float(value / fother, arena);
+      return create_float(value / fother, ctx);
     }
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
@@ -161,7 +159,7 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
-      return create_float(value / iother, arena);
+      return create_float(value / iother, ctx);
     }
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
@@ -173,7 +171,7 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
         error_callback.add_error(error_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
-      return create_float(value / fother, arena);
+      return create_float(value / fother, ctx);
     }
     default:
       error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -181,7 +179,7 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
   }
 }
 
-starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
@@ -189,7 +187,7 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
-      return create_float(std::floor(value / fother), arena);
+      return create_float(std::floor(value / fother), ctx);
     }
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
@@ -197,7 +195,7 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
-      return create_float(std::floor(value / iother), arena);
+      return create_float(std::floor(value / iother), ctx);
     }
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
@@ -209,7 +207,7 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
         error_callback.add_error(error_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
-      return create_float(std::floor(value / fother), arena);
+      return create_float(std::floor(value / fother), ctx);
     }
     default:
       error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -217,7 +215,7 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
   }
 }
 
-starlark_obj* percent_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* percent_op(double value, const starlark_float& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
@@ -225,7 +223,7 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
-      return create_float(starlark_fmod(value, fother), arena);
+      return create_float(starlark_fmod(value, fother), ctx);
     }
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
@@ -233,7 +231,7 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
-      return create_float(starlark_fmod(value, iother), arena);
+      return create_float(starlark_fmod(value, iother), ctx);
     }
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
@@ -245,7 +243,7 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
         error_callback.add_error(error_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
-      return create_float(starlark_fmod(value, fother), arena);
+      return create_float(starlark_fmod(value, fother), ctx);
     }
     default:
       error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -255,52 +253,52 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
 
 }  // namespace
 
-starlark_obj* starlark_float::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return plus_op(value, *this, other, "+", arena, error_callback);
+starlark_obj* starlark_float::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return plus_op(value, *this, other, "+", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return plus_op(value, *this, other, "+=", arena, error_callback);
+starlark_obj* starlark_float::plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return plus_op(value, *this, other, "+=", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return minus_op(value, *this, other, "-", arena, error_callback);
+starlark_obj* starlark_float::binary_minus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return minus_op(value, *this, other, "-", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return minus_op(value, *this, other, "-=", arena, error_callback);
+starlark_obj* starlark_float::minus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return minus_op(value, *this, other, "-=", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return star_op(value, *this, other, "*", arena, error_callback);
+starlark_obj* starlark_float::binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return star_op(value, *this, other, "*", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return star_op(value, *this, other, "*=", arena, error_callback);
+starlark_obj* starlark_float::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return star_op(value, *this, other, "*=", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::binary_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return slash_op(value, *this, other, "/", arena, error_callback);
+starlark_obj* starlark_float::binary_slash(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return slash_op(value, *this, other, "/", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return slash_op(value, *this, other, "/=", arena, error_callback);
+starlark_obj* starlark_float::slash_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return slash_op(value, *this, other, "/=", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return slash_slash_op(value, *this, other, "//", arena, error_callback);
+starlark_obj* starlark_float::binary_slash_slash(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return slash_slash_op(value, *this, other, "//", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::slash_slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return slash_slash_op(value, *this, other, "//=", arena, error_callback);
+starlark_obj* starlark_float::slash_slash_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return slash_slash_op(value, *this, other, "//=", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return percent_op(value, *this, other, "%", arena, error_callback);
+starlark_obj* starlark_float::binary_percent(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return percent_op(value, *this, other, "%", ctx, error_callback);
 }
 
-starlark_obj* starlark_float::percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return percent_op(value, *this, other, "%=", arena, error_callback);
+starlark_obj* starlark_float::percent_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return percent_op(value, *this, other, "%=", ctx, error_callback);
 }
 
 bool starlark_float::inner_repr(printer& print, printer_action action) const {

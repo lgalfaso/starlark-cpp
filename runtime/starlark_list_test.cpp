@@ -337,8 +337,9 @@ TEST(StarlarkList, UnaryPlus) {
   error_handler error_callback;
   starlark_list list(0);
   Arena arena;
+  context ctx(arena);
 
-  list.unary_plus(arena, error_callback);
+  list.unary_plus(ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary +: 'list'");
@@ -348,8 +349,9 @@ TEST(StarlarkList, UnaryMinus) {
   error_handler error_callback;
   starlark_list list(0);
   Arena arena;
+  context ctx(arena);
 
-  list.unary_minus(arena, error_callback);
+  list.unary_minus(ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary -: 'list'");
@@ -359,8 +361,9 @@ TEST(StarlarkList, UnaryTilde) {
   error_handler error_callback;
   starlark_list list(0);
   Arena arena;
+  context ctx(arena);
 
-  list.unary_tilde(arena, error_callback);
+  list.unary_tilde(ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary ~: 'list'");
@@ -376,8 +379,9 @@ TEST(StarlarkList, BinaryPlus) {
   list_1.add(&zero, error_callback);
   list_2.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result = list_1.binary_plus(list_2, arena, error_callback);
+  auto* result = list_1.binary_plus(list_2, ctx, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(list_1.str(), "[0]");
@@ -389,9 +393,10 @@ TEST(StarlarkList, BinaryPlusNotList) {
   starlark_list list(0);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = list.binary_plus(tuple, arena, error_callback);
+  auto* result = list.binary_plus(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate list (not \"tuple\") to list");
@@ -407,8 +412,9 @@ TEST(StarlarkList, PlusEqualsAssign) {
   list_1.add(&zero, error_callback);
   list_2.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result = list_1.plus_equals_assign(list_2, arena, error_callback);
+  auto* result = list_1.plus_equals_assign(list_2, ctx, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(list_1.str(), "[0, 1]");
@@ -425,8 +431,9 @@ TEST(StarlarkList, PlusEqualsAssignSelf) {
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result = list.plus_equals_assign(list, arena, error_callback);
+  auto* result = list.plus_equals_assign(list, ctx, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(list.str(), "[0, 1, 0, 1]");
@@ -437,9 +444,10 @@ TEST(StarlarkList, PlusEqualsAssignNotList) {
   starlark_list list(0);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = list.plus_equals_assign(tuple, arena, error_callback);
+  auto* result = list.plus_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate list (not \"tuple\") to list");
@@ -450,13 +458,14 @@ TEST(StarlarkList, PlusEqualsAssignWhileIterating) {
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
-  list.plus_equals_assign(list, arena, error_callback);
+  list.plus_equals_assign(list, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
@@ -473,11 +482,12 @@ TEST(StarlarkList, StarEqualsAssign) {
   list1.add(&zero, error_callback);
   list1.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result_1 = list1.star_equals_assign(two, arena, error_callback);
-  auto* result_2 = list1.star_equals_assign(three, arena, error_callback);
-  auto* result_3 = list0.star_equals_assign(three, arena, error_callback);
-  auto* result_4 = list0.star_equals_assign(two, arena, error_callback);
+  auto* result_1 = list1.star_equals_assign(two, ctx, error_callback);
+  auto* result_2 = list1.star_equals_assign(three, ctx, error_callback);
+  auto* result_3 = list0.star_equals_assign(three, ctx, error_callback);
+  auto* result_4 = list0.star_equals_assign(two, ctx, error_callback);
 
   EXPECT_EQ(list0.str(), "[]");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]");
@@ -505,9 +515,10 @@ TEST(StarlarkList, StarEqualsAssignNegativeAndZero) {
   list2.add(&zero, error_callback);
   list2.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result_1 = list1.star_equals_assign(minus_one, arena, error_callback);
-  auto* result_2 = list2.star_equals_assign(minus_two, arena, error_callback);
+  auto* result_1 = list1.star_equals_assign(minus_one, ctx, error_callback);
+  auto* result_2 = list2.star_equals_assign(minus_two, ctx, error_callback);
 
   EXPECT_EQ(list1.str(), "[]");
   EXPECT_EQ(list2.str(), "[]");
@@ -531,12 +542,13 @@ TEST(StarlarkList, StarEqualsAssignReverse) {
   list1.add(&zero, error_callback);
   list1.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result_1 = two.star_equals_assign(list1, arena, error_callback);
-  auto* result_2 = three.star_equals_assign(list1, arena, error_callback);
-  auto* result_3 = three.star_equals_assign(list0, arena, error_callback);
-  auto* result_4 = minus_one.star_equals_assign(list1, arena, error_callback);
-  auto* result_5 = minus_two.star_equals_assign(list1, arena, error_callback);
+  auto* result_1 = two.star_equals_assign(list1, ctx, error_callback);
+  auto* result_2 = three.star_equals_assign(list1, ctx, error_callback);
+  auto* result_3 = three.star_equals_assign(list0, ctx, error_callback);
+  auto* result_4 = minus_one.star_equals_assign(list1, ctx, error_callback);
+  auto* result_5 = minus_two.star_equals_assign(list1, ctx, error_callback);
 
   EXPECT_EQ(list0.str(), "[]");
   EXPECT_EQ(list1.str(), "[0, 1]");
@@ -556,9 +568,10 @@ TEST(StarlarkList, StarEqualsAssignNotInt) {
   starlark_list list(0);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = list.star_equals_assign(tuple, arena, error_callback);
+  auto* result = list.star_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
@@ -568,10 +581,11 @@ TEST(StarlarkList, StarEqualsAssignTooBig) {
   starlark_list list(0);
   starlark_bigint big(number::one() << 64);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&big, error_callback);
 
-  auto* result = list.star_equals_assign(big, arena, error_callback);
+  auto* result = list.star_equals_assign(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
@@ -582,13 +596,14 @@ TEST(StarlarkList, StarEqualsAssignWhileIterating1) {
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
-  list.star_equals_assign(zero, arena, error_callback);
+  list.star_equals_assign(zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
@@ -598,13 +613,14 @@ TEST(StarlarkList, StarEqualsAssignWhileIterating2) {
   starlark_bigint zero(0);
   starlark_integer one(1);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
-  list.star_equals_assign(zero, arena, error_callback);
+  list.star_equals_assign(zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
@@ -615,13 +631,14 @@ TEST(StarlarkList, StarEqualsAssignWhileIterating3) {
   starlark_integer one(1);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
-  list.star_equals_assign(tuple, arena, error_callback);
+  list.star_equals_assign(tuple, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
 }
@@ -640,13 +657,14 @@ TEST(StarlarkList, BinaryStar) {
   list1.add(&zero, error_callback);
   list1.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result_1 = list1.binary_star(two, arena, error_callback);
-  auto* result_2 = list1.binary_star(three, arena, error_callback);
-  auto* result_3 = list0.binary_star(three, arena, error_callback);
-  auto* result_4 = list1.binary_star(minus_one, arena, error_callback);
-  auto* result_5 = list1.binary_star(minus_two, arena, error_callback);
-  auto* result_6 = list0.binary_star(two, arena, error_callback);
+  auto* result_1 = list1.binary_star(two, ctx, error_callback);
+  auto* result_2 = list1.binary_star(three, ctx, error_callback);
+  auto* result_3 = list0.binary_star(three, ctx, error_callback);
+  auto* result_4 = list1.binary_star(minus_one, ctx, error_callback);
+  auto* result_5 = list1.binary_star(minus_two, ctx, error_callback);
+  auto* result_6 = list0.binary_star(two, ctx, error_callback);
 
   EXPECT_EQ(list0.str(), "[]");
   EXPECT_EQ(list1.str(), "[0, 1]");
@@ -679,12 +697,13 @@ TEST(StarlarkList, BinaryStarReverse) {
   list1.add(&zero, error_callback);
   list1.add(&one, error_callback);
   Arena arena;
+  context ctx(arena);
 
-  auto* result_1 = two.binary_star(list1, arena, error_callback);
-  auto* result_2 = three.binary_star(list1, arena, error_callback);
-  auto* result_3 = three.binary_star(list0, arena, error_callback);
-  auto* result_4 = minus_one.binary_star(list1, arena, error_callback);
-  auto* result_5 = minus_two.binary_star(list1, arena, error_callback);
+  auto* result_1 = two.binary_star(list1, ctx, error_callback);
+  auto* result_2 = three.binary_star(list1, ctx, error_callback);
+  auto* result_3 = three.binary_star(list0, ctx, error_callback);
+  auto* result_4 = minus_one.binary_star(list1, ctx, error_callback);
+  auto* result_5 = minus_two.binary_star(list1, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "[0, 1, 0, 1]");
@@ -702,9 +721,10 @@ TEST(StarlarkList, BinaryStarNotInt) {
   starlark_list list(0);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = list.binary_star(tuple, arena, error_callback);
+  auto* result = list.binary_star(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
@@ -714,10 +734,11 @@ TEST(StarlarkList, BinaryStarTooBig) {
   starlark_list list(0);
   starlark_bigint big(number::one() << 64);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&big, error_callback);
 
-  auto* result = list.binary_star(big, arena, error_callback);
+  auto* result = list.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
@@ -744,15 +765,16 @@ TEST(StarlarkList, GetIterator) {
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list1.add(&zero, error_callback);
   list1.add(&one, error_callback);
 
-  auto* it0 = list0.get_iterator(true, arena, error_callback);
+  auto* it0 = list0.get_iterator(true, ctx, error_callback);
   EXPECT_FALSE(it0->has_next());
   it0->end_iterator();
 
-  auto* it1 = list1.get_iterator(true, arena, error_callback);
+  auto* it1 = list1.get_iterator(true, ctx, error_callback);
   EXPECT_TRUE(it1->has_next());
   EXPECT_TRUE(it1->next()->equals(zero));
   EXPECT_TRUE(it1->has_next());
@@ -767,11 +789,12 @@ TEST(StarlarkList, MutationWhileIterating1) {
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.add(&zero, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -781,6 +804,7 @@ TEST(StarlarkList, MutationWhileIterating1) {
 TEST(StarlarkList, Index) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -789,23 +813,24 @@ TEST(StarlarkList, Index) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(list.index(starlark_integer(-3), arena, error_callback)->repr(), "0");
-  EXPECT_EQ(list.index(starlark_bigint(-3), arena, error_callback)->repr(), "0");
-  EXPECT_EQ(list.index(starlark_integer(-2), arena, error_callback)->repr(), "1");
-  EXPECT_EQ(list.index(starlark_bigint(-2), arena, error_callback)->repr(), "1");
-  EXPECT_EQ(list.index(starlark_integer(-1), arena, error_callback)->repr(), "2");
-  EXPECT_EQ(list.index(starlark_integer(0), arena, error_callback)->repr(), "0");
-  EXPECT_EQ(list.index(starlark_bigint(0), arena, error_callback)->repr(), "0");
-  EXPECT_EQ(list.index(starlark_integer(1), arena, error_callback)->repr(), "1");
-  EXPECT_EQ(list.index(starlark_bigint(1), arena, error_callback)->repr(), "1");
-  EXPECT_EQ(list.index(starlark_integer(2), arena, error_callback)->repr(), "2");
-  EXPECT_EQ(list.index(starlark_bigint(2), arena, error_callback)->repr(), "2");
+  EXPECT_EQ(list.index(starlark_integer(-3), ctx, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_bigint(-3), ctx, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_integer(-2), ctx, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_bigint(-2), ctx, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_integer(-1), ctx, error_callback)->repr(), "2");
+  EXPECT_EQ(list.index(starlark_integer(0), ctx, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_bigint(0), ctx, error_callback)->repr(), "0");
+  EXPECT_EQ(list.index(starlark_integer(1), ctx, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_bigint(1), ctx, error_callback)->repr(), "1");
+  EXPECT_EQ(list.index(starlark_integer(2), ctx, error_callback)->repr(), "2");
+  EXPECT_EQ(list.index(starlark_bigint(2), ctx, error_callback)->repr(), "2");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkList, IndexOutOfRange1) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -814,7 +839,7 @@ TEST(StarlarkList, IndexOutOfRange1) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(nullptr, list.index(starlark_integer(-4), arena, error_callback));
+  EXPECT_EQ(nullptr, list.index(starlark_integer(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
@@ -822,6 +847,7 @@ TEST(StarlarkList, IndexOutOfRange1) {
 TEST(StarlarkList, IndexOutOfRange2) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -830,7 +856,7 @@ TEST(StarlarkList, IndexOutOfRange2) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(nullptr, list.index(starlark_integer(3), arena, error_callback));
+  EXPECT_EQ(nullptr, list.index(starlark_integer(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
@@ -838,6 +864,7 @@ TEST(StarlarkList, IndexOutOfRange2) {
 TEST(StarlarkList, IndexOutOfRange3) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -846,7 +873,7 @@ TEST(StarlarkList, IndexOutOfRange3) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(nullptr, list.index(starlark_bigint(-4), arena, error_callback));
+  EXPECT_EQ(nullptr, list.index(starlark_bigint(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
@@ -854,6 +881,7 @@ TEST(StarlarkList, IndexOutOfRange3) {
 TEST(StarlarkList, IndexOutOfRange4) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -862,7 +890,7 @@ TEST(StarlarkList, IndexOutOfRange4) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(nullptr, list.index(starlark_bigint(3), arena, error_callback));
+  EXPECT_EQ(nullptr, list.index(starlark_bigint(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
@@ -870,6 +898,7 @@ TEST(StarlarkList, IndexOutOfRange4) {
 TEST(StarlarkList, IndexOutOfRange5) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -878,7 +907,7 @@ TEST(StarlarkList, IndexOutOfRange5) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(nullptr, list.index(starlark_bigint(number::one() << 64), arena, error_callback));
+  EXPECT_EQ(nullptr, list.index(starlark_bigint(number::one() << 64), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
@@ -886,6 +915,7 @@ TEST(StarlarkList, IndexOutOfRange5) {
 TEST(StarlarkList, IndexNotInt) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -894,7 +924,7 @@ TEST(StarlarkList, IndexNotInt) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(nullptr, list.index(starlark_float(1), arena, error_callback));
+  EXPECT_EQ(nullptr, list.index(starlark_float(1), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: list indices must be integers or slices, not 'float'", error_callback.messages[0]);
 }
@@ -954,11 +984,12 @@ TEST(StarlarkList, MutationWhileIterating2) {
   starlark_integer zero(0);
   starlark_integer one(1);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   list.add(&zero, error_callback);
   list.add(&one, error_callback);
 
-  [[maybe_unused]] auto* it = list.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = list.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.index_assign(zero, one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -980,50 +1011,55 @@ TEST(StarlarkList, IndexAssignWithFreeze) {
 
 TEST(StarlarkList, GetAttrError) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_list list(0);
 
-  EXPECT_EQ(nullptr, list.get_attr(true, "count", arena, error_callback));
+  EXPECT_EQ(nullptr, list.get_attr(true, "count", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
 }
 
 TEST(StarlarkList, GetAttrErrorWithSuggestion) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_list list(0);
 
-  EXPECT_EQ(nullptr, list.get_attr(true, "appen", arena, error_callback));
+  EXPECT_EQ(nullptr, list.get_attr(true, "appen", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
 }
 
 TEST(StarlarkList, Dot) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_list list(0);
 
-  auto* result = list.dot("append", arena, error_callback);
+  auto* result = list.dot("append", ctx, error_callback);
   EXPECT_NE(nullptr, result);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkList, DotError) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_list list(0);
 
-  EXPECT_EQ(nullptr, list.dot("count", arena, error_callback));
+  EXPECT_EQ(nullptr, list.dot("count", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
 }
 
 TEST(StarlarkList, DotErrorWithSuggestion) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_list list(0);
 
-  EXPECT_EQ(nullptr, list.dot("appen", arena, error_callback));
+  EXPECT_EQ(nullptr, list.dot("appen", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
 }

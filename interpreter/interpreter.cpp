@@ -115,7 +115,7 @@ class error_handler : public error_fn {
   logger& log;
 };
 
-frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, Arena& arena, logger& log) {
+frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
   std::vector<starlark_obj*> stack;
   std::vector<frame*> frame_stack;
   std::vector<std::pair<int, int>> call_stack;
@@ -125,7 +125,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
   if (starlark_program == nullptr) {
     return nullptr;
   }
-  context ctx(arena);
   starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
   error_handler error_callback(block_ptr, instruction_ptr, starlark_program->block(0).op_code_size() - 1, log);
 
@@ -138,23 +137,23 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.push_back(ctx.none_value());
         break;
       case OpCode::kConstInt:
-        stack.push_back(Arena::Create<starlark_integer>(&arena, op_code.const_int().value()));
+        stack.push_back(Arena::Create<starlark_integer>(&ctx.arena(), op_code.const_int().value()));
         break;
       case OpCode::kConstBigInt:
-        stack.push_back(Arena::Create<starlark_bigint>(&arena,
+        stack.push_back(Arena::Create<starlark_bigint>(&ctx.arena(),
             parse_number(op_code.const_big_int().value(), nullptr, 0)));
         break;
       case OpCode::kConstFloat:
-        stack.push_back(Arena::Create<starlark_float>(&arena, op_code.const_float().value()));
+        stack.push_back(Arena::Create<starlark_float>(&ctx.arena(), op_code.const_float().value()));
         break;
       case OpCode::kConstString:
-        stack.push_back(Arena::Create<starlark_string>(&arena, op_code.const_string().value()));
+        stack.push_back(Arena::Create<starlark_string>(&ctx.arena(), op_code.const_string().value()));
         break;
       case OpCode::kConstBytes:
-        stack.push_back(Arena::Create<starlark_bytes>(&arena, op_code.const_bytes().value()));
+        stack.push_back(Arena::Create<starlark_bytes>(&ctx.arena(), op_code.const_bytes().value()));
         break;
       case OpCode::kMakeList:
-        stack.push_back(Arena::Create<starlark_list>(&arena, op_code.make_list().reserve_size()));
+        stack.push_back(Arena::Create<starlark_list>(&ctx.arena(), op_code.make_list().reserve_size()));
         break;
       case OpCode::kAddToList: {
         assert(stack.size() > op_code.add_to_list().number_of_elements());
@@ -170,7 +169,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       }
       case OpCode::kMakeDictionary:
         // Note: The reserve size is not used.
-        stack.push_back(Arena::Create<starlark_dictionary>(&arena));
+        stack.push_back(Arena::Create<starlark_dictionary>(&ctx.arena()));
         break;
       case OpCode::kAddToDictionary: {
         assert(stack.size() > op_code.add_to_dictionary().number_of_elements() * 2);
@@ -194,7 +193,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       }
       case OpCode::kMakeTuple: {
         assert(stack.size() >= op_code.make_tuple().number_of_elements());
-        starlark_tuple* result = Arena::Create<starlark_tuple>(&arena, op_code.make_tuple().number_of_elements());
+        starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), op_code.make_tuple().number_of_elements());
         for (int i = op_code.make_tuple().number_of_elements(); i > 0; --i) {
           result->add(stack[stack.size() - i]);
         }
@@ -252,7 +251,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         switch (op_code.create_frame().block_type()) {
           case BlockType::PREDECLARED_BLOCK: {
             assert(frame_stack.empty());
-            auto* global_frame = create_frame(arena, op_code.create_frame().symbol().size(), nullptr, &op_code.create_frame().symbol());
+            auto* global_frame = create_frame(ctx.arena(), op_code.create_frame().symbol().size(), nullptr, &op_code.create_frame().symbol());
             int count = 0;
             for (const auto& symbol : op_code.create_frame().symbol()) {
               auto pos = global_context.find(symbol);
@@ -269,11 +268,11 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
           }
           case BlockType::MODULE_BLOCK:
             assert(result == nullptr);
-            result = create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol());
+            result = create_frame(ctx.arena(), op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol());
             frame_stack.push_back(result);
             break;
           default:
-            frame_stack.push_back(create_frame(arena, op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol()));
+            frame_stack.push_back(create_frame(ctx.arena(), op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol()));
             break;
         }
         break;
@@ -290,13 +289,13 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       }
       case OpCode::kUnaryPlus:
         assert(!stack.empty());
-        stack.back() = stack.back()->unary_plus(arena, error_callback);
+        stack.back() = stack.back()->unary_plus(ctx, error_callback);
         break;
       case OpCode::kUnaryMinus:
-        stack.back() = stack.back()->unary_minus(arena, error_callback);
+        stack.back() = stack.back()->unary_minus(ctx, error_callback);
         break;
       case OpCode::kUnaryTilde:
-        stack.back() = stack.back()->unary_tilde(arena, error_callback);
+        stack.back() = stack.back()->unary_tilde(ctx, error_callback);
         break;
       case OpCode::kBinaryEqualsEquals: {
         assert(stack.size() >= 2);
@@ -359,7 +358,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         assert(stack.size() >= 2);                                                         \
         starlark_obj* other = stack.back();                                                \
         stack.pop_back();                                                                  \
-        stack.back() = stack.back()->method(*other, arena, error_callback);                \
+        stack.back() = stack.back()->method(*other, ctx, error_callback);                  \
         break;                                                                             \
       }
       BINARY_OP(OpCode::kBinaryLessThanLessThan, binary_lshift)
@@ -407,7 +406,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kGetIterator:
         assert(!frame_stack.empty());
         assert(!stack.empty());
-        frame_stack.back()->iterators.push_back(stack.back()->get_iterator(true, arena, error_callback));
+        frame_stack.back()->iterators.push_back(stack.back()->get_iterator(true, ctx, error_callback));
         stack.pop_back();
         break;
       case OpCode::kForIterator: {
@@ -434,7 +433,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         assert(stack.size() >= 2);
         auto* index = stack.back();
         stack.pop_back();
-        stack.back() = stack.back()->index(*index, arena, error_callback);
+        stack.back() = stack.back()->index(*index, ctx, error_callback);
         break;
       }
       case OpCode::kAssignIndexMember: {
@@ -450,7 +449,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       }
       case OpCode::kDotMember:
         assert(stack.size() >= 1);
-        stack.back() = stack.back()->dot(op_code.dot_member().member(), arena, error_callback);
+        stack.back() = stack.back()->dot(op_code.dot_member().member(), ctx, error_callback);
         break;
       case OpCode::kAssignDotMember: {
         assert(stack.size() >= 2);
@@ -474,7 +473,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         }                                                                                                                                                                \
         auto* element = stack.back();                                                                                                                                    \
         stack.pop_back();                                                                                                                                                \
-        auto* result = value->method(*element, arena, error_callback);                                                                                                   \
+        auto* result = value->method(*element, ctx, error_callback);                                                                                                     \
         frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()] = result;                                        \
         break;                                                                                                                                                           \
       }
@@ -499,11 +498,11 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();                                                                                                                                                \
         auto* value = stack.back();                                                                                                                                      \
         stack.pop_back();                                                                                                                                                \
-        auto* element = container->index(*index, arena, error_callback);                                                                                                 \
+        auto* element = container->index(*index, ctx, error_callback);                                                                                                   \
         if (element == nullptr) {                                                                                                                                        \
           break;                                                                                                                                                         \
         }                                                                                                                                                                \
-        auto* result = element->method(*value, arena, error_callback);                                                                                                   \
+        auto* result = element->method(*value, ctx, error_callback);                                                                                                     \
         if (result == nullptr) {                                                                                                                                         \
           break;                                                                                                                                                         \
         }                                                                                                                                                                \
@@ -527,13 +526,13 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         assert(stack.size() >= 2);                                                                                                                                       \
         auto* element = stack.back();                                                                                                                                    \
         stack.pop_back();                                                                                                                                                \
-        auto* field = element->dot(op_code.op_method().member(), arena, error_callback);                                                                                 \
+        auto* field = element->dot(op_code.op_method().member(), ctx, error_callback);                                                                                   \
         if (field == nullptr) {                                                                                                                                          \
           break;                                                                                                                                                         \
         }                                                                                                                                                                \
         auto* value = stack.back();                                                                                                                                      \
         stack.pop_back();                                                                                                                                                \
-        auto* result = field->method(*value, arena, error_callback);                                                                                                     \
+        auto* result = field->method(*value, ctx, error_callback);                                                                                                       \
         if (result == nullptr) {                                                                                                                                         \
           break;                                                                                                                                                         \
         }                                                                                                                                                                \
@@ -565,7 +564,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.pop_back();                                                                                                                                                \
         auto* element = stack.back();                                                                                                                                    \
         stack.pop_back();                                                                                                                                                \
-        container->method(*start, *stop, *stride, *element, arena, error_callback);                                                                                      \
+        container->method(*start, *stop, *stride, *element, ctx, error_callback);                                                                                        \
         break;                                                                                                                                                           \
       }
       ASSIGN_RANGE(OpCode::kAssignSliceRange, slice_range_assign)
@@ -622,45 +621,46 @@ frame* interpreter::run(std::string_view starlark_code,
   if (starlark_program == nullptr) {
     return nullptr;
   }
+  context ctx(arena);
 
   std::map<std::string, starlark_obj*, std::less<>> global_context;
-  global_context["True"] = Arena::Create<starlark_bool>(&arena, true);
-  global_context["False"] = Arena::Create<starlark_bool>(&arena, false);
-  global_context["None"] = Arena::Create<starlark_none>(&arena);
-  global_context[starlark_built_in_functions::abs_f] = create_function(arena, nullptr, starlark_fn_abs, starlark_built_in_functions::abs_f);
-  global_context[starlark_built_in_functions::all_f] = create_function(arena, nullptr, starlark_fn_all, starlark_built_in_functions::all_f);
-  global_context[starlark_built_in_functions::any_f] = create_function(arena, nullptr, starlark_fn_any, starlark_built_in_functions::any_f);
-  global_context[starlark_built_in_functions::bool_f] = create_function(arena, nullptr, starlark_fn_bool, starlark_built_in_functions::bool_f);
-  global_context[starlark_built_in_functions::bytes_f] = create_function(arena, nullptr, starlark_fn_bytes, starlark_built_in_functions::bytes_f);
-  global_context[starlark_built_in_functions::chr_f] = create_function(arena, nullptr, starlark_fn_chr, starlark_built_in_functions::chr_f);
-  global_context[starlark_built_in_functions::dict_f] = create_function(arena, nullptr, starlark_fn_dict, starlark_built_in_functions::dict_f);
-  global_context[starlark_built_in_functions::dir_f] = create_function(arena, nullptr, starlark_fn_dir, starlark_built_in_functions::dir_f);
-  global_context[starlark_built_in_functions::enumerate_f] = create_function(arena, nullptr, starlark_fn_enumerate, starlark_built_in_functions::enumerate_f);
-  global_context[starlark_built_in_functions::fail_f] = create_function(arena, nullptr, starlark_fn_fail, starlark_built_in_functions::fail_f);
-  global_context[starlark_built_in_functions::float_f] = create_function(arena, nullptr, starlark_fn_float, starlark_built_in_functions::float_f);
-  global_context[starlark_built_in_functions::getattr_f] = create_function(arena, nullptr, starlark_fn_getattr, starlark_built_in_functions::getattr_f);
-  global_context[starlark_built_in_functions::hasattr_f] = create_function(arena, nullptr, starlark_fn_hasattr, starlark_built_in_functions::hasattr_f);
-  global_context[starlark_built_in_functions::hash_f] = create_function(arena, nullptr, starlark_fn_hash, starlark_built_in_functions::hash_f);
-  global_context[starlark_built_in_functions::int_f] = create_function(arena, nullptr, starlark_fn_int, starlark_built_in_functions::int_f);
-  global_context[starlark_built_in_functions::len_f] = create_function(arena, nullptr, starlark_fn_len, starlark_built_in_functions::len_f);
-  global_context[starlark_built_in_functions::list_f] = create_function(arena, nullptr, starlark_fn_list, starlark_built_in_functions::list_f);
-  global_context[starlark_built_in_functions::max_f] = create_function(arena, nullptr, starlark_fn_max, starlark_built_in_functions::max_f);
-  global_context[starlark_built_in_functions::min_f] = create_function(arena, nullptr, starlark_fn_min, starlark_built_in_functions::min_f);
-  global_context[starlark_built_in_functions::ord_f] = create_function(arena, nullptr, starlark_fn_ord, starlark_built_in_functions::ord_f);
-  global_context[starlark_built_in_functions::print_f] = create_function(arena, nullptr, starlark_fn_print, starlark_built_in_functions::print_f);
-  global_context[starlark_built_in_functions::range_f] = create_function(arena, nullptr, starlark_fn_range, starlark_built_in_functions::range_f);
-  global_context[starlark_built_in_functions::repr_f] = create_function(arena, nullptr, starlark_fn_repr, starlark_built_in_functions::repr_f);
-  global_context[starlark_built_in_functions::reversed_f] = create_function(arena, nullptr, starlark_fn_reversed, starlark_built_in_functions::reversed_f);
-  global_context[starlark_built_in_functions::set_f] = create_function(arena, nullptr, starlark_fn_set, starlark_built_in_functions::set_f);
-  global_context[starlark_built_in_functions::sorted_f] = create_function(arena, nullptr, starlark_fn_sorted, starlark_built_in_functions::sorted_f);
-  global_context[starlark_built_in_functions::str_f] = create_function(arena, nullptr, starlark_fn_str, starlark_built_in_functions::str_f);
-  global_context[starlark_built_in_functions::tuple_f] = create_function(arena, nullptr, starlark_fn_tuple, starlark_built_in_functions::tuple_f);
-  global_context[starlark_built_in_functions::type_f] = create_function(arena, nullptr, starlark_fn_type, starlark_built_in_functions::type_f);
-  global_context[starlark_built_in_functions::zip_f] = create_function(arena, nullptr, starlark_fn_zip, starlark_built_in_functions::zip_f);
+  global_context["True"] = ctx.true_value();
+  global_context["False"] = ctx.false_value();
+  global_context["None"] = ctx.none_value();
+  global_context[starlark_built_in_functions::abs_f] = create_function(ctx, nullptr, starlark_fn_abs, starlark_built_in_functions::abs_f);
+  global_context[starlark_built_in_functions::all_f] = create_function(ctx, nullptr, starlark_fn_all, starlark_built_in_functions::all_f);
+  global_context[starlark_built_in_functions::any_f] = create_function(ctx, nullptr, starlark_fn_any, starlark_built_in_functions::any_f);
+  global_context[starlark_built_in_functions::bool_f] = create_function(ctx, nullptr, starlark_fn_bool, starlark_built_in_functions::bool_f);
+  global_context[starlark_built_in_functions::bytes_f] = create_function(ctx, nullptr, starlark_fn_bytes, starlark_built_in_functions::bytes_f);
+  global_context[starlark_built_in_functions::chr_f] = create_function(ctx, nullptr, starlark_fn_chr, starlark_built_in_functions::chr_f);
+  global_context[starlark_built_in_functions::dict_f] = create_function(ctx, nullptr, starlark_fn_dict, starlark_built_in_functions::dict_f);
+  global_context[starlark_built_in_functions::dir_f] = create_function(ctx, nullptr, starlark_fn_dir, starlark_built_in_functions::dir_f);
+  global_context[starlark_built_in_functions::enumerate_f] = create_function(ctx, nullptr, starlark_fn_enumerate, starlark_built_in_functions::enumerate_f);
+  global_context[starlark_built_in_functions::fail_f] = create_function(ctx, nullptr, starlark_fn_fail, starlark_built_in_functions::fail_f);
+  global_context[starlark_built_in_functions::float_f] = create_function(ctx, nullptr, starlark_fn_float, starlark_built_in_functions::float_f);
+  global_context[starlark_built_in_functions::getattr_f] = create_function(ctx, nullptr, starlark_fn_getattr, starlark_built_in_functions::getattr_f);
+  global_context[starlark_built_in_functions::hasattr_f] = create_function(ctx, nullptr, starlark_fn_hasattr, starlark_built_in_functions::hasattr_f);
+  global_context[starlark_built_in_functions::hash_f] = create_function(ctx, nullptr, starlark_fn_hash, starlark_built_in_functions::hash_f);
+  global_context[starlark_built_in_functions::int_f] = create_function(ctx, nullptr, starlark_fn_int, starlark_built_in_functions::int_f);
+  global_context[starlark_built_in_functions::len_f] = create_function(ctx, nullptr, starlark_fn_len, starlark_built_in_functions::len_f);
+  global_context[starlark_built_in_functions::list_f] = create_function(ctx, nullptr, starlark_fn_list, starlark_built_in_functions::list_f);
+  global_context[starlark_built_in_functions::max_f] = create_function(ctx, nullptr, starlark_fn_max, starlark_built_in_functions::max_f);
+  global_context[starlark_built_in_functions::min_f] = create_function(ctx, nullptr, starlark_fn_min, starlark_built_in_functions::min_f);
+  global_context[starlark_built_in_functions::ord_f] = create_function(ctx, nullptr, starlark_fn_ord, starlark_built_in_functions::ord_f);
+  global_context[starlark_built_in_functions::print_f] = create_function(ctx, nullptr, starlark_fn_print, starlark_built_in_functions::print_f);
+  global_context[starlark_built_in_functions::range_f] = create_function(ctx, nullptr, starlark_fn_range, starlark_built_in_functions::range_f);
+  global_context[starlark_built_in_functions::repr_f] = create_function(ctx, nullptr, starlark_fn_repr, starlark_built_in_functions::repr_f);
+  global_context[starlark_built_in_functions::reversed_f] = create_function(ctx, nullptr, starlark_fn_reversed, starlark_built_in_functions::reversed_f);
+  global_context[starlark_built_in_functions::set_f] = create_function(ctx, nullptr, starlark_fn_set, starlark_built_in_functions::set_f);
+  global_context[starlark_built_in_functions::sorted_f] = create_function(ctx, nullptr, starlark_fn_sorted, starlark_built_in_functions::sorted_f);
+  global_context[starlark_built_in_functions::str_f] = create_function(ctx, nullptr, starlark_fn_str, starlark_built_in_functions::str_f);
+  global_context[starlark_built_in_functions::tuple_f] = create_function(ctx, nullptr, starlark_fn_tuple, starlark_built_in_functions::tuple_f);
+  global_context[starlark_built_in_functions::type_f] = create_function(ctx, nullptr, starlark_fn_type, starlark_built_in_functions::type_f);
+  global_context[starlark_built_in_functions::zip_f] = create_function(ctx, nullptr, starlark_fn_zip, starlark_built_in_functions::zip_f);
   for (const auto& kv : custom_binding) {
     global_context.insert(kv);
   }
-  return run_program(starlark_program, global_context, arena, logging);
+  return run_program(starlark_program, global_context, ctx, logging);
 }
 
 }  // namespace interpreter

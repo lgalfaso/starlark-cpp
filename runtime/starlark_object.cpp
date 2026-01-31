@@ -12,7 +12,6 @@
 #include "runtime/error_messages.hpp"
 #include "runtime/levenshtein.hpp"
 
-using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 
 namespace starlark {
@@ -255,17 +254,17 @@ void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>
   error_callback.add_error(error_unpackable(type()));
 }
 
-starlark_obj* starlark_obj::unary_plus(Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::unary_plus(context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_unary("+", type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::unary_minus(Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::unary_minus(context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_unary("-", type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::unary_tilde(Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::unary_tilde(context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_unary("~", type()));
   return nullptr;
 }
@@ -275,112 +274,112 @@ bool starlark_obj::binary_in(const starlark_obj& other, error_fn& error_callback
   return false;
 }
 
-starlark_obj* starlark_obj::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("+=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::minus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("-=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("*=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::slash_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("/=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::slash_slash_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::slash_slash_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("//=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::percent_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("%=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::ampersand_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::ampersand_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("&=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("|=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::hat_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::hat_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("^=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::less_less_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::less_less_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary("<<=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::greater_greater_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::greater_greater_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_bad_operand_binary(">>=", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_lshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_lshift(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("<<", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_rshift(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_rshift(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary(">>", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_and(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_and(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("&", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_pipe(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("|", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_hat(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_hat(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("^", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("+", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_minus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("-", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("*", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_slash(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("/", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_slash_slash(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_slash_slash(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("//", type(), other.type()));
   return nullptr;
 }
 
-starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_bad_operand_binary("%", type(), other.type()));
   return nullptr;
 }
@@ -392,14 +391,14 @@ int64_t starlark_obj::len(bool produce_error, error_fn& error_callback) const {
   return -1;
 }
 
-starlark_iterator* starlark_obj::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
+starlark_iterator* starlark_obj::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
   if (produce_error) {
     error_callback.add_error(error_uniterable(type()));
   }
   return nullptr;
 }
 
-starlark_obj* starlark_obj::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_obj::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   error_callback.add_error(error_unsubscriptable(type()));
   return nullptr;
 }
@@ -408,8 +407,8 @@ void starlark_obj::index_assign(const starlark_obj& idx, starlark_obj& element, 
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-starlark_obj* starlark_obj::dot(std::string_view field_name, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return get_attr(true, field_name, arena, error_callback);
+starlark_obj* starlark_obj::dot(std::string_view field_name, context& ctx, error_fn& error_callback) {
+  return get_attr(true, field_name, ctx, error_callback);
 }
 
 void starlark_obj::dot_assign(std::string_view field_name, starlark_obj& element, error_fn& error_callback) {
@@ -428,51 +427,51 @@ void starlark_obj::dot_assign(std::string_view field_name, starlark_obj& element
   }
 }
 
-void starlark_obj::slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_star_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_star_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_slash_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_slash_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_percent_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_percent_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_ampersand_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_ampersand_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_pipe_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_pipe_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_hat_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_hat_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
-void starlark_obj::slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, Arena& arena, error_fn& error_callback) {
+void starlark_obj::slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
 
@@ -492,7 +491,7 @@ std::string_view starlark_obj::as_string() const {
   return "";
 }
 
-starlark_obj* starlark_obj::get_attr(bool produce_error, std::string_view attribute, Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::get_attr(bool produce_error, std::string_view attribute, context& ctx, error_fn& error_callback) {
   auto& method_fns = methods_meta();
   auto it = method_fns.find(attribute);
   if (it == method_fns.end()) {
@@ -507,7 +506,7 @@ starlark_obj* starlark_obj::get_attr(bool produce_error, std::string_view attrib
     }
     return nullptr;
   }
-  return create_function(arena, this, it->second, attribute);
+  return create_function(ctx, this, it->second, attribute);
 }
 
 starlark_numeric_type starlark_obj::numeric_type() const {

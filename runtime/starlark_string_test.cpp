@@ -233,9 +233,10 @@ TEST(StarlarkString, BinaryPlus) {
   starlark_string str_1("abc"sv);
   starlark_string str_2("def"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = str_1.binary_plus(str_2, arena, error_callback);
+  auto* result = str_1.binary_plus(str_2, ctx, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(str_1.str(), "abc");
@@ -246,9 +247,10 @@ TEST(StarlarkString, BinaryPlusNotList) {
   starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = str.binary_plus(tuple, arena, error_callback);
+  auto* result = str.binary_plus(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to string");
@@ -258,9 +260,10 @@ TEST(StarlarkString, PlusEqualsAssign) {
   starlark_string str_1("abc"sv);
   starlark_string str_2("def"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = str_1.plus_equals_assign(str_2, arena, error_callback);
+  auto* result = str_1.plus_equals_assign(str_2, ctx, error_callback);
 
   ASSERT_NE(result, nullptr);
   EXPECT_EQ(str_1.str(), "abc");
@@ -271,9 +274,10 @@ TEST(StarlarkString, PlusEqualsAssignNotList) {
   starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = str.plus_equals_assign(tuple, arena, error_callback);
+  auto* result = str.plus_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to string");
@@ -288,14 +292,15 @@ TEST(StarlarkString, BinaryStar) {
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = str.binary_star(two, arena, error_callback);
-  auto* result_2 = str.binary_star(three, arena, error_callback);
-  auto* result_3 = str.binary_star(minus_two, arena, error_callback);
-  auto* result_4 = str.binary_star(minus_one, arena, error_callback);
-  auto* result_5 = str0.binary_star(big, arena, error_callback);
-  auto* result_6 = str0.binary_star(two, arena, error_callback);
+  auto* result_1 = str.binary_star(two, ctx, error_callback);
+  auto* result_2 = str.binary_star(three, ctx, error_callback);
+  auto* result_3 = str.binary_star(minus_two, ctx, error_callback);
+  auto* result_4 = str.binary_star(minus_one, ctx, error_callback);
+  auto* result_5 = str0.binary_star(big, ctx, error_callback);
+  auto* result_6 = str0.binary_star(two, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "abcabc");
@@ -320,13 +325,14 @@ TEST(StarlarkString, BinaryStarReverse) {
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = two.binary_star(str, arena, error_callback);
-  auto* result_2 = three.binary_star(str, arena, error_callback);
-  auto* result_3 = minus_two.binary_star(str, arena, error_callback);
-  auto* result_4 = minus_one.binary_star(str, arena, error_callback);
-  auto* result_5 = big.binary_star(str0, arena, error_callback);
+  auto* result_1 = two.binary_star(str, ctx, error_callback);
+  auto* result_2 = three.binary_star(str, ctx, error_callback);
+  auto* result_3 = minus_two.binary_star(str, ctx, error_callback);
+  auto* result_4 = minus_one.binary_star(str, ctx, error_callback);
+  auto* result_5 = big.binary_star(str0, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "abcabc");
@@ -344,9 +350,10 @@ TEST(StarlarkString, BinaryStarNotInt) {
   starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = str.binary_star(tuple, arena, error_callback);
+  auto* result = str.binary_star(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
@@ -356,9 +363,10 @@ TEST(StarlarkString, BinaryStarTooBig) {
   starlark_string str("abc"sv);
   starlark_bigint big(number::one() << 64);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = str.binary_star(big, arena, error_callback);
+  auto* result = str.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
@@ -373,14 +381,15 @@ TEST(StarlarkString, StarEqualsAssign) {
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = str.star_equals_assign(two, arena, error_callback);
-  auto* result_2 = str.star_equals_assign(three, arena, error_callback);
-  auto* result_3 = str.star_equals_assign(minus_two, arena, error_callback);
-  auto* result_4 = str.star_equals_assign(minus_one, arena, error_callback);
-  auto* result_5 = str0.star_equals_assign(big, arena, error_callback);
-  auto* result_6 = str0.star_equals_assign(two, arena, error_callback);
+  auto* result_1 = str.star_equals_assign(two, ctx, error_callback);
+  auto* result_2 = str.star_equals_assign(three, ctx, error_callback);
+  auto* result_3 = str.star_equals_assign(minus_two, ctx, error_callback);
+  auto* result_4 = str.star_equals_assign(minus_one, ctx, error_callback);
+  auto* result_5 = str0.star_equals_assign(big, ctx, error_callback);
+  auto* result_6 = str0.star_equals_assign(two, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "abcabc");
@@ -405,13 +414,14 @@ TEST(StarlarkString, StarEqualsAssignReverse) {
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result_1 = two.star_equals_assign(str, arena, error_callback);
-  auto* result_2 = three.star_equals_assign(str, arena, error_callback);
-  auto* result_3 = minus_two.star_equals_assign(str, arena, error_callback);
-  auto* result_4 = minus_one.star_equals_assign(str, arena, error_callback);
-  auto* result_5 = big.star_equals_assign(str0, arena, error_callback);
+  auto* result_1 = two.star_equals_assign(str, ctx, error_callback);
+  auto* result_2 = three.star_equals_assign(str, ctx, error_callback);
+  auto* result_3 = minus_two.star_equals_assign(str, ctx, error_callback);
+  auto* result_4 = minus_one.star_equals_assign(str, ctx, error_callback);
+  auto* result_5 = big.star_equals_assign(str0, ctx, error_callback);
 
   ASSERT_NE(result_1, nullptr);
   EXPECT_EQ(result_1->str(), "abcabc");
@@ -429,9 +439,10 @@ TEST(StarlarkString, StarEqualsAssignNotInt) {
   starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = str.star_equals_assign(tuple, arena, error_callback);
+  auto* result = str.star_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
@@ -448,23 +459,25 @@ TEST(StarlarkString, Len) {
 TEST(StarlarkString, Index) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_string str("abc"sv);
 
-  EXPECT_EQ(str.index(starlark_integer(-3), arena, error_callback)->repr(), "\"a\"");
-  EXPECT_EQ(str.index(starlark_integer(-2), arena, error_callback)->repr(), "\"b\"");
-  EXPECT_EQ(str.index(starlark_integer(-1), arena, error_callback)->repr(), "\"c\"");
-  EXPECT_EQ(str.index(starlark_integer(0), arena, error_callback)->repr(), "\"a\"");
-  EXPECT_EQ(str.index(starlark_integer(1), arena, error_callback)->repr(), "\"b\"");
-  EXPECT_EQ(str.index(starlark_integer(2), arena, error_callback)->repr(), "\"c\"");
+  EXPECT_EQ(str.index(starlark_integer(-3), ctx, error_callback)->repr(), "\"a\"");
+  EXPECT_EQ(str.index(starlark_integer(-2), ctx, error_callback)->repr(), "\"b\"");
+  EXPECT_EQ(str.index(starlark_integer(-1), ctx, error_callback)->repr(), "\"c\"");
+  EXPECT_EQ(str.index(starlark_integer(0), ctx, error_callback)->repr(), "\"a\"");
+  EXPECT_EQ(str.index(starlark_integer(1), ctx, error_callback)->repr(), "\"b\"");
+  EXPECT_EQ(str.index(starlark_integer(2), ctx, error_callback)->repr(), "\"c\"");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkString, IndexOutOfRange1) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_string str("abc"sv);
 
-  EXPECT_EQ(nullptr, str.index(starlark_integer(-4), arena, error_callback));
+  EXPECT_EQ(nullptr, str.index(starlark_integer(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: string index out of range", error_callback.messages[0]);
 }
@@ -472,9 +485,10 @@ TEST(StarlarkString, IndexOutOfRange1) {
 TEST(StarlarkString, IndexOutOfRange2) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_string str("abc"sv);
 
-  EXPECT_EQ(nullptr, str.index(starlark_integer(3), arena, error_callback));
+  EXPECT_EQ(nullptr, str.index(starlark_integer(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: string index out of range", error_callback.messages[0]);
 }
@@ -491,7 +505,7 @@ TEST(StarlarkString, Count) {
   error_handler error_callback;
   starlark_string str("abc"sv);
 
-  auto* result = str.get_attr(true, "count", arena, error_callback);
+  auto* result = str.get_attr(true, "count", ctx, error_callback);
   ASSERT_NE(nullptr, result) << error_callback.messages[0];
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;

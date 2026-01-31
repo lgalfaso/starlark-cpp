@@ -185,7 +185,7 @@ bool starlark_string::binary_in(const starlark_obj& other, error_fn& error_callb
 
 namespace {
 
-starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   if (other.type() != this_obj.type()) {
     error_callback.add_error(error_no_concat(this_obj.type(), other.type()));
     return nullptr;
@@ -193,14 +193,14 @@ starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other
   // TODO(lmirelmann): Check that the value length would not go over the limit.
   std::string result{this_obj.as_string()};
   result += other.as_string();
-  return Arena::Create<starlark_string>(&arena, std::move(result));
+  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
 }
 
-starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
       if (this_obj.as_string().empty()) {
-        return Arena::Create<starlark_string>(&arena, std::string_view{});
+        return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
       auto multiplier = other.as_int64();
@@ -208,15 +208,15 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       for (int64_t i = 0; i < multiplier; ++i) {
         result += this_obj.as_string();
       }
-      return Arena::Create<starlark_string>(&arena, std::move(result));
+      return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
     }
     case starlark_numeric_type::kBigInt: {
       if (this_obj.as_string().empty()) {
-        return Arena::Create<starlark_string>(&arena, std::string_view{});
+        return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
       const auto& multiplier = other.as_bigint();
       if (multiplier <= number::zero()) {
-        return Arena::Create<starlark_string>(&arena, std::string_view{});
+        return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
         error_callback.add_error(error_max_sequence_length(max_string_length()));
@@ -228,7 +228,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       for (int64_t i = 0; i < int_value; ++i) {
         result += this_obj.as_string();
       }
-      return Arena::Create<starlark_string>(&arena, std::move(result));
+      return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
     }
     default:
       error_callback.add_error(error_no_multiply_sequence(other.type()));
@@ -236,7 +236,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
   }
 }
 
-starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
@@ -244,36 +244,36 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
 
 }  // namespace
 
-starlark_obj* starlark_string::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return plus_op(*this, other, "+", arena, error_callback);
+starlark_obj* starlark_string::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return plus_op(*this, other, "+", ctx, error_callback);
 }
 
-starlark_obj* starlark_string::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return plus_op(*this, other, "+=", arena, error_callback);
+starlark_obj* starlark_string::plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return plus_op(*this, other, "+=", ctx, error_callback);
 }
 
-starlark_obj* starlark_string::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return star_op(*this, other, "*", arena, error_callback);
+starlark_obj* starlark_string::binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return star_op(*this, other, "*", ctx, error_callback);
 }
 
-starlark_obj* starlark_string::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return star_op(*this, other, "*=", arena, error_callback);
+starlark_obj* starlark_string::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return star_op(*this, other, "*=", ctx, error_callback);
 }
 
-starlark_obj* starlark_string::binary_percent(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return percent_op(*this, other, "%", arena, error_callback);
+starlark_obj* starlark_string::binary_percent(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return percent_op(*this, other, "%", ctx, error_callback);
 }
 
-starlark_obj* starlark_string::percent_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return percent_op(*this, other, "%=", arena, error_callback);
+starlark_obj* starlark_string::percent_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return percent_op(*this, other, "%=", ctx, error_callback);
 }
 
-starlark_obj* starlark_string::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_string::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, value.size(), error_callback);
   if (idx < 0) {
     return nullptr;
   }
-  return Arena::Create<starlark_string>(&arena, value.substr(idx, 1));
+  return Arena::Create<starlark_string>(&ctx.arena(), value.substr(idx, 1));
 }
 
 std::string_view starlark_string::as_string() const {
@@ -324,7 +324,7 @@ starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starla
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): This is not the right implementation of string::count.
   assert(this_obj->type() == starlark_types::string_t);
-  return create_integer(this_obj->as_string().size(), ctx.arena());
+  return create_integer(this_obj->as_string().size(), ctx);
 }
 
 starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

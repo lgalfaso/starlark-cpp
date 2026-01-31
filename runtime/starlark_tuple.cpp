@@ -33,7 +33,7 @@ std::string_view starlark_tuple::type() const {
 
 namespace {
 
-starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   if (other.type() != this_obj.type()) {
     error_callback.add_error(error_no_concat(this_obj.type(), other.type(), this_obj.type()));
     return nullptr;
@@ -42,7 +42,7 @@ starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other,
   const starlark_tuple& t_other = static_cast<const starlark_tuple&>(other);
   const auto& this_values = inspect_tuple(this_obj);
   const auto& other_values = inspect_tuple(t_other);
-  auto* result = Arena::Create<starlark_tuple>(&arena, this_values.size() + other_values.size());
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), this_values.size() + other_values.size());
   for (auto& key : this_values) {
     result->add(key);
   }
@@ -52,19 +52,19 @@ starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other,
   return result;
 }
 
-starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
+starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   const auto& this_values = inspect_tuple(this_obj);
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
       if (this_values.empty()) {
-        return Arena::Create<starlark_tuple>(&arena, 0);
+        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
       auto value = other.as_int64();
       if (value <= 0) {
-        return Arena::Create<starlark_tuple>(&arena, 0);
+        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_tuple>(&arena, value * this_values.size());
+      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), value * this_values.size());
       for (int64_t i = 0; i < value; ++i) {
         for (auto& key : this_values) {
           result->add(key);
@@ -74,11 +74,11 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
     }
     case starlark_numeric_type::kBigInt: {
       if (this_values.empty()) {
-        return Arena::Create<starlark_tuple>(&arena, 0);
+        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
       const auto& value = other.as_bigint();
       if (value <= number::zero()) {
-        return Arena::Create<starlark_tuple>(&arena, 0);
+        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
       if (value.bit_size() >= 63) {
         error_callback.add_error(error_max_sequence_length(max_sequence_size()));
@@ -86,7 +86,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
       }
       int64_t int_value = value.at(0);
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_tuple>(&arena, int_value * this_values.size());
+      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), int_value * this_values.size());
       for (int64_t i = 0; i < int_value; ++i) {
         for (auto& key : this_values) {
           result->add(key);
@@ -102,20 +102,20 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
 
 }  // namespace
 
-starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return plus_op(*this, other, "+", arena, error_callback);
+starlark_obj* starlark_tuple::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return plus_op(*this, other, "+", ctx, error_callback);
 }
 
-starlark_obj* starlark_tuple::plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return plus_op(*this, other, "+=", arena, error_callback);
+starlark_obj* starlark_tuple::plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return plus_op(*this, other, "+=", ctx, error_callback);
 }
 
-starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
-  return star_op(*this, other, "*", arena, error_callback);
+starlark_obj* starlark_tuple::binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  return star_op(*this, other, "*", ctx, error_callback);
 }
 
-starlark_obj* starlark_tuple::star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
-  return star_op(*this, other, "*=", arena, error_callback);
+starlark_obj* starlark_tuple::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
+  return star_op(*this, other, "*=", ctx, error_callback);
 }
 
 int64_t starlark_tuple::len(bool produce_error, error_fn& error_callback) const {
@@ -220,11 +220,11 @@ bool starlark_tuple::binary_in(const starlark_obj& other, error_fn& error_callba
   return false;
 }
 
-starlark_iterator* starlark_tuple::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
-  return Arena::Create<starlark_tuple_iterator>(&arena, this);
+starlark_iterator* starlark_tuple::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
+  return Arena::Create<starlark_tuple_iterator>(&ctx.arena(), this);
 }
 
-starlark_obj* starlark_tuple::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_tuple::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, values.size(), error_callback);
   if (idx < 0) {
     return nullptr;

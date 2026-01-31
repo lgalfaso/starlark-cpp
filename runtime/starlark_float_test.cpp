@@ -26,6 +26,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
+using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -310,11 +311,12 @@ TEST(StarlarkFloat, PlusEqualsAssign) {
   starlark_integer i1(3);
   starlark_bigint b1(number::one() << 2);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.plus_equals_assign(f2, arena, error_callback);
-  auto* result2 = f1.plus_equals_assign(i1, arena, error_callback);
-  auto* result3 = f1.plus_equals_assign(b1, arena, error_callback);
+  auto* result1 = f1.plus_equals_assign(f2, ctx, error_callback);
+  auto* result2 = f1.plus_equals_assign(i1, ctx, error_callback);
+  auto* result3 = f1.plus_equals_assign(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("3.0", result1->str());
@@ -328,9 +330,10 @@ TEST(StarlarkFloat, PlusEqualsAssignError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.plus_equals_assign(true_obj, arena, error_callback);
+  f1.plus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +=: 'float' and 'bool'");
 }
@@ -341,11 +344,12 @@ TEST(StarlarkFloat, BinaryPlus) {
   starlark_integer i1(3);
   starlark_bigint b1(number::one() << 2);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.binary_plus(f2, arena, error_callback);
-  auto* result2 = f1.binary_plus(i1, arena, error_callback);
-  auto* result3 = f1.binary_plus(b1, arena, error_callback);
+  auto* result1 = f1.binary_plus(f2, ctx, error_callback);
+  auto* result2 = f1.binary_plus(i1, ctx, error_callback);
+  auto* result3 = f1.binary_plus(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("3.0", result1->str());
@@ -359,9 +363,10 @@ TEST(StarlarkFloat, BinaryPlusError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_plus(true_obj, arena, error_callback);
+  f1.binary_plus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +: 'float' and 'bool'");
 }
@@ -370,9 +375,10 @@ TEST(StarlarkFloat, BinaryPlusOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_plus(big, arena, error_callback);
+  f1.binary_plus(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -383,11 +389,12 @@ TEST(StarlarkFloat, MinusEqualsAssign) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 3);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.minus_equals_assign(f2, arena, error_callback);
-  auto* result2 = f1.minus_equals_assign(i1, arena, error_callback);
-  auto* result3 = f1.minus_equals_assign(b1, arena, error_callback);
+  auto* result1 = f1.minus_equals_assign(f2, ctx, error_callback);
+  auto* result2 = f1.minus_equals_assign(i1, ctx, error_callback);
+  auto* result3 = f1.minus_equals_assign(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("-1.0", result1->str());
@@ -401,9 +408,10 @@ TEST(StarlarkFloat, MinusEqualsAssignError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.minus_equals_assign(true_obj, arena, error_callback);
+  f1.minus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -=: 'float' and 'bool'");
 }
@@ -414,11 +422,12 @@ TEST(StarlarkFloat, BinaryMinus) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 3);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.binary_minus(f2, arena, error_callback);
-  auto* result2 = f1.binary_minus(i1, arena, error_callback);
-  auto* result3 = f1.binary_minus(b1, arena, error_callback);
+  auto* result1 = f1.binary_minus(f2, ctx, error_callback);
+  auto* result2 = f1.binary_minus(i1, ctx, error_callback);
+  auto* result3 = f1.binary_minus(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("-1.0", result1->str());
@@ -432,9 +441,10 @@ TEST(StarlarkFloat, BinaryMinusError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_minus(true_obj, arena, error_callback);
+  f1.binary_minus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'float' and 'bool'");
 }
@@ -443,9 +453,10 @@ TEST(StarlarkFloat, BinaryMinusOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_minus(big, arena, error_callback);
+  f1.binary_minus(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -456,11 +467,12 @@ TEST(StarlarkFloat, StarEqualsAssign) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 3);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.star_equals_assign(f2, arena, error_callback);
-  auto* result2 = f1.star_equals_assign(i1, arena, error_callback);
-  auto* result3 = f1.star_equals_assign(b1, arena, error_callback);
+  auto* result1 = f1.star_equals_assign(f2, ctx, error_callback);
+  auto* result2 = f1.star_equals_assign(i1, ctx, error_callback);
+  auto* result3 = f1.star_equals_assign(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("6.0", result1->str());
@@ -474,9 +486,10 @@ TEST(StarlarkFloat, StarEqualsAssignError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.star_equals_assign(true_obj, arena, error_callback);
+  f1.star_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *=: 'float' and 'bool'");
 }
@@ -487,11 +500,12 @@ TEST(StarlarkFloat, BinaryStar) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 3);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.binary_star(f2, arena, error_callback);
-  auto* result2 = f1.binary_star(i1, arena, error_callback);
-  auto* result3 = f1.binary_star(b1, arena, error_callback);
+  auto* result1 = f1.binary_star(f2, ctx, error_callback);
+  auto* result2 = f1.binary_star(i1, ctx, error_callback);
+  auto* result3 = f1.binary_star(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("6.0", result1->str());
@@ -505,9 +519,10 @@ TEST(StarlarkFloat, BinaryStarError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_star(true_obj, arena, error_callback);
+  f1.binary_star(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *: 'float' and 'bool'");
 }
@@ -516,9 +531,10 @@ TEST(StarlarkFloat, BinaryStarOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_star(big, arena, error_callback);
+  f1.binary_star(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -530,14 +546,15 @@ TEST(StarlarkFloat, SlashEqualsAssign) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 2);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.slash_equals_assign(f3, arena, error_callback);
-  auto* result2 = f1.slash_equals_assign(i1, arena, error_callback);
-  auto* result3 = f1.slash_equals_assign(b1, arena, error_callback);
-  auto* result4 = f2.slash_equals_assign(f3, arena, error_callback);
-  auto* result5 = f2.slash_equals_assign(i1, arena, error_callback);
-  auto* result6 = f2.slash_equals_assign(b1, arena, error_callback);
+  auto* result1 = f1.slash_equals_assign(f3, ctx, error_callback);
+  auto* result2 = f1.slash_equals_assign(i1, ctx, error_callback);
+  auto* result3 = f1.slash_equals_assign(b1, ctx, error_callback);
+  auto* result4 = f2.slash_equals_assign(f3, ctx, error_callback);
+  auto* result5 = f2.slash_equals_assign(i1, ctx, error_callback);
+  auto* result6 = f2.slash_equals_assign(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("5.0", result1->str());
@@ -557,9 +574,10 @@ TEST(StarlarkFloat, SlashEqualsAssignError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.slash_equals_assign(true_obj, arena, error_callback);
+  f1.slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /=: 'float' and 'bool'");
 }
@@ -571,14 +589,15 @@ TEST(StarlarkFloat, BinarySlash) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 2);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.binary_slash(f3, arena, error_callback);
-  auto* result2 = f1.binary_slash(i1, arena, error_callback);
-  auto* result3 = f1.binary_slash(b1, arena, error_callback);
-  auto* result4 = f2.binary_slash(f3, arena, error_callback);
-  auto* result5 = f2.binary_slash(i1, arena, error_callback);
-  auto* result6 = f2.binary_slash(b1, arena, error_callback);
+  auto* result1 = f1.binary_slash(f3, ctx, error_callback);
+  auto* result2 = f1.binary_slash(i1, ctx, error_callback);
+  auto* result3 = f1.binary_slash(b1, ctx, error_callback);
+  auto* result4 = f2.binary_slash(f3, ctx, error_callback);
+  auto* result5 = f2.binary_slash(i1, ctx, error_callback);
+  auto* result6 = f2.binary_slash(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("5.0", result1->str());
@@ -598,9 +617,10 @@ TEST(StarlarkFloat, BinarySlashError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash(true_obj, arena, error_callback);
+  f1.binary_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /: 'float' and 'bool'");
 }
@@ -609,9 +629,10 @@ TEST(StarlarkFloat, BinarySlashOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash(big, arena, error_callback);
+  f1.binary_slash(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -620,9 +641,10 @@ TEST(StarlarkFloat, BinarySlashZeroFloatError) {
   starlark_float f0(0.0);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash(f0, arena, error_callback);
+  f1.binary_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -631,9 +653,10 @@ TEST(StarlarkFloat, BinarySlashZeroIntError) {
   starlark_integer i0(0);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash(i0, arena, error_callback);
+  f1.binary_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -642,9 +665,10 @@ TEST(StarlarkFloat, BinarySlashZeroBigintError) {
   starlark_bigint b0(number::zero());
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash(b0, arena, error_callback);
+  f1.binary_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -656,14 +680,15 @@ TEST(StarlarkFloat, SlashSlashEqualsAssign) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 2);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.slash_slash_equals_assign(f3, arena, error_callback);
-  auto* result2 = f1.slash_slash_equals_assign(i1, arena, error_callback);
-  auto* result3 = f1.slash_slash_equals_assign(b1, arena, error_callback);
-  auto* result4 = f2.slash_slash_equals_assign(f3, arena, error_callback);
-  auto* result5 = f2.slash_slash_equals_assign(i1, arena, error_callback);
-  auto* result6 = f2.slash_slash_equals_assign(b1, arena, error_callback);
+  auto* result1 = f1.slash_slash_equals_assign(f3, ctx, error_callback);
+  auto* result2 = f1.slash_slash_equals_assign(i1, ctx, error_callback);
+  auto* result3 = f1.slash_slash_equals_assign(b1, ctx, error_callback);
+  auto* result4 = f2.slash_slash_equals_assign(f3, ctx, error_callback);
+  auto* result5 = f2.slash_slash_equals_assign(i1, ctx, error_callback);
+  auto* result6 = f2.slash_slash_equals_assign(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("5.0", result1->str());
@@ -683,9 +708,10 @@ TEST(StarlarkFloat, SlashSlashEqualsAssignError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.slash_slash_equals_assign(true_obj, arena, error_callback);
+  f1.slash_slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //=: 'float' and 'bool'");
 }
@@ -697,14 +723,15 @@ TEST(StarlarkFloat, BinarySlashSlash) {
   starlark_integer i1(4);
   starlark_bigint b1(number::one() << 2);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result1 = f1.binary_slash_slash(f3, arena, error_callback);
-  auto* result2 = f1.binary_slash_slash(i1, arena, error_callback);
-  auto* result3 = f1.binary_slash_slash(b1, arena, error_callback);
-  auto* result4 = f2.binary_slash_slash(f3, arena, error_callback);
-  auto* result5 = f2.binary_slash_slash(i1, arena, error_callback);
-  auto* result6 = f2.binary_slash_slash(b1, arena, error_callback);
+  auto* result1 = f1.binary_slash_slash(f3, ctx, error_callback);
+  auto* result2 = f1.binary_slash_slash(i1, ctx, error_callback);
+  auto* result3 = f1.binary_slash_slash(b1, ctx, error_callback);
+  auto* result4 = f2.binary_slash_slash(f3, ctx, error_callback);
+  auto* result5 = f2.binary_slash_slash(i1, ctx, error_callback);
+  auto* result6 = f2.binary_slash_slash(b1, ctx, error_callback);
 
   ASSERT_NE(result1, nullptr);
   EXPECT_EQ("5.0", result1->str());
@@ -724,9 +751,10 @@ TEST(StarlarkFloat, BinarySlashSlashError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash_slash(true_obj, arena, error_callback);
+  f1.binary_slash_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'float' and 'bool'");
 }
@@ -735,9 +763,10 @@ TEST(StarlarkFloat, BinarySlashSlashOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash_slash(big, arena, error_callback);
+  f1.binary_slash_slash(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -746,9 +775,10 @@ TEST(StarlarkFloat, BinarySlashSlashZeroFloatError) {
   starlark_float f0(0.0);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash_slash(f0, arena, error_callback);
+  f1.binary_slash_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -757,9 +787,10 @@ TEST(StarlarkFloat, BinarySlashSlashZeroIntError) {
   starlark_integer i0(0);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash_slash(i0, arena, error_callback);
+  f1.binary_slash_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -768,9 +799,10 @@ TEST(StarlarkFloat, BinarySlashSlashZeroBigintError) {
   starlark_bigint b0(number::zero());
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_slash_slash(b0, arena, error_callback);
+  f1.binary_slash_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -782,14 +814,15 @@ TEST(StarlarkFloat, BinaryPercent) {
     starlark_integer deni(d);
     starlark_bigint denb(d);
     Arena arena;
+    context ctx(arena);
     error_handler error_callback;
 
-    auto* resultf1 = num.binary_percent(denf, arena, error_callback);
-    auto* resulti1 = num.binary_percent(deni, arena, error_callback);
-    auto* resultb1 = num.binary_percent(denb, arena, error_callback);
-    auto* resultf2 = num.percent_equals_assign(denf, arena, error_callback);
-    auto* resulti2 = num.percent_equals_assign(deni, arena, error_callback);
-    auto* resultb2 = num.percent_equals_assign(denb, arena, error_callback);
+    auto* resultf1 = num.binary_percent(denf, ctx, error_callback);
+    auto* resulti1 = num.binary_percent(deni, ctx, error_callback);
+    auto* resultb1 = num.binary_percent(denb, ctx, error_callback);
+    auto* resultf2 = num.percent_equals_assign(denf, ctx, error_callback);
+    auto* resulti2 = num.percent_equals_assign(deni, ctx, error_callback);
+    auto* resultb2 = num.percent_equals_assign(denb, ctx, error_callback);
 
     EXPECT_THAT(error_callback.messages, SizeIs(0));
     EXPECT_NE(resultf1, nullptr);
@@ -1241,21 +1274,23 @@ TEST(StarlarkFloat, BinaryPercentInfinity) {
   starlark_float one(1);
   starlark_float inf(std::numeric_limits<double>::infinity());
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  EXPECT_EQ("0.0", zero.binary_percent(inf, arena, error_callback)->str());
-  EXPECT_EQ("1.0", one.binary_percent(inf, arena, error_callback)->str());
-  EXPECT_EQ("nan", inf.binary_percent(one, arena, error_callback)->str());
-  EXPECT_EQ("nan", inf.binary_percent(inf, arena, error_callback)->str());
+  EXPECT_EQ("0.0", zero.binary_percent(inf, ctx, error_callback)->str());
+  EXPECT_EQ("1.0", one.binary_percent(inf, ctx, error_callback)->str());
+  EXPECT_EQ("nan", inf.binary_percent(one, ctx, error_callback)->str());
+  EXPECT_EQ("nan", inf.binary_percent(inf, ctx, error_callback)->str());
 }
 
 TEST(StarlarkFloat, BinaryPercentError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_percent(true_obj, arena, error_callback);
+  f1.binary_percent(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %: 'float' and 'bool'");
 }
@@ -1264,9 +1299,10 @@ TEST(StarlarkFloat, BinaryPercentOverflowError) {
   starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_percent(big, arena, error_callback);
+  f1.binary_percent(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
 }
@@ -1275,9 +1311,10 @@ TEST(StarlarkFloat, BinaryPercentZeroFloatError) {
   starlark_float f0(0.0);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_percent(f0, arena, error_callback);
+  f1.binary_percent(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1286,9 +1323,10 @@ TEST(StarlarkFloat, BinaryPercentZeroIntError) {
   starlark_integer i0(0);
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_percent(i0, arena, error_callback);
+  f1.binary_percent(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1297,9 +1335,10 @@ TEST(StarlarkFloat, BinaryPercentZeroBigintError) {
   starlark_bigint b0(number::zero());
   starlark_float f1(1.0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.binary_percent(b0, arena, error_callback);
+  f1.binary_percent(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
 }
@@ -1308,9 +1347,10 @@ TEST(StarlarkFloat, PercentEqualsAssignError) {
   starlark_float f1(0);
   starlark_bool true_obj(true);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  f1.percent_equals_assign(true_obj, arena, error_callback);
+  f1.percent_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %=: 'float' and 'bool'");
 }

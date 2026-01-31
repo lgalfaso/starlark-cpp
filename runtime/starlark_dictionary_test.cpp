@@ -231,6 +231,7 @@ TEST(StarlarkDictionary, BinaryPipe) {
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
   dict_1.insert(&zero, &s_zero, error_callback);
@@ -239,7 +240,7 @@ TEST(StarlarkDictionary, BinaryPipe) {
   dict_2.insert(&two, &s_two, error_callback);
   dict_2.insert(&three, &s_three, error_callback);
 
-  auto* dict_3 = dict_1.binary_pipe(dict_2,  arena, error_callback);
+  auto* dict_3 = dict_1.binary_pipe(dict_2, ctx, error_callback);
   ASSERT_NE(dict_3, nullptr);
   EXPECT_EQ(dict_3->str(), "{0: \"four\", 1: \"one\", 2: \"two\", 3: \"three\"}");
   EXPECT_EQ(dict_1.str(), "{0: \"zero\", 1: \"one\"}");
@@ -250,9 +251,10 @@ TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
   starlark_dictionary dict;
   starlark_list list(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = dict.binary_pipe(list, arena, error_callback);
+  auto* result = dict.binary_pipe(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'dict' and 'list'");
@@ -271,6 +273,7 @@ TEST(StarlarkDictionary, PipeEqualsAssign) {
   starlark_dictionary dict_1;
   starlark_dictionary dict_2;
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
   dict_1.insert(&zero, &s_zero, error_callback);
@@ -279,7 +282,7 @@ TEST(StarlarkDictionary, PipeEqualsAssign) {
   dict_2.insert(&two, &s_two, error_callback);
   dict_2.insert(&three, &s_three, error_callback);
 
-  auto* dict_3 = dict_1.pipe_equals_assign(dict_2,  arena, error_callback);
+  auto* dict_3 = dict_1.pipe_equals_assign(dict_2,  ctx, error_callback);
   ASSERT_NE(dict_3, nullptr);
   EXPECT_EQ(dict_3->str(), "{0: \"four\", 1: \"one\", 2: \"two\", 3: \"three\"}");
   EXPECT_EQ(dict_1.str(), "{0: \"four\", 1: \"one\", 2: \"two\", 3: \"three\"}");
@@ -293,12 +296,13 @@ TEST(StarlarkDictionary, PipeEqualsAssignSelf) {
   starlark_string s_one("one"sv);
   starlark_dictionary dict_1;
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
   dict_1.insert(&zero, &s_zero, error_callback);
   dict_1.insert(&one, &s_one, error_callback);
 
-  auto* dict_3 = dict_1.pipe_equals_assign(dict_1,  arena, error_callback);
+  auto* dict_3 = dict_1.pipe_equals_assign(dict_1,  ctx, error_callback);
   ASSERT_NE(dict_3, nullptr);
   EXPECT_EQ(dict_3->str(), "{0: \"zero\", 1: \"one\"}");
   EXPECT_EQ(dict_1.str(), "{0: \"zero\", 1: \"one\"}");
@@ -308,9 +312,10 @@ TEST(StarlarkDictionary, PipeEqualsAssignWithNonDict) {
   starlark_dictionary dict;
   starlark_list list(0);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  auto* result = dict.pipe_equals_assign(list, arena, error_callback);
+  auto* result = dict.pipe_equals_assign(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'dict' and 'list'");
@@ -319,6 +324,7 @@ TEST(StarlarkDictionary, PipeEqualsAssignWithNonDict) {
 TEST(StarlarkDictionary, PipeEqualsAssignWhileIterating) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -327,15 +333,16 @@ TEST(StarlarkDictionary, PipeEqualsAssignWhileIterating) {
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 
-  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
-  dictionary.pipe_equals_assign(dictionary, arena, error_callback);
+  dictionary.pipe_equals_assign(dictionary, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, PipeEqualsAssigWithFreeze) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_dictionary dictionary;
   starlark_integer zero(0);
@@ -346,7 +353,7 @@ TEST(StarlarkDictionary, PipeEqualsAssigWithFreeze) {
   dictionary.insert(&s_one, &one, error_callback);
 
   dictionary.freeze();
-  dictionary.pipe_equals_assign(dictionary, arena, error_callback);
+  dictionary.pipe_equals_assign(dictionary, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
 }
@@ -382,15 +389,16 @@ TEST(StarlarkDictionary, GetIterator) {
   starlark_string s_zero("key0"sv);
   starlark_string s_one("key1"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   dictionary1.insert(&s_zero, &zero, error_callback);
   dictionary1.insert(&s_one, &one, error_callback);
 
-  auto* it0 = dictionary0.get_iterator(true, arena, error_callback);
+  auto* it0 = dictionary0.get_iterator(true, ctx, error_callback);
   EXPECT_FALSE(it0->has_next());
   it0->end_iterator();
 
-  auto* it1 = dictionary1.get_iterator(true, arena, error_callback);
+  auto* it1 = dictionary1.get_iterator(true, ctx, error_callback);
   EXPECT_TRUE(it1->has_next());
   EXPECT_TRUE(it1->next()->equals(s_zero));
   EXPECT_TRUE(it1->has_next());
@@ -407,10 +415,11 @@ TEST(StarlarkDictionary, MutationWhileIterating1) {
   starlark_string s_zero("key0"sv);
   starlark_string s_one("key1"sv);
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   dictionary.insert(&s_zero, &zero, error_callback);
 
-  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.insert(&s_one, &one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -420,6 +429,7 @@ TEST(StarlarkDictionary, MutationWhileIterating1) {
 TEST(StarlarkDictionary, Index) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -428,21 +438,22 @@ TEST(StarlarkDictionary, Index) {
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 
-  EXPECT_EQ(dictionary.index(s_zero, arena, error_callback)->repr(), "0");
-  EXPECT_EQ(dictionary.index(s_one, arena, error_callback)->repr(), "1");
+  EXPECT_EQ(dictionary.index(s_zero, ctx, error_callback)->repr(), "0");
+  EXPECT_EQ(dictionary.index(s_one, ctx, error_callback)->repr(), "1");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkDictionary, KeyError) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_string s_zero("key0"sv);
   starlark_string s_one("key1"sv);
   dictionary.insert(&s_zero, &zero, error_callback);
 
-  EXPECT_EQ(nullptr, dictionary.index(s_one, arena, error_callback));
+  EXPECT_EQ(nullptr, dictionary.index(s_one, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("KeyError: \"key1\"", error_callback.messages[0]);
 }
@@ -469,6 +480,7 @@ TEST(StarlarkDictionary, IndexAssign) {
 TEST(StarlarkDictionary, MutationWhileIterating2) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -479,7 +491,7 @@ TEST(StarlarkDictionary, MutationWhileIterating2) {
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 
-  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.index_assign(s_two, two, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -529,7 +541,7 @@ TEST(StarlarkDictionary, Clear) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  auto* method = dictionary.dot("clear", arena, error_callback);
+  auto* method = dictionary.dot("clear", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -552,9 +564,9 @@ TEST(StarlarkDictionary, ClearWhileIterating) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  auto* method = dictionary.dot("clear", arena, error_callback);
+  auto* method = dictionary.dot("clear", ctx, error_callback);
   ASSERT_NE(nullptr, method);
-  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, ctx, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
@@ -580,7 +592,7 @@ TEST(StarlarkDictionary, ClearWithArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&zero);
-  auto* method = dictionary.dot("clear", arena, error_callback);
+  auto* method = dictionary.dot("clear", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 

@@ -131,11 +131,11 @@ bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn& error_c
   return values.contains(&const_cast<starlark_obj&>(other));
 }
 
-starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   if (other.type() != type()) {
-    return starlark_obj::binary_pipe(other, arena, error_callback);
+    return starlark_obj::binary_pipe(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_dictionary>(&arena);
+  auto* result = Arena::Create<starlark_dictionary>(&ctx.arena());
   for (const auto& [key, value] : values) {
     result->insert(key, value, error_callback);
   }
@@ -146,12 +146,12 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, Arena&
   return result;
 }
 
-starlark_obj* starlark_dictionary::pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary::pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   if (!can_modify(error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
-    return starlark_obj::pipe_equals_assign(other, arena, error_callback);
+    return starlark_obj::pipe_equals_assign(other, ctx, error_callback);
   }
   const starlark_dictionary* d_other = static_cast<const starlark_dictionary*>(&other);
   for (auto& [key, value] : d_other->values) {
@@ -160,11 +160,11 @@ starlark_obj* starlark_dictionary::pipe_equals_assign(const starlark_obj& other,
   return this;
 }
 
-starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
-  return Arena::Create<starlark_dictionary_iterator>(&arena, this);
+starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
+  return Arena::Create<starlark_dictionary_iterator>(&ctx.arena(), this);
 }
 
-starlark_obj* starlark_dictionary::index(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_dictionary::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto result = values.find(&const_cast<starlark_obj&>(other));
   if (result == values.end()) {
     error_callback.add_error(error_dictionary_key_not_found(other.repr()));

@@ -13,6 +13,7 @@ using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::runtime::cmp_fb;
 using ::starlark::runtime::cmp_fi;
+using ::starlark::runtime::context;
 using ::starlark::runtime::create_integer;
 using ::starlark::runtime::create_integer_from_float;
 using ::starlark::runtime::equals_fi;
@@ -60,7 +61,8 @@ TEST(ToDouble, FromBigInt) {
 TEST(CreateIntegerFromBigInt, Downgrades) {
   auto test = [](starlark_numeric_type numeric_type, number&& value) {
     Arena arena;
-    EXPECT_EQ(numeric_type, create_integer(std::move(value), arena)->numeric_type());
+    context ctx(arena);
+    EXPECT_EQ(numeric_type, create_integer(std::move(value), ctx)->numeric_type());
   };
   test(starlark_numeric_type::kBigInt, (number::minus_one() << 63) - number::one());
   test(starlark_numeric_type::kInt64, number::minus_one() << 63);
@@ -74,18 +76,20 @@ TEST(CreateIntegerFromBigInt, Downgrades) {
 
 TEST(CreateIntegerFromFloat, SpecialCases) {
   Arena arena;
-  EXPECT_EQ(nullptr, create_integer_from_float(std::numeric_limits<double>::infinity(), arena));
-  EXPECT_EQ("0", create_integer_from_float(0, arena)->str());
-  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-1, arena)->str());
-  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-1, arena)->str());
-  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-64, arena)->str());
-  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-64, arena)->str());
+  context ctx(arena);
+  EXPECT_EQ(nullptr, create_integer_from_float(std::numeric_limits<double>::infinity(), ctx));
+  EXPECT_EQ("0", create_integer_from_float(0, ctx)->str());
+  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-1, ctx)->str());
+  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-1, ctx)->str());
+  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-64, ctx)->str());
+  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-64, ctx)->str());
 }
 
 TEST(CreateIntegerFromFloat, PowersOfTen) {
   auto test = [](double value, std::string_view expected) {
     Arena arena;
-    EXPECT_EQ(expected, create_integer_from_float(value, arena)->str());
+    context ctx(arena);
+    EXPECT_EQ(expected, create_integer_from_float(value, ctx)->str());
   };
   /*
   ```python

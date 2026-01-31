@@ -139,11 +139,11 @@ bool starlark_set::binary_in(const starlark_obj& other, error_fn& error_callback
   return values.contains(&const_cast<starlark_obj&>(other));
 }
 
-starlark_obj* starlark_set::binary_and(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_set::binary_and(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   if (other.type() != type()) {
-    return starlark_obj::binary_and(other, arena, error_callback);
+    return starlark_obj::binary_and(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&arena);
+  auto* result = Arena::Create<starlark_set>(&ctx.arena());
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
     if (s_other.contains(key)) {
@@ -153,11 +153,11 @@ starlark_obj* starlark_set::binary_and(const starlark_obj& other, Arena& arena, 
   return result;
 }
 
-starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   if (other.type() != type()) {
-    return starlark_obj::binary_pipe(other, arena, error_callback);
+    return starlark_obj::binary_pipe(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&arena);
+  auto* result = Arena::Create<starlark_set>(&ctx.arena());
   for (auto& key : values) {
     result->add(key, error_callback);
   }
@@ -168,11 +168,11 @@ starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, Arena& arena,
   return result;
 }
 
-starlark_obj* starlark_set::binary_hat(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_set::binary_hat(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   if (other.type() != type()) {
-    return starlark_obj::binary_hat(other, arena, error_callback);
+    return starlark_obj::binary_hat(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&arena);
+  auto* result = Arena::Create<starlark_set>(&ctx.arena());
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
     if (!s_other.values.contains(key)) {
@@ -187,11 +187,11 @@ starlark_obj* starlark_set::binary_hat(const starlark_obj& other, Arena& arena, 
   return result;
 }
 
-starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena, error_fn& error_callback) const {
+starlark_obj* starlark_set::binary_minus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   if (other.type() != type()) {
-    return starlark_obj::binary_minus(other, arena, error_callback);
+    return starlark_obj::binary_minus(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&arena);
+  auto* result = Arena::Create<starlark_set>(&ctx.arena());
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
     if (!s_other.values.contains(key)) {
@@ -201,12 +201,12 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, Arena& arena
   return result;
 }
 
-starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   if (!can_modify(error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
-    return starlark_obj::minus_equals_assign(other, arena, error_callback);
+    return starlark_obj::minus_equals_assign(other, ctx, error_callback);
   }
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : set_t(s_other.values)) {
@@ -215,12 +215,12 @@ starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, googl
   return this;
 }
 
-starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   if (!can_modify(error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
-    return starlark_obj::ampersand_equals_assign(other, arena, error_callback);
+    return starlark_obj::ampersand_equals_assign(other, ctx, error_callback);
   }
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (const auto& value : set_t(values)) {
@@ -231,12 +231,12 @@ starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, g
   return this;
 }
 
-starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   if (!can_modify(error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
-    return starlark_obj::pipe_equals_assign(other, arena, error_callback);
+    return starlark_obj::pipe_equals_assign(other, ctx, error_callback);
   }
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : s_other.values) {
@@ -245,12 +245,12 @@ starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, google
   return this;
 }
 
-starlark_obj* starlark_set::hat_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set::hat_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   if (!can_modify(error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
-    return starlark_obj::hat_equals_assign(other, arena, error_callback);
+    return starlark_obj::hat_equals_assign(other, ctx, error_callback);
   }
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (const auto& value : set_t(s_other.values)) {
@@ -263,8 +263,8 @@ starlark_obj* starlark_set::hat_equals_assign(const starlark_obj& other, google:
   return this;
 }
 
-starlark_iterator* starlark_set::get_iterator(bool produce_error, Arena& arena, error_fn& error_callback) {
-  return Arena::Create<starlark_set_iterator>(&arena, this);
+starlark_iterator* starlark_set::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
+  return Arena::Create<starlark_set_iterator>(&ctx.arena(), this);
 }
 
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {

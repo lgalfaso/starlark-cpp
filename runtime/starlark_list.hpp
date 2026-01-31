@@ -25,13 +25,13 @@ class starlark_list : public starlark_obj {
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
   void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
-  starlark_obj* binary_plus(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
-  starlark_obj* binary_star(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
-  starlark_obj* plus_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
-  starlark_obj* star_equals_assign(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) override;
+  starlark_obj* binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+  starlark_obj* binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+  starlark_obj* plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
+  starlark_obj* star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
-  starlark_iterator* get_iterator(bool produce_error, google::protobuf::Arena& arena, error_fn& error_callback) override;
-  starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
+  starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
+  starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
 
   class starlark_list_iterator : public starlark_iterator {

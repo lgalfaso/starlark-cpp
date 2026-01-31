@@ -156,21 +156,21 @@ starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark
     case starlark_numeric_type::kFloat: {
       auto fvalue = value->as_float();
       if (std::signbit(fvalue)) {
-        return create_float(std::abs(value->as_float()), ctx.arena());
+        return create_float(std::abs(value->as_float()), ctx);
       }
       return value;
     }
     case starlark_numeric_type::kInt64: {
       int64_t ivalue = value->as_int64();
       if (ivalue < 0) {
-        return value->unary_minus(ctx.arena(), error_callback);
+        return value->unary_minus(ctx, error_callback);
       }
       return value;
     }
     case starlark_numeric_type::kBigInt: {
       const auto& bvalue = value->as_bigint();
       if (bvalue.sign()) {
-        return value->unary_minus(ctx.arena(), error_callback);
+        return value->unary_minus(ctx, error_callback);
       }
       return value;
     }
@@ -184,7 +184,7 @@ starlark_obj* starlark_fn_all(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::all_f)) {
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx.arena(), error_callback);
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -200,7 +200,7 @@ starlark_obj* starlark_fn_any(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::any_f)) {
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx.arena(), error_callback);
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -236,7 +236,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     }
     return Arena::Create<starlark_bytes>(&ctx.arena(), result);
   }
-  auto* it = pos_args.front()->get_iterator(false, ctx.arena(), error_callback);
+  auto* it = pos_args.front()->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
     error_callback.add_error(error_convert(pos_args.front()->type(), starlark_types::bytes_t));
     return nullptr;
@@ -318,12 +318,12 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
     auto* pos_value = pos_args.front();
     // This is a special case. This should be extended to understand any mapping, but at the moment only `dictionary` implements it.
     if (pos_value->type() == starlark_types::dict_t) {
-      auto* it = pos_value->get_iterator(true, ctx.arena(), error_callback);
+      auto* it = pos_value->get_iterator(true, ctx, error_callback);
       assert(it != nullptr);
       while (it->has_next()) {
         auto* key = it->next();
         assert(key != nullptr);
-        auto* value = pos_value->index(*key, ctx.arena(), error_callback);
+        auto* value = pos_value->index(*key, ctx, error_callback);
         assert(value != nullptr);
         if (result->insert(key, value, error_callback).second) {
           // Should not happen as `pos_value` is already a dictionary.
@@ -333,14 +333,14 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
       it->end_iterator();
     } else {
       int pos = 0;
-      auto* it = pos_value->get_iterator(true, ctx.arena(), error_callback);
+      auto* it = pos_value->get_iterator(true, ctx, error_callback);
       if (it == nullptr) {
         return nullptr;
       }
       while (it->has_next()) {
         auto* kv = it->next();
         assert(kv != nullptr);
-        auto* it2 = kv->get_iterator(true, ctx.arena(), error_callback);
+        auto* it2 = kv->get_iterator(true, ctx, error_callback);
         if (it2 == nullptr) {
           return nullptr;
         }
@@ -410,7 +410,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
     error_callback.add_error(error_arguments_exactly_one(starlark_built_in_functions::enumerate_f, pos_args.size()));
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx.arena(), error_callback);
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -424,7 +424,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
     tuple->add(start);
     tuple->add(it->next());
     result->add(tuple, error_callback);
-    start = start->binary_plus(*one, ctx.arena(), error_callback);
+    start = start->binary_plus(*one, ctx, error_callback);
   }
   it->end_iterator();
   return result;
@@ -452,14 +452,14 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
     case starlark_numeric_type::kFloat:
       return value;
     case starlark_numeric_type::kInt64:
-      return create_float(value->as_int64(), ctx.arena());
+      return create_float(value->as_int64(), ctx);
     case starlark_numeric_type::kBigInt: {
       auto fvalue = to_double(value->as_bigint());
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_overflow(value->type(), starlark_types::float_t));
         return nullptr;
       }
-      return create_float(fvalue, ctx.arena());
+      return create_float(fvalue, ctx);
     }
     case starlark_numeric_type::kNotNumeric:
       if (value->type() == starlark_types::string_t) {
@@ -475,12 +475,12 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
           error_callback.add_error(error_overflow_float_too_large());
           return nullptr;
         }
-        return create_float(double_value, ctx.arena());
+        return create_float(double_value, ctx);
       } else if (value->type() == starlark_types::bool_t) {
         if (value->truthy()) {
-          return create_float(1.0, ctx.arena());
+          return create_float(1.0, ctx);
         } else {
-          return create_float(0.0, ctx.arena());
+          return create_float(0.0, ctx);
         }
       } else {
         error_callback.add_error(error_argument_string_or_real(starlark_built_in_functions::float_f, value->type()));
@@ -518,7 +518,7 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
   }
   auto* value = pos_args.front();
   if (value->type() == starlark_types::string_t || value->type() == starlark_types::bytes_t) {
-    return create_integer(value->hash(), ctx.arena());
+    return create_integer(value->hash(), ctx);
   } else {
     error_callback.add_error(error_argument_bad_operand_type(starlark_built_in_functions::hash_f, value->type(), starlark_types::string_t, starlark_types::bytes_t));
     return nullptr;
@@ -554,7 +554,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       }
       return nullptr;
     }
-    return create_integer_from_float(fvalue, ctx.arena());
+    return create_integer_from_float(fvalue, ctx);
   } else if (value->type() == starlark_types::bool_t) {
     if (pos_args.size() == 2) {
       error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
@@ -601,7 +601,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       error_callback.add_error(error_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
       return nullptr;
     }
-    return create_integer(std::move(result), ctx.arena());
+    return create_integer(std::move(result), ctx);
   } else {
     error_callback.add_error(error_argument_string_int_bool_or_real(starlark_built_in_functions::int_f, value->type()));
     return nullptr;
@@ -616,7 +616,7 @@ starlark_obj* starlark_fn_len(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (result < 0) {
     return nullptr;
   }
-  return create_integer(result, ctx.arena());
+  return create_integer(result, ctx);
 }
 
 starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -626,7 +626,7 @@ starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_a
   if (pos_args.empty()) {
     return Arena::Create<starlark_list>(&ctx.arena(), 0);
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx.arena(), error_callback);
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -667,13 +667,13 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
       error_callback.add_error(error_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
       return nullptr;
     }
-    return create_integer(result, ctx.arena());
+    return create_integer(result, ctx);
   } else if (value->type() == starlark_types::bytes_t) {
     if (value->len(false, error_callback) != 1) {
       error_callback.add_error(error_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
       return nullptr;
     }
-    return create_integer(static_cast<unsigned char>(value->as_string()[0]), ctx.arena());
+    return create_integer(static_cast<unsigned char>(value->as_string()[0]), ctx);
   } else {
     error_callback.add_error(error_expect_one_character_or_one_byte(starlark_built_in_functions::ord_f, value->type()));
     return nullptr;
@@ -771,7 +771,7 @@ starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_ar
     return Arena::Create<starlark_set>(&ctx.arena());
   }
 
-  auto* it = pos_args.front()->get_iterator(true, ctx.arena(), error_callback);
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -806,7 +806,7 @@ starlark_obj* starlark_fn_tuple(starlark_obj* this_obj, const starlark_obj::pos_
     return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
   }
 
-  auto* it = pos_args.front()->get_iterator(true, ctx.arena(), error_callback);
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
@@ -845,7 +845,7 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
   std::vector<starlark_iterator*> its;
   its.reserve(pos_args.size());
   for (auto* element : pos_args) {
-    auto* it = element->get_iterator(true, ctx.arena(), error_callback);
+    auto* it = element->get_iterator(true, ctx, error_callback);
     if (it == nullptr) {
       return nullptr;
     }
