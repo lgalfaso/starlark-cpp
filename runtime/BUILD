@@ -315,8 +315,10 @@ cc_library(
     deps = [
         ":error_fn",
         ":error_messages",
+        ":starlark_list",
         ":starlark_none",
         ":starlark_object",
+        ":starlark_tuple",
         ":starlark_types",
         "//containers:linked_hash_map",
     ],

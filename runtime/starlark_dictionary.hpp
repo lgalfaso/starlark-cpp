@@ -1,4 +1,4 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2025-2026 Lucas Mirelmann
 
 #ifndef RUNTIME_STARLARK_DICTIONARY_HPP_
 #define RUNTIME_STARLARK_DICTIONARY_HPP_
@@ -36,6 +36,9 @@ class starlark_dictionary : public starlark_obj {
 
   bool clear(error_fn& error_callback);
   starlark_obj* get(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) const;
+  starlark_obj* items(context& ctx, error_fn& error_callback) const;
+  starlark_obj* keys(context& ctx, error_fn& error_callback) const;
+  starlark_obj* values(context& ctx, error_fn& error_callback) const;
 
   class starlark_dictionary_iterator : public starlark_iterator {
    public:
@@ -61,7 +64,7 @@ class starlark_dictionary : public starlark_obj {
   static const std::map<std::string, fn*, std::less<>>& method_refs();
   static const std::vector<std::string>& attributes();
 
-  starlark::cnt::linked_hash_map<starlark_obj*, starlark_obj*, starlark_hash_op, starlark_equals_to> values;
+  starlark::cnt::linked_hash_map<starlark_obj*, starlark_obj*, starlark_hash_op, starlark_equals_to> values_;
   int iterators_count;
 };
 

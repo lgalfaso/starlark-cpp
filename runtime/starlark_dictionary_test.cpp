@@ -824,4 +824,232 @@ TEST(StarlarkDictionary, NamedArgs) {
   EXPECT_EQ("TypeError: dict.get() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkDictionary, Items) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("items", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::list_t);
+  EXPECT_EQ(result->str(), "[(\"key0\", 0), (\"key1\", 1)]");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, ItemsWhileIterating) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("items", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, ctx, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::list_t);
+  EXPECT_EQ(result->str(), "[(\"key0\", 0), (\"key1\", 1)]");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, ItemsWithArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&zero);
+  auto* method = dictionary.dot("items", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: dict.items() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+}
+
+TEST(StarlarkDictionary, Keys) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("keys", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::list_t);
+  EXPECT_EQ(result->str(), "[\"key0\", \"key1\"]");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, KeysWhileIterating) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("keys", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, ctx, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::list_t);
+  EXPECT_EQ(result->str(), "[\"key0\", \"key1\"]");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, KeysWithArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&zero);
+  auto* method = dictionary.dot("keys", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: dict.keys() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+}
+
+TEST(StarlarkDictionary, Values) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("values", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::list_t);
+  EXPECT_EQ(result->str(), "[0, 1]");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, ValuesWhileIterating) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("values", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, ctx, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::list_t);
+  EXPECT_EQ(result->str(), "[0, 1]");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, ValuesWithArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&zero);
+  auto* method = dictionary.dot("values", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: dict.values() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+}
+
 }  // namespace

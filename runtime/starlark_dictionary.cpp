@@ -9,7 +9,8 @@
 #include <vector>
 
 #include "runtime/error_messages.hpp"
-#include "runtime/starlark_none.hpp"
+#include "runtime/starlark_list.hpp"
+#include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -73,19 +74,19 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_dictionary
 }
 
 int64_t starlark_dictionary::len(bool produce_error, error_fn& error_callback) const {
-  return values.size();
+  return values_.size();
 }
 
 bool starlark_dictionary::inner_repr(printer& print, printer_action action) const {
   switch (action) {
     case printer_action::kPrintTop: {
-      if (values.size() == 0) {
+      if (values_.size() == 0) {
         print.append("{}");
         return false;
       }
       print.append("{");
       printer_action new_action = printer_action::kPrintFinal;
-      for (auto it = values.rbegin(); it != values.rend(); ++it) {
+      for (auto it = values_.rbegin(); it != values_.rend(); ++it) {
         print.add_task(printer::pending_task{
           .obj = this,
           .action = new_action,
@@ -123,12 +124,12 @@ bool starlark_dictionary::inner_repr(printer& print, printer_action action) cons
 }
 
 bool starlark_dictionary::truthy() const {
-  return !values.empty();
+  return !values_.empty();
 }
 
 bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`.
-  return values.contains(&const_cast<starlark_obj&>(other));
+  return values_.contains(&const_cast<starlark_obj&>(other));
 }
 
 starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -136,11 +137,11 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, contex
     return starlark_obj::binary_pipe(other, ctx, error_callback);
   }
   auto* result = Arena::Create<starlark_dictionary>(&ctx.arena());
-  for (const auto& [key, value] : values) {
+  for (const auto& [key, value] : values_) {
     result->insert(key, value, error_callback);
   }
   const starlark_dictionary* d_other = static_cast<const starlark_dictionary*>(&other);
-  for (auto& [key, value] : d_other->values) {
+  for (auto& [key, value] : d_other->values_) {
     result->insert(key, value, error_callback);
   }
   return result;
@@ -154,7 +155,7 @@ starlark_obj* starlark_dictionary::pipe_equals_assign(const starlark_obj& other,
     return starlark_obj::pipe_equals_assign(other, ctx, error_callback);
   }
   const starlark_dictionary* d_other = static_cast<const starlark_dictionary*>(&other);
-  for (auto& [key, value] : d_other->values) {
+  for (auto& [key, value] : d_other->values_) {
     insert(key, value, error_callback);
   }
   return this;
@@ -165,8 +166,8 @@ starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, context
 }
 
 starlark_obj* starlark_dictionary::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
-  auto result = values.find(&const_cast<starlark_obj&>(other));
-  if (result == values.end()) {
+  auto result = values_.find(&const_cast<starlark_obj&>(other));
+  if (result == values_.end()) {
     error_callback.add_error(error_dictionary_key_not_found(other.repr()));
     return nullptr;
   }
@@ -181,14 +182,14 @@ void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& el
     error_callback.add_error(error_unhashable_key(type(), idx.type()));
     return;
   }
-  values.insert(&const_cast<starlark_obj&>(idx), &element);
+  values_.insert(&const_cast<starlark_obj&>(idx), &element);
 }
 
 bool starlark_dictionary::clear(error_fn& error_callback) {
   if (!can_modify(error_callback)) {
     return false;
   }
-  values.clear();
+  values_.clear();
   return true;
 }
 
@@ -197,11 +198,38 @@ starlark_obj* starlark_dictionary::get(starlark_obj* key, starlark_obj* default_
     error_callback.add_error(error_unhashable_key(type(), key->type()));
     return nullptr;
   }
-  auto it = values.find(key);
-  if (it == values.end()) {
+  auto it = values_.find(key);
+  if (it == values_.end()) {
     return default_value;
   }
   return it->second;
+}
+
+starlark_obj* starlark_dictionary::items(context& ctx, error_fn& error_callback) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
+  for (auto entry : values_) {
+    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
+    tuple->add(entry.first);
+    tuple->add(entry.second);
+    result->add(tuple, error_callback);
+  }
+  return result;
+}
+
+starlark_obj* starlark_dictionary::keys(context& ctx, error_fn& error_callback) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
+  for (auto entry : values_) {
+    result->add(entry.first, error_callback);
+  }
+  return result;
+}
+
+starlark_obj* starlark_dictionary::values(context& ctx, error_fn& error_callback) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
+  for (auto entry : values_) {
+    result->add(entry.second, error_callback);
+  }
+  return result;
 }
 
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
@@ -209,12 +237,12 @@ bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_o
     return false;
   }
   const starlark_dictionary* n_other = reinterpret_cast<const starlark_dictionary*>(other);
-  if (values.size() != n_other->values.size()) {
+  if (values_.size() != n_other->values_.size()) {
     return false;
   }
-  for (const auto& element : values) {
-    auto other_element = n_other->values.find(element.first);
-    if (other_element == n_other->values.end()) {
+  for (const auto& element : values_) {
+    auto other_element = n_other->values_.find(element.first);
+    if (other_element == n_other->values_.end()) {
       return false;
     }
     comp.add_task(equals_comparator::pending_task{
@@ -226,7 +254,7 @@ bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_o
 }
 
 void starlark_dictionary::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
-  for (auto& [k, v] : values) {
+  for (auto& [k, v] : values_) {
     to_freeze.push_back(k);
     to_freeze.push_back(v);
   }
@@ -245,16 +273,16 @@ std::pair<bool, bool> starlark_dictionary::insert(starlark_obj* key, starlark_ob
     error_callback.add_error(error_unhashable_key(type(), key->type()));
     return std::make_pair(false, true);
   }
-  auto [it, result] = values.insert(key, value);
+  auto [it, result] = values_.insert(key, value);
   return std::make_pair(result, false);
 }
 
-starlark_dictionary::starlark_dictionary_iterator::starlark_dictionary_iterator(starlark_dictionary* dictionary) : dictionary(dictionary), it(dictionary->values.begin()) {
+starlark_dictionary::starlark_dictionary_iterator::starlark_dictionary_iterator(starlark_dictionary* dictionary) : dictionary(dictionary), it(dictionary->values_.begin()) {
   dictionary->iterators_count++;
 }
 
 bool starlark_dictionary::starlark_dictionary_iterator::has_next() const {
-  return it != dictionary->values.end();
+  return it != dictionary->values_.end();
 }
 
 starlark_obj* starlark_dictionary::starlark_dictionary_iterator::next() {
@@ -302,15 +330,21 @@ starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "dict.items")) {
+     return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::dict_t);
+  return static_cast<starlark_dictionary*>(this_obj)->items(ctx, error_callback);
 }
 
 starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "dict.keys")) {
+     return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::dict_t);
+  return static_cast<starlark_dictionary*>(this_obj)->keys(ctx, error_callback);
 }
 
 starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -338,9 +372,12 @@ starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "dict.values")) {
+     return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::dict_t);
+  return static_cast<starlark_dictionary*>(this_obj)->values(ctx, error_callback);
 }
 
 }  // namespace runtime
