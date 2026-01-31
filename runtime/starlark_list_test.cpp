@@ -18,6 +18,7 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_float;
@@ -324,8 +325,9 @@ TEST(StarlarkList, Call) {
   error_handler error_callback;
   starlark_list list(0);
   Arena arena;
+  context ctx(arena);
 
-  list.call({}, {}, arena, error_callback);
+  list.call({}, {}, ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object is not callable");

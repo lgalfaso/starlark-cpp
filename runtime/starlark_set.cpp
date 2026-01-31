@@ -17,22 +17,22 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
-starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_intersection(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_symmetric_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_intersection(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_symmetric_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_set::method_refs() {
   static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
@@ -334,97 +334,97 @@ bool starlark_set::can_modify(error_fn& error_callback) const {
   return true;
 }
 
-starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_intersection(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_intersection(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_symmetric_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_symmetric_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;

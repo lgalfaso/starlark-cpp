@@ -17,6 +17,7 @@
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_integer;
@@ -516,6 +517,7 @@ TEST(StarlarkDictionary, IndexAssignUsingUnhashableKey) {
 
 TEST(StarlarkDictionary, Clear) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_dictionary dictionary;
   starlark_integer zero(0);
@@ -529,7 +531,7 @@ TEST(StarlarkDictionary, Clear) {
   starlark_obj::named_args_t named_args;
   auto* method = dictionary.dot("clear", arena, error_callback);
   ASSERT_NE(nullptr, method);
-  auto* result = method->call(pos_args, named_args, arena, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->type(), starlark_types::none_t);
   EXPECT_EQ(dictionary.str(), "{}");
@@ -539,6 +541,7 @@ TEST(StarlarkDictionary, Clear) {
 TEST(StarlarkDictionary, ClearWhileIterating) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -554,7 +557,7 @@ TEST(StarlarkDictionary, ClearWhileIterating) {
   [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
-  auto* result = method->call(pos_args, named_args, arena, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -565,6 +568,7 @@ TEST(StarlarkDictionary, ClearWhileIterating) {
 TEST(StarlarkDictionary, ClearWithArguments) {
   error_handler error_callback;
   Arena arena;
+  context ctx(arena);
   starlark_dictionary dictionary;
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -580,7 +584,7 @@ TEST(StarlarkDictionary, ClearWithArguments) {
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
-  auto* result = method->call(pos_args, named_args, arena, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));

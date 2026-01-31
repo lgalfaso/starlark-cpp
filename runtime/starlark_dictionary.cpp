@@ -17,15 +17,15 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
-starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
-starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_dictionary::method_refs() {
   static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
@@ -265,7 +265,7 @@ bool starlark_dictionary::can_modify(error_fn& error_callback) const {
   return true;
 }
 
-starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!no_arg(pos_args, named_args, error_callback, "dict.clear")) {
      return nullptr;
   }
@@ -274,53 +274,52 @@ starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlar
   if (!static_cast<starlark_dictionary*>(this_obj)->clear(error_callback)) {
     return nullptr;
   }
-  // TODO(lmirelmann): Use the value from the cache.
-  return Arena::Create<starlark_none>(&arena);
+  return ctx.none_value();
 }
 
-starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
-starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;

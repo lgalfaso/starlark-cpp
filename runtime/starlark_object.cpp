@@ -246,7 +246,7 @@ void starlark_obj::freeze() {
   }
 }
 
-starlark_obj* starlark_obj::call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* starlark_obj::call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_not_callable(type()));
   return nullptr;
 }

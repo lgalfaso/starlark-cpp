@@ -23,6 +23,7 @@
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -43,7 +44,7 @@ using ::std::literals::string_view_literals::operator""sv;
 
 namespace {
 
-starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, Arena& arena, error_fn& error_callback) {
+starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   return nullptr;
 }
 

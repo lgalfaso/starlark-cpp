@@ -24,6 +24,7 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -486,6 +487,7 @@ TEST(StarlarkString, Dir) {
 
 TEST(StarlarkString, Count) {
   Arena arena;
+  context ctx(arena);
   error_handler error_callback;
   starlark_string str("abc"sv);
 
@@ -493,7 +495,7 @@ TEST(StarlarkString, Count) {
   ASSERT_NE(nullptr, result) << error_callback.messages[0];
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  auto* value = result->call(pos_args, named_args, arena, error_callback);
+  auto* value = result->call(pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, value);
   EXPECT_EQ(value->str(), "3");
   EXPECT_THAT(error_callback.messages, IsEmpty());

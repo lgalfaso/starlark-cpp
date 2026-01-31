@@ -121,11 +121,31 @@ struct starlark_equals_to {
   bool operator()(const starlark_obj* lhs, const starlark_obj* rhs) const;
 };
 
+class context {
+ public:
+  explicit context(google::protobuf::Arena& arena);
+  starlark_obj* false_value() const;
+  starlark_obj* true_value() const;
+  starlark_obj* none_value() const;
+  starlark_obj* zero() const;
+  starlark_obj* one() const;
+  // TODO(lmirelmann): Do not expose the arena.
+  google::protobuf::Arena& arena();
+
+ private:
+  google::protobuf::Arena& arena_;
+  starlark_obj* false_value_;
+  starlark_obj* true_value_;
+  starlark_obj* none_value_;
+  starlark_obj* zero_;
+  starlark_obj* one_;
+};
+
 class starlark_obj {
  public:
   typedef std::vector<starlark_obj*> pos_args_t;
   typedef starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>> named_args_t;
-  typedef starlark_obj* (fn)(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+  typedef starlark_obj* (fn)(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
   starlark_obj();
   virtual ~starlark_obj();
@@ -140,7 +160,7 @@ class starlark_obj {
   int cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;
   void freeze();
-  virtual starlark_obj* call(const pos_args_t& pos_args, const named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
+  virtual starlark_obj* call(const pos_args_t& pos_args, const named_args_t& named_args, context& ctx, error_fn& error_callback);
   virtual void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback);
 
   virtual starlark_obj* unary_plus(google::protobuf::Arena& arena, error_fn& error_callback) const;

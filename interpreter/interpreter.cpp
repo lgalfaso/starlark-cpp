@@ -37,6 +37,7 @@ using ::starlark::compiler::compiler;
 using ::starlark::grammar::options;
 using ::starlark::grammar::predeclared_symbols;
 using ::starlark::logging::logger;
+using ::starlark::runtime::context;
 using ::starlark::runtime::create_function;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
@@ -124,10 +125,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
   if (starlark_program == nullptr) {
     return nullptr;
   }
-  // TODO(lmirelmann): This should go into a structure that keeps some of the constants.
-  starlark_obj* none = global_context["None"];
-  starlark_obj* bool_true = global_context["True"];
-  starlark_obj* bool_false = global_context["False"];
+  context ctx(arena);
   starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
   error_handler error_callback(block_ptr, instruction_ptr, starlark_program->block(0).op_code_size() - 1, log);
 
@@ -137,7 +135,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
     instruction_ptr++;
     switch (op_code.op_code_case()) {
       case OpCode::kConstNone:
-        stack.push_back(none);
+        stack.push_back(ctx.none_value());
         break;
       case OpCode::kConstInt:
         stack.push_back(Arena::Create<starlark_integer>(&arena, op_code.const_int().value()));
@@ -287,7 +285,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       case OpCode::kUnaryNot: {
         assert(!stack.empty());
-        stack.back() = stack.back()->truthy() ? bool_false : bool_true;
+        stack.back() = stack.back()->truthy() ? ctx.false_value() : ctx.true_value();
         break;
       }
       case OpCode::kUnaryPlus:
@@ -304,56 +302,56 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->equals(*element) ? bool_true : bool_false);
+        stack.back() = (stack.back()->equals(*element) ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryBangEquals: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->equals(*element) ? bool_false : bool_true);
+        stack.back() = (stack.back()->equals(*element) ? ctx.false_value() : ctx.true_value());
         break;
       }
       case OpCode::kBinaryLessThan: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, "<", error_callback) < 0 ? bool_true : bool_false);
+        stack.back() = (stack.back()->cmp(*element, "<", error_callback) < 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryLessThanEquals: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, "<=", error_callback) <= 0 ? bool_true : bool_false);
+        stack.back() = (stack.back()->cmp(*element, "<=", error_callback) <= 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryGreaterThan: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, ">", error_callback) > 0 ? bool_true : bool_false);
+        stack.back() = (stack.back()->cmp(*element, ">", error_callback) > 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryGreaterThanEquals: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, ">=", error_callback) >= 0 ? bool_true : bool_false);
+        stack.back() = (stack.back()->cmp(*element, ">=", error_callback) >= 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryIn: {
         assert(stack.size() >= 2);
         starlark_obj* sequence = stack.back();
         stack.pop_back();
-        stack.back() = sequence->binary_in(*stack.back(), error_callback) ? bool_true : bool_false;
+        stack.back() = sequence->binary_in(*stack.back(), error_callback) ? ctx.true_value() : ctx.false_value();
         break;
       }
       case OpCode::kBinaryNotIn: {
         assert(stack.size() >= 2);
         starlark_obj* sequence = stack.back();
         stack.pop_back();
-        stack.back() = sequence->binary_in(*stack.back(), error_callback) ? bool_false : bool_true;
+        stack.back() = sequence->binary_in(*stack.back(), error_callback) ? ctx.false_value() : ctx.true_value();
         break;
       }
 #define BINARY_OP(op, method)                                                              \
@@ -403,7 +401,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         // TODO(lmirelmann): Get the variadic arguments.
         // TODO(lmirelmann): Get the named variadic arguments.
         stack.resize(stack.size() - args_count, nullptr);
-        stack.back() = stack.back()->call(pos_args, named_args, arena, error_callback);
+        stack.back() = stack.back()->call(pos_args, named_args, ctx, error_callback);
         break;
       }
       case OpCode::kGetIterator:

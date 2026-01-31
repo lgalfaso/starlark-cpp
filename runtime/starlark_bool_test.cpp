@@ -24,6 +24,7 @@
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -47,7 +48,7 @@ using ::testing::Lt;
 
 namespace {
 
-starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, Arena&, error_fn&) {
+starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn&) {
   return nullptr;
 }
 

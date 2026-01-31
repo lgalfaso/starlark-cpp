@@ -25,6 +25,7 @@ using ::starlark::grammar::options;
 using ::starlark::interpreter::frame;
 using ::starlark::interpreter::interpreter;
 using ::starlark::logging::logger;
+using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_none;
@@ -43,7 +44,7 @@ std::string print_logs(logger& logging) {
   return result;
 }
 
-starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!named_args.empty()) {
     error_callback.add_error("assert_eq does not take any named arguments.");
     return nullptr;
@@ -66,10 +67,10 @@ starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_
     error_callback.add_error(std::format("Actual: {}\nExpected: {}\n", actual->repr(), expected->repr()));
     return nullptr;
   }
-  return Arena::Create<starlark_none>(&arena);
+  return ctx.none_value();
 }
 
-starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   starlark_obj* error = nullptr;
   for (auto& [key, value] : named_args) {
     if (key == "error_message") {
@@ -119,7 +120,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
       return nullptr;
     }
   }
-  return Arena::Create<starlark_none>(&arena);
+  return ctx.none_value();
 }
 
 TEST(Interpreter, TestCase) {

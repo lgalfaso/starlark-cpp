@@ -20,6 +20,7 @@ cc_library(
         "//runtime:starlark_none",
         "//runtime:starlark_numeric_impl",
         "//runtime:starlark_object",
+        "//runtime:starlark_object_impl",
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
         "//runtime:starlark_types",
