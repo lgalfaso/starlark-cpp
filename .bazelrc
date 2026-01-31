@@ -3,7 +3,7 @@ common --cxxopt=-std=c++2b --host_cxxopt=-std=c++2b
 
 common:macos --cxxopt=-fconstexpr-steps=40000000
 coverage --cxxopt=-fno-inline --cxxopt=-fno-exceptions
-coverage --experimental_generate_llvm_lcov=false --features=-coverage --copt=-coverage --linkopt=-coverage --test_env=GCOV_PREFIX_STRIP=12
+coverage --features=-coverage --copt=-coverage --linkopt=-coverage --test_env=GCOV_PREFIX_STRIP=12
 
 build:asan --strip=never
 build:asan --copt -fsanitize=address
