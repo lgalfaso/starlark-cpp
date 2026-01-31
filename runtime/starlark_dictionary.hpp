@@ -35,6 +35,7 @@ class starlark_dictionary : public starlark_obj {
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
 
   bool clear(error_fn& error_callback);
+  starlark_obj* get(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) const;
 
   class starlark_dictionary_iterator : public starlark_iterator {
    public:

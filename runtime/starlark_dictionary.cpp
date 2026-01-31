@@ -192,6 +192,18 @@ bool starlark_dictionary::clear(error_fn& error_callback) {
   return true;
 }
 
+starlark_obj* starlark_dictionary::get(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) const {
+  if (key->hash() == -1) {
+    error_callback.add_error(error_unhashable_key(type(), key->type()));
+    return nullptr;
+  }
+  auto it = values.find(key);
+  if (it == values.end()) {
+    return default_value;
+  }
+  return it->second;
+}
+
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
@@ -278,9 +290,15 @@ starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlar
 }
 
 starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::dict_t);
+  if (!no_named_args(named_args, error_callback, "dict.get") ||
+      !min_args(pos_args, error_callback, "get", 1) ||
+      !max_args(pos_args, error_callback, "get", 2)) {
+    return nullptr;
+  }
+  starlark_obj* default_value = pos_args.size() == 2 ? pos_args[1] : ctx.none_value();
+  return static_cast<starlark_dictionary*>(this_obj)->get(pos_args.front(), default_value, error_callback);
 }
 
 starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
