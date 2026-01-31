@@ -322,6 +322,7 @@ starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
+  // TODO(lmirelmann): This is not the right implementation of string::count.
   assert(this_obj->type() == starlark_types::string_t);
   return create_integer(this_obj->as_string().size(), arena);
 }
