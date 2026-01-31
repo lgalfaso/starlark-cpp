@@ -14,6 +14,7 @@
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::runtime::starlark_bool;
@@ -21,12 +22,14 @@ using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
+using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
+using ::std::literals::string_view_literals::operator""sv;
 using ::testing::IsEmpty;
 using ::testing::Pair;
 using ::testing::SizeIs;
-using ::std::literals::string_view_literals::operator""sv;
 
 namespace {
 
@@ -509,6 +512,80 @@ TEST(StarlarkDictionary, IndexAssignUsingUnhashableKey) {
   dict.index_assign(list, none, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, Clear) {
+  Arena arena;
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("clear", arena, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, arena, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::none_t);
+  EXPECT_EQ(dictionary.str(), "{}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, ClearWhileIterating) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("clear", arena, error_callback);
+  ASSERT_NE(nullptr, method);
+  [[maybe_unused]] auto* it = dictionary.get_iterator(true, arena, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+}
+
+TEST(StarlarkDictionary, ClearWithArguments) {
+  error_handler error_callback;
+  Arena arena;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&zero);
+  auto* method = dictionary.dot("clear", arena, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, arena, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: dict.clear() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
 }  // namespace

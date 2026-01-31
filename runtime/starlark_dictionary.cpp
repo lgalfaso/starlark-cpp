@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "runtime/error_messages.hpp"
+#include "runtime/starlark_none.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -183,6 +184,14 @@ void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& el
   values.insert(&const_cast<starlark_obj&>(idx), &element);
 }
 
+bool starlark_dictionary::clear(error_fn& error_callback) {
+  if (!can_modify(error_callback)) {
+    return false;
+  }
+  values.clear();
+  return true;
+}
+
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   if (type() != other->type()) {
     return false;
@@ -257,9 +266,16 @@ bool starlark_dictionary::can_modify(error_fn& error_callback) const {
 }
 
 starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "dict.clear")) {
+     return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::dict_t);
+  if (!static_cast<starlark_dictionary*>(this_obj)->clear(error_callback)) {
+    return nullptr;
+  }
+  // TODO(lmirelmann): Use the value from the cache.
+  return Arena::Create<starlark_none>(&arena);
 }
 
 starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {

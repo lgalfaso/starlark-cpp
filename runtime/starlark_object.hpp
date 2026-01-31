@@ -220,6 +220,14 @@ class starlark_obj {
 int64_t starlark_hash(std::span<int64_t> values);
 starlark_obj* create_function(google::protobuf::Arena &arena, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
 
+bool no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+bool min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min);
+bool max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max);
+bool no_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+bool one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+bool n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name);
+bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+
 }  // namespace runtime
 }  // namespace starlark
 

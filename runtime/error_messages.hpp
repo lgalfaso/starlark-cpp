@@ -55,6 +55,7 @@ std::string error_invalid_literal_with_base(std::string_view fn_name, int64_t ba
 
 std::string error_no_keyword(std::string_view fn_name);
 std::string error_unknown_argument(std::string_view argument_name);
+std::string error_no_pos_args(std::string_view fn_name, int64_t actual);
 std::string error_arguments_too_few(std::string_view fn_name, int64_t actual, int64_t expected);
 std::string error_arguments_too_many(std::string_view fn_name, int64_t actual, int64_t expected);
 std::string error_arguments_exactly_one(std::string_view fn_name, int64_t actual);

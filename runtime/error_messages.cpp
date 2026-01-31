@@ -161,6 +161,10 @@ std::string error_unknown_argument(std::string_view argument_name) {
   return std::format("Unknown named argument '{}'.", argument_name);
 }
 
+std::string error_no_pos_args(std::string_view fn_name, int64_t actual) {
+  return std::format("TypeError: {}() takes no arguments ({} given)", fn_name, actual);
+}
+
 std::string error_arguments_too_few(std::string_view fn_name, int64_t actual, int64_t expected) {
   return std::format("TypeError: {} expected at least {} argument, got {}", fn_name, expected, actual);
 }

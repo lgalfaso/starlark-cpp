@@ -34,6 +34,8 @@ class starlark_dictionary : public starlark_obj {
   starlark_obj* index(const starlark_obj& other, google::protobuf::Arena& arena, error_fn& error_callback) const override;
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
 
+  bool clear(error_fn& error_callback);
+
   class starlark_dictionary_iterator : public starlark_iterator {
    public:
     explicit starlark_dictionary_iterator(starlark_dictionary* dictionary);

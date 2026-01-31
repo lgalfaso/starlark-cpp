@@ -149,61 +149,6 @@ starlark_obj* starlark_function::call(
   return nullptr;
 }
 
-namespace {
-
-bool no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
-  if (!named_args.empty()) {
-    error_callback.add_error(error_no_keyword(fn_name));
-    return false;
-  }
-  return true;
-}
-
-bool min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min) {
-  if (pos_args.size() < expected_min) {
-    error_callback.add_error(error_arguments_too_few(fn_name, pos_args.size(), expected_min));
-    return false;
-  }
-  return true;
-}
-
-bool max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max) {
-  if (pos_args.size() > expected_max) {
-    error_callback.add_error(error_arguments_too_many(fn_name, pos_args.size(), expected_max));
-    return false;
-  }
-  return true;
-}
-
-bool one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
-  if (!no_named_args(named_args, error_callback, fn_name)) {
-    return false;
-  }
-  if (pos_args.size() != 1) {
-    error_callback.add_error(error_arguments_exactly_one(fn_name, pos_args.size()));
-    return false;
-  }
-  return true;
-}
-
-bool n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name) {
-  if (!no_named_args(named_args, error_callback, fn_name)) {
-    return false;
-  }
-  if (pos_args.size() != pos_args_count) {
-    error_callback.add_error(error_arguments_exactly(fn_name, pos_args.size(), pos_args_count));
-    return false;
-  }
-  return true;
-}
-
-bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
-  return no_named_args(named_args, error_callback, fn_name) &&
-         max_args(pos_args, error_callback, fn_name, 1);
-}
-
-}  // namespace
-
 starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark_obj*>& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::abs_f)) {
     return nullptr;
