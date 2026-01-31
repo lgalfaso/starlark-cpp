@@ -158,7 +158,7 @@ TEST(StarlarkFloat, EqualsExact) {
   EXPECT_FALSE(starlark_float(std::numeric_limits<int64_t>::max()).equals(starlark_integer(std::numeric_limits<int64_t>::max())));
   EXPECT_FALSE(starlark_float(std::numeric_limits<int64_t>::max()).equals(starlark_bigint(std::numeric_limits<int64_t>::max())));
   EXPECT_FALSE(starlark_float(std::numeric_limits<double>::infinity()).equals(starlark_integer(std::numeric_limits<int64_t>::max())));
-  EXPECT_FALSE(starlark_float(std::numeric_limits<double>::infinity()).equals(starlark_bigint(number::one << 2000)));
+  EXPECT_FALSE(starlark_float(std::numeric_limits<double>::infinity()).equals(starlark_bigint(number::one() << 2000)));
 }
 
 TEST(StarlarkFloat, EqualsVsBigInt) {
@@ -308,7 +308,7 @@ TEST(StarlarkFloat, PlusEqualsAssign) {
   starlark_float f1(1.0);
   starlark_float f2(2.0);
   starlark_integer i1(3);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -339,7 +339,7 @@ TEST(StarlarkFloat, BinaryPlus) {
   starlark_float f1(1.0);
   starlark_float f2(2.0);
   starlark_integer i1(3);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -367,7 +367,7 @@ TEST(StarlarkFloat, BinaryPlusError) {
 }
 
 TEST(StarlarkFloat, BinaryPlusOverflowError) {
-  starlark_bigint big(number::one << 1200);
+  starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -381,7 +381,7 @@ TEST(StarlarkFloat, MinusEqualsAssign) {
   starlark_float f1(2.0);
   starlark_float f2(3.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 3);
+  starlark_bigint b1(number::one() << 3);
   Arena arena;
   error_handler error_callback;
 
@@ -412,7 +412,7 @@ TEST(StarlarkFloat, BinaryMinus) {
   starlark_float f1(2.0);
   starlark_float f2(3.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 3);
+  starlark_bigint b1(number::one() << 3);
   Arena arena;
   error_handler error_callback;
 
@@ -440,7 +440,7 @@ TEST(StarlarkFloat, BinaryMinusError) {
 }
 
 TEST(StarlarkFloat, BinaryMinusOverflowError) {
-  starlark_bigint big(number::one << 1200);
+  starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -454,7 +454,7 @@ TEST(StarlarkFloat, StarEqualsAssign) {
   starlark_float f1(2.0);
   starlark_float f2(3.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 3);
+  starlark_bigint b1(number::one() << 3);
   Arena arena;
   error_handler error_callback;
 
@@ -485,7 +485,7 @@ TEST(StarlarkFloat, BinaryStar) {
   starlark_float f1(2.0);
   starlark_float f2(3.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 3);
+  starlark_bigint b1(number::one() << 3);
   Arena arena;
   error_handler error_callback;
 
@@ -513,7 +513,7 @@ TEST(StarlarkFloat, BinaryStarError) {
 }
 
 TEST(StarlarkFloat, BinaryStarOverflowError) {
-  starlark_bigint big(number::one << 1200);
+  starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -528,7 +528,7 @@ TEST(StarlarkFloat, SlashEqualsAssign) {
   starlark_float f2(-10.0);
   starlark_float f3(2.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -569,7 +569,7 @@ TEST(StarlarkFloat, BinarySlash) {
   starlark_float f2(-10.0);
   starlark_float f3(2.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -606,7 +606,7 @@ TEST(StarlarkFloat, BinarySlashError) {
 }
 
 TEST(StarlarkFloat, BinarySlashOverflowError) {
-  starlark_bigint big(number::one << 1200);
+  starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -639,7 +639,7 @@ TEST(StarlarkFloat, BinarySlashZeroIntError) {
 }
 
 TEST(StarlarkFloat, BinarySlashZeroBigintError) {
-  starlark_bigint b0(number::zero);
+  starlark_bigint b0(number::zero());
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -654,7 +654,7 @@ TEST(StarlarkFloat, SlashSlashEqualsAssign) {
   starlark_float f2(-10.0);
   starlark_float f3(2.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -695,7 +695,7 @@ TEST(StarlarkFloat, BinarySlashSlash) {
   starlark_float f2(-10.0);
   starlark_float f3(2.0);
   starlark_integer i1(4);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -732,7 +732,7 @@ TEST(StarlarkFloat, BinarySlashSlashError) {
 }
 
 TEST(StarlarkFloat, BinarySlashSlashOverflowError) {
-  starlark_bigint big(number::one << 1200);
+  starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -765,7 +765,7 @@ TEST(StarlarkFloat, BinarySlashSlashZeroIntError) {
 }
 
 TEST(StarlarkFloat, BinarySlashSlashZeroBigintError) {
-  starlark_bigint b0(number::zero);
+  starlark_bigint b0(number::zero());
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -1261,7 +1261,7 @@ TEST(StarlarkFloat, BinaryPercentError) {
 }
 
 TEST(StarlarkFloat, BinaryPercentOverflowError) {
-  starlark_bigint big(number::one << 1200);
+  starlark_bigint big(number::one() << 1200);
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;
@@ -1294,7 +1294,7 @@ TEST(StarlarkFloat, BinaryPercentZeroIntError) {
 }
 
 TEST(StarlarkFloat, BinaryPercentZeroBigintError) {
-  starlark_bigint b0(number::zero);
+  starlark_bigint b0(number::zero());
   starlark_float f1(1.0);
   Arena arena;
   error_handler error_callback;

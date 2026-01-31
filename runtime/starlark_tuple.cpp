@@ -77,7 +77,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
         return Arena::Create<starlark_tuple>(&arena, 0);
       }
       const auto& value = other.as_bigint();
-      if (value <= number::zero) {
+      if (value <= number::zero()) {
         return Arena::Create<starlark_tuple>(&arena, 0);
       }
       if (value.bit_size() >= 63) {

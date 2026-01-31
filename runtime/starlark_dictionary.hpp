@@ -55,8 +55,8 @@ class starlark_dictionary : public starlark_obj {
  private:
   bool can_modify(error_fn& error_callback) const;
 
-  static const std::map<std::string, fn*, std::less<>> method_refs;
-  static const std::vector<std::string> attributes;
+  static const std::map<std::string, fn*, std::less<>>& method_refs();
+  static const std::vector<std::string>& attributes();
 
   starlark::cnt::linked_hash_map<starlark_obj*, starlark_obj*, starlark_hash_op, starlark_equals_to> values;
   int iterators_count;

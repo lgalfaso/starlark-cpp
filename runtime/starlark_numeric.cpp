@@ -56,7 +56,7 @@ bool equals_fb(double lhs, const number& rhs) {
   if (!std::isfinite(lhs)) {
     return false;
   }
-  if (rhs == number::zero) {
+  if (rhs == number::zero()) {
     return lhs == 0;
   }
   if (lhs == 0) {
@@ -89,7 +89,7 @@ bool equals_fb(double lhs, const number& rhs) {
 }
 
 bool equals_ib(int64_t lhs, const number& rhs) {
-  if (rhs == number::zero) {
+  if (rhs == number::zero()) {
     return lhs == 0;
   }
   if (lhs == 0) {
@@ -193,7 +193,7 @@ int cmp_fb(double lhs, const number& rhs) {
   if (!std::isfinite(lhs)) {
     return lhs > 0 ? 1 : -1;
   }
-  if (rhs == number::zero) {
+  if (rhs == number::zero()) {
     if (lhs != 0) {
       return lhs > 0 ? 1 : -1;
     }
@@ -267,7 +267,7 @@ int cmp_fb(double lhs, const number& rhs) {
 }
 
 int cmp_ib(int64_t lhs, const number& rhs) {
-  if (rhs == number::zero) {
+  if (rhs == number::zero()) {
       if (lhs != 0) {
         return lhs > 0 ? 1 : -1;
       }
@@ -298,7 +298,7 @@ int cmp_ib(int64_t lhs, const number& rhs) {
 number from_int64(int64_t value) {
   number result(value);
   if (value < 0) {
-    result -= number::one << 64;
+    result -= number::one() << 64;
   }
   return result;
 }
@@ -333,8 +333,8 @@ double starlark_fmod(double a, double b) {
 number starlark_div(const number& a, const number& b) {
   number d, r;
   std::tie(d, r) = number::div(a, b);
-  if (b.sign() != r.sign() && r != number::zero) {
-    d -= number::one;
+  if (b.sign() != r.sign() && r != number::zero()) {
+    d -= number::one();
   }
   return d;
 }
@@ -342,7 +342,7 @@ number starlark_div(const number& a, const number& b) {
 number starlark_mod(const number& a, const number& b) {
   number d, r;
   std::tie(d, r) = number::div(a, b);
-  if (b.sign() != r.sign() && r != number::zero) {
+  if (b.sign() != r.sign() && r != number::zero()) {
     r += b;
   }
   return r;

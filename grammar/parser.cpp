@@ -41,46 +41,56 @@ namespace grammar {
 
 namespace {
 
-const std::map<token_type, std::pair<int, BinaryExpr::BinaryOperator>> operator_precedence = {
-  {token_type::kOr, {1, BinaryExpr::OR}},
-  {token_type::kAnd, {2, BinaryExpr::AND}},
-  {token_type::kNot, {3, BinaryExpr::UNKNOWN}},  // As a prefix.
-  {token_type::kEqualsEquals, {4, BinaryExpr::EQUALS_EQUALS}},
-  {token_type::kNotEquals, {4, BinaryExpr::BANG_EQUALS}},
-  {token_type::kLess, {4, BinaryExpr::LESS_THAN}},
-  {token_type::kGreater, {4, BinaryExpr::GREATER_THAN}},
-  {token_type::kLessEquals, {4, BinaryExpr::LESS_THAN_EQUALS}},
-  {token_type::kGreaterEquals, {4, BinaryExpr::GREATER_THAN_EQUALS}},
-  {token_type::kIn, {4, BinaryExpr::IN}},
-  {token_type::kPipe, {5, BinaryExpr::PIPE}},
-  {token_type::kCaret, {6, BinaryExpr::HAT}},
-  {token_type::kAmpersand, {7, BinaryExpr::AMPERSAND}},
-  {token_type::kLessLess, {8, BinaryExpr::LESS_THAN_LESS_THAN}},
-  {token_type::kGreaterGreater, {8, BinaryExpr::GREATER_THAN_GREATER_THAN}},
-  {token_type::kMinus, {9, BinaryExpr::MINUS}},
-  {token_type::kPlus, {9, BinaryExpr::PLUS}},
-  {token_type::kStar, {10, BinaryExpr::STAR}},
-  {token_type::kPercent, {10, BinaryExpr::PERCENT}},
-  {token_type::kSlash, {10, BinaryExpr::SLASH}},
-  {token_type::kSlashSlash, {10, BinaryExpr::SLASH_SLASH}},
-};
+const std::map<token_type, std::pair<int, BinaryExpr::BinaryOperator>>& operator_precedence() {
+  static const std::map<token_type, std::pair<int, BinaryExpr::BinaryOperator>>* result =
+    new std::map<token_type, std::pair<int, BinaryExpr::BinaryOperator>>{
+      {token_type::kOr, {1, BinaryExpr::OR}},
+      {token_type::kAnd, {2, BinaryExpr::AND}},
+      {token_type::kNot, {3, BinaryExpr::UNKNOWN}},  // As a prefix.
+      {token_type::kEqualsEquals, {4, BinaryExpr::EQUALS_EQUALS}},
+      {token_type::kNotEquals, {4, BinaryExpr::BANG_EQUALS}},
+      {token_type::kLess, {4, BinaryExpr::LESS_THAN}},
+      {token_type::kGreater, {4, BinaryExpr::GREATER_THAN}},
+      {token_type::kLessEquals, {4, BinaryExpr::LESS_THAN_EQUALS}},
+      {token_type::kGreaterEquals, {4, BinaryExpr::GREATER_THAN_EQUALS}},
+      {token_type::kIn, {4, BinaryExpr::IN}},
+      {token_type::kPipe, {5, BinaryExpr::PIPE}},
+      {token_type::kCaret, {6, BinaryExpr::HAT}},
+      {token_type::kAmpersand, {7, BinaryExpr::AMPERSAND}},
+      {token_type::kLessLess, {8, BinaryExpr::LESS_THAN_LESS_THAN}},
+      {token_type::kGreaterGreater, {8, BinaryExpr::GREATER_THAN_GREATER_THAN}},
+      {token_type::kMinus, {9, BinaryExpr::MINUS}},
+      {token_type::kPlus, {9, BinaryExpr::PLUS}},
+      {token_type::kStar, {10, BinaryExpr::STAR}},
+      {token_type::kPercent, {10, BinaryExpr::PERCENT}},
+      {token_type::kSlash, {10, BinaryExpr::SLASH}},
+      {token_type::kSlashSlash, {10, BinaryExpr::SLASH_SLASH}},
+    };
+
+  return *result;
+}
 
 constexpr int MAX_PRECEDENCE = 11;
 
-const std::map<token_type, AssignStmt::AssignOperator> assign_ops = {
-  {token_type::kEquals, AssignStmt::EQUALS},
-  {token_type::kPlusEquals, AssignStmt::PLUS_EQUALS},
-  {token_type::kMinusEquals, AssignStmt::MINUS_EQUALS},
-  {token_type::kStarEquals, AssignStmt::STAR_EQUALS},
-  {token_type::kSlashEquals, AssignStmt::SLASH_EQUALS},
-  {token_type::kSlashSlashEquals, AssignStmt::SLASH_SLASH_EQUALS},
-  {token_type::kPercentEquals, AssignStmt::PERCENT_EQUALS},
-  {token_type::kAmpersandEquals, AssignStmt::AMPERSAND_EQUALS},
-  {token_type::kPipeEquals, AssignStmt::PIPE_EQUALS},
-  {token_type::kCaretEquals, AssignStmt::HAT_EQUALS},
-  {token_type::kLessLessEquals, AssignStmt::LESS_LESS_EQUALS},
-  {token_type::kGreaterGreaterEquals, AssignStmt::GREATER_GREATER_EQUALS},
-};
+const std::map<token_type, AssignStmt::AssignOperator>& assign_ops() {
+  static const std::map<token_type, AssignStmt::AssignOperator>* result =
+    new std::map<token_type, AssignStmt::AssignOperator>{
+      {token_type::kEquals, AssignStmt::EQUALS},
+      {token_type::kPlusEquals, AssignStmt::PLUS_EQUALS},
+      {token_type::kMinusEquals, AssignStmt::MINUS_EQUALS},
+      {token_type::kStarEquals, AssignStmt::STAR_EQUALS},
+      {token_type::kSlashEquals, AssignStmt::SLASH_EQUALS},
+      {token_type::kSlashSlashEquals, AssignStmt::SLASH_SLASH_EQUALS},
+      {token_type::kPercentEquals, AssignStmt::PERCENT_EQUALS},
+      {token_type::kAmpersandEquals, AssignStmt::AMPERSAND_EQUALS},
+      {token_type::kPipeEquals, AssignStmt::PIPE_EQUALS},
+      {token_type::kCaretEquals, AssignStmt::HAT_EQUALS},
+      {token_type::kLessLessEquals, AssignStmt::LESS_LESS_EQUALS},
+      {token_type::kGreaterGreaterEquals, AssignStmt::GREATER_GREATER_EQUALS},
+    };
+
+  return *result;
+}
 
 bool is_target(const Expression* base) {
   std::vector<const Expression*> frames{base};
@@ -243,7 +253,8 @@ parser::parser(std::string_view input, logger& logging) : parser(input, options{
 
 parser::parser(std::string_view input, const options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging)
     : opts(opts), lex(input, opts, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
-  base_bindings.insert(predeclared_symbols.begin(), predeclared_symbols.end());
+  const auto& symbols = predeclared_symbols();
+  base_bindings.insert(symbols.begin(), symbols.end());
   lex.next_token();
 }
 
@@ -806,9 +817,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
         }
         break;
-      case parser_state::kParseStatementExpression_0:
+      case parser_state::kParseStatementExpression_0: {
         found_non_load |= !top.statement->expression_statement().has_string_value();
-        if (auto op = assign_ops.find(lex.current_token().type()); op != assign_ops.end()) {
+        const auto& all_assign_ops = assign_ops();
+        if (auto op = all_assign_ops.find(lex.current_token().type()); op != all_assign_ops.end()) {
           found_non_load = true;
           if (!is_target(&top.statement->expression_statement())) {
             // Report the error and continue to parse this as an expression
@@ -844,6 +856,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           resolve(top.statement->mutable_expression_statement(), 0);
         }
         break;
+      }
       case parser_state::kParseExpression:
         frames.emplace_back(frame{
           .state = parser_state::kParseExpression_0,
@@ -956,7 +969,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
           break;
         }
-        if (top.test_p_precedence == operator_precedence.at(token_type::kNot).first) {
+        if (top.test_p_precedence == operator_precedence().at(token_type::kNot).first) {
           Expression* result_ref = top.test;
           for (;;) {
             if (!capture(token_type::kNot)) {
@@ -986,7 +999,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::kParseTestP_0:
         if (is_current(token_type::kNot)) {
-          if (top.test_p_precedence != operator_precedence.at(token_type::kIn).first) {
+          if (top.test_p_precedence != operator_precedence().at(token_type::kIn).first) {
             break;
           }
           if (!top.test_p_0_first) {
@@ -1013,31 +1026,34 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .test = top.test->mutable_binary_expression()->mutable_rhs(),
             .test_p_precedence = top.test_p_precedence + 1,
           });
-        } else if (auto next_op = operator_precedence.find(lex.current_token().type()); next_op != operator_precedence.end()) {
-          if (top.test_p_precedence != next_op->second.first) {
-            break;
+        } else {
+          const auto& all_operator_precedence = operator_precedence();
+          if (auto next_op = all_operator_precedence.find(lex.current_token().type()); next_op != all_operator_precedence.end()) {
+            if (top.test_p_precedence != next_op->second.first) {
+              break;
+            }
+            if (!top.test_p_0_first && top.test_p_precedence == all_operator_precedence.at(token_type::kEqualsEquals).first) {
+              add_error("Comparison operators are not associative. Use parens.");
+            }
+            lex.next_token();
+            {
+              Expression* new_result = Arena::Create<Expression>(top.test->GetArena());
+              new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
+              new_result->Swap(top.test);
+            }
+            top.test->mutable_binary_expression()->set_operator_(next_op->second.second);
+            frames.emplace_back(frame{
+              .state = parser_state::kParseTestP_0,
+              .test = top.test,
+              .test_p_precedence = top.test_p_precedence,
+              .test_p_0_first = false,
+            });
+            frames.emplace_back(frame{
+              .state = parser_state::kParseTestP,
+              .test = top.test->mutable_binary_expression()->mutable_rhs(),
+              .test_p_precedence = top.test_p_precedence + 1,
+            });
           }
-          if (!top.test_p_0_first && top.test_p_precedence == operator_precedence.at(token_type::kEqualsEquals).first) {
-            add_error("Comparison operators are not associative. Use parens.");
-          }
-          lex.next_token();
-          {
-            Expression* new_result = Arena::Create<Expression>(top.test->GetArena());
-            new_result->mutable_binary_expression()->mutable_lhs()->Swap(top.test);
-            new_result->Swap(top.test);
-          }
-          top.test->mutable_binary_expression()->set_operator_(next_op->second.second);
-          frames.emplace_back(frame{
-            .state = parser_state::kParseTestP_0,
-            .test = top.test,
-            .test_p_precedence = top.test_p_precedence,
-            .test_p_0_first = false,
-          });
-          frames.emplace_back(frame{
-            .state = parser_state::kParseTestP,
-            .test = top.test->mutable_binary_expression()->mutable_rhs(),
-            .test_p_precedence = top.test_p_precedence + 1,
-          });
         }
         break;
       case parser_state::kParsePrimary:

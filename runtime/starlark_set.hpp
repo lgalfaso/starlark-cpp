@@ -61,8 +61,8 @@ class starlark_set : public starlark_obj {
  private:
   bool can_modify(error_fn& error_callback) const;
 
-  static const std::map<std::string, fn*, std::less<>> method_refs;
-  static const std::vector<std::string> attributes;
+  static const std::map<std::string, fn*, std::less<>>& method_refs();
+  static const std::vector<std::string>& attributes();
 
   set_t values;
   int iterators_count;

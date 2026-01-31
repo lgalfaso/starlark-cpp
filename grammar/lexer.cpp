@@ -27,87 +27,97 @@ namespace grammar {
 
 namespace {
 
-static const std::map<std::string, token_type, std::less<>> all_operators = {
-  {"&", token_type::kAmpersand},
-  {"&=", token_type::kAmpersandEquals},
-  {"^", token_type::kCaret},
-  {"^=", token_type::kCaretEquals},
-  {":", token_type::kColon},
-  {",", token_type::kComma},
-  {".", token_type::kDot},
-  {"=", token_type::kEquals},
-  {"==", token_type::kEqualsEquals},
-  {">", token_type::kGreater},
-  {">=", token_type::kGreaterEquals},
-  {">>", token_type::kGreaterGreater},
-  {">>=", token_type::kGreaterGreaterEquals},
-  {"{", token_type::kLBrace},
-  {"[", token_type::kLBracket},
-  {"(", token_type::kLParen},
-  {"<", token_type::kLess},
-  {"<=", token_type::kLessEquals},
-  {"<<", token_type::kLessLess},
-  {"<<=", token_type::kLessLessEquals},
-  {"-", token_type::kMinus},
-  {"-=", token_type::kMinusEquals},
-  {"!=", token_type::kNotEquals},
-  {"%", token_type::kPercent},
-  {"%=", token_type::kPercentEquals},
-  {"|", token_type::kPipe},
-  {"|=", token_type::kPipeEquals},
-  {"+", token_type::kPlus},
-  {"+=", token_type::kPlusEquals},
-  {"}", token_type::kRBrace},
-  {"]", token_type::kRBracket},
-  {")", token_type::kRParen},
-  {";", token_type::kSemi},
-  {"/", token_type::kSlash},
-  {"/=", token_type::kSlashEquals},
-  {"//", token_type::kSlashSlash},
-  {"//=", token_type::kSlashSlashEquals},
-  {"*", token_type::kStar},
-  {"*=", token_type::kStarEquals},
-  {"**", token_type::kStarStar},
-  {"~", token_type::kTilde},
-};
+const std::map<std::string, token_type, std::less<>>& all_operators() {
+  static const std::map<std::string, token_type, std::less<>>* result =
+    new std::map<std::string, token_type, std::less<>>{
+      {"&", token_type::kAmpersand},
+      {"&=", token_type::kAmpersandEquals},
+      {"^", token_type::kCaret},
+      {"^=", token_type::kCaretEquals},
+      {":", token_type::kColon},
+      {",", token_type::kComma},
+      {".", token_type::kDot},
+      {"=", token_type::kEquals},
+      {"==", token_type::kEqualsEquals},
+      {">", token_type::kGreater},
+      {">=", token_type::kGreaterEquals},
+      {">>", token_type::kGreaterGreater},
+      {">>=", token_type::kGreaterGreaterEquals},
+      {"{", token_type::kLBrace},
+      {"[", token_type::kLBracket},
+      {"(", token_type::kLParen},
+      {"<", token_type::kLess},
+      {"<=", token_type::kLessEquals},
+      {"<<", token_type::kLessLess},
+      {"<<=", token_type::kLessLessEquals},
+      {"-", token_type::kMinus},
+      {"-=", token_type::kMinusEquals},
+      {"!=", token_type::kNotEquals},
+      {"%", token_type::kPercent},
+      {"%=", token_type::kPercentEquals},
+      {"|", token_type::kPipe},
+      {"|=", token_type::kPipeEquals},
+      {"+", token_type::kPlus},
+      {"+=", token_type::kPlusEquals},
+      {"}", token_type::kRBrace},
+      {"]", token_type::kRBracket},
+      {")", token_type::kRParen},
+      {";", token_type::kSemi},
+      {"/", token_type::kSlash},
+      {"/=", token_type::kSlashEquals},
+      {"//", token_type::kSlashSlash},
+      {"//=", token_type::kSlashSlashEquals},
+      {"*", token_type::kStar},
+      {"*=", token_type::kStarEquals},
+      {"**", token_type::kStarStar},
+      {"~", token_type::kTilde},
+    };
 
-static const std::map<std::string, token_type, std::less<>> all_keywords = {
-  {"and", token_type::kAnd},
-  {"break", token_type::kBreak},
-  {"continue", token_type::kContinue},
-  {"def", token_type::kDef},
-  {"elif", token_type::kElif},
-  {"else", token_type::kElse},
-  {"for", token_type::kFor},
-  {"if", token_type::kIf},
-  {"in", token_type::kIn},
-  {"lambda", token_type::kLambda},
-  {"load", token_type::kLoad},
-  {"not", token_type::kNot},
-  {"or", token_type::kOr},
-  {"pass", token_type::kPass},
-  {"return", token_type::kReturn},
+  return *result;
+}
+
+const std::map<std::string, token_type, std::less<>>& all_keywords() {
+  static const std::map<std::string, token_type, std::less<>>* result =
+    new std::map<std::string, token_type, std::less<>>{
+      {"and", token_type::kAnd},
+      {"break", token_type::kBreak},
+      {"continue", token_type::kContinue},
+      {"def", token_type::kDef},
+      {"elif", token_type::kElif},
+      {"else", token_type::kElse},
+      {"for", token_type::kFor},
+      {"if", token_type::kIf},
+      {"in", token_type::kIn},
+      {"lambda", token_type::kLambda},
+      {"load", token_type::kLoad},
+      {"not", token_type::kNot},
+      {"or", token_type::kOr},
+      {"pass", token_type::kPass},
+      {"return", token_type::kReturn},
 
 
-  {"as", token_type::kAs},
-  {"assert", token_type::kAssert},
-  {"async", token_type::kAsync},
-  {"await", token_type::kAwait},
-  {"class", token_type::kClass},
-  {"del", token_type::kDel},
-  {"except", token_type::kExcept},
-  {"finally", token_type::kFinally},
-  {"from", token_type::kFrom},
-  {"global", token_type::kGlobal},
-  {"import", token_type::kImport},
-  {"is", token_type::kIs},
-  {"nonlocal", token_type::kNonlocal},
-  {"raise", token_type::kRaise},
-  {"try", token_type::kTry},
-  {"while", token_type::kWhile},
-  {"with", token_type::kWith},
-  {"yield", token_type::kYield},
-};
+      {"as", token_type::kAs},
+      {"assert", token_type::kAssert},
+      {"async", token_type::kAsync},
+      {"await", token_type::kAwait},
+      {"class", token_type::kClass},
+      {"del", token_type::kDel},
+      {"except", token_type::kExcept},
+      {"finally", token_type::kFinally},
+      {"from", token_type::kFrom},
+      {"global", token_type::kGlobal},
+      {"import", token_type::kImport},
+      {"is", token_type::kIs},
+      {"nonlocal", token_type::kNonlocal},
+      {"raise", token_type::kRaise},
+      {"try", token_type::kTry},
+      {"while", token_type::kWhile},
+      {"with", token_type::kWith},
+      {"yield", token_type::kYield},
+    };
+
+  return *result;
+}
 
 std::map<char, std::vector<std::pair<std::string, token_type>>>
 parse_operators(const std::map<std::string, token_type, std::less<>>& all_op) {
@@ -118,9 +128,12 @@ parse_operators(const std::map<std::string, token_type, std::less<>>& all_op) {
   return result;
 }
 
-static const
-  std::map<char, std::vector<std::pair<std::string, token_type>>>
-  operators_by_starting_char = parse_operators(all_operators);
+const std::map<char, std::vector<std::pair<std::string, token_type>>>& operators_by_starting_char() {
+  static const std::map<char, std::vector<std::pair<std::string, token_type>>>* result =
+    new std::map<char, std::vector<std::pair<std::string, token_type>>>(parse_operators(all_operators()));
+
+  return *result;
+}
 
 int isoctal(int c) {
   return '0' <= c && c <= '7' ? 1 : 0;
@@ -262,7 +275,8 @@ void lexer::tokenize() {
         add_error("Unexpected character", start);
         return;
       }
-      if (auto element = all_keywords.find(identifier_name); element != all_keywords.end()) {
+      const auto& keywords = all_keywords();
+      if (auto element = keywords.find(identifier_name); element != keywords.end()) {
         current = token{element->second, start, get_position()};
       } else {
         current = token{token_type::kIdentifier, start, get_position(), identifier_name};
@@ -331,7 +345,7 @@ void lexer::consume_indentation(bool modify_indents) {
 
 void lexer::read_operator(char first_char) {
   auto start = get_position();
-  for (const auto& op : operators_by_starting_char.at(first_char)) {
+  for (const auto& op : operators_by_starting_char().at(first_char)) {
     if (source_code.capture(op.first)) {
       current = token{op.second, start, get_position()};
       return;

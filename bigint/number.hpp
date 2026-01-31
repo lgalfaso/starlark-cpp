@@ -112,9 +112,9 @@ class number {
   static std::tuple<number, number, number> gcd(const number& x,
                                                 const number& y);
 
-  static const number zero;
-  static const number one;
-  static const number minus_one;
+  static const number& zero();
+  static const number& one();
+  static const number& minus_one();
 
   // Should not be used by end users.
   number& karatsuba(const number& other,

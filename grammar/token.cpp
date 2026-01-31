@@ -46,7 +46,7 @@ const bigint::number& token::big_int_value() const {
   if (std::holds_alternative<bigint::number>(value)) {
     return std::get<bigint::number>(value);
   }
-  return bigint::number::zero;
+  return bigint::number::zero();
 }
 
 double token::double_value() const {

@@ -161,11 +161,11 @@ TEST(StarlarkAbs, Numeric) {
   itest(0, "0");
   itest(1, "1");
   itest(std::numeric_limits<int64_t>::max(), "9223372036854775807");
-  itest(number::minus_one << 64, "18446744073709551616");
-  itest(number(number::minus_one), "1");
-  itest(number(number::zero), "0");
-  itest(number(number::one), "1");
-  itest(number::one << 64, "18446744073709551616");
+  itest(number::minus_one() << 64, "18446744073709551616");
+  itest(number(number::minus_one()), "1");
+  itest(number(number::zero()), "0");
+  itest(number(number::one()), "1");
+  itest(number::one() << 64, "18446744073709551616");
   ftest(std::copysign(std::numeric_limits<double>::quiet_NaN(), -1), "nan");
   ftest(std::numeric_limits<double>::quiet_NaN(), "nan");
   ftest(-std::numeric_limits<double>::infinity(), "inf");
@@ -568,7 +568,7 @@ TEST(StarlarkBytes, OutOfRange) {
   starlark_bigint bminus_one(-1);
   starlark_integer imax_plus_one(256);
   starlark_bigint bmax_plus_one(256);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
 
   auto test = [](starlark_obj* value) {
     Arena arena;
@@ -1351,7 +1351,7 @@ TEST(StarlarkFloat, FromList) {
 }
 
 TEST(StarlarkFloat, BigintOverflow) {
-  starlark_bigint value(number::one << 2000);
+  starlark_bigint value(number::one() << 2000);
   Arena arena;
   error_handler error_callback;
 
@@ -2223,7 +2223,7 @@ TEST(StarlarkRange, OneArgumentBigInt) {
 }
 
 TEST(StarlarkRange, OneArgumentBigIntTooBig) {
-  starlark_bigint big(number::one << 63);
+  starlark_bigint big(number::one() << 63);
   Arena arena;
   error_handler error_callback;
 

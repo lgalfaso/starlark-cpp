@@ -32,11 +32,11 @@ TEST(CmpFi, HardCases) {
 }
 
 TEST(CmpFb, HardCases) {
-  EXPECT_THAT(cmp_fb(0.5, number::one), Lt(0));
-  EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::one), Lt(0));
-  EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::zero), Gt(0));
-  EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::zero), Lt(0));
-  EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::minus_one), Gt(0));
+  EXPECT_THAT(cmp_fb(0.5, number::one()), Lt(0));
+  EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::one()), Lt(0));
+  EXPECT_THAT(cmp_fb(0x1.0000000000000p-64, number::zero()), Gt(0));
+  EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::zero()), Lt(0));
+  EXPECT_THAT(cmp_fb(-0x1.0000000000000p-64, number::minus_one()), Gt(0));
 }
 
 TEST(EqualsFi, HardCases) {
@@ -45,16 +45,16 @@ TEST(EqualsFi, HardCases) {
 }
 
 TEST(ToDouble, FromBigInt) {
-  EXPECT_EQ(0.0, to_double(number::zero));
-  EXPECT_EQ(1.0, to_double(number::one));
-  EXPECT_EQ(-1.0, to_double(number::minus_one));
-  EXPECT_EQ(1.8446744073709552e+19, to_double((number::one << 64) - number::one));
-  EXPECT_EQ(3.6893488147419103e+19, to_double((number::one << 65) - number::one));
-  EXPECT_EQ(-3.6893488147419103e+19, to_double((number::minus_one << 65) + number::one));
-  EXPECT_EQ(-8.98846567431158e+307, to_double(number::minus_one << 1023));
-  EXPECT_EQ(8.98846567431158e+307, to_double(number::one << 1023));
-  EXPECT_EQ(-std::numeric_limits<double>::infinity(), to_double(number::minus_one << 1024));
-  EXPECT_EQ(std::numeric_limits<double>::infinity(), to_double(number::one << 1024));
+  EXPECT_EQ(0.0, to_double(number::zero()));
+  EXPECT_EQ(1.0, to_double(number::one()));
+  EXPECT_EQ(-1.0, to_double(number::minus_one()));
+  EXPECT_EQ(1.8446744073709552e+19, to_double((number::one() << 64) - number::one()));
+  EXPECT_EQ(3.6893488147419103e+19, to_double((number::one() << 65) - number::one()));
+  EXPECT_EQ(-3.6893488147419103e+19, to_double((number::minus_one() << 65) + number::one()));
+  EXPECT_EQ(-8.98846567431158e+307, to_double(number::minus_one() << 1023));
+  EXPECT_EQ(8.98846567431158e+307, to_double(number::one() << 1023));
+  EXPECT_EQ(-std::numeric_limits<double>::infinity(), to_double(number::minus_one() << 1024));
+  EXPECT_EQ(std::numeric_limits<double>::infinity(), to_double(number::one() << 1024));
 }
 
 TEST(CreateIntegerFromBigInt, Downgrades) {
@@ -62,14 +62,14 @@ TEST(CreateIntegerFromBigInt, Downgrades) {
     Arena arena;
     EXPECT_EQ(numeric_type, create_integer(std::move(value), arena)->numeric_type());
   };
-  test(starlark_numeric_type::kBigInt, (number::minus_one << 63) - number::one);
-  test(starlark_numeric_type::kInt64, number::minus_one << 63);
-  test(starlark_numeric_type::kInt64, (number::minus_one << 63) + number::one);
-  test(starlark_numeric_type::kInt64, number(number::minus_one));
-  test(starlark_numeric_type::kInt64, number(number::zero));
-  test(starlark_numeric_type::kInt64, number(number::one));
-  test(starlark_numeric_type::kInt64, (number::one << 63) - number::one);
-  test(starlark_numeric_type::kBigInt, number::one << 63);
+  test(starlark_numeric_type::kBigInt, (number::minus_one() << 63) - number::one());
+  test(starlark_numeric_type::kInt64, number::minus_one() << 63);
+  test(starlark_numeric_type::kInt64, (number::minus_one() << 63) + number::one());
+  test(starlark_numeric_type::kInt64, number(number::minus_one()));
+  test(starlark_numeric_type::kInt64, number(number::zero()));
+  test(starlark_numeric_type::kInt64, number(number::one()));
+  test(starlark_numeric_type::kInt64, (number::one() << 63) - number::one());
+  test(starlark_numeric_type::kBigInt, number::one() << 63);
 }
 
 TEST(CreateIntegerFromFloat, SpecialCases) {

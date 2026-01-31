@@ -34,33 +34,43 @@ starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj
 starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 
-const std::map<std::string, starlark_obj::fn*, std::less<>> starlark_set::method_refs {
-  {"add", starlark_set_fn_add},
-  {"clear", starlark_set_fn_clear},
-  {"difference", starlark_set_fn_difference},
-  {"difference_update", starlark_set_fn_difference_update},
-  {"discard", starlark_set_fn_discard},
-  {"intersection", starlark_set_fn_intersection},
-  {"intersection_update", starlark_set_fn_intersection_update},
-  {"isdisjoint", starlark_set_fn_isdisjoint},
-  {"issubset", starlark_set_fn_issubset},
-  {"issuperset", starlark_set_fn_issuperset},
-  {"pop", starlark_set_fn_pop},
-  {"remove", starlark_set_fn_remove},
-  {"symmetric_difference", starlark_set_fn_symmetric_difference},
-  {"symmetric_difference_update", starlark_set_fn_symmetric_difference_update},
-  {"union", starlark_set_fn_union},
-  {"update", starlark_set_fn_update},
-};
+const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_set::method_refs() {
+  static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
+    new std::map<std::string, starlark_obj::fn*, std::less<>>{
+      {"add", starlark_set_fn_add},
+      {"clear", starlark_set_fn_clear},
+      {"difference", starlark_set_fn_difference},
+      {"difference_update", starlark_set_fn_difference_update},
+      {"discard", starlark_set_fn_discard},
+      {"intersection", starlark_set_fn_intersection},
+      {"intersection_update", starlark_set_fn_intersection_update},
+      {"isdisjoint", starlark_set_fn_isdisjoint},
+      {"issubset", starlark_set_fn_issubset},
+      {"issuperset", starlark_set_fn_issuperset},
+      {"pop", starlark_set_fn_pop},
+      {"remove", starlark_set_fn_remove},
+      {"symmetric_difference", starlark_set_fn_symmetric_difference},
+      {"symmetric_difference_update", starlark_set_fn_symmetric_difference_update},
+      {"union", starlark_set_fn_union},
+      {"update", starlark_set_fn_update},
+    };
 
-const std::vector<std::string> starlark_set::attributes = ([]() {
-    std::vector<std::string> result;
-    result.reserve(starlark_set::method_refs.size());
-    for (const auto& [k, v] : starlark_set::method_refs) {
-      result.push_back(k);
-    }
-    return result;
-  })();
+  return *result;
+}
+
+const std::vector<std::string>& starlark_set::attributes() {
+  static const std::vector<std::string>* result =
+    new std::vector<std::string>(([]() {
+      std::vector<std::string> result;
+      result.reserve(method_refs().size());
+      for (const auto& [k, v] : method_refs()) {
+        result.push_back(k);
+      }
+      return result;
+    })());
+
+  return *result;
+}
 
 starlark_set::starlark_set() : iterators_count(0) {}
 
@@ -69,11 +79,11 @@ std::string_view starlark_set::type() const {
 }
 
 const std::vector<std::string>& starlark_set::dir() const {
-  return attributes;
+  return attributes();
 }
 
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_set::methods_meta() const {
-  return method_refs;
+  return method_refs();
 }
 
 int64_t starlark_set::len(bool produce_error, error_fn& error_callback) const {

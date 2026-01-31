@@ -26,26 +26,36 @@ starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const st
 starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 
-const std::map<std::string, starlark_obj::fn*, std::less<>> starlark_dictionary::method_refs {
-  {"clear", starlark_dictionary_fn_clear},
-  {"get", starlark_dictionary_fn_get},
-  {"items", starlark_dictionary_fn_items},
-  {"keys", starlark_dictionary_fn_keys},
-  {"pop", starlark_dictionary_fn_pop},
-  {"popitem", starlark_dictionary_fn_popitem},
-  {"setdefault", starlark_dictionary_fn_setdefault},
-  {"update", starlark_dictionary_fn_update},
-  {"values", starlark_dictionary_fn_values},
-};
+const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_dictionary::method_refs() {
+  static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
+    new std::map<std::string, starlark_obj::fn*, std::less<>>{
+      {"clear", starlark_dictionary_fn_clear},
+      {"get", starlark_dictionary_fn_get},
+      {"items", starlark_dictionary_fn_items},
+      {"keys", starlark_dictionary_fn_keys},
+      {"pop", starlark_dictionary_fn_pop},
+      {"popitem", starlark_dictionary_fn_popitem},
+      {"setdefault", starlark_dictionary_fn_setdefault},
+      {"update", starlark_dictionary_fn_update},
+      {"values", starlark_dictionary_fn_values},
+    };
 
-const std::vector<std::string> starlark_dictionary::attributes = ([]() {
-    std::vector<std::string> result;
-    result.reserve(starlark_dictionary::method_refs.size());
-    for (const auto& [k, v] : starlark_dictionary::method_refs) {
-      result.push_back(k);
-    }
-    return result;
-  })();
+  return *result;
+}
+
+const std::vector<std::string>& starlark_dictionary::attributes() {
+  static const std::vector<std::string>* result =
+    new std::vector<std::string>(([]() {
+      std::vector<std::string> result;
+      result.reserve(method_refs().size());
+      for (const auto& [k, v] : method_refs()) {
+        result.push_back(k);
+      }
+      return result;
+    })());
+
+  return *result;
+}
 
 starlark_dictionary::starlark_dictionary() : iterators_count(0) {}
 
@@ -54,11 +64,11 @@ std::string_view starlark_dictionary::type() const {
 }
 
 const std::vector<std::string>& starlark_dictionary::dir() const {
-  return attributes;
+  return attributes();
 }
 
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_dictionary::methods_meta() const {
-  return method_refs;
+  return method_refs();
 }
 
 int64_t starlark_dictionary::len(bool produce_error, error_fn& error_callback) const {

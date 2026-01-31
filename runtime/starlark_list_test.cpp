@@ -490,7 +490,7 @@ TEST(StarlarkList, StarEqualsAssign) {
 }
 
 TEST(StarlarkList, StarEqualsAssignNegativeAndZero) {
-  starlark_bigint minus_two(number::minus_one << 1);
+  starlark_bigint minus_two(number::minus_one() << 1);
   starlark_integer minus_one(-1);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -516,7 +516,7 @@ TEST(StarlarkList, StarEqualsAssignNegativeAndZero) {
 }
 
 TEST(StarlarkList, StarEqualsAssignReverse) {
-  starlark_bigint minus_two(number::minus_one << 1);
+  starlark_bigint minus_two(number::minus_one() << 1);
   starlark_integer minus_one(-1);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -564,7 +564,7 @@ TEST(StarlarkList, StarEqualsAssignNotInt) {
 
 TEST(StarlarkList, StarEqualsAssignTooBig) {
   starlark_list list(0);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   Arena arena;
   error_handler error_callback;
   list.add(&big, error_callback);
@@ -625,7 +625,7 @@ TEST(StarlarkList, StarEqualsAssignWhileIterating3) {
 }
 
 TEST(StarlarkList, BinaryStar) {
-  starlark_bigint minus_two(number::minus_one << 1);
+  starlark_bigint minus_two(number::minus_one() << 1);
   starlark_integer minus_one(-1);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -664,7 +664,7 @@ TEST(StarlarkList, BinaryStar) {
 }
 
 TEST(StarlarkList, BinaryStarReverse) {
-  starlark_bigint minus_two(number::minus_one << 1);
+  starlark_bigint minus_two(number::minus_one() << 1);
   starlark_integer minus_one(-1);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -710,7 +710,7 @@ TEST(StarlarkList, BinaryStarNotInt) {
 
 TEST(StarlarkList, BinaryStarTooBig) {
   starlark_list list(0);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   Arena arena;
   error_handler error_callback;
   list.add(&big, error_callback);
@@ -876,7 +876,7 @@ TEST(StarlarkList, IndexOutOfRange5) {
   list.add(&one, error_callback);
   list.add(&two, error_callback);
 
-  EXPECT_EQ(nullptr, list.index(starlark_bigint(number::one << 64), arena, error_callback));
+  EXPECT_EQ(nullptr, list.index(starlark_bigint(number::one() << 64), arena, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }

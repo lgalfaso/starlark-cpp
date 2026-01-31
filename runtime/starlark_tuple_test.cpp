@@ -345,7 +345,7 @@ TEST(StarlarkTuple, BinaryStar) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_tuple tuple(0);
   starlark_tuple tuple0(0);
   tuple.add(&zero);
@@ -381,7 +381,7 @@ TEST(StarlarkTuple, BinaryStarReverse) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_tuple tuple(0);
   starlark_tuple tuple0(0);
   tuple.add(&zero);
@@ -421,7 +421,7 @@ TEST(StarlarkTuple, BinaryStarNotInt) {
 
 TEST(StarlarkTuple, BinaryStarTooBig) {
   starlark_tuple tuple(0);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   Arena arena;
   error_handler error_callback;
   tuple.add(&big);
@@ -439,7 +439,7 @@ TEST(StarlarkTuple, StarEqualsAssign) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_tuple tuple(0);
   starlark_tuple tuple0(0);
   tuple.add(&zero);
@@ -475,7 +475,7 @@ TEST(StarlarkTuple, StarEqualsAssignReverse) {
   starlark_integer one(1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_tuple tuple(0);
   starlark_tuple tuple0(0);
   tuple.add(&zero);

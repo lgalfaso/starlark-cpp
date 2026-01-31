@@ -248,7 +248,7 @@ starlark_obj* slash_slash_op(int64_t value, const starlark_integer& this_obj, co
     }
     case starlark_numeric_type::kBigInt: {
       auto bother = other.as_bigint();
-      if (bother == number::zero) {
+      if (bother == number::zero()) {
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
@@ -283,7 +283,7 @@ starlark_obj* percent_op(int64_t value, const starlark_integer& this_obj, const 
     }
     case starlark_numeric_type::kBigInt: {
       auto bother = other.as_bigint();
-      if (bother == number::zero) {
+      if (bother == number::zero()) {
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }

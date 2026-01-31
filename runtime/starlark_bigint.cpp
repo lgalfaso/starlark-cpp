@@ -83,7 +83,7 @@ void starlark_bigint::inner_cmp(order_comparator& comp, const starlark_obj* othe
 }
 
 bool starlark_bigint::truthy() const {
-  return value != number::zero;
+  return value != number::zero();
 }
 
 starlark_obj* starlark_bigint::unary_plus(Arena& arena, error_fn& error_callback) const {
@@ -239,7 +239,7 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
     }
     case starlark_numeric_type::kBigInt: {
       const auto& bother = other.as_bigint();
-      if (bother == number::zero) {
+      if (bother == number::zero()) {
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
@@ -276,7 +276,7 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
     }
     case starlark_numeric_type::kBigInt: {
       const auto& bother = other.as_bigint();
-      if (bother == number::zero) {
+      if (bother == number::zero()) {
         error_callback.add_error(error_division_by_zero());
         return nullptr;
       }
@@ -327,7 +327,7 @@ starlark_obj* hat_op(const number& value, const starlark_bigint& this_obj, const
 starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
-      if (value == number::zero) {
+      if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
       auto shift = other.as_int64();
@@ -342,7 +342,7 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
       return create_integer(value << shift, arena);
     }
     case starlark_numeric_type::kBigInt: {
-      if (value == number::zero) {
+      if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
       const auto& shift = other.as_bigint();
@@ -370,7 +370,7 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
 starlark_obj* greater_greater_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, Arena& arena, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
-      if (value == number::zero) {
+      if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
       auto shift = other.as_int64();
@@ -384,7 +384,7 @@ starlark_obj* greater_greater_op(const number& value, const starlark_bigint& thi
       return create_integer(value >> shift, arena);
     }
     case starlark_numeric_type::kBigInt: {
-      if (value == number::zero) {
+      if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
       const auto& shift = other.as_bigint();

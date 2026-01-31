@@ -95,7 +95,7 @@ TEST(StarlarkInteger, Equals) {
 
   starlark::bigint::number min_int64 = starlark::bigint::number::parse_hex("-8000000000000000");
   EXPECT_TRUE(starlark_integer(std::numeric_limits<int64_t>::min()).equals(starlark_bigint(min_int64)));
-  EXPECT_TRUE(starlark_integer(std::numeric_limits<int64_t>::min() + 1).equals(starlark_bigint(min_int64 + starlark::bigint::number::one)));
+  EXPECT_TRUE(starlark_integer(std::numeric_limits<int64_t>::min() + 1).equals(starlark_bigint(min_int64 + starlark::bigint::number::one())));
 
   EXPECT_FALSE(starlark_integer(0).equals(starlark_string(""sv)));
 }
@@ -174,7 +174,7 @@ TEST(StarlarkInteger, OrderVsBigInt) {
   EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(1), "cmp", error_callback), Gt(0));
   EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(2), "cmp", error_callback), Eq(0));
 
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(number::one << 64), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(number::one() << 64), "cmp", error_callback), Lt(0));
 }
 
 TEST(StarlarkInteger, OrderVsBool) {
@@ -273,11 +273,11 @@ TEST(StarlarkInteger, LShift) {
 
   result = one.binary_lshift(starlark_integer(100), arena, error_callback);
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(starlark_bigint(number::one << 100).equals(*result));
+  EXPECT_TRUE(starlark_bigint(number::one() << 100).equals(*result));
 
   result = one.binary_lshift(starlark_integer(1 << 28), arena, error_callback);
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(starlark_bigint(number::one << (1 << 28)).equals(*result));
+  EXPECT_TRUE(starlark_bigint(number::one() << (1 << 28)).equals(*result));
 
   result = one.binary_lshift(starlark_bigint(62), arena, error_callback);
   ASSERT_NE(result, nullptr);
@@ -285,7 +285,7 @@ TEST(StarlarkInteger, LShift) {
 
   result = one.binary_lshift(starlark_bigint(63), arena, error_callback);
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(starlark_bigint(number::one << 63).equals(*result));
+  EXPECT_TRUE(starlark_bigint(number::one() << 63).equals(*result));
 
   result = one.less_less_equals_assign(starlark_integer(3), arena, error_callback);
   ASSERT_NE(result, nullptr);
@@ -297,11 +297,11 @@ TEST(StarlarkInteger, LShift) {
 
   result = one.less_less_equals_assign(starlark_integer(100), arena, error_callback);
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(starlark_bigint(number::one << 100).equals(*result));
+  EXPECT_TRUE(starlark_bigint(number::one() << 100).equals(*result));
 
   result = one.less_less_equals_assign(starlark_integer(1 << 28), arena, error_callback);
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(starlark_bigint(number::one << (1 << 28)).equals(*result));
+  EXPECT_TRUE(starlark_bigint(number::one() << (1 << 28)).equals(*result));
 
   result = one.less_less_equals_assign(starlark_bigint(62), arena, error_callback);
   ASSERT_NE(result, nullptr);
@@ -309,7 +309,7 @@ TEST(StarlarkInteger, LShift) {
 
   result = one.less_less_equals_assign(starlark_bigint(63), arena, error_callback);
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(starlark_bigint(number::one << 63).equals(*result));
+  EXPECT_TRUE(starlark_bigint(number::one() << 63).equals(*result));
 }
 
 TEST(StarlarkInteger, RShift) {
@@ -336,11 +336,11 @@ TEST(StarlarkInteger, RShift) {
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_integer(20).binary_rshift(starlark_bigint(number::one << 64), arena, error_callback);
+  result = starlark_integer(20).binary_rshift(starlark_bigint(number::one() << 64), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_integer(20).binary_rshift(starlark_bigint(number::one), arena, error_callback);
+  result = starlark_integer(20).binary_rshift(starlark_bigint(number::one()), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(10).equals(*result));
 
@@ -364,11 +364,11 @@ TEST(StarlarkInteger, RShift) {
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_integer(20).greater_greater_equals_assign(starlark_bigint(number::one << 64), arena, error_callback);
+  result = starlark_integer(20).greater_greater_equals_assign(starlark_bigint(number::one() << 64), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(0).equals(*result));
 
-  result = starlark_integer(20).greater_greater_equals_assign(starlark_bigint(number::one), arena, error_callback);
+  result = starlark_integer(20).greater_greater_equals_assign(starlark_bigint(number::one()), arena, error_callback);
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_integer(10).equals(*result));
 }
@@ -413,13 +413,13 @@ TEST(StarlarkInteger, ShiftInvalidInput) {
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
   error_callback.messages.clear();
 
-  result = starlark_integer(100).binary_lshift(starlark_bigint(number::minus_one), arena, error_callback);
+  result = starlark_integer(100).binary_lshift(starlark_bigint(number::minus_one()), arena, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
   error_callback.messages.clear();
 
-  result = starlark_integer(100).binary_rshift(starlark_bigint(number::minus_one), arena, error_callback);
+  result = starlark_integer(100).binary_rshift(starlark_bigint(number::minus_one()), arena, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
@@ -437,19 +437,19 @@ TEST(StarlarkInteger, ShiftInvalidInput) {
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
 
-  result = starlark_integer(100).binary_lshift(starlark_bigint(number::one << 100), arena, error_callback);
+  result = starlark_integer(100).binary_lshift(starlark_bigint(number::one() << 100), arena, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
 
-  result = starlark_integer(100).binary_lshift(starlark_bigint(number::one << 63), arena, error_callback);
+  result = starlark_integer(100).binary_lshift(starlark_bigint(number::one() << 63), arena, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
   error_callback.messages.clear();
 
-  result = starlark_integer(100).binary_lshift(starlark_bigint(number::one << 62), arena, error_callback);
+  result = starlark_integer(100).binary_lshift(starlark_bigint(number::one() << 62), arena, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
@@ -641,7 +641,7 @@ TEST(StarlarkInteger, BinaryPlus) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -661,7 +661,7 @@ TEST(StarlarkInteger, PlusEqualsAssign) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -848,7 +848,7 @@ TEST(StarlarkInteger, BinaryMinus) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -868,7 +868,7 @@ TEST(StarlarkInteger, MinusEqualsAssign) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -1047,7 +1047,7 @@ TEST(StarlarkInteger, StarEqualsAssign) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -1078,7 +1078,7 @@ TEST(StarlarkInteger, BinaryStar) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -1109,7 +1109,7 @@ TEST(StarlarkInteger, SlashEqualsAssign) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -1140,7 +1140,7 @@ TEST(StarlarkInteger, BinarySlash) {
   starlark_float f1(1.0);
   starlark_integer i1(3);
   starlark_integer i2(16);
-  starlark_bigint b1(number::one << 2);
+  starlark_bigint b1(number::one() << 2);
   Arena arena;
   error_handler error_callback;
 
@@ -1168,7 +1168,7 @@ TEST(StarlarkInteger, BinarySlashError) {
 }
 
 TEST(StarlarkInteger, BinarySlashOverflowiDenominatorError) {
-  starlark_bigint big(number::one << 1200);
+  starlark_bigint big(number::one() << 1200);
   starlark_integer small(1);
   Arena arena;
   error_handler error_callback;
@@ -1201,7 +1201,7 @@ TEST(StarlarkInteger, BinarySlashZeroIntError) {
 }
 
 TEST(StarlarkInteger, BinarySlashZeroBigintError) {
-  starlark_bigint b0(number::zero);
+  starlark_bigint b0(number::zero());
   starlark_integer small(1);
   Arena arena;
   error_handler error_callback;
@@ -1717,7 +1717,7 @@ TEST(StarlarkInteger, BinarySlashSlashZeroIntError) {
 }
 
 TEST(StarlarkInteger, BinarySlashSlashZeroBigintError) {
-  starlark_bigint b0(number::zero);
+  starlark_bigint b0(number::zero());
   starlark_integer small(1);
   Arena arena;
   error_handler error_callback;
@@ -2244,7 +2244,7 @@ TEST(StarlarkInteger, BinaryPercentZeroIntError) {
 }
 
 TEST(StarlarkInteger, BinaryPercentZeroBigintError) {
-  starlark_bigint b0(number::zero);
+  starlark_bigint b0(number::zero());
   starlark_integer small(1);
   Arena arena;
   error_handler error_callback;

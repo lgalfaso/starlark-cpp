@@ -129,14 +129,23 @@ number::nbase number::bits(int pos, int length) const {
   return ((nbase{1} << length) - nbase{1}) & b;
 }
 
-// static const.
-const number number::zero(0);
+const number& number::zero() {
+  static const number* result = new number(0);
 
-// static const.
-const number number::one(1);
+  return *result;
+}
 
-// static const.
-const number number::minus_one = -one;
+const number& number::one() {
+  static const number* result = new number(1);
+
+  return *result;
+}
+
+const number& number::minus_one() {
+  static const number* result = new number(-one());
+
+  return *result;
+}
 
 number& number::operator=(const number& other) {
   values_ = other.values_;
@@ -191,7 +200,7 @@ std::string number::to_string(int base) const {
     return "";
   }
   std::string result;
-  if (*this == number::zero) {
+  if (*this == number::zero()) {
     result = "0";
     return result;
   }
@@ -202,7 +211,7 @@ std::string number::to_string(int base) const {
     ref.neg();
   }
   number num_base(base);
-  while (ref != number::zero) {
+  while (ref != number::zero()) {
     const auto [res, rem] = number::div(ref, num_base);
     ref = res;
     result += nums[rem.at(0)];
@@ -288,7 +297,7 @@ void number::normalize() {
 number& number::mod_pow2(int power) {
   assert(power >= 0);
   if (power == 0) {
-    *this = zero;
+    *this = zero();
     return *this;
   }
   sign_ = false;
@@ -476,17 +485,17 @@ number&& number::operator*(const number& other) && {
 // static.
 std::pair<number, number> number::div(const number& dividend,
                                       const number& divisor) {
-  if (divisor == zero) {
-    return std::make_pair(zero, zero);
+  if (divisor == zero()) {
+    return std::make_pair(zero(), zero());
   }
-  if (abs_cmp(divisor.values_, one.values_) == 0) {
+  if (abs_cmp(divisor.values_, one().values_) == 0) {
     if (divisor.sign()) {
-      return std::make_pair(-dividend, zero);
+      return std::make_pair(-dividend, zero());
     }
-    return std::make_pair(dividend, zero);
+    return std::make_pair(dividend, zero());
   }
   if (abs_cmp(dividend.values_, divisor.values_) < 0) {
-    return std::make_pair(zero, dividend);
+    return std::make_pair(zero(), dividend);
   }
   // TODO(lmirelmann): If needed, it should be possible to rewrite this as a 2 by 1 division.
 
@@ -530,7 +539,7 @@ std::pair<number, number> number::div(const number& dividend,
   }
   while (abs_cmp(r.values_, dd.values_) >= 0) {
     base_op(r.values_, dd.values_, &r.values_, dec_op);
-    base_op(d.values_, one.values_, &d.values_, add_op);
+    base_op(d.values_, one().values_, &d.values_, add_op);
     r.normalize();
     d.normalize();
   }
@@ -573,7 +582,7 @@ number& number::long_mult(const number& other) {
     return *this;
   }
   if (other.values_.empty()) {
-    *this = zero;
+    *this = zero();
   }
   long_mult(values_.cbegin(), values_.cend(), other.values_.cbegin(),
             other.values_.cend(), &values_);
@@ -642,7 +651,7 @@ number& number::karatsuba(const number& other,
     return *this;
   }
   if (other.values_.empty()) {
-    *this = zero;
+    *this = zero();
   }
   karatsuba_mult(std::max(values_size_type{1}, fallback_threshold),
                  values_.cbegin(), values_.cend(),
@@ -711,18 +720,18 @@ number&& number::operator<<(int pos) && {
 // static.
 std::tuple<number, number, number> number::gcd(const number& x,
                                                const number& y) {
-  if (x == zero) {
-    return std::make_tuple(one, one, y);
+  if (x == zero()) {
+    return std::make_tuple(one(), one(), y);
   }
-  if (y == zero) {
-    return std::make_tuple(one, one, x);
+  if (y == zero()) {
+    return std::make_tuple(one(), one(), x);
   }
   number u(x), v(y), a(1), b(0), c(0), d(1);
   int g = std::min(u.countr_zero(), v.countr_zero());
   u >>= g;
   v >>= g;
   const number x_(u), y_(v);
-  while (u != zero) {
+  while (u != zero()) {
     while (u.even()) {
       u >>= 1;
       if (a.even() && b.even()) {
@@ -782,7 +791,9 @@ number::nbase number::inverse_mod_base(const nbase a) {
 // `gcd(m, 2) == 1`.
 number number::montgomery(const number& m, const nbase& inv_m, const number& x,
                           const number& y) {
-  if (m.length() == 0) return zero;
+  if (m.length() == 0) {
+    return zero();
+  }
   number a;
   for (values_size_type i = 0; i < m.values_.size(); ++i) {
     nbase u = (a.at(0) + x.at(i) * y.at(0)) * inv_m;
@@ -795,26 +806,26 @@ number number::montgomery(const number& m, const nbase& inv_m, const number& x,
 }
 
 number& number::pow_mod(const number& power, const number& modulus) {
-  if (*this == zero) {
+  if (*this == zero()) {
     return *this;
   }
-  if (modulus == zero) {
+  if (modulus == zero()) {
     return *this;
   }
-  if (power == zero) {
-    *this = one;
+  if (power == zero()) {
+    *this = one();
     return *this;
   }
 
   // 0. Make `0 <= *this < modulus`.
   number q(modulus);
-  if (q < zero) {
+  if (q < zero()) {
     q.neg();
   }
   if (abs_cmp(this->values_, q.values_) >= 0) {
     *this %= q;
   }
-  if (*this < zero) {
+  if (*this < zero()) {
     *this = q - *this;
   }
 
@@ -826,7 +837,7 @@ number& number::pow_mod(const number& power, const number& modulus) {
   //    modulo arithmetics `2^j`.
   number x_2;
   if (j > 0) {
-    x_2 = one;
+    x_2 = one();
     number w1(*this);
     w1.mod_pow2(j);
     number w2(power);
@@ -844,7 +855,7 @@ number& number::pow_mod(const number& power, const number& modulus) {
   // 3. Compute `x_1 = this->mod_pow(power, q)` using Montgomery with
   //    sliding windows.
   number x_1;
-  if (q > one) {
+  if (q > one()) {
     x_1 = *this;
     x_1 %= q;
 
@@ -853,7 +864,7 @@ number& number::pow_mod(const number& power, const number& modulus) {
     nbase mask = (~nbase{0}) >> (kBitsInBase - mask_size);
     number power_(power);
     std::vector<std::pair<int, nbase>> work;
-    while (power_ != zero) {
+    while (power_ != zero()) {
       int p2 = power_.countr_zero();
       power_ >>= p2;
       work.emplace_back(p2, power_.at(0) & mask);
@@ -863,14 +874,14 @@ number& number::pow_mod(const number& power, const number& modulus) {
     nbase inv_m = -inverse_mod_base(q.at(0));
     std::vector<number> windows;
     windows.emplace_back(montgomery(q, inv_m, x_1,
-        (one << (2 * kBitsInBase * q.length())) % q));
+        (one() << (2 * kBitsInBase * q.length())) % q));
     if (mask_size > 1) {
       const number w2 = montgomery(q, inv_m, windows[0], windows[0]);
       for (int i = 1, m = 1 << (mask_size - 1); i < m; ++i) {
         windows.emplace_back(montgomery(q, inv_m, w2, windows[i - 1]));
       }
     }
-    x_1 = (one << (kBitsInBase * q.length())) % q;
+    x_1 = (one() << (kBitsInBase * q.length())) % q;
     for (auto it = work.crbegin(); it != work.crend(); it++) {
       for (int i = 0; i < mask_size; ++i) {
         x_1 = montgomery(q, inv_m, x_1, x_1);
@@ -882,12 +893,12 @@ number& number::pow_mod(const number& power, const number& modulus) {
     }
 
     // Inverse montgomery.
-    x_1 = montgomery(q, inv_m, x_1, one);
+    x_1 = montgomery(q, inv_m, x_1, one());
   }
 
   // 4. Compute `q^-1 (mod 2^j)` and `y = (x_2 - x_1)*(q^-1) (mod 2^j)`.
   number q_inv;
-  std::tie(q_inv, std::ignore, std::ignore) = gcd(q, one << j);
+  std::tie(q_inv, std::ignore, std::ignore) = gcd(q, one() << j);
   number y = ((x_2 - x_1) * q_inv).mod_pow2(j);
 
 
@@ -993,7 +1004,7 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
-      return number::zero;
+      return number::zero();
     }
     pos += 2;
     base = 16;
@@ -1002,7 +1013,7 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
-      return number::zero;
+      return number::zero();
     }
     pos += 2;
     base = 2;
@@ -1011,7 +1022,7 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
-      return number::zero;
+      return number::zero();
     }
     pos += 2;
     base = 8;
@@ -1020,7 +1031,7 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
     if (end_ptr != nullptr) {
       *end_ptr = &input[0];
     }
-    return number::zero;
+    return number::zero();
   }
   if (input[pos] == '0') {
     while (pos < input.length() && input[pos] == '0') {
@@ -1030,13 +1041,13 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
       if (end_ptr != nullptr) {
         *end_ptr = &input[pos];
       }
-      return number::zero;
+      return number::zero();
     } else if (base == 0) {
       // In base 10, do not allow leading zeros unless it is all zeros.
       if (end_ptr != nullptr) {
         *end_ptr = &input[0];
       }
-      return number::zero;
+      return number::zero();
     }
   }
   if (base == 0) {
@@ -1247,7 +1258,7 @@ number& number::logical_xor(const number& other) {
 }
 
 number& number::logical_not() {
-  *this += one;
+  *this += one();
   this->neg();
   return *this;
 }

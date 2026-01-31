@@ -40,8 +40,8 @@ class starlark_bytes : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
-  static const std::map<std::string, fn*, std::less<>> method_refs;
-  static const std::vector<std::string> attributes;
+  static const std::map<std::string, fn*, std::less<>>& method_refs();
+  static const std::vector<std::string>& attributes();
 
   std::string value;
 };

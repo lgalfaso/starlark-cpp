@@ -243,9 +243,9 @@ TEST(StarlarkRange, BinaryInBigInt) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, (number::minus_one << 63) - number::one, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, number::one << 63, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, number::one << 64, false);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, (number::minus_one() << 63) - number::one(), false);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, number::one() << 63, false);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, number::one() << 64, false);
 }
 
 TEST(StarlarkRange, BinaryInFloat) {

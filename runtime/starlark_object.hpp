@@ -209,8 +209,8 @@ class starlark_obj {
   int64_t inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
 
  private:
-  static const std::map<std::string, fn*, std::less<>> method_refs;
-  static const std::vector<std::string> attributes;
+  static const std::map<std::string, fn*, std::less<>>& method_refs();
+  static const std::vector<std::string>& attributes();
 
   friend class printer;
   friend class equals_comparator;

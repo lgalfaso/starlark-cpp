@@ -283,7 +283,7 @@ TEST(StarlarkString, BinaryStar) {
   starlark_integer minus_one(-1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;
@@ -315,7 +315,7 @@ TEST(StarlarkString, BinaryStarReverse) {
   starlark_integer minus_one(-1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;
@@ -353,7 +353,7 @@ TEST(StarlarkString, BinaryStarNotInt) {
 
 TEST(StarlarkString, BinaryStarTooBig) {
   starlark_string str("abc"sv);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   Arena arena;
   error_handler error_callback;
 
@@ -368,7 +368,7 @@ TEST(StarlarkString, StarEqualsAssign) {
   starlark_integer minus_one(-1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;
@@ -400,7 +400,7 @@ TEST(StarlarkString, StarEqualsAssignReverse) {
   starlark_integer minus_one(-1);
   starlark_integer two(2);
   starlark_bigint three(3);
-  starlark_bigint big(number::one << 64);
+  starlark_bigint big(number::one() << 64);
   starlark_string str0(""sv);
   starlark_string str("abc"sv);
   Arena arena;

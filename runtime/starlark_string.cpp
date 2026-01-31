@@ -62,52 +62,62 @@ starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_ob
 starlark_obj* starlark_string_fn_title(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 starlark_obj* starlark_string_fn_upper(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, google::protobuf::Arena& arena, error_fn& error_callback);
 
-const std::map<std::string, starlark_obj::fn*, std::less<>> starlark_string::method_refs {
-    {"capitalize", starlark_string_fn_capitalize},
-    {"codepoint_ords", starlark_string_fn_codepoint_ords},
-    {"codepoints", starlark_string_fn_codepoints},
-    {"count", starlark_string_fn_count},
-    {"elem_ords", starlark_string_fn_elem_ords},
-    {"elems", starlark_string_fn_elems},
-    {"endswith", starlark_string_fn_endswith},
-    {"find", starlark_string_fn_find},
-    {"format", starlark_string_fn_format},
-    {"index", starlark_string_fn_index},
-    {"isalnum", starlark_string_fn_isalnum},
-    {"isalpha", starlark_string_fn_isalpha},
-    {"isdigit", starlark_string_fn_isdigit},
-    {"islower", starlark_string_fn_islower},
-    {"isspace", starlark_string_fn_isspace},
-    {"istitle", starlark_string_fn_istitle},
-    {"isupper", starlark_string_fn_isupper},
-    {"join", starlark_string_fn_join},
-    {"lower", starlark_string_fn_lower},
-    {"lstrip", starlark_string_fn_lstrip},
-    {"partition", starlark_string_fn_partition},
-    {"replace", starlark_string_fn_replace},
-    {"removeprefix", starlark_string_fn_removeprefix},
-    {"removesuffix", starlark_string_fn_removesuffix},
-    {"rfind", starlark_string_fn_rfind},
-    {"rindex", starlark_string_fn_rindex},
-    {"rpartition", starlark_string_fn_rpartition},
-    {"rsplit", starlark_string_fn_rsplit},
-    {"rstrip", starlark_string_fn_rstrip},
-    {"split", starlark_string_fn_split},
-    {"splitlines", starlark_string_fn_splitlines},
-    {"startswith", starlark_string_fn_startswith},
-    {"strip", starlark_string_fn_strip},
-    {"title", starlark_string_fn_title},
-    {"upper", starlark_string_fn_upper},
-};
+const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::method_refs() {
+  static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
+    new std::map<std::string, starlark_obj::fn*, std::less<>>{
+      {"capitalize", starlark_string_fn_capitalize},
+      {"codepoint_ords", starlark_string_fn_codepoint_ords},
+      {"codepoints", starlark_string_fn_codepoints},
+      {"count", starlark_string_fn_count},
+      {"elem_ords", starlark_string_fn_elem_ords},
+      {"elems", starlark_string_fn_elems},
+      {"endswith", starlark_string_fn_endswith},
+      {"find", starlark_string_fn_find},
+      {"format", starlark_string_fn_format},
+      {"index", starlark_string_fn_index},
+      {"isalnum", starlark_string_fn_isalnum},
+      {"isalpha", starlark_string_fn_isalpha},
+      {"isdigit", starlark_string_fn_isdigit},
+      {"islower", starlark_string_fn_islower},
+      {"isspace", starlark_string_fn_isspace},
+      {"istitle", starlark_string_fn_istitle},
+      {"isupper", starlark_string_fn_isupper},
+      {"join", starlark_string_fn_join},
+      {"lower", starlark_string_fn_lower},
+      {"lstrip", starlark_string_fn_lstrip},
+      {"partition", starlark_string_fn_partition},
+      {"replace", starlark_string_fn_replace},
+      {"removeprefix", starlark_string_fn_removeprefix},
+      {"removesuffix", starlark_string_fn_removesuffix},
+      {"rfind", starlark_string_fn_rfind},
+      {"rindex", starlark_string_fn_rindex},
+      {"rpartition", starlark_string_fn_rpartition},
+      {"rsplit", starlark_string_fn_rsplit},
+      {"rstrip", starlark_string_fn_rstrip},
+      {"split", starlark_string_fn_split},
+      {"splitlines", starlark_string_fn_splitlines},
+      {"startswith", starlark_string_fn_startswith},
+      {"strip", starlark_string_fn_strip},
+      {"title", starlark_string_fn_title},
+      {"upper", starlark_string_fn_upper},
+  };
 
-const std::vector<std::string> starlark_string::attributes = ([]() {
+  return *result;
+}
+
+const std::vector<std::string>& starlark_string::attributes() {
+  static const std::vector<std::string>* result =
+    new std::vector<std::string>(([]() {
     std::vector<std::string> result;
-    result.reserve(starlark_string::method_refs.size());
-    for (const auto& [k, v] : starlark_string::method_refs) {
+    result.reserve(method_refs().size());
+    for (const auto& [k, v] : method_refs()) {
       result.push_back(k);
     }
     return result;
-  })();
+  })());
+
+  return *result;
+}
 
 starlark_string::starlark_string(std::string&& value) : value(value) {}
 starlark_string::starlark_string(std::string_view value) : value(value) {}
@@ -121,11 +131,11 @@ bool starlark_string::primitive() const {
 }
 
 const std::vector<std::string>& starlark_string::dir() const {
-  return attributes;
+  return attributes();
 }
 
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::methods_meta() const {
-  return method_refs;
+  return method_refs();
 }
 
 std::string starlark_string::str() const {
@@ -205,7 +215,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
         return Arena::Create<starlark_string>(&arena, std::string_view{});
       }
       const auto& multiplier = other.as_bigint();
-      if (multiplier <= number::zero) {
+      if (multiplier <= number::zero()) {
         return Arena::Create<starlark_string>(&arena, std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {

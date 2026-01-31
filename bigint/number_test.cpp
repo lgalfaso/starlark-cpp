@@ -19,7 +19,7 @@ namespace {
 TEST(Number, StartsAtZero) {
   number num;
   EXPECT_EQ(0, num.length());
-  EXPECT_EQ(number::zero, number(0));
+  EXPECT_EQ(number::zero(), number(0));
 }
 
 TEST(Number, SignIsFalseForZero) {
@@ -65,8 +65,8 @@ TEST(Number, ParseInvalidHex) {
 }
 
 TEST(Number, bit_size) {
-  EXPECT_EQ(0, number::zero.bit_size());
-  number n = number::one;
+  EXPECT_EQ(0, number::zero().bit_size());
+  number n = number::one();
   for (int i = 1; i <= number::kBitsInBase * 2; ++i) {
     EXPECT_EQ(i, n.bit_size());
     n <<= 1;
@@ -74,8 +74,8 @@ TEST(Number, bit_size) {
 }
 
 TEST(Number, bits) {
-  EXPECT_EQ(0, number::one.bits(10, 64));
-  EXPECT_EQ(0x10, (number::one << 4).bits(0, 64));
+  EXPECT_EQ(0, number::one().bits(10, 64));
+  EXPECT_EQ(0x10, (number::one() << 4).bits(0, 64));
 }
 
 TEST(Number, Comparators) {
@@ -310,21 +310,21 @@ TEST(Number, MultiplicationToSelf) {
 }
 
 TEST(Number, MultiplocationFromZero) {
-  auto n = number::zero * number::minus_one;
+  auto n = number::zero() * number::minus_one();
   EXPECT_FALSE(n.sign());
-  EXPECT_EQ(n, number::zero);
+  EXPECT_EQ(n, number::zero());
 }
 
 TEST(Number, MurtiplocationByZero) {
-  auto n = ((number::minus_one << 200) + number::one) * number::zero;
+  auto n = ((number::minus_one() << 200) + number::one()) * number::zero();
   EXPECT_FALSE(n.sign());
-  EXPECT_EQ(n, number::zero);
+  EXPECT_EQ(n, number::zero());
 }
 
 TEST(Number, MurtiplocationByZeroLongMult) {
-  auto n = ((number::minus_one << 200) + number::one).long_mult(number::zero);
+  auto n = ((number::minus_one() << 200) + number::one()).long_mult(number::zero());
   EXPECT_FALSE(n.sign());
-  EXPECT_EQ(n, number::zero);
+  EXPECT_EQ(n, number::zero());
 }
 
 TEST(Number, Karatsuba) {
@@ -1023,32 +1023,32 @@ TEST(Number, ToString) {
 TEST(Number, DivisionUnits) {
   number n = "fedcba"_number;
   number d, r;
-  std::tie(d, r) = number::div(n, number::one);
-  EXPECT_EQ(r, number::zero);
+  std::tie(d, r) = number::div(n, number::one());
+  EXPECT_EQ(r, number::zero());
   EXPECT_EQ(d, n);
-  std::tie(d, r) = number::div(n, -number::one);
-  EXPECT_EQ(r, number::zero);
+  std::tie(d, r) = number::div(n, number::minus_one());
+  EXPECT_EQ(r, number::zero());
   EXPECT_EQ(d, -n);
-  std::tie(d, r) = number::div(-n, number::one);
-  EXPECT_EQ(r, number::zero);
+  std::tie(d, r) = number::div(-n, number::one());
+  EXPECT_EQ(r, number::zero());
   EXPECT_EQ(d, -n);
-  std::tie(d, r) = number::div(-n, -number::one);
-  EXPECT_EQ(r, number::zero);
+  std::tie(d, r) = number::div(-n, number::minus_one());
+  EXPECT_EQ(r, number::zero());
   EXPECT_EQ(d, n);
 }
 
 TEST(Number, DivisionSmall) {
   for (int i = 0; i < 4; ++i) {
-    number n = number::one << 40;
+    number n = number::one() << 40;
     number p = "fedcba"_number;
     if ((i & 1) != 0) n.neg();
     if ((i & 2) != 0) p.neg();
     number d, r;
     std::tie(d, r) = number::div(n, p);
     if (!r.sign()) {
-      EXPECT_TRUE(number::zero <= r);
+      EXPECT_TRUE(number::zero() <= r);
     } else {
-      EXPECT_TRUE(r <= number::zero);
+      EXPECT_TRUE(r <= number::zero());
     }
     EXPECT_LT(r.abs_cmp(p), 0);
     EXPECT_EQ(n, d * p + r);
@@ -1065,15 +1065,15 @@ TEST(Number, DivisionSmallPower2) {
   number p(3);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
-      number n = number::one << (sizeof(kBigPrime) * j);
+      number n = number::one() << (sizeof(kBigPrime) * j);
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1085,15 +1085,15 @@ TEST(Number, DivisionSmallPowerTwoMinusOne) {
   number p(3);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
-      number n = (number::one << (sizeof(kBigPrime) * j)) - number::one;
+      number n = (number::one() << (sizeof(kBigPrime) * j)) - number::one();
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1102,7 +1102,7 @@ TEST(Number, DivisionSmallPowerTwoMinusOne) {
 }
 
 TEST(Number, DivisionSmallPower2Div) {
-  number p = number::one << 256;
+  number p = number::one() << 256;
   number w = number::parse_hex(kBigNumber);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
@@ -1112,9 +1112,9 @@ TEST(Number, DivisionSmallPower2Div) {
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1123,19 +1123,19 @@ TEST(Number, DivisionSmallPower2Div) {
 }
 
 TEST(Number, DivisionSmallPowerTwoMinusOneiDiv) {
-  number p = (number::one << 256) - number::one;
+  number p = (number::one() << 256) - number::one();
   number w = number::parse_hex(kBigNumber);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
-      number n = (w << (sizeof(kBigPrime) * j)) - number::one;
+      number n = (w << (sizeof(kBigPrime) * j)) - number::one();
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1144,19 +1144,19 @@ TEST(Number, DivisionSmallPowerTwoMinusOneiDiv) {
 }
 
 TEST(Number, DivisionSmallPowerTwoPlusOneDiv) {
-  number p = (number::one << 256) + number::one;
+  number p = (number::one() << 256) + number::one();
   number w = number::parse_hex(kBigNumber);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
-      number n = (w << (sizeof(kBigPrime) * j)) - number::one;
+      number n = (w << (sizeof(kBigPrime) * j)) - number::one();
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1168,15 +1168,15 @@ TEST(Number, DivisionBigPower2) {
   number p = number::parse_hex(kBigPrime);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
-      number n = number::one << (sizeof(kBigPrime) * j);
+      number n = number::one() << (sizeof(kBigPrime) * j);
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1188,15 +1188,15 @@ TEST(Number, DivisionBigPowerTwoMinusOne) {
   number p = number::parse_hex(kBigPrime);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
-      number n = (number::one << (sizeof(kBigPrime) * j)) - number::one;
+      number n = (number::one() << (sizeof(kBigPrime) * j)) - number::one();
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1215,9 +1215,9 @@ TEST(Number, DivisionBigPower2BigTop) {
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1230,15 +1230,15 @@ TEST(Number, DivisionBigPowerTwoMinusOneBigTop) {
   number p = number::parse_hex(kBigPrime);
   for (int j = 4; j < 64; ++j) {
     for (int i = 0; i < 4; ++i) {
-      number n = (w << (sizeof(kBigPrime) * j)) - number::one;
+      number n = (w << (sizeof(kBigPrime) * j)) - number::one();
       if ((i & 1) != 0) n.neg();
       if ((i & 2) != 0) p.neg();
       number d, r;
       std::tie(d, r) = number::div(n, p);
       if (!r.sign()) {
-        EXPECT_TRUE(number::zero <= r);
+        EXPECT_TRUE(number::zero() <= r);
       } else {
-        EXPECT_TRUE(r <= number::zero);
+        EXPECT_TRUE(r <= number::zero());
       }
       EXPECT_LT(r.abs_cmp(p), 0);
       EXPECT_EQ(n, d * p + r);
@@ -1247,7 +1247,7 @@ TEST(Number, DivisionBigPowerTwoMinusOneBigTop) {
 }
 
 TEST(Number, Mod) {
-  number n = number::one << sizeof(kBigPrime) * 8;
+  number n = number::one() << sizeof(kBigPrime) * 8;
   number p = number::parse_hex(kBigPrime);
   number r;
   r = n % p;
@@ -1256,25 +1256,25 @@ TEST(Number, Mod) {
 TEST(Number, ModPowSimple) {
   number p = number::parse_hex(kBigPrime);
   number r = number::parse_hex(kBigNumber);
-  EXPECT_EQ(number::one, r.pow_mod(p - number::one, p));
-  EXPECT_EQ(number::one, ("0x1"_number << 10000).pow_mod(p - number::one, p));
-  EXPECT_EQ(number::one, (-"0x1"_number << 10000).pow_mod(p - number::one, p));
+  EXPECT_EQ(number::one(), r.pow_mod(p - number::one(), p));
+  EXPECT_EQ(number::one(), ("0x1"_number << 10000).pow_mod(p - number::one(), p));
+  EXPECT_EQ(number::one(), (-"0x1"_number << 10000).pow_mod(p - number::one(), p));
 }
 
 TEST(Number, ModPowSimpleEvenMod) {
   number p = number::parse_hex(kBigPrime);
   number r = number::parse_hex(kBigNumber);
   number::nbase power2 = 50;
-  EXPECT_EQ(number::one,
-            r.pow_mod((p - number::one) * (number::one << power2),
-                      p * (number::one << (power2 - 1))));
+  EXPECT_EQ(number::one(),
+            r.pow_mod((p - number::one()) * (number::one() << power2),
+                      p * (number::one() << (power2 - 1))));
 }
 
 TEST(Number, ModPowSimplePower2Mod) {
   number r = number::parse_hex(kBigNumber);
   number::nbase power2 = 500;
-  EXPECT_EQ(number::one,
-            r.pow_mod(number::one << power2, number::one << (power2 - 1)));
+  EXPECT_EQ(number::one(),
+            r.pow_mod(number::one() << power2, number::one() << (power2 - 1)));
 }
 
 TEST(Number, ModPowOdd) {
@@ -1294,13 +1294,13 @@ TEST(Number, ModPowOdd) {
   "8e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e3916e9701"_number;
   number p = number::parse_hex(kBigPrime);
   number r = number::parse_hex(kBigNumber);
-  EXPECT_EQ(result, r.pow_mod(p - number::one, p << 12));
+  EXPECT_EQ(result, r.pow_mod(p - number::one(), p << 12));
 }
 
 TEST(Number, ModPow) {
   number p = number::parse_hex(kBigPrime);
   number e = "10001"_number;
-  number phi = p - number::one;
+  number phi = p - number::one();
   number inv_e_phi;
   std::tie(inv_e_phi, std::ignore, std::ignore) = number::gcd(e, phi);
   number r = number::parse_hex(kBigNumber);
@@ -1314,7 +1314,7 @@ TEST(Number, ModPow) {
 TEST(Number, ParseNumber) {
   std::string zero = "0";
   const char* end;
-  EXPECT_EQ(number::zero, parse_number(zero, &end, 0));
+  EXPECT_EQ(number::zero(), parse_number(zero, &end, 0));
   EXPECT_EQ(&*zero.end(), end);
   std::string non_zero = "0327";
   EXPECT_EQ("327", parse_number(non_zero, &end, 10).to_string(10));
@@ -1330,8 +1330,8 @@ TEST(Number, ParseNumber) {
             parse_number("1234567890abcdefABCDEFG", nullptr, 0));
   EXPECT_EQ("aa952952952894a5129489534a5"_number,
             parse_number("0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101", nullptr, 0));
-  EXPECT_EQ(number::minus_one, parse_number("-1", nullptr, 0));
-  EXPECT_EQ(number::minus_one, parse_number("-0x1", nullptr, 0));
+  EXPECT_EQ(number::minus_one(), parse_number("-1", nullptr, 0));
+  EXPECT_EQ(number::minus_one(), parse_number("-0x1", nullptr, 0));
   EXPECT_EQ("99999999999999999999999999999999999999999999999999999999999999999999999999999999",
             parse_number("99999999999999999999999999999999999999999999999999999999999999999999999999999999", nullptr, 0).to_string(10));
   EXPECT_EQ("77777777777777777777777777777777777777777777777777777777777777777777777777777777",

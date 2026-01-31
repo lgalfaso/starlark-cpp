@@ -108,9 +108,19 @@ int order_comparator::run(std::string_view op, error_fn& error_callback) {
 
 starlark_iterator::~starlark_iterator() {}
 
-const std::vector<std::string> starlark_obj::attributes;
+const std::vector<std::string>& starlark_obj::attributes() {
+  static const std::vector<std::string>* result =
+    new std::vector<std::string>();
 
-const std::map<std::string, starlark_obj::fn*, std::less<>> starlark_obj::method_refs;
+  return *result;
+}
+
+const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_obj::method_refs() {
+  static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
+    new std::map<std::string, starlark_obj::fn*, std::less<>>();
+
+  return *result;
+}
 
 starlark_obj::starlark_obj() : freezed(false) {}
 
@@ -135,11 +145,11 @@ bool starlark_obj::primitive() const {
 }
 
 const std::vector<std::string>& starlark_obj::dir() const {
-  return attributes;
+  return attributes();
 }
 
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_obj::methods_meta() const {
-  return method_refs;
+  return method_refs();
 }
 
 bool starlark_obj::equals(const starlark_obj& other) const {
@@ -471,7 +481,7 @@ int64_t starlark_obj::as_int64() const {
 }
 
 const number& starlark_obj::as_bigint() const {
-  return number::zero;
+  return number::zero();
 }
 
 double starlark_obj::as_float() const {

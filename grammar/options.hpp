@@ -54,7 +54,7 @@ struct options {
   bool allow_binary_integer_literals = false;
 };
 
-extern const std::set<std::string> predeclared_symbols;
+const std::set<std::string>& predeclared_symbols();
 
 }  // namespace grammar
 }  // namespace starlark
