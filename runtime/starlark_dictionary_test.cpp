@@ -728,7 +728,7 @@ TEST(StarlarkDictionary, GetWhileIterating) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkDictionary, UnhashableKey) {
+TEST(StarlarkDictionary, GetUnhashableKey) {
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
@@ -1320,6 +1320,236 @@ TEST(StarlarkDictionary, PopitemWithNamedArgs) {
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: dict.popitem() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, Setdefault) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&s_one);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "1");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, SetdefaultKeyNotPresent) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&s_two);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::none_t);
+  EXPECT_EQ(result->str(), "None");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1, \"key2\": None}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, SetdefaultWithDefault) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&s_one);
+  pos_args.push_back(&two);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "1");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, SetdefaultWithDefaultKeyNotPresent) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&s_two);
+  pos_args.push_back(&two);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "2");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1, \"key2\": 2}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, SetdefaultWhileIterating) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&s_one);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  [[maybe_unused]] auto it = dictionary.get_iterator(true, ctx, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, SetdefaultUnhashableKey) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_list list(0);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, SetdefaultNoArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: setdefault expected at least 1 argument, got 0", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, SetdefaultThreeArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: setdefault expected at most 2 argument, got 3", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, SetdefaultWithNamedArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&one);
+  named_args.insert("one", &one);
+  auto* method = dictionary.dot("setdefault", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: dict.setdefault() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Values) {

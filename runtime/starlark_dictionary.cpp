@@ -260,6 +260,22 @@ starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callbac
   return result;
 }
 
+starlark_obj* starlark_dictionary::setdefault(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) {
+  if (!can_modify("append", error_callback)) {
+    return nullptr;
+  }
+  if (key->hash() == -1) {
+    error_callback.add_error(error_unhashable_key(type(), key->type()));
+    return nullptr;
+  }
+  auto it = values_.find(key);
+  if (it != values_.end()) {
+    return it->second;
+  }
+  values_.insert(key, default_value);
+  return default_value;
+}
+
 starlark_obj* starlark_dictionary::values(context& ctx, error_fn& error_callback) const {
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
   for (auto entry : values_) {
@@ -405,9 +421,15 @@ starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starl
 }
 
 starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "dict.setdefault") ||
+      !min_args(pos_args, error_callback, "setdefault", 1) ||
+      !max_args(pos_args, error_callback, "setdefault", 2)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::dict_t);
+  auto* default_value = pos_args.size() > 1 ? pos_args[1] : ctx.none_value();
+  return static_cast<starlark_dictionary*>(this_obj)->setdefault(pos_args.front(), default_value, error_callback);
 }
 
 starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
