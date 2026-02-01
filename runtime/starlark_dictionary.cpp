@@ -148,7 +148,7 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, contex
 }
 
 starlark_obj* starlark_dictionary::pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("append", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -175,7 +175,7 @@ starlark_obj* starlark_dictionary::index(const starlark_obj& other, context& ctx
 }
 
 void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("update", error_callback)) {
     return;
   }
   if (idx.hash() == -1) {
@@ -186,7 +186,7 @@ void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& el
 }
 
 bool starlark_dictionary::clear(error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("delete", error_callback)) {
     return false;
   }
   values_.clear();
@@ -225,7 +225,7 @@ starlark_obj* starlark_dictionary::keys(context& ctx, error_fn& error_callback) 
 }
 
 starlark_obj* starlark_dictionary::pop(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("delete", error_callback)) {
     return nullptr;
   }
   if (key->hash() == -1) {
@@ -241,6 +241,22 @@ starlark_obj* starlark_dictionary::pop(starlark_obj* key, starlark_obj* default_
   }
   auto* result = it->second;
   values_.erase(key);
+  return result;
+}
+
+starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callback) {
+  if (!can_modify("delete", error_callback)) {
+    return nullptr;
+  }
+  if (values_.empty()) {
+    error_callback.add_error(error_empty_dictionary("popitem"));
+    return nullptr;
+  }
+  starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
+  auto it = values_.begin();
+  result->add(it->first);
+  result->add(it->second);
+  values_.erase(it->first);
   return result;
 }
 
@@ -286,7 +302,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
 }
 
 std::pair<bool, bool> starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("append", error_callback)) {
     return std::make_pair(false, true);
   }
   if (key->hash() == -1) {
@@ -313,9 +329,9 @@ void starlark_dictionary::starlark_dictionary_iterator::end_iterator() {
   dictionary->iterators_count--;
 }
 
-bool starlark_dictionary::can_modify(error_fn& error_callback) const {
+bool starlark_dictionary::can_modify(std::string_view op, error_fn& error_callback) const {
   if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
+    error_callback.add_error(error_op_in_loop(type(), op));
     return false;
   }
   if (freezed) {
@@ -380,9 +396,12 @@ starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "dict.popitem")) {
+     return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::dict_t);
+  return static_cast<starlark_dictionary*>(this_obj)->popitem(ctx, error_callback);
 }
 
 starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

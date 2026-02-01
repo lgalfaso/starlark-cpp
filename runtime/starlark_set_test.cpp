@@ -305,7 +305,7 @@ TEST(StarlarkSet, AndEqualsAssignWhileIterating) {
   auto* result = set.ampersand_equals_assign(set,  ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("Error in delete: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, BinaryAndWithNonSet) {
@@ -472,7 +472,7 @@ TEST(StarlarkSet, HatEqualsAssignWhileIterating) {
   auto* result = set.hat_equals_assign(set,  ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("Error in update: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, HatEqualsAssignWithNonSet) {
@@ -584,7 +584,7 @@ TEST(StarlarkSet, MinusEqualsAssignWhileIterating) {
   auto* result = set.minus_equals_assign(set,  ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("Error in delete: set value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, MinusEqualsAssignWithNonSet) {

@@ -54,7 +54,7 @@ class starlark_list : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
-  bool can_modify(error_fn& error_callback) const;
+  bool can_modify(std::string_view op, error_fn& error_callback) const;
 
   static const std::map<std::string, fn*, std::less<>>& method_refs();
   static const std::vector<std::string>& attributes();

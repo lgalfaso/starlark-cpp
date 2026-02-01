@@ -15,6 +15,7 @@ std::string error_not_callable(std::string_view type);
 std::string error_unpackable(std::string_view type);
 std::string error_unhashable_key(std::string_view type, std::string_view key_type);
 std::string error_unhashable_value(std::string_view type, std::string_view value_type);
+std::string error_empty_dictionary(std::string_view fn_name);
 std::string error_uniterable(std::string_view type);
 std::string error_argument_uniterable(std::string_view type);
 std::string error_unsubscriptable(std::string_view type);
@@ -70,7 +71,7 @@ std::string error_expect_character(std::string_view fn_name, std::string_view ty
 std::string error_expect_one_character_or_one_byte(std::string_view fn_name, std::string_view type);
 std::string error_argument_non_zero(std::string_view fn_name, int64_t arg_pos);
 
-std::string error_append_in_loop(std::string_view type);
+std::string error_op_in_loop(std::string_view type, std::string_view op);
 std::string error_mutate_frozen_value(std::string_view type);
 
 std::string error_like_required(std::string_view like_type, std::string_view actual_type);

@@ -25,6 +25,10 @@ std::string error_unhashable_value(std::string_view type, std::string_view value
   return std::format("TypeError: cannot use '{}' as a {} element (unhashable type: '{}')", value_type, type, value_type);
 }
 
+std::string error_empty_dictionary(std::string_view fn_name) {
+  return std::format("KeyError: '{}(): dictionary is empty'", fn_name);
+}
+
 std::string error_uniterable(std::string_view type) {
   return std::format("TypeError: '{}' object is not iterable", type);
 }
@@ -217,8 +221,8 @@ std::string error_argument_non_zero(std::string_view fn_name, int64_t arg_pos) {
   return std::format("ValueError: {}() arg {} must not be zero", fn_name, arg_pos);
 }
 
-std::string error_append_in_loop(std::string_view type) {
-  return std::format("Error in append: {} value is temporarily immutable due to active for-loop iteration", type);
+std::string error_op_in_loop(std::string_view type, std::string_view op) {
+  return std::format("Error in {}: {} value is temporarily immutable due to active for-loop iteration", op, type);
 }
 
 std::string error_mutate_frozen_value(std::string_view type) {

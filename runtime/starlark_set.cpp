@@ -202,7 +202,7 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, context& ctx
 }
 
 starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("delete", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -216,7 +216,7 @@ starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, conte
 }
 
 starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("delete", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -232,7 +232,7 @@ starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, c
 }
 
 starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("append", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -246,7 +246,7 @@ starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, contex
 }
 
 starlark_obj* starlark_set::hat_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("update", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -296,7 +296,7 @@ void starlark_set::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 }
 
 std::pair<bool, bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("append", error_callback)) {
     return std::make_pair(false, true);
   }
   if (element->hash() == -1) {
@@ -322,9 +322,9 @@ void starlark_set::starlark_set_iterator::end_iterator() {
   set->iterators_count--;
 }
 
-bool starlark_set::can_modify(error_fn& error_callback) const {
+bool starlark_set::can_modify(std::string_view op, error_fn& error_callback) const {
   if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
+    error_callback.add_error(error_op_in_loop(type(), op));
     return false;
   }
   if (freezed) {

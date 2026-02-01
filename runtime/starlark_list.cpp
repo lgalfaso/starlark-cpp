@@ -209,7 +209,7 @@ starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, conte
     error_callback.add_error(error_no_concat(type(), other.type(), type()));
     return nullptr;
   }
-  if (!can_modify(error_callback)) {
+  if (!can_modify("append", error_callback)) {
     return nullptr;
   }
   const starlark_list& l_other = static_cast<const starlark_list&>(other);
@@ -224,7 +224,7 @@ starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, conte
 starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
-      if (!can_modify(error_callback)) {
+      if (!can_modify("append", error_callback)) {
         return nullptr;
       }
       if (values.empty()) {
@@ -245,7 +245,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       return this;
     }
     case starlark_numeric_type::kBigInt: {
-      if (!can_modify(error_callback)) {
+      if (!can_modify("append", error_callback)) {
         return nullptr;
       }
       if (values.empty()) {
@@ -289,7 +289,7 @@ starlark_obj* starlark_list::index(const starlark_obj& other, context& ctx, erro
 }
 
 void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("update", error_callback)) {
     return;
   }
   auto iidx = inner_index(idx, values.size(), error_callback);
@@ -342,7 +342,7 @@ void starlark_list::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 }
 
 void starlark_list::add(starlark_obj* element, error_fn& error_callback) {
-  if (!can_modify(error_callback)) {
+  if (!can_modify("append", error_callback)) {
     return;
   }
   // TODO(lmirelmann): Check that this does not go over the maximum number of elements.
@@ -365,9 +365,9 @@ void starlark_list::starlark_list_iterator::end_iterator() {
   list->iterators_count--;
 }
 
-bool starlark_list::can_modify(error_fn& error_callback) const {
+bool starlark_list::can_modify(std::string_view op, error_fn& error_callback) const {
   if (iterators_count) {
-    error_callback.add_error(error_append_in_loop(type()));
+    error_callback.add_error(error_op_in_loop(type(), op));
     return false;
   }
   if (freezed) {

@@ -39,6 +39,7 @@ class starlark_dictionary : public starlark_obj {
   starlark_obj* items(context& ctx, error_fn& error_callback) const;
   starlark_obj* keys(context& ctx, error_fn& error_callback) const;
   starlark_obj* pop(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback);
+  starlark_obj* popitem(context& ctx, error_fn& error_callback);
   starlark_obj* values(context& ctx, error_fn& error_callback) const;
 
   class starlark_dictionary_iterator : public starlark_iterator {
@@ -60,7 +61,7 @@ class starlark_dictionary : public starlark_obj {
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
  private:
-  bool can_modify(error_fn& error_callback) const;
+  bool can_modify(std::string_view op, error_fn& error_callback) const;
 
   static const std::map<std::string, fn*, std::less<>>& method_refs();
   static const std::vector<std::string>& attributes();

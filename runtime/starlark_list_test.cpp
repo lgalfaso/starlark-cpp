@@ -979,7 +979,7 @@ TEST(StarlarkList, IndexAssignOutOfRange2) {
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
 
-TEST(StarlarkList, MutationWhileIterating2) {
+TEST(StarlarkList, IndexAssignWhileIterating) {
   starlark_list list(0);
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -993,7 +993,7 @@ TEST(StarlarkList, MutationWhileIterating2) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.index_assign(zero, one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("Error in update: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, IndexAssignWithFreeze) {
