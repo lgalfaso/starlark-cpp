@@ -318,6 +318,7 @@ cc_library(
         ":starlark_list",
         ":starlark_none",
         ":starlark_object",
+        ":starlark_string",
         ":starlark_tuple",
         ":starlark_types",
         "//containers:linked_hash_map",

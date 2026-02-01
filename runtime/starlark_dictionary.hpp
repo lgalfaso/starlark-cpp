@@ -41,6 +41,7 @@ class starlark_dictionary : public starlark_obj {
   starlark_obj* pop(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback);
   starlark_obj* popitem(context& ctx, error_fn& error_callback);
   starlark_obj* setdefault(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback);
+  bool update(starlark_obj* iterable, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
   starlark_obj* values(context& ctx, error_fn& error_callback) const;
 
   class starlark_dictionary_iterator : public starlark_iterator {

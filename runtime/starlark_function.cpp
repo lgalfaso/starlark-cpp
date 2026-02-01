@@ -314,66 +314,9 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
     return nullptr;
   }
   starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
-  if (!pos_args.empty()) {
-    auto* pos_value = pos_args.front();
-    // This is a special case. This should be extended to understand any mapping, but at the moment only `dictionary` implements it.
-    if (pos_value->type() == starlark_types::dict_t) {
-      auto* it = pos_value->get_iterator(true, ctx, error_callback);
-      assert(it != nullptr);
-      while (it->has_next()) {
-        auto* key = it->next();
-        assert(key != nullptr);
-        auto* value = pos_value->index(*key, ctx, error_callback);
-        assert(value != nullptr);
-        if (result->insert(key, value, error_callback).second) {
-          // Should not happen as `pos_value` is already a dictionary.
-          return nullptr;
-        }
-      }
-      it->end_iterator();
-    } else {
-      int pos = 0;
-      auto* it = pos_value->get_iterator(true, ctx, error_callback);
-      if (it == nullptr) {
-        return nullptr;
-      }
-      while (it->has_next()) {
-        auto* kv = it->next();
-        assert(kv != nullptr);
-        auto* it2 = kv->get_iterator(true, ctx, error_callback);
-        if (it2 == nullptr) {
-          return nullptr;
-        }
-        if (!it2->has_next()) {
-          error_callback.add_error(error_dictionary_update_sequence(pos, 0, 2));
-          return nullptr;
-        }
-        auto* key = it2->next();
-        assert(key != nullptr);
-        if (!it2->has_next()) {
-          error_callback.add_error(error_dictionary_update_sequence(pos, 1, 2));
-          return nullptr;
-        }
-        auto* value = it2->next();
-        assert(value != nullptr);
-        if (it2->has_next()) {
-          error_callback.add_error(error_dictionary_update_sequence(pos, kv->len(false, error_callback), 2));
-          return nullptr;
-        }
-        if (result->insert(key, value, error_callback).second) {
-          return nullptr;
-        }
-        it2->end_iterator();
-        pos++;
-      }
-      it->end_iterator();
-    }
-  }
-  for (auto& [key, value] : named_args) {
-    if (result->insert(Arena::Create<starlark_string>(&ctx.arena(), key), value, error_callback).second) {
-      // Should not happen.
-      return nullptr;
-    }
+  starlark_obj* iterable = pos_args.empty() ? nullptr : pos_args.front();
+  if (result->update(iterable, named_args, ctx, error_callback)) {
+    return nullptr;
   }
   return result;
 }

@@ -14,6 +14,7 @@
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
+#include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -25,6 +26,7 @@ using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
+using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
 using ::std::literals::string_view_literals::operator""sv;
@@ -1550,6 +1552,390 @@ TEST(StarlarkDictionary, SetdefaultWithNamedArgs) {
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: dict.setdefault() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkDictionary, UpdateEmpty) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "None");
+  EXPECT_EQ(dictionary.repr(), "{\"key0\": 0, \"key1\": 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, UpdateFromDict) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_dictionary dict;
+  starlark_none none;
+  dict.insert(&none, &none, error_callback);
+  pos_args.push_back(&dict);
+
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "None");
+  EXPECT_EQ(dictionary.repr(), "{\"key0\": 0, \"key1\": 1, None: None}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, UpdateFromIterable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_tuple tuple(0);
+  starlark_none none;
+  tuple.add(&none);
+  tuple.add(&one);
+  list.add(&tuple, error_callback);
+  pos_args.push_back(&list);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(result->repr(), "None");
+  EXPECT_EQ(dictionary.repr(), "{\"key0\": 0, \"key1\": 1, None: 1}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, UpdateFromNamedArguments) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  std::string s_two("key2"sv);
+  std::string s_three("key3"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_two, &two);
+  named_args.insert(s_three, &three);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(result->repr(), "None");
+  EXPECT_EQ(dictionary.repr(), "{\"key0\": 0, \"key1\": 1, \"key2\": 2, \"key3\": 3}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, UpdateFromNamedArgumentsAndIterable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  starlark_string s_two("key2"sv);
+  std::string ss_two("key2"sv);
+  std::string ss_three("key3"sv);
+
+
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_tuple tuple1(0);
+  tuple1.add(&s_zero);
+  tuple1.add(ctx.none_value());
+  list.add(&tuple1, error_callback);
+  starlark_tuple tuple2(0);
+  tuple2.add(&s_two);
+  tuple2.add(ctx.none_value());
+  list.add(&tuple2, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(ss_two, &two);
+  named_args.insert(ss_three, &three);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(result->repr(), "None");
+  EXPECT_EQ(dictionary.repr(), "{\"key0\": None, \"key1\": 1, \"key2\": 2, \"key3\": 3}");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, UpdateFromInteger) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&one);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+}
+
+TEST(StarlarkDictionary, UpdateFromNonIterable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  list.add(&one, error_callback);
+  pos_args.push_back(&list);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+}
+
+TEST(StarlarkDictionary, UpdateFromNonHashable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list1(0);
+  starlark_list list2(0);
+  starlark_tuple tuple(0);
+  tuple.add(&list2);
+  tuple.add(&one);
+  list1.add(&tuple, error_callback);
+  pos_args.push_back(&list1);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'list' as a dict key (unhashable type: 'list')");
+}
+
+TEST(StarlarkDictionary, UpdateMultiplePositionalArguments) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: update expected at most 1 argument, got 2");
+}
+
+TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements1) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
+  starlark_none none;
+  tuple1.add(&none);
+  tuple1.add(&one);
+  list.add(&tuple1, error_callback);
+  list.add(&tuple2, error_callback);
+  pos_args.push_back(&list);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 0; 2 is required");
+}
+
+TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements2) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
+  starlark_none none;
+  tuple1.add(&none);
+  tuple1.add(&one);
+  tuple2.add(&none);
+  list.add(&tuple1, error_callback);
+  list.add(&tuple2, error_callback);
+  pos_args.push_back(&list);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 1; 2 is required");
+}
+
+TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements3) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_tuple tuple1(0);
+  starlark_tuple tuple2(0);
+  starlark_none none;
+  tuple1.add(&none);
+  tuple1.add(&one);
+  tuple2.add(&none);
+  tuple2.add(&none);
+  tuple2.add(&none);
+  list.add(&tuple1, error_callback);
+  list.add(&tuple2, error_callback);
+  pos_args.push_back(&list);
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
+}
+
+TEST(StarlarkDictionary, UpdateWhileIterating) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_string s_zero("key0"sv);
+  starlark_string s_one("key1"sv);
+  dictionary.insert(&s_zero, &zero, error_callback);
+  dictionary.insert(&s_one, &one, error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = dictionary.dot("update", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  [[maybe_unused]] auto it = dictionary.get_iterator(true, ctx, error_callback);
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Values) {
