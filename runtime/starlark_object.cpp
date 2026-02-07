@@ -537,13 +537,13 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
     }
     case starlark_numeric_type::kBigInt: {
       const auto& idx = other.as_bigint();
-      if (idx.bit_size() > 63) {
+      if (!idx.fits_in_int64()) {
         error_callback.add_error(error_index_out_of_range(type()));
         return -1;
       }
-      auto iidx = idx.at(0);
+      auto iidx = idx.as_int64();
       if (idx.sign()) {
-        iidx = obj_len - iidx;
+        iidx += obj_len;
       }
       if (iidx < 0 || obj_len <= iidx) {
         error_callback.add_error(error_index_out_of_range(type()));
