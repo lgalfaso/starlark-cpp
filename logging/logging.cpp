@@ -1,8 +1,7 @@
-// Copyright 2024-2025 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
 #include "logging/logging.hpp"
 
-#include <chrono>
 #include <string>
 #include <vector>
 
@@ -12,19 +11,11 @@ namespace logging {
 namespace {
 
 LogEntry create_log(LogLevel level, std::string_view message, std::string_view module, const Position& pos) {
-  const std::chrono::time_point<std::chrono::system_clock> now =
-        std::chrono::system_clock::now();
-  auto now_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(
-      now.time_since_epoch()).count();
-  auto now_in_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
-      now.time_since_epoch()).count();
   LogEntry entry;
   entry.set_level(level);
   entry.set_module(module);
   entry.set_message(message);
   *entry.mutable_pos() = pos;
-  entry.mutable_timestamp()->set_seconds(now_in_seconds);
-  entry.mutable_timestamp()->set_nanos(now_in_ns % 1'000'000'000);
   return entry;
 }
 

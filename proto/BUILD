@@ -32,7 +32,6 @@ proto_library(
     name = "starlark_logging_proto",
     srcs = ["starlark_logging.proto"],
     visibility = ["//visibility:public"],
-    deps = ["@protobuf//:timestamp_proto"],
 )
 
 cc_proto_library(

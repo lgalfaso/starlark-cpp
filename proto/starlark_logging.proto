@@ -2,8 +2,6 @@ edition = "2024";
 
 package starlark.logging;
 
-import "google/protobuf/timestamp.proto";
-
 enum LogLevel {
   LOG_LEVEL_UNKNOWN = 0;
   LOG_LEVEL_DEBUG = 1;
@@ -25,6 +23,5 @@ message LogEntry {
   string module = 2;
   string message = 3;
   Position pos = 4;
-  google.protobuf.Timestamp timestamp = 5;
 }
 
