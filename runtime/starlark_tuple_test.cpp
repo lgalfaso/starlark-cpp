@@ -278,7 +278,7 @@ TEST(StarlarkTuple, Freeze) {
 
   tuple.add(&list);
   tuple.freeze();
-  list.add(&one, error_callback);
+  list.append(&one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
 }

@@ -162,7 +162,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         starlark_list* list = static_cast<starlark_list*>(candidate_list);
         assert(stack.size() >= op_code.add_to_list().number_of_elements());
         for (int i = 0; i < op_code.add_to_list().number_of_elements(); ++i) {
-          list->add(stack[stack.size() - op_code.add_to_list().number_of_elements() + i], error_callback);
+          list->append(stack[stack.size() - op_code.add_to_list().number_of_elements() + i], error_callback);
         }
         stack.resize(stack.size() - op_code.add_to_list().number_of_elements(), nullptr);
         break;

@@ -212,7 +212,7 @@ starlark_obj* starlark_dictionary::items(context& ctx, error_fn& error_callback)
     auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
     tuple->add(entry.first);
     tuple->add(entry.second);
-    result->add(tuple, error_callback);
+    result->append(tuple, error_callback);
   }
   return result;
 }
@@ -220,7 +220,7 @@ starlark_obj* starlark_dictionary::items(context& ctx, error_fn& error_callback)
 starlark_obj* starlark_dictionary::keys(context& ctx, error_fn& error_callback) const {
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
   for (auto entry : values_) {
-    result->add(entry.first, error_callback);
+    result->append(entry.first, error_callback);
   }
   return result;
 }
@@ -335,7 +335,7 @@ bool starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::nam
 starlark_obj* starlark_dictionary::values(context& ctx, error_fn& error_callback) const {
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
   for (auto entry : values_) {
-    result->add(entry.second, error_callback);
+    result->append(entry.second, error_callback);
   }
   return result;
 }

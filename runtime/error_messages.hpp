@@ -23,6 +23,7 @@ std::string error_no_item_assignment(std::string_view type);
 std::string error_incomparable(std::string_view op, std::string_view type1, std::string_view type2);
 std::string error_index_out_of_range(std::string_view type);
 std::string error_index_integer_or_slice(std::string_view type, std::string_view actual);
+std::string error_index_integer_on_a_slice(std::string_view actual);
 
 std::string error_bad_operand_unary(std::string_view op, std::string_view type);
 std::string error_bad_operand_binary(std::string_view op, std::string_view type1, std::string_view type2);

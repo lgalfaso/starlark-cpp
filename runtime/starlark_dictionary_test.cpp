@@ -1626,7 +1626,7 @@ TEST(StarlarkDictionary, UpdateFromIterable) {
   starlark_none none;
   tuple.add(&none);
   tuple.add(&one);
-  list.add(&tuple, error_callback);
+  list.append(&tuple, error_callback);
   pos_args.push_back(&list);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
@@ -1692,11 +1692,11 @@ TEST(StarlarkDictionary, UpdateFromNamedArgumentsAndIterable) {
   starlark_tuple tuple1(0);
   tuple1.add(&s_zero);
   tuple1.add(ctx.none_value());
-  list.add(&tuple1, error_callback);
+  list.append(&tuple1, error_callback);
   starlark_tuple tuple2(0);
   tuple2.add(&s_two);
   tuple2.add(ctx.none_value());
-  list.add(&tuple2, error_callback);
+  list.append(&tuple2, error_callback);
   pos_args.push_back(&list);
   named_args.insert(ss_two, &two);
   named_args.insert(ss_three, &three);
@@ -1748,7 +1748,7 @@ TEST(StarlarkDictionary, UpdateFromNonIterable) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
-  list.add(&one, error_callback);
+  list.append(&one, error_callback);
   pos_args.push_back(&list);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
@@ -1778,7 +1778,7 @@ TEST(StarlarkDictionary, UpdateFromNonHashable) {
   starlark_tuple tuple(0);
   tuple.add(&list2);
   tuple.add(&one);
-  list1.add(&tuple, error_callback);
+  list1.append(&tuple, error_callback);
   pos_args.push_back(&list1);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
@@ -1835,8 +1835,8 @@ TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements1) {
   starlark_none none;
   tuple1.add(&none);
   tuple1.add(&one);
-  list.add(&tuple1, error_callback);
-  list.add(&tuple2, error_callback);
+  list.append(&tuple1, error_callback);
+  list.append(&tuple2, error_callback);
   pos_args.push_back(&list);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
@@ -1868,8 +1868,8 @@ TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements2) {
   tuple1.add(&none);
   tuple1.add(&one);
   tuple2.add(&none);
-  list.add(&tuple1, error_callback);
-  list.add(&tuple2, error_callback);
+  list.append(&tuple1, error_callback);
+  list.append(&tuple2, error_callback);
   pos_args.push_back(&list);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
@@ -1903,8 +1903,8 @@ TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements3) {
   tuple2.add(&none);
   tuple2.add(&none);
   tuple2.add(&none);
-  list.add(&tuple1, error_callback);
-  list.add(&tuple2, error_callback);
+  list.append(&tuple1, error_callback);
+  list.append(&tuple2, error_callback);
   pos_args.push_back(&list);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);

@@ -260,14 +260,14 @@ TEST(StarlarkAll, List) {
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
-  list2.add(&one, error_callback);
+  list2.append(&one, error_callback);
   starlark_obj::pos_args_t pos_args2;
   starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
 
   starlark_list list3(0);
-  list3.add(&zero, error_callback);
-  list3.add(&one, error_callback);
+  list3.append(&zero, error_callback);
+  list3.append(&one, error_callback);
   starlark_obj::pos_args_t pos_args3;
   starlark_obj::named_args_t named_args3;
   pos_args3.push_back(&list3);
@@ -354,20 +354,20 @@ TEST(StarlarkAny, List) {
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
-  list2.add(&one, error_callback);
+  list2.append(&one, error_callback);
   starlark_obj::pos_args_t pos_args2;
   starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
 
   starlark_list list3(0);
-  list3.add(&zero, error_callback);
-  list3.add(&one, error_callback);
+  list3.append(&zero, error_callback);
+  list3.append(&one, error_callback);
   starlark_obj::pos_args_t pos_args3;
   starlark_obj::named_args_t named_args3;
   pos_args3.push_back(&list3);
 
   starlark_list list4(0);
-  list4.add(&zero, error_callback);
+  list4.append(&zero, error_callback);
   starlark_obj::pos_args_t pos_args4;
   starlark_obj::named_args_t named_args4;
   pos_args4.push_back(&list4);
@@ -454,7 +454,7 @@ TEST(StarlarkBool, List) {
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
-  list2.add(&one, error_callback);
+  list2.append(&one, error_callback);
   starlark_obj::pos_args_t pos_args2;
   starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
@@ -571,10 +571,10 @@ TEST(StarlarkBytes, List) {
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
-  list2.add(&zero, error_callback);
-  list2.add(&one, error_callback);
-  list2.add(&max_minus_one, error_callback);
-  list2.add(&max_byte, error_callback);
+  list2.append(&zero, error_callback);
+  list2.append(&one, error_callback);
+  list2.append(&max_minus_one, error_callback);
+  list2.append(&max_byte, error_callback);
   starlark_obj::pos_args_t pos_args2;
   starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
@@ -600,7 +600,7 @@ TEST(StarlarkBytes, OutOfRange) {
     context ctx(arena);
     error_handler error_callback;
     starlark_list list(0);
-    list.add(value, error_callback);
+    list.append(value, error_callback);
     starlark_obj::pos_args_t pos_args;
     starlark_obj::named_args_t named_args;
     pos_args.push_back(&list);
@@ -638,7 +638,7 @@ TEST(StarlarkBytes, ListWithNone) {
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_none none;
-  list.add(&none, error_callback);
+  list.append(&none, error_callback);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
@@ -869,7 +869,7 @@ TEST(StarlarkDict, FromIterable) {
   starlark_integer one(1);
   tuple.add(&none);
   tuple.add(&one);
-  list.add(&tuple, error_callback);
+  list.append(&tuple, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
@@ -923,7 +923,7 @@ TEST(StarlarkDict, FromNonIterable) {
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
   starlark_integer one(1);
-  list.add(&one, error_callback);
+  list.append(&one, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
@@ -945,7 +945,7 @@ TEST(StarlarkDict, FromNonHashable) {
   starlark_integer one(1);
   tuple.add(&list2);
   tuple.add(&one);
-  list1.add(&tuple, error_callback);
+  list1.append(&tuple, error_callback);
   pos_args.push_back(&list1);
 
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
@@ -985,8 +985,8 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements1) {
   starlark_integer one(1);
   tuple1.add(&none);
   tuple1.add(&one);
-  list.add(&tuple1, error_callback);
-  list.add(&tuple2, error_callback);
+  list.append(&tuple1, error_callback);
+  list.append(&tuple2, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
@@ -1010,8 +1010,8 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements2) {
   tuple1.add(&none);
   tuple1.add(&one);
   tuple2.add(&none);
-  list.add(&tuple1, error_callback);
-  list.add(&tuple2, error_callback);
+  list.append(&tuple1, error_callback);
+  list.append(&tuple2, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
@@ -1037,8 +1037,8 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
   tuple2.add(&none);
   tuple2.add(&none);
   tuple2.add(&none);
-  list.add(&tuple1, error_callback);
-  list.add(&tuple2, error_callback);
+  list.append(&tuple1, error_callback);
+  list.append(&tuple2, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
@@ -1124,9 +1124,9 @@ TEST(StarlarkEnumerate, FromIterable) {
   starlark_string s_one("one"sv);
   starlark_string s_two("two"sv);
   starlark_string s_three("three"sv);
-  list.add(&s_one, error_callback);
-  list.add(&s_two, error_callback);
-  list.add(&s_three, error_callback);
+  list.append(&s_one, error_callback);
+  list.append(&s_two, error_callback);
+  list.append(&s_three, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
@@ -1147,9 +1147,9 @@ TEST(StarlarkEnumerate, FromIterableWithStart) {
   starlark_string s_one("one"sv);
   starlark_string s_two("two"sv);
   starlark_string s_three("three"sv);
-  list.add(&s_one, error_callback);
-  list.add(&s_two, error_callback);
-  list.add(&s_three, error_callback);
+  list.append(&s_one, error_callback);
+  list.append(&s_two, error_callback);
+  list.append(&s_three, error_callback);
   pos_args.push_back(&list);
   starlark_integer start(100);
   named_args.insert(s_start, &start);
@@ -1172,9 +1172,9 @@ TEST(StarlarkEnumerate, InvalidStart) {
   starlark_string s_one("one"sv);
   starlark_string s_two("two"sv);
   starlark_string s_three("three"sv);
-  list.add(&s_one, error_callback);
-  list.add(&s_two, error_callback);
-  list.add(&s_three, error_callback);
+  list.append(&s_one, error_callback);
+  list.append(&s_two, error_callback);
+  list.append(&s_three, error_callback);
   pos_args.push_back(&list);
   starlark_string start("100"sv);
   named_args.insert(s_start, &start);
@@ -1197,9 +1197,9 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
   starlark_string s_two("two"sv);
   starlark_string s_three("three"sv);
   std::string s_end("end");
-  list.add(&s_one, error_callback);
-  list.add(&s_two, error_callback);
-  list.add(&s_three, error_callback);
+  list.append(&s_one, error_callback);
+  list.append(&s_two, error_callback);
+  list.append(&s_three, error_callback);
   pos_args.push_back(&list);
   starlark_string end("100"sv);
   named_args.insert(s_end, &end);
@@ -1235,9 +1235,9 @@ TEST(StarlarkEnumerate, TooManyPosArguments) {
   starlark_string s_one("one"sv);
   starlark_string s_two("two"sv);
   starlark_string s_three("three"sv);
-  list.add(&s_one, error_callback);
-  list.add(&s_two, error_callback);
-  list.add(&s_three, error_callback);
+  list.append(&s_one, error_callback);
+  list.append(&s_two, error_callback);
+  list.append(&s_three, error_callback);
   pos_args.push_back(&list);
   pos_args.push_back(&list);
 
@@ -2018,7 +2018,7 @@ TEST(StarlarkLen, List) {
   pos_args1.push_back(&list1);
 
   starlark_list list2(0);
-  list2.add(&one, error_callback);
+  list2.append(&one, error_callback);
   starlark_obj::pos_args_t pos_args2;
   starlark_obj::named_args_t named_args2;
   pos_args2.push_back(&list2);
@@ -2621,9 +2621,9 @@ TEST(StarlarkSet, OneArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  list.add(&one, error_callback);
-  list.add(&two, error_callback);
-  list.add(&one, error_callback);
+  list.append(&one, error_callback);
+  list.append(&two, error_callback);
+  list.append(&one, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_set(nullptr, pos_args, named_args, ctx, error_callback);
@@ -2641,9 +2641,9 @@ TEST(StarlarkSet, ElementNotHashable) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  list.add(&one, error_callback);
-  list.add(&two, error_callback);
-  list.add(&list, error_callback);
+  list.append(&one, error_callback);
+  list.append(&two, error_callback);
+  list.append(&list, error_callback);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, ctx, error_callback));
@@ -2783,9 +2783,9 @@ TEST(StarlarkTuple, OneArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  list.add(&one, error_callback);
-  list.add(&two, error_callback);
-  list.add(&one, error_callback);
+  list.append(&one, error_callback);
+  list.append(&two, error_callback);
+  list.append(&one, error_callback);
   pos_args.push_back(&list);
 
   auto* result = starlark_fn_tuple(nullptr, pos_args, named_args, ctx, error_callback);

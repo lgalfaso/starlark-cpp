@@ -57,6 +57,10 @@ std::string error_index_integer_or_slice(std::string_view type, std::string_view
   return std::format("TypeError: {} indices must be integers or slices, not '{}'", type, actual);
 }
 
+std::string error_index_integer_on_a_slice(std::string_view actual) {
+  return std::format("TypeError: slice indices must be integers, not '{}'", actual);
+}
+
 std::string error_bad_operand_unary(std::string_view op, std::string_view type) {
   return std::format("TypeError: bad operand type for unary {}: '{}'", op, type);
 }

@@ -19,7 +19,6 @@ class starlark_list : public starlark_obj {
  public:
   explicit starlark_list(std::size_t reserve_size);
   std::string_view type() const override;
-  void add(starlark_obj* element, error_fn& error_callback);
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
@@ -33,6 +32,14 @@ class starlark_list : public starlark_obj {
   starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
+
+  bool append(starlark_obj* element, error_fn& error_callback);
+  bool clear(error_fn& error_callback);
+  bool extend(starlark_obj* other, context& ctx, error_fn& error_callback);
+  starlark_obj* index(starlark_obj* element, int64_t start, int64_t end, context& ctx, error_fn& error_callback) const;
+  bool insert(starlark_obj* element, int64_t pos, error_fn& error_callback);
+  starlark_obj* pop(int64_t idx, error_fn& error_callback);
+  bool remove(starlark_obj* element, error_fn& error_callback);
 
   class starlark_list_iterator : public starlark_iterator {
    public:

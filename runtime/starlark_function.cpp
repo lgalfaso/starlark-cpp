@@ -329,7 +329,7 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), attributes.size());
   for (const auto& attribute : attributes) {
     // TODO(lmirelmann): This recreates the strings for every call. This can be quite wasteful. Given that this method is not called a lot, then maybe this is ok.
-    result->add(Arena::Create<starlark_string>(&ctx.arena(), attribute), error_callback);
+    result->append(Arena::Create<starlark_string>(&ctx.arena(), attribute), error_callback);
   }
   return result;
 }
@@ -366,7 +366,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
     auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
     tuple->add(start);
     tuple->add(it->next());
-    result->add(tuple, error_callback);
+    result->append(tuple, error_callback);
     start = start->binary_plus(*one, ctx, error_callback);
   }
   it->end_iterator();
@@ -575,7 +575,7 @@ starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_a
   }
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
   while (it->has_next()) {
-    result->add(it->next(), error_callback);
+    result->append(it->next(), error_callback);
   }
   it->end_iterator();
   return result;
@@ -801,7 +801,7 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
     for (auto* it : its) {
       tuple->add(it->next());
     }
-    result->add(tuple, error_callback);
+    result->append(tuple, error_callback);
   }
   for (auto* it : its) {
     it->end_iterator();
