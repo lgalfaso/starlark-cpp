@@ -61,6 +61,10 @@ std::string error_index_integer_on_a_slice(std::string_view actual) {
   return std::format("TypeError: slice indices must be integers, not '{}'", actual);
 }
 
+std::string error_item_not_in_collection(std::string_view type, std::string_view fn_name) {
+  return std::format("ValueError: {}.{}(x): x not in {}", type, fn_name, type);
+}
+
 std::string error_bad_operand_unary(std::string_view op, std::string_view type) {
   return std::format("TypeError: bad operand type for unary {}: '{}'", op, type);
 }

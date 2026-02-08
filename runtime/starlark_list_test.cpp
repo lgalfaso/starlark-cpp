@@ -803,7 +803,7 @@ TEST(StarlarkList, MutationWhileIterating1) {
   EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
-TEST(StarlarkList, Index) {
+TEST(StarlarkList, Subscript) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -829,7 +829,7 @@ TEST(StarlarkList, Index) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkList, IndexOutOfRange1) {
+TEST(StarlarkList, SubscriptOutOfRange1) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -846,7 +846,7 @@ TEST(StarlarkList, IndexOutOfRange1) {
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
 
-TEST(StarlarkList, IndexOutOfRange2) {
+TEST(StarlarkList, SubscriptOutOfRange2) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -863,7 +863,7 @@ TEST(StarlarkList, IndexOutOfRange2) {
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
 
-TEST(StarlarkList, IndexOutOfRange3) {
+TEST(StarlarkList, SubscriptOutOfRange3) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -880,7 +880,7 @@ TEST(StarlarkList, IndexOutOfRange3) {
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
 
-TEST(StarlarkList, IndexOutOfRange4) {
+TEST(StarlarkList, SubscriptOutOfRange4) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -897,7 +897,7 @@ TEST(StarlarkList, IndexOutOfRange4) {
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
 
-TEST(StarlarkList, IndexOutOfRange5) {
+TEST(StarlarkList, SubscriptOutOfRange5) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -914,7 +914,7 @@ TEST(StarlarkList, IndexOutOfRange5) {
   EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
 }
 
-TEST(StarlarkList, IndexNotInt) {
+TEST(StarlarkList, SubscriptNotInt) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -1427,6 +1427,353 @@ TEST(StarlarkList, ExtendWhileIterating) {
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "Error in append: list value is temporarily immutable due to active for-loop iteration");
   EXPECT_EQ(list1.str(), "[0]");
+}
+
+TEST(StarlarkList, Index) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+}
+
+TEST(StarlarkList, IndexNotFound) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.minus_one());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: list.index(x): x not in list");
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+}
+
+TEST(StarlarkList, IndexWithNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at least 1 argument, got 0");
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+}
+
+TEST(StarlarkList, IndexWithStart) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "2");
+}
+
+TEST(StarlarkList, IndexWithStartAsNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.none_value());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+}
+
+TEST(StarlarkList, IndexWithStartAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.false_value());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+}
+
+TEST(StarlarkList, IndexWithStartAsBigint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  starlark_bigint bigint_one(1);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(&bigint_one);
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "2");
+}
+
+TEST(StarlarkList, IndexWithStartAsBigintBig) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  starlark_bigint big(number::minus_one() << 100);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(&big);
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+}
+
+TEST(StarlarkList, IndexWithStartAndEnd) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+}
+
+TEST(StarlarkList, IndexWithStartAndEndAsBigInt) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  starlark_bigint big(number::one() << 100);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(&big);
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+}
+
+TEST(StarlarkList, IndexWithStartAndEndAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.true_value());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
+}
+
+TEST(StarlarkList, IndexWithFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_list list1(0);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.zero(), error_callback);
+  list1.append(ctx.one(), error_callback);
+  list1.append(ctx.one(), error_callback);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.minus_one());
+  pos_args.push_back(ctx.zero());
+  auto* method = list1.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at most 3 argument, got 4");
+  EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
 }  // namespace

@@ -11,6 +11,7 @@
 #include "runtime/error_messages.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_integer.hpp"
+#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -339,7 +340,24 @@ bool starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_ca
 }
 
 starlark_obj* starlark_list::index(starlark_obj* element, int64_t start, int64_t end, context& ctx, error_fn& error_callback) const {
-  // TODO(lmirelmann): Implement.
+  if (start < 0) {
+    start += values.size();
+    start = std::max<int64_t>(start, 0);
+  } else {
+    start = std::min<int64_t>(start, values.size());
+  }
+  if (end < 0) {
+    end += values.size();
+    end = std::max<int64_t>(end, 0);
+  } else {
+    end = std::min<int64_t>(end, values.size());
+  }
+  for (auto i = start; i < end; ++i) {
+    if (values[i]->equals(*element)) {
+      return create_integer(i, ctx);
+    }
+  }
+  error_callback.add_error(error_item_not_in_collection(type(), "index"));
   return nullptr;
 }
 
@@ -486,10 +504,14 @@ starlark_obj* starlark_list_fn_index(starlark_obj* this_obj, const starlark_obj:
         return true;
       case starlark_numeric_type::kBigInt:
         if (!idx->as_bigint().fits_in_int64()) {
-          error_callback.add_error(error_index_out_of_range(idx->type()));
-          return false;
+          if (idx->as_bigint().sign()) {
+            result = std::numeric_limits<int64_t>::min();
+          } else {
+            result = std::numeric_limits<int64_t>::max();
+          }
+        } else {
+          result = idx->as_bigint().as_int64();
         }
-        result = idx->as_bigint().as_int64();
         return true;
       default:
         if (idx->type() == starlark_types::none_t) {
