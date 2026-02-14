@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <limits>
 #include <map>
 #include <string>
 #include <vector>
@@ -341,14 +342,12 @@ bool starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_ca
 
 starlark_obj* starlark_list::index(starlark_obj* element, int64_t start, int64_t end, context& ctx, error_fn& error_callback) const {
   if (start < 0) {
-    start += values.size();
-    start = std::max<int64_t>(start, 0);
+    start = std::max<int64_t>(start + values.size(), 0);
   } else {
     start = std::min<int64_t>(start, values.size());
   }
   if (end < 0) {
-    end += values.size();
-    end = std::max<int64_t>(end, 0);
+    end = std::max<int64_t>(end + values.size(), 0);
   } else {
     end = std::min<int64_t>(end, values.size());
   }
@@ -365,23 +364,42 @@ bool starlark_list::insert(starlark_obj* element, int64_t pos, error_fn& error_c
   if (!can_modify("append", error_callback)) {
     return false;
   }
-  // TODO(lmirelmann): Implement.
-  return false;
+  if (pos < 0) {
+    pos = std::max<int64_t>(pos + values.size(), 0);
+  } else {
+    pos = std::min<int64_t>(pos, values.size());
+  }
+  values.insert(values.begin() + pos, element);
+  return true;
 }
 
 starlark_obj* starlark_list::pop(int64_t idx, error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
     return nullptr;
   }
-  // TODO(lmirelmann): Implement.
-  return nullptr;
+  if (idx < 0) {
+    idx += values.size();
+  }
+  if (idx < 0 || idx >= values.size()) {
+    error_callback.add_error(error_index_out_of_range("pop"));
+    return nullptr;
+  }
+  auto* result = values[idx];
+  values.erase(values.begin() + idx);
+  return result;
 }
 
 bool starlark_list::remove(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
     return false;
   }
-  // TODO(lmirelmann): Implement.
+  for (auto it = values.begin(); it != values.end(); ++it) {
+    if ((*it)->equals(*element)) {
+      values.erase(it);
+      return true;
+    }
+  }
+  error_callback.add_error(error_item_not_in_collection(type(), "remove"));
   return false;
 }
 
@@ -542,22 +560,26 @@ starlark_obj* starlark_list_fn_insert(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   int64_t idx;
-  switch (pos_args[1]->numeric_type()) {
+  switch (pos_args.front()->numeric_type()) {
     case starlark_numeric_type::kInt64:
-      idx = pos_args[1]->as_int64();
+      idx = pos_args.front()->as_int64();
       break;
     case starlark_numeric_type::kBigInt:
-      if (!pos_args[1]->as_bigint().fits_in_int64()) {
-        error_callback.add_error(error_index_out_of_range(pos_args[1]->type()));
-        return nullptr;
+      if (!pos_args.front()->as_bigint().fits_in_int64()) {
+        if (pos_args.front()->as_bigint().sign()) {
+          idx = std::numeric_limits<int64_t>::min();
+        } else {
+          idx = std::numeric_limits<int64_t>::max();
+        }
+      } else {
+        idx = pos_args.front()->as_bigint().as_int64();
       }
-      idx = pos_args[1]->as_bigint().as_int64();
       break;
     default:
-      error_callback.add_error(error_index_integer_on_a_slice(pos_args[1]->type()));
+      error_callback.add_error(error_index_integer_on_a_slice(pos_args.front()->type()));
       return nullptr;
   }
-  if (!static_cast<starlark_list*>(this_obj)->insert(pos_args.front(), idx, error_callback)) {
+  if (!static_cast<starlark_list*>(this_obj)->insert(pos_args[1], idx, error_callback)) {
     return nullptr;
   }
   return ctx.none_value();
@@ -568,7 +590,7 @@ starlark_obj* starlark_list_fn_pop(starlark_obj* this_obj, const starlark_obj::p
      return nullptr;
   }
   int64_t idx = -1;
-  if (pos_args.size() > 1) {
+  if (pos_args.size() >= 1) {
     auto* iidx = pos_args.front();
     switch (iidx->numeric_type()) {
       case starlark_numeric_type::kInt64:
@@ -576,7 +598,7 @@ starlark_obj* starlark_list_fn_pop(starlark_obj* this_obj, const starlark_obj::p
         break;
       case starlark_numeric_type::kBigInt:
         if (!iidx->as_bigint().fits_in_int64()) {
-          error_callback.add_error(error_index_out_of_range(iidx->type()));
+          error_callback.add_error(error_index_out_of_range("pop"));
           return nullptr;
         }
         idx = iidx->as_bigint().as_int64();
