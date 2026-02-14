@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "runtime/starlark_bool.hpp"
+#include "runtime/starlark_float.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_set.hpp"
@@ -17,6 +18,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_set;
@@ -59,6 +61,19 @@ TEST(StarlarkSet, Truthy) {
 
   set1.add(&none, error_callback);
   EXPECT_TRUE(set1.truthy());
+}
+
+TEST(StarlarkSet, AddingAnEqualsElementIsANoop) {
+  starlark_float f_one(1);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_set set1;
+  set1.add(&f_one, error_callback);
+  set1.add(ctx.one(), error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ("set([1.0])", set1.str());
 }
 
 TEST(StarlarkSet, Equals) {
