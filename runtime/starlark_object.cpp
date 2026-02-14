@@ -648,6 +648,29 @@ bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlar
          max_args(pos_args, error_callback, fn_name, 1);
 }
 
+bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
+  switch (iidx.numeric_type()) {
+    case starlark_numeric_type::kInt64:
+      idx = iidx.as_int64();
+      break;
+    case starlark_numeric_type::kBigInt:
+      if (!iidx.as_bigint().fits_in_int64()) {
+        if (iidx.as_bigint().sign()) {
+          idx = std::numeric_limits<int64_t>::min();
+        } else {
+          idx = std::numeric_limits<int64_t>::max();
+        }
+      } else {
+        idx = iidx.as_bigint().as_int64();
+      }
+      break;
+    default:
+      error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
+      return false;
+  }
+  return true;
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

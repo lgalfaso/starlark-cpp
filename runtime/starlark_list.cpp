@@ -560,24 +560,8 @@ starlark_obj* starlark_list_fn_insert(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   int64_t idx;
-  switch (pos_args.front()->numeric_type()) {
-    case starlark_numeric_type::kInt64:
-      idx = pos_args.front()->as_int64();
-      break;
-    case starlark_numeric_type::kBigInt:
-      if (!pos_args.front()->as_bigint().fits_in_int64()) {
-        if (pos_args.front()->as_bigint().sign()) {
-          idx = std::numeric_limits<int64_t>::min();
-        } else {
-          idx = std::numeric_limits<int64_t>::max();
-        }
-      } else {
-        idx = pos_args.front()->as_bigint().as_int64();
-      }
-      break;
-    default:
-      error_callback.add_error(error_index_integer_on_a_slice(pos_args.front()->type()));
-      return nullptr;
+  if (!to_int64_with_clamping_for_index(*pos_args.front(), idx, error_callback)) {
+    return nullptr;
   }
   if (!static_cast<starlark_list*>(this_obj)->insert(pos_args[1], idx, error_callback)) {
     return nullptr;
@@ -590,23 +574,9 @@ starlark_obj* starlark_list_fn_pop(starlark_obj* this_obj, const starlark_obj::p
      return nullptr;
   }
   int64_t idx = -1;
-  if (pos_args.size() >= 1) {
-    auto* iidx = pos_args.front();
-    switch (iidx->numeric_type()) {
-      case starlark_numeric_type::kInt64:
-        idx = iidx->as_int64();
-        break;
-      case starlark_numeric_type::kBigInt:
-        if (!iidx->as_bigint().fits_in_int64()) {
-          error_callback.add_error(error_index_out_of_range("pop"));
-          return nullptr;
-        }
-        idx = iidx->as_bigint().as_int64();
-        break;
-      default:
-        error_callback.add_error(error_index_integer_on_a_slice(iidx->type()));
-        return nullptr;
-    }
+  if (pos_args.size() >= 1 &&
+      !to_int64_with_clamping_for_index(*pos_args.front(), idx, error_callback)) {
+    return nullptr;
   }
   return static_cast<starlark_list*>(this_obj)->pop(idx, error_callback);
 }
