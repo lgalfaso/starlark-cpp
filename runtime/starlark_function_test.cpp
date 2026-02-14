@@ -1381,6 +1381,8 @@ TEST(StarlarkFloat, FromString) {
   test("Infinity", "inf");
   test("-Infinity", "-inf");
   test("NaN", "nan");
+  test("-NaN", "nan");
+  test("+NaN", "nan");
 }
 
 TEST(StarlarkFloat, FromBool) {

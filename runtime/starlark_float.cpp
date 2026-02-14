@@ -304,8 +304,9 @@ starlark_obj* starlark_float::percent_equals_assign(const starlark_obj& other, c
 bool starlark_float::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
   // This tries to follow the same format as Python.
-  auto result = std::format("{:.17g}", value);
+  std::string result;
   if (std::isfinite(value)) {
+    result = std::format("{:.17g}", value);
     // The formatting using %g is not the same as the one used by Python.
     // The following modifications need to be performed after the intial formatting:
     // - If the value is represented as an integer in non-scientific notation,
@@ -334,6 +335,8 @@ bool starlark_float::inner_repr(printer& print, printer_action action) const {
         result += ".0";
       }
     }
+  } else {
+    result = std::isnan(value) ? "nan" : std::format("{}", value);
   }
   print.append(result);
   return false;
