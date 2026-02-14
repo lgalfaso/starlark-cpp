@@ -278,6 +278,7 @@ message FunctionSignature {
   bool has_star_argument = 3;
   bool has_star_star_argument = 4;
   message Param {
+    // TODO(lmirelmann): This is not able to express when there are named only arguments, and when the default arguments in the named arguments are not at the end.
     string name = 1;
     PosInFrame pos = 2;
   }
