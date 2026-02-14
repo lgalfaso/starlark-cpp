@@ -997,6 +997,8 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
   if (input.starts_with("-")) {
     pos += 1;
     neg = true;
+  } else if (input.starts_with("+")) {
+    pos += 1;
   }
   auto prefix = input.substr(pos, 2);
   if (prefix == "0x" || prefix == "0X") {

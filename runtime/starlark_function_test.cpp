@@ -1833,11 +1833,12 @@ TEST(StarlarkInt, FromString) {
     pos_args.push_back(&str);
 
     auto* result = starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback);
-    ASSERT_NE(nullptr, result);
+    ASSERT_NE(nullptr, result) << value;
     EXPECT_EQ(result->str(), expected);
   };
 
   test("-0123", "-123");
+  test("+0123", "123");
   test("-123", "-123");
   test("0", "0");
   test("123", "123");
@@ -1864,7 +1865,7 @@ TEST(StarlarkInt, FromStringWithBase) {
 
     auto* result1 = starlark_fn_int(nullptr, pos_args1, named_args1, ctx, error_callback);
     auto* result2 = starlark_fn_int(nullptr, pos_args2, named_args2, ctx, error_callback);
-    ASSERT_NE(nullptr, result1);
+    ASSERT_NE(nullptr, result1) << value;
     ASSERT_NE(nullptr, result2);
 
     EXPECT_EQ(result1->str(), expected);
@@ -1875,12 +1876,18 @@ TEST(StarlarkInt, FromStringWithBase) {
   test("123", 0, "123");
   test("0123", 10, "123");
   test("0x123", 16, "291");
+  test("+0x123", 16, "291");
+  test("-0x123", 16, "-291");
   test("123", 16, "291");
   test("0x123", 0, "291");
   test("0o123", 8, "83");
+  test("-0o123", 8, "-83");
+  test("+0o123", 8, "83");
   test("123", 8, "83");
   test("0o123", 0, "83");
   test("0b101", 2, "5");
+  test("+0b101", 2, "5");
+  test("-0b101", 2, "-5");
   test("101", 2, "5");
   test("0b101", 0, "5");
 }
