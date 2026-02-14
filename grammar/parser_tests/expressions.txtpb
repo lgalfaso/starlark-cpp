@@ -1,0 +1,15 @@
+statement {
+  expression_statement {
+    tuple {
+      value {
+        int_value: 1
+      }
+      value {
+        int_value: 2
+      }
+      value {
+        int_value: 3
+      }
+    }
+  }
+}
