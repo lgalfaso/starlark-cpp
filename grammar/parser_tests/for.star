@@ -20,3 +20,5 @@ def foo():
     continue
   for (a,b),c in []:
     continue
+  for x in 1, 2:
+    print(x)
