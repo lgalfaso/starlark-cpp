@@ -2598,6 +2598,92 @@ TEST(StarlarkRepr, NamedArguments) {
   EXPECT_EQ("TypeError: repr() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkReversed, Tuple) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_tuple tuple1(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args1;
+  starlark_obj::named_args_t named_args1;
+  pos_args1.push_back(&tuple1);
+
+  starlark_tuple tuple2(0);
+  tuple2.add(&zero);
+  tuple2.add(&one);
+  starlark_obj::pos_args_t pos_args2;
+  starlark_obj::named_args_t named_args2;
+  pos_args2.push_back(&tuple2);
+
+  EXPECT_EQ("[]", starlark_fn_reversed(nullptr, pos_args1, named_args1, ctx, error_callback)->str());
+  EXPECT_EQ("[1, 0]", starlark_fn_reversed(nullptr, pos_args2, named_args2, ctx, error_callback)->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkReversed, Integer) {
+  starlark_integer one(1);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&one);
+
+  EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
+}
+
+TEST(StarlarkReversed, NoPosArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: reversed() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkReversed, MultiplePosArgs) {
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: reversed() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkReversed, NamedArguments) {
+  std::string s_one("1");
+  starlark_integer one(1);
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: reversed() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkSet, NoArguments) {
   Arena arena;
   context ctx(arena);

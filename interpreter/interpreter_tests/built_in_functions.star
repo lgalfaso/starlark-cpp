@@ -35,7 +35,7 @@ assert_eq(ord("😃"), 128515)
 # TODO(lmirelmann): print
 assert_eq(list(range(3, 8, 2)), [3, 5, 7])
 assert_eq(repr([1, 2]), "[1, 2]")
-# TODO(lmirelmann): reversed
+assert_eq(reversed(range(5)), [4, 3, 2, 1, 0])
 assert_eq(repr(set([1, 2, 3])), "set([1, 2, 3])")
 # TODO(lmirelmann): sorted
 assert_eq(str("abc"), 'abc')

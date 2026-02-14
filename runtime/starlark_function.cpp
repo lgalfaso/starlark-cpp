@@ -701,9 +701,24 @@ starlark_obj* starlark_fn_repr(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_reversed(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::reversed_f)) {
+    return nullptr;
+  }
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  std::vector<starlark_obj*> elements;
+  while (it->has_next()) {
+    elements.push_back(it->next());
+  }
+  it->end_iterator();
+  std::reverse(elements.begin(), elements.end());
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), elements.size());
+  for (auto* element : elements) {
+    result->append(element, error_callback);
+  }
+  return result;
 }
 
 starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
