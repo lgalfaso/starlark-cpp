@@ -441,6 +441,9 @@ foo = "\200")starlark",
 foo = "bar\ud83d")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\ud83d\\\"\"):2,7:2,18 NEWLINE:2,18:2,18 EOF:2,18:2,18",
        { "Invalid escape sequence:2,11" });
+  check(R"starlark(
+foo = '\119')starlark",
+      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\t9\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13");
 }
 
 TEST(LexerTest, StringTripleQuoteEscapeSequence) {

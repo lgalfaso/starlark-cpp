@@ -1,0 +1,61 @@
+statement {
+  assign_statement {
+    lhs {
+      identifier {
+        name: "a"
+        nfkc_name: "a"
+        frame: 1
+        pos_in_frame: 0
+      }
+    }
+    op: EQUALS
+    rhs {
+      int_value: 1
+    }
+  }
+}
+statement {
+  expression_statement {
+    dictionary_expression {
+    }
+  }
+}
+statement {
+  expression_statement {
+    dictionary_expression {
+      entry {
+        key {
+          string_value: "a"
+        }
+        value {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+      }
+    }
+  }
+}
+statement {
+  expression_statement {
+    dictionary_expression {
+      entry {
+        key {
+          string_value: "a"
+        }
+        value {
+          identifier {
+            name: "a"
+            nfkc_name: "a"
+            frame: 1
+            pos_in_frame: 0
+          }
+        }
+      }
+    }
+  }
+}
+module_binding: "a"

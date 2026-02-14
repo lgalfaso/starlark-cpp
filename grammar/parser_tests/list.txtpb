@@ -136,4 +136,18 @@ statement {
     }
   }
 }
+statement {
+  expression_statement {
+    list_expression {
+      element {
+        identifier {
+          name: "a"
+          nfkc_name: "a"
+          frame: 1
+          pos_in_frame: 0
+        }
+      }
+    }
+  }
+}
 module_binding: "a"
