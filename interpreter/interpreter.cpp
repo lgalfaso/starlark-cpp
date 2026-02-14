@@ -397,8 +397,47 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
           // TODO(lmirelmann): Avoid the generation of starlark_string.
           named_args.insert(key->as_string(), value);
         }
-        // TODO(lmirelmann): Get the variadic arguments.
-        // TODO(lmirelmann): Get the named variadic arguments.
+        if (op_code.call().has_variadic_positional_argument()) {
+          auto* iterable = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * op_code.call().named_arguments_count()];
+          auto* it = iterable->get_iterator(true, ctx, error_callback);
+          if (it == nullptr) {
+            break;
+          }
+          while (it->has_next()) {
+            pos_args.push_back(it->next());
+          }
+          it->end_iterator();
+        }
+        if (op_code.call().has_variadic_named_argument()) {
+          auto* iterable = stack.back();
+          // TODO(lmirelmann): This should be generalized if we want to support other types that are mappings.
+          if (iterable->type() != starlark_types::dict_t) {
+            error_callback.add_error(std::format("TypeError: argument after ** must be a mapping, not {}", iterable->type()));
+            return nullptr;
+          }
+          auto* it = iterable->get_iterator(true, ctx, error_callback);
+          if (it == nullptr) {
+            // Should not happen.
+            break;
+          }
+          while (it->has_next()) {
+            auto* key = it->next();
+            if (key->type() != starlark_types::string_t) {
+              error_callback.add_error("TypeError: keywords must be strings");
+              return nullptr;
+            }
+            auto* value = iterable->index(*key, ctx, error_callback);
+            if (value == nullptr) {
+              // Should not happen.
+              return nullptr;
+            }
+            if (!named_args.insert(key->as_string(), value).second) {
+              error_callback.add_error(std::format("TypeError: got multiple values for keyword argument '{}'", key->as_string()));
+              return nullptr;
+            }
+          }
+          it->end_iterator();
+        }
         stack.resize(stack.size() - args_count, nullptr);
         stack.back() = stack.back()->call(pos_args, named_args, ctx, error_callback);
         break;
