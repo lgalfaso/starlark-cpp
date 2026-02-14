@@ -10,4 +10,5 @@ def foo5(a, *b):
   return a(*b)
 def foo6(a, **b):
   return a(**b)
-
+def foo7(a, *, b = 2, c):
+  print(a, b, c)
