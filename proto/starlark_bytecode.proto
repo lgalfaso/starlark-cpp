@@ -274,13 +274,13 @@ message Fail {}
 
 message FunctionSignature {
   repeated Param param = 1;
-  uint64 default_arguments_count = 2;
-  bool has_star_argument = 3;
-  bool has_star_star_argument = 4;
+  bool has_star_argument = 2;
+  bool has_star_star_argument = 3;
+  uint64 keyword_only_parameter_count = 4;
   message Param {
-    // TODO(lmirelmann): This is not able to express when there are named only arguments, and when the default arguments in the named arguments are not at the end.
     string name = 1;
     PosInFrame pos = 2;
+    bool default_initialization = 3;
   }
 }
 

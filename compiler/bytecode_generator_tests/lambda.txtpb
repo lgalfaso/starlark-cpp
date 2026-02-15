@@ -20,7 +20,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK } }                            #  0
   op_code { const_string { value: "1" } }                                            #  1
   op_code { return { } }                                                             #  2
-  function_signature { default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
+  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }    #  0
@@ -28,7 +28,7 @@ block {
   op_code { const_int { value: 1 } }                                                 #  2
   op_code { binary_plus { } }                                                        #  3
   op_code { return { } }                                                             #  4
-  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } } default_arguments_count: 0 has_star_argument: false has_star_star_argument: false }
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }    #  0
@@ -36,5 +36,5 @@ block {
   op_code { load { frame: 0 pos_in_frame: 1 } }                                      #  2
   op_code { binary_plus { } }                                                        #  3
   op_code { return { } }                                                             #  4
-  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } } param { name: "b" pos { frame: 0 pos_in_frame: 1 } } default_arguments_count: 1 has_star_argument: false has_star_star_argument: false }
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
 }

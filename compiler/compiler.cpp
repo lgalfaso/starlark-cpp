@@ -840,18 +840,30 @@ void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Par
   int arguments_with_defaults_count = 0;
   bool has_star_argument = false;
   bool has_star_star_argument = false;
+  int keyword_only_parameter_count = 0;
+  bool keyword_only_mode = false;
   for (const auto& param : *params) {
     switch (param.parameter_type_case()) {
       case Parameter::kInitialization:
         ++arguments_with_defaults_count;
+        if (keyword_only_mode) {
+          keyword_only_parameter_count++;
+        }
         break;
       case Parameter::kStar:
-        has_star_argument = true;
+        if (param.identifier().name().empty()) {
+          keyword_only_mode = true;
+        } else {
+          has_star_argument = true;
+        }
         break;
       case Parameter::kStarStar:
         has_star_star_argument = true;
         break;
       default:
+        if (keyword_only_mode) {
+          keyword_only_parameter_count++;
+        }
         break;
     }
   }
@@ -871,14 +883,18 @@ void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Par
   blocks.push_back(block_for_function);
   output.add_block();
   auto* function_signature = mutable_block()->mutable_function_signature();
-  function_signature->set_default_arguments_count(arguments_with_defaults_count);
   function_signature->set_has_star_argument(has_star_argument);
   function_signature->set_has_star_star_argument(has_star_star_argument);
+  function_signature->set_keyword_only_parameter_count(keyword_only_parameter_count);
   for (const auto& param : *params) {
+    if (param.identifier().name().empty()) {
+      continue;
+    }
     auto fn_param = function_signature->add_param();
     fn_param->set_name(param.identifier().nfkc_name());
     fn_param->mutable_pos()->set_frame(param.identifier().frame());
     fn_param->mutable_pos()->set_pos_in_frame(param.identifier().pos_in_frame());
+    fn_param->set_default_initialization(param.parameter_type_case() == Parameter::kInitialization);
   }
 }
 
