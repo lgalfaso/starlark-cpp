@@ -621,7 +621,6 @@ TEST(StarlarkString, SliceRange) {
   test(ctx.one(), ctx.one(), ctx.none_value(), "", "", "", "", "", "");
   test(ctx.one(), ctx.one(), ctx.minus_one(), "", "", "", "", "", "");
   test(ctx.one(), ctx.one(), ctx.one(), "", "", "", "", "", "");
-
 }
 
 TEST(StarlarkString, SliceRangeBoolStart) {

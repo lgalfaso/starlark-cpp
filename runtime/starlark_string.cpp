@@ -281,7 +281,7 @@ starlark_obj* starlark_string::slice_range(const starlark_obj& start, const star
   if (!valid) {
     return nullptr;
   }
-  
+
   decltype(value) result;
   if (i_stride > 0) {
     for (auto i = i_start; i < i_end; i += i_stride) {

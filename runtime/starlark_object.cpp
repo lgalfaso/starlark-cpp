@@ -2,11 +2,13 @@
 
 #include "runtime/starlark_object.hpp"
 
+#include <algorithm>
 #include <bit>
 #include <functional>
 #include <limits>
 #include <map>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
