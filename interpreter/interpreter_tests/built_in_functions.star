@@ -20,7 +20,8 @@ assert_eq(float(0.0), 0.0)
 assert_eq(float(1), 1.0)
 assert_eq(float("Inf"), 1e308*10)
 assert_eq(float("-Inf"), -1e308*10)
-# TODO(lmirelmann): getattr
+l = []
+assert_eq(getattr(l, "append"), l.append)
 assert_eq(hasattr(b'', "elems"), True)
 assert_eq(hash("abc"), 6041520446639342335)
 assert_eq(int("0123", 10), 123)
