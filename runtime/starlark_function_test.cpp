@@ -1511,6 +1511,146 @@ TEST(StarlarkFloat, NamedArguments) {
   EXPECT_EQ("TypeError: float() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkGetattr, CheckAttribute) {
+  starlark_list list(0);
+  starlark_string attribute("append"sv);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  pos_args.push_back(&list);
+  pos_args.push_back(&attribute);
+  auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+
+  pos_args.clear();
+  named_args.clear();
+  pos_args.push_back(&list);
+  auto* call_result = result->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, call_result);
+  EXPECT_EQ(call_result->str(), "None");
+  EXPECT_EQ(list.str(), "[[...]]");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkGetattr, AttributeDoesNotExist) {
+  starlark_list list(0);
+  starlark_string attribute("appen"sv);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  pos_args.push_back(&list);
+  pos_args.push_back(&attribute);
+  auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ(list.str(), "[]");
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?", error_callback.messages[0]);
+}
+
+TEST(StarlarkGetattr, AttributeDoesNotExistWithDefault) {
+  starlark_list list(0);
+  starlark_list list2(0);
+  starlark_string attribute("appen"sv);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  pos_args.push_back(&list);
+  pos_args.push_back(&attribute);
+  pos_args.push_back(&list2);
+  auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(&list2, result);
+  EXPECT_EQ(list.str(), "[]");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkGetattr, AttributeNotString) {
+  starlark_list list(0);
+  starlark_bytes attribute("append"sv);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  pos_args.push_back(&list);
+  pos_args.push_back(&attribute);
+  auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ(list.str(), "[]");
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: attribute name must be string, not 'bytes'", error_callback.messages[0]);
+}
+
+TEST(StarlarkGetattr, OneParam) {
+  starlark_list list(0);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  pos_args.push_back(&list);
+  auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ(list.str(), "[]");
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: getattr expected at least 2 argument, got 1", error_callback.messages[0]);
+}
+
+TEST(StarlarkGetattr, FourParams) {
+  starlark_list list(0);
+  starlark_string attribute("append"sv);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  pos_args.push_back(&list);
+  pos_args.push_back(&attribute);
+  pos_args.push_back(&attribute);
+  pos_args.push_back(&attribute);
+  auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ(list.str(), "[]");
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: getattr expected at most 3 argument, got 4", error_callback.messages[0]);
+}
+
+TEST(StarlarkGetattr, NamedArguments) {
+  starlark_list list(0);
+  starlark_string attribute("append"sv);
+  std::string s_one("one");
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  pos_args.push_back(&list);
+  pos_args.push_back(&attribute);
+  named_args.insert(s_one, ctx.one());
+
+  auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: getattr() takes no keyword arguments", error_callback.messages[0]);
+}
+
 TEST(StarlarkHasattr, CheckAttribute) {
   auto test = [](starlark_obj& element, std::string_view attr, bool expected) {
     starlark_string attribute(attr);

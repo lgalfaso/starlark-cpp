@@ -144,6 +144,7 @@ starlark_obj* starlark_function::call(
     const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args,
     context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
+  error_callback.add_error("Unimplemented");
   return nullptr;
 }
 
@@ -433,9 +434,25 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
 }
 
 starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::getattr_f) ||
+      !min_args(pos_args, error_callback, starlark_built_in_functions::getattr_f, 2) ||
+      !max_args(pos_args, error_callback, starlark_built_in_functions::getattr_f, 3)) {
+    return nullptr;
+  }
+  auto* element = pos_args.front();
+  auto* name = pos_args[1];
+  if (name->type() != starlark_types::string_t) {
+    error_callback.add_error(error_attribute_string(name->type()));
+    return nullptr;
+  }
+  auto* result = element->get_attr(pos_args.size() == 2, name->as_string(), ctx, error_callback);
+  if (result == nullptr) {
+    if (pos_args.size() <= 2) {
+      return nullptr;
+    }
+    result = pos_args[2];
+  }
+  return result;
 }
 
 starlark_obj* starlark_fn_hasattr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
