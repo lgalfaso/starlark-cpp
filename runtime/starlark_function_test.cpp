@@ -114,11 +114,21 @@ TEST(StarlarkFunction, Hash) {
 }
 
 TEST(StarlarkFunction, Equals) {
+  starlark_list list1(0);
+  starlark_list list2(0);
+  starlark_integer zero(0);
+  starlark_integer one(1);
   EXPECT_TRUE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base2_fn, "fn_name")));
   EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "another_name")));
   EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base2_fn, "another_name")));
   EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_list(0)));
+  EXPECT_FALSE(starlark_built_in_function(&list1, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(&list1, base_fn, "fn_name").equals(starlark_built_in_function(&list2, base_fn, "fn_name")));
+  EXPECT_TRUE(starlark_built_in_function(&list1, base_fn, "fn_name").equals(starlark_built_in_function(&list1, base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(&zero, base_fn, "fn_name").equals(starlark_built_in_function(&list1, base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(&zero, base_fn, "fn_name").equals(starlark_built_in_function(&one, base_fn, "fn_name")));
+  EXPECT_TRUE(starlark_built_in_function(&zero, base_fn, "fn_name").equals(starlark_built_in_function(&zero, base_fn, "fn_name")));
 }
 
 TEST_F(FnTest, Call) {
