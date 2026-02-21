@@ -1014,6 +1014,206 @@ TEST(StarlarkList, IndexAssignWithFreeze) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
 }
 
+TEST(StarlarkList, SliceRange) {
+  Arena arena;
+  context ctx(arena);
+  auto test = [&ctx](const starlark_obj* start, const starlark_obj* end, const starlark_obj* stride,
+      std::string_view expected_value0,
+      std::string_view expected_value1,
+      std::string_view expected_value2,
+      std::string_view expected_value3,
+      std::string_view expected_value4,
+      std::string_view expected_value5) {
+    error_handler error_callback;
+    starlark_list list(0);
+    starlark_integer two(2);
+    starlark_integer three(3);
+    starlark_integer four(4);
+
+    auto* result0 = list.slice_range(*start, *end, *stride, ctx, error_callback);
+    list.append(ctx.zero(), error_callback);
+    auto* result1 = list.slice_range(*start, *end, *stride, ctx, error_callback);
+    list.append(ctx.one(), error_callback);
+    auto* result2 = list.slice_range(*start, *end, *stride, ctx, error_callback);
+    list.append(&two, error_callback);
+    auto* result3 = list.slice_range(*start, *end, *stride, ctx, error_callback);
+    list.append(&three, error_callback);
+    auto* result4 = list.slice_range(*start, *end, *stride, ctx, error_callback);
+    list.append(&four, error_callback);
+    auto* result5 = list.slice_range(*start, *end, *stride, ctx, error_callback);
+
+    ASSERT_NE(nullptr, result0);
+    ASSERT_NE(nullptr, result1);
+    ASSERT_NE(nullptr, result2);
+    ASSERT_NE(nullptr, result3);
+    ASSERT_NE(nullptr, result4);
+    ASSERT_NE(nullptr, result5);
+    EXPECT_EQ(expected_value0, result0->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value1, result1->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value2, result2->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value3, result3->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value4, result4->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value5, result5->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  /*
+  ```python
+  def tt(a):
+      if a == None:
+          return "ctx.none_value()"
+      if a == -1:
+          return "ctx.minus_one()"
+      if a == 0:
+          return "ctx.zero()"
+      if a == 1:
+          return "ctx.one()"
+
+  def rr(a, b, c):
+      return 'test({}, {}, {}, "{}", "{}", "{}", "{}", "{}", "{}");'.format(tt(a), tt(b), tt(c), *[str(list(range(x))[a:b:c]) for x in range(6)])
+
+  "\n  ".join([rr(a,b,c) for a in (None, -1, 0, 1) for b in (None, -1, 0, 1) for c in (None, -1, 1)])
+  ```
+  */
+
+  test(ctx.none_value(), ctx.none_value(), ctx.none_value(), "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]", "[0, 1, 2, 3, 4]");
+  test(ctx.none_value(), ctx.none_value(), ctx.minus_one(), "[]", "[0]", "[1, 0]", "[2, 1, 0]", "[3, 2, 1, 0]", "[4, 3, 2, 1, 0]");
+  test(ctx.none_value(), ctx.none_value(), ctx.one(), "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]", "[0, 1, 2, 3, 4]");
+  test(ctx.none_value(), ctx.minus_one(), ctx.none_value(), "[]", "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]");
+  test(ctx.none_value(), ctx.minus_one(), ctx.minus_one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.none_value(), ctx.minus_one(), ctx.one(), "[]", "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]");
+  test(ctx.none_value(), ctx.zero(), ctx.none_value(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.none_value(), ctx.zero(), ctx.minus_one(), "[]", "[]", "[1]", "[2, 1]", "[3, 2, 1]", "[4, 3, 2, 1]");
+  test(ctx.none_value(), ctx.zero(), ctx.one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.none_value(), ctx.one(), ctx.none_value(), "[]", "[0]", "[0]", "[0]", "[0]", "[0]");
+  test(ctx.none_value(), ctx.one(), ctx.minus_one(), "[]", "[]", "[]", "[2]", "[3, 2]", "[4, 3, 2]");
+  test(ctx.none_value(), ctx.one(), ctx.one(), "[]", "[0]", "[0]", "[0]", "[0]", "[0]");
+
+  test(ctx.minus_one(), ctx.none_value(), ctx.none_value(), "[]", "[0]", "[1]", "[2]", "[3]", "[4]");
+  test(ctx.minus_one(), ctx.none_value(), ctx.minus_one(), "[]", "[0]", "[1, 0]", "[2, 1, 0]", "[3, 2, 1, 0]", "[4, 3, 2, 1, 0]");
+  test(ctx.minus_one(), ctx.none_value(), ctx.one(), "[]", "[0]", "[1]", "[2]", "[3]", "[4]");
+  test(ctx.minus_one(), ctx.minus_one(), ctx.none_value(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.minus_one(), ctx.minus_one(), ctx.minus_one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.minus_one(), ctx.minus_one(), ctx.one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.minus_one(), ctx.zero(), ctx.none_value(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.minus_one(), ctx.zero(), ctx.minus_one(), "[]", "[]", "[1]", "[2, 1]", "[3, 2, 1]", "[4, 3, 2, 1]");
+  test(ctx.minus_one(), ctx.zero(), ctx.one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.minus_one(), ctx.one(), ctx.none_value(), "[]", "[0]", "[]", "[]", "[]", "[]");
+  test(ctx.minus_one(), ctx.one(), ctx.minus_one(), "[]", "[]", "[]", "[2]", "[3, 2]", "[4, 3, 2]");
+  test(ctx.minus_one(), ctx.one(), ctx.one(), "[]", "[0]", "[]", "[]", "[]", "[]");
+
+  test(ctx.zero(), ctx.none_value(), ctx.none_value(), "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]", "[0, 1, 2, 3, 4]");
+  test(ctx.zero(), ctx.none_value(), ctx.minus_one(), "[]", "[0]", "[0]", "[0]", "[0]", "[0]");
+  test(ctx.zero(), ctx.none_value(), ctx.one(), "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]", "[0, 1, 2, 3, 4]");
+  test(ctx.zero(), ctx.minus_one(), ctx.none_value(), "[]", "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]");
+  test(ctx.zero(), ctx.minus_one(), ctx.minus_one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.zero(), ctx.minus_one(), ctx.one(), "[]", "[]", "[0]", "[0, 1]", "[0, 1, 2]", "[0, 1, 2, 3]");
+  test(ctx.zero(), ctx.zero(), ctx.none_value(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.zero(), ctx.zero(), ctx.minus_one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.zero(), ctx.zero(), ctx.one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.zero(), ctx.one(), ctx.none_value(), "[]", "[0]", "[0]", "[0]", "[0]", "[0]");
+  test(ctx.zero(), ctx.one(), ctx.minus_one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.zero(), ctx.one(), ctx.one(), "[]", "[0]", "[0]", "[0]", "[0]", "[0]");
+
+  test(ctx.one(), ctx.none_value(), ctx.none_value(), "[]", "[]", "[1]", "[1, 2]", "[1, 2, 3]", "[1, 2, 3, 4]");
+  test(ctx.one(), ctx.none_value(), ctx.minus_one(), "[]", "[0]", "[1, 0]", "[1, 0]", "[1, 0]", "[1, 0]");
+  test(ctx.one(), ctx.none_value(), ctx.one(), "[]", "[]", "[1]", "[1, 2]", "[1, 2, 3]", "[1, 2, 3, 4]");
+  test(ctx.one(), ctx.minus_one(), ctx.none_value(), "[]", "[]", "[]", "[1]", "[1, 2]", "[1, 2, 3]");
+  test(ctx.one(), ctx.minus_one(), ctx.minus_one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.one(), ctx.minus_one(), ctx.one(), "[]", "[]", "[]", "[1]", "[1, 2]", "[1, 2, 3]");
+  test(ctx.one(), ctx.zero(), ctx.none_value(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.one(), ctx.zero(), ctx.minus_one(), "[]", "[]", "[1]", "[1]", "[1]", "[1]");
+  test(ctx.one(), ctx.zero(), ctx.one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.one(), ctx.one(), ctx.none_value(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.one(), ctx.one(), ctx.minus_one(), "[]", "[]", "[]", "[]", "[]", "[]");
+  test(ctx.one(), ctx.one(), ctx.one(), "[]", "[]", "[]", "[]", "[]", "[]");
+}
+
+TEST(StarlarkList, SliceRangeBoolStart) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  list.append(ctx.zero(), error_callback);
+  list.append(ctx.one(), error_callback);
+  list.append(&two, error_callback);
+  list.append(&three, error_callback);
+  list.append(&four, error_callback);
+
+  auto* result = list.slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+}
+
+TEST(StarlarkList, SliceRangeBoolEnd) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  list.append(ctx.zero(), error_callback);
+  list.append(ctx.one(), error_callback);
+  list.append(&two, error_callback);
+  list.append(&three, error_callback);
+  list.append(&four, error_callback);
+
+  auto* result = list.slice_range(*ctx.none_value(), *ctx.false_value(), *ctx.none_value(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+}
+
+TEST(StarlarkList, SliceRangeBoolStride) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  list.append(ctx.zero(), error_callback);
+  list.append(ctx.one(), error_callback);
+  list.append(&two, error_callback);
+  list.append(&three, error_callback);
+  list.append(&four, error_callback);
+
+  auto* result = list.slice_range(*ctx.none_value(), *ctx.none_value(), *ctx.false_value(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+}
+
+TEST(StarlarkList, SliceRangeZeroStride) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  starlark_integer two(2);
+  starlark_integer three(3);
+  starlark_integer four(4);
+  list.append(ctx.zero(), error_callback);
+  list.append(ctx.one(), error_callback);
+  list.append(&two, error_callback);
+  list.append(&three, error_callback);
+  list.append(&four, error_callback);
+
+  auto* result = list.slice_range(*ctx.none_value(), *ctx.none_value(), *ctx.zero(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
+}
+
 TEST(StarlarkList, GetAttrError) {
   Arena arena;
   context ctx(arena);

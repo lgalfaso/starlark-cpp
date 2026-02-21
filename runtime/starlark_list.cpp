@@ -301,6 +301,26 @@ void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element,
   values[iidx] = &element;
 }
 
+starlark_obj* starlark_list::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
+  auto [i_start, i_end, i_stride, valid] = inner_slice_range(start, stop, stride, values.size(), error_callback);
+  if (!valid) {
+    return nullptr;
+  }
+
+  // TODO(lmirelmann): Pre-calculate the size.
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  if (i_stride > 0) {
+    for (auto i = i_start; i < i_end; i += i_stride) {
+      result->values.push_back(values[i]);
+    }
+  } else {
+    for (auto i = i_start; i > i_end; i += i_stride) {
+      result->values.push_back(values[i]);
+    }
+  }
+  return result;
+}
+
 bool starlark_list::append(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
     return false;
@@ -515,39 +535,14 @@ starlark_obj* starlark_list_fn_index(starlark_obj* this_obj, const starlark_obj:
       !max_args(pos_args, error_callback, "index", 3)) {
     return nullptr;
   }
-  auto parse_number = [&error_callback](starlark_obj* idx, int64_t& result) -> bool {
-    switch (idx->numeric_type()) {
-      case starlark_numeric_type::kInt64:
-        result = idx->as_int64();
-        return true;
-      case starlark_numeric_type::kBigInt:
-        if (!idx->as_bigint().fits_in_int64()) {
-          if (idx->as_bigint().sign()) {
-            result = std::numeric_limits<int64_t>::min();
-          } else {
-            result = std::numeric_limits<int64_t>::max();
-          }
-        } else {
-          result = idx->as_bigint().as_int64();
-        }
-        return true;
-      default:
-        if (idx->type() == starlark_types::none_t) {
-          return true;
-        }
-        error_callback.add_error(error_index_integer_on_a_slice(idx->type()));
-        return false;
-    }
-  };
-
   int64_t start = 0;
   int64_t end = -1;
   if (pos_args.size() >= 2) {
-    if (!parse_number(pos_args[1], start)) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
       return nullptr;
     }
     if (pos_args.size() >= 3) {
-      if (!parse_number(pos_args[2], end)) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
         return nullptr;
       }
     }

@@ -6,391 +6,56 @@
 
 #include <limits>
 
-#include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_integer.hpp"
-#include "runtime/starlark_float.hpp"
-#include "runtime/starlark_none.hpp"
 #include "runtime/starlark_range.hpp"
 #include "runtime/starlark_testing.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::bigint::number;
 using ::starlark::runtime::context;
-using ::starlark::runtime::starlark_bigint;
-using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_integer;
-using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_range;
 using ::starlark::testing::error_handler;
-using ::testing::Ge;
 using ::testing::IsEmpty;
-using ::testing::Lt;
-using ::testing::SizeIs;
 
 namespace {
 
-TEST(StarlarkRange, Type) {
-  EXPECT_EQ("range", starlark_range(0, 100, 1).type());
-}
+/*
+```python
+x = range(-3, 4)
+t = ["test({}, {}, {}, {}, {}, {}, {});\n".format(a, b, c, d, e, f, repr(str(range(a, b, c)[d:e:f])).replace("'", '"')) for a in x for b in x for c in x if c for d in x for e in x for f in x if f]
+ll = (len(x)**2) * (len(x) - 1)
+st = [t[i:i + ll] for i in range(0, len(t), ll)]
 
-TEST(StarlarkRange, Primitve) {
-  EXPECT_FALSE(starlark_range(0, 100, 1).primitive());
-}
 
-TEST(StarlarkRange, Truthy) {
-  auto test = [](int64_t start, int64_t end, int64_t step, bool expected) {
-    starlark_range range(start, end, step);
-    EXPECT_EQ(range.truthy(), expected) << range.str();
-  };
-
-  test(0, 0, 1, false);
-  test(0, 0, -1, false);
-  test(0, 100, 1, true);
-  test(0, 100, -1, false);
-  test(0, 100, 1000, true);
-  test(0, 100, -1000, false);
-  test(100, 0, 1, false);
-  test(100, 0, -1, true);
-  test(100, 0, 1000, false);
-  test(100, 0, -1000, true);
-}
-
-TEST(StarlarkRange, Repr) {
-  auto test = [](int64_t start, int64_t end, int64_t step, std::string_view expected) {
-    starlark_range range(start, end, step);
-    EXPECT_EQ(range.repr(), expected);
-  };
-
-  test(0, 0, 1, "range(0)");
-  test(0, 1, 1, "range(1)");
-  test(0, 0, -1, "range(0, 0, -1)");
-  test(0, 100, 1, "range(100)");
-  test(1, 100, 1, "range(1, 100)");
-  test(0, 100, -1, "range(0, 100, -1)");
-  test(0, 100, 1000, "range(0, 100, 1000)");
-  test(0, 100, -1000, "range(0, 100, -1000)");
-  test(100, 0, 1, "range(100, 0)");
-  test(100, 0, -1, "range(100, 0, -1)");
-  test(100, 0, 1000, "range(100, 0, 1000)");
-  test(100, 0, -1000, "range(100, 0, -1000)");
-}
-
-TEST(StarlarkRange, Hash) {
-  EXPECT_EQ(starlark_range(0, 100, 1).hash(), -1);
-}
-
-TEST(StarlarkRange, Len) {
-  auto test = [](int64_t start, int64_t end, int64_t step, int64_t expected) {
-    error_handler error_callback;
-
-    starlark_range range(start, end, step);
-    EXPECT_EQ(range.len(true, error_callback), expected);
-    EXPECT_THAT(error_callback.messages, IsEmpty());
-  };
-
-  test(0, 0, 1, 0);
-  test(0, 0, -1, 0);
-  test(0, 99, 1, 99);
-  test(0, 100, 1, 100);
-  test(0, 101, 1, 101);
-  test(0, 99, 10, 10);
-  test(0, 100, 10, 10);
-  test(0, 101, 10, 11);
-  test(0, 100, -1, 0);
-  test(0, 100, 1000, 1);
-  test(0, 100, -1000, 0);
-  test(100, 0, 1, 0);
-  test(99, 0, -1, 99);
-  test(100, 0, -1, 100);
-  test(101, 0, -1, 101);
-  test(99, 0, -10, 10);
-  test(100, 0, -10, 10);
-  test(101, 0, -10, 11);
-  test(100, 0, 1000, 0);
-  test(100, 0, -1000, 1);
-}
-
-TEST(StarlarkRange, LenHardCases) {
-  auto test = [](int64_t start, int64_t end, int64_t step, bool valid) {
-    error_handler error_callback;
-    starlark_range range(start, end, step);
-
-    if (valid) {
-      EXPECT_THAT(range.len(true, error_callback), Ge(0));
-      EXPECT_THAT(error_callback.messages, IsEmpty());
-    } else {
-      EXPECT_THAT(range.len(true, error_callback), Lt(0));
-      EXPECT_THAT(error_callback.messages, IsEmpty());
-    }
-  };
-
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), -2, true);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), -1, true);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 2, true);
-  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), -2, true);
-  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), -1, false);
-  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), 1, true);
-  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), 2, true);
-}
-
-TEST(StarlarkRange, Equals) {
-  auto test = [](int64_t start1, int64_t end1, int64_t step1, int64_t start2, int64_t end2, int64_t step2, bool expected) {
-    starlark_range range1(start1, end1, step1);
-    starlark_range range2(start2, end2, step2);
-    EXPECT_EQ(range1.equals(range2), expected);
-    EXPECT_EQ(range2.equals(range1), expected);
-  };
-  test(0, 100, 1, 0, 100, 1, true);
-  test(1, 100, 1, 0, 100, 1, false);
-  test(0, 100, 2, 0, 100, 2, true);
-  test(0, 100, 1, 0, 100, 2, false);
-  test(0, 99, 2, 0, 100, 2, true);
-  test(0, 100, 2, 0, 101, 2, false);
-  test(0, 0, 2, 100, 100, 2, true);
-  EXPECT_FALSE(starlark_range(0, 100, 1).equals(starlark_none()));
-}
-
-TEST(StarlarkRange, Index) {
-  auto test = [](int64_t start, int64_t end, int64_t step, int64_t idx, int64_t expected) {
+for n,l in enumerate(st):
+  print("""
+TEST(StarlarkRange, SliceRange_{}) {{
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {{
     Arena arena;
     context ctx(arena);
     error_handler error_callback;
-    starlark_integer index(idx);
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
 
-    starlark_range range(start, end, step);
-    auto* result = range.index(index, ctx, error_callback);
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
     ASSERT_NE(nullptr, result);
-    EXPECT_TRUE(result->equals(starlark_integer(expected)));
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
-  };
-  test(0, 100, 1, 0, 0);
-  test(0, 100, 1, 1, 1);
-  test(0, 100, 2, 1, 2);
-  test(1, 100, 1, 0, 1);
-  test(1, 100, 1, 1, 2);
-  test(1, 100, 2, 0, 1);
-  test(1, 100, 2, 1, 3);
-  test(0, 100, 1, 99, 99);
-  test(1, 100, 1, 98, 99);
-  test(1, 100, 1, -1, 99);
-}
+  }};
 
-TEST(StarlarkRange, IndexOutOfRange) {
-  Arena arena;
-  context ctx(arena);
-  error_handler error_callback;
-  starlark_integer index(100);
+""".format(n))
+  print("  ", end = "");
+  print("  ".join(l), end = "")
+  print("}")
+```
 
-  starlark_range range(0, 100, 1);
-  auto* result = range.index(index, ctx, error_callback);
-  EXPECT_EQ(nullptr, result);
-  ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "IndexError: range index out of range");
-}
+  Then, there is a fix to solve the discrepancy in how ranges are represented when they start from 0 and have step 1. The fix is `%s/range(0, \(-\?[0-9]\+\))/range(\1)/`
+*/
 
-TEST(StarlarkRange, BinaryIn) {
-  auto test = [](int64_t start, int64_t end, int64_t step, int64_t element, bool expected) {
-    error_handler error_callback;
-
-    starlark_range range(start, end, step);
-    EXPECT_EQ(range.binary_in(starlark_integer(element), error_callback), expected) << "Range: " << range.repr() << ", E: " << element;
-    EXPECT_EQ(range.binary_in(starlark_bigint(element), error_callback), expected) << "Range: " << range.repr() << ", E: " << element;
-    EXPECT_THAT(error_callback.messages, IsEmpty());
-  };
-
-  test(0, 100, 1, -1, false);
-  test(0, 100, 1, 0, true);
-  test(0, 100, 1, 1, true);
-  test(0, 100, 1, 99, true);
-  test(0, 100, 1, 100, false);
-  test(100, 0, -1, 0, false);
-  test(100, 0, -1, 1, true);
-  test(100, 0, -1, 99, true);
-  test(100, 0, -1, 100, true);
-  test(100, 0, -1, 101, false);
-
-  test(-1, 100, 1, std::numeric_limits<int64_t>::min(), false);
-  test(-1, 100, 1, std::numeric_limits<int64_t>::max(), false);
-  test(0, 100, 1, std::numeric_limits<int64_t>::min(), false);
-  test(0, 100, 1, std::numeric_limits<int64_t>::max(), false);
-  test(1, 100, 1, std::numeric_limits<int64_t>::min(), false);
-  test(1, 100, 1, std::numeric_limits<int64_t>::max(), false);
-
-  test(100, -1, -1, std::numeric_limits<int64_t>::min(), false);
-  test(100, -1, -1, std::numeric_limits<int64_t>::max(), false);
-  test(100, 0, -1, std::numeric_limits<int64_t>::min(), false);
-  test(100, 0, -1, std::numeric_limits<int64_t>::max(), false);
-  test(100, 1, -1, std::numeric_limits<int64_t>::min(), false);
-  test(100, 1, -1, std::numeric_limits<int64_t>::max(), false);
-
-  test(std::numeric_limits<int64_t>::min() + 1, std::numeric_limits<int64_t>::max(), 1, std::numeric_limits<int64_t>::min(), false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max() - 1, 1, std::numeric_limits<int64_t>::max(), false);
-  test(std::numeric_limits<int64_t>::max() - 1, std::numeric_limits<int64_t>::min(), -1, std::numeric_limits<int64_t>::max(), false);
-  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min() + 1, -1, std::numeric_limits<int64_t>::min(), false);
-
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 3, std::numeric_limits<int64_t>::min() + 1, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 3, std::numeric_limits<int64_t>::min() + 2, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 3, std::numeric_limits<int64_t>::min() + 3, true);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 3, std::numeric_limits<int64_t>::max() - 1, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 3, std::numeric_limits<int64_t>::max() - 2, true);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 3, std::numeric_limits<int64_t>::max() - 3, false);
-}
-
-TEST(StarlarkRange, BinaryInBigInt) {
-  auto test = [](int64_t start, int64_t end, int64_t step, const number element, bool expected) {
-    error_handler error_callback;
-
-    starlark_range range(start, end, step);
-    EXPECT_EQ(range.binary_in(starlark_bigint(element), error_callback), expected) << "Range: " << range.repr() << ", E: " << element.to_string(10);
-    EXPECT_THAT(error_callback.messages, IsEmpty());
-  };
-
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, (number::minus_one() << 63) - number::one(), false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, number::one() << 63, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, number::one() << 64, false);
-}
-
-TEST(StarlarkRange, BinaryInFloat) {
-  auto test = [](int64_t start, int64_t end, int64_t step, double element, bool expected) {
-    error_handler error_callback;
-
-    starlark_range range(start, end, step);
-    EXPECT_EQ(range.binary_in(starlark_float(element), error_callback), expected) << "Range: " << range.repr() << ", E: " << element;
-    EXPECT_THAT(error_callback.messages, IsEmpty());
-  };
-
-  test(0, 100, 1, -1, false);
-  test(0, 100, 1, -0.5, false);
-  test(0, 100, 1, 0, true);
-  test(0, 100, 1, 0.5, false);
-  test(0, 100, 1, 1, true);
-  test(0, 100, 1, 1.5, false);
-  test(0, 100, 1, 98.5, false);
-  test(0, 100, 1, 99, true);
-  test(0, 100, 1, 99.5, false);
-  test(0, 100, 1, 100, false);
-  test(0, 100, 1, 100.5, false);
-  test(0, 100, 1, -0x1.0000000000001p+63, false);
-  test(0, 100, 1, 0x1.0000000000000p+63, false);
-  test(0, 100, 1, -std::numeric_limits<double>::infinity(), false);
-  test(0, 100, 1, std::numeric_limits<double>::infinity(), false);
-  test(0, 100, 1, std::numeric_limits<double>::quiet_NaN(), false);
-  test(100, 0, -1, -0.5, false);
-  test(100, 0, -1, 0, false);
-  test(100, 0, -1, 0.5, false);
-  test(100, 0, -1, 1, true);
-  test(100, 0, -1, 1.5, false);
-  test(100, 0, -1, 98.5, false);
-  test(100, 0, -1, 99, true);
-  test(100, 0, -1, 99.5, false);
-  test(100, 0, -1, 100, true);
-  test(100, 0, -1, 100.5, false);
-  test(100, 0, -1, 101, false);
-  test(100, 0, -1, 101.5, false);
-}
-
-TEST(StarlarkRange, BinaryInNone) {
-  error_handler error_callback;
-  starlark_none none;
-
-  starlark_range range(0, 100, 1);
-  EXPECT_FALSE(range.binary_in(none, error_callback));
-  EXPECT_THAT(error_callback.messages, IsEmpty());
-}
-
-TEST(StarlarkRange, GetIterator) {
-  starlark_range range0(10, 20, -3);
-  starlark_range range1(10, 20, 3);
-  starlark_range range2(20, 10, -3);
-  Arena arena;
-  context ctx(arena);
-  error_handler error_callback;
-
-  auto* it0 = range0.get_iterator(true, ctx, error_callback);
-  EXPECT_FALSE(it0->has_next());
-  it0->end_iterator();
-
-  auto* it1 = range1.get_iterator(true, ctx, error_callback);
-  EXPECT_TRUE(it1->has_next());
-  EXPECT_EQ(it1->next()->str(), "10");
-  EXPECT_TRUE(it1->has_next());
-  EXPECT_EQ(it1->next()->str(), "13");
-  EXPECT_TRUE(it1->has_next());
-  EXPECT_EQ(it1->next()->str(), "16");
-  EXPECT_TRUE(it1->has_next());
-  EXPECT_EQ(it1->next()->str(), "19");
-  EXPECT_FALSE(it1->has_next());
-  it1->end_iterator();
-
-  auto* it2 = range2.get_iterator(true, ctx, error_callback);
-  EXPECT_TRUE(it2->has_next());
-  EXPECT_EQ(it2->next()->str(), "20");
-  EXPECT_TRUE(it2->has_next());
-  EXPECT_EQ(it2->next()->str(), "17");
-  EXPECT_TRUE(it2->has_next());
-  EXPECT_EQ(it2->next()->str(), "14");
-  EXPECT_TRUE(it2->has_next());
-  EXPECT_EQ(it2->next()->str(), "11");
-  EXPECT_FALSE(it2->has_next());
-  it2->end_iterator();
-  EXPECT_THAT(error_callback.messages, IsEmpty());
-}
-
-TEST(StarlarkRange, SliceRangeBoolStart) {
-  Arena arena;
-  context ctx(arena);
-  error_handler error_callback;
-  starlark_range range(0, 100, 1);
-
-  auto* result = range.slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback);
-  ASSERT_EQ(nullptr, result);
-  EXPECT_EQ("range(100)", range.str());
-  EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
-}
-
-TEST(StarlarkRange, SliceRangeBoolEnd) {
-  Arena arena;
-  context ctx(arena);
-  error_handler error_callback;
-  starlark_range range(0, 100, 1);
-
-  auto* result = range.slice_range(*ctx.none_value(), *ctx.false_value(), *ctx.none_value(), ctx, error_callback);
-  ASSERT_EQ(nullptr, result);
-  EXPECT_EQ("range(100)", range.str());
-  EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
-}
-
-TEST(StarlarkRange, SliceRangeBoolStride) {
-  Arena arena;
-  context ctx(arena);
-  error_handler error_callback;
-  starlark_range range(0, 100, 1);
-
-  auto* result = range.slice_range(*ctx.none_value(), *ctx.none_value(), *ctx.false_value(), ctx, error_callback);
-  ASSERT_EQ(nullptr, result);
-  EXPECT_EQ("range(100)", range.str());
-  EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
-}
-
-TEST(StarlarkRange, SliceRangeZeroStride) {
-  Arena arena;
-  context ctx(arena);
-  error_handler error_callback;
-  starlark_range range(0, 100, 1);
-
-  auto* result = range.slice_range(*ctx.none_value(), *ctx.none_value(), *ctx.zero(), ctx, error_callback);
-  ASSERT_EQ(nullptr, result);
-  EXPECT_EQ("range(100)", range.str());
-  EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
-}
-
-TEST(StarlarkRange, SliceRange) {
+TEST(StarlarkRange, SliceRange_0) {
   auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
     Arena arena;
     context ctx(arena);
@@ -406,14 +71,6 @@ TEST(StarlarkRange, SliceRange) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-  /*
-  ```python
-  x = range(-3, 4)
-  print("\n  ".join(["test({}, {}, {}, {}, {}, {}, {});".format(a, b, c, d, e, f, repr(str(range(a, b, c)[d:e:f]))) for a in x for b in x for c in x if c for d in x for e in x for f in x if f]))
-  ```
-
-  Then, there is a fix to solve the discrepancy in how ranges are represented when they start from 0 and have step 1. The fix is `%s/range(0, \(-\?[0-9]\+\))/range(\1)/`
-  */
 
   test(-3, -3, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, -3, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -709,6 +366,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -3, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(-3, -3, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(-3, -3, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_1) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -3, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, -3, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, -3, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -1003,6 +679,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -3, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-3, -3, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-3, -3, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_2) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -3, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, -3, -1, -3, -3, -2, "range(-2, -2, 2)");
   test(-3, -3, -1, -3, -3, -1, "range(-2, -2)");
@@ -1297,6 +992,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -3, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-3, -3, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-3, -3, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_3) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -3, 1, -3, -3, -3, "range(-4, -4, -3)");
   test(-3, -3, 1, -3, -3, -2, "range(-4, -4, -2)");
   test(-3, -3, 1, -3, -3, -1, "range(-4, -4, -1)");
@@ -1591,6 +1305,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -3, 1, 3, 3, 1, "range(-3, -3)");
   test(-3, -3, 1, 3, 3, 2, "range(-3, -3, 2)");
   test(-3, -3, 1, 3, 3, 3, "range(-3, -3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_4) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -3, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, -3, 2, -3, -3, -2, "range(-5, -5, -4)");
   test(-3, -3, 2, -3, -3, -1, "range(-5, -5, -2)");
@@ -1885,6 +1618,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -3, 2, 3, 3, 1, "range(-3, -3, 2)");
   test(-3, -3, 2, 3, 3, 2, "range(-3, -3, 4)");
   test(-3, -3, 2, 3, 3, 3, "range(-3, -3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_5) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -3, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, -3, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, -3, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -2179,6 +1931,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -3, 3, 3, 3, 1, "range(-3, -3, 3)");
   test(-3, -3, 3, 3, 3, 2, "range(-3, -3, 6)");
   test(-3, -3, 3, 3, 3, 3, "range(-3, -3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_6) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -2, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, -2, -3, -3, -3, -2, "range(0, 0, 6)");
   test(-3, -2, -3, -3, -3, -1, "range(0, 0, 3)");
@@ -2473,6 +2244,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -2, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(-3, -2, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(-3, -2, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_7) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -2, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, -2, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, -2, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -2767,6 +2557,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -2, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-3, -2, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-3, -2, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_8) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -2, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, -2, -1, -3, -3, -2, "range(-2, -2, 2)");
   test(-3, -2, -1, -3, -3, -1, "range(-2, -2)");
@@ -3061,6 +2870,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -2, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-3, -2, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-3, -2, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_9) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -2, 1, -3, -3, -3, "range(-4, -4, -3)");
   test(-3, -2, 1, -3, -3, -2, "range(-4, -4, -2)");
   test(-3, -2, 1, -3, -3, -1, "range(-4, -4, -1)");
@@ -3355,6 +3183,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -2, 1, 3, 3, 1, "range(-2, -2)");
   test(-3, -2, 1, 3, 3, 2, "range(-2, -2, 2)");
   test(-3, -2, 1, 3, 3, 3, "range(-2, -2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_10) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -2, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, -2, 2, -3, -3, -2, "range(-5, -5, -4)");
   test(-3, -2, 2, -3, -3, -1, "range(-5, -5, -2)");
@@ -3649,6 +3496,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -2, 2, 3, 3, 1, "range(-1, -1, 2)");
   test(-3, -2, 2, 3, 3, 2, "range(-1, -1, 4)");
   test(-3, -2, 2, 3, 3, 3, "range(-1, -1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_11) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -2, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, -2, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, -2, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -3943,6 +3809,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -2, 3, 3, 3, 1, "range(0, 0, 3)");
   test(-3, -2, 3, 3, 3, 2, "range(0, 0, 6)");
   test(-3, -2, 3, 3, 3, 3, "range(0, 0, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_12) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -1, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, -1, -3, -3, -3, -2, "range(0, 0, 6)");
   test(-3, -1, -3, -3, -3, -1, "range(0, 0, 3)");
@@ -4237,6 +4122,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -1, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(-3, -1, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(-3, -1, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_13) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -1, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, -1, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, -1, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -4531,6 +4435,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -1, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-3, -1, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-3, -1, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_14) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -1, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, -1, -1, -3, -3, -2, "range(-2, -2, 2)");
   test(-3, -1, -1, -3, -3, -1, "range(-2, -2)");
@@ -4825,6 +4748,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -1, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-3, -1, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-3, -1, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_15) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -1, 1, -3, -3, -3, "range(-4, -4, -3)");
   test(-3, -1, 1, -3, -3, -2, "range(-4, -4, -2)");
   test(-3, -1, 1, -3, -3, -1, "range(-4, -4, -1)");
@@ -5119,6 +5061,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -1, 1, 3, 3, 1, "range(-1, -1)");
   test(-3, -1, 1, 3, 3, 2, "range(-1, -1, 2)");
   test(-3, -1, 1, 3, 3, 3, "range(-1, -1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_16) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -1, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, -1, 2, -3, -3, -2, "range(-5, -5, -4)");
   test(-3, -1, 2, -3, -3, -1, "range(-5, -5, -2)");
@@ -5413,6 +5374,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -1, 2, 3, 3, 1, "range(-1, -1, 2)");
   test(-3, -1, 2, 3, 3, 2, "range(-1, -1, 4)");
   test(-3, -1, 2, 3, 3, 3, "range(-1, -1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_17) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, -1, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, -1, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, -1, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -5707,6 +5687,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, -1, 3, 3, 3, 1, "range(0, 0, 3)");
   test(-3, -1, 3, 3, 3, 2, "range(0, 0, 6)");
   test(-3, -1, 3, 3, 3, 3, "range(0, 0, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_18) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 0, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 0, -3, -3, -3, -2, "range(0, 0, 6)");
   test(-3, 0, -3, -3, -3, -1, "range(0, 0, 3)");
@@ -6001,6 +6000,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 0, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(-3, 0, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(-3, 0, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_19) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 0, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 0, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 0, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -6295,6 +6313,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 0, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-3, 0, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-3, 0, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_20) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 0, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 0, -1, -3, -3, -2, "range(-2, -2, 2)");
   test(-3, 0, -1, -3, -3, -1, "range(-2, -2)");
@@ -6589,6 +6626,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 0, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-3, 0, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-3, 0, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_21) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 0, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-3, 0, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-3, 0, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -6883,6 +6939,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 0, 1, 3, 3, 1, "range(0)");
   test(-3, 0, 1, 3, 3, 2, "range(0, 0, 2)");
   test(-3, 0, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_22) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 0, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, 0, 2, -3, -3, -2, "range(-5, -5, -4)");
   test(-3, 0, 2, -3, -3, -1, "range(-5, -5, -2)");
@@ -7177,6 +7252,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 0, 2, 3, 3, 1, "range(1, 1, 2)");
   test(-3, 0, 2, 3, 3, 2, "range(1, 1, 4)");
   test(-3, 0, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_23) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 0, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 0, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 0, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -7471,6 +7565,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 0, 3, 3, 3, 1, "range(0, 0, 3)");
   test(-3, 0, 3, 3, 3, 2, "range(0, 0, 6)");
   test(-3, 0, 3, 3, 3, 3, "range(0, 0, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_24) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 1, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 1, -3, -3, -3, -2, "range(0, 0, 6)");
   test(-3, 1, -3, -3, -3, -1, "range(0, 0, 3)");
@@ -7765,6 +7878,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 1, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(-3, 1, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(-3, 1, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_25) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 1, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 1, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 1, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -8059,6 +8191,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 1, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-3, 1, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-3, 1, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_26) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 1, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 1, -1, -3, -3, -2, "range(-2, -2, 2)");
   test(-3, 1, -1, -3, -3, -1, "range(-2, -2)");
@@ -8353,6 +8504,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 1, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-3, 1, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-3, 1, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_27) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-3, 1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-3, 1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -8647,6 +8817,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 1, 1, 3, 3, 1, "range(0)");
   test(-3, 1, 1, 3, 3, 2, "range(0, 0, 2)");
   test(-3, 1, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_28) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 1, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, 1, 2, -3, -3, -2, "range(-5, -5, -4)");
   test(-3, 1, 2, -3, -3, -1, "range(-5, -5, -2)");
@@ -8941,6 +9130,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 1, 2, 3, 3, 1, "range(1, 1, 2)");
   test(-3, 1, 2, 3, 3, 2, "range(1, 1, 4)");
   test(-3, 1, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_29) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 1, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 1, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 1, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -9235,6 +9443,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 1, 3, 3, 3, 1, "range(3, 3, 3)");
   test(-3, 1, 3, 3, 3, 2, "range(3, 3, 6)");
   test(-3, 1, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_30) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 2, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 2, -3, -3, -3, -2, "range(0, 0, 6)");
   test(-3, 2, -3, -3, -3, -1, "range(0, 0, 3)");
@@ -9529,6 +9756,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 2, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(-3, 2, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(-3, 2, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_31) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 2, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 2, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 2, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -9823,6 +10069,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 2, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-3, 2, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-3, 2, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_32) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 2, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 2, -1, -3, -3, -2, "range(-2, -2, 2)");
   test(-3, 2, -1, -3, -3, -1, "range(-2, -2)");
@@ -10117,6 +10382,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 2, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-3, 2, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-3, 2, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_33) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(-3, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(-3, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -10411,6 +10695,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 2, 1, 3, 3, 1, "range(0)");
   test(-3, 2, 1, 3, 3, 2, "range(0, 0, 2)");
   test(-3, 2, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_34) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 2, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-3, 2, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-3, 2, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -10705,6 +11008,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 2, 2, 3, 3, 1, "range(3, 3, 2)");
   test(-3, 2, 2, 3, 3, 2, "range(3, 3, 4)");
   test(-3, 2, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_35) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 2, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 2, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 2, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -10999,6 +11321,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 2, 3, 3, 3, 1, "range(3, 3, 3)");
   test(-3, 2, 3, 3, 3, 2, "range(3, 3, 6)");
   test(-3, 2, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_36) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 3, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 3, -3, -3, -3, -2, "range(0, 0, 6)");
   test(-3, 3, -3, -3, -3, -1, "range(0, 0, 3)");
@@ -11293,6 +11634,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 3, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(-3, 3, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(-3, 3, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_37) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 3, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 3, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 3, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -11587,6 +11947,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 3, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-3, 3, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-3, 3, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_38) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 3, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 3, -1, -3, -3, -2, "range(-2, -2, 2)");
   test(-3, 3, -1, -3, -3, -1, "range(-2, -2)");
@@ -11881,6 +12260,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 3, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-3, 3, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-3, 3, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_39) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(-3, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(-3, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -12175,6 +12573,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 3, 1, 3, 3, 1, "range(0)");
   test(-3, 3, 1, 3, 3, 2, "range(0, 0, 2)");
   test(-3, 3, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_40) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 3, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-3, 3, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-3, 3, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -12469,6 +12886,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 3, 2, 3, 3, 1, "range(3, 3, 2)");
   test(-3, 3, 2, 3, 3, 2, "range(3, 3, 4)");
   test(-3, 3, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_41) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-3, 3, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 3, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 3, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -12763,6 +13199,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-3, 3, 3, 3, 3, 1, "range(3, 3, 3)");
   test(-3, 3, 3, 3, 3, 2, "range(3, 3, 6)");
   test(-3, 3, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_42) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -3, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, -3, -3, -3, -3, -2, "range(1, 1, 6)");
   test(-2, -3, -3, -3, -3, -1, "range(1, 1, 3)");
@@ -13057,6 +13512,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -3, -3, 3, 3, 1, "range(-5, -5, -3)");
   test(-2, -3, -3, 3, 3, 2, "range(-5, -5, -6)");
   test(-2, -3, -3, 3, 3, 3, "range(-5, -5, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_43) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -3, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, -3, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, -3, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -13351,6 +13825,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -3, -2, 3, 3, 1, "range(-4, -4, -2)");
   test(-2, -3, -2, 3, 3, 2, "range(-4, -4, -4)");
   test(-2, -3, -2, 3, 3, 3, "range(-4, -4, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_44) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -3, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, -3, -1, -3, -3, -2, "range(-1, -1, 2)");
   test(-2, -3, -1, -3, -3, -1, "range(-1, -1)");
@@ -13645,6 +14138,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -3, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-2, -3, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-2, -3, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_45) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -3, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, -3, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, -3, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -13939,6 +14451,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -3, 1, 3, 3, 1, "range(-2, -2)");
   test(-2, -3, 1, 3, 3, 2, "range(-2, -2, 2)");
   test(-2, -3, 1, 3, 3, 3, "range(-2, -2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_46) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -3, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, -3, 2, -3, -3, -2, "range(-4, -4, -4)");
   test(-2, -3, 2, -3, -3, -1, "range(-4, -4, -2)");
@@ -14233,6 +14764,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -3, 2, 3, 3, 1, "range(-2, -2, 2)");
   test(-2, -3, 2, 3, 3, 2, "range(-2, -2, 4)");
   test(-2, -3, 2, 3, 3, 3, "range(-2, -2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_47) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -3, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, -3, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, -3, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -14527,6 +15077,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -3, 3, 3, 3, 1, "range(-2, -2, 3)");
   test(-2, -3, 3, 3, 3, 2, "range(-2, -2, 6)");
   test(-2, -3, 3, 3, 3, 3, "range(-2, -2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_48) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -2, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, -2, -3, -3, -3, -2, "range(1, 1, 6)");
   test(-2, -2, -3, -3, -3, -1, "range(1, 1, 3)");
@@ -14821,6 +15390,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -2, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(-2, -2, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(-2, -2, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_49) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -2, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, -2, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, -2, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -15115,6 +15703,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -2, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(-2, -2, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(-2, -2, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_50) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -2, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, -2, -1, -3, -3, -2, "range(-1, -1, 2)");
   test(-2, -2, -1, -3, -3, -1, "range(-1, -1)");
@@ -15409,6 +16016,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -2, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(-2, -2, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(-2, -2, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_51) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -2, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, -2, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, -2, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -15703,6 +16329,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -2, 1, 3, 3, 1, "range(-2, -2)");
   test(-2, -2, 1, 3, 3, 2, "range(-2, -2, 2)");
   test(-2, -2, 1, 3, 3, 3, "range(-2, -2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_52) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -2, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, -2, 2, -3, -3, -2, "range(-4, -4, -4)");
   test(-2, -2, 2, -3, -3, -1, "range(-4, -4, -2)");
@@ -15997,6 +16642,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -2, 2, 3, 3, 1, "range(-2, -2, 2)");
   test(-2, -2, 2, 3, 3, 2, "range(-2, -2, 4)");
   test(-2, -2, 2, 3, 3, 3, "range(-2, -2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_53) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -2, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, -2, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, -2, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -16291,6 +16955,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -2, 3, 3, 3, 1, "range(-2, -2, 3)");
   test(-2, -2, 3, 3, 3, 2, "range(-2, -2, 6)");
   test(-2, -2, 3, 3, 3, 3, "range(-2, -2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_54) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -1, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, -1, -3, -3, -3, -2, "range(1, 1, 6)");
   test(-2, -1, -3, -3, -3, -1, "range(1, 1, 3)");
@@ -16585,6 +17268,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -1, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(-2, -1, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(-2, -1, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_55) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -1, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, -1, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, -1, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -16879,6 +17581,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -1, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(-2, -1, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(-2, -1, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_56) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -1, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, -1, -1, -3, -3, -2, "range(-1, -1, 2)");
   test(-2, -1, -1, -3, -3, -1, "range(-1, -1)");
@@ -17173,6 +17894,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -1, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(-2, -1, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(-2, -1, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_57) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -1, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, -1, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, -1, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -17467,6 +18207,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -1, 1, 3, 3, 1, "range(-1, -1)");
   test(-2, -1, 1, 3, 3, 2, "range(-1, -1, 2)");
   test(-2, -1, 1, 3, 3, 3, "range(-1, -1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_58) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -1, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, -1, 2, -3, -3, -2, "range(-4, -4, -4)");
   test(-2, -1, 2, -3, -3, -1, "range(-4, -4, -2)");
@@ -17761,6 +18520,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -1, 2, 3, 3, 1, "range(0, 0, 2)");
   test(-2, -1, 2, 3, 3, 2, "range(0, 0, 4)");
   test(-2, -1, 2, 3, 3, 3, "range(0, 0, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_59) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, -1, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, -1, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, -1, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -18055,6 +18833,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, -1, 3, 3, 3, 1, "range(1, 1, 3)");
   test(-2, -1, 3, 3, 3, 2, "range(1, 1, 6)");
   test(-2, -1, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_60) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 0, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 0, -3, -3, -3, -2, "range(1, 1, 6)");
   test(-2, 0, -3, -3, -3, -1, "range(1, 1, 3)");
@@ -18349,6 +19146,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 0, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(-2, 0, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(-2, 0, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_61) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 0, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 0, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 0, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -18643,6 +19459,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 0, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(-2, 0, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(-2, 0, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_62) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 0, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 0, -1, -3, -3, -2, "range(-1, -1, 2)");
   test(-2, 0, -1, -3, -3, -1, "range(-1, -1)");
@@ -18937,6 +19772,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 0, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(-2, 0, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(-2, 0, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_63) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 0, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, 0, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, 0, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -19231,6 +20085,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 0, 1, 3, 3, 1, "range(0)");
   test(-2, 0, 1, 3, 3, 2, "range(0, 0, 2)");
   test(-2, 0, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_64) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 0, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, 0, 2, -3, -3, -2, "range(-4, -4, -4)");
   test(-2, 0, 2, -3, -3, -1, "range(-4, -4, -2)");
@@ -19525,6 +20398,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 0, 2, 3, 3, 1, "range(0, 0, 2)");
   test(-2, 0, 2, 3, 3, 2, "range(0, 0, 4)");
   test(-2, 0, 2, 3, 3, 3, "range(0, 0, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_65) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 0, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 0, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 0, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -19819,6 +20711,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 0, 3, 3, 3, 1, "range(1, 1, 3)");
   test(-2, 0, 3, 3, 3, 2, "range(1, 1, 6)");
   test(-2, 0, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_66) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 1, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 1, -3, -3, -3, -2, "range(1, 1, 6)");
   test(-2, 1, -3, -3, -3, -1, "range(1, 1, 3)");
@@ -20113,6 +21024,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 1, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(-2, 1, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(-2, 1, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_67) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 1, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 1, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 1, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -20407,6 +21337,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 1, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(-2, 1, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(-2, 1, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_68) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 1, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 1, -1, -3, -3, -2, "range(-1, -1, 2)");
   test(-2, 1, -1, -3, -3, -1, "range(-1, -1)");
@@ -20701,6 +21650,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 1, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(-2, 1, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(-2, 1, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_69) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-2, 1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-2, 1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -20995,6 +21963,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 1, 1, 3, 3, 1, "range(1, 1)");
   test(-2, 1, 1, 3, 3, 2, "range(1, 1, 2)");
   test(-2, 1, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_70) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 1, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, 1, 2, -3, -3, -2, "range(-4, -4, -4)");
   test(-2, 1, 2, -3, -3, -1, "range(-4, -4, -2)");
@@ -21289,6 +22276,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 1, 2, 3, 3, 1, "range(2, 2, 2)");
   test(-2, 1, 2, 3, 3, 2, "range(2, 2, 4)");
   test(-2, 1, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_71) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 1, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 1, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 1, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -21583,6 +22589,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 1, 3, 3, 3, 1, "range(1, 1, 3)");
   test(-2, 1, 3, 3, 3, 2, "range(1, 1, 6)");
   test(-2, 1, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_72) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 2, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 2, -3, -3, -3, -2, "range(1, 1, 6)");
   test(-2, 2, -3, -3, -3, -1, "range(1, 1, 3)");
@@ -21877,6 +22902,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 2, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(-2, 2, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(-2, 2, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_73) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 2, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 2, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 2, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -22171,6 +23215,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 2, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(-2, 2, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(-2, 2, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_74) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 2, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 2, -1, -3, -3, -2, "range(-1, -1, 2)");
   test(-2, 2, -1, -3, -3, -1, "range(-1, -1)");
@@ -22465,6 +23528,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 2, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(-2, 2, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(-2, 2, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_75) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(-2, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(-2, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -22759,6 +23841,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 2, 1, 3, 3, 1, "range(1, 1)");
   test(-2, 2, 1, 3, 3, 2, "range(1, 1, 2)");
   test(-2, 2, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_76) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 2, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, 2, 2, -3, -3, -2, "range(-4, -4, -4)");
   test(-2, 2, 2, -3, -3, -1, "range(-4, -4, -2)");
@@ -23053,6 +24154,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 2, 2, 3, 3, 1, "range(2, 2, 2)");
   test(-2, 2, 2, 3, 3, 2, "range(2, 2, 4)");
   test(-2, 2, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_77) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 2, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 2, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 2, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -23347,6 +24467,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 2, 3, 3, 3, 1, "range(4, 4, 3)");
   test(-2, 2, 3, 3, 3, 2, "range(4, 4, 6)");
   test(-2, 2, 3, 3, 3, 3, "range(4, 4, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_78) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 3, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 3, -3, -3, -3, -2, "range(1, 1, 6)");
   test(-2, 3, -3, -3, -3, -1, "range(1, 1, 3)");
@@ -23641,6 +24780,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 3, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(-2, 3, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(-2, 3, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_79) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 3, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 3, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 3, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -23935,6 +25093,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 3, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(-2, 3, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(-2, 3, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_80) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 3, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 3, -1, -3, -3, -2, "range(-1, -1, 2)");
   test(-2, 3, -1, -3, -3, -1, "range(-1, -1)");
@@ -24229,6 +25406,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 3, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(-2, 3, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(-2, 3, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_81) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(-2, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(-2, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -24523,6 +25719,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 3, 1, 3, 3, 1, "range(1, 1)");
   test(-2, 3, 1, 3, 3, 2, "range(1, 1, 2)");
   test(-2, 3, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_82) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 3, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(-2, 3, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(-2, 3, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -24817,6 +26032,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 3, 2, 3, 3, 1, "range(4, 4, 2)");
   test(-2, 3, 2, 3, 3, 2, "range(4, 4, 4)");
   test(-2, 3, 2, 3, 3, 3, "range(4, 4, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_83) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-2, 3, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 3, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 3, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -25111,6 +26345,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-2, 3, 3, 3, 3, 1, "range(4, 4, 3)");
   test(-2, 3, 3, 3, 3, 2, "range(4, 4, 6)");
   test(-2, 3, 3, 3, 3, 3, "range(4, 4, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_84) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -3, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, -3, -3, -3, -3, -2, "range(2, 2, 6)");
   test(-1, -3, -3, -3, -3, -1, "range(2, 2, 3)");
@@ -25405,6 +26658,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -3, -3, 3, 3, 1, "range(-4, -4, -3)");
   test(-1, -3, -3, 3, 3, 2, "range(-4, -4, -6)");
   test(-1, -3, -3, 3, 3, 3, "range(-4, -4, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_85) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -3, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, -3, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, -3, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -25699,6 +26971,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -3, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-1, -3, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-1, -3, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_86) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, -3, -1, -3, -3, -2, "range(0, 0, 2)");
   test(-1, -3, -1, -3, -3, -1, "range(0)");
@@ -25993,6 +27284,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -3, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(-1, -3, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(-1, -3, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_87) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -3, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, -3, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, -3, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -26287,6 +27597,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -3, 1, 3, 3, 1, "range(-1, -1)");
   test(-1, -3, 1, 3, 3, 2, "range(-1, -1, 2)");
   test(-1, -3, 1, 3, 3, 3, "range(-1, -1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_88) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -3, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, -3, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-1, -3, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -26581,6 +27910,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -3, 2, 3, 3, 1, "range(-1, -1, 2)");
   test(-1, -3, 2, 3, 3, 2, "range(-1, -1, 4)");
   test(-1, -3, 2, 3, 3, 3, "range(-1, -1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_89) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -3, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, -3, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, -3, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -26875,6 +28223,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -3, 3, 3, 3, 1, "range(-1, -1, 3)");
   test(-1, -3, 3, 3, 3, 2, "range(-1, -1, 6)");
   test(-1, -3, 3, 3, 3, 3, "range(-1, -1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_90) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -2, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, -2, -3, -3, -3, -2, "range(2, 2, 6)");
   test(-1, -2, -3, -3, -3, -1, "range(2, 2, 3)");
@@ -27169,6 +28536,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -2, -3, 3, 3, 1, "range(-4, -4, -3)");
   test(-1, -2, -3, 3, 3, 2, "range(-4, -4, -6)");
   test(-1, -2, -3, 3, 3, 3, "range(-4, -4, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_91) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -2, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, -2, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, -2, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -27463,6 +28849,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -2, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(-1, -2, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(-1, -2, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_92) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -2, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, -2, -1, -3, -3, -2, "range(0, 0, 2)");
   test(-1, -2, -1, -3, -3, -1, "range(0)");
@@ -27757,6 +29162,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -2, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(-1, -2, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(-1, -2, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_93) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -2, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, -2, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, -2, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -28051,6 +29475,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -2, 1, 3, 3, 1, "range(-1, -1)");
   test(-1, -2, 1, 3, 3, 2, "range(-1, -1, 2)");
   test(-1, -2, 1, 3, 3, 3, "range(-1, -1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_94) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -2, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, -2, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-1, -2, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -28345,6 +29788,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -2, 2, 3, 3, 1, "range(-1, -1, 2)");
   test(-1, -2, 2, 3, 3, 2, "range(-1, -1, 4)");
   test(-1, -2, 2, 3, 3, 3, "range(-1, -1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_95) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -2, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, -2, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, -2, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -28639,6 +30101,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -2, 3, 3, 3, 1, "range(-1, -1, 3)");
   test(-1, -2, 3, 3, 3, 2, "range(-1, -1, 6)");
   test(-1, -2, 3, 3, 3, 3, "range(-1, -1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_96) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -1, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, -1, -3, -3, -3, -2, "range(2, 2, 6)");
   test(-1, -1, -3, -3, -3, -1, "range(2, 2, 3)");
@@ -28933,6 +30414,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -1, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(-1, -1, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(-1, -1, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_97) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -1, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, -1, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, -1, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -29227,6 +30727,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -1, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(-1, -1, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(-1, -1, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_98) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -1, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, -1, -1, -3, -3, -2, "range(0, 0, 2)");
   test(-1, -1, -1, -3, -3, -1, "range(0)");
@@ -29521,6 +31040,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -1, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(-1, -1, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(-1, -1, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_99) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, -1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, -1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -29815,6 +31353,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -1, 1, 3, 3, 1, "range(-1, -1)");
   test(-1, -1, 1, 3, 3, 2, "range(-1, -1, 2)");
   test(-1, -1, 1, 3, 3, 3, "range(-1, -1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_100) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -1, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, -1, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-1, -1, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -30109,6 +31666,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -1, 2, 3, 3, 1, "range(-1, -1, 2)");
   test(-1, -1, 2, 3, 3, 2, "range(-1, -1, 4)");
   test(-1, -1, 2, 3, 3, 3, "range(-1, -1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_101) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, -1, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, -1, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, -1, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -30403,6 +31979,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, -1, 3, 3, 3, 1, "range(-1, -1, 3)");
   test(-1, -1, 3, 3, 3, 2, "range(-1, -1, 6)");
   test(-1, -1, 3, 3, 3, 3, "range(-1, -1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_102) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 0, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 0, -3, -3, -3, -2, "range(2, 2, 6)");
   test(-1, 0, -3, -3, -3, -1, "range(2, 2, 3)");
@@ -30697,6 +32292,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 0, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(-1, 0, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(-1, 0, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_103) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 0, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 0, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 0, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -30991,6 +32605,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 0, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(-1, 0, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(-1, 0, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_104) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 0, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 0, -1, -3, -3, -2, "range(0, 0, 2)");
   test(-1, 0, -1, -3, -3, -1, "range(0)");
@@ -31285,6 +32918,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 0, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(-1, 0, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(-1, 0, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_105) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 0, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, 0, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, 0, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -31579,6 +33231,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 0, 1, 3, 3, 1, "range(0)");
   test(-1, 0, 1, 3, 3, 2, "range(0, 0, 2)");
   test(-1, 0, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_106) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 0, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 0, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-1, 0, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -31873,6 +33544,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 0, 2, 3, 3, 1, "range(1, 1, 2)");
   test(-1, 0, 2, 3, 3, 2, "range(1, 1, 4)");
   test(-1, 0, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_107) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 0, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 0, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 0, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -32167,6 +33857,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 0, 3, 3, 3, 1, "range(2, 2, 3)");
   test(-1, 0, 3, 3, 3, 2, "range(2, 2, 6)");
   test(-1, 0, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_108) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 1, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 1, -3, -3, -3, -2, "range(2, 2, 6)");
   test(-1, 1, -3, -3, -3, -1, "range(2, 2, 3)");
@@ -32461,6 +34170,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 1, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(-1, 1, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(-1, 1, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_109) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 1, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 1, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 1, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -32755,6 +34483,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 1, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(-1, 1, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(-1, 1, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_110) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 1, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 1, -1, -3, -3, -2, "range(0, 0, 2)");
   test(-1, 1, -1, -3, -3, -1, "range(0)");
@@ -33049,6 +34796,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 1, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(-1, 1, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(-1, 1, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_111) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, 1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, 1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -33343,6 +35109,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 1, 1, 3, 3, 1, "range(1, 1)");
   test(-1, 1, 1, 3, 3, 2, "range(1, 1, 2)");
   test(-1, 1, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_112) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 1, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 1, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-1, 1, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -33637,6 +35422,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 1, 2, 3, 3, 1, "range(1, 1, 2)");
   test(-1, 1, 2, 3, 3, 2, "range(1, 1, 4)");
   test(-1, 1, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_113) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 1, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 1, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 1, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -33931,6 +35735,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 1, 3, 3, 3, 1, "range(2, 2, 3)");
   test(-1, 1, 3, 3, 3, 2, "range(2, 2, 6)");
   test(-1, 1, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_114) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 2, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 2, -3, -3, -3, -2, "range(2, 2, 6)");
   test(-1, 2, -3, -3, -3, -1, "range(2, 2, 3)");
@@ -34225,6 +36048,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 2, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(-1, 2, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(-1, 2, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_115) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 2, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 2, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 2, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -34519,6 +36361,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 2, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(-1, 2, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(-1, 2, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_116) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 2, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 2, -1, -3, -3, -2, "range(0, 0, 2)");
   test(-1, 2, -1, -3, -3, -1, "range(0)");
@@ -34813,6 +36674,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 2, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(-1, 2, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(-1, 2, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_117) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(-1, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(-1, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -35107,6 +36987,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 2, 1, 3, 3, 1, "range(2, 2)");
   test(-1, 2, 1, 3, 3, 2, "range(2, 2, 2)");
   test(-1, 2, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_118) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 2, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 2, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-1, 2, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -35401,6 +37300,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 2, 2, 3, 3, 1, "range(3, 3, 2)");
   test(-1, 2, 2, 3, 3, 2, "range(3, 3, 4)");
   test(-1, 2, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_119) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 2, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 2, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 2, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -35695,6 +37613,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 2, 3, 3, 3, 1, "range(2, 2, 3)");
   test(-1, 2, 3, 3, 3, 2, "range(2, 2, 6)");
   test(-1, 2, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_120) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 3, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 3, -3, -3, -3, -2, "range(2, 2, 6)");
   test(-1, 3, -3, -3, -3, -1, "range(2, 2, 3)");
@@ -35989,6 +37926,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 3, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(-1, 3, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(-1, 3, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_121) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 3, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 3, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 3, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -36283,6 +38239,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 3, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(-1, 3, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(-1, 3, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_122) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 3, -1, -3, -3, -2, "range(0, 0, 2)");
   test(-1, 3, -1, -3, -3, -1, "range(0)");
@@ -36577,6 +38552,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 3, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(-1, 3, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(-1, 3, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_123) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(-1, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(-1, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -36871,6 +38865,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 3, 1, 3, 3, 1, "range(2, 2)");
   test(-1, 3, 1, 3, 3, 2, "range(2, 2, 2)");
   test(-1, 3, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_124) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 3, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 3, 2, -3, -3, -2, "range(-3, -3, -4)");
   test(-1, 3, 2, -3, -3, -1, "range(-3, -3, -2)");
@@ -37165,6 +39178,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 3, 2, 3, 3, 1, "range(3, 3, 2)");
   test(-1, 3, 2, 3, 3, 2, "range(3, 3, 4)");
   test(-1, 3, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_125) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(-1, 3, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 3, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 3, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -37459,6 +39491,25 @@ TEST(StarlarkRange, SliceRange) {
   test(-1, 3, 3, 3, 3, 1, "range(5, 5, 3)");
   test(-1, 3, 3, 3, 3, 2, "range(5, 5, 6)");
   test(-1, 3, 3, 3, 3, 3, "range(5, 5, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_126) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -3, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, -3, -3, -3, -3, -2, "range(3, 3, 6)");
   test(0, -3, -3, -3, -3, -1, "range(3, 3, 3)");
@@ -37753,6 +39804,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -3, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(0, -3, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(0, -3, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_127) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -3, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, -3, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, -3, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -38047,6 +40117,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -3, -2, 3, 3, 1, "range(-4, -4, -2)");
   test(0, -3, -2, 3, 3, 2, "range(-4, -4, -4)");
   test(0, -3, -2, 3, 3, 3, "range(-4, -4, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_128) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(0, -3, -1, -3, -3, -2, "range(0, 0, 2)");
   test(0, -3, -1, -3, -3, -1, "range(0)");
@@ -38341,6 +40430,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -3, -1, 3, 3, 1, "range(-3, -3, -1)");
   test(0, -3, -1, 3, 3, 2, "range(-3, -3, -2)");
   test(0, -3, -1, 3, 3, 3, "range(-3, -3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_129) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -3, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, -3, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, -3, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -38635,6 +40743,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -3, 1, 3, 3, 1, "range(0)");
   test(0, -3, 1, 3, 3, 2, "range(0, 0, 2)");
   test(0, -3, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_130) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -3, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, -3, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(0, -3, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -38929,6 +41056,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -3, 2, 3, 3, 1, "range(0, 0, 2)");
   test(0, -3, 2, 3, 3, 2, "range(0, 0, 4)");
   test(0, -3, 2, 3, 3, 3, "range(0, 0, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_131) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -3, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, -3, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, -3, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -39223,6 +41369,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -3, 3, 3, 3, 1, "range(0, 0, 3)");
   test(0, -3, 3, 3, 3, 2, "range(0, 0, 6)");
   test(0, -3, 3, 3, 3, 3, "range(0, 0, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_132) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -2, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, -2, -3, -3, -3, -2, "range(3, 3, 6)");
   test(0, -2, -3, -3, -3, -1, "range(3, 3, 3)");
@@ -39517,6 +41682,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -2, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(0, -2, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(0, -2, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_133) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -2, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, -2, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, -2, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -39811,6 +41995,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -2, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(0, -2, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(0, -2, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_134) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, -2, -1, -3, -3, -2, "range(1, 1, 2)");
   test(0, -2, -1, -3, -3, -1, "range(1, 1)");
@@ -40105,6 +42308,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -2, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(0, -2, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(0, -2, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_135) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, -2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, -2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -40399,6 +42621,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -2, 1, 3, 3, 1, "range(0)");
   test(0, -2, 1, 3, 3, 2, "range(0, 0, 2)");
   test(0, -2, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_136) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -2, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, -2, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(0, -2, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -40693,6 +42934,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -2, 2, 3, 3, 1, "range(0, 0, 2)");
   test(0, -2, 2, 3, 3, 2, "range(0, 0, 4)");
   test(0, -2, 2, 3, 3, 3, "range(0, 0, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_137) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -2, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, -2, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, -2, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -40987,6 +43247,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -2, 3, 3, 3, 1, "range(0, 0, 3)");
   test(0, -2, 3, 3, 3, 2, "range(0, 0, 6)");
   test(0, -2, 3, 3, 3, 3, "range(0, 0, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_138) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -1, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, -1, -3, -3, -3, -2, "range(3, 3, 6)");
   test(0, -1, -3, -3, -3, -1, "range(3, 3, 3)");
@@ -41281,6 +43560,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -1, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(0, -1, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(0, -1, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_139) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -1, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, -1, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, -1, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -41575,6 +43873,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -1, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(0, -1, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(0, -1, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_140) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -1, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, -1, -1, -3, -3, -2, "range(1, 1, 2)");
   test(0, -1, -1, -3, -3, -1, "range(1, 1)");
@@ -41869,6 +44186,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -1, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(0, -1, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(0, -1, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_141) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -1, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, -1, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, -1, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -42163,6 +44499,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -1, 1, 3, 3, 1, "range(0)");
   test(0, -1, 1, 3, 3, 2, "range(0, 0, 2)");
   test(0, -1, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_142) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -1, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, -1, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(0, -1, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -42457,6 +44812,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -1, 2, 3, 3, 1, "range(0, 0, 2)");
   test(0, -1, 2, 3, 3, 2, "range(0, 0, 4)");
   test(0, -1, 2, 3, 3, 3, "range(0, 0, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_143) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, -1, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, -1, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, -1, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -42751,6 +45125,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, -1, 3, 3, 3, 1, "range(0, 0, 3)");
   test(0, -1, 3, 3, 3, 2, "range(0, 0, 6)");
   test(0, -1, 3, 3, 3, 3, "range(0, 0, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_144) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 0, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 0, -3, -3, -3, -2, "range(3, 3, 6)");
   test(0, 0, -3, -3, -3, -1, "range(3, 3, 3)");
@@ -43045,6 +45438,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 0, -3, 3, 3, 1, "range(0, 0, -3)");
   test(0, 0, -3, 3, 3, 2, "range(0, 0, -6)");
   test(0, 0, -3, 3, 3, 3, "range(0, 0, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_145) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 0, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 0, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 0, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -43339,6 +45751,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 0, -2, 3, 3, 1, "range(0, 0, -2)");
   test(0, 0, -2, 3, 3, 2, "range(0, 0, -4)");
   test(0, 0, -2, 3, 3, 3, "range(0, 0, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_146) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 0, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 0, -1, -3, -3, -2, "range(1, 1, 2)");
   test(0, 0, -1, -3, -3, -1, "range(1, 1)");
@@ -43633,6 +46064,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 0, -1, 3, 3, 1, "range(0, 0, -1)");
   test(0, 0, -1, 3, 3, 2, "range(0, 0, -2)");
   test(0, 0, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_147) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 0, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, 0, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, 0, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -43927,6 +46377,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 0, 1, 3, 3, 1, "range(0)");
   test(0, 0, 1, 3, 3, 2, "range(0, 0, 2)");
   test(0, 0, 1, 3, 3, 3, "range(0, 0, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_148) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 0, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 0, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(0, 0, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -44221,6 +46690,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 0, 2, 3, 3, 1, "range(0, 0, 2)");
   test(0, 0, 2, 3, 3, 2, "range(0, 0, 4)");
   test(0, 0, 2, 3, 3, 3, "range(0, 0, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_149) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 0, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 0, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 0, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -44515,6 +47003,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 0, 3, 3, 3, 1, "range(0, 0, 3)");
   test(0, 0, 3, 3, 3, 2, "range(0, 0, 6)");
   test(0, 0, 3, 3, 3, 3, "range(0, 0, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_150) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 1, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 1, -3, -3, -3, -2, "range(3, 3, 6)");
   test(0, 1, -3, -3, -3, -1, "range(3, 3, 3)");
@@ -44809,6 +47316,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 1, -3, 3, 3, 1, "range(0, 0, -3)");
   test(0, 1, -3, 3, 3, 2, "range(0, 0, -6)");
   test(0, 1, -3, 3, 3, 3, "range(0, 0, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_151) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 1, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 1, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 1, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -45103,6 +47629,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 1, -2, 3, 3, 1, "range(0, 0, -2)");
   test(0, 1, -2, 3, 3, 2, "range(0, 0, -4)");
   test(0, 1, -2, 3, 3, 3, "range(0, 0, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_152) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 1, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 1, -1, -3, -3, -2, "range(1, 1, 2)");
   test(0, 1, -1, -3, -3, -1, "range(1, 1)");
@@ -45397,6 +47942,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 1, -1, 3, 3, 1, "range(0, 0, -1)");
   test(0, 1, -1, 3, 3, 2, "range(0, 0, -2)");
   test(0, 1, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_153) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 1, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, 1, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, 1, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -45691,6 +48255,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 1, 1, 3, 3, 1, "range(1, 1)");
   test(0, 1, 1, 3, 3, 2, "range(1, 1, 2)");
   test(0, 1, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_154) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 1, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 1, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(0, 1, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -45985,6 +48568,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 1, 2, 3, 3, 1, "range(2, 2, 2)");
   test(0, 1, 2, 3, 3, 2, "range(2, 2, 4)");
   test(0, 1, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_155) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 1, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 1, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 1, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -46279,6 +48881,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 1, 3, 3, 3, 1, "range(3, 3, 3)");
   test(0, 1, 3, 3, 3, 2, "range(3, 3, 6)");
   test(0, 1, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_156) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 2, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 2, -3, -3, -3, -2, "range(3, 3, 6)");
   test(0, 2, -3, -3, -3, -1, "range(3, 3, 3)");
@@ -46573,6 +49194,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 2, -3, 3, 3, 1, "range(0, 0, -3)");
   test(0, 2, -3, 3, 3, 2, "range(0, 0, -6)");
   test(0, 2, -3, 3, 3, 3, "range(0, 0, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_157) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 2, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 2, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 2, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -46867,6 +49507,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 2, -2, 3, 3, 1, "range(0, 0, -2)");
   test(0, 2, -2, 3, 3, 2, "range(0, 0, -4)");
   test(0, 2, -2, 3, 3, 3, "range(0, 0, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_158) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 2, -1, -3, -3, -2, "range(1, 1, 2)");
   test(0, 2, -1, -3, -3, -1, "range(1, 1)");
@@ -47161,6 +49820,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 2, -1, 3, 3, 1, "range(0, 0, -1)");
   test(0, 2, -1, 3, 3, 2, "range(0, 0, -2)");
   test(0, 2, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_159) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -47455,6 +50133,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 2, 1, 3, 3, 1, "range(2, 2)");
   test(0, 2, 1, 3, 3, 2, "range(2, 2, 2)");
   test(0, 2, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_160) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 2, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 2, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(0, 2, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -47749,6 +50446,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 2, 2, 3, 3, 1, "range(2, 2, 2)");
   test(0, 2, 2, 3, 3, 2, "range(2, 2, 4)");
   test(0, 2, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_161) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 2, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 2, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 2, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -48043,6 +50759,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 2, 3, 3, 3, 1, "range(3, 3, 3)");
   test(0, 2, 3, 3, 3, 2, "range(3, 3, 6)");
   test(0, 2, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_162) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 3, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 3, -3, -3, -3, -2, "range(3, 3, 6)");
   test(0, 3, -3, -3, -3, -1, "range(3, 3, 3)");
@@ -48337,6 +51072,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 3, -3, 3, 3, 1, "range(0, 0, -3)");
   test(0, 3, -3, 3, 3, 2, "range(0, 0, -6)");
   test(0, 3, -3, 3, 3, 3, "range(0, 0, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_163) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 3, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 3, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 3, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -48631,6 +51385,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 3, -2, 3, 3, 1, "range(0, 0, -2)");
   test(0, 3, -2, 3, 3, 2, "range(0, 0, -4)");
   test(0, 3, -2, 3, 3, 3, "range(0, 0, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_164) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 3, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 3, -1, -3, -3, -2, "range(1, 1, 2)");
   test(0, 3, -1, -3, -3, -1, "range(1, 1)");
@@ -48925,6 +51698,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 3, -1, 3, 3, 1, "range(0, 0, -1)");
   test(0, 3, -1, 3, 3, 2, "range(0, 0, -2)");
   test(0, 3, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_165) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(0, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(0, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -49219,6 +52011,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 3, 1, 3, 3, 1, "range(3, 3)");
   test(0, 3, 1, 3, 3, 2, "range(3, 3, 2)");
   test(0, 3, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_166) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 3, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 3, 2, -3, -3, -2, "range(-2, -2, -4)");
   test(0, 3, 2, -3, -3, -1, "range(-2, -2, -2)");
@@ -49513,6 +52324,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 3, 2, 3, 3, 1, "range(4, 4, 2)");
   test(0, 3, 2, 3, 3, 2, "range(4, 4, 4)");
   test(0, 3, 2, 3, 3, 3, "range(4, 4, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_167) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(0, 3, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 3, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 3, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -49807,6 +52637,25 @@ TEST(StarlarkRange, SliceRange) {
   test(0, 3, 3, 3, 3, 1, "range(3, 3, 3)");
   test(0, 3, 3, 3, 3, 2, "range(3, 3, 6)");
   test(0, 3, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_168) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -3, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, -3, -3, -3, -3, -2, "range(4, 4, 6)");
   test(1, -3, -3, -3, -3, -1, "range(4, 4, 3)");
@@ -50101,6 +52950,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -3, -3, 3, 3, 1, "range(-5, -5, -3)");
   test(1, -3, -3, 3, 3, 2, "range(-5, -5, -6)");
   test(1, -3, -3, 3, 3, 3, "range(-5, -5, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_169) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -3, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, -3, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, -3, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -50395,6 +53263,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -3, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(1, -3, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(1, -3, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_170) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(1, -3, -1, -3, -3, -2, "range(0, 0, 2)");
   test(1, -3, -1, -3, -3, -1, "range(0)");
@@ -50689,6 +53576,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -3, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(1, -3, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(1, -3, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_171) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, -3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, -3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -50983,6 +53889,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -3, 1, 3, 3, 1, "range(1, 1)");
   test(1, -3, 1, 3, 3, 2, "range(1, 1, 2)");
   test(1, -3, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_172) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -3, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, -3, 2, -3, -3, -2, "range(-1, -1, -4)");
   test(1, -3, 2, -3, -3, -1, "range(-1, -1, -2)");
@@ -51277,6 +54202,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -3, 2, 3, 3, 1, "range(1, 1, 2)");
   test(1, -3, 2, 3, 3, 2, "range(1, 1, 4)");
   test(1, -3, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_173) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -3, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, -3, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, -3, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -51571,6 +54515,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -3, 3, 3, 3, 1, "range(1, 1, 3)");
   test(1, -3, 3, 3, 3, 2, "range(1, 1, 6)");
   test(1, -3, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_174) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -2, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, -2, -3, -3, -3, -2, "range(4, 4, 6)");
   test(1, -2, -3, -3, -3, -1, "range(4, 4, 3)");
@@ -51865,6 +54828,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -2, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(1, -2, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(1, -2, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_175) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -2, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, -2, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, -2, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -52159,6 +55141,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -2, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(1, -2, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(1, -2, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_176) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(1, -2, -1, -3, -3, -2, "range(1, 1, 2)");
   test(1, -2, -1, -3, -3, -1, "range(1, 1)");
@@ -52453,6 +55454,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -2, -1, 3, 3, 1, "range(-2, -2, -1)");
   test(1, -2, -1, 3, 3, 2, "range(-2, -2, -2)");
   test(1, -2, -1, 3, 3, 3, "range(-2, -2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_177) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -2, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, -2, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, -2, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -52747,6 +55767,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -2, 1, 3, 3, 1, "range(1, 1)");
   test(1, -2, 1, 3, 3, 2, "range(1, 1, 2)");
   test(1, -2, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_178) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -2, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, -2, 2, -3, -3, -2, "range(-1, -1, -4)");
   test(1, -2, 2, -3, -3, -1, "range(-1, -1, -2)");
@@ -53041,6 +56080,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -2, 2, 3, 3, 1, "range(1, 1, 2)");
   test(1, -2, 2, 3, 3, 2, "range(1, 1, 4)");
   test(1, -2, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_179) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -2, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, -2, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, -2, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -53335,6 +56393,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -2, 3, 3, 3, 1, "range(1, 1, 3)");
   test(1, -2, 3, 3, 3, 2, "range(1, 1, 6)");
   test(1, -2, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_180) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -1, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, -1, -3, -3, -3, -2, "range(4, 4, 6)");
   test(1, -1, -3, -3, -3, -1, "range(4, 4, 3)");
@@ -53629,6 +56706,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -1, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(1, -1, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(1, -1, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_181) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -1, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, -1, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, -1, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -53923,6 +57019,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -1, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(1, -1, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(1, -1, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_182) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, -1, -1, -3, -3, -2, "range(2, 2, 2)");
   test(1, -1, -1, -3, -3, -1, "range(2, 2)");
@@ -54217,6 +57332,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -1, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(1, -1, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(1, -1, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_183) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -1, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, -1, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, -1, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -54511,6 +57645,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -1, 1, 3, 3, 1, "range(1, 1)");
   test(1, -1, 1, 3, 3, 2, "range(1, 1, 2)");
   test(1, -1, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_184) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -1, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, -1, 2, -3, -3, -2, "range(-1, -1, -4)");
   test(1, -1, 2, -3, -3, -1, "range(-1, -1, -2)");
@@ -54805,6 +57958,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -1, 2, 3, 3, 1, "range(1, 1, 2)");
   test(1, -1, 2, 3, 3, 2, "range(1, 1, 4)");
   test(1, -1, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_185) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, -1, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, -1, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, -1, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -55099,6 +58271,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, -1, 3, 3, 3, 1, "range(1, 1, 3)");
   test(1, -1, 3, 3, 3, 2, "range(1, 1, 6)");
   test(1, -1, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_186) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 0, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 0, -3, -3, -3, -2, "range(4, 4, 6)");
   test(1, 0, -3, -3, -3, -1, "range(4, 4, 3)");
@@ -55393,6 +58584,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 0, -3, 3, 3, 1, "range(-2, -2, -3)");
   test(1, 0, -3, 3, 3, 2, "range(-2, -2, -6)");
   test(1, 0, -3, 3, 3, 3, "range(-2, -2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_187) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 0, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 0, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 0, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -55687,6 +58897,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 0, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(1, 0, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(1, 0, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_188) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 0, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 0, -1, -3, -3, -2, "range(2, 2, 2)");
   test(1, 0, -1, -3, -3, -1, "range(2, 2)");
@@ -55981,6 +59210,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 0, -1, 3, 3, 1, "range(0, 0, -1)");
   test(1, 0, -1, 3, 3, 2, "range(0, 0, -2)");
   test(1, 0, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_189) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 0, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 0, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 0, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -56275,6 +59523,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 0, 1, 3, 3, 1, "range(1, 1)");
   test(1, 0, 1, 3, 3, 2, "range(1, 1, 2)");
   test(1, 0, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_190) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 0, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 0, 2, -3, -3, -2, "range(-1, -1, -4)");
   test(1, 0, 2, -3, -3, -1, "range(-1, -1, -2)");
@@ -56569,6 +59836,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 0, 2, 3, 3, 1, "range(1, 1, 2)");
   test(1, 0, 2, 3, 3, 2, "range(1, 1, 4)");
   test(1, 0, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_191) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 0, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 0, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 0, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -56863,6 +60149,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 0, 3, 3, 3, 1, "range(1, 1, 3)");
   test(1, 0, 3, 3, 3, 2, "range(1, 1, 6)");
   test(1, 0, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_192) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 1, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 1, -3, -3, -3, -2, "range(4, 4, 6)");
   test(1, 1, -3, -3, -3, -1, "range(4, 4, 3)");
@@ -57157,6 +60462,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 1, -3, 3, 3, 1, "range(1, 1, -3)");
   test(1, 1, -3, 3, 3, 2, "range(1, 1, -6)");
   test(1, 1, -3, 3, 3, 3, "range(1, 1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_193) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 1, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 1, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 1, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -57451,6 +60775,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 1, -2, 3, 3, 1, "range(1, 1, -2)");
   test(1, 1, -2, 3, 3, 2, "range(1, 1, -4)");
   test(1, 1, -2, 3, 3, 3, "range(1, 1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_194) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 1, -1, -3, -3, -2, "range(2, 2, 2)");
   test(1, 1, -1, -3, -3, -1, "range(2, 2)");
@@ -57745,6 +61088,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 1, -1, 3, 3, 1, "range(1, 1, -1)");
   test(1, 1, -1, 3, 3, 2, "range(1, 1, -2)");
   test(1, 1, -1, 3, 3, 3, "range(1, 1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_195) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 1, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 1, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 1, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -58039,6 +61401,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 1, 1, 3, 3, 1, "range(1, 1)");
   test(1, 1, 1, 3, 3, 2, "range(1, 1, 2)");
   test(1, 1, 1, 3, 3, 3, "range(1, 1, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_196) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 1, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 1, 2, -3, -3, -2, "range(-1, -1, -4)");
   test(1, 1, 2, -3, -3, -1, "range(-1, -1, -2)");
@@ -58333,6 +61714,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 1, 2, 3, 3, 1, "range(1, 1, 2)");
   test(1, 1, 2, 3, 3, 2, "range(1, 1, 4)");
   test(1, 1, 2, 3, 3, 3, "range(1, 1, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_197) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 1, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 1, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 1, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -58627,6 +62027,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 1, 3, 3, 3, 1, "range(1, 1, 3)");
   test(1, 1, 3, 3, 3, 2, "range(1, 1, 6)");
   test(1, 1, 3, 3, 3, 3, "range(1, 1, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_198) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 2, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 2, -3, -3, -3, -2, "range(4, 4, 6)");
   test(1, 2, -3, -3, -3, -1, "range(4, 4, 3)");
@@ -58921,6 +62340,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 2, -3, 3, 3, 1, "range(1, 1, -3)");
   test(1, 2, -3, 3, 3, 2, "range(1, 1, -6)");
   test(1, 2, -3, 3, 3, 3, "range(1, 1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_199) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 2, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 2, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 2, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -59215,6 +62653,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 2, -2, 3, 3, 1, "range(1, 1, -2)");
   test(1, 2, -2, 3, 3, 2, "range(1, 1, -4)");
   test(1, 2, -2, 3, 3, 3, "range(1, 1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_200) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 2, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 2, -1, -3, -3, -2, "range(2, 2, 2)");
   test(1, 2, -1, -3, -3, -1, "range(2, 2)");
@@ -59509,6 +62966,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 2, -1, 3, 3, 1, "range(1, 1, -1)");
   test(1, 2, -1, 3, 3, 2, "range(1, 1, -2)");
   test(1, 2, -1, 3, 3, 3, "range(1, 1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_201) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 2, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 2, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 2, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -59803,6 +63279,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 2, 1, 3, 3, 1, "range(2, 2)");
   test(1, 2, 1, 3, 3, 2, "range(2, 2, 2)");
   test(1, 2, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_202) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 2, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 2, 2, -3, -3, -2, "range(-1, -1, -4)");
   test(1, 2, 2, -3, -3, -1, "range(-1, -1, -2)");
@@ -60097,6 +63592,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 2, 2, 3, 3, 1, "range(3, 3, 2)");
   test(1, 2, 2, 3, 3, 2, "range(3, 3, 4)");
   test(1, 2, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_203) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 2, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 2, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 2, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -60391,6 +63905,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 2, 3, 3, 3, 1, "range(4, 4, 3)");
   test(1, 2, 3, 3, 3, 2, "range(4, 4, 6)");
   test(1, 2, 3, 3, 3, 3, "range(4, 4, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_204) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 3, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 3, -3, -3, -3, -2, "range(4, 4, 6)");
   test(1, 3, -3, -3, -3, -1, "range(4, 4, 3)");
@@ -60685,6 +64218,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 3, -3, 3, 3, 1, "range(1, 1, -3)");
   test(1, 3, -3, 3, 3, 2, "range(1, 1, -6)");
   test(1, 3, -3, 3, 3, 3, "range(1, 1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_205) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 3, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 3, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 3, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -60979,6 +64531,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 3, -2, 3, 3, 1, "range(1, 1, -2)");
   test(1, 3, -2, 3, 3, 2, "range(1, 1, -4)");
   test(1, 3, -2, 3, 3, 3, "range(1, 1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_206) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 3, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 3, -1, -3, -3, -2, "range(2, 2, 2)");
   test(1, 3, -1, -3, -3, -1, "range(2, 2)");
@@ -61273,6 +64844,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 3, -1, 3, 3, 1, "range(1, 1, -1)");
   test(1, 3, -1, 3, 3, 2, "range(1, 1, -2)");
   test(1, 3, -1, 3, 3, 3, "range(1, 1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_207) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -61567,6 +65157,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 3, 1, 3, 3, 1, "range(3, 3)");
   test(1, 3, 1, 3, 3, 2, "range(3, 3, 2)");
   test(1, 3, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_208) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 3, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 3, 2, -3, -3, -2, "range(-1, -1, -4)");
   test(1, 3, 2, -3, -3, -1, "range(-1, -1, -2)");
@@ -61861,6 +65470,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 3, 2, 3, 3, 1, "range(3, 3, 2)");
   test(1, 3, 2, 3, 3, 2, "range(3, 3, 4)");
   test(1, 3, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_209) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(1, 3, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 3, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 3, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -62155,6 +65783,25 @@ TEST(StarlarkRange, SliceRange) {
   test(1, 3, 3, 3, 3, 1, "range(4, 4, 3)");
   test(1, 3, 3, 3, 3, 2, "range(4, 4, 6)");
   test(1, 3, 3, 3, 3, 3, "range(4, 4, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_210) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -3, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, -3, -3, -3, -3, -2, "range(5, 5, 6)");
   test(2, -3, -3, -3, -3, -1, "range(5, 5, 3)");
@@ -62449,6 +66096,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -3, -3, 3, 3, 1, "range(-4, -4, -3)");
   test(2, -3, -3, 3, 3, 2, "range(-4, -4, -6)");
   test(2, -3, -3, 3, 3, 3, "range(-4, -4, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_211) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -3, -2, -3, -3, -3, "range(2, 2, 6)");
   test(2, -3, -2, -3, -3, -2, "range(2, 2, 4)");
   test(2, -3, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -62743,6 +66409,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -3, -2, 3, 3, 1, "range(-4, -4, -2)");
   test(2, -3, -2, 3, 3, 2, "range(-4, -4, -4)");
   test(2, -3, -2, 3, 3, 3, "range(-4, -4, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_212) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(2, -3, -1, -3, -3, -2, "range(0, 0, 2)");
   test(2, -3, -1, -3, -3, -1, "range(0)");
@@ -63037,6 +66722,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -3, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(2, -3, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(2, -3, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_213) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -3, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, -3, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, -3, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -63331,6 +67035,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -3, 1, 3, 3, 1, "range(2, 2)");
   test(2, -3, 1, 3, 3, 2, "range(2, 2, 2)");
   test(2, -3, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_214) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -3, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, -3, 2, -3, -3, -2, "range(0, 0, -4)");
   test(2, -3, 2, -3, -3, -1, "range(0, 0, -2)");
@@ -63625,6 +67348,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -3, 2, 3, 3, 1, "range(2, 2, 2)");
   test(2, -3, 2, 3, 3, 2, "range(2, 2, 4)");
   test(2, -3, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_215) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -3, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, -3, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, -3, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -63919,6 +67661,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -3, 3, 3, 3, 1, "range(2, 2, 3)");
   test(2, -3, 3, 3, 3, 2, "range(2, 2, 6)");
   test(2, -3, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_216) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -2, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, -2, -3, -3, -3, -2, "range(5, 5, 6)");
   test(2, -2, -3, -3, -3, -1, "range(5, 5, 3)");
@@ -64213,6 +67974,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -2, -3, 3, 3, 1, "range(-4, -4, -3)");
   test(2, -2, -3, 3, 3, 2, "range(-4, -4, -6)");
   test(2, -2, -3, 3, 3, 3, "range(-4, -4, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_217) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -2, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, -2, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, -2, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -64507,6 +68287,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -2, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(2, -2, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(2, -2, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_218) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(2, -2, -1, -3, -3, -2, "range(1, 1, 2)");
   test(2, -2, -1, -3, -3, -1, "range(1, 1)");
@@ -64801,6 +68600,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -2, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(2, -2, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(2, -2, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_219) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -2, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, -2, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, -2, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -65095,6 +68913,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -2, 1, 3, 3, 1, "range(2, 2)");
   test(2, -2, 1, 3, 3, 2, "range(2, 2, 2)");
   test(2, -2, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_220) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -2, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, -2, 2, -3, -3, -2, "range(0, 0, -4)");
   test(2, -2, 2, -3, -3, -1, "range(0, 0, -2)");
@@ -65389,6 +69226,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -2, 2, 3, 3, 1, "range(2, 2, 2)");
   test(2, -2, 2, 3, 3, 2, "range(2, 2, 4)");
   test(2, -2, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_221) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -2, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, -2, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, -2, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -65683,6 +69539,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -2, 3, 3, 3, 1, "range(2, 2, 3)");
   test(2, -2, 3, 3, 3, 2, "range(2, 2, 6)");
   test(2, -2, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_222) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -1, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, -1, -3, -3, -3, -2, "range(5, 5, 6)");
   test(2, -1, -3, -3, -3, -1, "range(5, 5, 3)");
@@ -65977,6 +69852,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -1, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(2, -1, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(2, -1, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_223) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -1, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, -1, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, -1, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -66271,6 +70165,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -1, -2, 3, 3, 1, "range(-2, -2, -2)");
   test(2, -1, -2, 3, 3, 2, "range(-2, -2, -4)");
   test(2, -1, -2, 3, 3, 3, "range(-2, -2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_224) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(2, -1, -1, -3, -3, -2, "range(2, 2, 2)");
   test(2, -1, -1, -3, -3, -1, "range(2, 2)");
@@ -66565,6 +70478,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -1, -1, 3, 3, 1, "range(-1, -1, -1)");
   test(2, -1, -1, 3, 3, 2, "range(-1, -1, -2)");
   test(2, -1, -1, 3, 3, 3, "range(-1, -1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_225) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -1, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, -1, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, -1, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -66859,6 +70791,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -1, 1, 3, 3, 1, "range(2, 2)");
   test(2, -1, 1, 3, 3, 2, "range(2, 2, 2)");
   test(2, -1, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_226) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -1, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, -1, 2, -3, -3, -2, "range(0, 0, -4)");
   test(2, -1, 2, -3, -3, -1, "range(0, 0, -2)");
@@ -67153,6 +71104,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -1, 2, 3, 3, 1, "range(2, 2, 2)");
   test(2, -1, 2, 3, 3, 2, "range(2, 2, 4)");
   test(2, -1, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_227) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, -1, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, -1, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, -1, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -67447,6 +71417,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, -1, 3, 3, 3, 1, "range(2, 2, 3)");
   test(2, -1, 3, 3, 3, 2, "range(2, 2, 6)");
   test(2, -1, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_228) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 0, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 0, -3, -3, -3, -2, "range(5, 5, 6)");
   test(2, 0, -3, -3, -3, -1, "range(5, 5, 3)");
@@ -67741,6 +71730,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 0, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(2, 0, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(2, 0, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_229) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 0, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 0, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 0, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -68035,6 +72043,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 0, -2, 3, 3, 1, "range(0, 0, -2)");
   test(2, 0, -2, 3, 3, 2, "range(0, 0, -4)");
   test(2, 0, -2, 3, 3, 3, "range(0, 0, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_230) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 0, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 0, -1, -3, -3, -2, "range(3, 3, 2)");
   test(2, 0, -1, -3, -3, -1, "range(3, 3)");
@@ -68329,6 +72356,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 0, -1, 3, 3, 1, "range(0, 0, -1)");
   test(2, 0, -1, 3, 3, 2, "range(0, 0, -2)");
   test(2, 0, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_231) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 0, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 0, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 0, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -68623,6 +72669,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 0, 1, 3, 3, 1, "range(2, 2)");
   test(2, 0, 1, 3, 3, 2, "range(2, 2, 2)");
   test(2, 0, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_232) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 0, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 0, 2, -3, -3, -2, "range(0, 0, -4)");
   test(2, 0, 2, -3, -3, -1, "range(0, 0, -2)");
@@ -68917,6 +72982,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 0, 2, 3, 3, 1, "range(2, 2, 2)");
   test(2, 0, 2, 3, 3, 2, "range(2, 2, 4)");
   test(2, 0, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_233) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 0, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 0, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 0, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -69211,6 +73295,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 0, 3, 3, 3, 1, "range(2, 2, 3)");
   test(2, 0, 3, 3, 3, 2, "range(2, 2, 6)");
   test(2, 0, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_234) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 1, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 1, -3, -3, -3, -2, "range(5, 5, 6)");
   test(2, 1, -3, -3, -3, -1, "range(5, 5, 3)");
@@ -69505,6 +73608,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 1, -3, 3, 3, 1, "range(-1, -1, -3)");
   test(2, 1, -3, 3, 3, 2, "range(-1, -1, -6)");
   test(2, 1, -3, 3, 3, 3, "range(-1, -1, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_235) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 1, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 1, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 1, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -69799,6 +73921,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 1, -2, 3, 3, 1, "range(0, 0, -2)");
   test(2, 1, -2, 3, 3, 2, "range(0, 0, -4)");
   test(2, 1, -2, 3, 3, 3, "range(0, 0, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_236) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 1, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 1, -1, -3, -3, -2, "range(3, 3, 2)");
   test(2, 1, -1, -3, -3, -1, "range(3, 3)");
@@ -70093,6 +74234,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 1, -1, 3, 3, 1, "range(1, 1, -1)");
   test(2, 1, -1, 3, 3, 2, "range(1, 1, -2)");
   test(2, 1, -1, 3, 3, 3, "range(1, 1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_237) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 1, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 1, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 1, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -70387,6 +74547,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 1, 1, 3, 3, 1, "range(2, 2)");
   test(2, 1, 1, 3, 3, 2, "range(2, 2, 2)");
   test(2, 1, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_238) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 1, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 1, 2, -3, -3, -2, "range(0, 0, -4)");
   test(2, 1, 2, -3, -3, -1, "range(0, 0, -2)");
@@ -70681,6 +74860,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 1, 2, 3, 3, 1, "range(2, 2, 2)");
   test(2, 1, 2, 3, 3, 2, "range(2, 2, 4)");
   test(2, 1, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_239) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 1, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 1, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 1, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -70975,6 +75173,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 1, 3, 3, 3, 1, "range(2, 2, 3)");
   test(2, 1, 3, 3, 3, 2, "range(2, 2, 6)");
   test(2, 1, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_240) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 2, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 2, -3, -3, -3, -2, "range(5, 5, 6)");
   test(2, 2, -3, -3, -3, -1, "range(5, 5, 3)");
@@ -71269,6 +75486,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 2, -3, 3, 3, 1, "range(2, 2, -3)");
   test(2, 2, -3, 3, 3, 2, "range(2, 2, -6)");
   test(2, 2, -3, 3, 3, 3, "range(2, 2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_241) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 2, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 2, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 2, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -71563,6 +75799,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 2, -2, 3, 3, 1, "range(2, 2, -2)");
   test(2, 2, -2, 3, 3, 2, "range(2, 2, -4)");
   test(2, 2, -2, 3, 3, 3, "range(2, 2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_242) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 2, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 2, -1, -3, -3, -2, "range(3, 3, 2)");
   test(2, 2, -1, -3, -3, -1, "range(3, 3)");
@@ -71857,6 +76112,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 2, -1, 3, 3, 1, "range(2, 2, -1)");
   test(2, 2, -1, 3, 3, 2, "range(2, 2, -2)");
   test(2, 2, -1, 3, 3, 3, "range(2, 2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_243) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 2, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 2, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 2, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -72151,6 +76425,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 2, 1, 3, 3, 1, "range(2, 2)");
   test(2, 2, 1, 3, 3, 2, "range(2, 2, 2)");
   test(2, 2, 1, 3, 3, 3, "range(2, 2, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_244) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 2, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 2, 2, -3, -3, -2, "range(0, 0, -4)");
   test(2, 2, 2, -3, -3, -1, "range(0, 0, -2)");
@@ -72445,6 +76738,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 2, 2, 3, 3, 1, "range(2, 2, 2)");
   test(2, 2, 2, 3, 3, 2, "range(2, 2, 4)");
   test(2, 2, 2, 3, 3, 3, "range(2, 2, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_245) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 2, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 2, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 2, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -72739,6 +77051,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 2, 3, 3, 3, 1, "range(2, 2, 3)");
   test(2, 2, 3, 3, 3, 2, "range(2, 2, 6)");
   test(2, 2, 3, 3, 3, 3, "range(2, 2, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_246) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 3, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 3, -3, -3, -3, -2, "range(5, 5, 6)");
   test(2, 3, -3, -3, -3, -1, "range(5, 5, 3)");
@@ -73033,6 +77364,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 3, -3, 3, 3, 1, "range(2, 2, -3)");
   test(2, 3, -3, 3, 3, 2, "range(2, 2, -6)");
   test(2, 3, -3, 3, 3, 3, "range(2, 2, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_247) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 3, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 3, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 3, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -73327,6 +77677,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 3, -2, 3, 3, 1, "range(2, 2, -2)");
   test(2, 3, -2, 3, 3, 2, "range(2, 2, -4)");
   test(2, 3, -2, 3, 3, 3, "range(2, 2, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_248) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 3, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 3, -1, -3, -3, -2, "range(3, 3, 2)");
   test(2, 3, -1, -3, -3, -1, "range(3, 3)");
@@ -73621,6 +77990,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 3, -1, 3, 3, 1, "range(2, 2, -1)");
   test(2, 3, -1, 3, 3, 2, "range(2, 2, -2)");
   test(2, 3, -1, 3, 3, 3, "range(2, 2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_249) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 3, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 3, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 3, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -73915,6 +78303,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 3, 1, 3, 3, 1, "range(3, 3)");
   test(2, 3, 1, 3, 3, 2, "range(3, 3, 2)");
   test(2, 3, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_250) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 3, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 3, 2, -3, -3, -2, "range(0, 0, -4)");
   test(2, 3, 2, -3, -3, -1, "range(0, 0, -2)");
@@ -74209,6 +78616,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 3, 2, 3, 3, 1, "range(4, 4, 2)");
   test(2, 3, 2, 3, 3, 2, "range(4, 4, 4)");
   test(2, 3, 2, 3, 3, 3, "range(4, 4, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_251) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(2, 3, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 3, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 3, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -74503,6 +78929,25 @@ TEST(StarlarkRange, SliceRange) {
   test(2, 3, 3, 3, 3, 1, "range(5, 5, 3)");
   test(2, 3, 3, 3, 3, 2, "range(5, 5, 6)");
   test(2, 3, 3, 3, 3, 3, "range(5, 5, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_252) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -3, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, -3, -3, -3, -3, -2, "range(6, 6, 6)");
   test(3, -3, -3, -3, -3, -1, "range(6, 6, 3)");
@@ -74797,6 +79242,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -3, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(3, -3, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(3, -3, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_253) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -3, -2, -3, -3, -3, "range(3, 3, 6)");
   test(3, -3, -2, -3, -3, -2, "range(3, 3, 4)");
   test(3, -3, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -75091,6 +79555,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -3, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(3, -3, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(3, -3, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_254) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(3, -3, -1, -3, -3, -2, "range(0, 0, 2)");
   test(3, -3, -1, -3, -3, -1, "range(0)");
@@ -75385,6 +79868,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -3, -1, 3, 3, 1, "range(0, 0, -1)");
   test(3, -3, -1, 3, 3, 2, "range(0, 0, -2)");
   test(3, -3, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_255) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -3, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, -3, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, -3, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -75679,6 +80181,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -3, 1, 3, 3, 1, "range(3, 3)");
   test(3, -3, 1, 3, 3, 2, "range(3, 3, 2)");
   test(3, -3, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_256) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -3, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, -3, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, -3, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -75973,6 +80494,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -3, 2, 3, 3, 1, "range(3, 3, 2)");
   test(3, -3, 2, 3, 3, 2, "range(3, 3, 4)");
   test(3, -3, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_257) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -3, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, -3, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, -3, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -76267,6 +80807,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -3, 3, 3, 3, 1, "range(3, 3, 3)");
   test(3, -3, 3, 3, 3, 2, "range(3, 3, 6)");
   test(3, -3, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_258) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -2, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, -2, -3, -3, -3, -2, "range(6, 6, 6)");
   test(3, -2, -3, -3, -3, -1, "range(6, 6, 3)");
@@ -76561,6 +81120,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -2, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(3, -2, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(3, -2, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_259) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -2, -2, -3, -3, -3, "range(3, 3, 6)");
   test(3, -2, -2, -3, -3, -2, "range(3, 3, 4)");
   test(3, -2, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -76855,6 +81433,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -2, -2, 3, 3, 1, "range(-3, -3, -2)");
   test(3, -2, -2, 3, 3, 2, "range(-3, -3, -4)");
   test(3, -2, -2, 3, 3, 3, "range(-3, -3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_260) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(3, -2, -1, -3, -3, -2, "range(1, 1, 2)");
   test(3, -2, -1, -3, -3, -1, "range(1, 1)");
@@ -77149,6 +81746,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -2, -1, 3, 3, 1, "range(0, 0, -1)");
   test(3, -2, -1, 3, 3, 2, "range(0, 0, -2)");
   test(3, -2, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_261) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -2, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, -2, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, -2, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -77443,6 +82059,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -2, 1, 3, 3, 1, "range(3, 3)");
   test(3, -2, 1, 3, 3, 2, "range(3, 3, 2)");
   test(3, -2, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_262) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -2, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, -2, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, -2, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -77737,6 +82372,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -2, 2, 3, 3, 1, "range(3, 3, 2)");
   test(3, -2, 2, 3, 3, 2, "range(3, 3, 4)");
   test(3, -2, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_263) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -2, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, -2, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, -2, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -78031,6 +82685,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -2, 3, 3, 3, 1, "range(3, 3, 3)");
   test(3, -2, 3, 3, 3, 2, "range(3, 3, 6)");
   test(3, -2, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_264) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -1, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, -1, -3, -3, -3, -2, "range(6, 6, 6)");
   test(3, -1, -3, -3, -3, -1, "range(6, 6, 3)");
@@ -78325,6 +82998,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -1, -3, 3, 3, 1, "range(-3, -3, -3)");
   test(3, -1, -3, 3, 3, 2, "range(-3, -3, -6)");
   test(3, -1, -3, 3, 3, 3, "range(-3, -3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_265) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -1, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, -1, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, -1, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -78619,6 +83311,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -1, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(3, -1, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(3, -1, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_266) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(3, -1, -1, -3, -3, -2, "range(2, 2, 2)");
   test(3, -1, -1, -3, -3, -1, "range(2, 2)");
@@ -78913,6 +83624,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -1, -1, 3, 3, 1, "range(0, 0, -1)");
   test(3, -1, -1, 3, 3, 2, "range(0, 0, -2)");
   test(3, -1, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_267) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -1, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, -1, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, -1, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -79207,6 +83937,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -1, 1, 3, 3, 1, "range(3, 3)");
   test(3, -1, 1, 3, 3, 2, "range(3, 3, 2)");
   test(3, -1, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_268) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -1, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, -1, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, -1, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -79501,6 +84250,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -1, 2, 3, 3, 1, "range(3, 3, 2)");
   test(3, -1, 2, 3, 3, 2, "range(3, 3, 4)");
   test(3, -1, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_269) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, -1, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, -1, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, -1, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -79795,6 +84563,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, -1, 3, 3, 3, 1, "range(3, 3, 3)");
   test(3, -1, 3, 3, 3, 2, "range(3, 3, 6)");
   test(3, -1, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_270) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 0, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 0, -3, -3, -3, -2, "range(6, 6, 6)");
   test(3, 0, -3, -3, -3, -1, "range(6, 6, 3)");
@@ -80089,6 +84876,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 0, -3, 3, 3, 1, "range(0, 0, -3)");
   test(3, 0, -3, 3, 3, 2, "range(0, 0, -6)");
   test(3, 0, -3, 3, 3, 3, "range(0, 0, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_271) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 0, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 0, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 0, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -80383,6 +85189,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 0, -2, 3, 3, 1, "range(-1, -1, -2)");
   test(3, 0, -2, 3, 3, 2, "range(-1, -1, -4)");
   test(3, 0, -2, 3, 3, 3, "range(-1, -1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_272) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 0, -1, -3, -3, -3, "range(3, 3, 3)");
   test(3, 0, -1, -3, -3, -2, "range(3, 3, 2)");
   test(3, 0, -1, -3, -3, -1, "range(3, 3)");
@@ -80677,6 +85502,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 0, -1, 3, 3, 1, "range(0, 0, -1)");
   test(3, 0, -1, 3, 3, 2, "range(0, 0, -2)");
   test(3, 0, -1, 3, 3, 3, "range(0, 0, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_273) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 0, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 0, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 0, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -80971,6 +85815,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 0, 1, 3, 3, 1, "range(3, 3)");
   test(3, 0, 1, 3, 3, 2, "range(3, 3, 2)");
   test(3, 0, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_274) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 0, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 0, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, 0, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -81265,6 +86128,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 0, 2, 3, 3, 1, "range(3, 3, 2)");
   test(3, 0, 2, 3, 3, 2, "range(3, 3, 4)");
   test(3, 0, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_275) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 0, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 0, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, 0, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -81559,6 +86441,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 0, 3, 3, 3, 1, "range(3, 3, 3)");
   test(3, 0, 3, 3, 3, 2, "range(3, 3, 6)");
   test(3, 0, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_276) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 1, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 1, -3, -3, -3, -2, "range(6, 6, 6)");
   test(3, 1, -3, -3, -3, -1, "range(6, 6, 3)");
@@ -81853,6 +86754,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 1, -3, 3, 3, 1, "range(0, 0, -3)");
   test(3, 1, -3, 3, 3, 2, "range(0, 0, -6)");
   test(3, 1, -3, 3, 3, 3, "range(0, 0, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_277) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 1, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 1, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 1, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -82147,6 +87067,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 1, -2, 3, 3, 1, "range(1, 1, -2)");
   test(3, 1, -2, 3, 3, 2, "range(1, 1, -4)");
   test(3, 1, -2, 3, 3, 3, "range(1, 1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_278) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 1, -1, -3, -3, -3, "range(4, 4, 3)");
   test(3, 1, -1, -3, -3, -2, "range(4, 4, 2)");
   test(3, 1, -1, -3, -3, -1, "range(4, 4)");
@@ -82441,6 +87380,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 1, -1, 3, 3, 1, "range(1, 1, -1)");
   test(3, 1, -1, 3, 3, 2, "range(1, 1, -2)");
   test(3, 1, -1, 3, 3, 3, "range(1, 1, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_279) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 1, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 1, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 1, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -82735,6 +87693,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 1, 1, 3, 3, 1, "range(3, 3)");
   test(3, 1, 1, 3, 3, 2, "range(3, 3, 2)");
   test(3, 1, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_280) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 1, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 1, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, 1, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -83029,6 +88006,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 1, 2, 3, 3, 1, "range(3, 3, 2)");
   test(3, 1, 2, 3, 3, 2, "range(3, 3, 4)");
   test(3, 1, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_281) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 1, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 1, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, 1, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -83323,6 +88319,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 1, 3, 3, 3, 1, "range(3, 3, 3)");
   test(3, 1, 3, 3, 3, 2, "range(3, 3, 6)");
   test(3, 1, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_282) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 2, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 2, -3, -3, -3, -2, "range(6, 6, 6)");
   test(3, 2, -3, -3, -3, -1, "range(6, 6, 3)");
@@ -83617,6 +88632,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 2, -3, 3, 3, 1, "range(0, 0, -3)");
   test(3, 2, -3, 3, 3, 2, "range(0, 0, -6)");
   test(3, 2, -3, 3, 3, 3, "range(0, 0, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_283) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 2, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 2, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 2, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -83911,6 +88945,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 2, -2, 3, 3, 1, "range(1, 1, -2)");
   test(3, 2, -2, 3, 3, 2, "range(1, 1, -4)");
   test(3, 2, -2, 3, 3, 3, "range(1, 1, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_284) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 2, -1, -3, -3, -3, "range(4, 4, 3)");
   test(3, 2, -1, -3, -3, -2, "range(4, 4, 2)");
   test(3, 2, -1, -3, -3, -1, "range(4, 4)");
@@ -84205,6 +89258,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 2, -1, 3, 3, 1, "range(2, 2, -1)");
   test(3, 2, -1, 3, 3, 2, "range(2, 2, -2)");
   test(3, 2, -1, 3, 3, 3, "range(2, 2, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_285) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 2, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 2, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 2, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -84499,6 +89571,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 2, 1, 3, 3, 1, "range(3, 3)");
   test(3, 2, 1, 3, 3, 2, "range(3, 3, 2)");
   test(3, 2, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_286) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 2, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 2, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, 2, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -84793,6 +89884,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 2, 2, 3, 3, 1, "range(3, 3, 2)");
   test(3, 2, 2, 3, 3, 2, "range(3, 3, 4)");
   test(3, 2, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_287) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 2, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 2, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, 2, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -85087,6 +90197,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 2, 3, 3, 3, 1, "range(3, 3, 3)");
   test(3, 2, 3, 3, 3, 2, "range(3, 3, 6)");
   test(3, 2, 3, 3, 3, 3, "range(3, 3, 9)");
+}
+
+TEST(StarlarkRange, SliceRange_288) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 3, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 3, -3, -3, -3, -2, "range(6, 6, 6)");
   test(3, 3, -3, -3, -3, -1, "range(6, 6, 3)");
@@ -85381,6 +90510,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 3, -3, 3, 3, 1, "range(3, 3, -3)");
   test(3, 3, -3, 3, 3, 2, "range(3, 3, -6)");
   test(3, 3, -3, 3, 3, 3, "range(3, 3, -9)");
+}
+
+TEST(StarlarkRange, SliceRange_289) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 3, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 3, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 3, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -85675,6 +90823,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 3, -2, 3, 3, 1, "range(3, 3, -2)");
   test(3, 3, -2, 3, 3, 2, "range(3, 3, -4)");
   test(3, 3, -2, 3, 3, 3, "range(3, 3, -6)");
+}
+
+TEST(StarlarkRange, SliceRange_290) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 3, -1, -3, -3, -3, "range(4, 4, 3)");
   test(3, 3, -1, -3, -3, -2, "range(4, 4, 2)");
   test(3, 3, -1, -3, -3, -1, "range(4, 4)");
@@ -85969,6 +91136,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 3, -1, 3, 3, 1, "range(3, 3, -1)");
   test(3, 3, -1, 3, 3, 2, "range(3, 3, -2)");
   test(3, 3, -1, 3, 3, 3, "range(3, 3, -3)");
+}
+
+TEST(StarlarkRange, SliceRange_291) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 3, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 3, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 3, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -86263,6 +91449,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 3, 1, 3, 3, 1, "range(3, 3)");
   test(3, 3, 1, 3, 3, 2, "range(3, 3, 2)");
   test(3, 3, 1, 3, 3, 3, "range(3, 3, 3)");
+}
+
+TEST(StarlarkRange, SliceRange_292) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 3, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 3, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, 3, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -86557,6 +91762,25 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 3, 2, 3, 3, 1, "range(3, 3, 2)");
   test(3, 3, 2, 3, 3, 2, "range(3, 3, 4)");
   test(3, 3, 2, 3, 3, 3, "range(3, 3, 6)");
+}
+
+TEST(StarlarkRange, SliceRange_293) {
+  auto test = [](int64_t istart, int64_t iend, int64_t istep, int64_t sstart, int64_t send, int64_t sstep, std::string_view expected_value) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_range range(istart, iend, istep);
+    starlark_integer start(sstart);
+    starlark_integer end(send);
+    starlark_integer step(sstep);
+
+    auto* result = range.slice_range(start, end, step, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+
   test(3, 3, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 3, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, 3, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -86853,4 +92077,5 @@ TEST(StarlarkRange, SliceRange) {
   test(3, 3, 3, 3, 3, 3, "range(3, 3, 9)");
 }
 
-}  // namespace
+}   // namespace
+

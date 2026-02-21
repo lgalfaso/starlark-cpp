@@ -138,6 +138,19 @@ starlark_obj* starlark_range::index(const starlark_obj& other, context& ctx, err
   return create_integer(start + idx * step, ctx);
 }
 
+starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
+  auto [i_start, i_end, i_stride, valid] = inner_slice_range(start, stop, stride, len_, error_callback);
+  if (!valid) {
+    return nullptr;
+  }
+
+  // TODO(lmirelmann): Check that none of these overflow/underflow.
+  auto r_step = this->step * i_stride;
+  auto r_start = this->start + this->step * i_start;
+  auto r_end = this->start + this->step * i_end;
+  return Arena::Create<starlark_range>(&ctx.arena(), r_start, r_end, r_step);
+}
+
 starlark_range::starlark_range_iterator::starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, context& ctx)
   : current_pos(current_pos), step(step), remaining(remaining), ctx(ctx) {}
 

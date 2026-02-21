@@ -232,6 +232,25 @@ starlark_obj* starlark_tuple::index(const starlark_obj& other, context& ctx, err
   return values[idx];
 }
 
+starlark_obj* starlark_tuple::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
+  auto [i_start, i_end, i_stride, valid] = inner_slice_range(start, stop, stride, values.size(), error_callback);
+  if (!valid) {
+    return nullptr;
+  }
+
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+  if (i_stride > 0) {
+    for (auto i = i_start; i < i_end; i += i_stride) {
+      result->values.push_back(values[i]);
+    }
+  } else {
+    for (auto i = i_start; i > i_end; i += i_stride) {
+      result->values.push_back(values[i]);
+    }
+  }
+  return result;
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_tuple::inner_hash() const {
   return std::span(values.begin(), values.end());
 }

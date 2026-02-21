@@ -1,9 +1,10 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2026 Lucas Mirelmann
 
 #include "runtime/starlark_object.hpp"
 
 #include <bit>
 #include <functional>
+#include <limits>
 #include <map>
 #include <string>
 #include <utility>
@@ -11,6 +12,7 @@
 
 #include "runtime/error_messages.hpp"
 #include "runtime/levenshtein.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::starlark::bigint::number;
 
@@ -427,6 +429,11 @@ void starlark_obj::dot_assign(std::string_view field_name, starlark_obj& element
   }
 }
 
+starlark_obj* starlark_obj::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
+  error_callback.add_error(error_unsubscriptable(type()));
+  return nullptr;
+}
+
 void starlark_obj::slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_no_item_assignment(type()));
 }
@@ -557,6 +564,44 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
   }
 }
 
+std::tuple<int64_t, int64_t, int64_t, bool> starlark_obj::inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const {
+  /*
+  This implementation does not fully folllow the same logic as Bazel and aligns better with Python.
+  The discrepancies are not significant and mostly impact the representation of `range` for some adge cases.
+  Eg, for `range(-3, -2, 1)[-2:-1:-3]`, Bazel returns `range(-3, -3, -3)` and Python returns `range(-4, -3, -3)`.
+  These two ranges are equal, and the difference is only visible by calling `str`.
+  */
+  int64_t i_stride = 1;
+  if (!to_int64_with_clamping_for_index_allow_none(stride, i_stride, error_callback)) {
+    return std::make_tuple(0, 0, 0, false);
+  }
+  if (i_stride == 0) {
+    error_callback.add_error(error_step_non_zero());
+    return std::make_tuple(0, 0, 0, false);
+  }
+  int64_t i_start = i_stride > 0 ? 0 : len - 1;
+  int64_t i_end = i_stride > 0 ? len : -len - 1;
+  int64_t lower = i_stride > 0 ? 0 : -1;
+  int64_t upper = i_stride > 0 ? len : lower + len;
+  if (!to_int64_with_clamping_for_index_allow_none(start, i_start, error_callback)) {
+    return std::make_tuple(0, 0, 0, false);
+  }
+  if (!to_int64_with_clamping_for_index_allow_none(stop, i_end, error_callback)) {
+    return std::make_tuple(0, 0, 0, false);
+  }
+  if (i_start < 0) {
+    i_start = std::max<int64_t>(i_start + len, lower);
+  } else {
+    i_start = std::min<int64_t>(i_start, upper);
+  }
+  if (i_end < 0) {
+    i_end = std::max<int64_t>(i_end + len, lower);
+  } else {
+    i_end = std::min<int64_t>(i_end, upper);
+  }
+  return std::make_tuple(i_start, i_end, i_stride, true);
+}
+
 size_t starlark_hash_op::operator()(const starlark_obj* value) const {
   return value->hash();
 }
@@ -665,6 +710,32 @@ bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, er
       }
       break;
     default:
+      error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
+      return false;
+  }
+  return true;
+}
+
+bool to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
+  switch (iidx.numeric_type()) {
+    case starlark_numeric_type::kInt64:
+      idx = iidx.as_int64();
+      break;
+    case starlark_numeric_type::kBigInt:
+      if (!iidx.as_bigint().fits_in_int64()) {
+        if (iidx.as_bigint().sign()) {
+          idx = std::numeric_limits<int64_t>::min();
+        } else {
+          idx = std::numeric_limits<int64_t>::max();
+        }
+      } else {
+        idx = iidx.as_bigint().as_int64();
+      }
+      break;
+    default:
+      if (iidx.type() == starlark_types::none_t) {
+        return true;
+      }
       error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
       return false;
   }

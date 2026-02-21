@@ -21,6 +21,7 @@ class starlark_range : public starlark_obj {
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+  starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
 
   class starlark_range_iterator : public starlark_iterator {
    public:

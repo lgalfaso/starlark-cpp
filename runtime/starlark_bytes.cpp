@@ -240,6 +240,25 @@ starlark_obj* starlark_bytes::index(const starlark_obj& other, context& ctx, err
   return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(idx, 1));
 }
 
+starlark_obj* starlark_bytes::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
+  auto [i_start, i_end, i_stride, valid] = inner_slice_range(start, stop, stride, value.size(), error_callback);
+  if (!valid) {
+    return nullptr;
+  }
+
+  decltype(value) result;
+  if (i_stride > 0) {
+    for (auto i = i_start; i < i_end; i += i_stride) {
+      result += value[i];
+    }
+  } else {
+    for (auto i = i_start; i > i_end; i += i_stride) {
+      result += value[i];
+    }
+  }
+  return Arena::Create<starlark_bytes>(&ctx.arena(), result);
+}
+
 std::string_view starlark_bytes::as_string() const {
   return value;
 }

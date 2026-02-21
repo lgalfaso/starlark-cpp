@@ -515,4 +515,165 @@ TEST(StarlarkString, Count) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkString, SliceRange) {
+  Arena arena;
+  context ctx(arena);
+  auto test = [&ctx](const starlark_obj* start, const starlark_obj* end, const starlark_obj* stride,
+      std::string_view expected_value0,
+      std::string_view expected_value1,
+      std::string_view expected_value2,
+      std::string_view expected_value3,
+      std::string_view expected_value4,
+      std::string_view expected_value5) {
+    error_handler error_callback;
+    starlark_string str0(""sv);
+    starlark_string str1("a"sv);
+    starlark_string str2("ab"sv);
+    starlark_string str3("abc"sv);
+    starlark_string str4("abcd"sv);
+    starlark_string str5("abcde"sv);
+
+    auto* result0 = str0.slice_range(*start, *end, *stride, ctx, error_callback);
+    auto* result1 = str1.slice_range(*start, *end, *stride, ctx, error_callback);
+    auto* result2 = str2.slice_range(*start, *end, *stride, ctx, error_callback);
+    auto* result3 = str3.slice_range(*start, *end, *stride, ctx, error_callback);
+    auto* result4 = str4.slice_range(*start, *end, *stride, ctx, error_callback);
+    auto* result5 = str5.slice_range(*start, *end, *stride, ctx, error_callback);
+
+    ASSERT_NE(nullptr, result0);
+    ASSERT_NE(nullptr, result1);
+    ASSERT_NE(nullptr, result2);
+    ASSERT_NE(nullptr, result3);
+    ASSERT_NE(nullptr, result4);
+    ASSERT_NE(nullptr, result5);
+    EXPECT_EQ(expected_value0, result0->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value1, result1->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value2, result2->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value3, result3->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value4, result4->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_EQ(expected_value5, result5->str()) << "Start: " << start->str() << ", end: " << end->str() << ", stride: " << stride->str() << "\n";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  /*
+  ```python
+  def tt(a):
+      if a == None:
+          return "ctx.none_value()"
+      if a == -1:
+          return "ctx.minus_one()"
+      if a == 0:
+          return "ctx.zero()"
+      if a == 1:
+          return "ctx.one()"
+
+  def rr(a, b, c):
+      return 'test({}, {}, {}, "{}", "{}", "{}", "{}", "{}", "{}");'.format(tt(a), tt(b), tt(c), *[str('abcde'[:x][a:b:c]) for x in range(6)])
+  "\n  ".join([rr(a,b,c) for a in (None, -1, 0, 1) for b in (None, -1, 0, 1) for c in (None, -1, 1)])
+  ```
+  */
+
+  test(ctx.none_value(), ctx.none_value(), ctx.none_value(), "", "a", "ab", "abc", "abcd", "abcde");
+  test(ctx.none_value(), ctx.none_value(), ctx.minus_one(), "", "a", "ba", "cba", "dcba", "edcba");
+  test(ctx.none_value(), ctx.none_value(), ctx.one(), "", "a", "ab", "abc", "abcd", "abcde");
+  test(ctx.none_value(), ctx.minus_one(), ctx.none_value(), "", "", "a", "ab", "abc", "abcd");
+  test(ctx.none_value(), ctx.minus_one(), ctx.minus_one(), "", "", "", "", "", "");
+  test(ctx.none_value(), ctx.minus_one(), ctx.one(), "", "", "a", "ab", "abc", "abcd");
+  test(ctx.none_value(), ctx.zero(), ctx.none_value(), "", "", "", "", "", "");
+  test(ctx.none_value(), ctx.zero(), ctx.minus_one(), "", "", "b", "cb", "dcb", "edcb");
+  test(ctx.none_value(), ctx.zero(), ctx.one(), "", "", "", "", "", "");
+  test(ctx.none_value(), ctx.one(), ctx.none_value(), "", "a", "a", "a", "a", "a");
+  test(ctx.none_value(), ctx.one(), ctx.minus_one(), "", "", "", "c", "dc", "edc");
+  test(ctx.none_value(), ctx.one(), ctx.one(), "", "a", "a", "a", "a", "a");
+  test(ctx.minus_one(), ctx.none_value(), ctx.none_value(), "", "a", "b", "c", "d", "e");
+  test(ctx.minus_one(), ctx.none_value(), ctx.minus_one(), "", "a", "ba", "cba", "dcba", "edcba");
+  test(ctx.minus_one(), ctx.none_value(), ctx.one(), "", "a", "b", "c", "d", "e");
+  test(ctx.minus_one(), ctx.minus_one(), ctx.none_value(), "", "", "", "", "", "");
+  test(ctx.minus_one(), ctx.minus_one(), ctx.minus_one(), "", "", "", "", "", "");
+  test(ctx.minus_one(), ctx.minus_one(), ctx.one(), "", "", "", "", "", "");
+  test(ctx.minus_one(), ctx.zero(), ctx.none_value(), "", "", "", "", "", "");
+  test(ctx.minus_one(), ctx.zero(), ctx.minus_one(), "", "", "b", "cb", "dcb", "edcb");
+  test(ctx.minus_one(), ctx.zero(), ctx.one(), "", "", "", "", "", "");
+  test(ctx.minus_one(), ctx.one(), ctx.none_value(), "", "a", "", "", "", "");
+  test(ctx.minus_one(), ctx.one(), ctx.minus_one(), "", "", "", "c", "dc", "edc");
+  test(ctx.minus_one(), ctx.one(), ctx.one(), "", "a", "", "", "", "");
+  test(ctx.zero(), ctx.none_value(), ctx.none_value(), "", "a", "ab", "abc", "abcd", "abcde");
+  test(ctx.zero(), ctx.none_value(), ctx.minus_one(), "", "a", "a", "a", "a", "a");
+  test(ctx.zero(), ctx.none_value(), ctx.one(), "", "a", "ab", "abc", "abcd", "abcde");
+  test(ctx.zero(), ctx.minus_one(), ctx.none_value(), "", "", "a", "ab", "abc", "abcd");
+  test(ctx.zero(), ctx.minus_one(), ctx.minus_one(), "", "", "", "", "", "");
+  test(ctx.zero(), ctx.minus_one(), ctx.one(), "", "", "a", "ab", "abc", "abcd");
+  test(ctx.zero(), ctx.zero(), ctx.none_value(), "", "", "", "", "", "");
+  test(ctx.zero(), ctx.zero(), ctx.minus_one(), "", "", "", "", "", "");
+  test(ctx.zero(), ctx.zero(), ctx.one(), "", "", "", "", "", "");
+  test(ctx.zero(), ctx.one(), ctx.none_value(), "", "a", "a", "a", "a", "a");
+  test(ctx.zero(), ctx.one(), ctx.minus_one(), "", "", "", "", "", "");
+  test(ctx.zero(), ctx.one(), ctx.one(), "", "a", "a", "a", "a", "a");
+  test(ctx.one(), ctx.none_value(), ctx.none_value(), "", "", "b", "bc", "bcd", "bcde");
+  test(ctx.one(), ctx.none_value(), ctx.minus_one(), "", "a", "ba", "ba", "ba", "ba");
+  test(ctx.one(), ctx.none_value(), ctx.one(), "", "", "b", "bc", "bcd", "bcde");
+  test(ctx.one(), ctx.minus_one(), ctx.none_value(), "", "", "", "b", "bc", "bcd");
+  test(ctx.one(), ctx.minus_one(), ctx.minus_one(), "", "", "", "", "", "");
+  test(ctx.one(), ctx.minus_one(), ctx.one(), "", "", "", "b", "bc", "bcd");
+  test(ctx.one(), ctx.zero(), ctx.none_value(), "", "", "", "", "", "");
+  test(ctx.one(), ctx.zero(), ctx.minus_one(), "", "", "b", "b", "b", "b");
+  test(ctx.one(), ctx.zero(), ctx.one(), "", "", "", "", "", "");
+  test(ctx.one(), ctx.one(), ctx.none_value(), "", "", "", "", "", "");
+  test(ctx.one(), ctx.one(), ctx.minus_one(), "", "", "", "", "", "");
+  test(ctx.one(), ctx.one(), ctx.one(), "", "", "", "", "", "");
+
+}
+
+TEST(StarlarkString, SliceRangeBoolStart) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_string str("abcdef"sv);
+
+  auto* result = str.slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("abcdef", str.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+}
+
+TEST(StarlarkString, SliceRangeBoolEnd) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_string str("abcdef"sv);
+
+  auto* result = str.slice_range(*ctx.none_value(), *ctx.false_value(), *ctx.none_value(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("abcdef", str.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+}
+
+TEST(StarlarkString, SliceRangeBoolStride) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_string str("abcdef"sv);
+
+  auto* result = str.slice_range(*ctx.none_value(), *ctx.none_value(), *ctx.false_value(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("abcdef", str.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+}
+
+TEST(StarlarkString, SliceRangeZeroStride) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_string str("abcdef"sv);
+
+  auto* result = str.slice_range(*ctx.none_value(), *ctx.none_value(), *ctx.zero(), ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_EQ("abcdef", str.str());
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
+}
+
 }  // namespace

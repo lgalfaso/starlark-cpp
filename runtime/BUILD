@@ -93,6 +93,7 @@ cc_library(
         ":error_fn",
         ":error_messages",
         ":levenshtein",
+        ":starlark_types",
         "//bigint:number",
         "//containers:linked_hash_map",
         "@protobuf",
@@ -490,6 +491,20 @@ cc_test(
     deps = [
         ":starlark_function_builder_impl",
         ":starlark_none",
+        ":starlark_numeric_impl",
+        ":starlark_object_impl",
+        ":starlark_range",
+        ":starlark_testing",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "starlark_range_slice_test",
+    size = "small",
+    srcs = ["starlark_range_slice_test.cpp"],
+    deps = [
+        ":starlark_function_builder_impl",
         ":starlark_numeric_impl",
         ":starlark_object_impl",
         ":starlark_range",

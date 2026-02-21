@@ -72,6 +72,7 @@ std::string error_attribute_string(std::string_view type);
 std::string error_expect_character(std::string_view fn_name, std::string_view type, int64_t length);
 std::string error_expect_one_character_or_one_byte(std::string_view fn_name, std::string_view type);
 std::string error_argument_non_zero(std::string_view fn_name, int64_t arg_pos);
+std::string error_step_non_zero();
 
 std::string error_op_in_loop(std::string_view type, std::string_view op);
 std::string error_mutate_frozen_value(std::string_view type);

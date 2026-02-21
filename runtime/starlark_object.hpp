@@ -199,6 +199,7 @@ class starlark_obj {
   virtual starlark_obj* dot(std::string_view field_name, context& ctx, error_fn& error_callback);
   virtual void dot_assign(std::string_view field_name, starlark_obj& element, error_fn& error_callback);
 
+  virtual starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const;
   virtual void slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
   virtual void slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
   virtual void slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
@@ -229,6 +230,7 @@ class starlark_obj {
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
   int64_t inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
+  std::tuple<int64_t, int64_t, int64_t, bool> inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const;
 
  private:
   static const std::map<std::string, fn*, std::less<>>& method_refs();
@@ -250,6 +252,7 @@ bool one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::n
 bool n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name);
 bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
 bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
+bool to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
 
 }  // namespace runtime
 }  // namespace starlark

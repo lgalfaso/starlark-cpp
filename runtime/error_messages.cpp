@@ -229,6 +229,10 @@ std::string error_argument_non_zero(std::string_view fn_name, int64_t arg_pos) {
   return std::format("ValueError: {}() arg {} must not be zero", fn_name, arg_pos);
 }
 
+std::string error_step_non_zero() {
+  return "ValueError: slice step cannot be zero";
+}
+
 std::string error_op_in_loop(std::string_view type, std::string_view op) {
   return std::format("Error in {}: {} value is temporarily immutable due to active for-loop iteration", op, type);
 }
