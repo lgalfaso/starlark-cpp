@@ -619,13 +619,24 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       ASSIGN_RANGE(OpCode::kAssignSliceRangeLessLessEquals, slice_range_less_less_equals_assign)
       ASSIGN_RANGE(OpCode::kAssignSliceRangeGreaterGreaterEquals, slice_range_greater_greater_equals_assign)
 #undef ASSIGN_RANGE
+      case OpCode::kSliceRange: {
+        assert(stack.size() >= 4);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.back() = element->slice_range(*start, *stop, *stride, ctx, error_callback);
+        break;
+      }
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
       case OpCode::kFail:
         return nullptr;
       case OpCode::kLoadModule:
-      case OpCode::kSliceRange:
       case OpCode::kReturn:
       case OpCode::kMakeFunction:
       case OpCode::kSetDefaultValues:
