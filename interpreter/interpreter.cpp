@@ -661,7 +661,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kFail:
         return nullptr;
       case OpCode::kLoadModule:
-      case OpCode::kSetDefaultValues:
 
       case OpCode::OP_CODE_NOT_SET:
         // TODO(lmirelmann): Implement the other instructions.

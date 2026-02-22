@@ -2,25 +2,21 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "print" } }
   op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo1" symbol: "foo2" symbol: "foo3" symbol: "foo4" symbol: "foo5" symbol: "foo6" symbol: "foo7" } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_function { entrypoint: 1 } }
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { make_function { entrypoint: 2 } }
+  op_code { make_function { entrypoint: 2 default_values_count: 0 } }
   op_code { store { frame: 1 pos_in_frame: 1 } }
-  op_code { make_function { entrypoint: 3 } }
+  op_code { make_function { entrypoint: 3 default_values_count: 0 } }
   op_code { store { frame: 1 pos_in_frame: 2 } }
   op_code { const_int { value: 1 } }
-  op_code { make_tuple { number_of_elements: 1 } }
-  op_code { make_function { entrypoint: 4 } }
-  op_code { set_default_values { } }
+  op_code { make_function { entrypoint: 4 default_values_count: 1 } }
   op_code { store { frame: 1 pos_in_frame: 3 } }
-  op_code { make_function { entrypoint: 5 } }
+  op_code { make_function { entrypoint: 5 default_values_count: 0 } }
   op_code { store { frame: 1 pos_in_frame: 4 } }
-  op_code { make_function { entrypoint: 6 } }
+  op_code { make_function { entrypoint: 6 default_values_count: 0 } }
   op_code { store { frame: 1 pos_in_frame: 5 } }
   op_code { const_int: { value: 2 } }
-  op_code { make_tuple: { number_of_elements: 1 } }
-  op_code { make_function: { entrypoint: 7 } }
-  op_code { set_default_values: { } }
+  op_code { make_function: { entrypoint: 7 default_values_count: 1 } }
   op_code { store { frame: 1 pos_in_frame: 6 } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

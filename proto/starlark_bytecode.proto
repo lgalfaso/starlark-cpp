@@ -128,7 +128,6 @@ message OpCode {
     Return return = 62;
 
     MakeFunction make_function = 63;
-    SetDefaultValues set_default_values = 64;
 
     CreateFrame create_frame = 65;
     PopFrame pop_frame = 66;
@@ -249,9 +248,8 @@ message Return {}
 
 message MakeFunction {
   uint32 entrypoint = 1;
+  uint32 default_values_count = 2;
 }
-
-message SetDefaultValues {}
 
 message CreateFrame {
   BlockType block_type = 1;

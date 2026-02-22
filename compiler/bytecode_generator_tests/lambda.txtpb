@@ -2,19 +2,17 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }                         #  0
   op_code { create_frame { block_type: MODULE_BLOCK } }                              #  1
   op_code { create_frame { block_type: FILE_BLOCK } }                                #  2
-  op_code { make_function { entrypoint: 1 } }                                        #  3
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }                #  3
   op_code { pop { } }                                                                #  4
-  op_code { make_function { entrypoint: 2 } }                                        #  5
+  op_code { make_function { entrypoint: 2 default_values_count: 0 } }                #  5
   op_code { pop { } }                                                                #  6
   op_code { const_int { value: 1 } }                                                 #  7
-  op_code { make_tuple { number_of_elements: 1 } }                                   #  8
-  op_code { make_function { entrypoint: 3 } }                                        #  9
-  op_code { set_default_values { } }                                                 # 10
-  op_code { pop { } }                                                                # 11
+  op_code { make_function { entrypoint: 3 default_values_count: 1 } }                #  8
+  op_code { pop { } }                                                                #  9
+  op_code { pop_frame { } }                                                          # 10
+  op_code { pop_frame { } }                                                          # 11
   op_code { pop_frame { } }                                                          # 12
-  op_code { pop_frame { } }                                                          # 13
-  op_code { pop_frame { } }                                                          # 14
-  op_code { end { } }                                                                # 15
+  op_code { end { } }                                                                # 13
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK } }                            #  0

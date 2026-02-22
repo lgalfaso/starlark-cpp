@@ -2,10 +2,8 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_function { entrypoint: 1 } }
-  op_code { make_tuple { number_of_elements: 1 } }
-  op_code { make_function { entrypoint: 2 } }
-  op_code { set_default_values { } }
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }
+  op_code { make_function { entrypoint: 2 default_values_count: 1 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

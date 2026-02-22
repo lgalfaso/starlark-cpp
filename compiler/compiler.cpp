@@ -868,16 +868,9 @@ void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Par
     }
   }
 
-  // Maybe prepare the default arguments.
-  if (arguments_with_defaults_count > 0) {
-    mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(arguments_with_defaults_count);
-  }
   auto* make_function = mutable_block()->add_op_code()->mutable_make_function();
+  make_function->set_default_values_count(arguments_with_defaults_count);
 
-  // Maybe store the default arguments.
-  if (arguments_with_defaults_count > 0) {
-    mutable_block()->add_op_code()->mutable_set_default_values();
-  }
   int block_for_function = output.block_size();
   make_function->set_entrypoint(block_for_function);
   blocks.push_back(block_for_function);
