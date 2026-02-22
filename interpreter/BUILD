@@ -18,8 +18,12 @@ cc_library(
     hdrs = ["function.hpp"],
     deps = [
         ":frame",
+        "//proto:starlark_bytecode_cc_proto",
+        "//runtime:starlark_dictionary",
         "//runtime:starlark_function",
         "//runtime:starlark_object",
+        "//runtime:starlark_string",
+        "//runtime:starlark_tuple",
     ],
 )
 

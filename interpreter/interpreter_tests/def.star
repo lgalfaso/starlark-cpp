@@ -10,7 +10,71 @@ def bar():
 
 c = bar();
 
+def man(a, b):
+  return a + b
+
+def shell(a, b = 10):
+  return a + b
+
+def rock(a, b = []):
+  b.append(a)
+  return b
+
+def make_tuple(*args):
+  return args
+
+def make_dict(**kwargs):
+  return kwargs
+
 assert_eq(foo(), "a")
 assert_eq(c(), ['x'])
 assert_eq(c(), ['x', 'x'])
+assert_eq(man(1, 2), 3)
+assert_eq(man(1, b = 3), 4)
+assert_eq(man(a = 4, b = 7), 11)
+assert_eq(shell(1, 2), 3)
+assert_eq(shell(1, b = 3), 4)
+assert_eq(shell(4), 14)
+assert_eq(shell(a = 6), 16)
+assert_eq(rock(1), [1])
+assert_eq(rock(2), [1, 2])
+assert_eq(rock(3, []), [3])
+assert_eq(make_tuple(1, 2, 3, 4), (1, 2, 3, 4))
+assert_eq(make_dict(a = 1, b = 2, c = 3, d = 4), {'a': 1, 'b': 2, 'c': 3, 'd': 4})
+
+
+assert_fail("""
+def foo():
+  pass
+
+foo(1)
+""", error_message = "TypeError: foo() takes 0 positional arguments but 1 were given")
+
+assert_fail("""
+def foo(a):
+  pass
+
+foo(1, a = 2)
+""", error_message = "TypeError: foo() got multiple values for argument 'a'")
+
+assert_fail("""
+def foo(a):
+  pass
+
+foo(b = 2)
+""", error_message = "TypeError: foo() got an unexpected keyword argument 'b'")
+
+assert_fail("""
+def foo(a):
+  pass
+
+foo()
+""", error_message = "TypeError: foo() missing required positional argument 'a'")
+
+assert_fail("""
+def foo(*, a):
+  pass
+
+foo()
+""", error_message = "TypeError: foo() missing required keyword-only argument 'a'")
 

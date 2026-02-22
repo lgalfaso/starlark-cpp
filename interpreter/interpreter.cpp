@@ -272,6 +272,9 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
             result = create_frame(ctx.arena(), &op_code.create_frame().symbol());
             frame_stacks.back().push_back(result);
             break;
+          case BlockType::FUNCTION_BLOCK:
+            // This frame will be created by the function call.
+            break;
           default:
             frame_stacks.back().push_back(create_frame(ctx.arena(), &op_code.create_frame().symbol()));
             break;
@@ -633,9 +636,19 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       }
       case OpCode::kMakeFunction: {
+        assert(stack.size() >= op_code.make_function().default_values_count());
+        std::vector<starlark_obj*> default_values;
+        default_values.reserve(op_code.make_function().default_values_count());
+        for (int i = op_code.make_function().default_values_count(); i > 0; --i) {
+          default_values.push_back(stack[stack.size() - i]);
+        }
+        stack.resize(stack.size() - op_code.make_function().default_values_count(), nullptr);
         stack.push_back(Arena::Create<interpreter_function>(
             &ctx.arena(),
             op_code.make_function().entrypoint(),
+            std::move(default_values),
+            &starlark_program->block(op_code.make_function().entrypoint()).function_signature(),
+            &starlark_program->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
             frame_stacks,
             call_stack,
             instruction_ptr,
