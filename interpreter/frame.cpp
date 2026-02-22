@@ -2,6 +2,8 @@
 
 #include "interpreter/frame.hpp"
 
+#include <string>
+
 using ::google::protobuf::RepeatedPtrField;
 
 namespace starlark {

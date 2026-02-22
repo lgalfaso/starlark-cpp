@@ -3,6 +3,8 @@
 #ifndef INTERPRETER_INTERPRETER_HPP_
 #define INTERPRETER_INTERPRETER_HPP_
 
+#include <functional>
+#include <map>
 #include <string>
 #include <vector>
 

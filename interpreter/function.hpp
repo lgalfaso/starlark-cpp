@@ -3,6 +3,8 @@
 #ifndef INTERPRETER_FUNCTION_HPP_
 #define INTERPRETER_FUNCTION_HPP_
 
+#include <vector>
+
 #include "interpreter/frame.hpp"
 #include "runtime/starlark_function.hpp"
 

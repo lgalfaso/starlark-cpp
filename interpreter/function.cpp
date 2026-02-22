@@ -2,6 +2,9 @@
 
 #include "interpreter/function.hpp"
 
+#include <utility>
+#include <vector>
+
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_obj;

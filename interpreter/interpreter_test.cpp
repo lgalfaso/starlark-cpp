@@ -145,7 +145,7 @@ TEST(Interpreter, TestCase) {
   custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
   custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
 
-  frame* result = runner.run(starlark_code, options{ .allow_top_level_rebinding = true, .allow_top_level_for = true, }, custom_binding, arena, logging);
+  frame* result = runner.run(starlark_code, options{}, custom_binding, arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
 }
 
