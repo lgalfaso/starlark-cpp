@@ -19,6 +19,6 @@ block {
   op_code { store { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { return { } }
-  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
+  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo" }
 }
 

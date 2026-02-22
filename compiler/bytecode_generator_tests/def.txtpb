@@ -27,13 +27,13 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK } }
   op_code { const_int { value: 1 } }
   op_code { return { } }
-  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
+  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo1" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK } }
   op_code { const_none { } }
   op_code { return { } }
-  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
+  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo2" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
@@ -41,7 +41,7 @@ block {
   op_code { const_int { value: 1 } }
   op_code { binary_plus { } }
   op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
+  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo3" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
@@ -49,7 +49,7 @@ block {
   op_code { load { frame: 0 pos_in_frame: 1 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 }
+  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo4" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
@@ -57,7 +57,7 @@ block {
   op_code { load { frame: 0 pos_in_frame: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } }
   op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 0 }
+  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo5" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
@@ -65,7 +65,7 @@ block {
   op_code { load { frame: 0 pos_in_frame: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: false has_star_star_argument: true keyword_only_parameter_count: 0 }
+  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: false has_star_star_argument: true keyword_only_parameter_count: 0 fn_name: "foo6" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" symbol: "c" } }
@@ -77,5 +77,5 @@ block {
   op_code { pop { } }
   op_code { const_none { } }
   op_code { return { } }
-  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } param { name: "c" pos { frame: 0 pos_in_frame: 2 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 2 }
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } param { name: "c" pos { frame: 0 pos_in_frame: 2 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 2 fn_name: "foo7" }
 }

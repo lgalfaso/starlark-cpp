@@ -135,7 +135,7 @@ class bytecode_generator : public ast_listener_base {
   std::vector<std::vector<uint64_t>> comprehension_comp_clause;
 
   void fix_comp_clause(const RepeatedPtrField<CompClause>& clauses);
-  void mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
+  void mid_def_or_lambda_expression(std::string_view fn_name, const RepeatedPtrField<Parameter>* params);
   void exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
   Block* mutable_block();
   const Block& block() const;
@@ -801,7 +801,7 @@ void bytecode_generator::exit_return_statement(const ReturnStmt* return_statemen
 }
 
 void bytecode_generator::mid_lambda_expression(const LambdaExpr* lambda_expression) {
-  mid_def_or_lambda_expression(&lambda_expression->parameter());
+  mid_def_or_lambda_expression("<lambda>", &lambda_expression->parameter());
   auto* function_block = mutable_block()->add_op_code()->mutable_create_frame();
   function_block->set_block_type(BlockType::FUNCTION_BLOCK);
   for (const auto& symbol : lambda_expression->function_binding()) {
@@ -815,7 +815,7 @@ void bytecode_generator::exit_lambda_expression(const LambdaExpr* lambda_express
 }
 
 void bytecode_generator::mid_def_statement(const DefStmt* def_statement) {
-  mid_def_or_lambda_expression(&def_statement->parameter());
+  mid_def_or_lambda_expression(def_statement->function_name().nfkc_name(), &def_statement->parameter());
   auto* function_block = mutable_block()->add_op_code()->mutable_create_frame();
   function_block->set_block_type(BlockType::FUNCTION_BLOCK);
   for (const auto& symbol : def_statement->function_binding()) {
@@ -835,7 +835,7 @@ void bytecode_generator::exit_def_statement(const DefStmt* def_statement) {
   id_op->set_pos_in_frame(def_statement->function_name().pos_in_frame());
 }
 
-void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params) {
+void bytecode_generator::mid_def_or_lambda_expression(std::string_view fn_name, const RepeatedPtrField<Parameter>* params) {
   // Capture the function signature.
   int arguments_with_defaults_count = 0;
   bool has_star_argument = false;
@@ -876,6 +876,7 @@ void bytecode_generator::mid_def_or_lambda_expression(const RepeatedPtrField<Par
   blocks.push_back(block_for_function);
   output.add_block();
   auto* function_signature = mutable_block()->mutable_function_signature();
+  function_signature->set_fn_name(fn_name);
   function_signature->set_has_star_argument(has_star_argument);
   function_signature->set_has_star_star_argument(has_star_star_argument);
   function_signature->set_keyword_only_parameter_count(keyword_only_parameter_count);

@@ -275,6 +275,7 @@ message FunctionSignature {
   bool has_star_argument = 2;
   bool has_star_star_argument = 3;
   uint64 keyword_only_parameter_count = 4;
+  string fn_name = 5;
   message Param {
     string name = 1;
     PosInFrame pos = 2;
