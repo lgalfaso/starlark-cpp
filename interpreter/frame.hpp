@@ -18,7 +18,6 @@ namespace interpreter {
 struct frame {
   frame(std::size_t, const google::protobuf::RepeatedPtrField<std::string>* names);
 
-  frame* parent_frame;
   std::vector<starlark::runtime::starlark_obj*> elements;
   const google::protobuf::RepeatedPtrField<std::string>* names;
   std::vector<starlark::runtime::starlark_iterator*> iterators;
