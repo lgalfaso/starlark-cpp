@@ -3,10 +3,33 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
+    name = "frame",
+    srcs = ["frame.cpp"],
+    hdrs = ["frame.hpp"],
+    deps = [
+        "//runtime:starlark_object",
+        "@protobuf",
+    ],
+)
+
+cc_library(
+    name = "function",
+    srcs = ["function.cpp"],
+    hdrs = ["function.hpp"],
+    deps = [
+        ":frame",
+        "//runtime:starlark_function",
+        "//runtime:starlark_object",
+    ],
+)
+
+cc_library(
     name = "interpreter",
     srcs = ["interpreter.cpp"],
     hdrs = ["interpreter.hpp"],
     deps = [
+        ":frame",
+        ":function",
         "//compiler",
         "//runtime:starlark_bigint",
         "//runtime:starlark_bool",

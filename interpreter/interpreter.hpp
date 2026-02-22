@@ -3,15 +3,11 @@
 #ifndef INTERPRETER_INTERPRETER_HPP_
 #define INTERPRETER_INTERPRETER_HPP_
 
-#include <functional>
-#include <map>
 #include <string>
-#include <string_view>
 #include <vector>
 
-#include "google/protobuf/arena.h"
-#include "google/protobuf/repeated_field.h"
 #include "grammar/options.hpp"
+#include "interpreter/frame.hpp"
 #include "logging/logging.hpp"
 #include "runtime/starlark_object.hpp"
 
@@ -19,15 +15,6 @@
 
 namespace starlark {
 namespace interpreter {
-
-struct frame {
-  frame(std::size_t, const google::protobuf::RepeatedPtrField<std::string>* names);
-
-  frame* parent_frame;
-  std::vector<starlark::runtime::starlark_obj*> elements;
-  const google::protobuf::RepeatedPtrField<std::string>* names;
-  std::vector<starlark::runtime::starlark_iterator*> iterators;
-};
 
 class interpreter {
  public:

@@ -12,6 +12,8 @@
 
 #include "bigint/number.hpp"
 #include "compiler/compiler.hpp"
+#include "interpreter/frame.hpp"
+#include "interpreter/function.hpp"
 #include "runtime/error_fn.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
@@ -117,7 +119,7 @@ class error_handler : public error_fn {
 
 frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
   std::vector<starlark_obj*> stack;
-  std::vector<frame*> frame_stack;
+  std::vector<std::vector<frame*>> frame_stacks;
   std::vector<std::pair<int, int>> call_stack;
   int instruction_ptr = 0;
   int block_ptr = 0;
@@ -203,18 +205,18 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       }
       case OpCode::kStore: {
         assert(!stack.empty());
-        assert(frame_stack.size() > op_code.store().frame());
-        assert(frame_stack[frame_stack.size() - 1 - op_code.store().frame()]->elements.size() > op_code.store().pos_in_frame());
-        frame_stack[frame_stack.size() - 1 - op_code.store().frame()]->elements[op_code.store().pos_in_frame()] = stack.back();
+        assert(frame_stacks.back().size() > op_code.store().frame());
+        assert(frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.store().frame()]->elements.size() > op_code.store().pos_in_frame());
+        frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.store().frame()]->elements[op_code.store().pos_in_frame()] = stack.back();
         stack.pop_back();
         break;
       }
       case OpCode::kLoad: {
-        assert(frame_stack.size() > op_code.load().frame());
-        assert(frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->elements.size() > op_code.load().pos_in_frame());
-        auto* value = frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->elements[op_code.load().pos_in_frame()];
+        assert(frame_stacks.back().size() > op_code.load().frame());
+        assert(frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.load().frame()]->elements.size() > op_code.load().pos_in_frame());
+        auto* value = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.load().frame()]->elements[op_code.load().pos_in_frame()];
         if (value == nullptr) {
-          const auto& name = frame_stack[frame_stack.size() - 1 - op_code.load().frame()]->names->Get(op_code.load().pos_in_frame());
+          const auto& name = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.load().frame()]->names->Get(op_code.load().pos_in_frame());
           error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));
           break;
         }
@@ -250,7 +252,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kCreateFrame:
         switch (op_code.create_frame().block_type()) {
           case BlockType::PREDECLARED_BLOCK: {
-            assert(frame_stack.empty());
+            assert(frame_stacks.empty());
             auto* global_frame = create_frame(ctx.arena(), op_code.create_frame().symbol().size(), nullptr, &op_code.create_frame().symbol());
             int count = 0;
             for (const auto& symbol : op_code.create_frame().symbol()) {
@@ -263,21 +265,22 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
                 count++;
               }
             }
-            frame_stack.push_back(global_frame);
+            frame_stacks.push_back({});
+            frame_stacks.back().push_back(global_frame);
             break;
           }
           case BlockType::MODULE_BLOCK:
             assert(result == nullptr);
-            result = create_frame(ctx.arena(), op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol());
-            frame_stack.push_back(result);
+            result = create_frame(ctx.arena(), op_code.create_frame().symbol().size(), frame_stacks.back().back(), &op_code.create_frame().symbol());
+            frame_stacks.back().push_back(result);
             break;
           default:
-            frame_stack.push_back(create_frame(ctx.arena(), op_code.create_frame().symbol().size(), frame_stack.back(), &op_code.create_frame().symbol()));
+            frame_stacks.back().push_back(create_frame(ctx.arena(), op_code.create_frame().symbol().size(), frame_stacks.back().back(), &op_code.create_frame().symbol()));
             break;
         }
         break;
       case OpCode::kPopFrame:
-        frame_stack.pop_back();
+        frame_stacks.back().pop_back();
         break;
       case OpCode::kPop:
         stack.pop_back();
@@ -443,15 +446,15 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       }
       case OpCode::kGetIterator:
-        assert(!frame_stack.empty());
+        assert(!frame_stacks.back().empty());
         assert(!stack.empty());
-        frame_stack.back()->iterators.push_back(stack.back()->get_iterator(true, ctx, error_callback));
+        frame_stacks.back().back()->iterators.push_back(stack.back()->get_iterator(true, ctx, error_callback));
         stack.pop_back();
         break;
       case OpCode::kForIterator: {
-        assert(!frame_stack.empty());
-        assert(!frame_stack.back()->iterators.empty());
-        auto* it = frame_stack.back()->iterators.back();
+        assert(!frame_stacks.back().empty());
+        assert(!frame_stacks.back().back()->iterators.empty());
+        auto* it = frame_stacks.back().back()->iterators.back();
         if (it->has_next()) {
           stack.push_back(it->next());
         } else {
@@ -460,10 +463,10 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       }
       case OpCode::kEndIterator:
-        assert(!frame_stack.empty());
-        assert(!frame_stack.back()->iterators.empty());
-        frame_stack.back()->iterators.back()->end_iterator();
-        frame_stack.back()->iterators.pop_back();
+        assert(!frame_stacks.back().empty());
+        assert(!frame_stacks.back().back()->iterators.empty());
+        frame_stacks.back().back()->iterators.back()->end_iterator();
+        frame_stacks.back().back()->iterators.pop_back();
         break;
       case OpCode::kGoto:
         instruction_ptr = op_code.goto_().address();
@@ -502,18 +505,18 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
 #define COMPOUND_ASSIGN(op, op_method, method)                                                                                                                           \
       case op: {                                                                                                                                                         \
         assert(stack.size() >= 1);                                                                                                                                       \
-        assert(frame_stack.size() > op_code.op_method().frame());                                                                                                        \
-        assert(frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->elements.size() > op_code.op_method().pos_in_frame());                                 \
-        auto* value = frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()];                                   \
+        assert(frame_stacks.back().size() > op_code.op_method().frame());                                                                                                \
+        assert(frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements.size() > op_code.op_method().pos_in_frame());                 \
+        auto* value = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()];                   \
         if (value == nullptr) {                                                                                                                                          \
-          const auto& name = frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->names->Get(op_code.op_method().pos_in_frame());                          \
+          const auto& name = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->names->Get(op_code.op_method().pos_in_frame());          \
           error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));                   \
           break;                                                                                                                                                         \
         }                                                                                                                                                                \
         auto* element = stack.back();                                                                                                                                    \
         stack.pop_back();                                                                                                                                                \
         auto* result = value->method(*element, ctx, error_callback);                                                                                                     \
-        frame_stack[frame_stack.size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()] = result;                                        \
+        frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()] = result;                        \
         break;                                                                                                                                                           \
       }
       COMPOUND_ASSIGN(OpCode::kAssignPlusEquals, assign_plus_equals, plus_equals_assign)
@@ -631,14 +634,35 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.back() = element->slice_range(*start, *stop, *stride, ctx, error_callback);
         break;
       }
+      case OpCode::kMakeFunction: {
+        stack.push_back(Arena::Create<interpreter_function>(
+            &ctx.arena(),
+            op_code.make_function().entrypoint(),
+            frame_stacks,
+            call_stack,
+            instruction_ptr,
+            block_ptr));
+        break;
+      }
+      case OpCode::kReturn: {
+        assert(frame_stacks.size() >= 2);
+        assert(call_stack.size() >= 1);
+        assert(stack.size() >= 2);
+        frame_stacks.pop_back();
+        block_ptr = call_stack.back().first;
+        instruction_ptr = call_stack.back().second;
+        call_stack.pop_back();
+        auto* result = stack.back();
+        stack.pop_back();
+        stack.back() = result;
+        break;
+      }
       case OpCode::kEnd:
         assert(stack.empty());
         return result;
       case OpCode::kFail:
         return nullptr;
       case OpCode::kLoadModule:
-      case OpCode::kReturn:
-      case OpCode::kMakeFunction:
       case OpCode::kSetDefaultValues:
 
       case OpCode::OP_CODE_NOT_SET:
@@ -651,8 +675,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
 }
 
 }  // namespace
-
-frame::frame(std::size_t size, const RepeatedPtrField<std::string>* names) : elements(size), names(names) {}
 
 // TODO(lmirelmann): There has to be a way to define the loader.
 interpreter::interpreter() {}
