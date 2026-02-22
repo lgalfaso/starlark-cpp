@@ -9,7 +9,7 @@ using ::google::protobuf::RepeatedPtrField;
 namespace starlark {
 namespace interpreter {
 
-frame::frame(std::size_t size, const RepeatedPtrField<std::string>* names) : elements(size), names(names) {}
+frame::frame(const RepeatedPtrField<std::string>* names) : elements(names->size()), names(names) {}
 
 }  // namespace interpreter
 }  // namespace starlark

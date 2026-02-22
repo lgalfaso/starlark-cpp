@@ -91,8 +91,8 @@ namespace interpreter {
 
 namespace {
 
-frame* create_frame(Arena& arena, std::size_t size, const RepeatedPtrField<std::string>* names) {
-  return Arena::Create<frame>(&arena, size, names);
+frame* create_frame(Arena& arena, const RepeatedPtrField<std::string>* names) {
+  return Arena::Create<frame>(&arena, names);
 }
 
 class error_handler : public error_fn {
@@ -251,7 +251,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         switch (op_code.create_frame().block_type()) {
           case BlockType::PREDECLARED_BLOCK: {
             assert(frame_stacks.empty());
-            auto* global_frame = create_frame(ctx.arena(), op_code.create_frame().symbol().size(), &op_code.create_frame().symbol());
+            auto* global_frame = create_frame(ctx.arena(), &op_code.create_frame().symbol());
             int count = 0;
             for (const auto& symbol : op_code.create_frame().symbol()) {
               auto pos = global_context.find(symbol);
@@ -269,11 +269,11 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
           }
           case BlockType::MODULE_BLOCK:
             assert(result == nullptr);
-            result = create_frame(ctx.arena(), op_code.create_frame().symbol().size(), &op_code.create_frame().symbol());
+            result = create_frame(ctx.arena(), &op_code.create_frame().symbol());
             frame_stacks.back().push_back(result);
             break;
           default:
-            frame_stacks.back().push_back(create_frame(ctx.arena(), op_code.create_frame().symbol().size(), &op_code.create_frame().symbol()));
+            frame_stacks.back().push_back(create_frame(ctx.arena(), &op_code.create_frame().symbol()));
             break;
         }
         break;
