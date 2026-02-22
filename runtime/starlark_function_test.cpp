@@ -1647,6 +1647,7 @@ TEST(StarlarkGetattr, NamedArguments) {
   named_args.insert(s_one, ctx.one());
 
   auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: getattr() takes no keyword arguments", error_callback.messages[0]);
 }
