@@ -274,6 +274,30 @@ std::string error_in_element(std::string_view type, std::string_view actual, std
   return std::format("TypeError: 'in <{}>' requires {} as left operand, not {}", type, expected, actual);
 }
 
+std::string_view error_incomplete_format() {
+  return "ValueError: incomplete format";
+}
+
+std::string_view error_not_enough_arguments_for_format_string() {
+  return "TypeError: not enough arguments for format string";
+}
+
+std::string_view error_not_all_arguments_converted_during_string_formatting() {
+  return "TypeError: not all arguments converted during string formatting";
+}
+
+std::string error_unsupported_format_character(char format, std::size_t pos) {
+  return std::format("ValueError: unsupported format character '{}' (0x{:x}) at index {}", format, static_cast<int>(static_cast<unsigned char>(format)), pos);
+}
+
+std::string error_format_integer_is_required(char format, std::string_view type) {
+  return std::format("TypeError: %{} format: an integer is required, not {}", format, type);
+}
+
+std::string error_format_real_is_required(char format, std::string_view type) {
+  return std::format("TypeError: %{} format: a real number is required, not {}", format, type);
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

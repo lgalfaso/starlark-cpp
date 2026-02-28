@@ -278,6 +278,14 @@ starlark_obj* starlark_tuple::starlark_tuple_iterator::next() {
 
 void starlark_tuple::starlark_tuple_iterator::end_iterator() {}
 
+std::size_t starlark_tuple::size() const {
+  return values.size();
+}
+
+const starlark_obj* starlark_tuple::at(std::size_t pos) const {
+  return values[pos];
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

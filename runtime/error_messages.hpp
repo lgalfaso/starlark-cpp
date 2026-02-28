@@ -87,6 +87,12 @@ std::string error_unpack_too_few(int64_t expected, int64_t actual);
 std::string error_unpack_too_many(int64_t expected, int64_t actual);
 std::string error_in_element(std::string_view type, std::string_view actual, std::string_view expected);
 
+std::string_view error_incomplete_format();
+std::string_view error_not_enough_arguments_for_format_string();
+std::string_view error_not_all_arguments_converted_during_string_formatting();
+std::string error_unsupported_format_character(char c, std::size_t pos);
+std::string error_format_integer_is_required(char format, std::string_view type);
+std::string error_format_real_is_required(char format, std::string_view type);
 
 }  // namespace runtime
 }  // namespace starlark

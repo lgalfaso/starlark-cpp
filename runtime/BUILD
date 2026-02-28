@@ -556,6 +556,7 @@ cc_library(
         ":siphash",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_tuple",
         ":starlark_types",
         "//bigint:number",
         "//unicode:utf8_reader",

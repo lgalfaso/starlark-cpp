@@ -42,6 +42,9 @@ class starlark_tuple : public starlark_obj {
     std::vector<starlark_obj*>::iterator it;
   };
 
+  std::size_t size() const;
+  const starlark_obj* at(std::size_t pos) const;
+
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;

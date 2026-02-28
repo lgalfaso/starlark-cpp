@@ -1,4 +1,4 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2025-2026 Lucas Mirelmann
 
 #include "runtime/starlark_string.hpp"
 
@@ -16,6 +16,7 @@
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 #include "unicode/utf8_reader.hpp"
 
@@ -236,10 +237,294 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
   }
 }
 
+namespace {
+
+bool parse_interpolation(std::string_view format, std::vector<std::string>& parts, std::vector<std::pair<char, std::size_t>>& convertions, error_fn& error_callback) {
+  bool last_is_percent = false;
+  parts.emplace_back();
+  std::size_t pos = 0;
+  for (const auto& c : format) {
+    if (last_is_percent) {
+      if (c == '%') {
+        parts.back() += c;
+      } else {
+        convertions.push_back(std::make_pair(c, pos));
+        parts.emplace_back();
+      }
+      last_is_percent = false;
+    } else if (c == '%') {
+      last_is_percent = true;
+    } else {
+      parts.back() += c;
+    }
+    ++pos;
+  }
+  if (last_is_percent) {
+    error_callback.add_error(error_incomplete_format());
+  }
+  return !last_is_percent;
+}
+
+bool interpolation_convertion(std::string& result, const starlark_obj& element, char format, std::size_t index, context& ctx, error_fn& error_callback) {
+  // TODO(lmirelmann): Resolve inline the cases that need a float to int conversion without the creation of a new object.
+  // TODO(lmirelmann): There is a lot of duplication, there are many things that can be simplified.
+  switch (format) {
+    case 's':
+      result += element.str();
+      break;
+    case 'r':
+      result += element.repr();
+      break;
+    case 'd':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:d}", element.as_int64());
+          break;
+        case starlark_numeric_type::kBigInt:
+          result += element.as_bigint().to_string(10, false);
+          break;
+        case starlark_numeric_type::kFloat: {
+          auto* as_integer = create_integer_from_float(element.as_float(), ctx, error_callback);
+          if (as_integer == nullptr) {
+            return false;
+          }
+          return interpolation_convertion(result, *create_integer_from_float(element.as_float(), ctx, error_callback), format, index, ctx, error_callback);
+        }
+        default:
+          error_callback.add_error(error_format_integer_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'o':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:o}", element.as_int64());
+          break;
+        case starlark_numeric_type::kBigInt:
+          result += element.as_bigint().to_string(8, false);
+          break;
+        case starlark_numeric_type::kFloat: {
+          auto* as_integer = create_integer_from_float(element.as_float(), ctx, error_callback);
+          if (as_integer == nullptr) {
+            return false;
+          }
+          return interpolation_convertion(result, *create_integer_from_float(element.as_float(), ctx, error_callback), format, index, ctx, error_callback);
+        }
+        default:
+          error_callback.add_error(error_format_integer_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'x':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:x}", element.as_int64());
+          break;
+        case starlark_numeric_type::kBigInt:
+          result += element.as_bigint().to_string(16, false);
+          break;
+        case starlark_numeric_type::kFloat: {
+          auto* as_integer = create_integer_from_float(element.as_float(), ctx, error_callback);
+          if (as_integer == nullptr) {
+            return false;
+          }
+          return interpolation_convertion(result, *create_integer_from_float(element.as_float(), ctx, error_callback), format, index, ctx, error_callback);
+        }
+        default:
+          error_callback.add_error(error_format_integer_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'X':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:X}", element.as_int64());
+          break;
+        case starlark_numeric_type::kBigInt:
+          result += element.as_bigint().to_string(16, true);
+          break;
+        case starlark_numeric_type::kFloat: {
+          auto* as_integer = create_integer_from_float(element.as_float(), ctx, error_callback);
+          if (as_integer == nullptr) {
+            return false;
+          }
+          return interpolation_convertion(result, *create_integer_from_float(element.as_float(), ctx, error_callback), format, index, ctx, error_callback);
+        }
+        default:
+          error_callback.add_error(error_format_integer_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'e':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:e}", static_cast<double>(element.as_int64()));
+          break;
+        case starlark_numeric_type::kBigInt:
+          result += std::format("{:e}", to_double(element.as_bigint()));
+          break;
+        case starlark_numeric_type::kFloat:
+          if (std::isfinite(element.as_float())) {
+            result += std::format("{:e}", element.as_float());
+          } else {
+            result += element.str();
+          }
+          break;
+        default:
+          error_callback.add_error(error_format_real_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'E':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:E}", static_cast<double>(element.as_int64()));
+          break;
+        case starlark_numeric_type::kBigInt: {
+          auto value = to_double(element.as_bigint());
+          if (std::isfinite(value)) {
+            result += std::format("{:E}", value);
+          } else {
+            result += std::format("{:e}", value);
+          }
+          break;
+        }
+        case starlark_numeric_type::kFloat:
+          if (std::isfinite(element.as_float())) {
+            result += std::format("{:E}", element.as_float());
+          } else {
+            result += element.str();
+          }
+          break;
+        default:
+          error_callback.add_error(error_format_real_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'f':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:f}", static_cast<double>(element.as_int64()));
+          break;
+        case starlark_numeric_type::kBigInt:
+          result += std::format("{:f}", to_double(element.as_bigint()));
+          break;
+        case starlark_numeric_type::kFloat:
+          if (std::isfinite(element.as_float())) {
+            result += std::format("{:f}", element.as_float());
+          } else {
+            result += element.str();
+          }
+          break;
+        default:
+          error_callback.add_error(error_format_real_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'F':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += std::format("{:F}", static_cast<double>(element.as_int64()));
+          break;
+        case starlark_numeric_type::kBigInt: {
+          auto value = to_double(element.as_bigint());
+          if (std::isfinite(value)) {
+            result += std::format("{:F}", value);
+          } else {
+            result += std::format("{:f}", value);
+          }
+          break;
+        }
+        case starlark_numeric_type::kFloat:
+          if (std::isfinite(element.as_float())) {
+            result += std::format("{:F}", element.as_float());
+          } else {
+            result += element.str();
+          }
+          break;
+        default:
+          error_callback.add_error(error_format_real_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'g':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += float_to_string(static_cast<double>(element.as_int64()), false);
+          break;
+        case starlark_numeric_type::kBigInt:
+          result += float_to_string(to_double(element.as_bigint()), false);
+          break;
+        case starlark_numeric_type::kFloat:
+          result += float_to_string(element.as_float(), false);
+          break;
+        default:
+          error_callback.add_error(error_format_real_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    case 'G':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          result += float_to_string(static_cast<double>(element.as_int64()), true);
+          break;
+        case starlark_numeric_type::kBigInt: {
+          result += float_to_string(to_double(element.as_bigint()), true);
+          break;
+        }
+        case starlark_numeric_type::kFloat:
+          result += float_to_string(element.as_float(), true);
+          break;
+        default:
+          error_callback.add_error(error_format_real_is_required(format, element.type()));
+          return false;
+      }
+      break;
+    default:
+      error_callback.add_error(error_unsupported_format_character(format, index));
+      return false;
+  }
+  return true;
+}
+
+}  // namespace
+
 starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  std::vector<std::string> parts;
+  std::vector<std::pair<char, std::size_t>> convertions;
+  if (!parse_interpolation(this_obj.as_string(), parts, convertions, error_callback)) {
+    return nullptr;
+  }
+  std::string result = parts[0];
+  if (other.type() != starlark_types::tuple_t) {
+    if (parts.size() != 2) {
+      error_callback.add_error(error_not_enough_arguments_for_format_string());
+      return nullptr;
+    }
+    if (!interpolation_convertion(result, other, convertions[0].first, convertions[0].second, ctx, error_callback)) {
+      return nullptr;
+    }
+    result += parts[1];
+    return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  }
+
+  const starlark_tuple& t_other = static_cast<const starlark_tuple&>(other);
+  if (t_other.size() != convertions.size()) {
+    if (t_other.size() < convertions.size()) {
+      error_callback.add_error(error_not_enough_arguments_for_format_string());
+    } else {
+      error_callback.add_error(error_not_all_arguments_converted_during_string_formatting());
+    }
+    return nullptr;
+  }
+
+  for (std::size_t i = 0; i < convertions.size(); ++i) {
+    if (!interpolation_convertion(result, *t_other.at(i), convertions[i].first, convertions[i].second, ctx, error_callback)) {
+      return nullptr;
+    }
+    result += parts[i + 1];
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
 }
 
 }  // namespace
