@@ -220,6 +220,7 @@ cc_test(
         ":starlark_numeric",
         ":starlark_numeric_impl",
         ":starlark_object_impl",
+        ":starlark_testing",
         "@googletest//:gtest_main",
     ],
 )
