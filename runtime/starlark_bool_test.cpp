@@ -52,6 +52,13 @@ starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& po
   return nullptr;
 }
 
+class starlark_testing_function : public starlark_function {
+ public:
+  starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override {
+    return starlark_obj::call(pos_args, named_args, ctx, error_callback);
+  }
+};
+
 TEST(StarlarkBool, Type) {
   EXPECT_EQ("bool", starlark_bool(true).type());
 }
@@ -82,7 +89,7 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(false).equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_float(0.0)));
-  EXPECT_FALSE(starlark_bool(false).equals(starlark_function()));
+  EXPECT_FALSE(starlark_bool(false).equals(starlark_testing_function()));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_list(0)));
   EXPECT_FALSE(starlark_bool(false).equals(starlark_range(0, 1, 1)));
@@ -96,7 +103,7 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(true).equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_float(0.0)));
-  EXPECT_FALSE(starlark_bool(true).equals(starlark_function()));
+  EXPECT_FALSE(starlark_bool(true).equals(starlark_testing_function()));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_list(0)));
   EXPECT_FALSE(starlark_bool(true).equals(starlark_range(0, 1, 1)));

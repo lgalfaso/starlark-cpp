@@ -140,14 +140,6 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_function::inner_hash(
   return 0;
 }
 
-starlark_obj* starlark_function::call(
-    const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args,
-    context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
-}
-
 starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark_obj*>& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::abs_f)) {
     return nullptr;

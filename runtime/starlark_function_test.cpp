@@ -76,6 +76,13 @@ starlark_obj* base2_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& p
   return nullptr;
 }
 
+class starlark_testing_function : public starlark_function {
+ public:
+  starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override {
+    return starlark_obj::call(pos_args, named_args, ctx, error_callback);
+  }
+};
+
 class FnTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -89,17 +96,17 @@ class FnTest : public ::testing::Test {
 };
 
 TEST(StarlarkFunction, Type) {
-  EXPECT_EQ("function", starlark_function().type());
+  EXPECT_EQ("function", starlark_testing_function().type());
   EXPECT_EQ("builtin_function_or_method", starlark_built_in_function(nullptr, base_fn, "fn_name").type());
 }
 
 TEST(StarlarkFunction, Primitve) {
-  EXPECT_FALSE(starlark_function().primitive());
+  EXPECT_FALSE(starlark_testing_function().primitive());
   EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").primitive());
 }
 
 TEST(StarlarkFunction, Truthy) {
-  EXPECT_TRUE(starlark_function().truthy());
+  EXPECT_TRUE(starlark_testing_function().truthy());
   EXPECT_TRUE(starlark_built_in_function(nullptr, base_fn, "fn_name").truthy());
 }
 

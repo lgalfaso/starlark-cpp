@@ -25,6 +25,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::runtime::context;
+using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -49,6 +50,13 @@ using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
+
+class starlark_testing_function : public starlark_function {
+ public:
+  starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override {
+    return starlark_obj::call(pos_args, named_args, ctx, error_callback);
+  }
+};
 
 TEST(StarlarkBytes, Type) {
   EXPECT_EQ("bytes", starlark_bytes(""sv).type());
@@ -111,7 +119,7 @@ TEST(StarlarkBytes, Equals) {
   EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_string(""sv)));
   EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_float(0.0)));
-  EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_function()));
+  EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_testing_function()));
   EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_integer(0)));
   EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_list(0)));
   EXPECT_FALSE(starlark_bytes(""sv).equals(starlark_none()));
