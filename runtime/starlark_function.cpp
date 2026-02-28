@@ -505,16 +505,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
       return nullptr;
     }
-    auto fvalue = value->as_float();
-    if (!std::isfinite(fvalue)) {
-      if (std::isinf(fvalue)) {
-        error_callback.add_error(error_convert_float_infinity_to_integer());
-      } else {
-        error_callback.add_error(error_convert_float_nan_to_integer());
-      }
-      return nullptr;
-    }
-    return create_integer_from_float(fvalue, ctx);
+    return create_integer_from_float(value->as_float(), ctx, error_callback);
   } else if (value->type() == starlark_types::bool_t) {
     if (pos_args.size() == 2) {
       error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));

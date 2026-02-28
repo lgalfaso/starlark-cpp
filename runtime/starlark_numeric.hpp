@@ -27,7 +27,7 @@ int64_t starlark_mod(int64_t a, int64_t b);
 
 starlark_obj* create_integer(std::int64_t value, context& ctx);
 starlark_obj* create_integer(starlark::bigint::number&& value, context& ctx);
-starlark_obj* create_integer_from_float(double value, context& ctx);
+starlark_obj* create_integer_from_float(double value, context& ctx, error_fn& error_callback);
 starlark_obj* create_float(double value, context& ctx);
 
 std::string float_to_string(double value, bool uppercase);

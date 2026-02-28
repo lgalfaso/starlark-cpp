@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "google/protobuf/arena.h"
+#include "runtime/error_messages.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_float.hpp"
 #include "runtime/starlark_integer.hpp"
@@ -28,8 +29,13 @@ starlark_obj* create_integer(number&& value, context& ctx) {
   return Arena::Create<starlark_bigint>(&ctx.arena(), std::move(value));
 }
 
-starlark_obj* create_integer_from_float(double value, context& ctx) {
+starlark_obj* create_integer_from_float(double value, context& ctx, error_fn& error_callback) {
   if (!std::isfinite(value)) {
+    if (std::isinf(value)) {
+      error_callback.add_error(error_convert_float_infinity_to_integer());
+    } else {
+      error_callback.add_error(error_convert_float_nan_to_integer());
+    }
     return nullptr;
   }
   if (value == 0) {

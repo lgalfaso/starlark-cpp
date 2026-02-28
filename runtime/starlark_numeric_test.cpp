@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_testing.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -19,6 +20,7 @@ using ::starlark::runtime::create_integer_from_float;
 using ::starlark::runtime::equals_fi;
 using ::starlark::runtime::starlark_numeric_type;
 using ::starlark::runtime::to_double;
+using ::starlark::testing::error_handler;
 using ::testing::Gt;
 using ::testing::Lt;
 
@@ -77,19 +79,23 @@ TEST(CreateIntegerFromBigInt, Downgrades) {
 TEST(CreateIntegerFromFloat, SpecialCases) {
   Arena arena;
   context ctx(arena);
-  EXPECT_EQ(nullptr, create_integer_from_float(std::numeric_limits<double>::infinity(), ctx));
-  EXPECT_EQ("0", create_integer_from_float(0, ctx)->str());
-  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-1, ctx)->str());
-  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-1, ctx)->str());
-  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-64, ctx)->str());
-  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-64, ctx)->str());
+  error_handler error_callback;
+
+  EXPECT_EQ(nullptr, create_integer_from_float(std::numeric_limits<double>::infinity(), ctx, error_callback));
+  EXPECT_EQ("0", create_integer_from_float(0, ctx, error_callback)->str());
+  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-1, ctx, error_callback)->str());
+  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-1, ctx, error_callback)->str());
+  EXPECT_EQ("0", create_integer_from_float(0x1.0000000000000p-64, ctx, error_callback)->str());
+  EXPECT_EQ("0", create_integer_from_float(-0x1.0000000000000p-64, ctx, error_callback)->str());
 }
 
 TEST(CreateIntegerFromFloat, PowersOfTen) {
   auto test = [](double value, std::string_view expected) {
     Arena arena;
     context ctx(arena);
-    EXPECT_EQ(expected, create_integer_from_float(value, ctx)->str());
+    error_handler error_callback;
+
+    EXPECT_EQ(expected, create_integer_from_float(value, ctx, error_callback)->str());
   };
   /*
   ```python
