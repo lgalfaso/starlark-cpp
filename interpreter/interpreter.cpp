@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "bigint/number.hpp"
@@ -378,17 +379,12 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       BINARY_OP(OpCode::kBinarySlashSlash, binary_slash_slash)
 #undef BINARY_OP
       case OpCode::kCall: {
+        // TODO(lmirelmann): Implement recursion derection.
         int args_count = op_code.call().positional_arguments_count() +
             2 * op_code.call().named_arguments_count() +
             (op_code.call().has_variadic_positional_argument() ? 1 : 0) +
             (op_code.call().has_variadic_named_argument() ? 1 : 0);
         assert(stack.size() >= args_count + 1);
-        /*
-          int32 positional_arguments_count = 1;
-          int32 named_arguments_count = 2;
-          bool has_variadic_positional_argument = 3;
-          bool has_variadic_named_argument = 4;
-        */
         starlark_obj::pos_args_t pos_args;
         starlark_obj::named_args_t named_args;
         for (int i = 0; i < op_code.call().positional_arguments_count(); ++i) {

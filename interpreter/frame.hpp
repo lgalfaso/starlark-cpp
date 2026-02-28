@@ -16,7 +16,7 @@ namespace starlark {
 namespace interpreter {
 
 struct frame {
-  frame(const google::protobuf::RepeatedPtrField<std::string>* names);
+  explicit frame(const google::protobuf::RepeatedPtrField<std::string>* names);
 
   std::vector<starlark::runtime::starlark_obj*> elements;
   const google::protobuf::RepeatedPtrField<std::string>* names;

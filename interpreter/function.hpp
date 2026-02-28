@@ -3,6 +3,7 @@
 #ifndef INTERPRETER_FUNCTION_HPP_
 #define INTERPRETER_FUNCTION_HPP_
 
+#include <string>
 #include <vector>
 
 #include "interpreter/frame.hpp"
