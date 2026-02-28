@@ -194,8 +194,10 @@ std::string number::hex() const {
   return result;
 }
 
-std::string number::to_string(int base) const {
-  static const char nums[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+std::string number::to_string(int base, bool uppercase) const {
+  static const char nums_l[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+  static const char nums_u[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const char* nums = uppercase ? nums_u : nums_l;
   if (base < 2 || base > 36) {
     return "";
   }

@@ -31,7 +31,7 @@ bool starlark_bigint::primitive() const {
 
 bool starlark_bigint::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
-  print.append(value.to_string(10));
+  print.append(value.to_string(10, false));
   return false;
 }
 

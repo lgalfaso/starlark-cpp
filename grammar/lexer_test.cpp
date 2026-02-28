@@ -128,7 +128,7 @@ std::vector<std::string> read_tokens(lexer& input, std::string_view original) {
       parts.back() += ")";
     } else if (current_token.type() == token_type::kBigInt) {
       parts.back() += "(";
-      parts.back() += current_token.big_int_value().to_string(10);
+      parts.back() += current_token.big_int_value().to_string(10, false);
       parts.back() += ")";
     } else if (current_token.type() == token_type::kFloat) {
       parts.back() += "(";

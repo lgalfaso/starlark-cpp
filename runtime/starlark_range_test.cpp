@@ -243,7 +243,7 @@ TEST(StarlarkRange, BinaryInBigInt) {
     error_handler error_callback;
 
     starlark_range range(start, end, step);
-    EXPECT_EQ(range.binary_in(starlark_bigint(element), error_callback), expected) << "Range: " << range.repr() << ", E: " << element.to_string(10);
+    EXPECT_EQ(range.binary_in(starlark_bigint(element), error_callback), expected) << "Range: " << range.repr() << ", E: " << element.to_string(10, false);
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 

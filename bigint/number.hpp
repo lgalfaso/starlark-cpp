@@ -59,7 +59,7 @@ class number {
 
   // Returns an hexa representation of the number.
   std::string hex() const;
-  std::string to_string(int base) const;
+  std::string to_string(int base, bool uppercase) const;
 
   // Negates this number.
   number& neg();

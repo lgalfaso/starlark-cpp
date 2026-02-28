@@ -10,7 +10,7 @@ namespace starlark {
 namespace bigint {
 
 std::ostream& operator<<(std::ostream& os, const number& n) {
-  os << n.to_string(10);
+  os << n.to_string(10, false);
   return os;
 }
 

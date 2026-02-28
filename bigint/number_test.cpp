@@ -428,7 +428,7 @@ static char kBigNumber[] =
 
 TEST(Number, ToString) {
   number p = number::parse_hex(kBigPrime);
-  EXPECT_EQ("", p.to_string(1));
+  EXPECT_EQ("", p.to_string(1, false));
   EXPECT_EQ(
       "1101100001111101111100111000100011000100101010001001100011101000"
       "0110101101100101110110110010111101001111110001000011000010111011"
@@ -482,7 +482,7 @@ TEST(Number, ToString) {
       "1110001110001110001110001110001110001110001110001110001110001110"
       "0011100011100011100011100011100011100011100011100011100011100011"
       "10001110001110001110001110001110001110010101100011110001",
-      p.to_string(2));
+      p.to_string(2, false));
   EXPECT_EQ("1210120000101212111212112122120212221201210101010012210010"
       "0000021122200022102121220120102120021011012020122122020102212210"
       "2101210202111011202100100121120002120021102122200102012111112112"
@@ -515,7 +515,7 @@ TEST(Number, ToString) {
       "0200110102210221111100201112011011121010111222102211120220020022"
       "2202200121210022122020000200102100111110101020012120111102210211"
       "2001021010002201201112222122222202111000012221102212112001220221"
-      "12202212222102111200200120121122022012000222201022002", p.to_string(3));
+      "12202212222102111200200120121122022012000222201022002", p.to_string(3, false));
   EXPECT_EQ("3120133133032020301022202120322012231211312302331033301003"
       "0023231012302031132311323131021211100031321231202312232200310300"
       "1132230200332311333022322301030120312222131221331201222010210113"
@@ -542,7 +542,7 @@ TEST(Number, ToString) {
       "3203203203203203203203203203203203203203203203203203203203203203"
       "2032032032032032032032032032032032032032032032032032032032032032"
       "0320320320320320320320320320320320320320320320320320320321112033"
-      "01", p.to_string(4));
+      "01", p.to_string(4, false));
   EXPECT_EQ("3122303401102221023243012034022444044303333301200140044201"
       "0303031042242412041333231214403313200314304024131210202200120412"
       "3003411443142022341211131044121333002441441244014134422413043221"
@@ -565,7 +565,7 @@ TEST(Number, ToString) {
       "2342102342102342102342102342102342102342102342102342102342102342"
       "1023421023421023421023421023421023421023421023421023421023421023"
       "4210234210234210234210234210234210234210234210234210234210234210"
-      "2342102342102342102344033043", p.to_string(5));
+      "2342102342102342102344033043", p.to_string(5, false));
   EXPECT_EQ("1330443534051223512334255411354531132534302213143025015033"
       "3320453020410535434400214433502203533023135354541504531222003051"
       "3141015331003414145010253351343345134054403302004130010450550134"
@@ -586,7 +586,7 @@ TEST(Number, ToString) {
       "3131545051223411221352450135211534034050153521430122201400034225"
       "3144135234403244222024121355204341403510143105351500212312204302"
       "3234000504051504553150505250323524523540152203325131023434313002"
-      "53225423345", p.to_string(6));
+      "53225423345", p.to_string(6, false));
   EXPECT_EQ("2521445403404045565000166245604150305246310300446155022215"
       "3405111366320066462654236104133511321154566266160231556634363156"
       "2656146420444305523360353256125341344542611061064246326543514650"
@@ -605,7 +605,7 @@ TEST(Number, ToString) {
       "2341041012200124413034554163423605020503240162234404065161364150"
       "3242460066666656211151513100032044223422046242613330651545510152"
       "2522023152540634453060521406130665052663104601603601231236201113"
-      "3024153425503543322213642032134610333", p.to_string(7));
+      "3024153425503543322213642032134610333", p.to_string(7, false));
   EXPECT_EQ("3303737161061124230720655456662751761030273215443275536672"
       "2312403363330555350151405726203732774535304614332516647660650222"
       "1370472533074403766604262334754717137736255740762077715174577671"
@@ -623,7 +623,7 @@ TEST(Number, ToString) {
       "6161616161616161616161616161616161616161616161616161616161616161"
       "6161616161616161616161616161616161616161616161616161616161616161"
       "6161616161616161616161616161616161616161616161616161616161616161"
-      "6161616161616161616254361", p.to_string(8));
+      "6161616161616161616254361", p.to_string(8, false));
   EXPECT_EQ("1716011774775576787653333183100075802725565125071352185663"
       "8572353674152310546076242580365445478534612771660621347313818311"
       "8163051136524126104387452033264677734216062818100663855447737848"
@@ -640,7 +640,7 @@ TEST(Number, ToString) {
       "3334434777364518172411187723171706847753358663423354213844351012"
       "4131380236087743822107362142662485666133838443214641471148727468"
       "0628680553278200612314411205514383750371026514885886740058427750"
-      "568482788374620517568160881262", p.to_string(9));
+      "568482788374620517568160881262", p.to_string(9, false));
   EXPECT_EQ("2222222222222222222222222222222222222222222222222222222222"
       "2222222222222222222222222222222222222222222222222222222222222222"
       "2222222222222222222222222222222222222222222222222222222222222222"
@@ -656,7 +656,7 @@ TEST(Number, ToString) {
       "2222222222222222222222222222222222222222222222222222222222222222"
       "2222222222222222222222222222222222222222222222222222222222222222"
       "2222222222222222222222222222222222222222222222222222222222222222"
-      "2222222222222222222222222222222222222222252273", p.to_string(10));
+      "2222222222222222222222222222222222222222252273", p.to_string(10, false));
   EXPECT_EQ("452a929a30a79509833900544106a70613152816011707179265277868"
       "14881a062854a081731a68654395aa587465662511939533344957a517530258"
       "99a5053421903633aa12a850688430055169174363765802209a79a109334195"
@@ -672,7 +672,7 @@ TEST(Number, ToString) {
       "987677a6305a68a3470a758a69a6292363539661289182708441151126400340"
       "1145375647a49444717049475028041a175700323509259a7655a5a764101597"
       "8277a05837a839768388a4707649028a25742644301119947954010574415928"
-      "18a22a", p.to_string(11));
+      "18a22a", p.to_string(11, false));
   EXPECT_EQ("108624112b058444175a176984b027565a3531b4849b6699411b4ba635"
       "53190493058600365a03249190225286b01a211378099b50353023aab084ab69"
       "72823509b9b534504a2358251751306a50260387821b707510a29a790a106502"
@@ -687,7 +687,7 @@ TEST(Number, ToString) {
       "39381596904b8944b3623145b134130ab514398927b0345a8b2ab55636741402"
       "a4322109031180360013344bba4a158102a1416867788b3365a517501b517161"
       "23714967a417335131741521843747361575562ba3b6524380a037a650a19938"
-      "a67876519a9b395b733a3543973418793ab55", p.to_string(12));
+      "a67876519a9b395b733a3543973418793ab55", p.to_string(12, false));
   EXPECT_EQ("14c0bb96015c97c1407c59cb93a73808980cc723b146a741b8aca60317"
       "278a80cb08ca6c2627590343b060a2532984c372510a09819684c32339459baa"
       "495493822bb7b684a22a5420a8b512caab4c7801115c377a0ac6547434c49850"
@@ -702,7 +702,7 @@ TEST(Number, ToString) {
       "c8b55ab353c84121b69c74cb176955175a150c01b670309a47ab8bb443c99b16"
       "7a598b6a0b77b014849b9aa3b23bac153863750680164511c558bc07719b2861"
       "94c403309a759504913a8c1c578c776a8c8a5aa78a92b1c4a32973110ba71132"
-      "65477087", p.to_string(13));
+      "65477087", p.to_string(13, false));
   EXPECT_EQ("ba2ccd767dc7a80812131dbb729ac8dc939cc9d5abab1942933847614c"
       "cad551763933a27c9a64bcc09187d09ac5bb72d57b01446d9d619b20b5c10992"
       "00237b2456c598ab5c2978d6ab5d0d22da0a51038a340679b83a354502c1dc57"
@@ -716,7 +716,7 @@ TEST(Number, ToString) {
       "3ac763174300dbc66d130d2db3461674370cd6d2c90c00a01426d2ccb993662c"
       "01ccbcb049d97907087348b3abc3255c735431584aa4c187cb3d374055ba6517"
       "3b4c24a70638b0b0b208780d2bb27b1752c5675c23a2637bd88034857849040c"
-      "16933c180411501a95a3d485a076b7d8686a2647285453", p.to_string(14));
+      "16933c180411501a95a3d485a076b7d8686a2647285453", p.to_string(14, false));
   EXPECT_EQ("700b6c29288d05d6bce376ee505a3ba508d8b1a25641c5d4b0c67aec36"
       "d0b215cc186657341a07a1e662e7d32bc4b91dd70ba7ec82895e66e60a446e7a"
       "71a048ddbd1d3b7253ec081b4eceead26d9997da6b9a78536c1870307681e00a"
@@ -730,7 +730,7 @@ TEST(Number, ToString) {
       "2222b956b46677858e82dc2aa6d4068cca0d4808ab16eb45adb388b99a7625a8"
       "2e740c04ed71dda98882b51b07800ebea375547108b0a017347a014c35031651"
       "ccaee7891673d7a5bb6779e756872b5ce282bce6edede95d2491363609cd7426"
-      "cce236d5ee55c63b6cc26bb8", p.to_string(15));
+      "cce236d5ee55c63b6cc26bb8", p.to_string(15, false));
   EXPECT_EQ("d87df388c4a898e86b65db2f4fc430bb46c8d7b5edd26540de6d8b6ba0"
       "d305eb20fb5fcaeb1318daa769f61a84917c4eab63c81fdb08b26e7b39e5fef2"
       "b7c1f21ff34f97fdcc4212f590a37e4a50d076c23a1732b0cde504953e4db384"
@@ -744,7 +744,7 @@ TEST(Number, ToString) {
       "e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e"
       "38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e3"
       "8e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e39"
-      "58f1", p.to_string(16));
+      "58f1", p.to_string(16, false));
   EXPECT_EQ("1b622a6ed0d3d77gbd3addg425dd9293d9gbd0971g30cb066b762f9d63"
       "4daa3964363476g4gd8d330e52fa77c5217903bfc863f35513a6463408b4b904"
       "9a2598840de940239e27c79798381865331c0601f5d81g6713gfe572d98585e8"
@@ -757,7 +757,7 @@ TEST(Number, ToString) {
       "3d2198b03e78a94fed65baa6b6084560g3802e5af643fffe364g3g251650b250"
       "a40973d1b522985g9730bbf7cdg9fa3e66c9f78719a940e47db5a9234g81ad37"
       "96g8c1e1dd72f848169c0511g94cc2c3c5547g24f8736agaeba40e5f71a61d0a"
-      "6154e3a1ea84c9e64aa8c104d32850a6ce280fe5e28ee0a72d4", p.to_string(17));
+      "6154e3a1ea84c9e64aa8c104d32850a6ce280fe5e28ee0a72d4", p.to_string(17, false));
   EXPECT_EQ("177995h09353f792e1da3eb786eec5f2e9df19af4fdf936eg6853c75f4"
       "79203a9h2hc49g6598abf6244db8a7g62ae3c9f0df1fe2ce00a3dd86f57c48c0"
       "c5e3486267515ehf11e9a94907bb24g95ag5b4a4eh1dc2h254b1hfaca7dbaf5b"
@@ -770,7 +770,7 @@ TEST(Number, ToString) {
       "bd7f52babb6c8be8d176d2d7adba1f484277fg46694d5d0dcchhh089cda6fh4f"
       "7cf98gh38ag698d7ab8fbe4g43ea065d3fbc416f8c880d21fa6ha170a086dhf2"
       "a795h8566bg88ae9a162h1bbc3gf2bea2ae4gcfg851db4eggddcge50a31d2hag"
-      "5db95b1448333dc4h478ggc939a1d43fg7b", p.to_string(18));
+      "5db95b1448333dc4h478ggc939a1d43fg7b", p.to_string(18, false));
   EXPECT_EQ("46ic2eg7ggc757c7ac746cbbd53i9995d13c1b1e7ie54b0ae9a00255ge"
       "0g3heie824cdfa75b02hb60aiacic66d65228aa1hfbbh822bb5425h0hc48df52"
       "27a0cb71dc624948631341hc5a07f62hf15fdd7879i8dg8130db0h091b0g18ag"
@@ -783,7 +783,7 @@ TEST(Number, ToString) {
       "3ed15cga18407b47gh33eie6aead2919a6e65hg01897g577e6icegc48gg6848c"
       "3ac04g82d6c34c97c732119504ad0b82cgd6gbc29i44d608f072hde3c3483dgd"
       "75fgb15fafi3db1ci5bb728h62fe64g893ha7ffi7ic495d613a11040d895bfda"
-      "a1e72ciaa52cda06e85i", p.to_string(19));
+      "a1e72ciaa52cda06e85i", p.to_string(19, false));
   EXPECT_EQ("18caic9370gbf27322jc51bc56a69gj07c8bj60g0bdi40e9h7d578jeac"
       "4a5eci0e8j8g972d2423ajhca27g2a0hghb4d842b7ac67bb72g37f374d4ci0c6"
       "3g4b6ib3i5b46cd4b849ji71j0fc5d79eg1biii60g5j2b2cfej874h31dc94f8f"
@@ -796,7 +796,7 @@ TEST(Number, ToString) {
       "248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248h"
       "fb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb24"
       "8hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb248hfb"
-      "2491add", p.to_string(20));
+      "2491add", p.to_string(20, false));
   EXPECT_EQ("bg8i72b8gc311ea1a964098eid4j4caebikk3ka38358c9cg1d77e5icdh"
       "iej61ib6j23017f55h86e28763bf51bci5bdeggfkfb846j34hc9907b3283g07a"
       "k5cg07612i872k750c6e36kg950gch254gjjekj8d8c58k84ebfeafbi7c4c8jhh"
@@ -809,7 +809,7 @@ TEST(Number, ToString) {
       "k74k4ek71chjbf0i5d7i3gh7d12ifhff5bff9bb97dki71b7ddii967id406h78c"
       "cj33hcade3ih67kkb6b422j371c5kk9b395ah26b1g09709f9bc9ebia2b144k9j"
       "012b28f9beef478fgfc2b41ggkc7gaa27i7a869d8g9f6gi8i215dei8jh",
-      p.to_string(21));
+      p.to_string(21, false));
   EXPECT_EQ("3iaad485i1b3j8cjcab5f9he794ge017claah2gd4ia62c0h856i2lge7h"
       "bhl80h59ack91l8e31b70kic043bd164fi0j2g8cc4jgeak4d8klfhje7f2ee9ah"
       "3i9edkl9ilah1kf7a498ffc54keg7bbe84k1dfb121a9j24khakjl39lhlh004e4"
@@ -821,7 +821,7 @@ TEST(Number, ToString) {
       "3l3ji2j8bcalajj12d2aj0hc0che8l31c608hf0e5ibl6khl9f6h3kh5iefa5080"
       "jj9d7hi2l05g37770b789jkijdlbi5g3h6hgb409d06l7l0b8c85ejcj8184kc36"
       "f2dhcebk17jh1k0f513l087a7fh45fcb5ab249l5bkilkl89l3ci24bh44ej47hc"
-      "3501873l994j791g28dfi3b6kja809e0i916ek69e4j2e6l", p.to_string(22));
+      "3501873l994j791g28dfi3b6kja809e0i916ek69e4j2e6l", p.to_string(22, false));
   EXPECT_EQ("fjhcm044h9ed1l8keeh9fg3cgc0eamkg7jibhg1dkfck809214jil8cge7"
       "jafl1l84g6fgmbe6i3mg1ib16201c1cafi91i8fb66ia955cehbfb3lc7h3hj143"
       "hk6de5c1ael1gl03g3b3ljc4cfbh5lha4dj8elb51c86i26cl0d1321j0ddid6c2"
@@ -833,7 +833,7 @@ TEST(Number, ToString) {
       "ga28816j7a7h3lb6d5765c4k6ami6cleakl13am0gh5k798881me6d87b2dc3mel"
       "3bdagk5bhbea25e42637832e86hd313h613lfa672a7cec8f5ch582ej946e7h5h"
       "181bc7j84ee23k378aj717431e38c15gd8222i3i1ff1h4lc0mac235ac88b8h93"
-      "1fki4ab5mh86m0059gf5383cl38d600jj8e1", p.to_string(23));
+      "1fki4ab5mh86m0059gf5383cl38d600jj8e1", p.to_string(23, false));
   EXPECT_EQ("14ai896i02bdlcfi0g9d5meme0l3abj5d0k172f0jdcd9h0jfcj8fbn964"
       "749g8l0akc3bfm1glae6kg7l18g8342cl9m8e0430l62gmfg9lanickngfl2ab6j"
       "g9a87j050i67cnkjl1ml7e31mbfdibimh6d48ln5ha5ihin0lbbnm1kgjhdm3dj2"
@@ -845,7 +845,7 @@ TEST(Number, ToString) {
       "9l3gm6472g2ha095kj9ln1daegngmh1n69b6m2c01fbih76ek87g7677eikbifbj"
       "84c3i4gdkjiijf1mm0a1cmhef4gea7935ne62bag0ee6f50a5ncjjm5307fnkk0h"
       "0j6aenb9160nib0h88gc9010491i0b81130i36m6l518mh2k1f8a91jladbgmek6"
-      "aa9mh1286nnf34fmi9m33klnkkh", p.to_string(24));
+      "aa9mh1286nnf34fmi9m33klnkkh", p.to_string(24, false));
   EXPECT_EQ("gcfj15cb2hn1aj2eo4n3ii1a1k4m13335mee748id79ki8a39fke875ac0"
       "747f3l9n9acj7685o78i0elo7o1ljme84hbofaiaj2931a9ogdnce5h31glc56ae"
       "fkjgf7e7jjonidclfk2l6nllfhkhidf67effn70f9e3o23mo5g242h7jg3me735i"
@@ -857,7 +857,7 @@ TEST(Number, ToString) {
       "dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5d"
       "m5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm"
       "5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5dm5"
-      "dm5dm5dm5dm5do3fn", p.to_string(25));
+      "dm5dm5dm5dm5do3fn", p.to_string(25, false));
   EXPECT_EQ("29j76f22gjk5alpjjedhaf64i49ki4hnnb0bj9i8bmb49lo326oclhbnmc"
       "0727admjkempgmh05nblom22g2nccmdmm7f10742i1c459a01hcggkg2964n6d47"
       "h5fdpfkpgphfdflm06fkpphm9144pdlljdh5kimh7g7ebe4d9o0j6c3lgplachp8"
@@ -869,7 +869,7 @@ TEST(Number, ToString) {
       "m8cbdh40pkac5jgkem97na0a53271l89234dpjho4gb4390n3l5ee58gi75moe1m"
       "ij0f39chja9c4fbbc48206g83734ib8o53hbpo9j0k29kba9i3fpfjd5b29dodd3"
       "ifpmeh7m6bckb2d6eeme762a7pppk6hoa1iej0982ofnpk1ng79khdli4fmcmk34"
-      "mniejp6h7", p.to_string(26));
+      "mniejp6h7", p.to_string(26, false));
   EXPECT_EQ("1lf0andnehfnpjla35l302eo2lnh53n2aak5nk3pp75b7ce711mi7im7q1"
       "6gdggple18g562244m1bjp15jj0fab57a811cqdfia2jfngab50iq5j06j8gmegb"
       "hejijp4g965m9kc7p4bkjpcbdhoqookgfqo7b7nmpp0bf01i332224b0m2e62ff0"
@@ -881,7 +881,7 @@ TEST(Number, ToString) {
       "on622d3ad2il7ib7cj0j3o0e6no53ii3ndm94j69h5lqha3dcegm6djog7a3hnb9"
       "g59kmnea5q6aba5cjbmd5317a9co2b0qgd86j2cijcoimpok1a8bmd24fcdlaep8"
       "dkiiqkigl8h60ib9dca65fdblmiba0ofdqnqom91qcpmih8eknqbdiifgh850qj8"
-      "2", p.to_string(27));
+      "2", p.to_string(27, false));
   EXPECT_EQ("6bnk7i548l5qcgfqhb0a7oadm62khenjhq7cgrrlgfpfi4o1aclkq7kch8"
       "j9ah48ehor5ao7m4mrrjngcnnk3a75cjbq31r7fbrg9hfr9q0f7r4457gbnlhd8h"
       "g18em228b0ale6qcqgk6b18r9l804bn6b1leaf64hl2m5kkniqa04h5p5lklc15n"
@@ -893,7 +893,7 @@ TEST(Number, ToString) {
       "707c7k9abkpj02hjm4h48id0ecb8bcdmpoi5bbrjba9ic9529je3ccfg1ner0aid"
       "crabg024mcnl5f5llolj4q08np8e91rjh3c11iq743jiilero60304dl5o9nn5nm"
       "c2lpmei3lkhb0bnkc4mohbqa6de6aa9lpa0grakrhgi82kmke9oh40igh",
-      p.to_string(28));
+      p.to_string(28, false));
   EXPECT_EQ("3b0o25638l6sfikfmo80cnc2oqibo5q8if41iq5j192gbqb60hopr85gfq"
       "ab61fsbdqkk2jgh6j2hc9ndai5e8aqr4dfmo9lfgc40i08828he12s133aksam6e"
       "hmmo7jpe61ejml5ioaono5k2rrlqlmibn887lk01ibrjqrbmems8s31g69medf3q"
@@ -904,7 +904,7 @@ TEST(Number, ToString) {
       "39q767p2skaefk2ieprcrj6d03h316a12lderelk70h7c2q8e295ij6dl2ff51sb"
       "jlgr8dbfm8fj94ndg554babnk8i57osaandr3lmcm18j6q6qcskae69coege1ab7"
       "pji2ok3qpg2deqmg0mhi1rpfa0gckibmlpooasg2jkia14k4o58issqr054gbfn7"
-      "kbriogqldrmhboajbmofse0jg9qpe4kj2qsl6e8920icje9rqi", p.to_string(29));
+      "kbriogqldrmhboajbmofse0jg9qpe4kj2qsl6e8920icje9rqi", p.to_string(29, false));
   EXPECT_EQ("6esltobc2mq3jepn2cejsotd0l6dn8ikh91hri8c0kalb0k9371m2ncqs3"
       "oc2lkom1cp4r8ti4bm6m1fnqk3f51oqi4ro19g3bh3b8oqjhdh4gma7tlq83sh4b"
       "odrsip1ooor9c8b1h2419j57of61q292ls5k3ektn27mslti9pf860tpp3naah94"
@@ -915,7 +915,7 @@ TEST(Number, ToString) {
       "5r9rkcbf23b4gtmd9lggt74k33socc03fgmk8431el5c5rnpnti5cole6he2ah36"
       "1qgej0d7bpb4qba5oj10n63obeiqhg53e73q651h2p5jdfafgjsn3ctgc064kafr"
       "1s2l11ne02ankqh7l1spj3mtfpjh16pb316e8mg0bl3m891tlbeh0r0f60clhf9e"
-      "j351i7dgapqf19gc0s9l82i7in1adnr7psdj4jhst5n", p.to_string(30));
+      "j351i7dgapqf19gc0s9l82i7in1adnr7psdj4jhst5n", p.to_string(30, false));
   EXPECT_EQ("1b7m2p036lm8jbof7k85ebl6f9lrnbf2s2ii6ge5u15m9tbk13croe4gkr"
       "1lbcnqoio18t6nbmg6gkf635893ns3979nfnds4fsol72n39lmb97e0o95hpt9dg"
       "31mhi8lu0o5btt00onl7kr275se66itonjl02am03g9cl6cqa8cpn4ciuq5bc9ck"
@@ -926,7 +926,7 @@ TEST(Number, ToString) {
       "t1qtufksqts01gpu11httokfcq2tn54prq7gaagfhlc5oipafkqa19e5o2om1siu"
       "6dpcjajs4shp2ea9mkhot46u383sdmnkomluugk7d7mr087394cr1b76gb0scc6c"
       "spc31mmn9ul3tg3rgo8b985ubo1lh83etq7pm2fppkkse20e32e69stb0lf63nmb"
-      "t431t4umrfm9d05sifss6btb9ufc99ht8bg26", p.to_string(31));
+      "t431t4umrfm9d05sifss6btb9ufc99ht8bg26", p.to_string(31, false));
   EXPECT_EQ("r1uv7264l2cegqr5rcnkvh1gnd3chltltn96ag6udm5mn86j0nli1uqvpb"
       "lh666qktkvc6k4i5u4tar3p0ftm25idptjjpfuuars3sgvud7pfvec889fb453fp"
       "551k3mo8t1eclgpnig959u9mpo84jv2lrts8u15d3uutk00umr0d4358hfpbfp3g"
@@ -937,7 +937,7 @@ TEST(Number, ToString) {
       "idk7v9g29nl1nj57t8kgbase73hose73hose73hose73hose73hose73hose73ho"
       "se73hose73hose73hose73hose73hose73hose73hose73hose73hose73hose73"
       "hose73hose73hose73hose73hose73hose73hose73hose73hose73hose73hose"
-      "73hose73hose73hose73hose73im7h", p.to_string(32));
+      "73hose73hose73hose73hose73im7h", p.to_string(32, false));
   EXPECT_EQ("1f6tn9563npah9rs2eu31kaqq1qg0nmvb1f51hu88jpb58sv7mf1rmn6sg"
       "k5hajaffs8gs1hs8hinc45w2gbfd3cdloiajpoiu7j750d3l1gjgo2unv7o93pvo"
       "mwcr809uuruo7qngb2q1jpg74b89eevsnjkit6c69afosttj6v8537giu6a32osl"
@@ -948,7 +948,7 @@ TEST(Number, ToString) {
       "070dnpbq9v0jmk2djdfrl22k8n8ub1gapbtfsk7tb2le4mf7k66abvf37ltd8e52"
       "oj1jpsd40d7gcs1r868s2km7qvwqklhvejjd1j5jwr8f84l78b54ksmsvkdi8od4"
       "cndl89c6og07unkvlk6li6rjla17phsojsje2qiw1qchomsrrwfw30r7r2s4p8ov"
-      "o6p7u0uo6dg5swcfsd9d2vomw", p.to_string(33));
+      "o6p7u0uo6dg5swcfsd9d2vomw", p.to_string(33, false));
   EXPECT_EQ("6lwa9qp74c0bq95slxumgbebfo46riw1jvrhfrwj5l8dwgm2jv0a3q0mum"
       "mrv0lsbcxq506f8e997gpfkcdxx3dfgob5q7go8v5ntcw1877nrq5ald1pxxghuu"
       "pjekaiuoni33df22vf2hk6um1n21t12s0og0jtnb8rw9iwdosxtsf4tuneclvuql"
@@ -959,7 +959,7 @@ TEST(Number, ToString) {
       "9q1dl67jv4v4e7jdtvfe93i1krd1mxvivmk5mfatexx0e8xj9r6hsd2nl5g4tlrr"
       "nfd07fdrljm0xgh043lk9t2tpj4hv0bt38wbjerk4jf62muwdcesjxxnqhjew833"
       "iwbd57dxsm8p1me7fturkbmu5i3putr2glsl98vpp6hs1p5dc4qbh3g1cuiqkb2t"
-      "k2qnbb7017mw46vfq6l", p.to_string(34));
+      "k2qnbb7017mw46vfq6l", p.to_string(34, false));
   EXPECT_EQ("25muwbungx5dlodbxuqu6nojsmiwkbnci0rogdr7anbo9j9ryf714h3win"
       "ee2r7k30o360a4c1s5gsi5cj0388pyw9i0351ku65v541d09rj6qyp0upn344ff5"
       "9vkvc0pc8yq9hm79ttjdnt580iksq6c6tlvmeiltkkiwwaqjjx9v60g6rmlqx0y5"
@@ -970,7 +970,7 @@ TEST(Number, ToString) {
       "uaburin3enj4gjnb6088tuko12821xcc916ob163tpashsknbkcfayciwn6ld7ei"
       "c1wl4yooa3niubmmxt8wo35y37t0do821f992n15nngclolesdcoitb6jpqxo3x3"
       "ohcyx47q0ped53r4gltpwqphi6slgydr2gb9b2iy5ngp3vvxu4ijkcjw1u5rybik"
-      "7hvja1mxrinw23", p.to_string(35));
+      "7hvja1mxrinw23", p.to_string(35, false));
   EXPECT_EQ("1l4rxoven8lqzp9yx7kxr2djr2ub3lk4x246xymo2arn2cnl2jnntputje"
       "c359a6bl63ppt12xn9rmvm5s3ic4906t5u9pxvz2cnx7dnos1x6c91dbz0ey5fey"
       "6vb9hqa7zn7eo0blveijydj75xq5fd4acs4bxbikpqcm9s6brzz1u6u618j2xa2m"
@@ -981,43 +981,54 @@ TEST(Number, ToString) {
       "69iweivjwv42binzb2zb89mdpi74be8eg467a3zlgc6guoe3xm8437bwfvqil7sa"
       "fjnajcfbzz4u765z8qi1vj5ihoohv3aztzt39bt58fp8dngu9w7xom51xwai8e1o"
       "0mexapnfs3gqe2pdnw4ma3v1r6xvu28je4iffo0uovutxb55h3fwtfy1wclh96fr"
-      "r90hkhqlt", p.to_string(36));
-  EXPECT_EQ("-1", number(1).neg().to_string(10));
-  EXPECT_EQ(p, parse_number(p.to_string(2), nullptr, 2));
-  EXPECT_EQ(p, parse_number(p.to_string(3), nullptr, 3));
-  EXPECT_EQ(p, parse_number(p.to_string(4), nullptr, 4));
-  EXPECT_EQ(p, parse_number(p.to_string(5), nullptr, 5));
-  EXPECT_EQ(p, parse_number(p.to_string(6), nullptr, 6));
-  EXPECT_EQ(p, parse_number(p.to_string(7), nullptr, 7));
-  EXPECT_EQ(p, parse_number(p.to_string(8), nullptr, 8));
-  EXPECT_EQ(p, parse_number(p.to_string(9), nullptr, 9));
-  EXPECT_EQ(p, parse_number(p.to_string(10), nullptr, 10));
-  EXPECT_EQ(p, parse_number(p.to_string(11), nullptr, 11));
-  EXPECT_EQ(p, parse_number(p.to_string(12), nullptr, 12));
-  EXPECT_EQ(p, parse_number(p.to_string(13), nullptr, 13));
-  EXPECT_EQ(p, parse_number(p.to_string(14), nullptr, 14));
-  EXPECT_EQ(p, parse_number(p.to_string(15), nullptr, 15));
-  EXPECT_EQ(p, parse_number(p.to_string(16), nullptr, 16));
-  EXPECT_EQ(p, parse_number(p.to_string(17), nullptr, 17));
-  EXPECT_EQ(p, parse_number(p.to_string(18), nullptr, 18));
-  EXPECT_EQ(p, parse_number(p.to_string(19), nullptr, 19));
-  EXPECT_EQ(p, parse_number(p.to_string(20), nullptr, 20));
-  EXPECT_EQ(p, parse_number(p.to_string(21), nullptr, 21));
-  EXPECT_EQ(p, parse_number(p.to_string(22), nullptr, 22));
-  EXPECT_EQ(p, parse_number(p.to_string(23), nullptr, 23));
-  EXPECT_EQ(p, parse_number(p.to_string(24), nullptr, 24));
-  EXPECT_EQ(p, parse_number(p.to_string(25), nullptr, 25));
-  EXPECT_EQ(p, parse_number(p.to_string(26), nullptr, 26));
-  EXPECT_EQ(p, parse_number(p.to_string(27), nullptr, 27));
-  EXPECT_EQ(p, parse_number(p.to_string(28), nullptr, 28));
-  EXPECT_EQ(p, parse_number(p.to_string(29), nullptr, 29));
-  EXPECT_EQ(p, parse_number(p.to_string(30), nullptr, 30));
-  EXPECT_EQ(p, parse_number(p.to_string(31), nullptr, 31));
-  EXPECT_EQ(p, parse_number(p.to_string(32), nullptr, 32));
-  EXPECT_EQ(p, parse_number(p.to_string(33), nullptr, 33));
-  EXPECT_EQ(p, parse_number(p.to_string(34), nullptr, 34));
-  EXPECT_EQ(p, parse_number(p.to_string(35), nullptr, 35));
-  EXPECT_EQ(p, parse_number(p.to_string(36), nullptr, 36));
+      "r90hkhqlt", p.to_string(36, false));
+  EXPECT_EQ("1L4RXOVEN8LQZP9YX7KXR2DJR2UB3LK4X246XYMO2ARN2CNL2JNNTPUTJE"
+      "C359A6BL63PPT12XN9RMVM5S3IC4906T5U9PXVZ2CNX7DNOS1X6C91DBZ0EY5FEY"
+      "6VB9HQA7ZN7EO0BLVEIJYDJ75XQ5FD4ACS4BXBIKPQCM9S6BRZZ1U6U618J2XA2M"
+      "WX86ACK1JUEEKUM97FEGZQ1YTA696JQ32EWJDWFJD2HP8T1FN03OK3F6VUAU4TY7"
+      "8FW6SYCESDWTHIKVXGCU456UUVGPE4SCC6NKQCUNC5DETBPBNR6FXR4KOQRMTIAO"
+      "4Z9DESEF129CTSY3WQGS7JNIR9425JGUOIPBKLYQ3WZWT832Q46AGPP8O7OMLKIZ"
+      "GY307VVKU584FAM4LN53QYW1EM94HBNX421XRWC5NK32RYZG29KTLG5A9PQ20EK3"
+      "69IWEIVJWV42BINZB2ZB89MDPI74BE8EG467A3ZLGC6GUOE3XM8437BWFVQIL7SA"
+      "FJNAJCFBZZ4U765Z8QI1VJ5IHOOHV3AZTZT39BT58FP8DNGU9W7XOM51XWAI8E1O"
+      "0MEXAPNFS3GQE2PDNW4MA3V1R6XVU28JE4IFFO0UOVUTXB55H3FWTFY1WCLH96FR"
+      "R90HKHQLT", p.to_string(36, true));
+  EXPECT_EQ("-1", number(1).neg().to_string(10, false));
+  EXPECT_EQ(p, parse_number(p.to_string(2, false), nullptr, 2));
+  EXPECT_EQ(p, parse_number(p.to_string(3, false), nullptr, 3));
+  EXPECT_EQ(p, parse_number(p.to_string(4, false), nullptr, 4));
+  EXPECT_EQ(p, parse_number(p.to_string(5, false), nullptr, 5));
+  EXPECT_EQ(p, parse_number(p.to_string(6, false), nullptr, 6));
+  EXPECT_EQ(p, parse_number(p.to_string(7, false), nullptr, 7));
+  EXPECT_EQ(p, parse_number(p.to_string(8, false), nullptr, 8));
+  EXPECT_EQ(p, parse_number(p.to_string(9, false), nullptr, 9));
+  EXPECT_EQ(p, parse_number(p.to_string(10, false), nullptr, 10));
+  EXPECT_EQ(p, parse_number(p.to_string(11, false), nullptr, 11));
+  EXPECT_EQ(p, parse_number(p.to_string(12, false), nullptr, 12));
+  EXPECT_EQ(p, parse_number(p.to_string(13, false), nullptr, 13));
+  EXPECT_EQ(p, parse_number(p.to_string(14, false), nullptr, 14));
+  EXPECT_EQ(p, parse_number(p.to_string(15, false), nullptr, 15));
+  EXPECT_EQ(p, parse_number(p.to_string(16, false), nullptr, 16));
+  EXPECT_EQ(p, parse_number(p.to_string(17, false), nullptr, 17));
+  EXPECT_EQ(p, parse_number(p.to_string(18, false), nullptr, 18));
+  EXPECT_EQ(p, parse_number(p.to_string(19, false), nullptr, 19));
+  EXPECT_EQ(p, parse_number(p.to_string(20, false), nullptr, 20));
+  EXPECT_EQ(p, parse_number(p.to_string(21, false), nullptr, 21));
+  EXPECT_EQ(p, parse_number(p.to_string(22, false), nullptr, 22));
+  EXPECT_EQ(p, parse_number(p.to_string(23, false), nullptr, 23));
+  EXPECT_EQ(p, parse_number(p.to_string(24, false), nullptr, 24));
+  EXPECT_EQ(p, parse_number(p.to_string(25, false), nullptr, 25));
+  EXPECT_EQ(p, parse_number(p.to_string(26, false), nullptr, 26));
+  EXPECT_EQ(p, parse_number(p.to_string(27, false), nullptr, 27));
+  EXPECT_EQ(p, parse_number(p.to_string(28, false), nullptr, 28));
+  EXPECT_EQ(p, parse_number(p.to_string(29, false), nullptr, 29));
+  EXPECT_EQ(p, parse_number(p.to_string(30, false), nullptr, 30));
+  EXPECT_EQ(p, parse_number(p.to_string(31, false), nullptr, 31));
+  EXPECT_EQ(p, parse_number(p.to_string(32, false), nullptr, 32));
+  EXPECT_EQ(p, parse_number(p.to_string(33, false), nullptr, 33));
+  EXPECT_EQ(p, parse_number(p.to_string(34, false), nullptr, 34));
+  EXPECT_EQ(p, parse_number(p.to_string(35, false), nullptr, 35));
+  EXPECT_EQ(p, parse_number(p.to_string(36, false), nullptr, 36));
 }
 
 TEST(Number, DivisionUnits) {
@@ -1317,9 +1328,9 @@ TEST(Number, ParseNumber) {
   EXPECT_EQ(number::zero(), parse_number(zero, &end, 0));
   EXPECT_EQ(&*zero.end(), end);
   std::string non_zero = "0327";
-  EXPECT_EQ("327", parse_number(non_zero, &end, 10).to_string(10));
+  EXPECT_EQ("327", parse_number(non_zero, &end, 10).to_string(10, false));
   EXPECT_EQ(&*non_zero.end(), end);
-  EXPECT_EQ("0", parse_number(non_zero, &end, 0).to_string(10));
+  EXPECT_EQ("0", parse_number(non_zero, &end, 0).to_string(10, false));
   EXPECT_EQ(&*non_zero.begin(), end);
 
   EXPECT_EQ("1234567890abcdefabcdef"_number,
@@ -1333,11 +1344,11 @@ TEST(Number, ParseNumber) {
   EXPECT_EQ(number::minus_one(), parse_number("-1", nullptr, 0));
   EXPECT_EQ(number::minus_one(), parse_number("-0x1", nullptr, 0));
   EXPECT_EQ("99999999999999999999999999999999999999999999999999999999999999999999999999999999",
-            parse_number("99999999999999999999999999999999999999999999999999999999999999999999999999999999", nullptr, 0).to_string(10));
+            parse_number("99999999999999999999999999999999999999999999999999999999999999999999999999999999", nullptr, 0).to_string(10, false));
   EXPECT_EQ("77777777777777777777777777777777777777777777777777777777777777777777777777777777",
-            parse_number("0o77777777777777777777777777777777777777777777777777777777777777777777777777777777", nullptr, 0).to_string(8));
+            parse_number("0o77777777777777777777777777777777777777777777777777777777777777777777777777777777", nullptr, 0).to_string(8, false));
   EXPECT_EQ("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", nullptr, 0).to_string(16));
+            parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", nullptr, 0).to_string(16, false));
 }
 
 }  // namespace

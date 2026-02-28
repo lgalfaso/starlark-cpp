@@ -1212,7 +1212,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           top.primary->set_int_value(lex.current_token().int_value());
           lex.next_token();
         } else if (is_current(token_type::kBigInt)) {
-          top.primary->set_big_int_value(lex.current_token().big_int_value().to_string(10));
+          top.primary->set_big_int_value(lex.current_token().big_int_value().to_string(10, false));
           lex.next_token();
         } else if (is_current(token_type::kIdentifier)) {
           set_identifier(*top.primary->mutable_identifier());
