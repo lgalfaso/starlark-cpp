@@ -303,42 +303,7 @@ starlark_obj* starlark_float::percent_equals_assign(const starlark_obj& other, c
 
 bool starlark_float::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
-  // This tries to follow the same format as Python.
-  std::string result;
-  if (std::isfinite(value)) {
-    result = std::format("{:.17g}", value);
-    // The formatting using %g is not the same as the one used by Python.
-    // The following modifications need to be performed after the intial formatting:
-    // - If the value is represented as an integer in non-scientific notation,
-    //   then it has to have one a period and at least one decimal number after the period.
-    // - If after the previous correction, there are more than 17 digit,
-    //   then convert to scientific notation
-    int start = 0;
-    if (result[start] == '-' || result[start] == '+') {
-        ++start;
-    }
-    int count = 0;
-    while (start + count < result.size() && std::isdigit(result[start + count])) {
-      count++;
-    }
-    if (start + count == result.size()) {
-      // If the output is an integer.
-      if (count == 17) {
-        // If the number of significant digits is already the max, convert to scientific notation.
-        result.erase(result.find_last_not_of('0') + 1);
-        if (result.size() > start + 1) {
-          result = result.substr(0, start + 1) + "." + result.substr(start + 1, result.size() - start - 1);
-        }
-        result += std::format("e{:+2d}", count - 1);
-      } else {
-        // If not, make sure that the representation is clear that this is a float.
-        result += ".0";
-      }
-    }
-  } else {
-    result = std::isnan(value) ? "nan" : std::format("{}", value);
-  }
-  print.append(result);
+  print.append(float_to_string(value, false));
   return false;
 }
 

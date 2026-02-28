@@ -30,6 +30,8 @@ starlark_obj* create_integer(starlark::bigint::number&& value, context& ctx);
 starlark_obj* create_integer_from_float(double value, context& ctx);
 starlark_obj* create_float(double value, context& ctx);
 
+std::string float_to_string(double value, bool uppercase);
+
 }  // namespace runtime
 }  // namespace starlark
 
