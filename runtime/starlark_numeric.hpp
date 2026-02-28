@@ -3,6 +3,8 @@
 #ifndef RUNTIME_STARLARK_NUMERIC_HPP_
 #define RUNTIME_STARLARK_NUMERIC_HPP_
 
+#include <string>
+
 #include "bigint/number.hpp"
 #include "runtime/starlark_object.hpp"
 
