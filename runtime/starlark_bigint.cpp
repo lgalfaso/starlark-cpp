@@ -334,7 +334,8 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
         error_callback.add_error(error_negative_shift());
         return nullptr;
       }
-      if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(shift) + value.bit_size()) {
+      if (log2_max_bigint() < shift ||
+          log2_max_bigint() < shift + value.bit_size()) {
         error_callback.add_error(error_overflow_too_many_digits());
         return nullptr;
       }
@@ -354,7 +355,8 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
         return nullptr;
       }
       auto int_shift = shift.at(0);
-      if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(int_shift) + value.bit_size()) {
+      if (log2_max_bigint() < int_shift ||
+          log2_max_bigint() < int_shift + value.bit_size()) {
         error_callback.add_error(error_overflow_too_many_digits());
         return nullptr;
       }

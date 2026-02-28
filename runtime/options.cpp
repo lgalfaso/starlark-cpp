@@ -9,7 +9,7 @@ namespace runtime {
 
 int64_t log2_max_bigint() {
   // TODO(lmirelmann): Make this configurable.
-  return 30;  // 2**30.
+  return 1'073'741'824;  // 2**30.
 }
 
 int64_t max_sequence_size() {

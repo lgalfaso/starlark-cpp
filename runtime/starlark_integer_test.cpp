@@ -303,9 +303,9 @@ TEST(StarlarkInteger, LShift) {
   ASSERT_NE(result, nullptr);
   EXPECT_TRUE(starlark_bigint(number::one() << 100).equals(*result));
 
-  result = one.less_less_equals_assign(starlark_integer(1 << 28), ctx, error_callback);
+  result = one.less_less_equals_assign(starlark_integer((1 << 30) - 1), ctx, error_callback);
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(starlark_bigint(number::one() << (1 << 28)).equals(*result));
+  EXPECT_TRUE(starlark_bigint(number::one() << ((1 << 30) - 1)).equals(*result));
 
   result = one.less_less_equals_assign(starlark_bigint(62), ctx, error_callback);
   ASSERT_NE(result, nullptr);
@@ -431,7 +431,7 @@ TEST(StarlarkInteger, ShiftInvalidInput) {
   EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
   error_callback.messages.clear();
 
-  result = starlark_integer(1).binary_lshift(starlark_integer(1 << 29), ctx, error_callback);
+  result = starlark_integer(1).binary_lshift(starlark_integer(1 << 30), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");

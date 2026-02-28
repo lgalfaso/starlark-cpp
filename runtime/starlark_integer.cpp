@@ -346,7 +346,8 @@ starlark_obj* less_less_op(int64_t value, const starlark_integer& this_obj, cons
       if (shift < left_shift_space) {
         return create_integer(value << shift, ctx);
       } else {
-        if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(shift) + 64 - left_shift_space) {
+        if (log2_max_bigint() < shift ||
+            log2_max_bigint() < shift + 64 - left_shift_space) {
           error_callback.add_error(error_overflow_too_many_digits());
           return nullptr;
         }
@@ -371,7 +372,8 @@ starlark_obj* less_less_op(int64_t value, const starlark_integer& this_obj, cons
       if (int_shift < left_shift_space) {
         return create_integer(value << int_shift, ctx);
       } else {
-        if (log2_max_bigint() < 64 - std::countl_zero<uint64_t>(int_shift) + 64 - left_shift_space) {
+        if (log2_max_bigint() < int_shift ||
+            log2_max_bigint() < int_shift + 64 - left_shift_space) {
           error_callback.add_error(error_overflow_too_many_digits());
           return nullptr;
         }
