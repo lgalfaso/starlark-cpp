@@ -29,6 +29,10 @@ std::string error_empty_dictionary(std::string_view fn_name) {
   return std::format("KeyError: '{}(): dictionary is empty'", fn_name);
 }
 
+std::string error_empty_set(std::string_view fn_name) {
+  return std::format("KeyError: '{} from an empty set'", fn_name);
+}
+
 std::string error_uniterable(std::string_view type) {
   return std::format("TypeError: '{}' object is not iterable", type);
 }

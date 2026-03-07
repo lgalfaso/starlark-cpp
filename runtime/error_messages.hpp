@@ -16,6 +16,7 @@ std::string error_unpackable(std::string_view type);
 std::string error_unhashable_key(std::string_view type, std::string_view key_type);
 std::string error_unhashable_value(std::string_view type, std::string_view value_type);
 std::string error_empty_dictionary(std::string_view fn_name);
+std::string error_empty_set(std::string_view fn_name);
 std::string error_uniterable(std::string_view type);
 std::string error_argument_uniterable(std::string_view type);
 std::string error_unsubscriptable(std::string_view type);

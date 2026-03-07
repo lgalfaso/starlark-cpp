@@ -26,7 +26,6 @@ class starlark_set : public starlark_obj {
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
-  std::pair<bool, bool> add(starlark_obj* element, error_fn& error_callback);
   bool contains(starlark_obj* obj) const;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_and(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
@@ -39,6 +38,23 @@ class starlark_set : public starlark_obj {
   starlark_obj* hat_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
+
+  std::pair<bool, bool> add(starlark_obj* element, error_fn& error_callback);
+  bool clear(error_fn& error_callback);
+  starlark_obj* difference(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const;
+  bool difference_update(std::vector<starlark_obj*> others, context& ctx, error_fn& error_callback);
+  bool discard(starlark_obj* element, error_fn& error_callback);
+  starlark_obj* intersection(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const;
+  bool intersection_update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
+  std::pair<bool, bool> isdisjoint(starlark_obj* other, context& ctx, error_fn& error_callback) const;
+  std::pair<bool, bool> issubset(starlark_obj* other, context& ctx, error_fn& error_callback) const;
+  std::pair<bool, bool> issuperset(starlark_obj* other, context& ctx, error_fn& error_callback) const;
+  starlark_obj* pop(error_fn& error_callback);
+  bool remove(starlark_obj* element, error_fn& error_callback);
+  starlark_obj* symmetric_difference(starlark_obj* other, context& ctx, error_fn& error_callback) const;
+  bool symmetric_difference_update(starlark_obj* other, context& ctx, error_fn& error_callback);
+  starlark_obj* union_(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
+  bool update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
 
   class starlark_set_iterator : public starlark_iterator {
    public:
