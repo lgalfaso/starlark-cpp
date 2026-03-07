@@ -321,26 +321,26 @@ starlark_obj* starlark_list::slice_range(const starlark_obj& start, const starla
   return result;
 }
 
-bool starlark_list::append(starlark_obj* element, error_fn& error_callback) {
+status starlark_list::append(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
-    return false;
+    return error_status();
   }
   // TODO(lmirelmann): Check that the number of elements does not go over the maximum.
   values.push_back(element);
-  return true;
+  return ok_status();
 }
 
-bool starlark_list::clear(error_fn& error_callback) {
+status starlark_list::clear(error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return false;
+    return error_status();
   }
   values.clear();
-  return true;
+  return ok_status();
 }
 
-bool starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_callback) {
+status starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
-    return false;
+    return error_status();
   }
   if (other->type() == type()) {
     starlark_list* lother = static_cast<starlark_list*>(other);
@@ -350,14 +350,14 @@ bool starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_ca
   } else {
     auto* it = other->get_iterator(true, ctx, error_callback);
     if (it == nullptr) {
-      return false;
+      return error_status();
     }
     while (it->has_next()) {
       values.push_back(it->next());
     }
     it->end_iterator();
   }
-  return true;
+  return ok_status();
 }
 
 starlark_obj* starlark_list::index(starlark_obj* element, int64_t start, int64_t end, context& ctx, error_fn& error_callback) const {
@@ -380,9 +380,9 @@ starlark_obj* starlark_list::index(starlark_obj* element, int64_t start, int64_t
   return nullptr;
 }
 
-bool starlark_list::insert(starlark_obj* element, int64_t pos, error_fn& error_callback) {
+status starlark_list::insert(starlark_obj* element, int64_t pos, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
-    return false;
+    return error_status();
   }
   if (pos < 0) {
     pos = std::max<int64_t>(pos + values.size(), 0);
@@ -390,7 +390,7 @@ bool starlark_list::insert(starlark_obj* element, int64_t pos, error_fn& error_c
     pos = std::min<int64_t>(pos, values.size());
   }
   values.insert(values.begin() + pos, element);
-  return true;
+  return ok_status();
 }
 
 starlark_obj* starlark_list::pop(int64_t idx, error_fn& error_callback) {
@@ -409,18 +409,18 @@ starlark_obj* starlark_list::pop(int64_t idx, error_fn& error_callback) {
   return result;
 }
 
-bool starlark_list::remove(starlark_obj* element, error_fn& error_callback) {
+status starlark_list::remove(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return false;
+    return error_status();
   }
   for (auto it = values.begin(); it != values.end(); ++it) {
     if ((*it)->equals(*element)) {
       values.erase(it);
-      return true;
+      return ok_status();
     }
   }
   error_callback.add_error(error_item_not_in_collection(type(), "remove"));
-  return false;
+  return error_status();
 }
 
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
@@ -499,7 +499,7 @@ starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::list_t);
-  if (!static_cast<starlark_list*>(this_obj)->append(pos_args.front(), error_callback)) {
+  if (!static_cast<starlark_list*>(this_obj)->append(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -511,7 +511,7 @@ starlark_obj* starlark_list_fn_clear(starlark_obj* this_obj, const starlark_obj:
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::list_t);
-  if (!static_cast<starlark_list*>(this_obj)->clear(error_callback)) {
+  if (!static_cast<starlark_list*>(this_obj)->clear(error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -523,7 +523,7 @@ starlark_obj* starlark_list_fn_extend(starlark_obj* this_obj, const starlark_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::list_t);
-  if (!static_cast<starlark_list*>(this_obj)->extend(pos_args.front(), ctx, error_callback)) {
+  if (!static_cast<starlark_list*>(this_obj)->extend(pos_args.front(), ctx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -558,7 +558,7 @@ starlark_obj* starlark_list_fn_insert(starlark_obj* this_obj, const starlark_obj
   if (!to_int64_with_clamping_for_index(*pos_args.front(), idx, error_callback)) {
     return nullptr;
   }
-  if (!static_cast<starlark_list*>(this_obj)->insert(pos_args[1], idx, error_callback)) {
+  if (!static_cast<starlark_list*>(this_obj)->insert(pos_args[1], idx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -582,7 +582,7 @@ starlark_obj* starlark_list_fn_remove(starlark_obj* this_obj, const starlark_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::list_t);
-  if (!static_cast<starlark_list*>(this_obj)->remove(pos_args.front(), error_callback)) {
+  if (!static_cast<starlark_list*>(this_obj)->remove(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();

@@ -308,7 +308,7 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
   }
   starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
   starlark_obj* iterable = pos_args.empty() ? nullptr : pos_args.front();
-  if (result->update(iterable, named_args, ctx, error_callback)) {
+  if (!result->update(iterable, named_args, ctx, error_callback).ok()) {
     return nullptr;
   }
   return result;
@@ -735,7 +735,7 @@ starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   auto* result = Arena::Create<starlark_set>(&ctx.arena());
   while (it->has_next()) {
-    if (result->add(it->next(), error_callback).second) {
+    if (!result->add(it->next(), error_callback).ok()) {
       return nullptr;
     }
   }

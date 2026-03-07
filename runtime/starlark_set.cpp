@@ -267,23 +267,23 @@ starlark_iterator* starlark_set::get_iterator(bool produce_error, context& ctx, 
   return Arena::Create<starlark_set_iterator>(&ctx.arena(), this);
 }
 
-std::pair<bool, bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
+status_or<bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
-    return std::make_pair(false, true);
+    return status_or<bool>(status_code::kError);
   }
   if (element->hash() == -1) {
     error_callback.add_error(error_unhashable_value(type(), element->type()));
-    return std::make_pair(false, true);
+    return status_or<bool>(status_code::kError);
   }
-  return std::make_pair(values.insert(element).second, false);
+  return status_or<bool>(values.insert(element).second);
 }
 
-bool starlark_set::clear(error_fn& error_callback) {
+status starlark_set::clear(error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return true;
+    return error_status();
   }
   values.clear();
-  return false;
+  return ok_status();
 }
 
 starlark_obj* starlark_set::difference(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const {
@@ -297,7 +297,7 @@ starlark_obj* starlark_set::difference(const std::vector<starlark_obj*>& others,
       return nullptr;
     }
     while (it->has_next()) {
-      if (result->discard(it->next(), error_callback)) {
+      if (!result->discard(it->next(), error_callback).ok()) {
         it->end_iterator();
         return nullptr;
       }
@@ -307,9 +307,9 @@ starlark_obj* starlark_set::difference(const std::vector<starlark_obj*>& others,
   return result;
 }
 
-bool starlark_set::difference_update(std::vector<starlark_obj*> others, context& ctx, error_fn& error_callback) {
+status starlark_set::difference_update(std::vector<starlark_obj*> others, context& ctx, error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return true;
+    return error_status();
   }
   for (auto* other : others) {
     if (other == this) {
@@ -318,29 +318,29 @@ bool starlark_set::difference_update(std::vector<starlark_obj*> others, context&
     }
     auto* it = other->get_iterator(true, ctx, error_callback);
     if (it == nullptr) {
-      return true;
+      return error_status();
     }
     while (it->has_next()) {
-      if (discard(it->next(), error_callback)) {
+      if (!discard(it->next(), error_callback).ok()) {
         it->end_iterator();
-        return true;
+        return error_status();
       }
     }
     it->end_iterator();
   }
-  return false;
+  return ok_status();
 }
 
-bool starlark_set::discard(starlark_obj* element, error_fn& error_callback) {
+status starlark_set::discard(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return true;
+    return error_status();
   }
   if (element->hash() == -1) {
     error_callback.add_error(error_unhashable_value(type(), element->type()));
-    return true;
+    return error_status();
   }
   values.erase(element);
-  return false;
+  return ok_status();
 }
 
 starlark_obj* starlark_set::intersection(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const {
@@ -383,9 +383,9 @@ starlark_obj* starlark_set::intersection(const std::vector<starlark_obj*>& other
   return result;
 }
 
-bool starlark_set::intersection_update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
+status starlark_set::intersection_update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return true;
+    return error_status();
   }
   for (auto* other : others) {
     if (other == this) {
@@ -393,7 +393,7 @@ bool starlark_set::intersection_update(const std::vector<starlark_obj*>& others,
     }
     auto* it = other->get_iterator(true, ctx, error_callback);
     if (it == nullptr) {
-      return true;
+      return error_status();
     }
     set_t other_as_set;
     while (it->has_next()) {
@@ -401,7 +401,7 @@ bool starlark_set::intersection_update(const std::vector<starlark_obj*>& others,
       if (element->hash() == -1) {
         it->end_iterator();
         error_callback.add_error(error_unhashable_value(type(), element->type()));
-        return true;
+        return error_status();
       }
       if (values.contains(element)) {
         other_as_set.insert(element);
@@ -421,13 +421,13 @@ bool starlark_set::intersection_update(const std::vector<starlark_obj*>& others,
       values.erase(value);
     }
   }
-  return false;
+  return ok_status();
 }
 
-std::pair<bool, bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx, error_fn& error_callback) const {
+status_or<bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx, error_fn& error_callback) const {
   auto* it = other->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
-    return std::make_pair(true, false);
+    return status_or<bool>(status_code::kError);
   }
   bool result = true;
   while (it->has_next()) {
@@ -435,7 +435,7 @@ std::pair<bool, bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx
     if (element->hash() == -1) {
       it->end_iterator();
       error_callback.add_error(error_unhashable_value(type(), element->type()));
-      return std::make_pair(true, false);
+      return status_or<bool>(status_code::kError);
     }
     if (values.contains(element)) {
       // Do not terminate early as the spec mandates that we have to check that every element is hashable.
@@ -443,13 +443,13 @@ std::pair<bool, bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx
     }
   }
   it->end_iterator();
-  return std::make_pair(false, result);
+  return status_or<bool>(result);
 }
 
-std::pair<bool, bool> starlark_set::issubset(starlark_obj* other, context& ctx, error_fn& error_callback) const {
+status_or<bool> starlark_set::issubset(starlark_obj* other, context& ctx, error_fn& error_callback) const {
   auto* it = other->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
-    return std::make_pair(true, false);
+    return status_or<bool>(status_code::kError);
   }
   set_t other_as_set;
   while (it->has_next()) {
@@ -457,21 +457,20 @@ std::pair<bool, bool> starlark_set::issubset(starlark_obj* other, context& ctx, 
     if (element->hash() == -1) {
       it->end_iterator();
       error_callback.add_error(error_unhashable_value(type(), element->type()));
-      return std::make_pair(true, false);
+      return status_or<bool>(status_code::kError);
     }
     if (values.contains(element)) {
       other_as_set.insert(element);
     }
   }
   it->end_iterator();
-
-  return std::make_pair(false, values.size() == other_as_set.size());
+  return status_or<bool>(values.size() == other_as_set.size());
 }
 
-std::pair<bool, bool> starlark_set::issuperset(starlark_obj* other, context& ctx, error_fn& error_callback) const {
+status_or<bool> starlark_set::issuperset(starlark_obj* other, context& ctx, error_fn& error_callback) const {
   auto* it = other->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
-    return std::make_pair(true, false);
+    return status_or<bool>(status_code::kError);
   }
   bool result = true;
   while (it->has_next()) {
@@ -479,7 +478,7 @@ std::pair<bool, bool> starlark_set::issuperset(starlark_obj* other, context& ctx
     if (element->hash() == -1) {
       it->end_iterator();
       error_callback.add_error(error_unhashable_value(type(), element->type()));
-      return std::make_pair(true, false);
+      return status_or<bool>(status_code::kError);
     }
     if (!values.contains(element)) {
       // Do not terminate early as the spec mandates that we have to check that every element is hashable.
@@ -487,7 +486,7 @@ std::pair<bool, bool> starlark_set::issuperset(starlark_obj* other, context& ctx
     }
   }
   it->end_iterator();
-  return std::make_pair(false, result);
+  return status_or<bool>(result);
 }
 
 starlark_obj* starlark_set::pop(error_fn& error_callback) {
@@ -503,19 +502,19 @@ starlark_obj* starlark_set::pop(error_fn& error_callback) {
   return result;
 }
 
-bool starlark_set::remove(starlark_obj* element, error_fn& error_callback) {
+status starlark_set::remove(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return true;
+    return error_status();
   }
   if (element->hash() == -1) {
     error_callback.add_error(error_unhashable_value(type(), element->type()));
-    return true;
+    return error_status();
   }
   if (values.erase(element) == 0) {
     error_callback.add_error(error_dictionary_key_not_found(element->repr()));
-    return true;
+    return error_status();
   }
-  return false;
+  return ok_status();
 }
 
 starlark_obj* starlark_set::symmetric_difference(starlark_obj* other, context& ctx, error_fn& error_callback) const {
@@ -532,7 +531,7 @@ starlark_obj* starlark_set::symmetric_difference(starlark_obj* other, context& c
     if (values.contains(element)) {
       result->values.erase(element);
     } else {
-      if (result->add(element, error_callback).second) {
+      if (!result->add(element, error_callback).ok()) {
         it->end_iterator();
         return nullptr;
       }
@@ -542,17 +541,17 @@ starlark_obj* starlark_set::symmetric_difference(starlark_obj* other, context& c
   return result;
 }
 
-bool starlark_set::symmetric_difference_update(starlark_obj* other, context& ctx, error_fn& error_callback) {
+status starlark_set::symmetric_difference_update(starlark_obj* other, context& ctx, error_fn& error_callback) {
   if (!can_modify("update", error_callback)) {
-    return true;
+    return error_status();
   }
   if (other == this) {
     values.clear();
-    return false;
+    return ok_status();
   }
   auto* it = other->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
-    return true;
+    return error_status();
   }
   set_t original_values(values);
   while (it->has_next()) {
@@ -560,14 +559,14 @@ bool starlark_set::symmetric_difference_update(starlark_obj* other, context& ctx
     if (original_values.contains(element)) {
       values.erase(element);
     } else {
-      if (add(element, error_callback).second) {
+      if (!add(element, error_callback).ok()) {
         it->end_iterator();
-        return true;
+        return error_status();
       }
     }
   }
   it->end_iterator();
-  return false;
+  return ok_status();
 }
 
 starlark_obj* starlark_set::union_(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
@@ -581,7 +580,7 @@ starlark_obj* starlark_set::union_(const std::vector<starlark_obj*>& others, con
       return nullptr;
     }
     while (it->has_next()) {
-      if (result->add(it->next(), error_callback).second) {
+      if (!result->add(it->next(), error_callback).ok()) {
         it->end_iterator();
         return nullptr;
       }
@@ -591,9 +590,9 @@ starlark_obj* starlark_set::union_(const std::vector<starlark_obj*>& others, con
   return result;
 }
 
-bool starlark_set::update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
+status starlark_set::update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
-    return true;
+    return error_status();
   }
   for (auto* other : others) {
     if (other == this) {
@@ -601,17 +600,17 @@ bool starlark_set::update(const std::vector<starlark_obj*>& others, context& ctx
     }
     auto* it = other->get_iterator(true, ctx, error_callback);
     if (it == nullptr) {
-      return true;
+      return error_status();
     }
     while (it->has_next()) {
-      if (add(it->next(), error_callback).second) {
+      if (!add(it->next(), error_callback).ok()) {
         it->end_iterator();
-        return true;
+        return error_status();
       }
     }
     it->end_iterator();
   }
-  return false;
+  return ok_status();
 }
 
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
@@ -676,7 +675,7 @@ starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::po
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->add(pos_args.front(), error_callback).second) {
+  if (!static_cast<starlark_set*>(this_obj)->add(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -688,7 +687,7 @@ starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->clear(error_callback)) {
+  if (!static_cast<starlark_set*>(this_obj)->clear(error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -709,7 +708,7 @@ starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const st
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->difference_update(pos_args, ctx, error_callback)) {
+  if (!static_cast<starlark_set*>(this_obj)->difference_update(pos_args, ctx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -721,7 +720,7 @@ starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->discard(pos_args.front(), error_callback)) {
+  if (!static_cast<starlark_set*>(this_obj)->discard(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -742,7 +741,7 @@ starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const 
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->intersection_update(pos_args, ctx, error_callback)) {
+  if (!static_cast<starlark_set*>(this_obj)->intersection_update(pos_args, ctx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -754,11 +753,11 @@ starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  auto [error, result] = static_cast<starlark_set*>(this_obj)->isdisjoint(pos_args.front(), ctx, error_callback);
-  if (error) {
+  auto result = static_cast<starlark_set*>(this_obj)->isdisjoint(pos_args.front(), ctx, error_callback);
+  if (!result.ok()) {
     return nullptr;
   }
-  return result ? ctx.true_value() : ctx.false_value();
+  return *result ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -767,11 +766,11 @@ starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_ob
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  auto [error, result] = static_cast<starlark_set*>(this_obj)->issubset(pos_args.front(), ctx, error_callback);
-  if (error) {
+  auto result = static_cast<starlark_set*>(this_obj)->issubset(pos_args.front(), ctx, error_callback);
+  if (!result.ok()) {
     return nullptr;
   }
-  return result ? ctx.true_value() : ctx.false_value();
+  return *result ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -780,11 +779,11 @@ starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  auto [error, result] = static_cast<starlark_set*>(this_obj)->issuperset(pos_args.front(), ctx, error_callback);
-  if (error) {
+  auto result = static_cast<starlark_set*>(this_obj)->issuperset(pos_args.front(), ctx, error_callback);
+  if (!result.ok()) {
     return nullptr;
   }
-  return result ? ctx.true_value() : ctx.false_value();
+  return *result ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -802,7 +801,7 @@ starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj:
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->remove(pos_args.front(), error_callback)) {
+  if (!static_cast<starlark_set*>(this_obj)->remove(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -823,7 +822,7 @@ starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->symmetric_difference_update(pos_args.front(), ctx, error_callback)) {
+  if (!static_cast<starlark_set*>(this_obj)->symmetric_difference_update(pos_args.front(), ctx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -844,7 +843,7 @@ starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj:
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::set_t);
-  if (static_cast<starlark_set*>(this_obj)->update(pos_args, ctx, error_callback)) {
+  if (!static_cast<starlark_set*>(this_obj)->update(pos_args, ctx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();

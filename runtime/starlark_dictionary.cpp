@@ -186,12 +186,12 @@ void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& el
   values_.insert(&const_cast<starlark_obj&>(idx), &element);
 }
 
-bool starlark_dictionary::clear(error_fn& error_callback) {
+status starlark_dictionary::clear(error_fn& error_callback) {
   if (!can_modify("delete", error_callback)) {
-    return false;
+    return error_status();
   }
   values_.clear();
-  return true;
+  return ok_status();
 }
 
 starlark_obj* starlark_dictionary::get(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) const {
@@ -277,9 +277,9 @@ starlark_obj* starlark_dictionary::setdefault(starlark_obj* key, starlark_obj* d
   return default_value;
 }
 
-bool starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
-    return true;
+    return error_status();
   }
   if (iterable != nullptr) {
     // This is a special case. This should be extended to understand any mapping, but at the moment only `dictionary` implements it.
@@ -292,33 +292,33 @@ bool starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::nam
       int pos = 0;
       auto* it = iterable->get_iterator(true, ctx, error_callback);
       if (it == nullptr) {
-        return true;
+        return error_status();
       }
       while (it->has_next()) {
         auto* kv = it->next();
         assert(kv != nullptr);
         auto* it2 = kv->get_iterator(true, ctx, error_callback);
         if (it2 == nullptr) {
-          return true;
+          return error_status();
         }
         if (!it2->has_next()) {
           error_callback.add_error(error_dictionary_update_sequence(pos, 0, 2));
-          return true;
+          return error_status();
         }
         auto* key = it2->next();
         assert(key != nullptr);
         if (!it2->has_next()) {
           error_callback.add_error(error_dictionary_update_sequence(pos, 1, 2));
-          return true;
+          return error_status();
         }
         auto* value = it2->next();
         assert(value != nullptr);
         if (it2->has_next()) {
           error_callback.add_error(error_dictionary_update_sequence(pos, kv->len(false, error_callback), 2));
-          return true;
+          return error_status();
         }
         if (insert(key, value, error_callback).second) {
-          return true;
+          return error_status();
         }
         it2->end_iterator();
         pos++;
@@ -329,7 +329,7 @@ bool starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::nam
   for (auto& [key, value] : named_args) {
     values_.insert(Arena::Create<starlark_string>(&ctx.arena(), key), value);
   }
-  return false;
+  return ok_status();
 }
 
 starlark_obj* starlark_dictionary::values(context& ctx, error_fn& error_callback) const {
@@ -419,7 +419,7 @@ starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlar
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::dict_t);
-  if (!static_cast<starlark_dictionary*>(this_obj)->clear(error_callback)) {
+  if (!static_cast<starlark_dictionary*>(this_obj)->clear(error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
@@ -495,7 +495,7 @@ starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starla
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::dict_t);
   starlark_obj* pos_arg = pos_args.empty() ? nullptr : pos_args.front();
-  if (static_cast<starlark_dictionary*>(this_obj)->update(pos_arg, named_args, ctx, error_callback)) {
+  if (!static_cast<starlark_dictionary*>(this_obj)->update(pos_arg, named_args, ctx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();
