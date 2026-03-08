@@ -302,6 +302,10 @@ std::string error_integer_or_like(std::string_view type, std::string_view other_
   return std::format("TypeError: argument should be integer or {}-like object, not '{}'", type, other_type);
 }
 
+std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type) {
+  return std::format("TypeError: {}() argument {} must be {}, not {}", fn_name, arg_num, expected_type, actual_type);
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

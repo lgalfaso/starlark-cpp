@@ -587,6 +587,33 @@ std::string_view starlark_string::as_string() const {
   return value;
 }
 
+int64_t starlark_string::count(std::string_view sub, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  } else {
+    start = std::min<int64_t>(start, value.size());
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    start = end + 1;
+  }
+  if (sub.empty()) {
+    return end - start + 1;
+  }
+  std::string_view view = value;
+  std::string_view reduced_view = view.substr(0, end);
+  int64_t count = 0;
+  for (auto pos = reduced_view.find(sub, start); start <= end && pos != std::string_view::npos; pos = reduced_view.find(sub, start)) {
+    count++;
+    start = pos + sub.length();
+  }
+  return count;
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -629,9 +656,32 @@ starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): This is not the right implementation of string::count.
+  if (!no_named_args(named_args, error_callback, "string.count") ||
+      !min_args(pos_args, error_callback, "count", 1) ||
+      !max_args(pos_args, error_callback, "count", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
-  return create_integer(this_obj->as_string().size(), ctx);
+  std::string sub;
+  if (pos_args.front()->type() != starlark_types::string_t) {
+    error_callback.add_error(error_argument_must_be_type("count", 1, starlark_types::string_t, pos_args.front()->type()));
+    return nullptr;
+  }
+  sub += pos_args.front()->as_string();
+  int64_t start = std::numeric_limits<int64_t>::min();
+  int64_t end = std::numeric_limits<int64_t>::max();
+  if (pos_args.size() >= 2) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+      return nullptr;
+    }
+    if (pos_args.size() >= 3) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+        return nullptr;
+      }
+    }
+  }
+  return create_integer(static_cast<starlark_string*>(this_obj)->count(sub, start, end), ctx);
 }
 
 starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

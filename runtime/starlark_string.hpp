@@ -38,6 +38,8 @@ class starlark_string : public starlark_obj {
   starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
   std::string_view as_string() const override;
 
+  int64_t count(std::string_view sub, int64_t start, int64_t end) const;
+
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;

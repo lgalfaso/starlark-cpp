@@ -1,7 +1,7 @@
 a = "wxyz"
-assert_eq(a.count(), 4)
+assert_eq(a.count(""), 5)
 c = "abc".count
-assert_eq(c(), 3)
+assert_eq(c(""), 4)
 
 assert_fail("""
 "abc".count = 3
