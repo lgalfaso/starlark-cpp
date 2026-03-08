@@ -17,6 +17,7 @@
 #include "containers/linked_hash_map.hpp"
 #include "google/protobuf/arena.h"
 #include "runtime/error_fn.hpp"
+#include "runtime/status.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -231,7 +232,7 @@ class starlark_obj {
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
   int64_t inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
-  std::tuple<int64_t, int64_t, int64_t, bool> inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const;
+  status_or<std::tuple<int64_t, int64_t, int64_t>> inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const;
 
  private:
   static const std::map<std::string, fn*, std::less<>>& method_refs();

@@ -566,7 +566,7 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
   }
 }
 
-std::tuple<int64_t, int64_t, int64_t, bool> starlark_obj::inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const {
+status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const {
   /*
   This implementation does not fully folllow the same logic as Bazel and aligns better with Python.
   The discrepancies are not significant and mostly impact the representation of `range` for some adge cases.
@@ -575,21 +575,21 @@ std::tuple<int64_t, int64_t, int64_t, bool> starlark_obj::inner_slice_range(cons
   */
   int64_t i_stride = 1;
   if (!to_int64_with_clamping_for_index_allow_none(stride, i_stride, error_callback)) {
-    return std::make_tuple(0, 0, 0, false);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
   }
   if (i_stride == 0) {
     error_callback.add_error(error_step_non_zero());
-    return std::make_tuple(0, 0, 0, false);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
   }
   int64_t i_start = i_stride > 0 ? 0 : len - 1;
   int64_t i_end = i_stride > 0 ? len : -len - 1;
   int64_t lower = i_stride > 0 ? 0 : -1;
   int64_t upper = i_stride > 0 ? len : lower + len;
   if (!to_int64_with_clamping_for_index_allow_none(start, i_start, error_callback)) {
-    return std::make_tuple(0, 0, 0, false);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
   }
   if (!to_int64_with_clamping_for_index_allow_none(stop, i_end, error_callback)) {
-    return std::make_tuple(0, 0, 0, false);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
   }
   if (i_start < 0) {
     i_start = std::max<int64_t>(i_start + len, lower);
@@ -601,7 +601,7 @@ std::tuple<int64_t, int64_t, int64_t, bool> starlark_obj::inner_slice_range(cons
   } else {
     i_end = std::min<int64_t>(i_end, upper);
   }
-  return std::make_tuple(i_start, i_end, i_stride, true);
+  return status_or<std::tuple<int64_t, int64_t, int64_t>>(std::make_tuple(i_start, i_end, i_stride));
 }
 
 size_t starlark_hash_op::operator()(const starlark_obj* value) const {

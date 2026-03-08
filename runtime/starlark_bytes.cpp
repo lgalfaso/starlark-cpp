@@ -243,10 +243,13 @@ starlark_obj* starlark_bytes::index(const starlark_obj& other, context& ctx, err
 }
 
 starlark_obj* starlark_bytes::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  auto [i_start, i_end, i_stride, valid] = inner_slice_range(start, stop, stride, value.size(), error_callback);
-  if (!valid) {
+  auto slice_result = inner_slice_range(start, stop, stride, value.size(), error_callback);
+  if (!slice_result.ok()) {
     return nullptr;
   }
+  auto i_start = std::get<0>(*slice_result);
+  auto i_end = std::get<1>(*slice_result);
+  auto i_stride = std::get<2>(*slice_result);
 
   decltype(value) result;
   if (i_stride > 0) {

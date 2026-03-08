@@ -100,6 +100,7 @@ cc_library(
         ":error_messages",
         ":levenshtein",
         ":starlark_types",
+        ":status",
         "//bigint:number",
         "//containers:linked_hash_map",
         "@protobuf",

@@ -302,10 +302,13 @@ void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element,
 }
 
 starlark_obj* starlark_list::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  auto [i_start, i_end, i_stride, valid] = inner_slice_range(start, stop, stride, values.size(), error_callback);
-  if (!valid) {
+  auto slice_result = inner_slice_range(start, stop, stride, values.size(), error_callback);
+  if (!slice_result.ok()) {
     return nullptr;
   }
+  auto i_start = std::get<0>(*slice_result);
+  auto i_end = std::get<1>(*slice_result);
+  auto i_stride = std::get<2>(*slice_result);
 
   // TODO(lmirelmann): Pre-calculate the size.
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
