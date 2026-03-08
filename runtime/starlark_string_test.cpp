@@ -210,33 +210,33 @@ TEST(StarlarkString, BinaryInErrors) {
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_string(""sv), error_callback));
+    EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_bytes(""sv), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'string'");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not bytes");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_integer(-1), error_callback));
+    EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_integer(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_integer(256), error_callback));
+    EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_integer(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_bigint(-1), error_callback));
+    EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_bigint(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
-    EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_bigint(256), error_callback));
+    EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_bigint(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
   }
 }
 
