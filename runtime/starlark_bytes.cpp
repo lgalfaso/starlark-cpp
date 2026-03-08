@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include <functional>
+#include <limits>
 #include <map>
 #include <string>
 #include <utility>
@@ -14,6 +15,7 @@
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
+#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -149,14 +151,14 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
     }
     case starlark_numeric_type::kNotNumeric: {
       if (other.type() != type()) {
-        error_callback.add_error(error_like_required(type(), other.type()));
+        error_callback.add_error(error_integer_or_like(type(), other.type()));
         return false;
       }
       const starlark_bytes& s_other = static_cast<const starlark_bytes&>(other);
       return value.contains(s_other.value);
     }
     default:
-     error_callback.add_error(error_like_required(type(), other.type()));
+     error_callback.add_error(error_integer_or_like(type(), other.type()));
      return false;
   }
 }
@@ -263,6 +265,58 @@ std::string_view starlark_bytes::as_string() const {
   return value;
 }
 
+int64_t starlark_bytes::count(std::string_view sub, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  } else {
+    start = std::min<int64_t>(start, value.size());
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    start = end + 1;
+  }
+  if (sub.empty()) {
+    return end - start + 1;
+  }
+  std::string_view view = value;
+  std::string_view reduced_view = view.substr(0, end);
+  int64_t count = 0;
+  for (auto pos = reduced_view.find(sub, start); start <= end && pos != std::string_view::npos; pos = reduced_view.find(sub, start)) {
+    count++;
+    start = pos + sub.length();
+  }
+  return count;
+}
+
+/*
+TODO(lmirelmann): Implement:
+
+starlark_obj* starlark_bytes::elems(context& ctx) const;
+bool starlark_bytes::endswith(std::vector<std::string_view> ends, int64_t start, int64_t end) const;
+int64_t starlark_bytes::find(std::string_view sub, int64_t start, int64_t end) const;
+starlark_obj* starlark_bytes::join(std::vector<std::string_view> elements, context& ctx) const;
+starlark_obj* starlark_bytes::lstrip(context& ctx) const;
+starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) const;
+starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx) const;
+starlark_obj* starlark_bytes::replace(std::string_view old, std::string_view new_, int64_t count) const;
+int64_t starlark_bytes::rfind(std::string_view sub, int64_t start, int64_t end) const;
+starlark_obj* starlark_bytes::rpartition(std::string_view sub, context& ctx) const;
+starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const;
+starlark_obj* starlark_bytes::rsplit(std::string_view sep,int64_t maxsplit, context& ctx) const;
+starlark_obj* starlark_bytes::rstrip(context& ctx) const;
+starlark_obj* starlark_bytes::rstrip(std::string_view cutset, context& ctx) const;
+starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const;
+starlark_obj* starlark_bytes::split(std::string_view sep,int64_t maxsplit, context& ctx) const;
+bool starlark_bytes::startswith(std::vector<std::string_view> begins, int64_t start, int64_t end) const;
+starlark_obj* starlark_bytes::strip(context& ctx) const;
+starlark_obj* starlark_bytes::strip(std::string_view cutset, context& ctx) const;
+*/
+
+
 bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
       value == (static_cast<const starlark_bytes*>(other))->value;
@@ -287,9 +341,58 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::inner_hash() c
 }
 
 starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.count") ||
+      !min_args(pos_args, error_callback, "count", 1) ||
+      !max_args(pos_args, error_callback, "count", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  std::string sub;
+  switch (pos_args.front()->numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      auto other_value = pos_args.front()->as_int64();
+      if (other_value < 0 || 255 < other_value) {
+        error_callback.add_error(error_byte_in_range());
+        return nullptr;
+      }
+      sub += static_cast<char>(other_value);
+      break;
+    }
+    case starlark_numeric_type::kBigInt: {
+      auto& other_value = pos_args.front()->as_bigint();
+      if (other_value.sign() || other_value.bit_size() >= 8) {
+        error_callback.add_error(error_byte_in_range());
+        return nullptr;
+      }
+      sub += static_cast<char>(other_value.at(0));
+      break;
+    }
+    case starlark_numeric_type::kNotNumeric: {
+      if (pos_args.front()->type() != starlark_types::bytes_t) {
+        error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, pos_args.front()->type()));
+        return nullptr;
+      }
+      sub += pos_args.front()->as_string();
+      break;
+    }
+    default:
+     error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, pos_args.front()->type()));
+     return nullptr;
+  }
+  int64_t start = std::numeric_limits<int64_t>::min();
+  int64_t end = std::numeric_limits<int64_t>::max();
+  if (pos_args.size() >= 2) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+      return nullptr;
+    }
+    if (pos_args.size() >= 3) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+        return nullptr;
+      }
+    }
+  }
+  return create_integer(static_cast<starlark_bytes*>(this_obj)->count(sub, start, end), ctx);
 }
 
 starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

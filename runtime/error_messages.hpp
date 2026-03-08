@@ -78,7 +78,6 @@ std::string error_step_non_zero();
 std::string error_op_in_loop(std::string_view type, std::string_view op);
 std::string error_mutate_frozen_value(std::string_view type);
 
-std::string error_like_required(std::string_view like_type, std::string_view actual_type);
 std::string error_no_concat(std::string_view this_type, std::string_view other_type);
 std::string error_no_concat(std::string_view this_type, std::string_view other_type, std::string_view possible_type);
 std::string error_no_multiply_sequence(std::string_view other_type);
@@ -94,6 +93,8 @@ std::string_view error_not_all_arguments_converted_during_string_formatting();
 std::string error_unsupported_format_character(char c, std::size_t pos);
 std::string error_format_integer_is_required(char format, std::string_view type);
 std::string error_format_real_is_required(char format, std::string_view type);
+
+std::string error_integer_or_like(std::string_view type, std::string_view other_type);
 
 }  // namespace runtime
 }  // namespace starlark

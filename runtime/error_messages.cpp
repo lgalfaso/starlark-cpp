@@ -246,10 +246,6 @@ std::string error_mutate_frozen_value(std::string_view type) {
   return std::format("TypeError: trying to mutate a frozen {} value", type);
 }
 
-std::string error_like_required(std::string_view like_type, std::string_view actual_type) {
-  return std::format("TypeError: a {}-like object is required, not '{}'", like_type, actual_type);
-}
-
 std::string error_no_concat(std::string_view this_type, std::string_view other_type) {
   return std::format("TypeError: can't concat {} to {}", other_type, this_type);
 }
@@ -300,6 +296,10 @@ std::string error_format_integer_is_required(char format, std::string_view type)
 
 std::string error_format_real_is_required(char format, std::string_view type) {
   return std::format("TypeError: %{} format: a real number is required, not {}", format, type);
+}
+
+std::string error_integer_or_like(std::string_view type, std::string_view other_type) {
+  return std::format("TypeError: argument should be integer or {}-like object, not '{}'", type, other_type);
 }
 
 }  // namespace runtime

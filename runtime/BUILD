@@ -284,6 +284,7 @@ cc_library(
         ":hex_encoder",
         ":options",
         ":siphash",
+        ":starlark_numeric",
         ":starlark_object",
         ":starlark_types",
     ],

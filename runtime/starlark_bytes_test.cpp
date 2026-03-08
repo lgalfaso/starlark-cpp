@@ -21,6 +21,7 @@
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
+#include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -41,6 +42,7 @@ using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Eq;
@@ -207,13 +209,13 @@ TEST(StarlarkBytes, BinaryInErrors) {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_string(""sv), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'string'");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'string'");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_float(0), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes-like object is required, not 'float'");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'float'");
   }
   {
     error_handler error_callback;
@@ -664,6 +666,562 @@ TEST(StarlarkBytes, SliceRangeZeroStride) {
   EXPECT_EQ("b\"abcdef\"", bytes.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
+}
+
+TEST(StarlarkBytes, CountNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: count expected at least 1 argument, got 0");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, CountEmptyString) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes empty(""sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&empty);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "4");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, Count) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("a"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "3");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountOverlap) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("aaaaaa"sv);
+  starlark_bytes a_bytes("aa"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "3");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"aaaaaa\"");
+}
+
+TEST(StarlarkBytes, CountInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_integer a_int('a');
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_int);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "3");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountBigInt) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bigint a_int('a');
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_int);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "3");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountIntegerNegative) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.minus_one());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountIntegerTooBig) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_integer some_int(256);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&some_int);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountBigIntNegative) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bigint some_int(-1);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&some_int);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountBigIntTooBig) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bigint some_int(256);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&some_int);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.none_value());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'NoneType'");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountFloat) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_float f_value('a');
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&f_value);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'float'");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountTwoArgumentsStartInt) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "1");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountTwoArgumentsStartIntSkip) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountTwoArgumentsStartNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("a"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.none_value());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "3");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountTwoArgumentsStartBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("a"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.false_value());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountThreeArgumentsStartInt) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("a"sv);
+  starlark_integer some_int(100);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(&some_int);
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "3");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountThreeArgumentsEndIntSkip) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("a"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(ctx.minus_one());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "2");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountThreeArgumentsEndNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("a"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.none_value());
+  pos_args.push_back(ctx.none_value());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "3");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountThreeArgumentsEndBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_bytes a_bytes("a"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&a_bytes);
+  pos_args.push_back(ctx.none_value());
+  pos_args.push_back(ctx.false_value());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, CountEmptyStringSameStartAndEnd) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes empty(""sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&empty);
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "1");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, CountEmptyStringEndBeforeStart) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes empty(""sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&empty);
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, CountFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&bytes);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: count expected at most 3 argument, got 4");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, CountWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("zero", ctx.zero());
+  auto* method = bytes.dot("count", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.count() takes no keyword arguments");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
 }  // namespace
