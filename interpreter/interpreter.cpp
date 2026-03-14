@@ -379,7 +379,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       BINARY_OP(OpCode::kBinarySlashSlash, binary_slash_slash)
 #undef BINARY_OP
       case OpCode::kCall: {
-        // TODO(lmirelmann): Implement recursion derection.
+        // TODO(lmirelmann): Implement recursion detection.
         int args_count = op_code.call().positional_arguments_count() +
             2 * op_code.call().named_arguments_count() +
             (op_code.call().has_variadic_positional_argument() ? 1 : 0) +
