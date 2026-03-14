@@ -30,54 +30,34 @@ status error_status();
 template<typename T>
 class status_or {
  public:
-  explicit status_or(status_code code);
-  explicit status_or(const T& value);
-  explicit status_or(T&& value);
-  bool ok() const;
+  explicit status_or(status_code code) : code(code) {}
+  explicit status_or(const T& value) : code(status_code::kOk), value(value) {}
+  explicit status_or(T&& value) : code(status_code::kOk), value(std::forward<T>(value)) {}
 
-  const T& operator*() const;
-  T& operator*();
-  const T* operator->() const;
-  T* operator->();
+  bool ok() const {
+    return code == status_code::kOk;
+  }
+
+  const T& operator*() const {
+    return value;
+  }
+
+  T& operator*() {
+    return value;
+  }
+
+  const T* operator->() const {
+    return &value;
+  }
+
+  T* operator->() {
+    return &value;
+  }
 
  private:
   status_code code;
   T value;
 };
-
-template<typename T>
-status_or<T>::status_or(status_code code) : code(code) {}
-
-template<typename T>
-status_or<T>::status_or(const T& value) : code(status_code::kOk), value(value) {}
-
-template<typename T>
-status_or<T>::status_or(T&& value) : code(status_code::kOk), value(std::forward<T>(value)) {}
-
-template<typename T>
-bool status_or<T>::ok() const {
-  return code == status_code::kOk;
-}
-  
-template<typename T>
-const T& status_or<T>::operator*() const {
-  return value;
-}
-
-template<typename T>
-T& status_or<T>::operator*() {
-  return value;
-}
-
-template<typename T>
-const T* status_or<T>::operator->() const {
-  return &value;
-}
-
-template<typename T>
-T* status_or<T>::operator->() {
-  return &value;
-}
 
 }  // namespace runtime
 }  // namespace starlark
