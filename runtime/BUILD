@@ -287,6 +287,7 @@ cc_library(
         ":siphash",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_tuple",
         ":starlark_types",
     ],
 )

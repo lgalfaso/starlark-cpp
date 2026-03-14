@@ -1409,4 +1409,927 @@ TEST(StarlarkString, CountWithNamedArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, EndswithNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith expected at least 1 argument, got 0");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithOneArgument) {
+  auto test = [](std::string_view entry, std::string_view ending, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(entry);
+    starlark_string param(ending);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param);
+    auto* method = str.dot("endswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+    EXPECT_EQ(result->truthy(), expected);
+  };
+
+  test("", "", true);
+  test("", "a", false);
+  test("abc", "c", true);
+  test("abc", "abc", true);
+  test("abc", "", true);
+  test("abc", "a", false);
+  test("abc", "aabc", false);
+}
+
+TEST(StarlarkString, EndswithEmptyTuple) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_tuple tuple(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_FALSE(result->truthy());
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithTupleWithOneEntry) {
+  auto test = [](std::string_view element, std::string_view entry, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_tuple tuple(1);
+    starlark_string param(entry);
+    tuple.add(&param);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&tuple);
+    auto* method = str.dot("endswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->truthy(), expected);
+  };
+
+  test("", "", true);
+  test("", "a", false);
+  test("abc", "c", true);
+  test("abc", "abc", true);
+  test("abc", "", true);
+  test("abc", "a", false);
+  test("abc", "aabc", false);
+}
+
+TEST(StarlarkString, EndswithBytes) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_bytes bytes(""sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&bytes);
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith() argument 1 must be string, not bytes");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithTupleWithBytes) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_tuple tuple(1);
+  starlark_bytes bytes(""sv);
+  tuple.add(&bytes);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: tuple for endswith must only contain string, not bytes");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithTwoArguments) {
+  auto test = [](std::string_view entry, std::string_view ending, int64_t start, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(entry);
+    starlark_string param1(ending);
+    starlark_integer param2(start);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = str.dot("endswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+    EXPECT_EQ(result->truthy(), expected) << "Entry: " << entry << ", ending: " << ending << ", start: " << start;
+  };
+
+  test("", "", 0, true);
+  test("", "", 1, false);
+  test("", "a", 0, false);
+  test("", "a", 1, false);
+  test("abc", "c", 0, true);
+  test("abc", "c", 2, true);
+  test("abc", "c", 3, false);
+  test("abc", "abc", 0, true);
+  test("abc", "abc", 1, false);
+  test("abc", "abc", -1, false);
+  test("abc", "abc", -2, false);
+  test("abc", "abc", -3, true);
+  test("abc", "abc", -4, true);
+  test("abc", "", 0, true);
+  test("abc", "", 2, true);
+  test("abc", "", 3, true);
+  test("abc", "", 4, false);
+  test("abc", "a", 0, false);
+  test("abc", "a", 3, false);
+  test("abc", "aabc", -1, false);
+  test("abc", "aabc", 0, false);
+  test("abc", "aabc", 3, false);
+}
+
+TEST(StarlarkString, EndswithStartNotInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithStartNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.none_value());
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_TRUE(result->truthy());
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithThreeArguments) {
+  auto test = [](std::string_view entry, std::string_view ending, int64_t start, int64_t end, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(entry);
+    starlark_string param1(ending);
+    starlark_integer param2(start);
+    starlark_integer param3(end);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("endswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+    EXPECT_EQ(result->truthy(), expected) << "Entry: b'" << entry << "', ending: b'" << ending << "', start: " << start << ", end: " << end;
+  };
+
+  test("", "", 0, -1, true);
+  test("", "", 0, 0, true);
+  test("", "", 1, 0, false);
+  test("", "a", 0, 1, false);
+  test("", "a", 1, 1, false);
+  test("abc", "c", 0, 3, true);
+  test("abc", "c", 2, 3, true);
+  test("abc", "c", 3, 3, false);
+  test("abc", "c", 1, 2, false);
+  test("abc", "b", 1, 2, true);
+  test("abc", "abc", 0, -1, false);
+  test("abc", "ab", 0, -1, true);
+  test("abc", "abc", 0, 2, false);
+  test("abc", "abc", 0, 3, true);
+  test("abc", "abc", 0, 4, true);
+  test("abc", "abc", 1, 3, false);
+  test("abc", "abc", -1, 4, false);
+  test("abc", "abc", -2, 10, false);
+  test("abc", "", 0, 3, true);
+  test("abc", "", 2, 3, true);
+  test("abc", "", 2, 1, false);
+  test("abc", "", 3, 3, true);
+  test("abc", "", 4, 3, false);
+  test("abc", "a", 0, 3, false);
+  test("abc", "a", 0, 1, true);
+  test("abc", "a", 3, 3, false);
+  test("abc", "aabc", -1, 2, false);
+  test("abc", "aabc", 0, 4, false);
+  test("abc", "aabc", 3, 3, false);
+
+  /*
+  for a in range(-5, 6):
+      for b in range(-5, 6):
+          print('  test("abab", "ab", {}, {}, {});'.format(a, b, str("abab".endswith("ab", a, b)).lower()))
+  */
+  test("abab", "ab", -5, -5, false);
+  test("abab", "ab", -5, -4, false);
+  test("abab", "ab", -5, -3, false);
+  test("abab", "ab", -5, -2, true);
+  test("abab", "ab", -5, -1, false);
+  test("abab", "ab", -5, 0, false);
+  test("abab", "ab", -5, 1, false);
+  test("abab", "ab", -5, 2, true);
+  test("abab", "ab", -5, 3, false);
+  test("abab", "ab", -5, 4, true);
+  test("abab", "ab", -5, 5, true);
+  test("abab", "ab", -4, -5, false);
+  test("abab", "ab", -4, -4, false);
+  test("abab", "ab", -4, -3, false);
+  test("abab", "ab", -4, -2, true);
+  test("abab", "ab", -4, -1, false);
+  test("abab", "ab", -4, 0, false);
+  test("abab", "ab", -4, 1, false);
+  test("abab", "ab", -4, 2, true);
+  test("abab", "ab", -4, 3, false);
+  test("abab", "ab", -4, 4, true);
+  test("abab", "ab", -4, 5, true);
+  test("abab", "ab", -3, -5, false);
+  test("abab", "ab", -3, -4, false);
+  test("abab", "ab", -3, -3, false);
+  test("abab", "ab", -3, -2, false);
+  test("abab", "ab", -3, -1, false);
+  test("abab", "ab", -3, 0, false);
+  test("abab", "ab", -3, 1, false);
+  test("abab", "ab", -3, 2, false);
+  test("abab", "ab", -3, 3, false);
+  test("abab", "ab", -3, 4, true);
+  test("abab", "ab", -3, 5, true);
+  test("abab", "ab", -2, -5, false);
+  test("abab", "ab", -2, -4, false);
+  test("abab", "ab", -2, -3, false);
+  test("abab", "ab", -2, -2, false);
+  test("abab", "ab", -2, -1, false);
+  test("abab", "ab", -2, 0, false);
+  test("abab", "ab", -2, 1, false);
+  test("abab", "ab", -2, 2, false);
+  test("abab", "ab", -2, 3, false);
+  test("abab", "ab", -2, 4, true);
+  test("abab", "ab", -2, 5, true);
+  test("abab", "ab", -1, -5, false);
+  test("abab", "ab", -1, -4, false);
+  test("abab", "ab", -1, -3, false);
+  test("abab", "ab", -1, -2, false);
+  test("abab", "ab", -1, -1, false);
+  test("abab", "ab", -1, 0, false);
+  test("abab", "ab", -1, 1, false);
+  test("abab", "ab", -1, 2, false);
+  test("abab", "ab", -1, 3, false);
+  test("abab", "ab", -1, 4, false);
+  test("abab", "ab", -1, 5, false);
+  test("abab", "ab", 0, -5, false);
+  test("abab", "ab", 0, -4, false);
+  test("abab", "ab", 0, -3, false);
+  test("abab", "ab", 0, -2, true);
+  test("abab", "ab", 0, -1, false);
+  test("abab", "ab", 0, 0, false);
+  test("abab", "ab", 0, 1, false);
+  test("abab", "ab", 0, 2, true);
+  test("abab", "ab", 0, 3, false);
+  test("abab", "ab", 0, 4, true);
+  test("abab", "ab", 0, 5, true);
+  test("abab", "ab", 1, -5, false);
+  test("abab", "ab", 1, -4, false);
+  test("abab", "ab", 1, -3, false);
+  test("abab", "ab", 1, -2, false);
+  test("abab", "ab", 1, -1, false);
+  test("abab", "ab", 1, 0, false);
+  test("abab", "ab", 1, 1, false);
+  test("abab", "ab", 1, 2, false);
+  test("abab", "ab", 1, 3, false);
+  test("abab", "ab", 1, 4, true);
+  test("abab", "ab", 1, 5, true);
+  test("abab", "ab", 2, -5, false);
+  test("abab", "ab", 2, -4, false);
+  test("abab", "ab", 2, -3, false);
+  test("abab", "ab", 2, -2, false);
+  test("abab", "ab", 2, -1, false);
+  test("abab", "ab", 2, 0, false);
+  test("abab", "ab", 2, 1, false);
+  test("abab", "ab", 2, 2, false);
+  test("abab", "ab", 2, 3, false);
+  test("abab", "ab", 2, 4, true);
+  test("abab", "ab", 2, 5, true);
+  test("abab", "ab", 3, -5, false);
+  test("abab", "ab", 3, -4, false);
+  test("abab", "ab", 3, -3, false);
+  test("abab", "ab", 3, -2, false);
+  test("abab", "ab", 3, -1, false);
+  test("abab", "ab", 3, 0, false);
+  test("abab", "ab", 3, 1, false);
+  test("abab", "ab", 3, 2, false);
+  test("abab", "ab", 3, 3, false);
+  test("abab", "ab", 3, 4, false);
+  test("abab", "ab", 3, 5, false);
+  test("abab", "ab", 4, -5, false);
+  test("abab", "ab", 4, -4, false);
+  test("abab", "ab", 4, -3, false);
+  test("abab", "ab", 4, -2, false);
+  test("abab", "ab", 4, -1, false);
+  test("abab", "ab", 4, 0, false);
+  test("abab", "ab", 4, 1, false);
+  test("abab", "ab", 4, 2, false);
+  test("abab", "ab", 4, 3, false);
+  test("abab", "ab", 4, 4, false);
+  test("abab", "ab", 4, 5, false);
+  test("abab", "ab", 5, -5, false);
+  test("abab", "ab", 5, -4, false);
+  test("abab", "ab", 5, -3, false);
+  test("abab", "ab", 5, -2, false);
+  test("abab", "ab", 5, -1, false);
+  test("abab", "ab", 5, 0, false);
+  test("abab", "ab", 5, 1, false);
+  test("abab", "ab", 5, 2, false);
+  test("abab", "ab", 5, 3, false);
+  test("abab", "ab", 5, 4, false);
+  test("abab", "ab", 5, 5, false);
+
+  /*
+  for a in range(-1, 2):
+      for b in range(-1, 2):
+          print('  test("", "", {}, {}, {});'.format(a, b, str("".endswith("", a, b)).lower()))
+  */
+  test("", "", -1, -1, true);
+  test("", "", -1, 0, true);
+  test("", "", -1, 1, true);
+  test("", "", 0, -1, true);
+  test("", "", 0, 0, true);
+  test("", "", 0, 1, true);
+  test("", "", 1, -1, false);
+  test("", "", 1, 0, false);
+  test("", "", 1, 1, false);
+}
+
+TEST(StarlarkString, EndswithEndNotInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithEndNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.none_value());
+  pos_args.push_back(ctx.none_value());
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_TRUE(result->truthy());
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith expected at most 3 argument, got 4");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, EndswithWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("zero", ctx.zero());
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string.endswith() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith expected at least 1 argument, got 0");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithOneArgument) {
+  auto test = [](std::string_view entry, std::string_view beginning, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(entry);
+    starlark_string param(beginning);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param);
+    auto* method = str.dot("startswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+    EXPECT_EQ(result->truthy(), expected);
+  };
+
+  test("", "", true);
+  test("", "a", false);
+  test("abc", "a", true);
+  test("abc", "abc", true);
+  test("abc", "", true);
+  test("abc", "c", false);
+  test("abc", "abcc", false);
+}
+
+TEST(StarlarkString, StartswithEmptyTuple) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_tuple tuple(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_FALSE(result->truthy());
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithTupleWithOneEntry) {
+  auto test = [](std::string_view element, std::string_view entry, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_tuple tuple(1);
+    starlark_string param(entry);
+    tuple.add(&param);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&tuple);
+    auto* method = str.dot("startswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->truthy(), expected);
+  };
+
+  test("", "", true);
+  test("", "a", false);
+  test("abc", "a", true);
+  test("abc", "abc", true);
+  test("abc", "", true);
+  test("abc", "c", false);
+  test("abc", "abcc", false);
+}
+
+TEST(StarlarkString, StartswithBytes) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_bytes bytes(""sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&bytes);
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith() argument 1 must be string, not bytes");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithTupleWithBytes) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_tuple tuple(1);
+  starlark_bytes bytes(""sv);
+  tuple.add(&bytes);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: tuple for startswith must only contain string, not bytes");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithTwoArguments) {
+  auto test = [](std::string_view entry, std::string_view beginning, int64_t start, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(entry);
+    starlark_string param1(beginning);
+    starlark_integer param2(start);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = str.dot("startswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+    EXPECT_EQ(result->truthy(), expected) << "Entry: " << entry << ", beginning: " << beginning << ", start: " << start;
+  };
+
+  test("", "", 0, true);
+  test("", "", 1, false);
+  test("", "a", 0, false);
+  test("", "a", 1, false);
+  test("abc", "a", 0, true);
+  test("abc", "a", 2, false);
+  test("abc", "a", 3, false);
+  test("abc", "abc", 0, true);
+  test("abc", "abc", 1, false);
+  test("abc", "abc", -1, false);
+  test("abc", "abc", -2, false);
+  test("abc", "abc", -3, true);
+  test("abc", "abc", -4, true);
+  test("abc", "", 0, true);
+  test("abc", "", 2, true);
+  test("abc", "", 3, true);
+  test("abc", "", 4, false);
+  test("abc", "c", 0, false);
+  test("abc", "c", 2, true);
+  test("abc", "c", 3, false);
+  test("abc", "abcc", -1, false);
+  test("abc", "abcc", 0, false);
+  test("abc", "abcc", 3, false);
+}
+
+TEST(StarlarkString, StartswithStartNotInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithStartNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.none_value());
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_TRUE(result->truthy());
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithThreeArguments) {
+  auto test = [](std::string_view entry, std::string_view beginning, int64_t start, int64_t end, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(entry);
+    starlark_string param1(beginning);
+    starlark_integer param2(start);
+    starlark_integer param3(end);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("startswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+    EXPECT_EQ(result->truthy(), expected) << "Entry: b'" << entry << "', beginning: b'" << beginning << "', start: " << start << ", end: " << end;
+  };
+
+  test("", "", 0, -1, true);
+  test("", "", 0, 0, true);
+  test("", "", 1, 0, false);
+  test("", "a", 0, 1, false);
+  test("", "a", 1, 1, false);
+  test("abc", "a", 0, 3, true);
+  test("abc", "a", 0, 2, true);
+  test("abc", "a", 1, 3, false);
+  test("abc", "a", 1, 2, false);
+  test("abc", "c", 0, 3, false);
+  test("abc", "c", 2, 3, true);
+  test("abc", "c", 3, 3, false);
+  test("abc", "c", 1, 2, false);
+  test("abc", "b", 1, 2, true);
+  test("abc", "abc", 0, -1, false);
+  test("abc", "ab", 0, -1, true);
+  test("abc", "abc", 0, 2, false);
+  test("abc", "abc", 0, 3, true);
+  test("abc", "abc", 0, 4, true);
+  test("abc", "abc", 1, 3, false);
+  test("abc", "abc", -1, 4, false);
+  test("abc", "abc", -2, 10, false);
+  test("abc", "", 0, 3, true);
+  test("abc", "", 2, 3, true);
+  test("abc", "", 2, 1, false);
+  test("abc", "", 3, 3, true);
+  test("abc", "", 4, 3, false);
+  test("abc", "a", 0, 3, true);
+  test("abc", "a", 0, 1, true);
+  test("abc", "a", 3, 3, false);
+  test("abc", "aabc", -1, 2, false);
+  test("abc", "aabc", 0, 4, false);
+  test("abc", "aabc", 3, 3, false);
+}
+
+TEST(StarlarkString, StartswithEndNotInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithEndNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.none_value());
+  pos_args.push_back(ctx.none_value());
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_TRUE(result->truthy());
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith expected at most 3 argument, got 4");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StartswithWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("zero", ctx.zero());
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string.startswith() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 }  // namespace

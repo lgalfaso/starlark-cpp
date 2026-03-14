@@ -4,6 +4,7 @@
 
 #include <cassert>
 
+#include <algorithm>
 #include <functional>
 #include <limits>
 #include <map>
@@ -16,6 +17,7 @@
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
 #include "runtime/starlark_numeric.hpp"
+#include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
@@ -285,8 +287,7 @@ int64_t starlark_bytes::count(std::string_view sub, int64_t start, int64_t end) 
   if (sub.empty()) {
     return end - start + 1;
   }
-  std::string_view view = value;
-  std::string_view reduced_view = view.substr(0, end);
+  std::string_view reduced_view = ((std::string_view)value).substr(0, end);
   int64_t count = 0;
   for (auto pos = reduced_view.find(sub, start); start <= end && pos != std::string_view::npos; pos = reduced_view.find(sub, start)) {
     count++;
@@ -299,9 +300,32 @@ int64_t starlark_bytes::count(std::string_view sub, int64_t start, int64_t end) 
 TODO(lmirelmann): Implement:
 
 starlark_obj* starlark_bytes::elems(context& ctx) const;
-bool starlark_bytes::endswith(std::vector<std::string_view> ends, int64_t start, int64_t end) const;
+*/
+
+bool starlark_bytes::endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    return false;
+  }
+  std::string_view reduced_view = ((std::string_view)value).substr(start, end - start);
+  for (const auto& end : ends) {
+    if (reduced_view.ends_with(end)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
 int64_t starlark_bytes::find(std::string_view sub, int64_t start, int64_t end) const;
-starlark_obj* starlark_bytes::join(std::vector<std::string_view> elements, context& ctx) const;
+starlark_obj* starlark_bytes::join(const std::vector<std::string_view>& elements, context& ctx) const;
 starlark_obj* starlark_bytes::lstrip(context& ctx) const;
 starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) const;
 starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx) const;
@@ -314,7 +338,30 @@ starlark_obj* starlark_bytes::rstrip(context& ctx) const;
 starlark_obj* starlark_bytes::rstrip(std::string_view cutset, context& ctx) const;
 starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const;
 starlark_obj* starlark_bytes::split(std::string_view sep,int64_t maxsplit, context& ctx) const;
-bool starlark_bytes::startswith(std::vector<std::string_view> begins, int64_t start, int64_t end) const;
+*/
+
+bool starlark_bytes::startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    return false;
+  }
+  std::string_view reduced_view = ((std::string_view)value).substr(start, end - start);
+  for (const auto& begin : begins) {
+    if (reduced_view.starts_with(begin)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
 starlark_obj* starlark_bytes::strip(context& ctx) const;
 starlark_obj* starlark_bytes::strip(std::string_view cutset, context& ctx) const;
 */
@@ -343,6 +390,73 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::inner_hash() c
   return static_cast<int64_t>(siphash(value.data(), value.length(), 0xA4093822299F31D0, 0x082EFA98EC4E6C89));
 }
 
+namespace {
+
+status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, error_fn& error_callback) {
+  static char all_chars[257] =
+      "\000\001\002\003\004\005\006\007\010\011\012\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037"
+      "\040\041\042\043\044\045\046\047\050\051\052\053\054\055\056\057\060\061\062\063\064\065\066\067\070\071\072\073\074\075\076\077"
+      "\100\101\102\103\104\105\106\107\110\111\112\113\114\115\116\117\120\121\122\123\124\125\126\127\130\131\132\133\134\135\136\137"
+      "\140\141\142\143\144\145\146\147\150\151\152\153\154\155\156\157\160\161\162\163\164\165\166\167\170\171\172\173\174\175\176\177"
+      "\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237"
+      "\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277"
+      "\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337"
+      "\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377";
+  switch (element->numeric_type()) {
+    case starlark_numeric_type::kInt64: {
+      auto other_value = element->as_int64();
+      if (other_value < 0 || 255 < other_value) {
+        error_callback.add_error(error_byte_in_range());
+        return status_or<std::string_view>(status_code::kError);
+      }
+      return status_or<std::string_view>(std::string_view(&all_chars[other_value], 1));
+    }
+    case starlark_numeric_type::kBigInt: {
+      auto& other_value = element->as_bigint();
+      if (other_value.sign() || other_value.bit_size() >= 8) {
+        error_callback.add_error(error_byte_in_range());
+        return status_or<std::string_view>(status_code::kError);
+      }
+      return status_or<std::string_view>(std::string_view(&all_chars[other_value.at(0)], 1));
+    }
+    case starlark_numeric_type::kNotNumeric: {
+      if (element->type() != starlark_types::bytes_t) {
+        error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, element->type()));
+        return status_or<std::string_view>(status_code::kError);
+      }
+      return status_or<std::string_view>(element->as_string());
+    }
+    default:
+      error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, element->type()));
+      return status_or<std::string_view>(status_code::kError);
+  }
+}
+
+status_or<std::vector<std::string_view>> bytes_int_or_tuple_as_vector_of_bytes(const starlark_obj* element, error_fn& error_callback) {
+  std::vector<std::string_view> result;
+  if (element->type() == starlark_types::tuple_t) {
+    auto* tuple = static_cast<const starlark_tuple*>(element);
+    for (int i = 0; i < tuple->size(); ++i) {
+      // TODO(lmirelmann): The error is not the same, it should be
+      // TypeError: tuple for endswith must only contain str, not int
+      auto entry = bytes_or_int_as_bytes(tuple->at(i), error_callback);
+      if (!entry.ok()) {
+        return status_or<std::vector<std::string_view>>(status_code::kError);
+      }
+      result.emplace_back(*entry);
+    }
+  } else {
+    auto entry = bytes_or_int_as_bytes(element, error_callback);
+    if (!entry.ok()) {
+      return status_or<std::vector<std::string_view>>(status_code::kError);
+    }
+    result.emplace_back(*entry);
+  }
+  return status_or<std::vector<std::string_view>>(result);
+}
+
+}  // namespace
+
 starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!no_named_args(named_args, error_callback, "bytes.count") ||
       !min_args(pos_args, error_callback, "count", 1) ||
@@ -351,37 +465,9 @@ starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
-  std::string sub;
-  switch (pos_args.front()->numeric_type()) {
-    case starlark_numeric_type::kInt64: {
-      auto other_value = pos_args.front()->as_int64();
-      if (other_value < 0 || 255 < other_value) {
-        error_callback.add_error(error_byte_in_range());
-        return nullptr;
-      }
-      sub += static_cast<char>(other_value);
-      break;
-    }
-    case starlark_numeric_type::kBigInt: {
-      auto& other_value = pos_args.front()->as_bigint();
-      if (other_value.sign() || other_value.bit_size() >= 8) {
-        error_callback.add_error(error_byte_in_range());
-        return nullptr;
-      }
-      sub += static_cast<char>(other_value.at(0));
-      break;
-    }
-    case starlark_numeric_type::kNotNumeric: {
-      if (pos_args.front()->type() != starlark_types::bytes_t) {
-        error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, pos_args.front()->type()));
-        return nullptr;
-      }
-      sub += pos_args.front()->as_string();
-      break;
-    }
-    default:
-     error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, pos_args.front()->type()));
-     return nullptr;
+  auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!sub.ok()) {
+    return nullptr;
   }
   int64_t start = std::numeric_limits<int64_t>::min();
   int64_t end = std::numeric_limits<int64_t>::max();
@@ -395,7 +481,7 @@ starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj
       }
     }
   }
-  return create_integer(static_cast<starlark_bytes*>(this_obj)->count(sub, start, end), ctx);
+  return create_integer(static_cast<starlark_bytes*>(this_obj)->count(*sub, start, end), ctx);
 }
 
 starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -405,9 +491,30 @@ starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.endswith") ||
+      !min_args(pos_args, error_callback, "endswith", 1) ||
+      !max_args(pos_args, error_callback, "endswith", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  auto subs = bytes_int_or_tuple_as_vector_of_bytes(pos_args.front(), error_callback);
+  if (!subs.ok()) {
+    return nullptr;
+  }
+  int64_t start = std::numeric_limits<int64_t>::min();
+  int64_t end = std::numeric_limits<int64_t>::max();
+  if (pos_args.size() >= 2) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+      return nullptr;
+    }
+    if (pos_args.size() >= 3) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+        return nullptr;
+      }
+    }
+  }
+  return static_cast<starlark_bytes*>(this_obj)->endswith(*subs, start, end) ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_bytes_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -483,9 +590,30 @@ starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.startswith") ||
+      !min_args(pos_args, error_callback, "startswith", 1) ||
+      !max_args(pos_args, error_callback, "startswith", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  auto subs = bytes_int_or_tuple_as_vector_of_bytes(pos_args.front(), error_callback);
+  if (!subs.ok()) {
+    return nullptr;
+  }
+  int64_t start = std::numeric_limits<int64_t>::min();
+  int64_t end = std::numeric_limits<int64_t>::max();
+  if (pos_args.size() >= 2) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+      return nullptr;
+    }
+    if (pos_args.size() >= 3) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+        return nullptr;
+      }
+    }
+  }
+  return static_cast<starlark_bytes*>(this_obj)->startswith(*subs, start, end) ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

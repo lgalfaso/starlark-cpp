@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "runtime/starlark_object.hpp"
@@ -36,9 +37,9 @@ class starlark_bytes : public starlark_obj {
 
   int64_t count(std::string_view sub, int64_t start, int64_t end) const;
   starlark_obj* elems(context& ctx) const;
-  bool endswith(std::vector<std::string_view> ends, int64_t start, int64_t end) const;
+  bool endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const;
   int64_t find(std::string_view sub, int64_t start, int64_t end) const;
-  starlark_obj* join(std::vector<std::string_view> elements, context& ctx) const;
+  starlark_obj* join(const std::vector<std::string_view>& elements, context& ctx) const;
   starlark_obj* lstrip(context& ctx) const;
   starlark_obj* lstrip(std::string_view cutset, context& ctx) const;
   starlark_obj* partition(std::string_view sub, context& ctx) const;
@@ -46,12 +47,12 @@ class starlark_bytes : public starlark_obj {
   int64_t rfind(std::string_view sub, int64_t start, int64_t end) const;
   starlark_obj* rpartition(std::string_view sub, context& ctx) const;
   starlark_obj* rsplit(int64_t maxsplit, context& ctx) const;
-  starlark_obj* rsplit(std::string_view sep,int64_t maxsplit, context& ctx) const;
+  starlark_obj* rsplit(std::string_view sep, int64_t maxsplit, context& ctx) const;
   starlark_obj* rstrip(context& ctx) const;
   starlark_obj* rstrip(std::string_view cutset, context& ctx) const;
   starlark_obj* split(int64_t maxsplit, context& ctx) const;
-  starlark_obj* split(std::string_view sep,int64_t maxsplit, context& ctx) const;
-  bool startswith(std::vector<std::string_view> begins, int64_t start, int64_t end) const;
+  starlark_obj* split(std::string_view sep, int64_t maxsplit, context& ctx) const;
+  bool startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const;
   starlark_obj* strip(context& ctx) const;
   starlark_obj* strip(std::string_view cutset, context& ctx) const;
 
