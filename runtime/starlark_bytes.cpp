@@ -344,10 +344,23 @@ int64_t starlark_bytes::find(std::string_view sub, int64_t start, int64_t end) c
   return result + start;
 }
 
+starlark_obj* starlark_bytes::join(const std::vector<std::string_view>& elements, context& ctx) const {
+  bool first = true;
+  std::string result;
+  for (auto element: elements) {
+    if (!first) {
+      result += value;
+    } else {
+      first = false;
+    }
+    result += element;
+  }
+  return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
+}
+
 /*
 TODO(lmirelmann): Implement:
 
-starlark_obj* starlark_bytes::join(const std::vector<std::string_view>& elements, context& ctx) const;
 starlark_obj* starlark_bytes::lstrip(context& ctx) const;
 starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) const;
 starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx) const;
@@ -608,9 +621,29 @@ starlark_obj* starlark_bytes_fn_index(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "join")) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+
+  auto it = pos_args.front()->get_iterator(true, ctx, error_callback);
+  if (it == nullptr) {
+    // TODO(lmirelmann): The error is not exactly the same, Python produces the following error:
+    // `TypeError: can only join an iterable`
+    return nullptr;
+  }
+  std::vector<std::string_view> elements;
+  while (it->has_next()) {
+    auto element = bytes_or_int_as_bytes(it->next(), error_callback);
+    if (!element.ok()) {
+      return nullptr;
+      it->end_iterator();
+    }
+    elements.push_back(*element);
+  }
+  it->end_iterator();
+  return static_cast<starlark_bytes*>(this_obj)->join(elements, ctx);
 }
 
 starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

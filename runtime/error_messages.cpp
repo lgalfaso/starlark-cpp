@@ -314,6 +314,10 @@ std::string_view error_substring_not_found() {
   return "ValueError: substring not found";
 }
 
+std::string error_non_terable(std::string_view fn_name) {
+  return std::format("TypeError: can only {} an iterable", fn_name);
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

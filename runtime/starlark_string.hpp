@@ -43,6 +43,7 @@ class starlark_string : public starlark_obj {
   bool startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const;
   int64_t find(std::string_view sub, int64_t start, int64_t end) const;
   int64_t rfind(std::string_view sub, int64_t start, int64_t end) const;
+  starlark_obj* join(const std::vector<std::string_view>& elements, context& ctx) const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
