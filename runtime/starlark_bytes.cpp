@@ -1,4 +1,4 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2025-2026 Lucas Mirelmann
 
 #include "runtime/starlark_bytes.hpp"
 
@@ -323,14 +323,61 @@ bool starlark_bytes::endswith(const std::vector<std::string_view>& ends, int64_t
   return false;
 }
 
+int64_t starlark_bytes::find(std::string_view sub, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    return -1;
+  }
+
+  std::string_view reduced_view = ((std::string_view)value).substr(start, end - start);
+  auto result = reduced_view.find(sub);
+  if (result == std::string_view::npos) {
+    return -1;
+  }
+  return result + start;
+}
+
 /*
-int64_t starlark_bytes::find(std::string_view sub, int64_t start, int64_t end) const;
+TODO(lmirelmann): Implement:
+
 starlark_obj* starlark_bytes::join(const std::vector<std::string_view>& elements, context& ctx) const;
 starlark_obj* starlark_bytes::lstrip(context& ctx) const;
 starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) const;
 starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx) const;
 starlark_obj* starlark_bytes::replace(std::string_view old, std::string_view new_, int64_t count) const;
-int64_t starlark_bytes::rfind(std::string_view sub, int64_t start, int64_t end) const;
+*/
+
+int64_t starlark_bytes::rfind(std::string_view sub, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    return -1;
+  }
+
+  std::string_view reduced_view = ((std::string_view)value).substr(start, end - start);
+  auto result = reduced_view.rfind(sub);
+  if (result == std::string_view::npos) {
+    return -1;
+  }
+  return result + start;
+}
+
+/*
+TODO(lmirelmann): Implement:
+
 starlark_obj* starlark_bytes::rpartition(std::string_view sub, context& ctx) const;
 starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const;
 starlark_obj* starlark_bytes::rsplit(std::string_view sep,int64_t maxsplit, context& ctx) const;
@@ -455,6 +502,22 @@ status_or<std::vector<std::string_view>> bytes_int_or_tuple_as_vector_of_bytes(c
   return status_or<std::vector<std::string_view>>(result);
 }
 
+status_or<std::pair<int64_t, int64_t>> get_start_and_end(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback) {
+  int64_t start = std::numeric_limits<int64_t>::min();
+  int64_t end = std::numeric_limits<int64_t>::max();
+  if (pos_args.size() >= 2) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+      return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+    }
+    if (pos_args.size() >= 3) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+        return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+      }
+    }
+  }
+  return status_or<std::pair<int64_t, int64_t>>(std::make_pair(start, end));
+}
+
 }  // namespace
 
 starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -469,19 +532,11 @@ starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj
   if (!sub.ok()) {
     return nullptr;
   }
-  int64_t start = std::numeric_limits<int64_t>::min();
-  int64_t end = std::numeric_limits<int64_t>::max();
-  if (pos_args.size() >= 2) {
-    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
-      return nullptr;
-    }
-    if (pos_args.size() >= 3) {
-      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
-        return nullptr;
-      }
-    }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
   }
-  return create_integer(static_cast<starlark_bytes*>(this_obj)->count(*sub, start, end), ctx);
+  return create_integer(static_cast<starlark_bytes*>(this_obj)->count(*sub, start_end->first, start_end->second), ctx);
 }
 
 starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -502,31 +557,54 @@ starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_
   if (!subs.ok()) {
     return nullptr;
   }
-  int64_t start = std::numeric_limits<int64_t>::min();
-  int64_t end = std::numeric_limits<int64_t>::max();
-  if (pos_args.size() >= 2) {
-    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
-      return nullptr;
-    }
-    if (pos_args.size() >= 3) {
-      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
-        return nullptr;
-      }
-    }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->endswith(*subs, start, end) ? ctx.true_value() : ctx.false_value();
+  return static_cast<starlark_bytes*>(this_obj)->endswith(*subs, start_end->first, start_end->second) ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_bytes_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.find") ||
+      !min_args(pos_args, error_callback, "find", 1) ||
+      !max_args(pos_args, error_callback, "find", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  return create_integer(static_cast<starlark_bytes*>(this_obj)->find(*sub, start_end->first, start_end->second), ctx);
 }
 
 starlark_obj* starlark_bytes_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.index") ||
+      !min_args(pos_args, error_callback, "index", 1) ||
+      !max_args(pos_args, error_callback, "index", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  auto result = static_cast<starlark_bytes*>(this_obj)->find(*sub, start_end->first, start_end->second);
+  if (result < 0) {
+    error_callback.add_error(error_substring_not_found());
+    return nullptr;
+  }
+  return create_integer(result, ctx);
 }
 
 starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -554,15 +632,46 @@ starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_bytes_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.rfind") ||
+      !min_args(pos_args, error_callback, "rfind", 1) ||
+      !max_args(pos_args, error_callback, "rfind", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  return create_integer(static_cast<starlark_bytes*>(this_obj)->rfind(*sub, start_end->first, start_end->second), ctx);
 }
 
 starlark_obj* starlark_bytes_fn_rindex(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.rindex") ||
+      !min_args(pos_args, error_callback, "rindex", 1) ||
+      !max_args(pos_args, error_callback, "rindex", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  auto result = static_cast<starlark_bytes*>(this_obj)->rfind(*sub, start_end->first, start_end->second);
+  if (result < 0) {
+    error_callback.add_error(error_substring_not_found());
+    return nullptr;
+  }
+  return create_integer(result, ctx);
 }
 
 starlark_obj* starlark_bytes_fn_rpartition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

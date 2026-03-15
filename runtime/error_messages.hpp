@@ -98,6 +98,8 @@ std::string error_integer_or_like(std::string_view type, std::string_view other_
 std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type);
 std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type);
 
+std::string_view error_substring_not_found();
+
 }  // namespace runtime
 }  // namespace starlark
 

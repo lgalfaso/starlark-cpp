@@ -658,6 +658,48 @@ bool starlark_string::startswith(const std::vector<std::string_view>& begins, in
   return false;
 }
 
+int64_t starlark_string::find(std::string_view sub, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    return -1;
+  }
+
+  std::string_view reduced_view = ((std::string_view)value).substr(start, end - start);
+  auto result = reduced_view.find(sub);
+  if (result == std::string_view::npos) {
+    return -1;
+  }
+  return result + start;
+}
+
+int64_t starlark_string::rfind(std::string_view sub, int64_t start, int64_t end) const {
+  if (start < 0) {
+    start = std::max<int64_t>(start + value.size(), 0);
+  }
+  if (end < 0) {
+    end = std::max<int64_t>(end + value.size(), 0);
+  } else {
+    end = std::min<int64_t>(end, value.size());
+  }
+  if (start > end) {
+    return -1;
+  }
+
+  std::string_view reduced_view = ((std::string_view)value).substr(start, end - start);
+  auto result = reduced_view.rfind(sub);
+  if (result == std::string_view::npos) {
+    return -1;
+  }
+  return result + start;
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -682,6 +724,15 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() 
 }
 
 namespace {
+
+status_or<std::string_view> string_as_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
+  if (element->type() != starlark_types::string_t) {
+    error_callback.add_error(error_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
+    return status_or<std::string_view>(status_code::kError);
+  }
+  return status_or<std::string_view>(element->as_string());
+}
+
 status_or<std::vector<std::string_view>> string_or_tuple_as_vector_of_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
   std::vector<std::string_view> result;
   if (element->type() == starlark_types::tuple_t) {
@@ -702,6 +753,22 @@ status_or<std::vector<std::string_view>> string_or_tuple_as_vector_of_string(con
     result.emplace_back(element->as_string());
   }
   return status_or<std::vector<std::string_view>>(result);
+}
+
+status_or<std::pair<int64_t, int64_t>> get_start_and_end(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback) {
+  int64_t start = std::numeric_limits<int64_t>::min();
+  int64_t end = std::numeric_limits<int64_t>::max();
+  if (pos_args.size() >= 2) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+      return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+    }
+    if (pos_args.size() >= 3) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+        return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+      }
+    }
+  }
+  return status_or<std::pair<int64_t, int64_t>>(std::make_pair(start, end));
 }
 
 }  // namespace
@@ -732,25 +799,15 @@ starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_ob
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
-  std::string sub;
-  if (pos_args.front()->type() != starlark_types::string_t) {
-    error_callback.add_error(error_argument_must_be_type("count", 1, starlark_types::string_t, pos_args.front()->type()));
+  auto sub = string_as_string(pos_args.front(), "count", 1, error_callback);
+  if (!sub.ok()) {
     return nullptr;
   }
-  sub += pos_args.front()->as_string();
-  int64_t start = std::numeric_limits<int64_t>::min();
-  int64_t end = std::numeric_limits<int64_t>::max();
-  if (pos_args.size() >= 2) {
-    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
-      return nullptr;
-    }
-    if (pos_args.size() >= 3) {
-      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
-        return nullptr;
-      }
-    }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
   }
-  return create_integer(static_cast<starlark_string*>(this_obj)->count(sub, start, end), ctx);
+  return create_integer(static_cast<starlark_string*>(this_obj)->count(*sub, start_end->first, start_end->second), ctx);
 }
 
 starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -777,25 +834,30 @@ starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark
   if (!subs.ok()) {
     return nullptr;
   }
-  int64_t start = std::numeric_limits<int64_t>::min();
-  int64_t end = std::numeric_limits<int64_t>::max();
-  if (pos_args.size() >= 2) {
-    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
-      return nullptr;
-    }
-    if (pos_args.size() >= 3) {
-      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
-        return nullptr;
-      }
-    }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
   }
-  return static_cast<starlark_string*>(this_obj)->endswith(*subs, start, end) ? ctx.true_value() : ctx.false_value();
+  return static_cast<starlark_string*>(this_obj)->endswith(*subs, start_end->first, start_end->second) ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "string.find") ||
+      !min_args(pos_args, error_callback, "find", 1) ||
+      !max_args(pos_args, error_callback, "find", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  auto sub = string_as_string(pos_args.front(), "find", 1, error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  return create_integer(static_cast<starlark_string*>(this_obj)->find(*sub, start_end->first, start_end->second), ctx);
 }
 
 starlark_obj* starlark_string_fn_format(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -805,9 +867,27 @@ starlark_obj* starlark_string_fn_format(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "string.index") ||
+      !min_args(pos_args, error_callback, "index", 1) ||
+      !max_args(pos_args, error_callback, "index", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  auto sub = string_as_string(pos_args.front(), "index", 1, error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  auto result = static_cast<starlark_string*>(this_obj)->find(*sub, start_end->first, start_end->second);
+  if (result < 0) {
+    error_callback.add_error(error_substring_not_found());
+    return nullptr;
+  }
+  return create_integer(result, ctx);
 }
 
 starlark_obj* starlark_string_fn_isalnum(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -895,15 +975,46 @@ starlark_obj* starlark_string_fn_removesuffix(starlark_obj* this_obj, const star
 }
 
 starlark_obj* starlark_string_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "string.rfind") ||
+      !min_args(pos_args, error_callback, "rfind", 1) ||
+      !max_args(pos_args, error_callback, "rfind", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  auto sub = string_as_string(pos_args.front(), "rfind", 1, error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  return create_integer(static_cast<starlark_string*>(this_obj)->rfind(*sub, start_end->first, start_end->second), ctx);
 }
 
 starlark_obj* starlark_string_fn_rindex(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "string.rindex") ||
+      !min_args(pos_args, error_callback, "rindex", 1) ||
+      !max_args(pos_args, error_callback, "rindex", 3)) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  auto sub = string_as_string(pos_args.front(), "rindex", 1, error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
+  }
+  auto result = static_cast<starlark_string*>(this_obj)->rfind(*sub, start_end->first, start_end->second);
+  if (result < 0) {
+    error_callback.add_error(error_substring_not_found());
+    return nullptr;
+  }
+  return create_integer(result, ctx);
 }
 
 starlark_obj* starlark_string_fn_rpartition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -948,19 +1059,11 @@ starlark_obj* starlark_string_fn_startswith(starlark_obj* this_obj, const starla
   if (!subs.ok()) {
     return nullptr;
   }
-  int64_t start = std::numeric_limits<int64_t>::min();
-  int64_t end = std::numeric_limits<int64_t>::max();
-  if (pos_args.size() >= 2) {
-    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
-      return nullptr;
-    }
-    if (pos_args.size() >= 3) {
-      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
-        return nullptr;
-      }
-    }
+  auto start_end = get_start_and_end(pos_args, error_callback);
+  if (!start_end.ok()) {
+    return nullptr;
   }
-  return static_cast<starlark_string*>(this_obj)->startswith(*subs, start, end) ? ctx.true_value() : ctx.false_value();
+  return static_cast<starlark_string*>(this_obj)->startswith(*subs, start_end->first, start_end->second) ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

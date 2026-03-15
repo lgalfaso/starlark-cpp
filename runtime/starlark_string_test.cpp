@@ -2332,4 +2332,1436 @@ TEST(StarlarkString, StartswithWithNamedArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, FindNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("find", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: find expected at least 1 argument, got 0");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, FindTuple) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_tuple tuple(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("find", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: find() argument 1 must be string, not tuple");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, FindOneArgument) {
+  auto test = [](std::string_view element, std::string_view sub, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = str.dot("find", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("banana", "", "0");
+  test("banana", "an", "1");
+  test("banana", "ban", "0");
+  test("banana", "bb", "-1");
+}
+
+TEST(StarlarkString, FindStartAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_string param1("an"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("find", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, FindTwoArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start,  int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = str.dot("find", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start;
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  /*
+  for a in range(-5, 6):
+      print('  test("abab", "ab", {}, {});'.format(a, "abab".find("ab", a)))
+  */
+  test("abab", "ab", -5, 0);
+  test("abab", "ab", -4, 0);
+  test("abab", "ab", -3, 2);
+  test("abab", "ab", -2, 2);
+  test("abab", "ab", -1, -1);
+  test("abab", "ab", 0, 0);
+  test("abab", "ab", 1, 2);
+  test("abab", "ab", 2, 2);
+  test("abab", "ab", 3, -1);
+  test("abab", "ab", 4, -1);
+  test("abab", "ab", 5, -1);
+}
+
+TEST(StarlarkString, FindThreeArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start, int64_t end, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+    starlark_integer param3(end);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("find", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start << ", end: " << end;
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  /*
+  for a in range(-1, 2):
+      for b in range(-1, 2):
+          print('  test("", "", {}, {}, {});'.format(a, b, "".find("", a, b))
+  */
+  test("", "", -1, -1, 0);
+  test("", "", -1, 0, 0);
+  test("", "", -1, 1, 0);
+  test("", "", 0, -1, 0);
+  test("", "", 0, 0, 0);
+  test("", "", 0, 1, 0);
+  test("", "", 1, -1, -1);
+  test("", "", 1, 0, -1);
+  test("", "", 1, 1, -1);
+
+  /*
+  for a in range(-5, 6):
+      for b in range(-5, 6):
+          print('  test("abab", "ab", {}, {}, {});'.format(a, b, "abab".find("ab", a, b)))
+  */
+  test("abab", "ab", -5, -5, -1);
+  test("abab", "ab", -5, -4, -1);
+  test("abab", "ab", -5, -3, -1);
+  test("abab", "ab", -5, -2, 0);
+  test("abab", "ab", -5, -1, 0);
+  test("abab", "ab", -5, 0, -1);
+  test("abab", "ab", -5, 1, -1);
+  test("abab", "ab", -5, 2, 0);
+  test("abab", "ab", -5, 3, 0);
+  test("abab", "ab", -5, 4, 0);
+  test("abab", "ab", -5, 5, 0);
+  test("abab", "ab", -4, -5, -1);
+  test("abab", "ab", -4, -4, -1);
+  test("abab", "ab", -4, -3, -1);
+  test("abab", "ab", -4, -2, 0);
+  test("abab", "ab", -4, -1, 0);
+  test("abab", "ab", -4, 0, -1);
+  test("abab", "ab", -4, 1, -1);
+  test("abab", "ab", -4, 2, 0);
+  test("abab", "ab", -4, 3, 0);
+  test("abab", "ab", -4, 4, 0);
+  test("abab", "ab", -4, 5, 0);
+  test("abab", "ab", -3, -5, -1);
+  test("abab", "ab", -3, -4, -1);
+  test("abab", "ab", -3, -3, -1);
+  test("abab", "ab", -3, -2, -1);
+  test("abab", "ab", -3, -1, -1);
+  test("abab", "ab", -3, 0, -1);
+  test("abab", "ab", -3, 1, -1);
+  test("abab", "ab", -3, 2, -1);
+  test("abab", "ab", -3, 3, -1);
+  test("abab", "ab", -3, 4, 2);
+  test("abab", "ab", -3, 5, 2);
+  test("abab", "ab", -2, -5, -1);
+  test("abab", "ab", -2, -4, -1);
+  test("abab", "ab", -2, -3, -1);
+  test("abab", "ab", -2, -2, -1);
+  test("abab", "ab", -2, -1, -1);
+  test("abab", "ab", -2, 0, -1);
+  test("abab", "ab", -2, 1, -1);
+  test("abab", "ab", -2, 2, -1);
+  test("abab", "ab", -2, 3, -1);
+  test("abab", "ab", -2, 4, 2);
+  test("abab", "ab", -2, 5, 2);
+  test("abab", "ab", -1, -5, -1);
+  test("abab", "ab", -1, -4, -1);
+  test("abab", "ab", -1, -3, -1);
+  test("abab", "ab", -1, -2, -1);
+  test("abab", "ab", -1, -1, -1);
+  test("abab", "ab", -1, 0, -1);
+  test("abab", "ab", -1, 1, -1);
+  test("abab", "ab", -1, 2, -1);
+  test("abab", "ab", -1, 3, -1);
+  test("abab", "ab", -1, 4, -1);
+  test("abab", "ab", -1, 5, -1);
+  test("abab", "ab", 0, -5, -1);
+  test("abab", "ab", 0, -4, -1);
+  test("abab", "ab", 0, -3, -1);
+  test("abab", "ab", 0, -2, 0);
+  test("abab", "ab", 0, -1, 0);
+  test("abab", "ab", 0, 0, -1);
+  test("abab", "ab", 0, 1, -1);
+  test("abab", "ab", 0, 2, 0);
+  test("abab", "ab", 0, 3, 0);
+  test("abab", "ab", 0, 4, 0);
+  test("abab", "ab", 0, 5, 0);
+  test("abab", "ab", 1, -5, -1);
+  test("abab", "ab", 1, -4, -1);
+  test("abab", "ab", 1, -3, -1);
+  test("abab", "ab", 1, -2, -1);
+  test("abab", "ab", 1, -1, -1);
+  test("abab", "ab", 1, 0, -1);
+  test("abab", "ab", 1, 1, -1);
+  test("abab", "ab", 1, 2, -1);
+  test("abab", "ab", 1, 3, -1);
+  test("abab", "ab", 1, 4, 2);
+  test("abab", "ab", 1, 5, 2);
+  test("abab", "ab", 2, -5, -1);
+  test("abab", "ab", 2, -4, -1);
+  test("abab", "ab", 2, -3, -1);
+  test("abab", "ab", 2, -2, -1);
+  test("abab", "ab", 2, -1, -1);
+  test("abab", "ab", 2, 0, -1);
+  test("abab", "ab", 2, 1, -1);
+  test("abab", "ab", 2, 2, -1);
+  test("abab", "ab", 2, 3, -1);
+  test("abab", "ab", 2, 4, 2);
+  test("abab", "ab", 2, 5, 2);
+  test("abab", "ab", 3, -5, -1);
+  test("abab", "ab", 3, -4, -1);
+  test("abab", "ab", 3, -3, -1);
+  test("abab", "ab", 3, -2, -1);
+  test("abab", "ab", 3, -1, -1);
+  test("abab", "ab", 3, 0, -1);
+  test("abab", "ab", 3, 1, -1);
+  test("abab", "ab", 3, 2, -1);
+  test("abab", "ab", 3, 3, -1);
+  test("abab", "ab", 3, 4, -1);
+  test("abab", "ab", 3, 5, -1);
+  test("abab", "ab", 4, -5, -1);
+  test("abab", "ab", 4, -4, -1);
+  test("abab", "ab", 4, -3, -1);
+  test("abab", "ab", 4, -2, -1);
+  test("abab", "ab", 4, -1, -1);
+  test("abab", "ab", 4, 0, -1);
+  test("abab", "ab", 4, 1, -1);
+  test("abab", "ab", 4, 2, -1);
+  test("abab", "ab", 4, 3, -1);
+  test("abab", "ab", 4, 4, -1);
+  test("abab", "ab", 4, 5, -1);
+  test("abab", "ab", 5, -5, -1);
+  test("abab", "ab", 5, -4, -1);
+  test("abab", "ab", 5, -3, -1);
+  test("abab", "ab", 5, -2, -1);
+  test("abab", "ab", 5, -1, -1);
+  test("abab", "ab", 5, 0, -1);
+  test("abab", "ab", 5, 1, -1);
+  test("abab", "ab", 5, 2, -1);
+  test("abab", "ab", 5, 3, -1);
+  test("abab", "ab", 5, 4, -1);
+  test("abab", "ab", 5, 5, -1);
+}
+
+TEST(StarlarkString, FindFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("find", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: find expected at most 3 argument, got 4");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, FindWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("zero", ctx.zero());
+  auto* method = str.dot("find", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string.find() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IndexNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at least 1 argument, got 0");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IndexTuple) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_tuple tuple(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: index() argument 1 must be string, not tuple");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, IndexOneArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = str.dot("index", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    if (expected < 0) {
+      EXPECT_EQ(nullptr, result);
+      ASSERT_THAT(error_callback.messages, SizeIs(1));
+      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+    } else {
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::int_t);
+      EXPECT_EQ(result->as_int64(), expected);
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    }
+  };
+
+  test("banana", "", 0);
+  test("banana", "an", 1);
+  test("banana", "ban", 0);
+  test("banana", "bb", -1);
+}
+
+TEST(StarlarkString, IndexStartAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_string param1("an"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, IndexTwoArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start,  int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = str.dot("index", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    if (expected < 0) {
+      EXPECT_EQ(nullptr, result);
+      ASSERT_THAT(error_callback.messages, SizeIs(1));
+      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+    } else {
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::int_t);
+      EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start;
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    }
+  };
+
+  /*
+  for a in range(-5, 6):
+      print('  test("abab", "ab", {}, {});'.format(a, "abab".find("ab", a)))
+  */
+  test("abab", "ab", -5, 0);
+  test("abab", "ab", -4, 0);
+  test("abab", "ab", -3, 2);
+  test("abab", "ab", -2, 2);
+  test("abab", "ab", -1, -1);
+  test("abab", "ab", 0, 0);
+  test("abab", "ab", 1, 2);
+  test("abab", "ab", 2, 2);
+  test("abab", "ab", 3, -1);
+  test("abab", "ab", 4, -1);
+  test("abab", "ab", 5, -1);
+}
+
+TEST(StarlarkString, IndexThreeArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start, int64_t end, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+    starlark_integer param3(end);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("index", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    if (expected < 0) {
+      EXPECT_EQ(nullptr, result);
+      ASSERT_THAT(error_callback.messages, SizeIs(1));
+      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+    } else {
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::int_t);
+      EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start << ", end: " << end;
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    }
+  };
+
+  /*
+  for a in range(-1, 2):
+      for b in range(-1, 2):
+          print('  test("", "", {}, {}, {});'.format(a, b, "".find("", a, b))
+  */
+  test("", "", -1, -1, 0);
+  test("", "", -1, 0, 0);
+  test("", "", -1, 1, 0);
+  test("", "", 0, -1, 0);
+  test("", "", 0, 0, 0);
+  test("", "", 0, 1, 0);
+  test("", "", 1, -1, -1);
+  test("", "", 1, 0, -1);
+  test("", "", 1, 1, -1);
+
+  /*
+  for a in range(-5, 6):
+      for b in range(-5, 6):
+          print('  test("abab", "ab", {}, {}, {});'.format(a, b, "abab".find("ab", a, b)))
+  */
+  test("abab", "ab", -5, -5, -1);
+  test("abab", "ab", -5, -4, -1);
+  test("abab", "ab", -5, -3, -1);
+  test("abab", "ab", -5, -2, 0);
+  test("abab", "ab", -5, -1, 0);
+  test("abab", "ab", -5, 0, -1);
+  test("abab", "ab", -5, 1, -1);
+  test("abab", "ab", -5, 2, 0);
+  test("abab", "ab", -5, 3, 0);
+  test("abab", "ab", -5, 4, 0);
+  test("abab", "ab", -5, 5, 0);
+  test("abab", "ab", -4, -5, -1);
+  test("abab", "ab", -4, -4, -1);
+  test("abab", "ab", -4, -3, -1);
+  test("abab", "ab", -4, -2, 0);
+  test("abab", "ab", -4, -1, 0);
+  test("abab", "ab", -4, 0, -1);
+  test("abab", "ab", -4, 1, -1);
+  test("abab", "ab", -4, 2, 0);
+  test("abab", "ab", -4, 3, 0);
+  test("abab", "ab", -4, 4, 0);
+  test("abab", "ab", -4, 5, 0);
+  test("abab", "ab", -3, -5, -1);
+  test("abab", "ab", -3, -4, -1);
+  test("abab", "ab", -3, -3, -1);
+  test("abab", "ab", -3, -2, -1);
+  test("abab", "ab", -3, -1, -1);
+  test("abab", "ab", -3, 0, -1);
+  test("abab", "ab", -3, 1, -1);
+  test("abab", "ab", -3, 2, -1);
+  test("abab", "ab", -3, 3, -1);
+  test("abab", "ab", -3, 4, 2);
+  test("abab", "ab", -3, 5, 2);
+  test("abab", "ab", -2, -5, -1);
+  test("abab", "ab", -2, -4, -1);
+  test("abab", "ab", -2, -3, -1);
+  test("abab", "ab", -2, -2, -1);
+  test("abab", "ab", -2, -1, -1);
+  test("abab", "ab", -2, 0, -1);
+  test("abab", "ab", -2, 1, -1);
+  test("abab", "ab", -2, 2, -1);
+  test("abab", "ab", -2, 3, -1);
+  test("abab", "ab", -2, 4, 2);
+  test("abab", "ab", -2, 5, 2);
+  test("abab", "ab", -1, -5, -1);
+  test("abab", "ab", -1, -4, -1);
+  test("abab", "ab", -1, -3, -1);
+  test("abab", "ab", -1, -2, -1);
+  test("abab", "ab", -1, -1, -1);
+  test("abab", "ab", -1, 0, -1);
+  test("abab", "ab", -1, 1, -1);
+  test("abab", "ab", -1, 2, -1);
+  test("abab", "ab", -1, 3, -1);
+  test("abab", "ab", -1, 4, -1);
+  test("abab", "ab", -1, 5, -1);
+  test("abab", "ab", 0, -5, -1);
+  test("abab", "ab", 0, -4, -1);
+  test("abab", "ab", 0, -3, -1);
+  test("abab", "ab", 0, -2, 0);
+  test("abab", "ab", 0, -1, 0);
+  test("abab", "ab", 0, 0, -1);
+  test("abab", "ab", 0, 1, -1);
+  test("abab", "ab", 0, 2, 0);
+  test("abab", "ab", 0, 3, 0);
+  test("abab", "ab", 0, 4, 0);
+  test("abab", "ab", 0, 5, 0);
+  test("abab", "ab", 1, -5, -1);
+  test("abab", "ab", 1, -4, -1);
+  test("abab", "ab", 1, -3, -1);
+  test("abab", "ab", 1, -2, -1);
+  test("abab", "ab", 1, -1, -1);
+  test("abab", "ab", 1, 0, -1);
+  test("abab", "ab", 1, 1, -1);
+  test("abab", "ab", 1, 2, -1);
+  test("abab", "ab", 1, 3, -1);
+  test("abab", "ab", 1, 4, 2);
+  test("abab", "ab", 1, 5, 2);
+  test("abab", "ab", 2, -5, -1);
+  test("abab", "ab", 2, -4, -1);
+  test("abab", "ab", 2, -3, -1);
+  test("abab", "ab", 2, -2, -1);
+  test("abab", "ab", 2, -1, -1);
+  test("abab", "ab", 2, 0, -1);
+  test("abab", "ab", 2, 1, -1);
+  test("abab", "ab", 2, 2, -1);
+  test("abab", "ab", 2, 3, -1);
+  test("abab", "ab", 2, 4, 2);
+  test("abab", "ab", 2, 5, 2);
+  test("abab", "ab", 3, -5, -1);
+  test("abab", "ab", 3, -4, -1);
+  test("abab", "ab", 3, -3, -1);
+  test("abab", "ab", 3, -2, -1);
+  test("abab", "ab", 3, -1, -1);
+  test("abab", "ab", 3, 0, -1);
+  test("abab", "ab", 3, 1, -1);
+  test("abab", "ab", 3, 2, -1);
+  test("abab", "ab", 3, 3, -1);
+  test("abab", "ab", 3, 4, -1);
+  test("abab", "ab", 3, 5, -1);
+  test("abab", "ab", 4, -5, -1);
+  test("abab", "ab", 4, -4, -1);
+  test("abab", "ab", 4, -3, -1);
+  test("abab", "ab", 4, -2, -1);
+  test("abab", "ab", 4, -1, -1);
+  test("abab", "ab", 4, 0, -1);
+  test("abab", "ab", 4, 1, -1);
+  test("abab", "ab", 4, 2, -1);
+  test("abab", "ab", 4, 3, -1);
+  test("abab", "ab", 4, 4, -1);
+  test("abab", "ab", 4, 5, -1);
+  test("abab", "ab", 5, -5, -1);
+  test("abab", "ab", 5, -4, -1);
+  test("abab", "ab", 5, -3, -1);
+  test("abab", "ab", 5, -2, -1);
+  test("abab", "ab", 5, -1, -1);
+  test("abab", "ab", 5, 0, -1);
+  test("abab", "ab", 5, 1, -1);
+  test("abab", "ab", 5, 2, -1);
+  test("abab", "ab", 5, 3, -1);
+  test("abab", "ab", 5, 4, -1);
+  test("abab", "ab", 5, 5, -1);
+}
+
+TEST(StarlarkString, IndexFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at most 3 argument, got 4");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IndexWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("zero", ctx.zero());
+  auto* method = str.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string.index() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RfindNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("rfind", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rfind expected at least 1 argument, got 0");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RfindTuple) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_tuple tuple(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("rfind", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rfind() argument 1 must be string, not tuple");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, RfindOneArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = str.dot("rfind", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->as_int64(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("banana", "", 6);
+  test("banana", "an", 3);
+  test("banana", "ban", 0);
+  test("banana", "bb", -1);
+}
+
+TEST(StarlarkString, RfindStartAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_string param1("an"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("rfind", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, RfindTwoArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start,  int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = str.dot("rfind", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start;
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  /*
+  for a in range(-5, 6):
+      print('  test("abab", "ab", {}, {});'.format(a, "abab".rfind("ab", a)))
+  */
+  test("abab", "ab", -5, 2);
+  test("abab", "ab", -4, 2);
+  test("abab", "ab", -3, 2);
+  test("abab", "ab", -2, 2);
+  test("abab", "ab", -1, -1);
+  test("abab", "ab", 0, 2);
+  test("abab", "ab", 1, 2);
+  test("abab", "ab", 2, 2);
+  test("abab", "ab", 3, -1);
+  test("abab", "ab", 4, -1);
+  test("abab", "ab", 5, -1);
+}
+
+TEST(StarlarkString, RfindThreeArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start, int64_t end, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+    starlark_integer param3(end);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("rfind", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start << ", end: " << end;
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  /*
+  for a in range(-1, 2):
+      for b in range(-1, 2):
+          print('  test("", "", {}, {}, {});'.format(a, b, "".rfind("", a, b))
+  */
+  test("", "", -1, -1, 0);
+  test("", "", -1, 0, 0);
+  test("", "", -1, 1, 0);
+  test("", "", 0, -1, 0);
+  test("", "", 0, 0, 0);
+  test("", "", 0, 1, 0);
+  test("", "", 1, -1, -1);
+  test("", "", 1, 0, -1);
+  test("", "", 1, 1, -1);
+
+  /*
+  for a in range(-5, 6):
+      for b in range(-5, 6):
+          print('  test("abab", "ab", {}, {}, {});'.format(a, b, "abab".rfind("ab", a, b)))
+  */
+  test("abab", "ab", -5, -5, -1);
+  test("abab", "ab", -5, -4, -1);
+  test("abab", "ab", -5, -3, -1);
+  test("abab", "ab", -5, -2, 0);
+  test("abab", "ab", -5, -1, 0);
+  test("abab", "ab", -5, 0, -1);
+  test("abab", "ab", -5, 1, -1);
+  test("abab", "ab", -5, 2, 0);
+  test("abab", "ab", -5, 3, 0);
+  test("abab", "ab", -5, 4, 2);
+  test("abab", "ab", -5, 5, 2);
+  test("abab", "ab", -4, -5, -1);
+  test("abab", "ab", -4, -4, -1);
+  test("abab", "ab", -4, -3, -1);
+  test("abab", "ab", -4, -2, 0);
+  test("abab", "ab", -4, -1, 0);
+  test("abab", "ab", -4, 0, -1);
+  test("abab", "ab", -4, 1, -1);
+  test("abab", "ab", -4, 2, 0);
+  test("abab", "ab", -4, 3, 0);
+  test("abab", "ab", -4, 4, 2);
+  test("abab", "ab", -4, 5, 2);
+  test("abab", "ab", -3, -5, -1);
+  test("abab", "ab", -3, -4, -1);
+  test("abab", "ab", -3, -3, -1);
+  test("abab", "ab", -3, -2, -1);
+  test("abab", "ab", -3, -1, -1);
+  test("abab", "ab", -3, 0, -1);
+  test("abab", "ab", -3, 1, -1);
+  test("abab", "ab", -3, 2, -1);
+  test("abab", "ab", -3, 3, -1);
+  test("abab", "ab", -3, 4, 2);
+  test("abab", "ab", -3, 5, 2);
+  test("abab", "ab", -2, -5, -1);
+  test("abab", "ab", -2, -4, -1);
+  test("abab", "ab", -2, -3, -1);
+  test("abab", "ab", -2, -2, -1);
+  test("abab", "ab", -2, -1, -1);
+  test("abab", "ab", -2, 0, -1);
+  test("abab", "ab", -2, 1, -1);
+  test("abab", "ab", -2, 2, -1);
+  test("abab", "ab", -2, 3, -1);
+  test("abab", "ab", -2, 4, 2);
+  test("abab", "ab", -2, 5, 2);
+  test("abab", "ab", -1, -5, -1);
+  test("abab", "ab", -1, -4, -1);
+  test("abab", "ab", -1, -3, -1);
+  test("abab", "ab", -1, -2, -1);
+  test("abab", "ab", -1, -1, -1);
+  test("abab", "ab", -1, 0, -1);
+  test("abab", "ab", -1, 1, -1);
+  test("abab", "ab", -1, 2, -1);
+  test("abab", "ab", -1, 3, -1);
+  test("abab", "ab", -1, 4, -1);
+  test("abab", "ab", -1, 5, -1);
+  test("abab", "ab", 0, -5, -1);
+  test("abab", "ab", 0, -4, -1);
+  test("abab", "ab", 0, -3, -1);
+  test("abab", "ab", 0, -2, 0);
+  test("abab", "ab", 0, -1, 0);
+  test("abab", "ab", 0, 0, -1);
+  test("abab", "ab", 0, 1, -1);
+  test("abab", "ab", 0, 2, 0);
+  test("abab", "ab", 0, 3, 0);
+  test("abab", "ab", 0, 4, 2);
+  test("abab", "ab", 0, 5, 2);
+  test("abab", "ab", 1, -5, -1);
+  test("abab", "ab", 1, -4, -1);
+  test("abab", "ab", 1, -3, -1);
+  test("abab", "ab", 1, -2, -1);
+  test("abab", "ab", 1, -1, -1);
+  test("abab", "ab", 1, 0, -1);
+  test("abab", "ab", 1, 1, -1);
+  test("abab", "ab", 1, 2, -1);
+  test("abab", "ab", 1, 3, -1);
+  test("abab", "ab", 1, 4, 2);
+  test("abab", "ab", 1, 5, 2);
+  test("abab", "ab", 2, -5, -1);
+  test("abab", "ab", 2, -4, -1);
+  test("abab", "ab", 2, -3, -1);
+  test("abab", "ab", 2, -2, -1);
+  test("abab", "ab", 2, -1, -1);
+  test("abab", "ab", 2, 0, -1);
+  test("abab", "ab", 2, 1, -1);
+  test("abab", "ab", 2, 2, -1);
+  test("abab", "ab", 2, 3, -1);
+  test("abab", "ab", 2, 4, 2);
+  test("abab", "ab", 2, 5, 2);
+  test("abab", "ab", 3, -5, -1);
+  test("abab", "ab", 3, -4, -1);
+  test("abab", "ab", 3, -3, -1);
+  test("abab", "ab", 3, -2, -1);
+  test("abab", "ab", 3, -1, -1);
+  test("abab", "ab", 3, 0, -1);
+  test("abab", "ab", 3, 1, -1);
+  test("abab", "ab", 3, 2, -1);
+  test("abab", "ab", 3, 3, -1);
+  test("abab", "ab", 3, 4, -1);
+  test("abab", "ab", 3, 5, -1);
+  test("abab", "ab", 4, -5, -1);
+  test("abab", "ab", 4, -4, -1);
+  test("abab", "ab", 4, -3, -1);
+  test("abab", "ab", 4, -2, -1);
+  test("abab", "ab", 4, -1, -1);
+  test("abab", "ab", 4, 0, -1);
+  test("abab", "ab", 4, 1, -1);
+  test("abab", "ab", 4, 2, -1);
+  test("abab", "ab", 4, 3, -1);
+  test("abab", "ab", 4, 4, -1);
+  test("abab", "ab", 4, 5, -1);
+  test("abab", "ab", 5, -5, -1);
+  test("abab", "ab", 5, -4, -1);
+  test("abab", "ab", 5, -3, -1);
+  test("abab", "ab", 5, -2, -1);
+  test("abab", "ab", 5, -1, -1);
+  test("abab", "ab", 5, 0, -1);
+  test("abab", "ab", 5, 1, -1);
+  test("abab", "ab", 5, 2, -1);
+  test("abab", "ab", 5, 3, -1);
+  test("abab", "ab", 5, 4, -1);
+  test("abab", "ab", 5, 5, -1);
+}
+
+TEST(StarlarkString, RfindFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("rfind", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rfind expected at most 3 argument, got 4");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RfindWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("zero", ctx.zero());
+  auto* method = str.dot("rfind", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string.rfind() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RindexNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("rindex", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rindex expected at least 1 argument, got 0");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RindexTuple) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_tuple tuple(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = str.dot("rindex", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rindex() argument 1 must be string, not tuple");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, RindexOneArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = str.dot("rindex", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    if (expected < 0) {
+      EXPECT_EQ(nullptr, result);
+      ASSERT_THAT(error_callback.messages, SizeIs(1));
+      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+    } else {
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::int_t);
+      EXPECT_EQ(result->as_int64(), expected);
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    }
+  };
+
+  test("banana", "", 6);
+  test("banana", "an", 3);
+  test("banana", "ban", 0);
+  test("banana", "bb", -1);
+}
+
+TEST(StarlarkString, RindexStartAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("banana"sv);
+  starlark_string param1("an"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("rindex", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(str.str(), "banana");
+}
+
+TEST(StarlarkString, RindexTwoArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start,  int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = str.dot("rindex", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    if (expected < 0) {
+      EXPECT_EQ(nullptr, result);
+      ASSERT_THAT(error_callback.messages, SizeIs(1));
+      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+    } else {
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::int_t);
+      EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start;
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    }
+  };
+
+  /*
+  for a in range(-5, 6):
+      print('  test("abab", "ab", {}, {});'.format(a, "abab".rfind("ab", a)))
+  */
+  test("abab", "ab", -5, 2);
+  test("abab", "ab", -4, 2);
+  test("abab", "ab", -3, 2);
+  test("abab", "ab", -2, 2);
+  test("abab", "ab", -1, -1);
+  test("abab", "ab", 0, 2);
+  test("abab", "ab", 1, 2);
+  test("abab", "ab", 2, 2);
+  test("abab", "ab", 3, -1);
+  test("abab", "ab", 4, -1);
+  test("abab", "ab", 5, -1);
+}
+
+TEST(StarlarkString, RindexThreeArgument) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start, int64_t end, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+    starlark_integer param3(end);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("rindex", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    if (expected < 0) {
+      EXPECT_EQ(nullptr, result);
+      ASSERT_THAT(error_callback.messages, SizeIs(1));
+      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+    } else {
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::int_t);
+      EXPECT_EQ(result->as_int64(), expected) << "Element: b'" << element << "', sub: b'" << sub << "', start: " << start << ", end: " << end;
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+    }
+  };
+
+  /*
+  for a in range(-1, 2):
+      for b in range(-1, 2):
+          print('  test("", "", {}, {}, {});'.format(a, b, "".rfind("", a, b))
+  */
+  test("", "", -1, -1, 0);
+  test("", "", -1, 0, 0);
+  test("", "", -1, 1, 0);
+  test("", "", 0, -1, 0);
+  test("", "", 0, 0, 0);
+  test("", "", 0, 1, 0);
+  test("", "", 1, -1, -1);
+  test("", "", 1, 0, -1);
+  test("", "", 1, 1, -1);
+
+  /*
+  for a in range(-5, 6):
+      for b in range(-5, 6):
+          print('  test("abab", "ab", {}, {}, {});'.format(a, b, "abab".rfind("ab", a, b)))
+  */
+  test("abab", "ab", -5, -5, -1);
+  test("abab", "ab", -5, -4, -1);
+  test("abab", "ab", -5, -3, -1);
+  test("abab", "ab", -5, -2, 0);
+  test("abab", "ab", -5, -1, 0);
+  test("abab", "ab", -5, 0, -1);
+  test("abab", "ab", -5, 1, -1);
+  test("abab", "ab", -5, 2, 0);
+  test("abab", "ab", -5, 3, 0);
+  test("abab", "ab", -5, 4, 2);
+  test("abab", "ab", -5, 5, 2);
+  test("abab", "ab", -4, -5, -1);
+  test("abab", "ab", -4, -4, -1);
+  test("abab", "ab", -4, -3, -1);
+  test("abab", "ab", -4, -2, 0);
+  test("abab", "ab", -4, -1, 0);
+  test("abab", "ab", -4, 0, -1);
+  test("abab", "ab", -4, 1, -1);
+  test("abab", "ab", -4, 2, 0);
+  test("abab", "ab", -4, 3, 0);
+  test("abab", "ab", -4, 4, 2);
+  test("abab", "ab", -4, 5, 2);
+  test("abab", "ab", -3, -5, -1);
+  test("abab", "ab", -3, -4, -1);
+  test("abab", "ab", -3, -3, -1);
+  test("abab", "ab", -3, -2, -1);
+  test("abab", "ab", -3, -1, -1);
+  test("abab", "ab", -3, 0, -1);
+  test("abab", "ab", -3, 1, -1);
+  test("abab", "ab", -3, 2, -1);
+  test("abab", "ab", -3, 3, -1);
+  test("abab", "ab", -3, 4, 2);
+  test("abab", "ab", -3, 5, 2);
+  test("abab", "ab", -2, -5, -1);
+  test("abab", "ab", -2, -4, -1);
+  test("abab", "ab", -2, -3, -1);
+  test("abab", "ab", -2, -2, -1);
+  test("abab", "ab", -2, -1, -1);
+  test("abab", "ab", -2, 0, -1);
+  test("abab", "ab", -2, 1, -1);
+  test("abab", "ab", -2, 2, -1);
+  test("abab", "ab", -2, 3, -1);
+  test("abab", "ab", -2, 4, 2);
+  test("abab", "ab", -2, 5, 2);
+  test("abab", "ab", -1, -5, -1);
+  test("abab", "ab", -1, -4, -1);
+  test("abab", "ab", -1, -3, -1);
+  test("abab", "ab", -1, -2, -1);
+  test("abab", "ab", -1, -1, -1);
+  test("abab", "ab", -1, 0, -1);
+  test("abab", "ab", -1, 1, -1);
+  test("abab", "ab", -1, 2, -1);
+  test("abab", "ab", -1, 3, -1);
+  test("abab", "ab", -1, 4, -1);
+  test("abab", "ab", -1, 5, -1);
+  test("abab", "ab", 0, -5, -1);
+  test("abab", "ab", 0, -4, -1);
+  test("abab", "ab", 0, -3, -1);
+  test("abab", "ab", 0, -2, 0);
+  test("abab", "ab", 0, -1, 0);
+  test("abab", "ab", 0, 0, -1);
+  test("abab", "ab", 0, 1, -1);
+  test("abab", "ab", 0, 2, 0);
+  test("abab", "ab", 0, 3, 0);
+  test("abab", "ab", 0, 4, 2);
+  test("abab", "ab", 0, 5, 2);
+  test("abab", "ab", 1, -5, -1);
+  test("abab", "ab", 1, -4, -1);
+  test("abab", "ab", 1, -3, -1);
+  test("abab", "ab", 1, -2, -1);
+  test("abab", "ab", 1, -1, -1);
+  test("abab", "ab", 1, 0, -1);
+  test("abab", "ab", 1, 1, -1);
+  test("abab", "ab", 1, 2, -1);
+  test("abab", "ab", 1, 3, -1);
+  test("abab", "ab", 1, 4, 2);
+  test("abab", "ab", 1, 5, 2);
+  test("abab", "ab", 2, -5, -1);
+  test("abab", "ab", 2, -4, -1);
+  test("abab", "ab", 2, -3, -1);
+  test("abab", "ab", 2, -2, -1);
+  test("abab", "ab", 2, -1, -1);
+  test("abab", "ab", 2, 0, -1);
+  test("abab", "ab", 2, 1, -1);
+  test("abab", "ab", 2, 2, -1);
+  test("abab", "ab", 2, 3, -1);
+  test("abab", "ab", 2, 4, 2);
+  test("abab", "ab", 2, 5, 2);
+  test("abab", "ab", 3, -5, -1);
+  test("abab", "ab", 3, -4, -1);
+  test("abab", "ab", 3, -3, -1);
+  test("abab", "ab", 3, -2, -1);
+  test("abab", "ab", 3, -1, -1);
+  test("abab", "ab", 3, 0, -1);
+  test("abab", "ab", 3, 1, -1);
+  test("abab", "ab", 3, 2, -1);
+  test("abab", "ab", 3, 3, -1);
+  test("abab", "ab", 3, 4, -1);
+  test("abab", "ab", 3, 5, -1);
+  test("abab", "ab", 4, -5, -1);
+  test("abab", "ab", 4, -4, -1);
+  test("abab", "ab", 4, -3, -1);
+  test("abab", "ab", 4, -2, -1);
+  test("abab", "ab", 4, -1, -1);
+  test("abab", "ab", 4, 0, -1);
+  test("abab", "ab", 4, 1, -1);
+  test("abab", "ab", 4, 2, -1);
+  test("abab", "ab", 4, 3, -1);
+  test("abab", "ab", 4, 4, -1);
+  test("abab", "ab", 4, 5, -1);
+  test("abab", "ab", 5, -5, -1);
+  test("abab", "ab", 5, -4, -1);
+  test("abab", "ab", 5, -3, -1);
+  test("abab", "ab", 5, -2, -1);
+  test("abab", "ab", 5, -1, -1);
+  test("abab", "ab", 5, 0, -1);
+  test("abab", "ab", 5, 1, -1);
+  test("abab", "ab", 5, 2, -1);
+  test("abab", "ab", 5, 3, -1);
+  test("abab", "ab", 5, 4, -1);
+  test("abab", "ab", 5, 5, -1);
+}
+
+TEST(StarlarkString, RindexFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("rindex", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rindex expected at most 3 argument, got 4");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RindexWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("zero", ctx.zero());
+  auto* method = str.dot("rindex", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string.rindex() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 }  // namespace

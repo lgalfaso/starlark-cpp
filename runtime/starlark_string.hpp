@@ -41,6 +41,8 @@ class starlark_string : public starlark_obj {
   int64_t count(std::string_view sub, int64_t start, int64_t end) const;
   bool endswith(std::vector<std::string_view> ends, int64_t start, int64_t end) const;
   bool startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const;
+  int64_t find(std::string_view sub, int64_t start, int64_t end) const;
+  int64_t rfind(std::string_view sub, int64_t start, int64_t end) const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
