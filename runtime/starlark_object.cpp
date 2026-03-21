@@ -695,6 +695,28 @@ bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlar
          max_args(pos_args, error_callback, fn_name, 1);
 }
 
+status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& error_callback) {
+  switch (iidx.numeric_type()) {
+    case starlark_numeric_type::kInt64:
+      return status_or<int64_t>(iidx.as_int64());
+    case starlark_numeric_type::kBigInt:
+      if (!iidx.as_bigint().fits_in_int64()) {
+        if (iidx.as_bigint().sign()) {
+          return status_or<int64_t>(std::numeric_limits<int64_t>::min());
+        } else {
+          return status_or<int64_t>(std::numeric_limits<int64_t>::max());
+        }
+      } else {
+        return status_or<int64_t>(iidx.as_bigint().as_int64());
+      }
+      break;
+    default:
+      error_callback.add_error(error_interpreted_as_integer(iidx.type()));
+      return status_or<int64_t>(status_code::kError);
+  }
+}
+
+// TODO(lmirelmann): Change this to return `status_or<int64_t>`.
 bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
   switch (iidx.numeric_type()) {
     case starlark_numeric_type::kInt64:
@@ -718,6 +740,7 @@ bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, er
   return true;
 }
 
+// TODO(lmirelmann): Change this to return `status`.
 bool to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
   switch (iidx.numeric_type()) {
     case starlark_numeric_type::kInt64:

@@ -132,6 +132,8 @@ class context {
   starlark_obj* minus_one() const;
   starlark_obj* zero() const;
   starlark_obj* one() const;
+  starlark_obj* empty_bytes() const;
+  starlark_obj* empty_string() const;
   // TODO(lmirelmann): Do not expose the arena.
   google::protobuf::Arena& arena();
 
@@ -143,6 +145,8 @@ class context {
   starlark_obj* minus_one_;
   starlark_obj* zero_;
   starlark_obj* one_;
+  starlark_obj* empty_bytes_;
+  starlark_obj* empty_string_;
 };
 
 class starlark_obj {
@@ -253,6 +257,7 @@ bool no_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_
 bool one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
 bool n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name);
 bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& error_callback);
 bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
 bool to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
 
