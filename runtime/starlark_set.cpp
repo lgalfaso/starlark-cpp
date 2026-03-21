@@ -670,7 +670,7 @@ bool starlark_set::can_modify(std::string_view op, error_fn& error_callback) con
 }
 
 starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.add")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.add").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -682,7 +682,7 @@ starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::po
 }
 
 starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "set.clear")) {
+  if (!no_arg(pos_args, named_args, error_callback, "set.clear").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -694,7 +694,7 @@ starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::
 }
 
 starlark_obj* starlark_set_fn_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "set.difference")) {
+  if (!no_named_args(named_args, error_callback, "set.difference").ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -703,7 +703,7 @@ starlark_obj* starlark_set_fn_difference(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "set.difference_update")) {
+  if (!no_named_args(named_args, error_callback, "set.difference_update").ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -715,7 +715,7 @@ starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const st
 }
 
 starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.discard")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.discard").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -727,7 +727,7 @@ starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_set_fn_intersection(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "set.intersection")) {
+  if (!no_named_args(named_args, error_callback, "set.intersection").ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -736,7 +736,7 @@ starlark_obj* starlark_set_fn_intersection(starlark_obj* this_obj, const starlar
 }
 
 starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "set.intersection_update")) {
+  if (!no_named_args(named_args, error_callback, "set.intersection_update").ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -748,7 +748,7 @@ starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const 
 }
 
 starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.isdisjoint")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.isdisjoint").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -761,7 +761,7 @@ starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.issubset")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.issubset").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -774,7 +774,7 @@ starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.issuperset")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.issuperset").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -787,7 +787,7 @@ starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "set.pop")) {
+  if (!no_arg(pos_args, named_args, error_callback, "set.pop").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -796,7 +796,7 @@ starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::po
 }
 
 starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.remove")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.remove").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -808,7 +808,7 @@ starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj:
 }
 
 starlark_obj* starlark_set_fn_symmetric_difference(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.symmetric_difference")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.symmetric_difference").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -817,7 +817,7 @@ starlark_obj* starlark_set_fn_symmetric_difference(starlark_obj* this_obj, const
 }
 
 starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "set.symmetric_difference_update")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "set.symmetric_difference_update").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -829,7 +829,7 @@ starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj
 }
 
 starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "set.union")) {
+  if (!no_named_args(named_args, error_callback, "set.union").ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -838,7 +838,7 @@ starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::
 }
 
 starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "set.update")) {
+  if (!no_named_args(named_args, error_callback, "set.update").ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);

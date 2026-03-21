@@ -703,7 +703,7 @@ int64_t starlark_string::rfind(std::string_view sub, int64_t start, int64_t end)
 starlark_obj* starlark_string::join(const std::vector<std::string_view>& elements, context& ctx) const {
   bool first = true;
   std::string result;
-  for (auto element: elements) {
+  for (auto element : elements) {
     if (!first) {
       result += value;
     } else {
@@ -773,11 +773,11 @@ status_or<std::pair<int64_t, int64_t>> get_start_and_end(const starlark_obj::pos
   int64_t start = std::numeric_limits<int64_t>::min();
   int64_t end = std::numeric_limits<int64_t>::max();
   if (pos_args.size() >= 2) {
-    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback).ok()) {
       return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
     }
     if (pos_args.size() >= 3) {
-      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback).ok()) {
         return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
       }
     }
@@ -806,9 +806,9 @@ starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.count") ||
-      !min_args(pos_args, error_callback, "count", 1) ||
-      !max_args(pos_args, error_callback, "count", 3)) {
+  if (!no_named_args(named_args, error_callback, "string.count").ok() ||
+      !min_args(pos_args, error_callback, "count", 1).ok() ||
+      !max_args(pos_args, error_callback, "count", 3).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -837,9 +837,9 @@ starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.endswith") ||
-      !min_args(pos_args, error_callback, "endswith", 1) ||
-      !max_args(pos_args, error_callback, "endswith", 3)) {
+  if (!no_named_args(named_args, error_callback, "string.endswith").ok() ||
+      !min_args(pos_args, error_callback, "endswith", 1).ok() ||
+      !max_args(pos_args, error_callback, "endswith", 3).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -856,9 +856,9 @@ starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark
 }
 
 starlark_obj* starlark_string_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.find") ||
-      !min_args(pos_args, error_callback, "find", 1) ||
-      !max_args(pos_args, error_callback, "find", 3)) {
+  if (!no_named_args(named_args, error_callback, "string.find").ok() ||
+      !min_args(pos_args, error_callback, "find", 1).ok() ||
+      !max_args(pos_args, error_callback, "find", 3).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -881,9 +881,9 @@ starlark_obj* starlark_string_fn_format(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.index") ||
-      !min_args(pos_args, error_callback, "index", 1) ||
-      !max_args(pos_args, error_callback, "index", 3)) {
+  if (!no_named_args(named_args, error_callback, "string.index").ok() ||
+      !min_args(pos_args, error_callback, "index", 1).ok() ||
+      !max_args(pos_args, error_callback, "index", 3).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -947,12 +947,12 @@ starlark_obj* starlark_string_fn_isupper(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_string_fn_join(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "join")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "join").ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
-  
+
   auto it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     // TODO(lmirelmann): The error is not exactly the same, Python produces the following error:
@@ -1009,9 +1009,9 @@ starlark_obj* starlark_string_fn_removesuffix(starlark_obj* this_obj, const star
 }
 
 starlark_obj* starlark_string_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.rfind") ||
-      !min_args(pos_args, error_callback, "rfind", 1) ||
-      !max_args(pos_args, error_callback, "rfind", 3)) {
+  if (!no_named_args(named_args, error_callback, "string.rfind").ok() ||
+      !min_args(pos_args, error_callback, "rfind", 1).ok() ||
+      !max_args(pos_args, error_callback, "rfind", 3).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -1028,9 +1028,9 @@ starlark_obj* starlark_string_fn_rfind(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_rindex(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.rindex") ||
-      !min_args(pos_args, error_callback, "rindex", 1) ||
-      !max_args(pos_args, error_callback, "rindex", 3)) {
+  if (!no_named_args(named_args, error_callback, "string.rindex").ok() ||
+      !min_args(pos_args, error_callback, "rindex", 1).ok() ||
+      !max_args(pos_args, error_callback, "rindex", 3).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -1082,9 +1082,9 @@ starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.startswith") ||
-      !min_args(pos_args, error_callback, "startswith", 1) ||
-      !max_args(pos_args, error_callback, "startswith", 3)) {
+  if (!no_named_args(named_args, error_callback, "string.startswith").ok() ||
+      !min_args(pos_args, error_callback, "startswith", 1).ok() ||
+      !max_args(pos_args, error_callback, "startswith", 3).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);

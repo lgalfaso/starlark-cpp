@@ -505,7 +505,7 @@ bool starlark_list::can_modify(std::string_view op, error_fn& error_callback) co
 }
 
 starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "list.append")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "list.append").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -517,7 +517,7 @@ starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_list_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "list.clear")) {
+  if (!no_arg(pos_args, named_args, error_callback, "list.clear").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -529,7 +529,7 @@ starlark_obj* starlark_list_fn_clear(starlark_obj* this_obj, const starlark_obj:
 }
 
 starlark_obj* starlark_list_fn_extend(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "list.extend")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "list.extend").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -541,19 +541,19 @@ starlark_obj* starlark_list_fn_extend(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_list_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "list.index") ||
-      !min_args(pos_args, error_callback, "index", 1) ||
-      !max_args(pos_args, error_callback, "index", 3)) {
+  if (!no_named_args(named_args, error_callback, "list.index").ok() ||
+      !min_args(pos_args, error_callback, "index", 1).ok() ||
+      !max_args(pos_args, error_callback, "index", 3).ok()) {
     return nullptr;
   }
   int64_t start = 0;
   int64_t end = -1;
   if (pos_args.size() >= 2) {
-    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback)) {
+    if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback).ok()) {
       return nullptr;
     }
     if (pos_args.size() >= 3) {
-      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback)) {
+      if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback).ok()) {
         return nullptr;
       }
     }
@@ -562,11 +562,11 @@ starlark_obj* starlark_list_fn_index(starlark_obj* this_obj, const starlark_obj:
 }
 
 starlark_obj* starlark_list_fn_insert(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!n_pos_args(pos_args, named_args, 2, error_callback, "list.insert")) {
+  if (!n_pos_args(pos_args, named_args, 2, error_callback, "list.insert").ok()) {
     return nullptr;
   }
   int64_t idx;
-  if (!to_int64_with_clamping_for_index(*pos_args.front(), idx, error_callback)) {
+  if (!to_int64_with_clamping_for_index(*pos_args.front(), idx, error_callback).ok()) {
     return nullptr;
   }
   if (!static_cast<starlark_list*>(this_obj)->insert(pos_args[1], idx, error_callback).ok()) {
@@ -576,19 +576,19 @@ starlark_obj* starlark_list_fn_insert(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_list_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "list.pop")) {
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "list.pop").ok()) {
      return nullptr;
   }
   int64_t idx = -1;
   if (pos_args.size() >= 1 &&
-      !to_int64_with_clamping_for_index(*pos_args.front(), idx, error_callback)) {
+      !to_int64_with_clamping_for_index(*pos_args.front(), idx, error_callback).ok()) {
     return nullptr;
   }
   return static_cast<starlark_list*>(this_obj)->pop(idx, error_callback);
 }
 
 starlark_obj* starlark_list_fn_remove(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, "list.remove")) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, "list.remove").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);

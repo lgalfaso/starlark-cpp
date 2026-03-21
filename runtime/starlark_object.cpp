@@ -574,7 +574,7 @@ status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range
   These two ranges are equal, and the difference is only visible by calling `str`.
   */
   int64_t i_stride = 1;
-  if (!to_int64_with_clamping_for_index_allow_none(stride, i_stride, error_callback)) {
+  if (!to_int64_with_clamping_for_index_allow_none(stride, i_stride, error_callback).ok()) {
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
   }
   if (i_stride == 0) {
@@ -585,10 +585,10 @@ status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range
   int64_t i_end = i_stride > 0 ? len : -len - 1;
   int64_t lower = i_stride > 0 ? 0 : -1;
   int64_t upper = i_stride > 0 ? len : lower + len;
-  if (!to_int64_with_clamping_for_index_allow_none(start, i_start, error_callback)) {
+  if (!to_int64_with_clamping_for_index_allow_none(start, i_start, error_callback).ok()) {
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
   }
-  if (!to_int64_with_clamping_for_index_allow_none(stop, i_end, error_callback)) {
+  if (!to_int64_with_clamping_for_index_allow_none(stop, i_end, error_callback).ok()) {
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
   }
   if (i_start < 0) {
@@ -633,66 +633,69 @@ int64_t starlark_hash(std::span<int64_t> values) {
   return acc;
 }
 
-bool no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
+status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
   if (!named_args.empty()) {
     error_callback.add_error(error_no_keyword(fn_name));
-    return false;
+    return error_status();
   }
-  return true;
+  return ok_status();
 }
 
-bool min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min) {
+status min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min) {
   if (pos_args.size() < expected_min) {
     error_callback.add_error(error_arguments_too_few(fn_name, pos_args.size(), expected_min));
-    return false;
+    return error_status();
   }
-  return true;
+  return ok_status();
 }
 
-bool max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max) {
+status max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max) {
   if (pos_args.size() > expected_max) {
     error_callback.add_error(error_arguments_too_many(fn_name, pos_args.size(), expected_max));
-    return false;
+    return error_status();
   }
-  return true;
+  return ok_status();
 }
 
-bool no_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
-  if (!no_named_args(named_args, error_callback, fn_name)) {
-    return false;
+status no_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
+  if (!no_named_args(named_args, error_callback, fn_name).ok()) {
+    return error_status();
   }
   if (!pos_args.empty()) {
     error_callback.add_error(error_no_pos_args(fn_name, pos_args.size()));
-    return false;
+    return error_status();
   }
-  return true;
+  return ok_status();
 }
 
-bool one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
-  if (!no_named_args(named_args, error_callback, fn_name)) {
-    return false;
+status one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
+  if (!no_named_args(named_args, error_callback, fn_name).ok()) {
+    return error_status();
   }
   if (pos_args.size() != 1) {
     error_callback.add_error(error_arguments_exactly_one(fn_name, pos_args.size()));
-    return false;
+    return error_status();
   }
-  return true;
+  return ok_status();
 }
 
-bool n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name) {
-  if (!no_named_args(named_args, error_callback, fn_name)) {
-    return false;
+status n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name) {
+  if (!no_named_args(named_args, error_callback, fn_name).ok()) {
+    return error_status();
   }
   if (pos_args.size() != pos_args_count) {
     error_callback.add_error(error_arguments_exactly(fn_name, pos_args.size(), pos_args_count));
-    return false;
+    return error_status();
   }
-  return true;
+  return ok_status();
 }
 
-bool zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
-  return no_named_args(named_args, error_callback, fn_name) &&
-         max_args(pos_args, error_callback, fn_name, 1);
+status zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
+  if (!no_named_args(named_args, error_callback, fn_name).ok() ||
+      !max_args(pos_args, error_callback, fn_name, 1).ok()) {
+    return error_status();
+  }
+  return ok_status();
 }
 
 status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& error_callback) {
@@ -717,7 +720,7 @@ status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& er
 }
 
 // TODO(lmirelmann): Change this to return `status_or<int64_t>`.
-bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
+status to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
   switch (iidx.numeric_type()) {
     case starlark_numeric_type::kInt64:
       idx = iidx.as_int64();
@@ -735,13 +738,12 @@ bool to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, er
       break;
     default:
       error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
-      return false;
+      return error_status();
   }
-  return true;
+  return ok_status();
 }
 
-// TODO(lmirelmann): Change this to return `status`.
-bool to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
+status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
   switch (iidx.numeric_type()) {
     case starlark_numeric_type::kInt64:
       idx = iidx.as_int64();
@@ -759,12 +761,12 @@ bool to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64
       break;
     default:
       if (iidx.type() == starlark_types::none_t) {
-        return true;
+        return ok_status();
       }
       error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
-      return false;
+      return error_status();
   }
-  return true;
+  return ok_status();
 }
 
 }  // namespace runtime

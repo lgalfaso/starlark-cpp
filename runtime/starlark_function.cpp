@@ -141,7 +141,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_function::inner_hash(
 }
 
 starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark_obj*>& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::abs_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::abs_f).ok()) {
     return nullptr;
   }
   auto* value = pos_args.front();
@@ -174,7 +174,7 @@ starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark
 }
 
 starlark_obj* starlark_fn_all(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::all_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::all_f).ok()) {
     return nullptr;
   }
   auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
@@ -190,7 +190,7 @@ starlark_obj* starlark_fn_all(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_any(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::any_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::any_f).ok()) {
     return nullptr;
   }
   auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
@@ -206,7 +206,7 @@ starlark_obj* starlark_fn_any(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bool_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bool_f).ok()) {
     return nullptr;
   }
   return pos_args.front()->truthy() ? ctx.true_value() : ctx.false_value();
@@ -214,7 +214,7 @@ starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_a
 
 starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): The Python version of `bytes` can take zero arguments and returns `b''`. It is not clear whether this is desired in this case.
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bytes_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bytes_f).ok()) {
     return nullptr;
   }
   if (pos_args.front()->type() == starlark_types::bytes_t) {
@@ -266,7 +266,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
 }
 
 starlark_obj* starlark_fn_chr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::chr_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::chr_f).ok()) {
     return nullptr;
   }
   std::string result;
@@ -303,7 +303,7 @@ starlark_obj* starlark_fn_chr(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!max_args(pos_args, error_callback, starlark_built_in_functions::dict_f, 1)) {
+  if (!max_args(pos_args, error_callback, starlark_built_in_functions::dict_f, 1).ok()) {
     return nullptr;
   }
   starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
@@ -315,7 +315,7 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::dir_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::dir_f).ok()) {
     return nullptr;
   }
   const auto& attributes = pos_args.front()->dir();
@@ -367,7 +367,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
 }
 
 starlark_obj* starlark_fn_fail(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::fail_f)) {
+  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::fail_f).ok()) {
     return nullptr;
   }
   std::string message = "Error:";
@@ -380,7 +380,7 @@ starlark_obj* starlark_fn_fail(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::float_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::float_f).ok()) {
     return nullptr;
   }
   auto* value = pos_args.front();
@@ -426,9 +426,9 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
 }
 
 starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::getattr_f) ||
-      !min_args(pos_args, error_callback, starlark_built_in_functions::getattr_f, 2) ||
-      !max_args(pos_args, error_callback, starlark_built_in_functions::getattr_f, 3)) {
+  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::getattr_f).ok() ||
+      !min_args(pos_args, error_callback, starlark_built_in_functions::getattr_f, 2).ok() ||
+      !max_args(pos_args, error_callback, starlark_built_in_functions::getattr_f, 3).ok()) {
     return nullptr;
   }
   auto* element = pos_args.front();
@@ -448,7 +448,7 @@ starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::po
 }
 
 starlark_obj* starlark_fn_hasattr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!n_pos_args(pos_args, named_args, 2, error_callback, starlark_built_in_functions::hasattr_f)) {
+  if (!n_pos_args(pos_args, named_args, 2, error_callback, starlark_built_in_functions::hasattr_f).ok()) {
     return nullptr;
   }
   auto* attr = pos_args.back();
@@ -465,7 +465,7 @@ starlark_obj* starlark_fn_hasattr(starlark_obj* this_obj, const starlark_obj::po
 }
 
 starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::hash_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::hash_f).ok()) {
     return nullptr;
   }
   auto* value = pos_args.front();
@@ -478,7 +478,7 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::int_f)) {
+  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::int_f).ok()) {
     return nullptr;
   }
   if (pos_args.size() != 1 && pos_args.size() != 2) {
@@ -552,7 +552,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_len(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::len_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::len_f).ok()) {
     return nullptr;
   }
   auto result = pos_args.front()->len(true, error_callback);
@@ -563,7 +563,7 @@ starlark_obj* starlark_fn_len(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::list_f)) {
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::list_f).ok()) {
     return nullptr;
   }
   if (pos_args.empty()) {
@@ -594,7 +594,7 @@ starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::ord_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::ord_f).ok()) {
     return nullptr;
   }
   auto* value = pos_args.front();
@@ -630,29 +630,29 @@ starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_
 }
 
 starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::range_f) ||
-      !min_args(pos_args, error_callback, starlark_built_in_functions::range_f, 1) ||
-      !max_args(pos_args, error_callback, starlark_built_in_functions::range_f, 3)) {
+  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::range_f).ok() ||
+      !min_args(pos_args, error_callback, starlark_built_in_functions::range_f, 1).ok() ||
+      !max_args(pos_args, error_callback, starlark_built_in_functions::range_f, 3).ok()) {
     return nullptr;
   }
 
-  auto read_int64 = [](starlark_obj* value, int64_t& output, error_fn& error_callback) -> bool {
+  auto read_int64 = [](starlark_obj* value, int64_t& output, error_fn& error_callback) -> status {
     switch (value->numeric_type()) {
     case starlark_numeric_type::kInt64:
       output = value->as_int64();
-      return true;
+      return ok_status();
     case starlark_numeric_type::kBigInt: {
       const auto& bvalue = value->as_bigint();
       if (!bvalue.fits_in_int64()) {
         error_callback.add_error(error_overflow(value->type(), starlark_types::int64));
-        return false;
+        return error_status();
       }
       output = bvalue.as_int64();
-      return true;
+      return ok_status();
     }
     default:
       error_callback.add_error(error_interpreted_as_integer(value->type()));
-      return false;
+      return error_status();
     }
   };
 
@@ -661,20 +661,20 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
   int64_t step = 1;
   switch (pos_args.size()) {
     case 1:
-      if (!read_int64(pos_args[0], end, error_callback)) {
+      if (!read_int64(pos_args[0], end, error_callback).ok()) {
         return nullptr;
       }
       break;
     case 2:
-      if (!read_int64(pos_args[0], start, error_callback) ||
-          !read_int64(pos_args[1], end, error_callback)) {
+      if (!read_int64(pos_args[0], start, error_callback).ok() ||
+          !read_int64(pos_args[1], end, error_callback).ok()) {
         return nullptr;
       }
       break;
     case 3:
-      if (!read_int64(pos_args[0], start, error_callback) ||
-          !read_int64(pos_args[1], end, error_callback) ||
-          !read_int64(pos_args[2], step, error_callback)) {
+      if (!read_int64(pos_args[0], start, error_callback).ok() ||
+          !read_int64(pos_args[1], end, error_callback).ok() ||
+          !read_int64(pos_args[2], step, error_callback).ok()) {
         return nullptr;
       }
       if (step == 0) {
@@ -694,14 +694,14 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
 }
 
 starlark_obj* starlark_fn_repr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::repr_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::repr_f).ok()) {
     return nullptr;
   }
   return Arena::Create<starlark_string>(&ctx.arena(), pos_args.front()->repr());
 }
 
 starlark_obj* starlark_fn_reversed(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::reversed_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::reversed_f).ok()) {
     return nullptr;
   }
   auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
@@ -722,7 +722,7 @@ starlark_obj* starlark_fn_reversed(starlark_obj* this_obj, const starlark_obj::p
 }
 
 starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::set_f)) {
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::set_f).ok()) {
     return nullptr;
   }
   if (pos_args.empty()) {
@@ -750,14 +750,14 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
 }
 
 starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::str_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::str_f).ok()) {
     return nullptr;
   }
   return Arena::Create<starlark_string>(&ctx.arena(), pos_args.front()->str());
 }
 
 starlark_obj* starlark_fn_tuple(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::tuple_f)) {
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::tuple_f).ok()) {
     return nullptr;
   }
   if (pos_args.empty()) {
@@ -777,7 +777,7 @@ starlark_obj* starlark_fn_tuple(starlark_obj* this_obj, const starlark_obj::pos_
 }
 
 starlark_obj* starlark_fn_type(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::type_f)) {
+  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::type_f).ok()) {
     return nullptr;
   }
   return Arena::Create<starlark_string>(&ctx.arena(), pos_args.front()->type());
@@ -793,7 +793,7 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
     return true;
   };
 
-  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::zip_f)) {
+  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::zip_f).ok()) {
     return nullptr;
   }
   if (pos_args.empty()) {

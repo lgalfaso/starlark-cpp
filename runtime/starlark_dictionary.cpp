@@ -414,7 +414,7 @@ bool starlark_dictionary::can_modify(std::string_view op, error_fn& error_callba
 }
 
 starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "dict.clear")) {
+  if (!no_arg(pos_args, named_args, error_callback, "dict.clear").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -428,9 +428,9 @@ starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlar
 starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::dict_t);
-  if (!no_named_args(named_args, error_callback, "dict.get") ||
-      !min_args(pos_args, error_callback, "get", 1) ||
-      !max_args(pos_args, error_callback, "get", 2)) {
+  if (!no_named_args(named_args, error_callback, "dict.get").ok() ||
+      !min_args(pos_args, error_callback, "get", 1).ok() ||
+      !max_args(pos_args, error_callback, "get", 2).ok()) {
     return nullptr;
   }
   starlark_obj* default_value = pos_args.size() == 2 ? pos_args[1] : ctx.none_value();
@@ -438,7 +438,7 @@ starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "dict.items")) {
+  if (!no_arg(pos_args, named_args, error_callback, "dict.items").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -447,7 +447,7 @@ starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlar
 }
 
 starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "dict.keys")) {
+  if (!no_arg(pos_args, named_args, error_callback, "dict.keys").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -458,9 +458,9 @@ starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark
 starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::dict_t);
-  if (!no_named_args(named_args, error_callback, "dict.pop") ||
-      !min_args(pos_args, error_callback, "pop", 1) ||
-      !max_args(pos_args, error_callback, "pop", 2)) {
+  if (!no_named_args(named_args, error_callback, "dict.pop").ok() ||
+      !min_args(pos_args, error_callback, "pop", 1).ok() ||
+      !max_args(pos_args, error_callback, "pop", 2).ok()) {
     return nullptr;
   }
   starlark_dictionary* dict = static_cast<starlark_dictionary*>(this_obj);
@@ -468,7 +468,7 @@ starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "dict.popitem")) {
+  if (!no_arg(pos_args, named_args, error_callback, "dict.popitem").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
@@ -477,9 +477,9 @@ starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starl
 }
 
 starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "dict.setdefault") ||
-      !min_args(pos_args, error_callback, "setdefault", 1) ||
-      !max_args(pos_args, error_callback, "setdefault", 2)) {
+  if (!no_named_args(named_args, error_callback, "dict.setdefault").ok() ||
+      !min_args(pos_args, error_callback, "setdefault", 1).ok() ||
+      !max_args(pos_args, error_callback, "setdefault", 2).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -489,7 +489,7 @@ starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const st
 }
 
 starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!max_args(pos_args, error_callback, "update", 1)) {
+  if (!max_args(pos_args, error_callback, "update", 1).ok()) {
     return nullptr;
   }
   assert(this_obj != nullptr);
@@ -502,7 +502,7 @@ starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_arg(pos_args, named_args, error_callback, "dict.values")) {
+  if (!no_arg(pos_args, named_args, error_callback, "dict.values").ok()) {
      return nullptr;
   }
   assert(this_obj != nullptr);
