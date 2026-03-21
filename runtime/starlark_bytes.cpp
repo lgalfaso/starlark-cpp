@@ -19,9 +19,11 @@
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
+#include "unicode/ucd_code_points.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::ucd::is_White_Space;
 
 namespace starlark {
 namespace runtime {
@@ -358,11 +360,25 @@ starlark_obj* starlark_bytes::join(const std::vector<std::string_view>& elements
   return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
 }
 
+starlark_obj* starlark_bytes::lstrip(context& ctx) const {
+  std::string::size_type i = 0;
+  while (i < value.size() && is_White_Space(value[i])) {
+    ++i;
+  }
+  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(i));
+}
+
+starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) const {
+  auto pos = value.find_first_not_of(cutset);
+  if (pos == std::string::npos) {
+    return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view());
+  }
+  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(pos));
+}
+
 /*
 TODO(lmirelmann): Implement:
 
-starlark_obj* starlark_bytes::lstrip(context& ctx) const;
-starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) const;
 starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx) const;
 starlark_obj* starlark_bytes::replace(std::string_view old, std::string_view new_, int64_t count) const;
 */
@@ -394,8 +410,27 @@ TODO(lmirelmann): Implement:
 starlark_obj* starlark_bytes::rpartition(std::string_view sub, context& ctx) const;
 starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const;
 starlark_obj* starlark_bytes::rsplit(std::string_view sep,int64_t maxsplit, context& ctx) const;
-starlark_obj* starlark_bytes::rstrip(context& ctx) const;
-starlark_obj* starlark_bytes::rstrip(std::string_view cutset, context& ctx) const;
+*/
+
+starlark_obj* starlark_bytes::rstrip(context& ctx) const {
+  auto i = value.size();
+  while (i > 0 && is_White_Space(value[i - 1])) {
+    --i;
+  }
+  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, i));
+}
+
+starlark_obj* starlark_bytes::rstrip(std::string_view cutset, context& ctx) const {
+  auto pos = value.find_last_not_of(cutset);
+  if (pos == std::string::npos) {
+    return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view());
+  }
+  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, pos + 1));
+}
+
+/*
+TODO(lmirelmann): Implement:
+
 starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const;
 starlark_obj* starlark_bytes::split(std::string_view sep,int64_t maxsplit, context& ctx) const;
 */
@@ -421,11 +456,26 @@ bool starlark_bytes::startswith(const std::vector<std::string_view>& begins, int
   return false;
 }
 
-/*
-starlark_obj* starlark_bytes::strip(context& ctx) const;
-starlark_obj* starlark_bytes::strip(std::string_view cutset, context& ctx) const;
-*/
+starlark_obj* starlark_bytes::strip(context& ctx) const {
+  std::string_view view = value;
+  std::string::size_type start, end;
+  for (start = 0; start < view.size() && is_White_Space(view[start]); ++start) {}
+  for (end = view.size(); end > start && is_White_Space(view[end - 1]); --end) {}
+  return Arena::Create<starlark_bytes>(&ctx.arena(), view.substr(start, end - start));
+}
 
+starlark_obj* starlark_bytes::strip(std::string_view cutset, context& ctx) const {
+  std::string_view view = value;
+  auto pos = view.find_first_not_of(cutset);
+  if (pos == std::string_view::npos) {
+    return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view());
+  }
+  view = view.substr(pos);
+  pos = view.find_last_not_of(cutset);
+  // `pos != std::string_view::npos` as in the previous check, we know that
+  // there is at least one element that does not match cutset.
+  return Arena::Create<starlark_bytes>(&ctx.arena(), view.substr(0, pos + 1));
+}
 
 bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
@@ -647,9 +697,19 @@ starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj:
 }
 
 starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "lstrip")) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  if (pos_args.empty()) {
+    return static_cast<starlark_bytes*>(this_obj)->lstrip(ctx);
+  }
+  auto cutset = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!cutset.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->lstrip(*cutset, ctx);
 }
 
 starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -720,9 +780,19 @@ starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "rstrip")) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  if (pos_args.empty()) {
+    return static_cast<starlark_bytes*>(this_obj)->rstrip(ctx);
+  }
+  auto cutset = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!cutset.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->rstrip(*cutset, ctx);
 }
 
 starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -759,9 +829,19 @@ starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlar
 }
 
 starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "strip")) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  if (pos_args.empty()) {
+    return static_cast<starlark_bytes*>(this_obj)->strip(ctx);
+  }
+  auto cutset = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!cutset.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->strip(*cutset, ctx);
 }
 
 }  // namespace runtime
