@@ -235,6 +235,7 @@ class starlark_obj {
   virtual void inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const;
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
+  // TODO(lmirelmann): Refactor the return to be status_or<int64_t>.
   int64_t inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
   status_or<std::tuple<int64_t, int64_t, int64_t>> inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const;
 
