@@ -16,6 +16,7 @@
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
+#include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
@@ -376,10 +377,28 @@ starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) cons
   return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(pos));
 }
 
+starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx, error_fn& error_callback) {
+  if (sub.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto pos = value.find(sub);
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  if (pos == std::string::npos) {
+    result->add(this);
+    result->add(ctx.empty_bytes());
+    result->add(ctx.empty_bytes());
+  } else {
+    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, pos)));
+    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), sub));
+    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(pos + sub.length())));
+  }
+  return result;
+}
+
 /*
 TODO(lmirelmann): Implement:
 
-starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx) const;
 starlark_obj* starlark_bytes::replace(std::string_view old, std::string_view new_, int64_t count) const;
 */
 
@@ -404,13 +423,73 @@ int64_t starlark_bytes::rfind(std::string_view sub, int64_t start, int64_t end) 
   return result + start;
 }
 
-/*
-TODO(lmirelmann): Implement:
+starlark_obj* starlark_bytes::rpartition(std::string_view sub, context& ctx, error_fn& error_callback) {
+  if (sub.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto pos = value.rfind(sub);
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  if (pos == std::string::npos) {
+    result->add(ctx.empty_bytes());
+    result->add(ctx.empty_bytes());
+    result->add(this);
+  } else {
+    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, pos)));
+    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), sub));
+    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(pos + sub.length())));
+  }
+  return result;
+}
 
-starlark_obj* starlark_bytes::rpartition(std::string_view sub, context& ctx) const;
-starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const;
-starlark_obj* starlark_bytes::rsplit(std::string_view sep,int64_t maxsplit, context& ctx) const;
-*/
+starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  std::string_view remaining_view = value;
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  std::string_view::size_type pos = remaining_view.size();
+  for (pos = remaining_view.size(); pos > 0 && is_White_Space(remaining_view[pos - 1]); --pos) {}
+  remaining_view = remaining_view.substr(0, pos);
+  while (!remaining_view.empty() && maxsplit > 0) {
+    for (pos = remaining_view.size(); pos > 0 && !is_White_Space(remaining_view[pos - 1]); --pos) {}
+    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(pos)));
+    remaining_view = remaining_view.substr(0, pos);
+    for (pos = remaining_view.size(); pos > 0 && is_White_Space(remaining_view[pos - 1]); --pos) {}
+    remaining_view = remaining_view.substr(0, pos);
+    maxsplit--;
+  }
+  if (!remaining_view.empty()) {
+    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+  }
+  result->unsafe_reverse();
+  return result;
+}
+
+starlark_obj* starlark_bytes::rsplit(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const {
+  if (sep.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  std::string_view remaining_view = value;
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  while (maxsplit > 0) {
+    auto pos = remaining_view.rfind(sep);
+    if (pos == std::string_view::npos) {
+      break;
+    }
+    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(pos + sep.length())));
+    remaining_view = remaining_view.substr(0, pos);
+    maxsplit--;
+  }
+  result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+  result->unsafe_reverse();
+  return result;
+
+}
 
 starlark_obj* starlark_bytes::rstrip(context& ctx) const {
   auto i = value.size();
@@ -428,12 +507,51 @@ starlark_obj* starlark_bytes::rstrip(std::string_view cutset, context& ctx) cons
   return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, pos + 1));
 }
 
-/*
-TODO(lmirelmann): Implement:
+starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  std::string_view remaining_view = value;
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  std::string_view::size_type pos = 0;
+  for (pos = 0; pos < remaining_view.size() && is_White_Space(remaining_view[pos]); ++pos) {}
+  remaining_view = remaining_view.substr(pos);
+  while (!remaining_view.empty() && maxsplit > 0) {
+    for (pos = 0; pos < remaining_view.size() && !is_White_Space(remaining_view[pos]); ++pos) {}
+    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(0, pos)));
+    remaining_view = remaining_view.substr(pos);
+    for (pos = 0; pos < remaining_view.size() && is_White_Space(remaining_view[pos]); ++pos) {}
+    remaining_view = remaining_view.substr(pos);
+    maxsplit--;
+  }
+  if (!remaining_view.empty()) {
+    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+  }
+  return result;
+}
 
-starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const;
-starlark_obj* starlark_bytes::split(std::string_view sep,int64_t maxsplit, context& ctx) const;
-*/
+starlark_obj* starlark_bytes::split(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const {
+  if (sep.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  std::string_view remaining_view = value;
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  while (maxsplit > 0) {
+    auto pos = remaining_view.find(sep);
+    if (pos == std::string_view::npos) {
+      break;
+    }
+    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(0, pos)));
+    remaining_view = remaining_view.substr(pos + sep.length());
+    maxsplit--;
+  }
+  result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+  return result;
+}
 
 bool starlark_bytes::startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const {
   if (start < 0) {
@@ -713,9 +831,17 @@ starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "partition")) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+
+  auto separator = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!separator.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->partition(*separator, ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -768,15 +894,48 @@ starlark_obj* starlark_bytes_fn_rindex(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_bytes_fn_rpartition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "rpartition")) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+
+  auto separator = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!separator.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->rpartition(*separator, ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.rsplit") ||
+      !max_args(pos_args, error_callback, "rsplit", 2)) {
+    return nullptr;
+  }
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+    int64_t maxsplit = -1;
+    if (pos_args.size() >= 2) {
+      auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+      if (!status_or_maxsplit.ok()) {
+        return nullptr;
+      }
+      maxsplit = *status_or_maxsplit;
+    }
+    return static_cast<starlark_bytes*>(this_obj)->rsplit(maxsplit, ctx);
+  }
+  auto sep = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!sep.ok()) {
+    return nullptr;
+  }
+  int64_t maxsplit = -1;
+  if (pos_args.size() >= 2) {
+    auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+    if (!status_or_maxsplit.ok()) {
+      return nullptr;
+    }
+    maxsplit = *status_or_maxsplit;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->rsplit(*sep, maxsplit, ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -796,9 +955,34 @@ starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.split") ||
+      !max_args(pos_args, error_callback, "split", 2)) {
+    return nullptr;
+  }
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+    int64_t maxsplit = -1;
+    if (pos_args.size() >= 2) {
+      auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+      if (!status_or_maxsplit.ok()) {
+        return nullptr;
+      }
+      maxsplit = *status_or_maxsplit;
+    }
+    return static_cast<starlark_bytes*>(this_obj)->split(maxsplit, ctx);
+  }
+  auto sep = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!sep.ok()) {
+    return nullptr;
+  }
+  int64_t maxsplit = -1;
+  if (pos_args.size() >= 2) {
+    auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+    if (!status_or_maxsplit.ok()) {
+      return nullptr;
+    }
+    maxsplit = *status_or_maxsplit;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->split(*sep, maxsplit, ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

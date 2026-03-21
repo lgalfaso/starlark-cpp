@@ -99,7 +99,9 @@ std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, s
 std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type);
 
 std::string_view error_substring_not_found();
-std::string error_non_terable(std::string_view fn_name);
+std::string error_non_iterable(std::string_view fn_name);
+
+std::string_view error_empty_separator();
 
 }  // namespace runtime
 }  // namespace starlark

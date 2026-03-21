@@ -3853,4 +3853,886 @@ TEST(StarlarkBytes, LstripWithNamedArguments) {
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
+TEST(StarlarkBytes, PartitionNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = bytes.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() takes exactly one argument (0 given)");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, PartitionBytes) {
+  auto test = [](std::string_view element, std::string_view separator, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(element);
+    starlark_bytes param1(separator);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = bytes.dot("partition", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("abc", "banana", "(b\"abc\", b\"\", b\"\")");
+  test("abc", "a", "(b\"\", b\"a\", b\"bc\")");
+  test("abc", "b", "(b\"a\", b\"b\", b\"c\")");
+  test("abc", "c", "(b\"ab\", b\"c\", b\"\")");
+  test("aaa", "a", "(b\"\", b\"a\", b\"aa\")");
+}
+
+TEST(StarlarkBytes, PartitionBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+}
+
+TEST(StarlarkBytes, PartitionEmptySeparator) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_bytes());
+  auto* method = bytes.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkBytes, PartitionWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("x", ctx.zero());
+  auto* method = bytes.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() takes no keyword arguments");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, RpartitionNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = bytes.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() takes exactly one argument (0 given)");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, RpartitionBytes) {
+  auto test = [](std::string_view element, std::string_view separator, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(element);
+    starlark_bytes param1(separator);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = bytes.dot("rpartition", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("abc", "banana", "(b\"\", b\"\", b\"abc\")");
+  test("abc", "a", "(b\"\", b\"a\", b\"bc\")");
+  test("abc", "b", "(b\"a\", b\"b\", b\"c\")");
+  test("abc", "c", "(b\"ab\", b\"c\", b\"\")");
+  test("aaa", "a", "(b\"aa\", b\"a\", b\"\")");
+}
+
+TEST(StarlarkBytes, RpartitionBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+}
+
+TEST(StarlarkBytes, RpartitionEmptySeparator) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_bytes());
+  auto* method = bytes.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkBytes, RpartitionWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("x", ctx.zero());
+  auto* method = bytes.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() takes no keyword arguments");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, SplitNoArguments) {
+  auto test = [](std::string_view input, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    auto* method = bytes.dot("split", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "[]");
+  test("  ", "[]");
+  test("abc", "[b\"abc\"]");
+  test("  abc  ", "[b\"abc\"]");
+  test("  a  b  c  ", "[b\"a\", b\"b\", b\"c\"]");
+}
+
+TEST(StarlarkBytes, SplitNoneSeparatorArguments) {
+  auto test = [](std::string_view input, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(ctx.none_value());
+    auto* method = bytes.dot("split", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "[]");
+  test("  ", "[]");
+  test("abc", "[b\"abc\"]");
+  test("  abc  ", "[b\"abc\"]");
+  test("  a  b  c  ", "[b\"a\", b\"b\", b\"c\"]");
+}
+
+TEST(StarlarkBytes, SplitBoolSeparatorArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+}
+
+TEST(StarlarkBytes, SplitEmptySeparatorArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_bytes());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkBytes, SplitOneArguments) {
+  auto test = [](std::string_view input, std::string_view separator, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+    starlark_bytes param1(separator);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = bytes.dot("split", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "x", "[b\"\"]");
+  test("  ", "x", "[b\"  \"]");
+  test("axbxc", "x", "[b\"a\", b\"b\", b\"c\"]");
+  test("xaxbxcx", "x", "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xxaxxbxxcxx", "x", "[b\"\", b\"\", b\"a\", b\"\", b\"b\", b\"\", b\"c\", b\"\", b\"\"]");
+  test("xxaxxbxxcxx", "xx", "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xaxbxcx", "xx", "[b\"xaxbxcx\"]");
+}
+
+TEST(StarlarkBytes, SplitTwoArguments) {
+  auto test = [](std::string_view input, std::string_view separator, int64_t maxsplit, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+    starlark_bytes param1(separator);
+    starlark_integer param2(maxsplit);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = bytes.dot("split", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "x", -1, "[b\"\"]");
+  test("", "x", 0, "[b\"\"]");
+  test("", "x", 1, "[b\"\"]");
+  test("  ", "x", -1, "[b\"  \"]");
+  test("  ", "x", 0, "[b\"  \"]");
+  test("  ", "x", 1, "[b\"  \"]");
+  test("axbxc", "x", -1, "[b\"a\", b\"b\", b\"c\"]");
+  test("axbxc", "x", 0, "[b\"axbxc\"]");
+  test("axbxc", "x", 1, "[b\"a\", b\"bxc\"]");
+  test("xaxbxcx", "x", -1, "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xaxbxcx", "x", 0, "[b\"xaxbxcx\"]");
+  test("xaxbxcx", "x", 1, "[b\"\", b\"axbxcx\"]");
+  test("xxaxxbxxcxx", "x", -1, "[b\"\", b\"\", b\"a\", b\"\", b\"b\", b\"\", b\"c\", b\"\", b\"\"]");
+  test("xxaxxbxxcxx", "x", 0, "[b\"xxaxxbxxcxx\"]");
+  test("xxaxxbxxcxx", "x", 1, "[b\"\", b\"xaxxbxxcxx\"]");
+  test("xxaxxbxxcxx", "xx", -1, "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xxaxxbxxcxx", "xx", 0, "[b\"xxaxxbxxcxx\"]");
+  test("xxaxxbxxcxx", "xx", 1, "[b\"\", b\"axxbxxcxx\"]");
+  test("xaxbxcx", "xx", -1, "[b\"xaxbxcx\"]");
+  test("xaxbxcx", "xx", 0, "[b\"xaxbxcx\"]");
+  test("xaxbxcx", "xx", 1, "[b\"xaxbxcx\"]");
+}
+
+TEST(StarlarkBytes, SplitEmptySeparatorTwoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_bytes());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkBytes, SplitTwoArgumentsBoolSeparator) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+}
+
+TEST(StarlarkBytes, SplitTwoArgumentsBoolMaxsplit) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&bytes);
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+}
+
+TEST(StarlarkBytes, SplitTwoArgumentsNoneSeparatorArguments) {
+  auto test = [](std::string_view input, int64_t maxsplit, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+    starlark_integer param2(maxsplit);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(ctx.none_value());
+    pos_args.push_back(&param2);
+    auto* method = bytes.dot("split", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", -1, "[]");
+  test("", 0, "[]");
+  test("", 1, "[]");
+  test("  ", -1, "[]");
+  test("  ", 0, "[]");
+  test("  ", 1, "[]");
+  test("abc", -1, "[b\"abc\"]");
+  test("abc", 0, "[b\"abc\"]");
+  test("abc", 1, "[b\"abc\"]");
+  test("  abc  ", -1, "[b\"abc\"]");
+  test("  abc  ", 0, "[b\"abc  \"]");
+  test("  abc  ", 1, "[b\"abc\"]");
+  test("  a  b  c  ", -1, "[b\"a\", b\"b\", b\"c\"]");
+  test("  a  b  c  ", 0, "[b\"a  b  c  \"]");
+  test("  a  b  c  ", 1, "[b\"a\", b\"b  c  \"]");
+}
+
+TEST(StarlarkBytes, SplitTwoArgumentsNoneSeparatorBoolMaxsplit) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.none_value());
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+}
+
+TEST(StarlarkBytes, SplitWithThreeArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: split expected at most 2 argument, got 3");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, SplitWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("maxsplit", ctx.zero());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.split() takes no keyword arguments");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, RsplitNoArguments) {
+  auto test = [](std::string_view input, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    auto* method = bytes.dot("rsplit", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "[]");
+  test("  ", "[]");
+  test("abc", "[b\"abc\"]");
+  test("  abc  ", "[b\"abc\"]");
+  test("  a  b  c  ", "[b\"a\", b\"b\", b\"c\"]");
+}
+
+TEST(StarlarkBytes, RsplitNoneSeparatorArguments) {
+  auto test = [](std::string_view input, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(ctx.none_value());
+    auto* method = bytes.dot("rsplit", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "[]");
+  test("  ", "[]");
+  test("abc", "[b\"abc\"]");
+  test("  abc  ", "[b\"abc\"]");
+  test("  a  b  c  ", "[b\"a\", b\"b\", b\"c\"]");
+}
+
+TEST(StarlarkBytes, RsplitBoolSeparatorArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+}
+
+TEST(StarlarkBytes, RsplitEmptySeparatorArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_bytes());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkBytes, RsplitOneArguments) {
+  auto test = [](std::string_view input, std::string_view separator, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+    starlark_bytes param1(separator);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = bytes.dot("rsplit", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "x", "[b\"\"]");
+  test("  ", "x", "[b\"  \"]");
+  test("axbxc", "x", "[b\"a\", b\"b\", b\"c\"]");
+  test("xaxbxcx", "x", "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xxaxxbxxcxx", "x", "[b\"\", b\"\", b\"a\", b\"\", b\"b\", b\"\", b\"c\", b\"\", b\"\"]");
+  test("xxaxxbxxcxx", "xx", "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xaxbxcx", "xx", "[b\"xaxbxcx\"]");
+}
+
+TEST(StarlarkBytes, RsplitTwoArguments) {
+  auto test = [](std::string_view input, std::string_view separator, int64_t maxsplit, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+    starlark_bytes param1(separator);
+    starlark_integer param2(maxsplit);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = bytes.dot("rsplit", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "x", -1, "[b\"\"]");
+  test("", "x", 0, "[b\"\"]");
+  test("", "x", 1, "[b\"\"]");
+  test("  ", "x", -1, "[b\"  \"]");
+  test("  ", "x", 0, "[b\"  \"]");
+  test("  ", "x", 1, "[b\"  \"]");
+  test("axbxc", "x", -1, "[b\"a\", b\"b\", b\"c\"]");
+  test("axbxc", "x", 0, "[b\"axbxc\"]");
+  test("axbxc", "x", 1, "[b\"axb\", b\"c\"]");
+  test("xaxbxcx", "x", -1, "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xaxbxcx", "x", 0, "[b\"xaxbxcx\"]");
+  test("xaxbxcx", "x", 1, "[b\"xaxbxc\", b\"\"]");
+  test("xxaxxbxxcxx", "x", -1, "[b\"\", b\"\", b\"a\", b\"\", b\"b\", b\"\", b\"c\", b\"\", b\"\"]");
+  test("xxaxxbxxcxx", "x", 0, "[b\"xxaxxbxxcxx\"]");
+  test("xxaxxbxxcxx", "x", 1, "[b\"xxaxxbxxcx\", b\"\"]");
+  test("xxaxxbxxcxx", "xx", -1, "[b\"\", b\"a\", b\"b\", b\"c\", b\"\"]");
+  test("xxaxxbxxcxx", "xx", 0, "[b\"xxaxxbxxcxx\"]");
+  test("xxaxxbxxcxx", "xx", 1, "[b\"xxaxxbxxc\", b\"\"]");
+  test("xaxbxcx", "xx", -1, "[b\"xaxbxcx\"]");
+  test("xaxbxcx", "xx", 0, "[b\"xaxbxcx\"]");
+  test("xaxbxcx", "xx", 1, "[b\"xaxbxcx\"]");
+}
+
+TEST(StarlarkBytes, RsplitEmptySeparatorTwoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_bytes());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkBytes, RsplitTwoArgumentsBoolSeparator) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+}
+
+TEST(StarlarkBytes, RsplitTwoArgumentsBoolMaxsplit) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&bytes);
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+}
+
+TEST(StarlarkBytes, RsplitTwoArgumentsNoneSeparatorArguments) {
+  auto test = [](std::string_view input, int64_t maxsplit, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+    starlark_integer param2(maxsplit);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(ctx.none_value());
+    pos_args.push_back(&param2);
+    auto* method = bytes.dot("rsplit", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", -1, "[]");
+  test("", 0, "[]");
+  test("", 1, "[]");
+  test("  ", -1, "[]");
+  test("  ", 0, "[]");
+  test("  ", 1, "[]");
+  test("abc", -1, "[b\"abc\"]");
+  test("abc", 0, "[b\"abc\"]");
+  test("abc", 1, "[b\"abc\"]");
+  test("  abc  ", -1, "[b\"abc\"]");
+  test("  abc  ", 0, "[b\"  abc\"]");
+  test("  abc  ", 1, "[b\"abc\"]");
+  test("  a  b  c  ", -1, "[b\"a\", b\"b\", b\"c\"]");
+  test("  a  b  c  ", 0, "[b\"  a  b  c\"]");
+  test("  a  b  c  ", 1, "[b\"  a  b\", b\"c\"]");
+}
+
+TEST(StarlarkBytes, RsplitTwoArgumentsNoneSeparatorBoolMaxsplit) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.none_value());
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+}
+
+TEST(StarlarkBytes, RsplitWithThreeArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit expected at most 2 argument, got 3");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, RsplitWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("maxsplit", ctx.zero());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.rsplit() takes no keyword arguments");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
 }  // namespace
