@@ -396,11 +396,37 @@ starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx, erro
   return result;
 }
 
-/*
-TODO(lmirelmann): Implement:
-
-starlark_obj* starlark_bytes::replace(std::string_view old, std::string_view new_, int64_t count) const;
-*/
+starlark_obj* starlark_bytes::replace(std::string_view old, std::string_view new_, int64_t count, context& ctx) const {
+  if (count < 0) {
+    count = std::numeric_limits<int64_t>::max();
+  }
+  std::string result;
+  std::string_view remaining_view = value;
+  if (old.empty()) {
+    while (count > 0) {
+      result += new_;
+      if (remaining_view.empty()) {
+        break;
+      }
+      result += remaining_view[0];
+      remaining_view = remaining_view.substr(1);
+      count--;
+    }
+  } else {
+    while (count > 0 && !remaining_view.empty()) {
+      auto pos = remaining_view.find(old);
+      if (pos == std::string_view::npos) {
+        break;
+      }
+      result += remaining_view.substr(0, pos);
+      result += new_;
+      remaining_view = remaining_view.substr(pos + old.length());
+      count--;
+    }
+  }
+  result += remaining_view;
+  return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
+}
 
 int64_t starlark_bytes::rfind(std::string_view sub, int64_t start, int64_t end) const {
   if (start < 0) {
@@ -844,9 +870,28 @@ starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark
 }
 
 starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "bytes.replace").ok() ||
+      !min_args(pos_args, error_callback, "replace", 2).ok() ||
+      !max_args(pos_args, error_callback, "replace", 3).ok()) {
+    return nullptr;
+  }
+  auto old = bytes_or_int_as_bytes(pos_args.front(), error_callback);
+  if (!old.ok()) {
+    return nullptr;
+  }
+  auto new_ = bytes_or_int_as_bytes(pos_args[1], error_callback);
+  if (!new_.ok()) {
+    return nullptr;
+  }
+  int64_t count = -1;
+  if (pos_args.size() >= 3) {
+    auto status_or_count = to_int64_with_clamping(*pos_args[2], error_callback);
+    if (!status_or_count.ok()) {
+      return nullptr;
+    }
+    count = *status_or_count;
+  }
+  return static_cast<starlark_bytes*>(this_obj)->replace(*old, *new_, count, ctx);
 }
 
 starlark_obj* starlark_bytes_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

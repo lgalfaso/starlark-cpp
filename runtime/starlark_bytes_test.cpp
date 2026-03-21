@@ -4735,4 +4735,262 @@ TEST(StarlarkBytes, RsplitWithNamedArguments) {
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
+TEST(StarlarkBytes, ReplaceWithNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at least 2 argument, got 0");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at least 2 argument, got 1");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithTwoArguments) {
+  auto test = [](std::string_view element, std::string_view old, std::string_view new_, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(element);
+    starlark_bytes param1(old);
+    starlark_bytes param2(new_);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = bytes.dot("replace", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bytes_t);
+    EXPECT_EQ(result->as_string(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "", "", "");
+  test("", "", "x", "x");
+  test("a", "", "x", "xax");
+  test("ab", "", "x", "xaxbx");
+
+  test("", "y", "", "");
+  test("", "y", "x", "");
+  test("a", "y", "x", "a");
+  test("ab", "y", "x", "ab");
+  test("ayb", "y", "x", "axb");
+  test("ayyb", "y", "x", "axxb");
+  test("ayxyb", "y", "x", "axxxb");
+  test("ayxyb", "y", "yy", "ayyxyyb");
+}
+
+TEST(StarlarkBytes, ReplaceWithTwoArgumentsOldAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithTwoArgumentsNewAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithThreeArguments) {
+  auto test = [](std::string_view element, std::string_view old, std::string_view new_, int64_t count, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(element);
+    starlark_bytes param1(old);
+    starlark_bytes param2(new_);
+    starlark_integer param3(count);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = bytes.dot("replace", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bytes_t);
+    EXPECT_EQ(result->as_string(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "", "", -1, "");
+  test("", "", "", 0, "");
+  test("", "", "", 1, "");
+  test("", "", "x", -1, "x");
+  test("", "", "x", 0, "");
+  test("", "", "x", 1, "x");
+  test("a", "", "x", -1, "xax");
+  test("a", "", "x", 0, "a");
+  test("a", "", "x", 1, "xa");
+  test("ab", "", "x", -1, "xaxbx");
+  test("ab", "", "x", 0, "ab");
+  test("ab", "", "x", 1, "xab");
+
+  test("", "y", "", -1, "");
+  test("", "y", "", 0, "");
+  test("", "y", "", 1, "");
+  test("", "y", "x", -1, "");
+  test("", "y", "x", 0, "");
+  test("", "y", "x", 1, "");
+  test("a", "y", "x", -1, "a");
+  test("a", "y", "x", 0, "a");
+  test("a", "y", "x", 1, "a");
+  test("ab", "y", "x", -1, "ab");
+  test("ab", "y", "x", 0, "ab");
+  test("ab", "y", "x", 1, "ab");
+  test("ayb", "y", "x", -1, "axb");
+  test("ayb", "y", "x", 0, "ayb");
+  test("ayb", "y", "x", 1, "axb");
+  test("ayyb", "y", "x", -1, "axxb");
+  test("ayyb", "y", "x", 0, "ayyb");
+  test("ayyb", "y", "x", 1, "axyb");
+  test("ayxyb", "y", "x", -1, "axxxb");
+  test("ayxyb", "y", "x", 0, "ayxyb");
+  test("ayxyb", "y", "x", 1, "axxyb");
+  test("ayxyb", "y", "yy", -1, "ayyxyyb");
+  test("ayxyb", "y", "yy", 0, "ayxyb");
+  test("ayxyb", "y", "yy", 1, "ayyxyb");
+}
+
+TEST(StarlarkBytes, ReplaceWithThreeArgumentsCountAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.true_value());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at most 3 argument, got 4");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.replace() takes no keyword arguments");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
 }  // namespace
