@@ -301,9 +301,11 @@ foo = 'b"a"r'
 foo = "şpěćïåł"
 )starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\305\\237p\\304\\233\\304\\207\\303\\257\\303\\245\\305\\202\"):2,7:2,16 NEWLINE:2,16:2,17 EOF:3,1:3,1");
+  check("foo = \"\xEF\xBF\xBD\"",
+        "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 STRING(\"\\357\\277\\275\"):1,7:1,10 NEWLINE:1,10:1,10 EOF:1,10:1,10");
   // It is not clear whether this is the right behavior for the column positions as this is an incomplete Unicode character.
   check("foo = \"\364\215\264\"",
-        "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 STRING(\"\\364\\215\\264\"):1,7:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12");
+        "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 ILLEGAL(\"\\\"\\364\\215\\264\\\"\"):1,7:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12");
 }
 
 TEST(LexerTest, StringTripleQuote) {
@@ -467,6 +469,11 @@ foo = r"bar\\n"
 foo = r"\
 ")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\\\\\n\"):2,7:2,12 NEWLINE:2,12:2,12 EOF:2,12:2,12");
+  checkErrors(R"starlark(
+foo = r"\\
+")starlark",
+        "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"r\\\"\\\\\\\\\"):2,7:2,11 NEWLINE:2,11:2,12 ILLEGAL(\"\\\"\"):3,1:3,2 NEWLINE:3,2:3,2 EOF:3,2:3,2",
+       { "Unterminated string:2,11", "Unterminated string:3,2" });
   check("foo = r\"\\\r\n\"",
         "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 STRING(\"\\\\\\n\"):1,7:2,2 NEWLINE:2,2:2,2 EOF:2,2:2,2");
 }

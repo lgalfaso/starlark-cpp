@@ -266,10 +266,12 @@ void lexer::tokenize() {
       auto start = get_position();
       auto identifier_name = read_identifier_or_keyword();
       if (identifier_name.empty()) {
+        // Skip the current character.
         auto start = get_position();
         source_code.skip_code_point();
         auto end_pos = source_code.pos();
         last_begin_of_line += (end_pos - start.pos() - 1);
+
         auto end = get_position();
         current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
         add_error("Unexpected character", start);
@@ -574,9 +576,16 @@ void lexer::read_string() {
         source_code.skip();
         break;
       default: {
+        // Handle a literal replacement character.
+        if (source_code.capture("\xEF\xBF\xBD")) {
+          result += "\xEF\xBF\xBD";
+          last_begin_of_line += 2;
+          break;
+        }
         // This is a lot of extra work to report the right column.
         auto ch = source_code.peek_code_point();
         if (ch == unicode::utf8_reader::kReplacementCharacter) {
+          found_errors = true;
           result += source_code.peek();
           source_code.skip();
         } else {
