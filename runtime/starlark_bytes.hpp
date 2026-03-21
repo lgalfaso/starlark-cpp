@@ -9,6 +9,7 @@
 #include <string_view>
 #include <vector>
 
+#include "runtime/starlark_range.hpp"
 #include "runtime/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
@@ -55,6 +56,43 @@ class starlark_bytes : public starlark_obj {
   bool startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const;
   starlark_obj* strip(context& ctx) const;
   starlark_obj* strip(std::string_view cutset, context& ctx) const;
+
+  class bytes_elems : public starlark_obj {
+   public:
+    bytes_elems(const starlark_bytes* bytes, range_state state);
+    std::string_view type() const override;
+    bool truthy() const override;
+
+    bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
+    int64_t len(bool produce_error, error_fn& error_callback) const override;
+    starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
+    starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+    starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
+
+   protected:
+    bool inner_repr(printer& print, printer_action action) const override;
+    bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
+    std::variant<int64_t, pending_hash> inner_hash() const override;
+
+   private:
+    const starlark_bytes* bytes;
+    const range_state state;
+  };
+
+  class starlark_elems_iterator : public starlark_iterator {
+   public:
+    starlark_elems_iterator(const starlark_bytes* bytes, int64_t current_pos, int64_t step, int64_t remaining, context& ctx);
+    bool has_next() const override;
+    starlark_obj* next() override;
+    void end_iterator() override;
+
+   private:
+    const starlark_bytes* bytes;
+    int64_t current_pos;
+    const int64_t step;
+    int64_t remaining;
+    context& ctx;
+  };
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

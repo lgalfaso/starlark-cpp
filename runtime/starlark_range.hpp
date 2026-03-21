@@ -12,6 +12,13 @@
 namespace starlark {
 namespace runtime {
 
+struct range_state {
+  const int64_t start;
+  const int64_t end;
+  const int64_t step;
+  const int64_t len;
+};
+
 class starlark_range : public starlark_obj {
  public:
   starlark_range(int64_t start, int64_t end, int64_t step);
@@ -42,11 +49,10 @@ class starlark_range : public starlark_obj {
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 
-  const int64_t start;
-  const int64_t end;
-  const int64_t step;
-  const int64_t len_;
+  const range_state state;
 };
+
+range_state calculate_state(int64_t start, int64_t end, int64_t step);
 
 }  // namespace runtime
 }  // namespace starlark

@@ -299,11 +299,9 @@ int64_t starlark_bytes::count(std::string_view sub, int64_t start, int64_t end) 
   return count;
 }
 
-/*
-TODO(lmirelmann): Implement:
-
-starlark_obj* starlark_bytes::elems(context& ctx) const;
-*/
+starlark_obj* starlark_bytes::elems(context& ctx) const {
+  return Arena::Create<starlark_bytes::bytes_elems>(&ctx.arena(), this, calculate_state(0, value.size(), 1));
+}
 
 bool starlark_bytes::endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const {
   if (start < 0) {
@@ -746,9 +744,12 @@ starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "bytes.elems").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  return static_cast<starlark_bytes*>(this_obj)->elems(ctx);
 }
 
 starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1071,6 +1072,119 @@ starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj
   }
   return static_cast<starlark_bytes*>(this_obj)->strip(*cutset, ctx);
 }
+
+starlark_bytes::bytes_elems::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state) : bytes(bytes), state(state) {}
+
+std::string_view starlark_bytes::bytes_elems::bytes_elems::type() const {
+  return "bytes.elems";
+}
+
+bool starlark_bytes::bytes_elems::bytes_elems::truthy() const {
+  return state.len > 0;
+}
+
+bool starlark_bytes::bytes_elems::binary_in(const starlark_obj& other, error_fn& error_callback) const {
+  auto entry = bytes_or_int_as_bytes(&other, error_callback);
+  if (!entry.ok()) {
+    return false;
+  }
+  if (entry->length() != 1) {
+    return false;
+  }
+  char c = entry->at(0);
+  for (std::string::size_type i = 0; i < state.len; ++i) {
+    if (bytes->value[state.start + i * state.step] == c) {
+      return true;
+    }
+  }
+  return false;
+}
+
+int64_t starlark_bytes::bytes_elems::len(bool produce_error, error_fn& error_callback) const {
+  return state.len;
+}
+
+starlark_iterator* starlark_bytes::bytes_elems::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
+  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), bytes, state.start, state.step, state.len, ctx);
+}
+
+starlark_obj* starlark_bytes::bytes_elems::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  auto idx = inner_index(other, state.len, error_callback);
+  if (idx < 0) {
+    return nullptr;
+  }
+  return Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(state.start + idx * state.step, 1));
+}
+
+starlark_obj* starlark_bytes::bytes_elems::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
+  auto slice_result = inner_slice_range(start, stop, stride, state.len, error_callback);
+  if (!slice_result.ok()) {
+    return nullptr;
+  }
+  auto i_start = std::get<0>(*slice_result);
+  auto i_end = std::get<1>(*slice_result);
+  auto i_stride = std::get<2>(*slice_result);
+
+  // TODO(lmirelmann): Check that none of these overflow/underflow.
+  auto r_step = this->state.step * i_stride;
+  auto r_start = this->state.start + this->state.step * i_start;
+  auto r_end = this->state.start + this->state.step * i_end;
+  return Arena::Create<bytes_elems>(&ctx.arena(), bytes, calculate_state(r_start, r_end, r_step));
+}
+
+bool starlark_bytes::bytes_elems::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::kPrintTop);
+  std::string result = "b\"";
+  if (state.step > 0) {
+    for (auto i = state.start; i < state.end; i += state.step) {
+      write_printable(bytes->value[i], /*allow_non_ascii_printable=*/ false, result);
+    }
+  } else {
+    for (auto i = state.start; i > state.end; i += state.step) {
+      write_printable(bytes->value[i], /*allow_non_ascii_printable=*/ false, result);
+    }
+  }
+  result += "\".elems()";
+  print.append(result);
+  return false;
+}
+
+bool starlark_bytes::bytes_elems::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
+  if (type() != other->type()) {
+    return false;
+  }
+  const bytes_elems* e_other = static_cast<const bytes_elems*>(other);
+  if (state.len != e_other->state.len) {
+    return false;
+  }
+  for (std::string::size_type i = 0; i < state.len; ++i) {
+    if (bytes->value[state.start + i * state.step] != e_other->bytes->value[e_other->state.start + i * e_other->state.step]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::bytes_elems::inner_hash() const {
+  return -1;
+}
+
+starlark_bytes::starlark_elems_iterator::starlark_elems_iterator(const starlark_bytes* bytes, int64_t current_pos, int64_t step, int64_t remaining, context& ctx)
+  : bytes(bytes), current_pos(current_pos), step(step), remaining(remaining), ctx(ctx) {}
+
+
+bool starlark_bytes::starlark_elems_iterator::has_next() const {
+  return remaining > 0;
+}
+
+starlark_obj* starlark_bytes::starlark_elems_iterator::next() {
+  auto result = Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(current_pos, 1));
+  current_pos += step;
+  remaining--;
+  return result;
+}
+
+void starlark_bytes::starlark_elems_iterator::end_iterator() {}
 
 }  // namespace runtime
 }  // namespace starlark

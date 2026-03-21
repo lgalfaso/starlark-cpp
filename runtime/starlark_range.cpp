@@ -29,36 +29,30 @@ int64_t calculate_len(int64_t start, int64_t end, int64_t step) {
 
 }  // namespace
 
-starlark_range::starlark_range(int64_t start, int64_t end, int64_t step) : start(start), end(end), step(step), len_(calculate_len(start, end, step)) {}
+starlark_range::starlark_range(int64_t start, int64_t end, int64_t step) : state(calculate_state(start, end, step)) {}
 
 std::string_view starlark_range::type() const {
   return starlark_types::range_t;
 }
 
 int64_t starlark_range::len(bool produce_error, error_fn& error_callback) const {
-  return len_;
+  return state.len;
 }
 
 bool starlark_range::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
-  if (step != 1) {
-    print.append(std::format("range({}, {}, {})", start, end, step));
-  } else if (start != 0) {
-    print.append(std::format("range({}, {})", start, end));
+  if (state.step != 1) {
+    print.append(std::format("range({}, {}, {})", state.start, state.end, state.step));
+  } else if (state.start != 0) {
+    print.append(std::format("range({}, {})", state.start, state.end));
   } else {
-    print.append(std::format("range({})", end));
+    print.append(std::format("range({})", state.end));
   }
   return false;
 }
 
 bool starlark_range::truthy() const {
-  if (start == end) {
-    return false;
-  }
-  if ((step > 0) ^ (start < end)) {
-    return false;
-  }
-  return true;
+  return state.len > 0;
 }
 
 bool starlark_range::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
@@ -66,10 +60,10 @@ bool starlark_range::inner_equals(equals_comparator& comp, const starlark_obj* o
     return false;
   }
   auto* rother = static_cast<const starlark_range*>(other);
-  if (len_ == 0) {
-    return rother->len_ == 0;
+  if (state.len == 0) {
+    return rother->state.len == 0;
   }
-  return start == rother->start && step == rother->step && len_ == rother->len_;
+  return state.start == rother->state.start && state.step == rother->state.step && state.len == rother->state.len;
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_range::inner_hash() const {
@@ -79,10 +73,10 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_range::inner_hash() c
 
 bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   auto check = [this](int64_t value) -> bool {
-    if (step > 0) {
-      return start <= value && value < end && (value - start) % step == 0;
+    if (state.step > 0) {
+      return state.start <= value && value < state.end && (value - state.start) % state.step == 0;
     } else {
-      return value <= start && end < value && (start - value) % step == 0;
+      return value <= state.start && state.end < value && (state.start - value) % state.step == 0;
     }
   };
 
@@ -127,19 +121,19 @@ bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callba
 }
 
 starlark_iterator* starlark_range::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_range_iterator>(&ctx.arena(), start, step, len_, ctx);
+  return Arena::Create<starlark_range_iterator>(&ctx.arena(), state.start, state.step, state.len, ctx);
 }
 
 starlark_obj* starlark_range::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
-  auto idx = inner_index(other, len_, error_callback);
+  auto idx = inner_index(other, state.len, error_callback);
   if (idx < 0) {
     return nullptr;
   }
-  return create_integer(start + idx * step, ctx);
+  return create_integer(state.start + idx * state.step, ctx);
 }
 
 starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  auto slice_result = inner_slice_range(start, stop, stride, len_, error_callback);
+  auto slice_result = inner_slice_range(start, stop, stride, state.len, error_callback);
   if (!slice_result.ok()) {
     return nullptr;
   }
@@ -148,9 +142,9 @@ starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starl
   auto i_stride = std::get<2>(*slice_result);
 
   // TODO(lmirelmann): Check that none of these overflow/underflow.
-  auto r_step = this->step * i_stride;
-  auto r_start = this->start + this->step * i_start;
-  auto r_end = this->start + this->step * i_end;
+  auto r_step = this->state.step * i_stride;
+  auto r_start = this->state.start + this->state.step * i_start;
+  auto r_end = this->state.start + this->state.step * i_end;
   return Arena::Create<starlark_range>(&ctx.arena(), r_start, r_end, r_step);
 }
 
@@ -169,6 +163,15 @@ starlark_obj* starlark_range::starlark_range_iterator::next() {
 }
 
 void starlark_range::starlark_range_iterator::end_iterator() {}
+
+range_state calculate_state(int64_t start, int64_t end, int64_t step) {
+  return range_state{
+    .start = start,
+    .end = end,
+    .step = step,
+    .len = calculate_len(start, end, step),
+  };
+}
 
 }  // namespace runtime
 }  // namespace starlark
