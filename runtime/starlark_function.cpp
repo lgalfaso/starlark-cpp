@@ -322,7 +322,7 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), attributes.size());
   for (const auto& attribute : attributes) {
     // TODO(lmirelmann): This recreates the strings for every call. This can be quite wasteful. Given that this method is not called a lot, then maybe this is ok.
-    result->append(Arena::Create<starlark_string>(&ctx.arena(), attribute), error_callback);
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), attribute));
   }
   return result;
 }
@@ -359,7 +359,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
     auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
     tuple->add(start);
     tuple->add(it->next());
-    result->append(tuple, error_callback);
+    result->unsafe_append(tuple);
     start = start->binary_plus(*one, ctx, error_callback);
   }
   it->end_iterator();
@@ -575,7 +575,7 @@ starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_a
   }
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
   while (it->has_next()) {
-    result->append(it->next(), error_callback);
+    result->unsafe_append(it->next());
   }
   it->end_iterator();
   return result;
@@ -716,7 +716,7 @@ starlark_obj* starlark_fn_reversed(starlark_obj* this_obj, const starlark_obj::p
   std::reverse(elements.begin(), elements.end());
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), elements.size());
   for (auto* element : elements) {
-    result->append(element, error_callback);
+    result->unsafe_append(element);
   }
   return result;
 }
@@ -816,7 +816,7 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
     for (auto* it : its) {
       tuple->add(it->next());
     }
-    result->append(tuple, error_callback);
+    result->unsafe_append(tuple);
   }
   for (auto* it : its) {
     it->end_iterator();

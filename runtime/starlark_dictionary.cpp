@@ -206,21 +206,21 @@ starlark_obj* starlark_dictionary::get(starlark_obj* key, starlark_obj* default_
   return it->second;
 }
 
-starlark_obj* starlark_dictionary::items(context& ctx, error_fn& error_callback) const {
+starlark_obj* starlark_dictionary::items(context& ctx) const {
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
   for (auto entry : values_) {
     auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
     tuple->add(entry.first);
     tuple->add(entry.second);
-    result->append(tuple, error_callback);
+    result->unsafe_append(tuple);
   }
   return result;
 }
 
-starlark_obj* starlark_dictionary::keys(context& ctx, error_fn& error_callback) const {
+starlark_obj* starlark_dictionary::keys(context& ctx) const {
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
   for (auto entry : values_) {
-    result->append(entry.first, error_callback);
+    result->unsafe_append(entry.first);
   }
   return result;
 }
@@ -332,10 +332,10 @@ status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::n
   return ok_status();
 }
 
-starlark_obj* starlark_dictionary::values(context& ctx, error_fn& error_callback) const {
+starlark_obj* starlark_dictionary::values(context& ctx) const {
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
   for (auto entry : values_) {
-    result->append(entry.second, error_callback);
+    result->unsafe_append(entry.second);
   }
   return result;
 }
@@ -443,7 +443,7 @@ starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlar
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::dict_t);
-  return static_cast<starlark_dictionary*>(this_obj)->items(ctx, error_callback);
+  return static_cast<starlark_dictionary*>(this_obj)->items(ctx);
 }
 
 starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -452,7 +452,7 @@ starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::dict_t);
-  return static_cast<starlark_dictionary*>(this_obj)->keys(ctx, error_callback);
+  return static_cast<starlark_dictionary*>(this_obj)->keys(ctx);
 }
 
 starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -507,7 +507,7 @@ starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starla
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::dict_t);
-  return static_cast<starlark_dictionary*>(this_obj)->values(ctx, error_callback);
+  return static_cast<starlark_dictionary*>(this_obj)->values(ctx);
 }
 
 }  // namespace runtime

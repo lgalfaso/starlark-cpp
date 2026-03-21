@@ -151,10 +151,10 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, context& ctx
   // TODO(lmirelmann): It should be possible to insert the entire thing using one call to `std::vector::insert`, but
   // this would slightly break the fact that `add` is the only one adding elements.
   for (auto& key : values) {
-    result->append(key, error_callback);
+    result->unsafe_append(key);
   }
   for (auto& key : l_other.values) {
-    result->append(key, error_callback);
+    result->unsafe_append(key);
   }
   return result;
 }
@@ -173,7 +173,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
       auto* result = Arena::Create<starlark_list>(&ctx.arena(), value * values.size());
       for (int64_t i = 0; i < value; ++i) {
         for (auto& key : values) {
-          result->append(key, error_callback);
+          result->unsafe_append(key);
         }
       }
       return result;
@@ -195,7 +195,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
       auto* result = Arena::Create<starlark_list>(&ctx.arena(), int_value * values.size());
       for (int64_t i = 0; i < int_value; ++i) {
         for (auto& key : values) {
-          result->append(key, error_callback);
+          result->unsafe_append(key);
         }
       }
       return result;
@@ -218,7 +218,7 @@ starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, conte
   // TODO(lmirelmann): Check the result size.
   // This needs to be able to handle the case `a += a`
   for (int i = 0, e = l_other.values.size(); i < e; ++i) {
-    append(l_other.values[i], error_callback);
+    unsafe_append(l_other.values[i]);
   }
   return this;
 }
@@ -241,7 +241,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
       for (int64_t i = 1; i < value; ++i) {
         for (int j = 0; j < original_size; ++j) {
-          append(values[j], error_callback);
+          unsafe_append(values[j]);
         }
       }
       return this;
@@ -267,7 +267,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
       for (int64_t i = 1; i < int_value; ++i) {
         for (int j = 0; j < original_size; ++j) {
-          append(values[j], error_callback);
+          unsafe_append(values[j]);
         }
       }
       return this;
@@ -424,6 +424,14 @@ status starlark_list::remove(starlark_obj* element, error_fn& error_callback) {
   }
   error_callback.add_error(error_item_not_in_collection(type(), "remove"));
   return error_status();
+}
+
+void starlark_list::unsafe_append(starlark_obj* element) {
+  values.push_back(element);
+}
+
+void starlark_list::unsafe_reverse() {
+  std::reverse(values.begin(), values.end());
 }
 
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {

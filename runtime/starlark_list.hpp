@@ -55,6 +55,9 @@ class starlark_list : public starlark_obj {
     std::vector<starlark_obj*>::iterator it;
   };
 
+  void unsafe_append(starlark_obj* element);
+  void unsafe_reverse();
+
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
