@@ -3949,4 +3949,482 @@ TEST(StarlarkString, JoinWithNamedArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, PartitionNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() takes exactly one argument (0 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, PartitionString) {
+  auto test = [](std::string_view element, std::string_view separator, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(separator);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = str.dot("partition", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("abc", "banana", "(\"abc\", \"\", \"\")");
+  test("abc", "a", "(\"\", \"a\", \"bc\")");
+  test("abc", "b", "(\"a\", \"b\", \"c\")");
+  test("abc", "c", "(\"ab\", \"c\", \"\")");
+  test("aaa", "a", "(\"\", \"a\", \"aa\")");
+}
+
+TEST(StarlarkString, PartitionBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() argument 1 must be string, not bool");
+}
+
+TEST(StarlarkString, PartitionEmptySeparator) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_string());
+  auto* method = str.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkString, PartitionWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("x", ctx.zero());
+  auto* method = str.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RpartitionNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() takes exactly one argument (0 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RpartitionString) {
+  auto test = [](std::string_view element, std::string_view separator, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(separator);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = str.dot("rpartition", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("abc", "banana", "(\"\", \"\", \"abc\")");
+  test("abc", "a", "(\"\", \"a\", \"bc\")");
+  test("abc", "b", "(\"a\", \"b\", \"c\")");
+  test("abc", "c", "(\"ab\", \"c\", \"\")");
+  test("aaa", "a", "(\"aa\", \"a\", \"\")");
+}
+
+TEST(StarlarkString, RpartitionBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() argument 1 must be string, not bool");
+}
+
+TEST(StarlarkString, RpartitionEmptySeparator) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_string());
+  auto* method = str.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+}
+
+TEST(StarlarkString, RpartitionWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("x", ctx.zero());
+  auto* method = str.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithNoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at least 2 argument, got 0");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at least 2 argument, got 1");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithTwoArguments) {
+  auto test = [](std::string_view element, std::string_view old, std::string_view new_, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(old);
+    starlark_string param2(new_);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    auto* method = str.dot("replace", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(result->as_string(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "", "", "");
+  test("", "", "x", "x");
+  test("a", "", "x", "xax");
+  test("ab", "", "x", "xaxbx");
+
+  test("", "y", "", "");
+  test("", "y", "x", "");
+  test("a", "y", "x", "a");
+  test("ab", "y", "x", "ab");
+  test("ayb", "y", "x", "axb");
+  test("ayyb", "y", "x", "axxb");
+  test("ayxyb", "y", "x", "axxxb");
+  test("ayxyb", "y", "yy", "ayyxyyb");
+}
+
+TEST(StarlarkString, ReplaceWithTwoArgumentsOldAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() argument 1 must be string, not bool");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithTwoArgumentsNewAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_string());
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() argument 2 must be string, not bool");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithThreeArguments) {
+  auto test = [](std::string_view element, std::string_view old, std::string_view new_, int64_t count, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(old);
+    starlark_string param2(new_);
+    starlark_integer param3(count);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("replace", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(result->as_string(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "", "", -1, "");
+  test("", "", "", 0, "");
+  test("", "", "", 1, "");
+  test("", "", "x", -1, "x");
+  test("", "", "x", 0, "");
+  test("", "", "x", 1, "x");
+  test("a", "", "x", -1, "xax");
+  test("a", "", "x", 0, "a");
+  test("a", "", "x", 1, "xa");
+  test("ab", "", "x", -1, "xaxbx");
+  test("ab", "", "x", 0, "ab");
+  test("ab", "", "x", 1, "xab");
+
+  test("", "y", "", -1, "");
+  test("", "y", "", 0, "");
+  test("", "y", "", 1, "");
+  test("", "y", "x", -1, "");
+  test("", "y", "x", 0, "");
+  test("", "y", "x", 1, "");
+  test("a", "y", "x", -1, "a");
+  test("a", "y", "x", 0, "a");
+  test("a", "y", "x", 1, "a");
+  test("ab", "y", "x", -1, "ab");
+  test("ab", "y", "x", 0, "ab");
+  test("ab", "y", "x", 1, "ab");
+  test("ayb", "y", "x", -1, "axb");
+  test("ayb", "y", "x", 0, "ayb");
+  test("ayb", "y", "x", 1, "axb");
+  test("ayyb", "y", "x", -1, "axxb");
+  test("ayyb", "y", "x", 0, "ayyb");
+  test("ayyb", "y", "x", 1, "axyb");
+  test("ayxyb", "y", "x", -1, "axxxb");
+  test("ayxyb", "y", "x", 0, "ayxyb");
+  test("ayxyb", "y", "x", 1, "axxyb");
+  test("ayxyb", "y", "yy", -1, "ayyxyyb");
+  test("ayxyb", "y", "yy", 0, "ayxyb");
+  test("ayxyb", "y", "yy", 1, "ayyxyb");
+}
+
+TEST(StarlarkString, ReplaceWithThreeArgumentsCountAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_string());
+  pos_args.push_back(ctx.empty_string());
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithFourArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at most 3 argument, got 4");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string.replace() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 }  // namespace

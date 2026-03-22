@@ -44,6 +44,9 @@ class starlark_string : public starlark_obj {
   int64_t find(std::string_view sub, int64_t start, int64_t end) const;
   int64_t rfind(std::string_view sub, int64_t start, int64_t end) const;
   starlark_obj* join(const std::vector<std::string_view>& elements, context& ctx) const;
+  starlark_obj* partition(std::string_view sub, context& ctx, error_fn& error_callback);
+  starlark_obj* rpartition(std::string_view sub, context& ctx, error_fn& error_callback);
+  starlark_obj* replace(std::string_view old, std::string_view new_, int64_t count, context& ctx) const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

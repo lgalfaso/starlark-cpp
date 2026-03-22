@@ -714,6 +714,76 @@ starlark_obj* starlark_string::join(const std::vector<std::string_view>& element
   return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
 }
 
+starlark_obj* starlark_string::partition(std::string_view sub, context& ctx, error_fn& error_callback) {
+  if (sub.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto pos = value.find(sub);
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  if (pos == std::string::npos) {
+    result->add(this);
+    result->add(ctx.empty_string());
+    result->add(ctx.empty_string());
+  } else {
+    result->add(Arena::Create<starlark_string>(&ctx.arena(), value.substr(0, pos)));
+    result->add(Arena::Create<starlark_string>(&ctx.arena(), sub));
+    result->add(Arena::Create<starlark_string>(&ctx.arena(), value.substr(pos + sub.length())));
+  }
+  return result;
+}
+
+starlark_obj* starlark_string::rpartition(std::string_view sub, context& ctx, error_fn& error_callback) {
+  if (sub.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto pos = value.rfind(sub);
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  if (pos == std::string::npos) {
+    result->add(ctx.empty_string());
+    result->add(ctx.empty_string());
+    result->add(this);
+  } else {
+    result->add(Arena::Create<starlark_string>(&ctx.arena(), value.substr(0, pos)));
+    result->add(Arena::Create<starlark_string>(&ctx.arena(), sub));
+    result->add(Arena::Create<starlark_string>(&ctx.arena(), value.substr(pos + sub.length())));
+  }
+  return result;
+}
+
+starlark_obj* starlark_string::replace(std::string_view old, std::string_view new_, int64_t count, context& ctx) const {
+  if (count < 0) {
+    count = std::numeric_limits<int64_t>::max();
+  }
+  std::string result;
+  std::string_view remaining_view = value;
+  if (old.empty()) {
+    while (count > 0) {
+      result += new_;
+      if (remaining_view.empty()) {
+        break;
+      }
+      result += remaining_view[0];
+      remaining_view = remaining_view.substr(1);
+      count--;
+    }
+  } else {
+    while (count > 0 && !remaining_view.empty()) {
+      auto pos = remaining_view.find(old);
+      if (pos == std::string_view::npos) {
+        break;
+      }
+      result += remaining_view.substr(0, pos);
+      result += new_;
+      remaining_view = remaining_view.substr(pos + old.length());
+      count--;
+    }
+  }
+  result += remaining_view;
+  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -985,15 +1055,42 @@ starlark_obj* starlark_string_fn_lstrip(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "partition").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+
+  auto separator = string_as_string(pos_args.front(), "partition", 1, error_callback);
+  if (!separator.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->partition(*separator, ctx, error_callback);
 }
 
 starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "string.replace").ok() ||
+      !min_args(pos_args, error_callback, "replace", 2).ok() ||
+      !max_args(pos_args, error_callback, "replace", 3).ok()) {
+    return nullptr;
+  }
+  auto old = string_as_string(pos_args.front(), "replace", 1, error_callback);
+  if (!old.ok()) {
+    return nullptr;
+  }
+  auto new_ = string_as_string(pos_args[1], "replace", 2, error_callback);
+  if (!new_.ok()) {
+    return nullptr;
+  }
+  int64_t count = -1;
+  if (pos_args.size() >= 3) {
+    auto status_or_count = to_int64_with_clamping(*pos_args[2], error_callback);
+    if (!status_or_count.ok()) {
+      return nullptr;
+    }
+    count = *status_or_count;
+  }
+  return static_cast<starlark_string*>(this_obj)->replace(*old, *new_, count, ctx);
 }
 
 starlark_obj* starlark_string_fn_removeprefix(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1052,9 +1149,17 @@ starlark_obj* starlark_string_fn_rindex(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_rpartition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "rpartition").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+
+  auto separator = string_as_string(pos_args.front(), "rpartition", 1, error_callback);
+  if (!separator.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->rpartition(*separator, ctx, error_callback);
 }
 
 starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
