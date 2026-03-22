@@ -151,7 +151,7 @@ TEST(StarlarkBytesElems, GetIterator) {
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
-  
+
   starlark_bytes bytes("abc"sv);
   auto* elems = bytes.elems(ctx);
   auto* it = elems->get_iterator(true, ctx, error_callback);
