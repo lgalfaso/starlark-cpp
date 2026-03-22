@@ -226,10 +226,10 @@ starlark_iterator* starlark_tuple::get_iterator(bool produce_error, context& ctx
 
 starlark_obj* starlark_tuple::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, values.size(), error_callback);
-  if (idx < 0) {
+  if (!idx.ok()) {
     return nullptr;
   }
-  return values[idx];
+  return values[*idx];
 }
 
 starlark_obj* starlark_tuple::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {

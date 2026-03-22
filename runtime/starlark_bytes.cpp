@@ -241,10 +241,10 @@ starlark_obj* starlark_bytes::star_equals_assign(const starlark_obj& other, cont
 
 starlark_obj* starlark_bytes::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, value.size(), error_callback);
-  if (idx < 0) {
+  if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(idx, 1));
+  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(*idx, 1));
 }
 
 starlark_obj* starlark_bytes::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
@@ -1110,10 +1110,10 @@ starlark_iterator* starlark_bytes::bytes_elems::get_iterator(bool produce_error,
 
 starlark_obj* starlark_bytes::bytes_elems::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, state.len, error_callback);
-  if (idx < 0) {
+  if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(state.start + idx * state.step, 1));
+  return Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(state.start + (*idx) * state.step, 1));
 }
 
 starlark_obj* starlark_bytes::bytes_elems::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {

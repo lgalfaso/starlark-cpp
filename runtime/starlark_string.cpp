@@ -557,10 +557,10 @@ starlark_obj* starlark_string::percent_equals_assign(const starlark_obj& other, 
 
 starlark_obj* starlark_string::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, value.size(), error_callback);
-  if (idx < 0) {
+  if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), value.substr(idx, 1));
+  return Arena::Create<starlark_string>(&ctx.arena(), value.substr(*idx, 1));
 }
 
 starlark_obj* starlark_string::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {

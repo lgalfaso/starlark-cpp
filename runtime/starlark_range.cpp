@@ -126,10 +126,10 @@ starlark_iterator* starlark_range::get_iterator(bool produce_error, context& ctx
 
 starlark_obj* starlark_range::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, state.len, error_callback);
-  if (idx < 0) {
+  if (!idx.ok()) {
     return nullptr;
   }
-  return create_integer(state.start + idx * state.step, ctx);
+  return create_integer(state.start + (*idx) * state.step, ctx);
 }
 
 starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {

@@ -284,10 +284,10 @@ starlark_iterator* starlark_list::get_iterator(bool produce_error, context& ctx,
 
 starlark_obj* starlark_list::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   auto idx = inner_index(other, values.size(), error_callback);
-  if (idx < 0) {
+  if (!idx.ok()) {
     return nullptr;
   }
-  return values[idx];
+  return values[*idx];
 }
 
 void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
@@ -295,10 +295,10 @@ void starlark_list::index_assign(const starlark_obj& idx, starlark_obj& element,
     return;
   }
   auto iidx = inner_index(idx, values.size(), error_callback);
-  if (iidx < 0) {
+  if (!iidx.ok()) {
     return;
   }
-  values[iidx] = &element;
+  values[*iidx] = &element;
 }
 
 starlark_obj* starlark_list::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {

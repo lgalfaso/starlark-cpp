@@ -531,7 +531,7 @@ void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   return;
 }
 
-int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const {
+status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const {
   switch (other.numeric_type()) {
     case starlark_numeric_type::kInt64: {
       auto idx = other.as_int64();
@@ -540,15 +540,15 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
       }
       if (idx < 0 || obj_len <= idx) {
         error_callback.add_error(error_index_out_of_range(type()));
-        return -1;
+        return status_or<int64_t>(status_code::kError);
       }
-      return idx;
+      return status_or<int64_t>(idx);
     }
     case starlark_numeric_type::kBigInt: {
       const auto& idx = other.as_bigint();
       if (!idx.fits_in_int64()) {
         error_callback.add_error(error_index_out_of_range(type()));
-        return -1;
+        return status_or<int64_t>(status_code::kError);
       }
       auto iidx = idx.as_int64();
       if (idx.sign()) {
@@ -556,13 +556,13 @@ int64_t starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, er
       }
       if (iidx < 0 || obj_len <= iidx) {
         error_callback.add_error(error_index_out_of_range(type()));
-        return -1;
+        return status_or<int64_t>(status_code::kError);
       }
-      return iidx;
+      return status_or<int64_t>(iidx);
     }
     default:
       error_callback.add_error(error_index_integer_or_slice(type(), other.type()));
-      return -1;
+      return status_or<int64_t>(status_code::kError);
   }
 }
 
