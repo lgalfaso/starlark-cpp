@@ -24,7 +24,7 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::ucd::is_White_Space;
+using ::starlark::ucd::is_space;
 
 namespace starlark {
 namespace runtime {
@@ -361,7 +361,7 @@ starlark_obj* starlark_bytes::join(const std::vector<std::string_view>& elements
 
 starlark_obj* starlark_bytes::lstrip(context& ctx) const {
   std::string::size_type i = 0;
-  while (i < value.size() && is_White_Space(value[i])) {
+  while (i < value.size() && is_space(value[i])) {
     ++i;
   }
   return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(i));
@@ -473,13 +473,13 @@ starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const {
     maxsplit = std::numeric_limits<int64_t>::max();
   }
   std::string_view::size_type pos = remaining_view.size();
-  for (pos = remaining_view.size(); pos > 0 && is_White_Space(remaining_view[pos - 1]); --pos) {}
+  for (pos = remaining_view.size(); pos > 0 && is_space(remaining_view[pos - 1]); --pos) {}
   remaining_view = remaining_view.substr(0, pos);
   while (!remaining_view.empty() && maxsplit > 0) {
-    for (pos = remaining_view.size(); pos > 0 && !is_White_Space(remaining_view[pos - 1]); --pos) {}
+    for (pos = remaining_view.size(); pos > 0 && !is_space(remaining_view[pos - 1]); --pos) {}
     result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(pos)));
     remaining_view = remaining_view.substr(0, pos);
-    for (pos = remaining_view.size(); pos > 0 && is_White_Space(remaining_view[pos - 1]); --pos) {}
+    for (pos = remaining_view.size(); pos > 0 && is_space(remaining_view[pos - 1]); --pos) {}
     remaining_view = remaining_view.substr(0, pos);
     maxsplit--;
   }
@@ -516,7 +516,7 @@ starlark_obj* starlark_bytes::rsplit(std::string_view sep, int64_t maxsplit, con
 
 starlark_obj* starlark_bytes::rstrip(context& ctx) const {
   auto i = value.size();
-  while (i > 0 && is_White_Space(value[i - 1])) {
+  while (i > 0 && is_space(value[i - 1])) {
     --i;
   }
   return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, i));
@@ -537,13 +537,13 @@ starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const {
     maxsplit = std::numeric_limits<int64_t>::max();
   }
   std::string_view::size_type pos = 0;
-  for (pos = 0; pos < remaining_view.size() && is_White_Space(remaining_view[pos]); ++pos) {}
+  for (pos = 0; pos < remaining_view.size() && is_space(remaining_view[pos]); ++pos) {}
   remaining_view = remaining_view.substr(pos);
   while (!remaining_view.empty() && maxsplit > 0) {
-    for (pos = 0; pos < remaining_view.size() && !is_White_Space(remaining_view[pos]); ++pos) {}
+    for (pos = 0; pos < remaining_view.size() && !is_space(remaining_view[pos]); ++pos) {}
     result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(0, pos)));
     remaining_view = remaining_view.substr(pos);
-    for (pos = 0; pos < remaining_view.size() && is_White_Space(remaining_view[pos]); ++pos) {}
+    for (pos = 0; pos < remaining_view.size() && is_space(remaining_view[pos]); ++pos) {}
     remaining_view = remaining_view.substr(pos);
     maxsplit--;
   }
@@ -600,8 +600,8 @@ bool starlark_bytes::startswith(const std::vector<std::string_view>& begins, int
 starlark_obj* starlark_bytes::strip(context& ctx) const {
   std::string_view view = value;
   std::string::size_type start, end;
-  for (start = 0; start < view.size() && is_White_Space(view[start]); ++start) {}
-  for (end = view.size(); end > start && is_White_Space(view[end - 1]); --end) {}
+  for (start = 0; start < view.size() && is_space(view[start]); ++start) {}
+  for (end = view.size(); end > start && is_space(view[end - 1]); --end) {}
   return Arena::Create<starlark_bytes>(&ctx.arena(), view.substr(start, end - start));
 }
 

@@ -84,7 +84,7 @@ TEST(UcdTest, IsXIdContinue) {
   }
 }
 
-TEST(UcdTest, IsWhiteSpace) {
+TEST(UcdTest, IsSpace) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(3));
 
@@ -93,7 +93,11 @@ TEST(UcdTest, IsWhiteSpace) {
   read_code_points(path.c_str(), all_cps, White_Space);
 
   for (int i = 0; i <= max_unicode; ++i) {
-    EXPECT_EQ(all_cps.contains(i), starlark::ucd::is_White_Space(i));
+    // There is a discrepancy between the expectation if `is_space` from Python and the definition of the
+    // Unicode binary porperty `White_Space`. The former includes the characters that have
+    // the Bidirectional cateogry "B" (Paragraph Separator). There are 4 characters that do not have the
+    // binary property White_Space and have the Bidirectional cateogry "B", there are '\x1c', '\x1d', '\x1e', and '\x1f'.
+    EXPECT_EQ(all_cps.contains(i) || (0x1c <= i && i <= 0x1f), starlark::ucd::is_space(i)) << "Codepoint: " << i << "\n";
   }
 }
 

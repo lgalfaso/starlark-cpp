@@ -26,6 +26,9 @@ struct unicode_data_record {
   bool canonical_character_decomposition_mapping;
   std::vector<std::uint32_t> character_decomposition_mapping;
   std::string general_category;
+  std::string bidirectional_category;
+  bool is_digit;
+  bool is_numeric;
 };
 
 /*

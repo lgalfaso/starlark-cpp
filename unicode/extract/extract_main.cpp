@@ -37,6 +37,14 @@ bool is_printable(std::uint32_t code_point);
 
 bool is_compatibility_decomposition(std::uint32_t code_point);
 
+bool is_alpha(std::uint32_t code_point);
+
+bool is_digit(std::uint32_t code_point);
+
+bool is_numeric(std::uint32_t code_point);
+
+bool is_space(std::uint32_t code_point);
+
 const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point);
 
 int ccc(std::uint32_t code_point);
@@ -74,7 +82,7 @@ const char* CPP_FOOTER = R"CPP(}  // namespace ucd
 constexpr int CODEPOINTS_PER_LINE = 64;
 
 std::set<std::string> binary_unicode_properties = {
-  "White_Space", "XID_Continue", "XID_Start"
+  "XID_Continue", "XID_Start", "Case_Ignorable", "Cased",
 };
 
 std::set<std::string> normalization_properties = {
@@ -338,6 +346,57 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> printable_set(
   return create_ranges(keys);
 }
 
+std::set<std::pair<std::uint32_t, std::uint32_t>> alpha_set(
+    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<std::uint32_t> keys;
+  for (const auto& entry : unicode_data) {
+    if (entry.second.general_category == "Lm" ||
+        entry.second.general_category == "Lt" ||
+        entry.second.general_category == "Lu" ||
+        entry.second.general_category == "Ll" ||
+        entry.second.general_category == "Lo") {
+      keys.insert(entry.first);
+    }
+  }
+  return create_ranges(keys);
+}
+
+std::set<std::pair<std::uint32_t, std::uint32_t>> digits_set(
+    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<std::uint32_t> keys;
+  for (const auto& entry : unicode_data) {
+    if (entry.second.is_digit) {
+      keys.insert(entry.first);
+    }
+  }
+  return create_ranges(keys);
+}
+
+std::set<std::pair<std::uint32_t, std::uint32_t>> numeric_set(
+    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<std::uint32_t> keys;
+  for (const auto& entry : unicode_data) {
+    if (entry.second.is_numeric) {
+      keys.insert(entry.first);
+    }
+  }
+  return create_ranges(keys);
+}
+
+std::set<std::pair<std::uint32_t, std::uint32_t>> space_set(
+    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<std::uint32_t> keys;
+  for (const auto& entry : unicode_data) {
+    if (entry.second.general_category == "Zs" ||
+        entry.second.bidirectional_category == "WS" ||
+        entry.second.bidirectional_category == "B" ||
+        entry.second.bidirectional_category == "S") {
+      keys.insert(entry.first);
+    }
+  }
+  return create_ranges(keys);
+}
+
 void write_header(const char* output_file,
                   const char* include_h) {
   std::string header_guard{include_h};
@@ -384,6 +443,10 @@ void write_impl(const char* derived_core_properties_file,
     print_code_points(cc_output, create_ranges(unicode_data), "is_assigned");
     print_code_points(cc_output, compatibility_set(unicode_data), "is_compatibility_decomposition");
     print_code_points(cc_output, printable_set(unicode_data), "is_printable");
+    print_code_points(cc_output, alpha_set(unicode_data), "is_alpha");
+    print_code_points(cc_output, digits_set(unicode_data), "is_digit");
+    print_code_points(cc_output, numeric_set(unicode_data), "is_numeric");
+    print_code_points(cc_output, space_set(unicode_data), "is_space");
     print_decomposition(cc_output, unicode_data);
     print_ccc(cc_output, unicode_data);
     print_canonical_composition(cc_output, unicode_data, comp_exclusions);

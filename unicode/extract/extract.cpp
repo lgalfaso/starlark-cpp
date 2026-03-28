@@ -103,7 +103,7 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
   }
 
   int previous_code = 0;
-  char general_category[100];
+  char general_buffer[100];
   while ((getline(&line, &len, fp)) != -1) {
     if (len > 0) {
       char* sline = line;
@@ -124,11 +124,11 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
       }
 
       // Read the general category.
-      count = std::sscanf(sline, "%99[0-9a-zA-Z_];%n", general_category, &length);
+      count = std::sscanf(sline, "%99[0-9a-zA-Z_];%n", general_buffer, &length);
       if (count != 1) {
         exit(1);
       }
-      std::string gc(general_category, length - 1);
+      std::string gc(general_buffer, length - 1);
       sline += length;
 
       // Canonical combining classes
@@ -139,12 +139,13 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
       }
       sline += length;
 
-      // Skip over Bidirectional category
-      for (int i = 0; i < 1; sline++) {
-        if (sline[0] == ';') {
-          ++i;
-        }
+      // Read the Bidirectional category
+      count = std::sscanf(sline, "%99[0-9a-zA-Z_];%n", general_buffer, &length);
+      if (count != 1) {
+        exit(1);
       }
+      std::string bidirectional_category(general_buffer, length - 1);
+      sline += length;
 
       // Read Character decomposition mapping.
       bool canonical = true;
@@ -164,6 +165,27 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
         decomposition.push_back(decomposition_code);
         sline += length;
       }
+      ++sline;
+
+      // It is a digit if it has a value in in the field "Decimal digit value" or
+      // in the field "Digit value".
+      bool is_digit = false;
+      for (int i = 0; i < 2; sline++) {
+        if (sline[0] == ';') {
+          ++i;
+        } else {
+          is_digit = true;
+        }
+      }
+      // It is numeric if it a digit or if it has a value in the field "Numeric value".
+      bool is_numeric = is_digit;
+      for (int i = 0; i < 1; sline++) {
+        if (sline[0] == ';') {
+          ++i;
+        } else {
+          is_numeric = true;
+        }
+      }
 
       // Ignore the rest of the fields.
 
@@ -178,6 +200,9 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
                   .canonical_character_decomposition_mapping = canonical,
                   .character_decomposition_mapping = decomposition,
                   .general_category = gc,
+                  .is_digit = is_digit,
+                  .is_numeric = is_numeric,
+                  .bidirectional_category = bidirectional_category,
               });
         }
       }
@@ -186,6 +211,9 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
               .canonical_character_decomposition_mapping = canonical,
               .character_decomposition_mapping = decomposition,
               .general_category = gc,
+              .is_digit = is_digit,
+              .is_numeric = is_numeric,
+              .bidirectional_category = bidirectional_category,
           });
       previous_code = code;
     }
