@@ -1,4 +1,4 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2025-2026 Lucas Mirelmann
 
 #ifndef RUNTIME_STARLARK_STRING_HPP_
 #define RUNTIME_STARLARK_STRING_HPP_
@@ -50,6 +50,7 @@ class starlark_string : public starlark_obj {
   bool isalnum() const;
   bool isalpha() const;
   bool isdigit() const;
+  bool isspace() const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

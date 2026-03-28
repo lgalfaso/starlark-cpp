@@ -28,6 +28,7 @@ using ::starlark::bigint::number;
 using ::starlark::ucd::is_alpha;
 using ::starlark::ucd::is_digit;
 using ::starlark::ucd::is_numeric;
+using ::starlark::ucd::is_space;
 using ::starlark::unicode::utf8_reader;
 
 namespace starlark {
@@ -833,6 +834,21 @@ bool starlark_string::isdigit() const {
   return true;
 }
 
+bool starlark_string::isspace() const {
+  if (value.empty()) {
+    return false;
+  }
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.peek_code_point();
+    if (!is_space(code_point)) {
+      return false;
+    }
+    reader.skip_code_point();
+  }
+  return true;
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -1057,9 +1073,12 @@ starlark_obj* starlark_string_fn_islower(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_string_fn_isspace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "isspace").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->isspace() ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_istitle(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

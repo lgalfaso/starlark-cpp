@@ -4448,6 +4448,7 @@ TEST(StarlarkString, IsalnumNoArguments) {
   };
 
   test("", false);
+  test(" ", false);
   test("abc", true);
   test("123", true);
   test("abc123", true);
@@ -4480,6 +4481,7 @@ TEST(StarlarkString, IsalphaNoArguments) {
   };
 
   test("", false);
+  test(" ", false);
   test("abc", true);
   test("123", false);
   test("abc123", false);
@@ -4512,8 +4514,42 @@ TEST(StarlarkString, IsdigitNoArguments) {
   };
 
   test("", false);
+  test(" ", false);
   test("abc", false);
   test("123", true);
+  test("abc123", false);
+  test("abc123!@#", false);
+  test("LettersOnly", false);
+  test("Letters and spaces", false);
+  test("µ", false);
+  test("¼", false);
+  test("\u3405", false);
+}
+
+TEST(StarlarkString, IsspaceNoArguments) {
+  auto test = [](std::string_view element, bool expected_value) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+
+    auto* method = str.dot("isspace", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bool_t);
+    EXPECT_EQ(result->truthy(), expected_value) << "'" << element << "'";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", false);
+  test(" ", true);
+  test("abc", false);
+  test("123", false);
   test("abc123", false);
   test("abc123!@#", false);
   test("LettersOnly", false);
@@ -4586,6 +4622,27 @@ TEST(StarlarkString, IsdigitWithOneArgument) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, IsspaceWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("isspace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isspace() takes no arguments (1 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 TEST(StarlarkString, IsalnumWithNamedArguments) {
   error_handler error_callback;
   Arena arena;
@@ -4649,6 +4706,28 @@ TEST(StarlarkString, IsdigitWithNamedArguments) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: isdigit() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsspaceWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("isspace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isspace() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
