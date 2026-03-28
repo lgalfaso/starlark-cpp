@@ -83,6 +83,7 @@ constexpr int CODEPOINTS_PER_LINE = 64;
 
 std::set<std::string> binary_unicode_properties = {
   "XID_Continue", "XID_Start", "Case_Ignorable", "Cased",
+  "Lowercase", "Uppercase",
 };
 
 std::set<std::string> normalization_properties = {

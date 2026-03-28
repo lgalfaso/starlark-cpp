@@ -51,6 +51,8 @@ class starlark_string : public starlark_obj {
   bool isalpha() const;
   bool isdigit() const;
   bool isspace() const;
+  bool islower() const;
+  bool isupper() const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;

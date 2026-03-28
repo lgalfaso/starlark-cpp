@@ -4559,6 +4559,84 @@ TEST(StarlarkString, IsspaceNoArguments) {
   test("\u3405", false);
 }
 
+TEST(StarlarkString, IslowerNoArguments) {
+  auto test = [](std::string_view element, bool expected_value) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+
+    auto* method = str.dot("islower", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bool_t);
+    EXPECT_EQ(result->truthy(), expected_value) << "'" << element << "'";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", false);
+  test(" ", false);
+  test("abc", true);
+  test("Abc", false);
+  test("ABC", false);
+  test("123", false);
+  test("abc123", true);
+  test("Abc123", false);
+  test("ABC123", false);
+  test("abc123!@#", true);
+  test("Abc123!@#", false);
+  test("ABC123!@#", false);
+  test("LettersOnly", false);
+  test("Letters and spaces", false);
+  test("µ", true);
+  test("¼", false);
+  test("\u3405", false);
+}
+
+TEST(StarlarkString, IsupperNoArguments) {
+  auto test = [](std::string_view element, bool expected_value) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+
+    auto* method = str.dot("isupper", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bool_t);
+    EXPECT_EQ(result->truthy(), expected_value) << "'" << element << "'";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", false);
+  test(" ", false);
+  test("abc", false);
+  test("Abc", false);
+  test("ABC", true);
+  test("123", false);
+  test("abc123", false);
+  test("Abc123", false);
+  test("ABC123", true);
+  test("abc123!@#", false);
+  test("Abc123!@#", false);
+  test("ABC123!@#", true);
+  test("LettersOnly", false);
+  test("Letters and spaces", false);
+  test("µ", false);
+  test("¼", false);
+  test("\u3405", false);
+}
+
 TEST(StarlarkString, IsalnumWithOneArgument) {
   error_handler error_callback;
   Arena arena;
@@ -4640,6 +4718,48 @@ TEST(StarlarkString, IsspaceWithOneArgument) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: isspace() takes no arguments (1 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IslowerWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("islower", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: islower() takes no arguments (1 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsupperWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("isupper", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isupper() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4728,6 +4848,50 @@ TEST(StarlarkString, IsspaceWithNamedArguments) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: isspace() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IslowerWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("islower", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: islower() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsupperWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("isupper", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isupper() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 

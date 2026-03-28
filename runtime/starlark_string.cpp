@@ -25,6 +25,9 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::ucd::is_Cased;
+using ::starlark::ucd::is_Lowercase;
+using ::starlark::ucd::is_Uppercase;
 using ::starlark::ucd::is_alpha;
 using ::starlark::ucd::is_digit;
 using ::starlark::ucd::is_numeric;
@@ -849,6 +852,40 @@ bool starlark_string::isspace() const {
   return true;
 }
 
+bool starlark_string::islower() const {
+  bool cased_found = false;
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.peek_code_point();
+    reader.skip_code_point();
+    if (!is_Cased(code_point)) {
+      continue;
+    }
+    cased_found = true;
+    if (!is_Lowercase(code_point)) {
+      return false;
+    }
+  }
+  return cased_found;
+}
+
+bool starlark_string::isupper() const {
+  bool cased_found = false;
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.peek_code_point();
+    reader.skip_code_point();
+    if (!is_Cased(code_point)) {
+      continue;
+    }
+    cased_found = true;
+    if (!is_Uppercase(code_point)) {
+      return false;
+    }
+  }
+  return cased_found;
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -1067,9 +1104,12 @@ starlark_obj* starlark_string_fn_isdigit(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_string_fn_islower(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "islower").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->islower() ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_isspace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1088,9 +1128,12 @@ starlark_obj* starlark_string_fn_istitle(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_string_fn_isupper(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "isupper").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->isupper() ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_join(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
