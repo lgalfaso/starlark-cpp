@@ -20,10 +20,14 @@
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
+#include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::ucd::is_alpha;
+using ::starlark::ucd::is_digit;
+using ::starlark::ucd::is_numeric;
 using ::starlark::unicode::utf8_reader;
 
 namespace starlark {
@@ -784,6 +788,51 @@ starlark_obj* starlark_string::replace(std::string_view old, std::string_view ne
   return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
 }
 
+bool starlark_string::isalnum() const {
+  if (value.empty()) {
+    return false;
+  }
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.peek_code_point();
+    if (!is_alpha(code_point) && !is_numeric(code_point)) {
+      return false;
+    }
+    reader.skip_code_point();
+  }
+  return true;
+}
+
+bool starlark_string::isalpha() const {
+  if (value.empty()) {
+    return false;
+  }
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.peek_code_point();
+    if (!is_alpha(code_point)) {
+      return false;
+    }
+    reader.skip_code_point();
+  }
+  return true;
+}
+
+bool starlark_string::isdigit() const {
+  if (value.empty()) {
+    return false;
+  }
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.peek_code_point();
+    if (!is_digit(code_point)) {
+      return false;
+    }
+    reader.skip_code_point();
+  }
+  return true;
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -975,21 +1024,30 @@ starlark_obj* starlark_string_fn_index(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_isalnum(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "isalnum").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->isalnum() ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_isalpha(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "isalpha").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->isalpha() ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_isdigit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "isdigit").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->isdigit() ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_islower(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

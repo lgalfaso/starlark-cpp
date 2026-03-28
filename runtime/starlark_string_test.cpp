@@ -4427,4 +4427,229 @@ TEST(StarlarkString, ReplaceWithNamedArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, IsalnumNoArguments) {
+  auto test = [](std::string_view element, bool expected_value) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+
+    auto* method = str.dot("isalnum", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bool_t);
+    EXPECT_EQ(result->truthy(), expected_value) << "'" << element << "'";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", false);
+  test("abc", true);
+  test("123", true);
+  test("abc123", true);
+  test("abc123!@#", false);
+  test("LettersOnly", true);
+  test("Letters and spaces", false);
+  test("µ", true);
+  test("¼", true);
+  test("\u3405", true);
+}
+
+TEST(StarlarkString, IsalphaNoArguments) {
+  auto test = [](std::string_view element, bool expected_value) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+
+    auto* method = str.dot("isalpha", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bool_t);
+    EXPECT_EQ(result->truthy(), expected_value) << "'" << element << "'";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", false);
+  test("abc", true);
+  test("123", false);
+  test("abc123", false);
+  test("abc123!@#", false);
+  test("LettersOnly", true);
+  test("Letters and spaces", false);
+  test("µ", true);
+  test("¼", false);
+  test("\u3405", true);
+}
+
+TEST(StarlarkString, IsdigitNoArguments) {
+  auto test = [](std::string_view element, bool expected_value) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+
+    auto* method = str.dot("isdigit", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bool_t);
+    EXPECT_EQ(result->truthy(), expected_value) << "'" << element << "'";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", false);
+  test("abc", false);
+  test("123", true);
+  test("abc123", false);
+  test("abc123!@#", false);
+  test("LettersOnly", false);
+  test("Letters and spaces", false);
+  test("µ", false);
+  test("¼", false);
+  test("\u3405", false);
+}
+
+TEST(StarlarkString, IsalnumWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("isalnum", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isalnum() takes no arguments (1 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsalphaWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("isalpha", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isalpha() takes no arguments (1 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsdigitWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("isdigit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isdigit() takes no arguments (1 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsalnumWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("isalnum", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isalnum() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsalphaWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("isalpha", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isalpha() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IsdigitWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("isdigit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: isdigit() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 }  // namespace

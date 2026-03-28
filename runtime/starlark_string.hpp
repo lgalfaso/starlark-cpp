@@ -47,6 +47,9 @@ class starlark_string : public starlark_obj {
   starlark_obj* partition(std::string_view sub, context& ctx, error_fn& error_callback);
   starlark_obj* rpartition(std::string_view sub, context& ctx, error_fn& error_callback);
   starlark_obj* replace(std::string_view old, std::string_view new_, int64_t count, context& ctx) const;
+  bool isalnum() const;
+  bool isalpha() const;
+  bool isdigit() const;
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
