@@ -11,12 +11,26 @@ namespace grammar {
 
 namespace {
 
-std::optional<std::string> read_number_over(std::string_view chars, utf8_reader& input) {
+bool is_binary_digit(char c) {
+  return ('0' <= c && c <= '1');
+}
+
+bool is_octal_digit(char c) {
+  return ('0' <= c && c <= '7');
+}
+
+bool is_hex_digit(char c) {
+  return ('0' <= c && c <= '9') ||
+         ('a' <= c && c <= 'f') ||
+         ('A' <= c && c <= 'F');
+}
+
+std::optional<std::string> read_number_over(bool(*match)(char), utf8_reader& input) {
   std::string result;
   bool accepted_digit = false;
   while (!input.empty()) {
     auto next = input.peek();
-    if (chars.find(next) == std::string_view::npos) {
+    if (!match(next)) {
       break;
     }
     accepted_digit = true;
@@ -42,7 +56,7 @@ std::optional<std::string> read_number(utf8_reader& input, bool allow_binary_lit
   std::string result;
 
   if (input.capture("0x") || input.capture("0X")) {
-    auto number = read_number_over("0123456789abcdefABCDEF", input);
+    auto number = read_number_over(is_hex_digit, input);
     if (!number) {
       return {};
     }
@@ -51,7 +65,7 @@ std::optional<std::string> read_number(utf8_reader& input, bool allow_binary_lit
     }
     result = "0x" + number.value();
   } else if (input.capture("0o") || input.capture("0O")) {
-    auto number = read_number_over("01234567", input);
+    auto number = read_number_over(is_octal_digit, input);
     if (!number) {
       return {};
     }
@@ -60,7 +74,7 @@ std::optional<std::string> read_number(utf8_reader& input, bool allow_binary_lit
     }
     result = "0o" + number.value();
   } else if (input.capture("0b") || input.capture("0B")) {
-    auto number = read_number_over("01", input);
+    auto number = read_number_over(is_binary_digit, input);
     if (!allow_binary_literals || !number) {
       return {};
     }
