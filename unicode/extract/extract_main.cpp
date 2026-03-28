@@ -89,6 +89,10 @@ std::set<std::string> normalization_properties = {
   "NFC_QC", "NFD_QC", "NFKC_QC", "NFKD_QC",
 };
 
+std::set<std::string> numeric_properties = {
+  "Numeric", "Digit", "Decimal",
+};
+
 #define FWRITE(STR, OUTPUT) fwrite(STR, sizeof(char), std::strlen(STR), OUTPUT)
 
 void print_in_multiple_lines(const char* characters, int& count, uint32_t to_print, FILE* output) {
@@ -373,11 +377,15 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> digits_set(
 }
 
 std::set<std::pair<std::uint32_t, std::uint32_t>> numeric_set(
-    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+    const std::map<std::string,
+             std::set<std::pair<std::uint32_t,
+                                  std::uint32_t>>>& extracted_numeric_properties) {
   std::set<std::uint32_t> keys;
-  for (const auto& entry : unicode_data) {
-    if (entry.second.is_numeric) {
-      keys.insert(entry.first);
+  for (const auto& entry : extracted_numeric_properties) {
+    for (auto r : entry.second) {
+      for (int i = r.first; i <= r.second; ++i) {
+        keys.insert(i);
+      }
     }
   }
   return create_ranges(keys);
@@ -429,6 +437,7 @@ void write_impl(const char* derived_core_properties_file,
                 const char* composition_exclusions,
                 const char* derived_normalization_props,
                 const char* prop_list,
+                const char* derived_numeric_type,
                 const char* output_file,
                 const char* include_h) {
   FILE* cc_output = fopen(output_file, "w");
@@ -445,7 +454,6 @@ void write_impl(const char* derived_core_properties_file,
     print_code_points(cc_output, printable_set(unicode_data), "is_printable");
     print_code_points(cc_output, alpha_set(unicode_data), "is_alpha");
     print_code_points(cc_output, digits_set(unicode_data), "is_digit");
-    print_code_points(cc_output, numeric_set(unicode_data), "is_numeric");
     print_code_points(cc_output, space_set(unicode_data), "is_space");
     print_decomposition(cc_output, unicode_data);
     print_ccc(cc_output, unicode_data);
@@ -483,6 +491,15 @@ void write_impl(const char* derived_core_properties_file,
                        name);
     }
   }
+  {
+    std::map<std::string,
+             std::set<std::pair<std::uint32_t,
+                                  std::uint32_t>>> extracted_numeric_properties;
+    starlark::ucd::read_all_code_points(derived_numeric_type,
+                              extracted_numeric_properties,
+                              numeric_properties);
+    print_code_points(cc_output, numeric_set(extracted_numeric_properties), "is_numeric");
+  }
 
   FWRITE(CPP_FOOTER, cc_output);
   fclose(cc_output);
@@ -491,15 +508,16 @@ void write_impl(const char* derived_core_properties_file,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  if (argc == 9) {
+  if (argc == 10) {
     const char* derived_core_properties_file = argv[1];
     const char* unicode_data_file = argv[2];
     const char* composition_exclusions = argv[3];
     const char* derived_normalization_props = argv[4];
     const char* prop_list = argv[5];
-    const char* output_cpp_file = argv[6];
-    const char* output_hpp_file = argv[7];
-    const char* include_h = argv[8];
+    const char* derived_numeric_type = argv[6];
+    const char* output_cpp_file = argv[7];
+    const char* output_hpp_file = argv[8];
+    const char* include_h = argv[9];
 
     write_header(output_hpp_file, include_h);
     write_impl(derived_core_properties_file,
@@ -507,6 +525,7 @@ int main(int argc, char *argv[]) {
                composition_exclusions,
                derived_normalization_props,
                prop_list,
+               derived_numeric_type,
                output_cpp_file,
                include_h);
   }
