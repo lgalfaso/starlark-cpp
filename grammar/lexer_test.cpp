@@ -306,6 +306,8 @@ foo = "şpěćïåł"
   // It is not clear whether this is the right behavior for the column positions as this is an incomplete Unicode character.
   check("foo = \"\364\215\264\"",
         "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 ILLEGAL(\"\\\"\\364\\215\\264\\\"\"):1,7:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12");
+  checkErrors("foo = \"\\xa\"",
+        "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 ILLEGAL(\"\\\"\\\\xa\\\"\"):1,7:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12", {"Invalid escape sequence:1,8"});
 }
 
 TEST(LexerTest, StringTripleQuote) {

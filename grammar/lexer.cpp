@@ -614,7 +614,7 @@ bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_val
   // This is inefficient, but we should be making not assumptions about `source_code` and its internal storage.
   for (int i = 0; i < max_size; ++i) {
     if (source_code.empty() || !f((unsigned char)source_code.peek())) {
-      if (i + 1 < min_size) {
+      if (i < min_size) {
         return false;
       }
       break;
