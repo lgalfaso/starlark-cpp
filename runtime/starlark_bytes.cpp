@@ -25,6 +25,8 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::ucd::is_space;
+using ::starlark::result::status_code;
+using ::starlark::result::status_or;
 
 namespace starlark {
 namespace runtime {

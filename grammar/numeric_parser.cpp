@@ -1,10 +1,12 @@
-// Copyright 2024-2025 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
 #include "grammar/numeric_parser.hpp"
 
 #include <string>
 
-using starlark::unicode::utf8_reader;
+using ::starlark::result::status_code;
+using ::starlark::result::status_or;
+using ::starlark::unicode::utf8_reader;
 
 namespace starlark {
 namespace grammar {
@@ -25,7 +27,7 @@ bool is_hex_digit(char c) {
          ('A' <= c && c <= 'F');
 }
 
-std::optional<std::string> read_number_over(bool(*match)(char), utf8_reader& input) {
+status_or<std::string> read_number_over(bool(*match)(char), utf8_reader& input) {
   std::string result;
   bool accepted_digit = false;
   while (!input.empty()) {
@@ -41,47 +43,47 @@ std::optional<std::string> read_number_over(bool(*match)(char), utf8_reader& inp
     while (!input.empty() && isdigit(input.peek())) {
       input.skip();
     }
-    return {};
+    return status_or<std::string>(status_code::kError);
   }
   if (!accepted_digit) {
-    return {};
+    return status_or<std::string>(status_code::kError);
   }
-  return result;
+  return status_or<std::string>(std::move(result));
 }
 
 }  // namespace
 
 
-std::optional<std::string> read_number(utf8_reader& input, bool allow_binary_literals) {
+status_or<std::string> read_number(utf8_reader& input, bool allow_binary_literals) {
   std::string result;
 
   if (input.capture("0x") || input.capture("0X")) {
     auto number = read_number_over(is_hex_digit, input);
-    if (!number) {
-      return {};
+    if (!number.ok()) {
+      return status_or<std::string>(status_code::kError);
     }
-    if (number.value() == "0") {
-      return "0";
+    if (*number == "0") {
+      return status_or<std::string>("0");
     }
-    result = "0x" + number.value();
+    result = "0x" + *number;
   } else if (input.capture("0o") || input.capture("0O")) {
     auto number = read_number_over(is_octal_digit, input);
-    if (!number) {
-      return {};
+    if (!number.ok()) {
+      return status_or<std::string>(status_code::kError);
     }
-    if (number.value() == "0") {
-      return "0";
+    if (*number == "0") {
+      return status_or<std::string>("0");
     }
-    result = "0o" + number.value();
+    result = "0o" + *number;
   } else if (input.capture("0b") || input.capture("0B")) {
     auto number = read_number_over(is_binary_digit, input);
-    if (!allow_binary_literals || !number) {
-      return {};
+    if (!allow_binary_literals || !number.ok()) {
+      return status_or<std::string>(status_code::kError);
     }
-    if (number.value() == "0") {
-      return "0";
+    if (*number == "0") {
+      return status_or<std::string>("0");
     }
-    result = "0b" + number.value();
+    result = "0b" + *number;
   } else {
     bool found_dot = false;
     bool found_e = false;
@@ -99,7 +101,7 @@ std::optional<std::string> read_number(utf8_reader& input, bool allow_binary_lit
       }
       if (next == 'e' || next == 'E') {
         if (!accepted_digit) {
-          return {};
+          return status_or<std::string>(status_code::kError);
         }
         if (found_e) {
           break;
@@ -123,10 +125,10 @@ std::optional<std::string> read_number(utf8_reader& input, bool allow_binary_lit
       input.skip();
     }
     if (!accepted_digit) {
-      return {};
+      return status_or<std::string>(status_code::kError);
     }
   }
-  return result;
+  return status_or<std::string>(std::move(result));
 }
 
 }  // namespace grammar

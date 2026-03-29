@@ -12,7 +12,7 @@
 #include "containers/linked_hash_map.hpp"
 #include "runtime/error_fn.hpp"
 #include "runtime/starlark_object.hpp"
-#include "runtime/status.hpp"
+#include "status_or/status.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -35,14 +35,14 @@ class starlark_dictionary : public starlark_obj {
   starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
 
-  status clear(error_fn& error_callback);
+  starlark::result::status clear(error_fn& error_callback);
   starlark_obj* get(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) const;
   starlark_obj* items(context& ctx) const;
   starlark_obj* keys(context& ctx) const;
   starlark_obj* pop(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback);
   starlark_obj* popitem(context& ctx, error_fn& error_callback);
   starlark_obj* setdefault(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback);
-  status update(starlark_obj* iterable, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+  starlark::result::status update(starlark_obj* iterable, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
   starlark_obj* values(context& ctx) const;
 
   class starlark_dictionary_iterator : public starlark_iterator {

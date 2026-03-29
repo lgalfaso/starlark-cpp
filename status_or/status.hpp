@@ -1,14 +1,14 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef RUNTIME_STATUS_HPP_
-#define RUNTIME_STATUS_HPP_
+#ifndef STATUS_OR_STATUS_HPP_
+#define STATUS_OR_STATUS_HPP_
 
 #include <utility>
 
 #pragma GCC visibility push(default)
 
 namespace starlark {
-namespace runtime {
+namespace result {
 
 enum class status_code {
   kOk,
@@ -59,10 +59,10 @@ class status_or {
   T value;
 };
 
-}  // namespace runtime
+}  // namespace result
 }  // namespace starlark
 
 #pragma GCC visibility pop
 
-#endif  // RUNTIME_STATUS_HPP_
+#endif  // STATUS_OR_STATUS_HPP_
 

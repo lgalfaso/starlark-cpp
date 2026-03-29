@@ -13,6 +13,11 @@
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::result::error_status;
+using ::starlark::result::ok_status;
+using ::starlark::result::status;
+using ::starlark::result::status_code;
+using ::starlark::result::status_or;
 
 namespace starlark {
 namespace runtime {

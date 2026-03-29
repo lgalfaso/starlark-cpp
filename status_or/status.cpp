@@ -1,9 +1,9 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include "runtime/status.hpp"
+#include "status_or/status.hpp"
 
 namespace starlark {
-namespace runtime {
+namespace result {
 
 status::status(status_code code) : code(code) {}
 
@@ -19,6 +19,6 @@ status error_status() {
   return status(status_code::kError);
 }
 
-}  // namespace runtime
+}  // namespace result
 }  // namespace starlark
 

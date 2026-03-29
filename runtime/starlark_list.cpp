@@ -17,6 +17,9 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::result::error_status;
+using ::starlark::result::ok_status;
+using ::starlark::result::status;
 
 namespace starlark {
 namespace runtime {

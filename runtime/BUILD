@@ -17,12 +17,6 @@ cc_library(
 )
 
 cc_library(
-    name = "status",
-    srcs = ["status.cpp"],
-    hdrs = ["status.hpp"],
-)
-
-cc_library(
     name = "levenshtein",
     srcs = ["levenshtein.cpp"],
     hdrs = ["levenshtein.hpp"],
@@ -100,9 +94,9 @@ cc_library(
         ":error_messages",
         ":levenshtein",
         ":starlark_types",
-        ":status",
         "//bigint:number",
         "//containers:linked_hash_map",
+        "//status_or:status",
         "@protobuf",
     ],
 )
@@ -349,8 +343,8 @@ cc_library(
         ":starlark_string",
         ":starlark_tuple",
         ":starlark_types",
-        ":status",
         "//containers:linked_hash_map",
+        "//status_or:status",
     ],
 )
 
@@ -480,7 +474,7 @@ cc_library(
         ":starlark_integer",
         ":starlark_object",
         ":starlark_types",
-        ":status",
+        "//status_or:status",
     ],
 )
 
@@ -550,8 +544,8 @@ cc_library(
         ":error_messages",
         ":starlark_object",
         ":starlark_types",
-        ":status",
         "//containers:linked_hash_set",
+        "//status_or:status",
     ],
 )
 

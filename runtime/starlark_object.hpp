@@ -17,7 +17,7 @@
 #include "containers/linked_hash_map.hpp"
 #include "google/protobuf/arena.h"
 #include "runtime/error_fn.hpp"
-#include "runtime/status.hpp"
+#include "status_or/status.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -235,8 +235,8 @@ class starlark_obj {
   virtual void inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const;
   virtual std::variant<int64_t, pending_hash> inner_hash() const = 0;
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
-  status_or<int64_t> inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
-  status_or<std::tuple<int64_t, int64_t, int64_t>> inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const;
+  starlark::result::status_or<int64_t> inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
+  starlark::result::status_or<std::tuple<int64_t, int64_t, int64_t>> inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const;
 
  private:
   static const std::map<std::string, fn*, std::less<>>& method_refs();
@@ -250,16 +250,16 @@ class starlark_obj {
 int64_t starlark_hash(std::span<int64_t> values);
 starlark_obj* create_function(context& ctx, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
 
-status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
-status min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min);
-status max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max);
-status no_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
-status one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
-status n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name);
-status zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
-status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& error_callback);
-status to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
-status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
+starlark::result::status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+starlark::result::status min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min);
+starlark::result::status max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max);
+starlark::result::status no_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+starlark::result::status one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+starlark::result::status n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name);
+starlark::result::status zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
+starlark::result::status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& error_callback);
+starlark::result::status to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
+starlark::result::status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
 
 }  // namespace runtime
 }  // namespace starlark

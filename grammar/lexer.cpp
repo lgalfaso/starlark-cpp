@@ -360,13 +360,13 @@ void lexer::read_operator(char first_char) {
 void lexer::read_numeric() {
   auto start = get_position();
   auto optional_value = read_number(source_code, opts.allow_binary_integer_literals);
-  if (!optional_value.has_value()) {
+  if (!optional_value.ok()) {
     add_error("Unable to parse numeric value", start);
     auto end = get_position();
     current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
     return;
   }
-  auto value = optional_value.value();
+  const auto& value = *optional_value;
   if (value.find('.') != std::string::npos ||
       (!value.starts_with("0x") && value.find('e') != std::string::npos)) {
     char* end;

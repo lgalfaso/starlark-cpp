@@ -88,6 +88,7 @@ cc_library(
     hdrs = ["numeric_parser.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//status_or:status",
         "//unicode:utf8_reader",
     ],
 )

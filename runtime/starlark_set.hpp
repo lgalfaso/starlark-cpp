@@ -11,7 +11,7 @@
 
 #include "containers/linked_hash_set.hpp"
 #include "runtime/starlark_object.hpp"
-#include "runtime/status.hpp"
+#include "status_or/status.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -40,22 +40,22 @@ class starlark_set : public starlark_obj {
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
 
-  status_or<bool> add(starlark_obj* element, error_fn& error_callback);
-  status clear(error_fn& error_callback);
+  starlark::result::status_or<bool> add(starlark_obj* element, error_fn& error_callback);
+  starlark::result::status clear(error_fn& error_callback);
   starlark_obj* difference(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const;
-  status difference_update(std::vector<starlark_obj*> others, context& ctx, error_fn& error_callback);
-  status discard(starlark_obj* element, error_fn& error_callback);
+  starlark::result::status difference_update(std::vector<starlark_obj*> others, context& ctx, error_fn& error_callback);
+  starlark::result::status discard(starlark_obj* element, error_fn& error_callback);
   starlark_obj* intersection(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const;
-  status intersection_update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
-  status_or<bool> isdisjoint(starlark_obj* other, context& ctx, error_fn& error_callback) const;
-  status_or<bool> issubset(starlark_obj* other, context& ctx, error_fn& error_callback) const;
-  status_or<bool> issuperset(starlark_obj* other, context& ctx, error_fn& error_callback) const;
+  starlark::result::status intersection_update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
+  starlark::result::status_or<bool> isdisjoint(starlark_obj* other, context& ctx, error_fn& error_callback) const;
+  starlark::result::status_or<bool> issubset(starlark_obj* other, context& ctx, error_fn& error_callback) const;
+  starlark::result::status_or<bool> issuperset(starlark_obj* other, context& ctx, error_fn& error_callback) const;
   starlark_obj* pop(error_fn& error_callback);
-  status remove(starlark_obj* element, error_fn& error_callback);
+  starlark::result::status remove(starlark_obj* element, error_fn& error_callback);
   starlark_obj* symmetric_difference(starlark_obj* other, context& ctx, error_fn& error_callback) const;
-  status symmetric_difference_update(starlark_obj* other, context& ctx, error_fn& error_callback);
+  starlark::result::status symmetric_difference_update(starlark_obj* other, context& ctx, error_fn& error_callback);
   starlark_obj* union_(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
-  status update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
+  starlark::result::status update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback);
 
   class starlark_set_iterator : public starlark_iterator {
    public:

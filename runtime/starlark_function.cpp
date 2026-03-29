@@ -26,6 +26,9 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::parse_number;
+using ::starlark::result::error_status;
+using ::starlark::result::ok_status;
+using ::starlark::result::status;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "runtime/starlark_object.hpp"
-#include "runtime/status.hpp"
+#include "status_or/status.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -35,13 +35,13 @@ class starlark_list : public starlark_obj {
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
   starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
 
-  status append(starlark_obj* element, error_fn& error_callback);
-  status clear(error_fn& error_callback);
-  status extend(starlark_obj* other, context& ctx, error_fn& error_callback);
+  starlark::result::status append(starlark_obj* element, error_fn& error_callback);
+  starlark::result::status clear(error_fn& error_callback);
+  starlark::result::status extend(starlark_obj* other, context& ctx, error_fn& error_callback);
   starlark_obj* index(starlark_obj* element, int64_t start, int64_t end, context& ctx, error_fn& error_callback) const;
-  status insert(starlark_obj* element, int64_t pos, error_fn& error_callback);
+  starlark::result::status insert(starlark_obj* element, int64_t pos, error_fn& error_callback);
   starlark_obj* pop(int64_t idx, error_fn& error_callback);
-  status remove(starlark_obj* element, error_fn& error_callback);
+  starlark::result::status remove(starlark_obj* element, error_fn& error_callback);
 
   class starlark_list_iterator : public starlark_iterator {
    public:

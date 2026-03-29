@@ -33,6 +33,8 @@ using ::starlark::ucd::is_digit;
 using ::starlark::ucd::is_numeric;
 using ::starlark::ucd::is_space;
 using ::starlark::unicode::utf8_reader;
+using ::starlark::result::status_code;
+using ::starlark::result::status_or;
 
 namespace starlark {
 namespace runtime {

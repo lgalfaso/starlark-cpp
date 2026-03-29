@@ -17,6 +17,11 @@
 #include "runtime/starlark_types.hpp"
 
 using ::starlark::bigint::number;
+using ::starlark::result::error_status;
+using ::starlark::result::ok_status;
+using ::starlark::result::status;
+using ::starlark::result::status_code;
+using ::starlark::result::status_or;
 
 namespace starlark {
 namespace runtime {
