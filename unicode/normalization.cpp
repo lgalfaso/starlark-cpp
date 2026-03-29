@@ -160,9 +160,8 @@ std::string to_nfc(std::string_view input) {
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
-    auto cp = reader.peek_code_point();
+    auto cp = reader.read_code_point();
     code_points.push_back(cp);
-    reader.skip_code_point();
     qc &= !ucd::is_NFC_QC_nm(cp);
     int ccc = ucd::ccc(cp);
     qc &= ccc == 0 || ccc >= last_ccc;
@@ -185,9 +184,8 @@ std::string to_nfd(std::string_view input) {
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
-    auto cp = reader.peek_code_point();
+    auto cp = reader.read_code_point();
     code_points.push_back(cp);
-    reader.skip_code_point();
     qc &= !ucd::is_NFD_QC_nm(cp);
     int ccc = ucd::ccc(cp);
     qc &= ccc == 0 || ccc >= last_ccc;
@@ -210,9 +208,8 @@ std::string to_nfkc(std::string_view input) {
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
-    auto cp = reader.peek_code_point();
+    auto cp = reader.read_code_point();
     code_points.push_back(cp);
-    reader.skip_code_point();
     qc &= !ucd::is_NFKC_QC_nm(cp);
     int ccc = ucd::ccc(cp);
     qc &= ccc == 0 || ccc >= last_ccc;
@@ -235,9 +232,8 @@ std::string to_nfkd(std::string_view input) {
   bool qc = true;
   int last_ccc = 0;
   while (reader.pending()) {
-    auto cp = reader.peek_code_point();
+    auto cp = reader.read_code_point();
     code_points.push_back(cp);
-    reader.skip_code_point();
     qc &= !ucd::is_NFKD_QC_nm(cp);
     int ccc = ucd::ccc(cp);
     qc &= ccc == 0 || ccc >= last_ccc;

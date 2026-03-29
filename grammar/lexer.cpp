@@ -268,7 +268,7 @@ void lexer::tokenize() {
       if (identifier_name.empty()) {
         // Skip the current character.
         auto start = get_position();
-        source_code.skip_code_point();
+        source_code.read_code_point();
         auto end_pos = source_code.pos();
         last_begin_of_line += (end_pos - start.pos() - 1);
 
@@ -591,7 +591,8 @@ void lexer::read_string() {
         } else {
           auto start = get_position();
           utf8_encode_code_point(ch, result, false, false);
-          source_code.skip_code_point();
+          // TODO(lmirelmann): Would be nice to avoid doing this extra read, but keep on handling the error case.
+          source_code.read_code_point();
 
           auto end_pos = source_code.pos();
           last_begin_of_line += (end_pos - start.pos() - 1);
@@ -683,7 +684,7 @@ std::string lexer::read_identifier_or_keyword() {
     if ((first && (ch == '_' || ucd::is_XID_Start(ch))) ||
         (!first && ucd::is_XID_Continue(ch))) {
       utf8_encode_code_point(ch, result, false, false);
-      source_code.skip_code_point();
+      source_code.read_code_point();
     } else {
       break;
     }

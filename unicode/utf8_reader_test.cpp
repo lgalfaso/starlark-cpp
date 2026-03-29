@@ -236,11 +236,11 @@ void checkSkipCodepoint(const char* input, std::size_t input_length, std::size_t
   std::string_view utf8_reader_code(input, input_length);
   utf8_reader s(utf8_reader_code, true, true);
   EXPECT_EQ(0, s.pos());
-  s.skip_code_point();
-  EXPECT_EQ(expected_pos, s.pos());
+  s.read_code_point();
+  EXPECT_EQ(expected_pos, s.pos()) << std::string_view(input, input_length);
 }
 
-TEST(SourceTest, SkipCodepoint) {
+TEST(SourceTest, ReadCodePoint) {
   // Normal encoding.
   checkSkipCodepoint("", 0, 0);
   checkSkipCodepoint("abc", 3, 1);
@@ -343,8 +343,7 @@ TEST(SourceTest, Capture) {
 void utf8_peek_skip_code_point(const char* data, size_t size) {
   utf8_reader reader(std::string_view(data, size), true, true);
   while (reader.pending()) {
-    reader.peek_code_point();
-    reader.skip_code_point();
+    reader.read_code_point();
   }
 }
 
@@ -418,7 +417,7 @@ TEST(UTF8Reader, AllCharacters) {
     } else {
       EXPECT_EQ(encoded, std::string(&source[3], length));
     }
-    reader.skip_code_point();
+    reader.read_code_point();
     EXPECT_FALSE(reader.pending());
   };
 

@@ -168,10 +168,12 @@ bool starlark_string::inner_repr(printer& print, printer_action action) const {
   std::string result = "\"";
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
+    // TODO(lmirelmann): Would be nice to avoid calling the read twice just to be able to
+    // handle the error case.
     auto code_point = reader.peek_code_point();
     if (code_point != utf8_reader::kReplacementCharacter) {
       write_printable(reader.peek_code_point(), /*allow_non_ascii_printable=*/ true, result);
-      reader.skip_code_point();
+      reader.read_code_point();
     } else {
       result += value[reader.pos()];
       reader.skip();
@@ -800,11 +802,10 @@ bool starlark_string::isalnum() const {
   }
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
-    auto code_point = reader.peek_code_point();
+    auto code_point = reader.read_code_point();
     if (!is_alpha(code_point) && !is_numeric(code_point)) {
       return false;
     }
-    reader.skip_code_point();
   }
   return true;
 }
@@ -815,11 +816,10 @@ bool starlark_string::isalpha() const {
   }
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
-    auto code_point = reader.peek_code_point();
+    auto code_point = reader.read_code_point();
     if (!is_alpha(code_point)) {
       return false;
     }
-    reader.skip_code_point();
   }
   return true;
 }
@@ -830,11 +830,10 @@ bool starlark_string::isdigit() const {
   }
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
-    auto code_point = reader.peek_code_point();
+    auto code_point = reader.read_code_point();
     if (!is_digit(code_point)) {
       return false;
     }
-    reader.skip_code_point();
   }
   return true;
 }
@@ -845,11 +844,10 @@ bool starlark_string::isspace() const {
   }
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
-    auto code_point = reader.peek_code_point();
+    auto code_point = reader.read_code_point();
     if (!is_space(code_point)) {
       return false;
     }
-    reader.skip_code_point();
   }
   return true;
 }
@@ -858,8 +856,7 @@ bool starlark_string::islower() const {
   bool cased_found = false;
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
-    auto code_point = reader.peek_code_point();
-    reader.skip_code_point();
+    auto code_point = reader.read_code_point();
     if (!is_Cased(code_point)) {
       continue;
     }
@@ -875,8 +872,7 @@ bool starlark_string::isupper() const {
   bool cased_found = false;
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
-    auto code_point = reader.peek_code_point();
-    reader.skip_code_point();
+    auto code_point = reader.read_code_point();
     if (!is_Cased(code_point)) {
       continue;
     }

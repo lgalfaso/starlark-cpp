@@ -227,8 +227,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     std::string result;
     utf8_reader reader(pos_args.front()->as_string(), false, false);
     while (reader.pending()) {
-      utf8_encode_code_point(reader.peek_code_point(), result, false, true);
-      reader.skip_code_point();
+      utf8_encode_code_point(reader.read_code_point(), result, false, true);
     }
     return Arena::Create<starlark_bytes>(&ctx.arena(), result);
   }
@@ -607,8 +606,7 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
       error_callback.add_error(error_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
       return nullptr;
     }
-    auto result = reader.peek_code_point();
-    reader.skip_code_point();
+    auto result = reader.read_code_point();
     if (reader.pending()) {
       error_callback.add_error(error_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
       return nullptr;

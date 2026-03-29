@@ -23,11 +23,9 @@ class utf8_reader {
   std::size_t pending() const;
   std::size_t pos() const;
   char peek(std::size_t delta = 0) const;
-  std::uint32_t peek_code_point() const;
+  std::uint32_t peek_code_point();
   void skip(std::size_t delta = 1);
-  // TODO(lmirelmann): Remove this method and create a method `read_codepoint` that will
-  // read a codepoint and at the same time move forward.
-  void skip_code_point();
+  std::uint32_t read_code_point();
   bool next(std::string_view candidate);
   bool capture(std::string_view candidate);
 
@@ -39,6 +37,8 @@ class utf8_reader {
   static constexpr std::uint32_t kMaxCodePoint = 0x10'ffffu;
 
  private:
+  std::uint32_t read_code_point(bool move_forward);
+
   std::string_view input;
   std::size_t input_pos = 0;
   bool strict;
