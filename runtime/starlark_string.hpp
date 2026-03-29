@@ -54,6 +54,9 @@ class starlark_string : public starlark_obj {
   bool islower() const;
   bool isupper() const;
 
+  starlark_obj* removeprefix(std::string_view sub, context& ctx);
+  starlark_obj* removesuffix(std::string_view sub, context& ctx);
+
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
   bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;

@@ -886,6 +886,20 @@ bool starlark_string::isupper() const {
   return cased_found;
 }
 
+starlark_obj* starlark_string::removeprefix(std::string_view sub, context& ctx) {
+  if (value.starts_with(sub)) {
+    return Arena::Create<starlark_string>(&ctx.arena(), value.substr(sub.length()));
+  }
+  return this;
+}
+
+starlark_obj* starlark_string::removesuffix(std::string_view sub, context& ctx) {
+  if (value.ends_with(sub)) {
+    return Arena::Create<starlark_string>(&ctx.arena(), value.substr(0, value.length() - sub.length()));
+  }
+  return this;
+}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -1214,15 +1228,31 @@ starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_string_fn_removeprefix(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "removeprefix").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+
+  auto sub = string_as_string(pos_args.front(), "removeprefix", 1, error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->removeprefix(*sub, ctx);
 }
 
 starlark_obj* starlark_string_fn_removesuffix(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!one_pos_arg(pos_args, named_args, error_callback, "removesuffix").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+
+  auto sub = string_as_string(pos_args.front(), "removesuffix", 1, error_callback);
+  if (!sub.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->removesuffix(*sub, ctx);
 }
 
 starlark_obj* starlark_string_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
