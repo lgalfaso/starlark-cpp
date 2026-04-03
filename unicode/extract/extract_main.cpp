@@ -51,6 +51,12 @@ int ccc(std::uint32_t code_point);
 
 std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs);
 
+const std::vector<std::uint32_t>& to_upper(std::uint32_t code_point);
+
+const std::vector<std::uint32_t>& to_title(std::uint32_t code_point);
+
+const std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>& to_lower(std::uint32_t code_point);
+
 )CPP";
 
 const char* HPP_FOOTER = R"CPP(}  // namespace ucd
@@ -298,6 +304,192 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t, sta
   FWRITE("}\n\n", output);
 }
 
+void print_to_upper(FILE* output,
+                    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
+                    const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
+  FWRITE("const std::vector<std::uint32_t>& to_upper(std::uint32_t code_point) {\n", output);
+  FWRITE("  static const std::vector<std::uint32_t> default_value{0x110000};\n", output);
+  std::map<std::uint32_t, std::vector<std::uint32_t>> entries;
+  for (const auto& entry : unicode_data) {
+    if (special_casing.contains(entry.first)) {
+      const auto& special_case = special_casing.at(entry.first);
+      // If this special case does no mapping at all, then skip.
+      if (special_case.upper.size() == 1 && special_case.upper.front() == entry.first && entry.second.uppercase_mapping == 0x110000) {
+        continue;
+      }
+
+      // If there is a condition, check whether the condition would cause issues.
+      if (!special_case.conditions.empty() &&
+          (special_case.upper.size() != 1 || special_case.upper.front() != entry.second.uppercase_mapping)) {
+        for (const auto& condition : special_case.conditions) {
+          // If this is a language ID, then ignore as we only support the root language.
+          // The only languages that currently have special casings are Lithuanian, Turkish and Azeri.
+          if (condition == "lt" || condition == "tr" || condition == "az") {
+            break;
+          }
+          // We have a case that there is a condition and this condition would not produce the same sequence.
+          // This is somethign that we are currently not supporting, so abort.
+          exit(1);
+        }
+      }
+
+      // We are safe, use the sequence from special_cases.
+      entries[entry.first] = special_case.upper;
+    } else if (entry.second.uppercase_mapping != 0x110000) {
+      entries[entry.first] = std::vector<std::uint32_t>({entry.second.uppercase_mapping});
+    }
+  }
+  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_upper = {", output);
+  int pos = 0;
+  for (const auto& entry : entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {0x%05X, {", entry.first);
+    for (auto c : entry.second) {
+      fprintf(output, " 0x%05X,", c);
+    }
+    FWRITE("}},", output);
+    ++pos;
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto upper_candidate = all_upper.find(code_point); upper_candidate != all_upper.end()) {\n", output);
+  FWRITE("    return upper_candidate->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return default_value;\n", output);
+  FWRITE("}\n\n", output);
+}
+
+void print_to_title(FILE* output,
+                    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
+                    const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
+  FWRITE("const std::vector<std::uint32_t>& to_title(std::uint32_t code_point) {\n", output);
+  FWRITE("  static const std::vector<std::uint32_t> default_value{0x110000};\n", output);
+  std::map<std::uint32_t, std::vector<std::uint32_t>> entries;
+  for (const auto& entry : unicode_data) {
+    if (special_casing.contains(entry.first)) {
+      const auto& special_case = special_casing.at(entry.first);
+      // If this special case does no mapping at all, then skip.
+      if (special_case.title.size() == 1 && special_case.title.front() == entry.first && entry.second.titlecase_mapping == 0x110000) {
+        continue;
+      }
+
+      // If there is a condition, check whether the condition would cause issues.
+      if (!special_case.conditions.empty() &&
+          (special_case.title.size() != 1 || special_case.title.front() != entry.second.titlecase_mapping)) {
+        for (const auto& condition : special_case.conditions) {
+          // If this is a language ID, then ignore as we only support the root language.
+          // The only languages that currently have special casings are Lithuanian, Turkish and Azeri.
+          if (condition == "lt" || condition == "tr" || condition == "az") {
+            break;
+          }
+          // We have a case that there is a condition and this condition would not produce the same sequence.
+          // This is somethign that we are currently not supporting, so abort.
+          exit(1);
+        }
+      }
+
+      // We are safe, use the sequence from special_cases.
+      entries[entry.first] = special_case.title;
+    } else if (entry.second.titlecase_mapping != 0x110000) {
+      entries[entry.first] = std::vector<std::uint32_t>({entry.second.titlecase_mapping});
+    }
+  }
+  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_title = {", output);
+  int pos = 0;
+  for (const auto& entry : entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {0x%05X, {", entry.first);
+    for (auto c : entry.second) {
+      fprintf(output, " 0x%05X,", c);
+    }
+    FWRITE("}},", output);
+    ++pos;
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto title_candidate = all_title.find(code_point); title_candidate != all_title.end()) {\n", output);
+  FWRITE("    return title_candidate->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return default_value;\n", output);
+  FWRITE("}\n\n", output);
+}
+
+void print_to_lower(FILE* output,
+                    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
+                    const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
+  FWRITE("const std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>& to_lower(std::uint32_t code_point) {\n", output);
+  FWRITE("  static const std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>> default_value{{0x110000}, {}};\n", output);
+  std::map<std::uint32_t, std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>> entries;
+  for (const auto& entry : unicode_data) {
+    if (special_casing.contains(entry.first)) {
+      const auto& special_case = special_casing.at(entry.first);
+      // If this special case does no mapping at all, then skip.
+      if (special_case.lower.size() == 1 && special_case.lower.front() == entry.first && entry.second.lowercase_mapping == 0x110000) {
+        continue;
+      }
+
+      // If there is a condition, check whether the condition would cause issues.
+      if (!special_case.conditions.empty() &&
+          (special_case.lower.size() != 1 || special_case.lower.front() != entry.second.lowercase_mapping)) {
+        bool skip = false;
+        for (const auto& condition : special_case.conditions) {
+          // If this is a language ID, then ignore as we only support the root language.
+          // The only languages that currently have special casings are Lithuanian, Turkish and Azeri.
+          if (condition == "lt" || condition == "tr" || condition == "az") {
+            skip = true;
+            break;
+          }
+          if (condition == "Final_Sigma") {
+            continue;
+          }
+          // We have a case that there is a condition and this condition would not produce the same sequence.
+          // This is somethign that we are currently not supporting, so abort.
+          exit(1);
+        }
+        if (skip) {
+          entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>({entry.second.lowercase_mapping}, {});
+          continue;
+        }
+        if (special_case.lower.size() != 1) {
+          exit(3);
+        }
+        entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>({entry.second.lowercase_mapping}, special_case.lower.front());
+      } else {
+        // We are safe, use the sequence from special_cases.
+        entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>(special_case.lower, {});
+      }
+    } else if (entry.second.lowercase_mapping != 0x110000) {
+      entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>({entry.second.lowercase_mapping}, {});
+    }
+  }
+  FWRITE("  static const cnt::flat_map<std::uint32_t, std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>> all_lower = {", output);
+  int pos = 0;
+  for (const auto& entry : entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {0x%05X, {{", entry.first);
+    for (auto c : entry.second.first) {
+      fprintf(output, " 0x%05X,", c);
+    }
+    FWRITE("}, ", output);
+    if (entry.second.second) {
+      fprintf(output, " 0x%05X,", entry.second.second.value());
+    } else {
+      FWRITE("{}", output);
+    }
+    FWRITE("}},", output);
+    ++pos;
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto lower_candidate = all_lower.find(code_point); lower_candidate != all_lower.end()) {\n", output);
+  FWRITE("    return lower_candidate->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return default_value;\n", output);
+  FWRITE("}\n\n", output);
+}
 
 std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::set<std::uint32_t>& input) {
   std::set<std::pair<std::uint32_t, std::uint32_t>> result;
@@ -440,6 +632,7 @@ void write_impl(const char* derived_core_properties_file,
                 const char* derived_normalization_props,
                 const char* prop_list,
                 const char* derived_numeric_type,
+                const char* special_casing_file,
                 const char* output_file,
                 const char* include_h) {
   FILE* cc_output = fopen(output_file, "w");
@@ -447,7 +640,9 @@ void write_impl(const char* derived_core_properties_file,
 
   {
     std::map<std::uint32_t, starlark::ucd::unicode_data_record> unicode_data;
+    std::map<std::uint32_t, starlark::ucd::special_casing_record> special_casing;
     starlark::ucd::read_unicode_data(unicode_data_file, unicode_data);
+    starlark::ucd::read_special_casing(special_casing_file, special_casing);
     std::set<std::uint32_t> comp_exclusions;
     starlark::ucd::read_raw_code_points(composition_exclusions, comp_exclusions);
 
@@ -460,6 +655,9 @@ void write_impl(const char* derived_core_properties_file,
     print_decomposition(cc_output, unicode_data);
     print_ccc(cc_output, unicode_data);
     print_canonical_composition(cc_output, unicode_data, comp_exclusions);
+    print_to_upper(cc_output, unicode_data, special_casing);
+    print_to_title(cc_output, unicode_data, special_casing);
+    print_to_lower(cc_output, unicode_data, special_casing);
   }
   {
     std::map<std::string,
@@ -510,16 +708,17 @@ void write_impl(const char* derived_core_properties_file,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  if (argc == 10) {
+  if (argc == 11) {
     const char* derived_core_properties_file = argv[1];
     const char* unicode_data_file = argv[2];
     const char* composition_exclusions = argv[3];
     const char* derived_normalization_props = argv[4];
     const char* prop_list = argv[5];
     const char* derived_numeric_type = argv[6];
-    const char* output_cpp_file = argv[7];
-    const char* output_hpp_file = argv[8];
-    const char* include_h = argv[9];
+    const char* special_casing = argv[7];
+    const char* output_cpp_file = argv[8];
+    const char* output_hpp_file = argv[9];
+    const char* include_h = argv[10];
 
     write_header(output_hpp_file, include_h);
     write_impl(derived_core_properties_file,
@@ -528,6 +727,7 @@ int main(int argc, char *argv[]) {
                derived_normalization_props,
                prop_list,
                derived_numeric_type,
+               special_casing,
                output_cpp_file,
                include_h);
   }

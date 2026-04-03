@@ -75,6 +75,19 @@ std::pair<std::uint32_t, std::uint32_t> parse_code_point_or_range(const std::str
   return std::make_pair(start, end);
 }
 
+void parse_code_point_sequence(std::vector<std::uint32_t>& code_points, const std::string& input) {
+  auto copy = input;
+  while (!copy.empty()) {
+    code_points.push_back(parse_code_point(copy));
+    auto pos = copy.find(" ");
+    if (pos != std::string::npos) {
+      copy.erase(0, pos + 1);
+    } else {
+      copy.clear();
+    }
+  }
+}
+
 std::uint32_t parse_decimal_value(const std::string& input) {
   int code_point;
   int count = std::sscanf(input.c_str(), "%d", &code_point);
@@ -132,16 +145,12 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
     auto character_decomposition = entry[5];
     bool canonical = character_decomposition.empty() || character_decomposition[0] != '<';
     if (!canonical) {
+      // If there is a tag, then remove it.
       character_decomposition.erase(0, character_decomposition.find(" ") + 1);
     }
     std::vector<std::uint32_t> decomposition;
-    while(!character_decomposition.empty()) {
-      decomposition.push_back(parse_code_point(character_decomposition));
-      character_decomposition.erase(0, character_decomposition.find(" "));
-      if (!character_decomposition.empty()) {
-        character_decomposition.erase(0, 1);
-      }
-    }
+    parse_code_point_sequence(decomposition, character_decomposition);
+
     bool is_digit = !entry[6].empty() || !entry[7].empty();
     std::uint32_t uppercase_mapping = 0x110000;
     if (!entry[12].empty()) {
@@ -190,6 +199,43 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
         .titlecase_mapping = titlecase_mapping,
     });
     previous_code_point = code_point;
+  }
+}
+
+void read_special_casing(const char* file, std::map<std::uint32_t, special_casing_record>& special_casing) {
+  auto content = read_file(file);
+  for (auto& entry : content) {
+    if (entry.size() < 5) {
+      exit(1);
+    }
+    std::uint32_t code_point = parse_code_point(entry[0]);
+    std::vector<std::uint32_t> lower;
+    auto element = entry[1];
+    element.erase(0, element.find_first_not_of(" "));
+    parse_code_point_sequence(lower, element);
+    std::vector<std::uint32_t> title;
+    element = entry[2];
+    element.erase(0, element.find_first_not_of(" "));
+    parse_code_point_sequence(title, element);
+    std::vector<std::uint32_t> upper;
+    element = entry[3];
+    element.erase(0, element.find_first_not_of(" "));
+    parse_code_point_sequence(upper, element);
+    std::vector<std::string> condition;
+    auto condition_str = entry[4];
+    condition_str.erase(0, condition_str.find_first_not_of(" "));
+    while (!condition_str.empty()) {
+      auto pos = condition_str.find(" ");
+      condition.emplace_back(condition_str.substr(0, pos));
+      condition_str.erase(0, pos);
+      condition_str.erase(0, condition_str.find_first_not_of(" "));
+    }
+    special_casing.emplace(code_point, special_casing_record{
+      .lower = lower,
+      .title = title,
+      .upper = upper,
+      .conditions = condition,
+    });
   }
 }
 

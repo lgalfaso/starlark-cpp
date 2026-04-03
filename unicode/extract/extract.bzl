@@ -8,6 +8,7 @@ def _extract_ucd_impl(ctx):
     args.add(ctx.file.derived_normalization_props)
     args.add(ctx.file.prop_list)
     args.add(ctx.file.derived_numeric_type)
+    args.add(ctx.file.special_casing)
     args.add(ctx.outputs.output_cc)
     args.add(ctx.outputs.output_h)
     args.add(ctx.outputs.output_h.short_path)
@@ -20,6 +21,7 @@ def _extract_ucd_impl(ctx):
             ctx.file.derived_normalization_props,
             ctx.file.prop_list,
             ctx.file.derived_numeric_type,
+            ctx.file.special_casing,
         ],
         outputs = [ctx.outputs.output_cc, ctx.outputs.output_h],
         arguments = [args],
@@ -35,6 +37,7 @@ extract_ucd = rule(
         "derived_normalization_props": attr.label(allow_single_file = True, default = "@ucd//:DerivedNormalizationProps.txt"),
         "prop_list": attr.label(allow_single_file = True, default = "@ucd//:PropList.txt"),
         "derived_numeric_type": attr.label(allow_single_file = True, default = "@ucd//:extracted/DerivedNumericType.txt"),
+        "special_casing": attr.label(allow_single_file = True, default = "@ucd//:SpecialCasing.txt"),
         "output_cc": attr.output(),
         "output_h": attr.output(),
         "gen_tool": attr.label(
