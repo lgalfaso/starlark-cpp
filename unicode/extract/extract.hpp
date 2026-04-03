@@ -28,7 +28,9 @@ struct unicode_data_record {
   std::string general_category;
   std::string bidirectional_category;
   bool is_digit;
-  bool is_numeric;
+  std::uint32_t uppercase_mapping;
+  std::uint32_t lowercase_mapping;
+  std::uint32_t titlecase_mapping;
 };
 
 /*

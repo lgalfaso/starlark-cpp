@@ -1,4 +1,4 @@
-// Copyright 2024-2025 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
 #include <cstdio>
 #include <cstdlib>
@@ -15,27 +15,85 @@
 namespace starlark {
 namespace ucd {
 
-void read_raw_code_points(const char* file,
-                          std::set<std::uint32_t>& set) {
-  FILE* fp = fopen(file, "r");
-  char* line = nullptr;
-  size_t len = 0;
+namespace {
 
+std::vector<std::vector<std::string>> read_file(const char* file) {
+  FILE* fp = fopen(file, "r");
   if (fp == nullptr) {
     std::exit(1);
   }
-
+  char* line = nullptr;
+  size_t len = 0;
+  std::vector<std::vector<std::string>> result;
   while ((getline(&line, &len, fp)) != -1) {
-    int code_point;
-    int count = std::sscanf(line, "%x", &code_point);
-    if (count > 0) {
-      set.insert(code_point);
+    std::vector<std::string> entry;
+    std::string element;
+    bool found = false;
+    for (int i = 0; i < len; ++i) {
+      if (line[i] == '#' || line[i] == '\n') {
+        break;
+      }
+      found = true;
+      if (line[i] == ';') {
+        entry.emplace_back(element);
+        element.clear();
+      } else {
+        element += line[i];
+      }
+    }
+    if (found) {
+      entry.emplace_back(element);
+      result.emplace_back(entry);
     }
   }
 
   fclose(fp);
   if (line) {
     free(line);
+  }
+  return result;
+}
+
+std::uint32_t parse_code_point(const std::string& input) {
+  int code_point;
+  int count = std::sscanf(input.c_str(), "%x", &code_point);
+  if (count != 1) {
+    exit(1);
+  }
+  return code_point;
+}
+
+std::pair<std::uint32_t, std::uint32_t> parse_code_point_or_range(const std::string& input) {
+  int start, end;
+  int count = std::sscanf(input.c_str(), "%x..%x", &start, &end);
+  if (count == 0) {
+    exit(1);
+  }
+  if (count == 1) {
+    end = start;
+  }
+  return std::make_pair(start, end);
+}
+
+std::uint32_t parse_decimal_value(const std::string& input) {
+  int code_point;
+  int count = std::sscanf(input.c_str(), "%d", &code_point);
+  if (count != 1) {
+    exit(1);
+  }
+  return code_point;
+}
+
+}  // namespace
+
+void read_raw_code_points(const char* file,
+                          std::set<std::uint32_t>& set) {
+  auto content = read_file(file);
+  for (const auto& entry : content) {
+    if (entry.size() != 1) {
+      exit(1);
+    }
+    set.insert(parse_code_point(entry.front()));
   }
 }
 
@@ -43,185 +101,95 @@ void read_all_code_points(const char* file,
     std::map<std::string,
              std::set<std::pair<std::uint32_t, std::uint32_t>>>& set,
     const std::set<std::string>& properties) {
-  FILE* fp = fopen(file, "r");
-  char* line = nullptr;
-  size_t len = 0;
-
-  if (fp == nullptr) {
-    std::exit(1);
-  }
-
-  int start, end, count1, count2;
-  char alias[100];
-  while ((getline(&line, &len, fp)) != -1) {
-    char* sline = line;
-    int count = std::sscanf(sline, "%x%n..%x%n",
-                            &start, &count1, &end, &count2);
-    if (count > 0) {
-      if (count == 1) {
-        sline += count1;
-      } else if (count == 2) {
-        sline += count2;
-      }
-      while (sline[0] == ' ') {
-        ++sline;
-      }
-      if (sline[0] != ';') {
-        std::exit(1);
-      }
-      ++sline;
-      while (std::sscanf(sline, " %99[0-9a-zA-Z_]%n", alias, &count1) > 0) {
-        if (strlen(alias) == 99) {
-          std::exit(1);
-        }
-        sline += count1;
-        if (!properties.contains(alias)) {
-          continue;
-        }
-        if (count == 1) {
-          set[alias].insert(std::make_pair(start, start));
-        } else if (count == 2) {
-          set[alias].insert(std::make_pair(start, end));
-        }
-      }
+  auto content = read_file(file);
+  for (const auto& entry : content) {
+    if (entry.size() < 2) {
+      exit(1);
     }
-  }
-
-  fclose(fp);
-  if (line) {
-    free(line);
+    auto alias = entry[1];
+    alias.erase(0, alias.find_first_not_of(" "));
+    alias.erase(alias.find_last_not_of(" ") + 1);
+    if (alias.find(" ") != std::string::npos) {
+      exit(1);
+    }
+    if (!properties.contains(alias)) {
+      continue;
+    }
+    set[alias].insert(parse_code_point_or_range(entry[0]));
   }
 }
 
 void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_record>& unicode_data) {
-  FILE* fp = fopen(file, "r");
-  char* line = nullptr;
-  size_t len = 0;
-
-  if (fp == nullptr) {
-    std::exit(1);
-  }
-
-  int previous_code = 0;
-  char general_buffer[100];
-  while ((getline(&line, &len, fp)) != -1) {
-    if (len > 0) {
-      char* sline = line;
-      int code, length;
-
-      // Read the code point.
-      int count = std::sscanf(sline, "%x;%n", &code, &length);
-      if (count != 1) {
-        exit(1);
-      }
-      sline += length;
-
-      // Skip over the Character name
-      for (int i = 0; i < 1; sline++) {
-        if (sline[0] == ';') {
-          ++i;
-        }
-      }
-
-      // Read the general category.
-      count = std::sscanf(sline, "%99[0-9a-zA-Z_];%n", general_buffer, &length);
-      if (count != 1) {
-        exit(1);
-      }
-      std::string gc(general_buffer, length - 1);
-      sline += length;
-
-      // Canonical combining classes
-      std::uint32_t ccc;
-      count = std::sscanf(sline, "%d;%n", &ccc, &length);
-      if (count != 1) {
-        exit(1);
-      }
-      sline += length;
-
-      // Read the Bidirectional category
-      count = std::sscanf(sline, "%99[0-9a-zA-Z_];%n", general_buffer, &length);
-      if (count != 1) {
-        exit(1);
-      }
-      std::string bidirectional_category(general_buffer, length - 1);
-      sline += length;
-
-      // Read Character decomposition mapping.
-      bool canonical = true;
-      if (sline[0] == '<') {
-        canonical = false;
-        while (sline[0] != ' ') {
-          ++sline;
-        }
-      }
-      std::vector<std::uint32_t> decomposition;
-      while (sline[0] != ';') {
-        int decomposition_code;
-        count = std::sscanf(sline, "%x%n", &decomposition_code, &length);
-        if (count != 1) {
-          exit(1);
-        }
-        decomposition.push_back(decomposition_code);
-        sline += length;
-      }
-      ++sline;
-
-      // It is a digit if it has a value in in the field "Decimal digit value" or
-      // in the field "Digit value".
-      bool is_digit = false;
-      for (int i = 0; i < 2; sline++) {
-        if (sline[0] == ';') {
-          ++i;
-        } else {
-          is_digit = true;
-        }
-      }
-      // It is numeric if it a digit or if it has a value in the field "Numeric value".
-      bool is_numeric = is_digit;
-      for (int i = 0; i < 1; sline++) {
-        if (sline[0] == ';') {
-          ++i;
-        } else {
-          is_numeric = true;
-        }
-      }
-
-      // Ignore the rest of the fields.
-
-
-      if (std::strstr(line, "Last>") != nullptr) {
-        if (decomposition.size() > 0) {
-          exit(1);
-        }
-        for (int i = previous_code + 1; i < code; ++i) {
-          unicode_data.emplace(i, unicode_data_record{
-                  .canonical_combining_class = ccc,
-                  .canonical_character_decomposition_mapping = canonical,
-                  .character_decomposition_mapping = decomposition,
-                  .general_category = gc,
-                  .is_digit = is_digit,
-                  .is_numeric = is_numeric,
-                  .bidirectional_category = bidirectional_category,
-              });
-        }
-      }
-      unicode_data.emplace(code, unicode_data_record{
-              .canonical_combining_class = ccc,
-              .canonical_character_decomposition_mapping = canonical,
-              .character_decomposition_mapping = decomposition,
-              .general_category = gc,
-              .is_digit = is_digit,
-              .is_numeric = is_numeric,
-              .bidirectional_category = bidirectional_category,
-          });
-      previous_code = code;
+  auto content = read_file(file);
+  std::uint32_t previous_code_point = 0;
+  for (auto& entry : content) {
+    if (entry.size() < 15) {
+      exit(1);
     }
-  }
+    std::uint32_t code_point = parse_code_point(entry[0]);
+    std::uint32_t ccc = parse_decimal_value(entry[3]);
 
-  fclose(fp);
-  if (line) {
-    free(line);
+    auto character_decomposition = entry[5];
+    bool canonical = character_decomposition.empty() || character_decomposition[0] != '<';
+    if (!canonical) {
+      character_decomposition.erase(0, character_decomposition.find(" ") + 1);
+    }
+    std::vector<std::uint32_t> decomposition;
+    while(!character_decomposition.empty()) {
+      decomposition.push_back(parse_code_point(character_decomposition));
+      character_decomposition.erase(0, character_decomposition.find(" "));
+      if (!character_decomposition.empty()) {
+        character_decomposition.erase(0, 1);
+      }
+    }
+    bool is_digit = !entry[6].empty() || !entry[7].empty();
+    std::uint32_t uppercase_mapping = 0x110000;
+    if (!entry[12].empty()) {
+      uppercase_mapping = parse_code_point(entry[12]);
+    }
+    std::uint32_t lowercase_mapping = 0x110000;
+    if (!entry[13].empty()) {
+      lowercase_mapping = parse_code_point(entry[13]);
+    }
+    std::uint32_t titlecase_mapping = 0x110000;
+    if (!entry[14].empty()) {
+      titlecase_mapping = parse_code_point(entry[14]);
+    }
+    if (entry[1].find("Last>") != std::string::npos) {
+      if (decomposition.size() > 0) {
+        exit(1);
+      }
+      for (int i = previous_code_point + 1; i < code_point; ++i) {
+        if (uppercase_mapping != 0x110000 ||
+            lowercase_mapping != 0x110000 ||
+            titlecase_mapping != 0x110000) {
+          exit(1);
+        }
+        unicode_data.emplace(i, unicode_data_record{
+            .canonical_combining_class = ccc,
+            .canonical_character_decomposition_mapping = canonical,
+            .character_decomposition_mapping = decomposition,
+            .general_category = entry[2],
+            .is_digit = is_digit,
+            .bidirectional_category = entry[4],
+            .uppercase_mapping = uppercase_mapping,
+            .lowercase_mapping = lowercase_mapping,
+            .titlecase_mapping = titlecase_mapping,
+        });
+      }
+    }
+    unicode_data.emplace(code_point, unicode_data_record{
+        .canonical_combining_class = ccc,
+        .canonical_character_decomposition_mapping = canonical,
+        .character_decomposition_mapping = decomposition,
+        .general_category = entry[2],
+        .is_digit = is_digit,
+        .bidirectional_category = entry[4],
+        .uppercase_mapping = uppercase_mapping,
+        .lowercase_mapping = lowercase_mapping,
+        .titlecase_mapping = titlecase_mapping,
+    });
+    previous_code_point = code_point;
   }
 }
 
