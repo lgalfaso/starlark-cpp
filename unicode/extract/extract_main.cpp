@@ -127,6 +127,7 @@ void print_code_points(
   std::vector<std::vector<std::pair<std::uint32_t, std::uint32_t>>> blocks;
   {
     // Split into chunks. Each chunk will be a single bitset.
+    // There are some oportunities to tweak this number to balance the binary size and speed.
     constexpr int MAX_GAP_SIZE = (1 << 16) - 1;
 
     bool create_new_block = true;
