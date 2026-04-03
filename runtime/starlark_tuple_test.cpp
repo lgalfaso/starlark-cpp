@@ -122,6 +122,15 @@ TEST(StarlarkTuple, Hash) {
   EXPECT_EQ(-1, starlark_tuple(0).add(&list).hash());
 }
 
+TEST(StarlarkTuple, EdgeCaseHash) {
+  starlark_tuple tuple(0);
+  starlark_integer int1(310754399146329265);
+  starlark_integer int2(175655388725559079);
+  tuple.add(&int1);
+  tuple.add(&int2);
+  EXPECT_EQ(1546275796, tuple.hash());
+}
+
 TEST(StarlarkTuple, DeepHash) {
   std::vector<starlark_tuple> all_tuples;
   all_tuples.reserve(100);
