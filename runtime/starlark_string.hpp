@@ -53,6 +53,9 @@ class starlark_string : public starlark_obj {
   bool isspace() const;
   bool islower() const;
   bool isupper() const;
+  starlark_obj* lower(context& ctx);
+  starlark_obj* title(context& ctx);
+  starlark_obj* upper(context& ctx);
 
   starlark_obj* removeprefix(std::string_view sub, context& ctx);
   starlark_obj* removesuffix(std::string_view sub, context& ctx);

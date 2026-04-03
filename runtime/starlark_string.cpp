@@ -20,6 +20,7 @@
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
+#include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
@@ -32,6 +33,8 @@ using ::starlark::ucd::is_alpha;
 using ::starlark::ucd::is_digit;
 using ::starlark::ucd::is_numeric;
 using ::starlark::ucd::is_space;
+using ::starlark::ucd::to_upper;
+using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
@@ -884,6 +887,29 @@ bool starlark_string::isupper() const {
   return cased_found;
 }
 
+starlark_obj* starlark_string::lower(context& ctx) {
+  // TODO(lmirelmann): Implement.
+  return this;
+}
+
+starlark_obj* starlark_string::title(context& ctx) {
+  // TODO(lmirelmann): Implement.
+  return this;
+}
+
+starlark_obj* starlark_string::upper(context& ctx) {
+  std::string result;
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.read_code_point();
+    auto new_code_points = to_upper(code_point);
+    for (const auto& c : new_code_points) {
+      utf8_encode_code_point(c == 0x110000 ? code_point : c, result, true, false);
+    }
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+}
+
 starlark_obj* starlark_string::removeprefix(std::string_view sub, context& ctx) {
   if (value.starts_with(sub)) {
     return Arena::Create<starlark_string>(&ctx.arena(), value.substr(sub.length()));
@@ -1175,9 +1201,12 @@ starlark_obj* starlark_string_fn_join(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_string_fn_lower(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "lower").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->lower(ctx);
 }
 
 starlark_obj* starlark_string_fn_lstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1360,15 +1389,21 @@ starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_title(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "title").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->title(ctx);
 }
 
 starlark_obj* starlark_string_fn_upper(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "upper").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->upper(ctx);
 }
 
 }  // namespace runtime
