@@ -5152,10 +5152,53 @@ TEST(StarlarkString, UpperWithNoArguments) {
 
   test("", "");
   test("a", "A");
+  test("A", "A");
   test("abc", "ABC");
+  test("ABC", "ABC");
   test("abc1234", "ABC1234");
+  test("ABC1234", "ABC1234");
   test("hello world!", "HELLO WORLD!");
+  test("Hello World!", "HELLO WORLD!");
   test("\u0390", "\u0399\u0308\u0301");
+  test("περιπτώσεις", "ΠΕΡΙΠΤΏΣΕΙΣ");
+}
+
+TEST(StarlarkString, LowerWithNoArguments) {
+  auto test = [](std::string_view element, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    auto* method = str.dot("lower", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    EXPECT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(result->as_string(), expected);
+
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "");
+  test("a", "a");
+  test("A", "a");
+  test("abc", "abc");
+  test("ABC", "abc");
+  test("abc1234", "abc1234");
+  test("ABC1234", "abc1234");
+  test("hello world!", "hello world!");
+  test("Hello World!", "hello world!");
+  test("\u0130", "\u0069\u0307");
+  test("ΠΕΡΙΠΤΏΣΕΙΣ", "περιπτώσεις");
+  test("Σ Σ", "σ σ");
+  test(" Σ Σ ", " σ σ ");
+  test("Σ.Σ.Σ", "σ.σ.ς");
+  test(" Σ.Σ.Σ ", " σ.σ.ς ");
 }
 
 TEST(StarlarkString, UpperWithOneArgument) {

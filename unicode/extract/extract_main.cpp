@@ -509,7 +509,9 @@ void print_to_lower(FILE* output,
         conditional_entries[entry.first] = conditional_elements.size();
       } else {
         // We are safe, use the sequence from special_cases.
-        elements.push_back(entry.second.lowercase_mapping);
+        for (const auto& element : special_case.lower) {
+          elements.push_back(element);
+        }
         entries[entry.first] = elements.size();
       }
     } else if (entry.second.lowercase_mapping != 0x110000) {

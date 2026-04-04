@@ -26,6 +26,9 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::result::status_code;
+using ::starlark::result::status_or;
+using ::starlark::ucd::is_Case_Ignorable;
 using ::starlark::ucd::is_Cased;
 using ::starlark::ucd::is_Lowercase;
 using ::starlark::ucd::is_Uppercase;
@@ -33,11 +36,10 @@ using ::starlark::ucd::is_alpha;
 using ::starlark::ucd::is_digit;
 using ::starlark::ucd::is_numeric;
 using ::starlark::ucd::is_space;
+using ::starlark::ucd::to_lower;
 using ::starlark::ucd::to_upper;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
-using ::starlark::result::status_code;
-using ::starlark::result::status_or;
 
 namespace starlark {
 namespace runtime {
@@ -253,8 +255,6 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       return nullptr;
   }
 }
-
-namespace {
 
 bool parse_interpolation(std::string_view format, std::vector<std::string>& parts, std::vector<std::pair<char, std::size_t>>& convertions, error_fn& error_callback) {
   bool last_is_percent = false;
@@ -504,8 +504,6 @@ bool interpolation_convertion(std::string& result, const starlark_obj& element, 
   return true;
 }
 
-}  // namespace
-
 starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   std::vector<std::string> parts;
   std::vector<std::pair<char, std::size_t>> convertions;
@@ -542,6 +540,59 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
     result += parts[i + 1];
   }
   return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+}
+
+enum class case_condition {
+  kNone,
+  kFinalSigma,
+};
+
+struct case_convertion {
+  std::string prefix;
+  std::string if_condition;
+  std::string else_condition;
+  case_condition condition;
+  std::size_t pos;
+};
+
+bool test_final_sigma_before(const std::vector<std::uint32_t>& code_points, std::size_t start) {
+  for (auto pos = start; pos > 0; --pos) {
+    if (is_Cased(code_points[pos - 1])) {
+      return true;
+    }
+    if (!is_Case_Ignorable(code_points[pos - 1])) {
+      return false;
+    }
+  }
+  return false;
+}
+
+bool test_final_sigma_after(const std::vector<std::uint32_t>& code_points, std::size_t start) {
+  for (auto pos = start + 1; pos < code_points.size(); ++pos) {
+    if (is_Cased(code_points[pos])) {
+      return false;
+    }
+    if (is_Case_Ignorable(code_points[pos])) {
+      continue;
+    }
+  }
+  return true;
+}
+
+std::string merge_parts(const std::vector<case_convertion>& parts, const std::vector<std::uint32_t>& code_points) {
+  std::string result;
+  for (const auto& part : parts) {
+    result += part.prefix;
+    if (part.condition == case_condition::kFinalSigma) {
+      if (test_final_sigma_before(code_points, part.pos) &&
+          test_final_sigma_after(code_points, part.pos)) {
+        result += part.if_condition;
+      } else {
+        result += part.else_condition;
+      }
+    }
+  }
+  return result;
 }
 
 }  // namespace
@@ -888,8 +939,35 @@ bool starlark_string::isupper() const {
 }
 
 starlark_obj* starlark_string::lower(context& ctx) {
-  // TODO(lmirelmann): Implement.
-  return this;
+  std::vector<case_convertion> parts;
+  std::vector<std::uint32_t> code_points;
+  utf8_reader reader(value, false, false);
+  std::size_t pos = 0;
+  parts.emplace_back();
+  parts.back().condition = case_condition::kNone;
+  while (reader.pending()) {
+    auto code_point = reader.read_code_point();
+    code_points.push_back(code_point);
+    auto new_code_points = to_lower(code_point);
+    if (new_code_points.second.has_value()) {
+      for (const auto& c : new_code_points.first) {
+        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().else_condition, true, false);
+      }
+      for (const auto& c : new_code_points.second.value()) {
+        utf8_encode_code_point(c, parts.back().if_condition, true, false);
+      }
+      parts.back().condition = case_condition::kFinalSigma;
+      parts.back().pos = pos;
+      parts.emplace_back();
+      parts.back().condition = case_condition::kNone;
+    } else {
+      for (const auto& c : new_code_points.first) {
+        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
+      }
+    }
+    pos++;
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), merge_parts(parts, code_points));
 }
 
 starlark_obj* starlark_string::title(context& ctx) {
