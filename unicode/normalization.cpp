@@ -116,7 +116,7 @@ void do_nfd(std::vector<std::uint32_t>& output, std::uint32_t c) {
     output.push_back(c);
     return;
   }
-  auto& decomp = ucd::decomposition(c);
+  auto decomp = ucd::decomposition(c);
   if (decomp.size() == 0) {
     output.push_back(c);
     return;
@@ -130,7 +130,7 @@ void do_nfkd(std::vector<std::uint32_t>& output, std::uint32_t c) {
   if (decompose_korean(output, c)) {
     return;
   }
-  auto& decomp = ucd::decomposition(c);
+  auto decomp = ucd::decomposition(c);
   if (decomp.size() == 0) {
     output.push_back(c);
     return;

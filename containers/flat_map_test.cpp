@@ -14,7 +14,7 @@ using testing::Pair;
 namespace {
 
 TEST(FlatMap, Find) {
-  flat_map<int, std::string> map({
+  flat_map<int, std::string, 3> map({
     {1, "1"},
     {2, "2"},
     {4, "4"},

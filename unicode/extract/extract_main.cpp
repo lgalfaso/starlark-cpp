@@ -23,8 +23,9 @@ const char* HPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
 
 #include <cstdint>
 
+#include <array>
 #include <optional>
-#include <vector>
+#include <span>
 
 #include "containers/flat_map.hpp"
 
@@ -45,17 +46,17 @@ bool is_numeric(std::uint32_t code_point);
 
 bool is_space(std::uint32_t code_point);
 
-const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point);
+std::span<const std::uint32_t> decomposition(std::uint32_t code_point);
 
 int ccc(std::uint32_t code_point);
 
 std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs);
 
-const std::vector<std::uint32_t>& to_upper(std::uint32_t code_point);
+std::span<const std::uint32_t> to_upper(std::uint32_t code_point);
 
-const std::vector<std::uint32_t>& to_title(std::uint32_t code_point);
+std::span<const std::uint32_t> to_title(std::uint32_t code_point);
 
-const std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>& to_lower(std::uint32_t code_point);
+std::pair<std::span<const std::uint32_t>, std::optional<std::span<const std::uint32_t>>> to_lower(std::uint32_t code_point);
 
 )CPP";
 
@@ -212,33 +213,47 @@ void print_code_points(
 }
 
 void print_decomposition(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  FWRITE("const std::vector<std::uint32_t>& decomposition(std::uint32_t code_point) {\n", output);
-  FWRITE("  static const std::vector<std::uint32_t> default_value;\n", output);
-  std::map<std::uint32_t, std::vector<std::uint32_t>> entries;
+  FWRITE("std::span<const std::uint32_t> decomposition(std::uint32_t code_point) {\n", output);
+  std::map<std::uint32_t, std::uint32_t> entries;
+  std::vector<std::uint32_t> elements;
   for (const auto& entry : unicode_data) {
     const auto& dc = entry.second.character_decomposition_mapping;
     if (dc.size() != 0) {
-      entries[entry.first] = dc;
+      for (const auto& element : dc) {
+        elements.push_back(element);
+      }
+      entries[entry.first] = elements.size();
     }
   }
-  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_dc = {", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_dc_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " {0x%05X, {", entry.first);
-    for (auto c : entry.second) {
-      fprintf(output, " 0x%05X,", c);
+    fprintf(output, " {0x%05X, 0x%05X}, ", entry.first, entry.second);
+    ++pos;
+  }
+  FWRITE("\n  };\n", output);
+  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_dc{", elements.size());
+  pos = 0;
+  for (const auto& element : elements) {
+    if (pos % 12 == 0) {
+      FWRITE("\n   ", output);
     }
-    FWRITE("}},", output);
+    fprintf(output, " 0x%05X,", element);
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto dc_candidate = all_dc.find(code_point); dc_candidate != all_dc.end()) {\n", output);
-  FWRITE("    return dc_candidate->second;\n", output);
+  FWRITE("  if (auto dc_candidate = all_dc_index.find(code_point); dc_candidate != all_dc_index.end()) {\n", output);
+  FWRITE("    std::size_t begin = 0;\n", output);
+  FWRITE("    auto end = dc_candidate->second;\n", output);
+  FWRITE("    if (dc_candidate != all_dc_index.begin()) {\n", output);
+  FWRITE("      begin = (--dc_candidate)->second;\n", output);
+  FWRITE("    }\n", output);
+  FWRITE("    return std::span<const std::uint32_t>(all_dc).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return default_value;\n", output);
+  FWRITE("  return std::span<const std::uint32_t>{};\n", output);
   FWRITE("}\n\n", output);
 }
 
@@ -250,7 +265,7 @@ void print_ccc(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicod
       entries[entry.first] = entry.second.canonical_combining_class;
     }
   }
-  FWRITE("  static const cnt::flat_map<std::uint32_t, int> all_ccc = {", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, int, %zu> all_ccc = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -287,7 +302,7 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t, sta
       entries[std::make_pair(cc[0], cc[1])] = entry.first;
     }
   }
-  FWRITE("  static const cnt::flat_map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> all_cc = {", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t, %zu> all_cc = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -307,9 +322,10 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t, sta
 void print_to_upper(FILE* output,
                     const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("const std::vector<std::uint32_t>& to_upper(std::uint32_t code_point) {\n", output);
-  FWRITE("  static const std::vector<std::uint32_t> default_value{0x110000};\n", output);
-  std::map<std::uint32_t, std::vector<std::uint32_t>> entries;
+  FWRITE("std::span<const std::uint32_t> to_upper(std::uint32_t code_point) {\n", output);
+  FWRITE("  static constexpr std::array<std::uint32_t, 1> default_value{0x110000};\n", output);
+  std::map<std::uint32_t, std::uint32_t> entries;
+  std::vector<std::uint32_t> elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -334,38 +350,54 @@ void print_to_upper(FILE* output,
       }
 
       // We are safe, use the sequence from special_cases.
-      entries[entry.first] = special_case.upper;
+      for (const auto& element : special_case.upper) {
+        elements.push_back(element);
+      }
+      entries[entry.first] = elements.size();
     } else if (entry.second.uppercase_mapping != 0x110000) {
-      entries[entry.first] = std::vector<std::uint32_t>({entry.second.uppercase_mapping});
+      elements.push_back(entry.second.uppercase_mapping);
+      entries[entry.first] = elements.size();
     }
   }
-  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_upper = {", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_upper_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " {0x%05X, {", entry.first);
-    for (auto c : entry.second) {
-      fprintf(output, " 0x%05X,", c);
-    }
-    FWRITE("}},", output);
+    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto upper_candidate = all_upper.find(code_point); upper_candidate != all_upper.end()) {\n", output);
-  FWRITE("    return upper_candidate->second;\n", output);
+  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_upper{", elements.size());
+  pos = 0;
+  for (const auto& element : elements) {
+    if (pos % 12 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " 0x%05X,", element);
+    ++pos;
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto upper_candidate = all_upper_index.find(code_point); upper_candidate != all_upper_index.end()) {\n", output);
+  FWRITE("    std::size_t begin = 0;\n", output);
+  FWRITE("    auto end = upper_candidate->second;\n", output);
+  FWRITE("    if (upper_candidate != all_upper_index.begin()) {\n", output);
+  FWRITE("      begin = (--upper_candidate)->second;\n", output);
+  FWRITE("    }\n", output);
+  FWRITE("    return std::span<const std::uint32_t>(all_upper).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return default_value;\n", output);
+  FWRITE("  return std::span<const std::uint32_t>(default_value);\n", output);
   FWRITE("}\n\n", output);
 }
 
 void print_to_title(FILE* output,
                     const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("const std::vector<std::uint32_t>& to_title(std::uint32_t code_point) {\n", output);
-  FWRITE("  static const std::vector<std::uint32_t> default_value{0x110000};\n", output);
-  std::map<std::uint32_t, std::vector<std::uint32_t>> entries;
+  FWRITE("std::span<const std::uint32_t> to_title(std::uint32_t code_point) {\n", output);
+  FWRITE("  static constexpr std::array<std::uint32_t, 1> default_value{0x110000};\n", output);
+  std::map<std::uint32_t, std::uint32_t> entries;
+  std::vector<std::uint32_t> elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -390,38 +422,56 @@ void print_to_title(FILE* output,
       }
 
       // We are safe, use the sequence from special_cases.
-      entries[entry.first] = special_case.title;
+      for (const auto& element : special_case.title) {
+        elements.push_back(element);
+      }
+      entries[entry.first] = elements.size();
     } else if (entry.second.titlecase_mapping != 0x110000) {
-      entries[entry.first] = std::vector<std::uint32_t>({entry.second.titlecase_mapping});
+      elements.push_back(entry.second.titlecase_mapping);
+      entries[entry.first] = elements.size();
     }
   }
-  FWRITE("  static const cnt::flat_map<std::uint32_t, std::vector<std::uint32_t>> all_title = {", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_title_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " {0x%05X, {", entry.first);
-    for (auto c : entry.second) {
-      fprintf(output, " 0x%05X,", c);
-    }
-    FWRITE("}},", output);
+    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto title_candidate = all_title.find(code_point); title_candidate != all_title.end()) {\n", output);
-  FWRITE("    return title_candidate->second;\n", output);
+  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_title{", elements.size());
+  pos = 0;
+  for (const auto& element : elements) {
+    if (pos % 12 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " 0x%05X,", element);
+    ++pos;
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto title_candidate = all_title_index.find(code_point); title_candidate != all_title_index.end()) {\n", output);
+  FWRITE("    std::size_t begin = 0;\n", output);
+  FWRITE("    auto end = title_candidate->second;\n", output);
+  FWRITE("    if (title_candidate != all_title_index.begin()) {\n", output);
+  FWRITE("      begin = (--title_candidate)->second;\n", output);
+  FWRITE("    }\n", output);
+  FWRITE("    return std::span<const std::uint32_t>(all_title).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return default_value;\n", output);
+  FWRITE("  return std::span<const std::uint32_t>(default_value);\n", output);
   FWRITE("}\n\n", output);
 }
 
 void print_to_lower(FILE* output,
                     const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("const std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>& to_lower(std::uint32_t code_point) {\n", output);
-  FWRITE("  static const std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>> default_value{{0x110000}, {}};\n", output);
-  std::map<std::uint32_t, std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>> entries;
+  FWRITE("std::pair<std::span<const std::uint32_t>, std::optional<std::span<const std::uint32_t>>> to_lower(std::uint32_t code_point) {\n", output);
+  FWRITE("  static constexpr std::array<std::uint32_t, 1> default_value{0x110000};\n", output);
+  std::map<std::uint32_t, std::uint32_t> entries;
+  std::vector<std::uint32_t> elements;
+  std::map<std::uint32_t, std::uint32_t> conditional_entries;
+  std::vector<std::uint32_t> conditional_elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -448,46 +498,88 @@ void print_to_lower(FILE* output,
           // This is somethign that we are currently not supporting, so abort.
           exit(1);
         }
+        elements.push_back(entry.second.lowercase_mapping);
+        entries[entry.first] = elements.size();
         if (skip) {
-          entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>({entry.second.lowercase_mapping}, {});
           continue;
         }
-        if (special_case.lower.size() != 1) {
-          exit(3);
+        for (const auto& element : special_case.lower) {
+          conditional_elements.push_back(element);
         }
-        entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>({entry.second.lowercase_mapping}, special_case.lower.front());
+        conditional_entries[entry.first] = conditional_elements.size();
       } else {
         // We are safe, use the sequence from special_cases.
-        entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>(special_case.lower, {});
+        elements.push_back(entry.second.lowercase_mapping);
+        entries[entry.first] = elements.size();
       }
     } else if (entry.second.lowercase_mapping != 0x110000) {
-      entries[entry.first] = std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>({entry.second.lowercase_mapping}, {});
+      elements.push_back(entry.second.lowercase_mapping);
+      entries[entry.first] = elements.size();
     }
   }
-  FWRITE("  static const cnt::flat_map<std::uint32_t, std::pair<std::vector<std::uint32_t>, std::optional<std::uint32_t>>> all_lower = {", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_lower_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " {0x%05X, {{", entry.first);
-    for (auto c : entry.second.first) {
-      fprintf(output, " 0x%05X,", c);
+    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
+    ++pos;
+  }
+  FWRITE("\n  };\n", output);
+  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_lower{", elements.size());
+  pos = 0;
+  for (const auto& element : elements) {
+    if (pos % 12 == 0) {
+      FWRITE("\n   ", output);
     }
-    FWRITE("}, ", output);
-    if (entry.second.second) {
-      fprintf(output, " 0x%05X,", entry.second.second.value());
-    } else {
-      FWRITE("{}", output);
+    fprintf(output, " 0x%05X,", element);
+    ++pos;
+  }
+  FWRITE("\n  };\n", output);
+
+  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> conditional_all_lower_index = {", conditional_entries.size());
+  pos = 0;
+  for (const auto& entry : conditional_entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
     }
-    FWRITE("}},", output);
+    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
+    ++pos;
+  }
+  FWRITE("\n  };\n", output);
+  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> conditional_all_lower{", conditional_elements.size());
+  pos = 0;
+  for (const auto& element : conditional_elements) {
+    if (pos % 12 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " 0x%05X,", element);
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto lower_candidate = all_lower.find(code_point); lower_candidate != all_lower.end()) {\n", output);
-  FWRITE("    return lower_candidate->second;\n", output);
+
+  FWRITE("  if (auto lower_candidate = all_lower_index.find(code_point); lower_candidate != all_lower_index.end()) {\n", output);
+  FWRITE("    std::size_t begin = 0;\n", output);
+  FWRITE("    auto end = lower_candidate->second;\n", output);
+  FWRITE("    if (lower_candidate != all_lower_index.begin()) {\n", output);
+  FWRITE("      begin = (--lower_candidate)->second;\n", output);
+  FWRITE("    }\n", output);
+  FWRITE("    auto entries = std::span<const std::uint32_t>(all_lower).subspan(begin, end - begin);\n", output);
+  FWRITE("    if (auto conditional_lower_candidate = conditional_all_lower_index.find(code_point); conditional_lower_candidate != conditional_all_lower_index.end()) {\n", output);
+
+  FWRITE("      std::size_t conditional_begin = 0;\n", output);
+  FWRITE("      auto conditional_end = conditional_lower_candidate->second;\n", output);
+  FWRITE("      if (conditional_lower_candidate != conditional_all_lower_index.begin()) {\n", output);
+  FWRITE("        conditional_begin = (--conditional_lower_candidate)->second;\n", output);
+  FWRITE("      }\n", output);
+  FWRITE("      auto conditional_entries = std::span<const std::uint32_t>(conditional_all_lower).subspan(conditional_begin, conditional_end - conditional_begin);\n", output);
+  FWRITE("      return std::pair<std::span<const uint32_t>, std::optional<std::span<const std::uint32_t>>>(entries, conditional_entries);\n", output);
+
+  FWRITE("    }\n", output);
+  FWRITE("    return std::pair<std::span<const uint32_t>, std::optional<std::span<const std::uint32_t>>>(entries, {});\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return default_value;\n", output);
+  FWRITE("  return std::pair<std::span<const uint32_t>, std::optional<std::span<const std::uint32_t>>>(default_value, {});\n", output);
   FWRITE("}\n\n", output);
 }
 
