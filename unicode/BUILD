@@ -112,13 +112,16 @@ cc_test(
     args = [
         "$(location @ucd//:DerivedCoreProperties.txt)",
         "$(location @ucd//:PropList.txt)",
+        "$(location @ucd//:auxiliary/WordBreakProperty.txt)",
     ],
     data = [
         "@ucd//:DerivedCoreProperties.txt",
         "@ucd//:PropList.txt",
+        "@ucd//:auxiliary/WordBreakProperty.txt",
     ],
     deps = [
         ":ucd",
+        "//unicode/extract",
         "@googletest//:gtest_main",
     ],
 )

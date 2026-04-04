@@ -239,5 +239,21 @@ void read_special_casing(const char* file, std::map<std::uint32_t, special_casin
   }
 }
 
+void read_word_break(const char* file, std::map<std::pair<std::uint32_t, std::uint32_t>, std::string>& word_break) {
+  auto content = read_file(file);
+  for (const auto& entry : content) {
+    if (entry.size() < 2) {
+      exit(1);
+    }
+    auto alias = entry[1];
+    alias.erase(0, alias.find_first_not_of(" "));
+    alias.erase(alias.find_last_not_of(" ") + 1);
+    if (alias.find(" ") != std::string::npos) {
+      exit(1);
+    }
+    word_break[parse_code_point_or_range(entry[0])] = alias;
+  }
+}
+
 }  // namespace ucd
 }  // namespace starlark

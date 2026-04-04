@@ -37,6 +37,13 @@ class flat_map {
     return end();
   }
 
+  std::array<std::pair<K, V>, N>::const_iterator upper_bound(const K& key) const {
+    return std::upper_bound(values.begin(), values.end(), key,
+        [](const K& k, const std::pair<K, V>& kv) -> bool {
+            return k < kv.first;
+        });
+  }
+
   std::array<std::pair<K, V>, N>::const_iterator begin() const {
     return values.begin();
   }

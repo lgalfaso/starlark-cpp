@@ -32,6 +32,32 @@ const char* HPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
 namespace starlark {
 namespace ucd {
 
+enum class word_break_type {
+  kCR,
+  kLF,
+  kNewline,
+  kExtend,
+  kZWJ,
+  kRegional_Indicator,
+  kFormat,
+  kKatakana,
+  kHebrew_Letter,
+  kALetter,
+  kSingle_Quote,
+  kDouble_Quote,
+  kMidNumLet,
+  kMidLetter,
+  kMidNum,
+  kNumeric,
+  kExtendNumLet,
+  kE_Base,
+  kE_Modifier,
+  kGlue_After_Zwj,
+  kE_Base_GAZ,
+  kWSegSpace,
+  kOther,
+};
+
 bool is_assigned(std::uint32_t code_point);
 
 bool is_printable(std::uint32_t code_point);
@@ -57,6 +83,8 @@ std::span<const std::uint32_t> to_upper(std::uint32_t code_point);
 std::span<const std::uint32_t> to_title(std::uint32_t code_point);
 
 std::pair<std::span<const std::uint32_t>, std::optional<std::span<const std::uint32_t>>> to_lower(std::uint32_t code_point);
+
+word_break_type word_break(std::uint32_t code_point);
 
 )CPP";
 
@@ -585,6 +613,32 @@ void print_to_lower(FILE* output,
   FWRITE("}\n\n", output);
 }
 
+
+void print_word_break(FILE* output,
+                      const std::map<std::pair<std::uint32_t, std::uint32_t>, std::string>& word_break) {
+  FWRITE("word_break_type word_break(std::uint32_t code_point) {\n", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::pair<std::uint32_t, std::uint32_t>, word_break_type, %zu> all_word_break = {", word_break.size());
+  int pos = 0;
+  for (const auto& entry : word_break) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {{0x%05X, 0x%05X}, word_break_type::k%s},", entry.first.first, entry.first.second, entry.second.c_str());
+    ++pos;
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  auto up_bound = all_word_break.upper_bound(std::pair<std::uint32_t, std::uint32_t>(code_point, 0x110000));\n", output);
+  FWRITE("  if (up_bound == all_word_break.begin()) {\n", output);
+  FWRITE("    return word_break_type::kOther;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  --up_bound;\n", output);
+  FWRITE("  if (up_bound->first.first <= code_point && code_point <= up_bound->first.second) {\n", output);
+  FWRITE("    return up_bound->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return word_break_type::kOther;\n", output);
+  FWRITE("}\n\n", output);
+}
+
 std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::set<std::uint32_t>& input) {
   std::set<std::pair<std::uint32_t, std::uint32_t>> result;
   std::uint32_t min = 0;
@@ -727,6 +781,7 @@ void write_impl(const char* derived_core_properties_file,
                 const char* prop_list,
                 const char* derived_numeric_type,
                 const char* special_casing_file,
+                const char* word_break_file,
                 const char* output_file,
                 const char* include_h) {
   FILE* cc_output = fopen(output_file, "w");
@@ -735,9 +790,11 @@ void write_impl(const char* derived_core_properties_file,
   {
     std::map<std::uint32_t, starlark::ucd::unicode_data_record> unicode_data;
     std::map<std::uint32_t, starlark::ucd::special_casing_record> special_casing;
+    std::map<std::pair<std::uint32_t, std::uint32_t>, std::string> word_break;
+    std::set<std::uint32_t> comp_exclusions;
     starlark::ucd::read_unicode_data(unicode_data_file, unicode_data);
     starlark::ucd::read_special_casing(special_casing_file, special_casing);
-    std::set<std::uint32_t> comp_exclusions;
+    starlark::ucd::read_word_break(word_break_file, word_break);
     starlark::ucd::read_raw_code_points(composition_exclusions, comp_exclusions);
 
     print_code_points(cc_output, create_ranges(unicode_data), "is_assigned");
@@ -752,6 +809,7 @@ void write_impl(const char* derived_core_properties_file,
     print_to_upper(cc_output, unicode_data, special_casing);
     print_to_title(cc_output, unicode_data, special_casing);
     print_to_lower(cc_output, unicode_data, special_casing);
+    print_word_break(cc_output, word_break);
   }
   {
     std::map<std::string,
@@ -802,7 +860,7 @@ void write_impl(const char* derived_core_properties_file,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  if (argc == 11) {
+  if (argc == 12) {
     const char* derived_core_properties_file = argv[1];
     const char* unicode_data_file = argv[2];
     const char* composition_exclusions = argv[3];
@@ -810,9 +868,10 @@ int main(int argc, char *argv[]) {
     const char* prop_list = argv[5];
     const char* derived_numeric_type = argv[6];
     const char* special_casing = argv[7];
-    const char* output_cpp_file = argv[8];
-    const char* output_hpp_file = argv[9];
-    const char* include_h = argv[10];
+    const char* word_break = argv[8];
+    const char* output_cpp_file = argv[9];
+    const char* output_hpp_file = argv[10];
+    const char* include_h = argv[11];
 
     write_header(output_hpp_file, include_h);
     write_impl(derived_core_properties_file,
@@ -822,6 +881,7 @@ int main(int argc, char *argv[]) {
                prop_list,
                derived_numeric_type,
                special_casing,
+               word_break,
                output_cpp_file,
                include_h);
   }

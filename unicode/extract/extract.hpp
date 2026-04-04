@@ -48,6 +48,8 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
 
 void read_special_casing(const char* file, std::map<std::uint32_t, special_casing_record>& special_casing);
 
+void read_word_break(const char* file, std::map<std::pair<std::uint32_t, std::uint32_t>, std::string>& word_break);
+
 }  // namespace ucd
 }  // namespace starlark
 
