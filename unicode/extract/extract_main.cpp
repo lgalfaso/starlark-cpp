@@ -1,4 +1,4 @@
-// Copyright 2024-2025 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
 #include <cstring>
 
@@ -78,6 +78,10 @@ int ccc(std::uint32_t code_point);
 
 std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs);
 
+// TODO(lmirelmann): Should be possible to output the encoded bytes un a string_view. This will
+// make the execution of whomever need this much faster as it would not need to re-encode things
+// multiple times. It hsould also sabe a few bytes as keeping the code points takes more space
+// than keeping the encoded bytes.
 std::span<const std::uint32_t> to_upper(std::uint32_t code_point);
 
 std::span<const std::uint32_t> to_title(std::uint32_t code_point);
@@ -95,7 +99,7 @@ const char* HPP_FOOTER = R"CPP(}  // namespace ucd
 
 )CPP";
 
-const char* CPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
+const char* CPP_HEADER = R"CPP(// Copyright 2024-2026 Lucas Mirelmann
 
 // Generated file, do not edit.
 
