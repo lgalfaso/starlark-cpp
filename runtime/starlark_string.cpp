@@ -37,6 +37,7 @@ using ::starlark::ucd::is_digit;
 using ::starlark::ucd::is_numeric;
 using ::starlark::ucd::is_space;
 using ::starlark::ucd::to_lower;
+using ::starlark::ucd::to_title;
 using ::starlark::ucd::to_upper;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
@@ -984,6 +985,47 @@ starlark_obj* starlark_string::upper(context& ctx) {
   return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
 }
 
+starlark_obj* starlark_string::capitalize(context& ctx) {
+  std::vector<case_convertion> parts;
+  std::vector<std::uint32_t> code_points;
+  utf8_reader reader(value, false, false);
+  std::size_t pos = 0;
+  parts.emplace_back();
+  parts.back().condition = case_condition::kNone;
+  bool is_first = true;
+  while (reader.pending()) {
+    auto code_point = reader.read_code_point();
+    code_points.push_back(code_point);
+    if (is_first) {
+      auto new_code_points = to_title(code_point);
+      for (const auto& c : new_code_points) {
+        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
+      }
+      is_first = false;
+    } else {
+      auto new_code_points = to_lower(code_point);
+      if (new_code_points.second.has_value()) {
+        for (const auto& c : new_code_points.first) {
+          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().else_condition, true, false);
+        }
+        for (const auto& c : new_code_points.second.value()) {
+          utf8_encode_code_point(c, parts.back().if_condition, true, false);
+        }
+        parts.back().condition = case_condition::kFinalSigma;
+        parts.back().pos = pos;
+        parts.emplace_back();
+        parts.back().condition = case_condition::kNone;
+      } else {
+        for (const auto& c : new_code_points.first) {
+          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
+        }
+      }
+    }
+    pos++;
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), merge_parts(parts, code_points));
+}
+
 starlark_obj* starlark_string::removeprefix(std::string_view sub, context& ctx) {
   if (value.starts_with(sub)) {
     return Arena::Create<starlark_string>(&ctx.arena(), value.substr(sub.length()));
@@ -1072,9 +1114,12 @@ status_or<std::pair<int64_t, int64_t>> get_start_and_end(const starlark_obj::pos
 }  // namespace
 
 starlark_obj* starlark_string_fn_capitalize(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "capitalize").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->capitalize(ctx);
 }
 
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
