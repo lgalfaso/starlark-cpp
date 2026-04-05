@@ -45,8 +45,6 @@ namespace starlark {
 namespace runtime {
 
 starlark_obj* starlark_string_fn_capitalize(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
-starlark_obj* starlark_string_fn_codepoint_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
-starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
@@ -84,8 +82,6 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::me
   static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
     new std::map<std::string, starlark_obj::fn*, std::less<>>{
       {"capitalize", starlark_string_fn_capitalize},
-      {"codepoint_ords", starlark_string_fn_codepoint_ords},
-      {"codepoints", starlark_string_fn_codepoints},
       {"count", starlark_string_fn_count},
       {"elem_ords", starlark_string_fn_elem_ords},
       {"elems", starlark_string_fn_elems},
@@ -1076,18 +1072,6 @@ status_or<std::pair<int64_t, int64_t>> get_start_and_end(const starlark_obj::pos
 }  // namespace
 
 starlark_obj* starlark_string_fn_capitalize(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
-}
-
-starlark_obj* starlark_string_fn_codepoint_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
-}
-
-starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // TODO(lmirelmann): Implement.
   error_callback.add_error("Unimplemented");
   return nullptr;
