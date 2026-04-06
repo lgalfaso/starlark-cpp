@@ -4,8 +4,11 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <cstdio>
+
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "unicode/extract/extract.hpp"
 #include "unicode/word_break.hpp"
@@ -25,7 +28,7 @@ read_unicode_word_break_tests(const char* file) {
     std::vector<std::uint64_t> break_points;
     std::string pending = entry.front();
     pending.erase(0, pending.find_first_not_of(" \t"));
-    while(!pending.empty()) {
+    while (!pending.empty()) {
       if (pending.starts_with("÷")) {
         break_points.push_back(pos);
       } else if (pending.starts_with("×")) {
