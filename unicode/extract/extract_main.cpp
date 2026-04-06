@@ -122,7 +122,8 @@ constexpr int CODEPOINTS_PER_LINE = 64;
 
 std::set<std::string> binary_unicode_properties = {
   "XID_Continue", "XID_Start", "Case_Ignorable", "Cased",
-  "Lowercase", "Uppercase",
+  "Lowercase", "Uppercase", "Extended_Pictographic",
+  "Regional_Indicator",
 };
 
 std::set<std::string> normalization_properties = {
@@ -786,6 +787,7 @@ void write_impl(const char* derived_core_properties_file,
                 const char* derived_numeric_type,
                 const char* special_casing_file,
                 const char* word_break_file,
+                const char* emoji_data,
                 const char* output_file,
                 const char* include_h) {
   FILE* cc_output = fopen(output_file, "w");
@@ -829,6 +831,9 @@ void write_impl(const char* derived_core_properties_file,
     starlark::ucd::read_all_code_points(prop_list,
                               binary_properties,
                               binary_unicode_properties);
+    starlark::ucd::read_all_code_points(emoji_data,
+                              binary_properties,
+                              binary_unicode_properties);
 
     for (const auto& normalization_property : normalization_properties) {
       if (binary_properties[normalization_property].empty()) {
@@ -864,7 +869,7 @@ void write_impl(const char* derived_core_properties_file,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  if (argc == 12) {
+  if (argc == 13) {
     const char* derived_core_properties_file = argv[1];
     const char* unicode_data_file = argv[2];
     const char* composition_exclusions = argv[3];
@@ -873,9 +878,10 @@ int main(int argc, char *argv[]) {
     const char* derived_numeric_type = argv[6];
     const char* special_casing = argv[7];
     const char* word_break = argv[8];
-    const char* output_cpp_file = argv[9];
-    const char* output_hpp_file = argv[10];
-    const char* include_h = argv[11];
+    const char* emoji_data = argv[9];
+    const char* output_cpp_file = argv[10];
+    const char* output_hpp_file = argv[11];
+    const char* include_h = argv[12];
 
     write_header(output_hpp_file, include_h);
     write_impl(derived_core_properties_file,
@@ -886,6 +892,7 @@ int main(int argc, char *argv[]) {
                derived_numeric_type,
                special_casing,
                word_break,
+               emoji_data,
                output_cpp_file,
                include_h);
   }

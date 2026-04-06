@@ -50,6 +50,8 @@ void read_special_casing(const char* file, std::map<std::uint32_t, special_casin
 
 void read_word_break(const char* file, std::map<std::pair<std::uint32_t, std::uint32_t>, std::string>& word_break);
 
+std::vector<std::vector<std::string>> read_file(const char* file);
+
 }  // namespace ucd
 }  // namespace starlark
 

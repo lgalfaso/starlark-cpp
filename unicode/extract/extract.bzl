@@ -10,6 +10,7 @@ def _extract_ucd_impl(ctx):
     args.add(ctx.file.derived_numeric_type)
     args.add(ctx.file.special_casing)
     args.add(ctx.file.word_break)
+    args.add(ctx.file.emoji_data)
     args.add(ctx.outputs.output_cc)
     args.add(ctx.outputs.output_h)
     args.add(ctx.outputs.output_h.short_path)
@@ -24,6 +25,7 @@ def _extract_ucd_impl(ctx):
             ctx.file.derived_numeric_type,
             ctx.file.special_casing,
             ctx.file.word_break,
+            ctx.file.emoji_data,
         ],
         outputs = [ctx.outputs.output_cc, ctx.outputs.output_h],
         arguments = [args],
@@ -41,6 +43,7 @@ extract_ucd = rule(
         "derived_numeric_type": attr.label(allow_single_file = True, default = "@ucd//:extracted/DerivedNumericType.txt"),
         "special_casing": attr.label(allow_single_file = True, default = "@ucd//:SpecialCasing.txt"),
         "word_break": attr.label(allow_single_file = True, default = "@ucd//:auxiliary/WordBreakProperty.txt"),
+        "emoji_data": attr.label(allow_single_file = True, default = "@ucd//:emoji/emoji-data.txt"),
         "output_cc": attr.output(),
         "output_h": attr.output(),
         "gen_tool": attr.label(

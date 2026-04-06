@@ -15,8 +15,6 @@
 namespace starlark {
 namespace ucd {
 
-namespace {
-
 std::vector<std::vector<std::string>> read_file(const char* file) {
   FILE* fp = fopen(file, "r");
   if (fp == nullptr) {
@@ -53,6 +51,8 @@ std::vector<std::vector<std::string>> read_file(const char* file) {
   }
   return result;
 }
+
+namespace {
 
 std::uint32_t parse_code_point(const std::string& input) {
   int code_point;

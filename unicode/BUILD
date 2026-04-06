@@ -135,3 +135,33 @@ cc_binary(
         "@google_benchmark//:benchmark",
     ],
 )
+
+cc_library(
+    name = "word_break",
+    srcs = ["word_break.cpp"],
+    hdrs = ["word_break.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ucd",
+    ],
+)
+
+cc_test(
+    name = "word_break_test",
+    size = "small",
+    srcs = ["word_break_test.cpp"],
+    args = [
+        "$(location @ucd//:auxiliary/WordBreakTest.txt)",
+    ],
+    data = [
+        "@ucd//:auxiliary/WordBreakTest.txt",
+    ],
+    deps = [
+        ":ucd",
+        ":word_break",
+        "//unicode/extract",
+        "@googletest//:gtest_main",
+    ],
+)
+
+
