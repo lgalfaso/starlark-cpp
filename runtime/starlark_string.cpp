@@ -23,6 +23,7 @@
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
+#include "unicode/word_break.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
@@ -41,6 +42,7 @@ using ::starlark::ucd::to_title;
 using ::starlark::ucd::to_upper;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
+using ::starlark::unicode::word_break;
 
 namespace starlark {
 namespace runtime {
@@ -592,6 +594,60 @@ std::string merge_parts(const std::vector<case_convertion>& parts, const std::ve
   return result;
 }
 
+std::string to_title_string(std::string_view value, bool& found_cased) {
+  std::vector<std::uint32_t> code_points;
+  utf8_reader reader(value, false, false);
+  while (reader.pending()) {
+    auto code_point = reader.read_code_point();
+    code_points.push_back(code_point);
+  }
+  std::vector<std::uint64_t> word_boundaries;
+  word_break(code_points, word_boundaries);
+
+  found_cased = false;
+  bool first_letter_of_word = true;
+  std::size_t word_boundary = 0;
+  std::vector<case_convertion> parts;
+  parts.emplace_back();
+  parts.back().condition = case_condition::kNone;
+  for (std::size_t pos = 0; pos < code_points.size(); ++pos) {
+    if (word_boundaries[word_boundary] == pos) {
+      first_letter_of_word = true;
+      word_boundary++;
+    }
+    auto code_point = code_points[pos];
+    auto cased = is_Cased(code_point);
+    found_cased |= cased;
+    if (first_letter_of_word && cased) {
+      found_cased = true;
+      auto new_code_points = to_title(code_point);
+      for (const auto& c : new_code_points) {
+        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
+      }
+      first_letter_of_word = false;
+    } else {
+      auto new_code_points = to_lower(code_point);
+      if (new_code_points.second.has_value()) {
+        for (const auto& c : new_code_points.first) {
+          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().else_condition, true, false);
+        }
+        for (const auto& c : new_code_points.second.value()) {
+          utf8_encode_code_point(c, parts.back().if_condition, true, false);
+        }
+        parts.back().condition = case_condition::kFinalSigma;
+        parts.back().pos = pos;
+        parts.emplace_back();
+        parts.back().condition = case_condition::kNone;
+      } else {
+        for (const auto& c : new_code_points.first) {
+          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
+        }
+      }
+    }
+  }
+  return merge_parts(parts, code_points);
+}
+
 }  // namespace
 
 starlark_obj* starlark_string::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -919,6 +975,13 @@ bool starlark_string::islower() const {
   return cased_found;
 }
 
+bool starlark_string::istitle() const {
+  bool found_cased;
+  auto titled_value = to_title_string(value, found_cased);
+  // The underlying algorithm is too complex to have a special case.
+  return found_cased && value == titled_value;
+}
+
 bool starlark_string::isupper() const {
   bool cased_found = false;
   utf8_reader reader(value, false, false);
@@ -968,8 +1031,8 @@ starlark_obj* starlark_string::lower(context& ctx) {
 }
 
 starlark_obj* starlark_string::title(context& ctx) {
-  // TODO(lmirelmann): Implement.
-  return this;
+  bool ignore;
+  return Arena::Create<starlark_string>(&ctx.arena(), to_title_string(value, ignore));
 }
 
 starlark_obj* starlark_string::upper(context& ctx) {
@@ -1267,9 +1330,12 @@ starlark_obj* starlark_string_fn_isspace(starlark_obj* this_obj, const starlark_
 }
 
 starlark_obj* starlark_string_fn_istitle(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "istitle").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->istitle() ? ctx.true_value() : ctx.false_value();
 }
 
 starlark_obj* starlark_string_fn_isupper(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

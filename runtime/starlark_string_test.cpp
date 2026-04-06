@@ -4598,6 +4598,45 @@ TEST(StarlarkString, IslowerNoArguments) {
   test("\u3405", false);
 }
 
+TEST(StarlarkString, IstitleNoArguments) {
+  auto test = [](std::string_view element, bool expected_value) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+
+    auto* method = str.dot("istitle", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::bool_t);
+    EXPECT_EQ(result->truthy(), expected_value) << "'" << element << "'";
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", false);
+  test(" ", false);
+  test("abc", false);
+  test("Abc", true);
+  test("ABC", false);
+  test("123", false);
+  test("abc123", false);
+  test("Abc123", true);
+  test("ABC123", false);
+  test("abc123!@#", false);
+  test("Abc123!@#", true);
+  test("ABC123!@#", false);
+  test("LettersOnly", false);
+  test("Letters and spaces", false);
+  test("µ", false);
+  test("¼", false);
+  test("\u3405", false);
+}
+
 TEST(StarlarkString, IsupperNoArguments) {
   auto test = [](std::string_view element, bool expected_value) {
     error_handler error_callback;
@@ -4742,6 +4781,27 @@ TEST(StarlarkString, IslowerWithOneArgument) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, IstitleWithOneArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  auto* method = str.dot("istitle", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: istitle() takes no arguments (1 given)");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 TEST(StarlarkString, IsupperWithOneArgument) {
   error_handler error_callback;
   Arena arena;
@@ -4870,6 +4930,28 @@ TEST(StarlarkString, IslowerWithNamedArguments) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: islower() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, IstitleWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("old", ctx.zero());
+  auto* method = str.dot("istitle", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: istitle() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5161,6 +5243,45 @@ TEST(StarlarkString, UpperWithNoArguments) {
   test("Hello World!", "HELLO WORLD!");
   test("\u0390", "\u0399\u0308\u0301");
   test("περιπτώσεις", "ΠΕΡΙΠΤΏΣΕΙΣ");
+}
+
+TEST(StarlarkString, TitleWithNoArguments) {
+  auto test = [](std::string_view element, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    auto* method = str.dot("title", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    EXPECT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(result->as_string(), expected);
+
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "");
+  test("a", "A");
+  test("A", "A");
+  test("abc", "Abc");
+  test("ABC", "Abc");
+  test("abc1234", "Abc1234");
+  test("ABC1234", "Abc1234");
+  test("123ABC1234", "123Abc1234");
+  test("hello world!", "Hello World!");
+  test("Hello World!", "Hello World!");
+  test("\u0390", "\u0399\u0308\u0301");
+  test("περιπτώσεις", "Περιπτώσεις");
+  test("Σ Σ", "Σ Σ");
+  test(" Σ Σ ", " Σ Σ ");
+  test("Σ.Σ.Σ", "Σ.σ.ς");
+  test(" Σ.Σ.Σ ", " Σ.σ.ς ");
 }
 
 TEST(StarlarkString, LowerWithNoArguments) {

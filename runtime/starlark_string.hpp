@@ -52,6 +52,7 @@ class starlark_string : public starlark_obj {
   bool isdigit() const;
   bool isspace() const;
   bool islower() const;
+  bool istitle() const;
   bool isupper() const;
   starlark_obj* lower(context& ctx);
   starlark_obj* title(context& ctx);
