@@ -1,8 +1,9 @@
 common --enable_platform_specific_config
 common --cxxopt=-std=c++2b --host_cxxopt=-std=c++2b
+common --cxxopt=-fno-exceptions
 
 common:macos --cxxopt=-fconstexpr-steps=40000000
-coverage --cxxopt=-fno-inline --cxxopt=-fno-exceptions
+coverage --cxxopt=-fno-inline
 coverage --features=-coverage --copt=-coverage --linkopt=-coverage --test_env=GCOV_PREFIX_STRIP=12
 
 build:asan --strip=never
