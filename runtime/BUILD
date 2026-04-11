@@ -583,6 +583,7 @@ cc_library(
         ":starlark_types",
         "//bigint:number",
         "//unicode:utf8_reader",
+        "//unicode:utf8_reverse_reader",
         "//unicode:word_break",
     ],
 )

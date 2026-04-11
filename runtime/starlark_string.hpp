@@ -47,6 +47,10 @@ class starlark_string : public starlark_obj {
   starlark_obj* partition(std::string_view sub, context& ctx, error_fn& error_callback);
   starlark_obj* rpartition(std::string_view sub, context& ctx, error_fn& error_callback);
   starlark_obj* replace(std::string_view old, std::string_view new_, int64_t count, context& ctx) const;
+  starlark_obj* rsplit(int64_t maxsplit, context& ctx) const;
+  starlark_obj* rsplit(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
+  starlark_obj* split(int64_t maxsplit, context& ctx) const;
+  starlark_obj* split(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
   bool isalnum() const;
   bool isalpha() const;
   bool isdigit() const;

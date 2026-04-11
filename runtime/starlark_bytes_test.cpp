@@ -4097,6 +4097,7 @@ TEST(StarlarkBytes, SplitNoArguments) {
   test("abc", "[b\"abc\"]");
   test("  abc  ", "[b\"abc\"]");
   test("  a  b  c  ", "[b\"a\", b\"b\", b\"c\"]");
+  test("\x{e2}\x{80}\x{82}a\x{e2}\x{80}\x{82}b\x{e2}\x{80}\x{82}c\x{e2}\x{80}\x{82}", "[b\"\\xe2\\x80\\x82a\\xe2\\x80\\x82b\\xe2\\x80\\x82c\\xe2\\x80\\x82\"]");
 }
 
 TEST(StarlarkBytes, SplitNoneSeparatorArguments) {

@@ -17,12 +17,14 @@
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
+#include "runtime/starlark_list.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
+#include "unicode/utf8_reverse_reader.hpp"
 #include "unicode/word_break.hpp"
 
 using ::google::protobuf::Arena;
@@ -42,6 +44,7 @@ using ::starlark::ucd::to_title;
 using ::starlark::ucd::to_upper;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
+using ::starlark::unicode::utf8_reverse_reader;
 using ::starlark::unicode::word_break;
 
 namespace starlark {
@@ -903,6 +906,106 @@ starlark_obj* starlark_string::replace(std::string_view old, std::string_view ne
   return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
 }
 
+starlark_obj* starlark_string::rsplit(int64_t maxsplit, context& ctx) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  utf8_reverse_reader reader(value, false);
+  while (reader.pending() && is_space(reader.peek_code_point())) {
+    reader.read_code_point();
+  }
+  while (reader.pending() && maxsplit > 0) {
+    auto end = reader.pending();
+    while (reader.pending() && !is_space(reader.peek_code_point())) {
+      reader.read_code_point();
+    }
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), value.substr(reader.pending(), end - reader.pending())));
+    while (reader.pending() && is_space(reader.peek_code_point())) {
+      reader.read_code_point();
+    }
+    maxsplit--;
+  }
+  if (reader.pending()) {
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), value.substr(0, reader.pending())));
+  }
+  result->unsafe_reverse();
+  return result;
+}
+
+starlark_obj* starlark_string::rsplit(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const {
+  if (sep.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  std::string_view remaining_view = value;
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  while (maxsplit > 0) {
+    auto pos = remaining_view.rfind(sep);
+    if (pos == std::string_view::npos) {
+      break;
+    }
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), remaining_view.substr(pos + sep.length())));
+    remaining_view = remaining_view.substr(0, pos);
+    maxsplit--;
+  }
+  result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), remaining_view));
+  result->unsafe_reverse();
+  return result;
+}
+
+starlark_obj* starlark_string::split(int64_t maxsplit, context& ctx) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  utf8_reader reader(value, false, false);
+  while (reader.pending() && is_space(reader.peek_code_point())) {
+    reader.read_code_point();
+  }
+  while (reader.pending() && maxsplit > 0) {
+    auto start = reader.pos();
+    while (reader.pending() && !is_space(reader.peek_code_point())) {
+      reader.read_code_point();
+    }
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), value.substr(start, reader.pos() - start)));
+    while (reader.pending() && is_space(reader.peek_code_point())) {
+      reader.read_code_point();
+    }
+    maxsplit--;
+  }
+  if (reader.pending()) {
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), value.substr(reader.pos())));
+  }
+  return result;
+}
+
+starlark_obj* starlark_string::split(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const {
+  if (sep.empty()) {
+    error_callback.add_error(error_empty_separator());
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  std::string_view remaining_view = value;
+  if (maxsplit < 0) {
+    maxsplit = std::numeric_limits<int64_t>::max();
+  }
+  while (maxsplit > 0) {
+    auto pos = remaining_view.find(sep);
+    if (pos == std::string_view::npos) {
+      break;
+    }
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), remaining_view.substr(0, pos)));
+    remaining_view = remaining_view.substr(pos + sep.length());
+    maxsplit--;
+  }
+  result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), remaining_view));
+  return result;
+}
+
 bool starlark_string::isalnum() const {
   if (value.empty()) {
     return false;
@@ -1513,9 +1616,34 @@ starlark_obj* starlark_string_fn_rpartition(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "string.rsplit").ok() ||
+      !max_args(pos_args, error_callback, "rsplit", 2).ok()) {
+    return nullptr;
+  }
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+    int64_t maxsplit = -1;
+    if (pos_args.size() >= 2) {
+      auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+      if (!status_or_maxsplit.ok()) {
+        return nullptr;
+      }
+      maxsplit = *status_or_maxsplit;
+    }
+    return static_cast<starlark_string*>(this_obj)->rsplit(maxsplit, ctx);
+  }
+  auto sep = string_as_string(pos_args.front(), "rsplit", 1, error_callback);
+  if (!sep.ok()) {
+    return nullptr;
+  }
+  int64_t maxsplit = -1;
+  if (pos_args.size() >= 2) {
+    auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+    if (!status_or_maxsplit.ok()) {
+      return nullptr;
+    }
+    maxsplit = *status_or_maxsplit;
+  }
+  return static_cast<starlark_string*>(this_obj)->rsplit(*sep, maxsplit, ctx, error_callback);
 }
 
 starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1525,9 +1653,34 @@ starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_named_args(named_args, error_callback, "string.split").ok() ||
+      !max_args(pos_args, error_callback, "split", 2).ok()) {
+    return nullptr;
+  }
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+    int64_t maxsplit = -1;
+    if (pos_args.size() >= 2) {
+      auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+      if (!status_or_maxsplit.ok()) {
+        return nullptr;
+      }
+      maxsplit = *status_or_maxsplit;
+    }
+    return static_cast<starlark_string*>(this_obj)->split(maxsplit, ctx);
+  }
+  auto sep = string_as_string(pos_args.front(), "split", 1, error_callback);
+  if (!sep.ok()) {
+    return nullptr;
+  }
+  int64_t maxsplit = -1;
+  if (pos_args.size() >= 2) {
+    auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+    if (!status_or_maxsplit.ok()) {
+      return nullptr;
+    }
+    maxsplit = *status_or_maxsplit;
+  }
+  return static_cast<starlark_string*>(this_obj)->split(*sep, maxsplit, ctx, error_callback);
 }
 
 starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
