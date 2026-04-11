@@ -14,6 +14,10 @@ namespace unicode {
 
 utf8_reverse_reader::utf8_reverse_reader(string_view input, bool strict) : input(input), input_pos(input.size()), strict(strict) {}
 
+std::size_t utf8_reverse_reader::pos() const {
+  return input_pos;
+}
+
 std::size_t utf8_reverse_reader::pending() const {
   return input_pos;
 }

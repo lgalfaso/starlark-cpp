@@ -14,6 +14,7 @@ namespace unicode {
 class utf8_reverse_reader {
  public:
   explicit utf8_reverse_reader(std::string_view input, bool strict);
+  std::size_t pos() const;
   std::size_t pending() const;
   std::uint32_t peek_code_point();
   std::uint32_t read_code_point();

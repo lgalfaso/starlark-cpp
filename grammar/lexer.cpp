@@ -16,11 +16,12 @@
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
-using starlark::bigint::parse_number;
-using starlark::logging::LogLevel;
-using starlark::logging::Position;
-using starlark::logging::logger;
-using starlark::unicode::utf8_encode_code_point;
+using ::starlark::bigint::parse_number;
+using ::starlark::logging::LogLevel;
+using ::starlark::logging::Position;
+using ::starlark::logging::logger;
+using ::starlark::unicode::utf8_encode_code_point;
+using ::starlark::unicode::replacement_character_utf8;
 
 namespace starlark {
 namespace grammar {
@@ -577,9 +578,9 @@ void lexer::read_string() {
         break;
       default: {
         // Handle a literal replacement character.
-        if (source_code.capture("\xEF\xBF\xBD")) {
-          result += "\xEF\xBF\xBD";
-          last_begin_of_line += 2;
+        if (source_code.capture(replacement_character_utf8())) {
+          result += replacement_character_utf8();
+          last_begin_of_line += replacement_character_utf8().size() - 1;
           break;
         }
         // This is a lot of extra work to report the right column.

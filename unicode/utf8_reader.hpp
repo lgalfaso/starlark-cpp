@@ -18,6 +18,8 @@ bool is_surrogate(std::uint32_t code_point);
 
 bool is_utf8_continue(char input);
 
+std::string_view replacement_character_utf8();
+
 class utf8_reader {
  public:
   explicit utf8_reader(std::string_view input, bool strict, bool remove_bom);

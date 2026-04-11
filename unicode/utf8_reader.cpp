@@ -23,6 +23,10 @@ bool is_surrogate(std::uint32_t code_point) {
   return (0xD800 <= code_point) && (code_point <= 0xDFFF);
 }
 
+std::string_view replacement_character_utf8() {
+  return "\xEF\xBF\xBD";
+}
+
 const std::uint32_t utf8_reader::kReplacementCharacter;
 const std::uint32_t utf8_reader::kBomCharacter;
 const std::uint32_t utf8_reader::kMaxCodePoint;
