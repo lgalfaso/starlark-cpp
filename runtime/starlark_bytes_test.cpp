@@ -3679,6 +3679,7 @@ TEST(StarlarkBytes, StripNoArguments) {
   test("   abcdefghij  ", "abcdefghij", "   abcdefghij", "abcdefghij  ");
   test("  abcdefghij   ", "abcdefghij", "  abcdefghij", "abcdefghij   ");
   test("abcdefghij", "abcdefghij", "abcdefghij", "abcdefghij");
+  test("\x{E2}\x{80}\x{AF}abcdefghij\x{E2}\x{80}\x{AF}", "\x{E2}\x{80}\x{AF}abcdefghij\x{E2}\x{80}\x{AF}", "\x{E2}\x{80}\x{AF}abcdefghij\x{E2}\x{80}\x{AF}", "\x{E2}\x{80}\x{AF}abcdefghij\x{E2}\x{80}\x{AF}");
 }
 
 TEST(StarlarkBytes, StripOneArgument) {

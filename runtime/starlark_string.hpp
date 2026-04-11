@@ -51,6 +51,12 @@ class starlark_string : public starlark_obj {
   starlark_obj* rsplit(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
   starlark_obj* split(int64_t maxsplit, context& ctx) const;
   starlark_obj* split(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
+  starlark_obj* lstrip(context& ctx) const;
+  starlark_obj* lstrip(std::string_view cutset, context& ctx) const;
+  starlark_obj* rstrip(context& ctx) const;
+  starlark_obj* rstrip(std::string_view cutset, context& ctx) const;
+  starlark_obj* strip(context& ctx) const;
+  starlark_obj* strip(std::string_view cutset, context& ctx) const;
   bool isalnum() const;
   bool isalpha() const;
   bool isdigit() const;

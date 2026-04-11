@@ -6193,4 +6193,221 @@ TEST(StarlarkString, RsplitWithNamedArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, StripNoArguments) {
+  auto test = [](std::string_view element, std::string_view expected, std::string_view rexpected, std::string_view lexpected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    auto* method = str.dot("strip", ctx, error_callback);
+    auto* rmethod = str.dot("rstrip", ctx, error_callback);
+    auto* lmethod = str.dot("lstrip", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    ASSERT_NE(nullptr, rmethod);
+    ASSERT_NE(nullptr, lmethod);
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    auto* rresult = rmethod->call(pos_args, named_args, ctx, error_callback);
+    auto* lresult = lmethod->call(pos_args, named_args, ctx, error_callback);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+    ASSERT_NE(nullptr, result);
+    ASSERT_NE(nullptr, rresult);
+    ASSERT_NE(nullptr, rresult);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(rresult->type(), starlark_types::string_t);
+    EXPECT_EQ(lresult->type(), starlark_types::string_t);
+    EXPECT_EQ(result->as_string(), expected);
+    EXPECT_EQ(rresult->as_string(), rexpected);
+    EXPECT_EQ(lresult->as_string(), lexpected);
+  };
+
+  test("", "", "", "");
+  test(" ", "", "", "");
+  test(" \t", "", "", "");
+  test("  abc  ", "abc", "  abc", "abc  ");
+  test("   abcdefghij  ", "abcdefghij", "   abcdefghij", "abcdefghij  ");
+  test("  abcdefghij   ", "abcdefghij", "  abcdefghij", "abcdefghij   ");
+  test("abcdefghij", "abcdefghij", "abcdefghij", "abcdefghij");
+  test("\x{E2}\x{80}\x{AF}abcdefghij\x{E2}\x{80}\x{AF}", "abcdefghij", "\x{E2}\x{80}\x{AF}abcdefghij", "abcdefghij\x{E2}\x{80}\x{AF}");
+}
+
+TEST(StarlarkString, StripOneArgument) {
+  auto test = [](std::string_view element, std::string_view cutset, std::string_view expected, std::string_view rexpected, std::string_view lexpected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(cutset);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    auto* method = str.dot("strip", ctx, error_callback);
+    auto* rmethod = str.dot("rstrip", ctx, error_callback);
+    auto* lmethod = str.dot("lstrip", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    ASSERT_NE(nullptr, rmethod);
+    ASSERT_NE(nullptr, lmethod);
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    auto* rresult = rmethod->call(pos_args, named_args, ctx, error_callback);
+    auto* lresult = lmethod->call(pos_args, named_args, ctx, error_callback);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+    ASSERT_NE(nullptr, result);
+    ASSERT_NE(nullptr, rresult);
+    ASSERT_NE(nullptr, rresult);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(rresult->type(), starlark_types::string_t);
+    EXPECT_EQ(lresult->type(), starlark_types::string_t);
+    EXPECT_EQ(result->as_string(), expected);
+    EXPECT_EQ(rresult->as_string(), rexpected);
+    EXPECT_EQ(lresult->as_string(), lexpected);
+  };
+
+  test("", "", "", "", "");
+  test(" ", "", " ", " ", " ");
+  test(" \t ", " ", "\t", " \t", "\t ");
+  test("  abc  ", "x", "  abc  ", "  abc  ", "  abc  ");
+  test("xxabcxx", "x", "abc", "xxabc", "abcxx");
+  test("zyxabcdefghijzyx", "xyz", "abcdefghij", "zyxabcdefghij", "abcdefghijzyx");
+  test("abcdefghij", "xyz", "abcdefghij", "abcdefghij", "abcdefghij");
+  test("zzyyxx", "xyz", "", "", "");
+  // Invalid sequences will not be modified, even if the sequence is present in `cutset`.
+  test("\x{F0}", "\x{F0}", "\x{F0}", "\x{F0}", "\x{F0}");
+  // The sequence with the replacement character can be removed.
+  test("\x{EF}\x{BF}\x{BD}abc\x{EF}\x{BF}\x{BD}", "\x{EF}\x{BF}\x{BD}", "abc", "\x{EF}\x{BF}\x{BD}abc", "abc\x{EF}\x{BF}\x{BD}");
+}
+
+TEST(StarlarkString, StripWithCutsetAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("strip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: strip() argument 1 must be string, not bool");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RstripWithCutsetAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("rstrip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rstrip() argument 1 must be string, not bool");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, LstripWithCutsetAsBool) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("lstrip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: lstrip() argument 1 must be string, not bool");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, StripWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("cutset", ctx.zero());
+  auto* method = str.dot("strip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: strip() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RstripWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("cutset", ctx.zero());
+  auto* method = str.dot("rstrip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rstrip() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, LstripWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("cutset", ctx.zero());
+  auto* method = str.dot("lstrip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: lstrip() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 }  // namespace

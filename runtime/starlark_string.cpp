@@ -42,6 +42,7 @@ using ::starlark::ucd::is_space;
 using ::starlark::ucd::to_lower;
 using ::starlark::ucd::to_title;
 using ::starlark::ucd::to_upper;
+using ::starlark::unicode::replacement_character_utf8;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 using ::starlark::unicode::utf8_reverse_reader;
@@ -651,6 +652,48 @@ std::string to_title_string(std::string_view value, bool& found_cased) {
   return merge_parts(parts, code_points);
 }
 
+enum class strip_type {
+  kLeft,
+  kRight,
+  kBoth,
+};
+
+std::string_view strip_impl(std::string_view value, std::string_view cutset, strip_type stype) {
+  std::size_t start = 0;
+  if (stype == strip_type::kLeft || stype == strip_type::kBoth) {
+    utf8_reader reader(value, false, false);
+    while (reader.pending()) {
+      auto begin = reader.pos();
+      if ((reader.read_code_point() == utf8_reader::kReplacementCharacter) &&
+          (value.substr(begin, reader.pos() - begin) != replacement_character_utf8())) {
+        break;
+      }
+      auto end = reader.pos();
+      if (cutset.find(value.substr(begin, end - begin)) == std::string::npos) {
+        break;
+      }
+      start = end;
+    }
+  }
+  std::size_t count = value.size();
+  if (stype == strip_type::kRight || stype == strip_type::kBoth) {
+    utf8_reverse_reader reverse_reader(value, false);
+    while (reverse_reader.pos() > start) {
+      auto end = reverse_reader.pos();
+      if ((reverse_reader.read_code_point() == utf8_reader::kReplacementCharacter) &&
+          (value.substr(reverse_reader.pos(), end - reverse_reader.pos()) != replacement_character_utf8())) {
+        break;
+      }
+      auto begin = reverse_reader.pos();
+      if (cutset.find(value.substr(begin, end - begin)) == std::string::npos) {
+        break;
+      }
+      count = begin;
+    }
+  }
+  return value.substr(start, count - start);
+}
+
 }  // namespace
 
 starlark_obj* starlark_string::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -1004,6 +1047,46 @@ starlark_obj* starlark_string::split(std::string_view sep, int64_t maxsplit, con
   }
   result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), remaining_view));
   return result;
+}
+
+starlark_obj* starlark_string::lstrip(context& ctx) const {
+  utf8_reader reader(value, false, false);
+  while (reader.pending() && is_space(reader.peek_code_point())) {
+    reader.read_code_point();
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), value.substr(reader.pos()));
+}
+
+starlark_obj* starlark_string::lstrip(std::string_view cutset, context& ctx) const {
+  return Arena::Create<starlark_string>(&ctx.arena(), strip_impl(value, cutset, strip_type::kLeft));
+}
+
+starlark_obj* starlark_string::rstrip(context& ctx) const {
+  utf8_reverse_reader reader(value, false);
+  while (reader.pending() && is_space(reader.peek_code_point())) {
+    reader.read_code_point();
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), value.substr(0, reader.pos()));
+}
+
+starlark_obj* starlark_string::rstrip(std::string_view cutset, context& ctx) const {
+  return Arena::Create<starlark_string>(&ctx.arena(), strip_impl(value, cutset, strip_type::kRight));
+}
+
+starlark_obj* starlark_string::strip(context& ctx) const {
+  utf8_reader reader(value, false, false);
+  while (reader.pending() && is_space(reader.peek_code_point())) {
+    reader.read_code_point();
+  }
+  utf8_reverse_reader reverse_reader(value, false);
+  while (reverse_reader.pos() > reader.pos() && is_space(reverse_reader.peek_code_point())) {
+    reverse_reader.read_code_point();
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), value.substr(reader.pos(), reverse_reader.pos() - reader.pos()));
+}
+
+starlark_obj* starlark_string::strip(std::string_view cutset, context& ctx) const {
+  return Arena::Create<starlark_string>(&ctx.arena(), strip_impl(value, cutset, strip_type::kBoth));
 }
 
 bool starlark_string::isalnum() const {
@@ -1486,9 +1569,19 @@ starlark_obj* starlark_string_fn_lower(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_lstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "lstrip").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  if (pos_args.empty()) {
+    return static_cast<starlark_string*>(this_obj)->lstrip(ctx);
+  }
+  auto cutset = string_as_string(pos_args.front(), "lstrip", 1, error_callback);
+  if (!cutset.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->lstrip(*cutset, ctx);
 }
 
 starlark_obj* starlark_string_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1647,9 +1740,19 @@ starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "rstrip").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  if (pos_args.empty()) {
+    return static_cast<starlark_string*>(this_obj)->rstrip(ctx);
+  }
+  auto cutset = string_as_string(pos_args.front(), "rstrip", 1, error_callback);
+  if (!cutset.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->rstrip(*cutset, ctx);
 }
 
 starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1709,9 +1812,19 @@ starlark_obj* starlark_string_fn_startswith(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "strip").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  if (pos_args.empty()) {
+    return static_cast<starlark_string*>(this_obj)->strip(ctx);
+  }
+  auto cutset = string_as_string(pos_args.front(), "strip", 1, error_callback);
+  if (!cutset.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->strip(*cutset, ctx);
 }
 
 starlark_obj* starlark_string_fn_title(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
