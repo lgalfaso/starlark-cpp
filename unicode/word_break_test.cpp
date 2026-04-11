@@ -11,8 +11,10 @@
 #include <vector>
 
 #include "unicode/extract/extract.hpp"
+#include "unicode/ucd_code_points.hpp"
 #include "unicode/word_break.hpp"
 
+using ::starlark::ucd::word_break_type;
 using testing::IsEmpty;
 using testing::SizeIs;
 
