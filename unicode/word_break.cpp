@@ -2,6 +2,7 @@
 
 #include "unicode/word_break.hpp"
 
+#include <algorithm>
 #include <vector>
 
 #include "unicode/ucd_code_points.hpp"
