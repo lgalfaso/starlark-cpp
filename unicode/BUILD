@@ -89,6 +89,28 @@ cc_fuzz_test(
     ],
 )
 
+cc_library(
+    name = "utf8_reverse_reader",
+    srcs = ["utf8_reverse_reader.cpp"],
+    hdrs = ["utf8_reverse_reader.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":utf8_reader",
+        ":ucd",
+    ],
+)
+
+cc_test(
+    name = "utf8_reverse_reader_test",
+    size = "small",
+    srcs = ["utf8_reverse_reader_test.cpp"],
+    deps = [
+        ":encode",
+        ":utf8_reverse_reader",
+        "@googletest//:gtest_main",
+    ],
+)
+
 extract_ucd(
     name = "ucd_extract",
     output_cc = "ucd_code_points.cpp",

@@ -11,13 +11,9 @@ using std::string_view;
 namespace starlark {
 namespace unicode {
 
-namespace {
-
 inline bool is_utf8_continue(char input) {
   return (((unsigned char)input) & 0xc0) == 0x80;
 }
-
-}  // namespace
 
 bool is_in_range(std::uint32_t code_point) {
   return code_point <= utf8_reader::kMaxCodePoint;

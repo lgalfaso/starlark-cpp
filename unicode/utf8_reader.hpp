@@ -16,6 +16,8 @@ bool is_in_range(std::uint32_t code_point);
 
 bool is_surrogate(std::uint32_t code_point);
 
+bool is_utf8_continue(char input);
+
 class utf8_reader {
  public:
   explicit utf8_reader(std::string_view input, bool strict, bool remove_bom);
