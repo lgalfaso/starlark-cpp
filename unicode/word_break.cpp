@@ -33,7 +33,9 @@ void word_break(const std::vector<std::uint32_t>& code_points, std::vector<std::
       reduced_previous_previous_word_break = reduced_previous_word_break;
       reduced_previous_word_break = current_word_break;
     }
-    current_word_break = starlark::ucd::word_break(code_points[pos]);
+    if (pos < code_points.size()) {
+      current_word_break = starlark::ucd::word_break(code_points[pos]);
+    }
     previous_ri_count = ri_count;
     if (current_word_break == word_break_type::kRegional_Indicator) {
       ri_count += 1;

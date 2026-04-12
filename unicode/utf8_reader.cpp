@@ -11,7 +11,7 @@ using std::string_view;
 namespace starlark {
 namespace unicode {
 
-inline bool is_utf8_continue(char input) {
+bool is_utf8_continue(char input) {
   return (((unsigned char)input) & 0xc0) == 0x80;
 }
 
