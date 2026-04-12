@@ -1089,6 +1089,48 @@ starlark_obj* starlark_string::strip(std::string_view cutset, context& ctx) cons
   return Arena::Create<starlark_string>(&ctx.arena(), strip_impl(value, cutset, strip_type::kBoth));
 }
 
+starlark_obj* starlark_string::splitlines(bool keepends, context& ctx) const {
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  utf8_reader reader(value, false, false);
+  std::size_t begin = 0;
+  std::size_t end = 0;
+  std::string_view mirror = value;
+  while (reader.pending()) {
+    bool found_end = false;
+    auto candidate = reader.read_code_point();
+    switch (candidate) {
+      case '\n':
+      case '\v':
+      case '\f':
+      case 0x1c:
+      case 0x1d:
+      case 0x1e:
+      case 0x85:
+      case 0x2028:
+      case 0x2029:
+        found_end = true;
+        break;
+      case '\r':
+        // This case can be either "\r" or "\r\n".
+        reader.capture("\n");
+        found_end = true;
+        break;
+    }
+    if (found_end) {
+      if (keepends) {
+        end = reader.pos();
+      }
+      result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), mirror.substr(begin, end - begin)));
+      begin = reader.pos();
+    }
+    end = reader.pos();
+  }
+  if (begin != end) {
+    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), mirror.substr(begin, end - begin)));
+  }
+  return result;
+}
+
 bool starlark_string::isalnum() const {
   if (value.empty()) {
     return false;
@@ -1787,9 +1829,20 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "splitlines").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  bool keepends = false;
+  if (!pos_args.empty()) {
+    if (pos_args.front()->type() != starlark_types::bool_t) {
+      error_callback.add_error(error_argument_must_be_type("splitlines", 1, starlark_types::bool_t, pos_args.front()->type()));
+      return nullptr;
+    }
+    keepends = pos_args.front()->truthy();
+  }
+  return static_cast<starlark_string*>(this_obj)->splitlines(keepends, ctx);
 }
 
 starlark_obj* starlark_string_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

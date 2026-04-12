@@ -57,6 +57,7 @@ class starlark_string : public starlark_obj {
   starlark_obj* rstrip(std::string_view cutset, context& ctx) const;
   starlark_obj* strip(context& ctx) const;
   starlark_obj* strip(std::string_view cutset, context& ctx) const;
+  starlark_obj* splitlines(bool keepends, context& ctx) const;
   bool isalnum() const;
   bool isalpha() const;
   bool isdigit() const;

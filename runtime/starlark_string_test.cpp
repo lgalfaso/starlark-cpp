@@ -6410,4 +6410,130 @@ TEST(StarlarkString, LstripWithNamedArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
+TEST(StarlarkString, SplitlinesNoArguments) {
+  auto test = [](std::string_view element, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    auto* method = str.dot("splitlines", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::list_t);
+    EXPECT_EQ(result->repr(), expected);
+  };
+
+  test("", "[]");
+  test(" ", "[\" \"]");
+  test("abc", "[\"abc\"]");
+  test("ab\nc", "[\"ab\", \"c\"]");
+  test("\n\n", "[\"\", \"\"]");
+  test("abc\r\ndef\r\n", "[\"abc\", \"def\"]");
+}
+
+TEST(StarlarkString, SplitlinesOneArguments) {
+  auto test = [](std::string_view element, std::string_view expected, bool keepends) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(keepends ? ctx.true_value() : ctx.false_value());
+    auto* method = str.dot("splitlines", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::list_t);
+    EXPECT_EQ(result->repr(), expected);
+  };
+
+  test("", "[]", true);
+  test("", "[]", false);
+  test(" ", "[\" \"]", true);
+  test(" ", "[\" \"]", false);
+  test("abc", "[\"abc\"]", true);
+  test("abc", "[\"abc\"]", false);
+  test("ab\nc", "[\"ab\\n\", \"c\"]", true);
+  test("ab\nc", "[\"ab\", \"c\"]", false);
+  test("\n\n", "[\"\\n\", \"\\n\"]", true);
+  test("\n\n", "[\"\", \"\"]", false);
+  test("abc\r\ndef\r\n", "[\"abc\\r\\n\", \"def\\r\\n\"]", true);
+  test("abc\r\ndef\r\n", "[\"abc\", \"def\"]", false);
+}
+
+TEST(StarlarkString, SplitlinesWithKeependsAsNumber) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = str.dot("splitlines", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines() argument 1 must be bool, not int");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, SplitlinesWithTwoArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
+  pos_args.push_back(ctx.true_value());
+  auto* method = str.dot("splitlines", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines expected at most 1 argument, got 2");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, SplitlinesWithNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  named_args.insert("keepends", ctx.true_value());
+  auto* method = str.dot("splitlines", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines() takes no keyword arguments");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 }  // namespace
