@@ -145,12 +145,31 @@ TEST_F(FnTest, Call) {
   error_handler error_callback;
 
   EXPECT_CALL(*fn_mock, Call(testing::_, testing::_, testing::_, testing::_, testing::_))
-      .WillOnce(testing::Return(nullptr));
-  fn.call({}, {}, ctx, error_callback);
-  // TODO(lmirelmann): Check the return value.
+      .WillOnce(testing::Return(ctx.one()));
+  auto* result = fn.call({}, {}, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ("1", result->str());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-// TODO(lmirelmann): Check the error case.
+starlark_obj* fn_error(starlark_obj* this_obj, const starlark_obj::pos_args_t&, const starlark_obj::named_args_t&, context&, error_fn& error_callback) {
+  error_callback.add_error("Error message");
+  return nullptr;
+}
+
+TEST_F(FnTest, CallWithError) {
+  starlark_built_in_function fn(nullptr, base_fn, "fn_name");
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  EXPECT_CALL(*fn_mock, Call(testing::_, testing::_, testing::_, testing::_, testing::_))
+      .WillOnce(testing::Invoke(fn_error));
+  auto* result = fn.call({}, {}, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "Error message");
+}
 
 TEST(StarlarkAbs, Numeric) {
   auto itest = [](auto&& value, std::string_view result) {
