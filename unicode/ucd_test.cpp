@@ -22,7 +22,7 @@ const char* XID_Continue = "XID_Continue";
 const char* White_Space = "White_Space";
 
 void read_code_points(const char* file,
-                     std::set<std::uint32_t>& set,
+                     std::set<char32_t>& set,
                      const char* category) {
   FILE* fp = fopen(file, "r");
   char* line = nullptr;
@@ -34,7 +34,7 @@ void read_code_points(const char* file,
   std::string cat = "; ";
   cat += category;
   cat += " ";
-  std::set<std::pair<std::uint32_t, std::uint32_t>> ranges;
+  std::set<std::pair<char32_t, char32_t>> ranges;
   while ((getline(&line, &len, fp)) != -1) {
     if (strstr(line, cat.c_str()) != nullptr) {
       int start, end;
@@ -52,7 +52,7 @@ void read_code_points(const char* file,
   }
 
   for (const auto& cps : ranges) {
-    for (std::uint32_t cp = cps.first; cp <= cps.second; ++cp) {
+    for (char32_t cp = cps.first; cp <= cps.second; ++cp) {
       set.insert(cp);
     }
   }
@@ -65,7 +65,7 @@ TEST(UcdTest, IsXIdStart) {
   ASSERT_THAT(argv, SizeIs(4));
 
   std::string path = argv[1];
-  std::set<std::uint32_t> all_cps;
+  std::set<char32_t> all_cps;
   read_code_points(path.c_str(), all_cps, XID_Start);
 
   for (int i = 0; i <= max_unicode; ++i) {
@@ -78,7 +78,7 @@ TEST(UcdTest, IsXIdContinue) {
   ASSERT_THAT(argv, SizeIs(4));
 
   std::string path = argv[1];
-  std::set<std::uint32_t> all_cps;
+  std::set<char32_t> all_cps;
   read_code_points(path.c_str(), all_cps, XID_Continue);
 
   for (int i = 0; i <= max_unicode; ++i) {
@@ -91,7 +91,7 @@ TEST(UcdTest, IsSpace) {
   ASSERT_THAT(argv, SizeIs(4));
 
   std::string path = argv[2];
-  std::set<std::uint32_t> all_cps;
+  std::set<char32_t> all_cps;
   read_code_points(path.c_str(), all_cps, White_Space);
 
   for (int i = 0; i <= max_unicode; ++i) {
@@ -108,9 +108,9 @@ TEST(UcdTest, WordBreakType) {
   ASSERT_THAT(argv, SizeIs(4));
 
   std::string path = argv[3];
-  std::map<std::pair<std::uint32_t, std::uint32_t>, std::string> word_break;
+  std::map<std::pair<char32_t, char32_t>, std::string> word_break;
   starlark::ucd::read_word_break(path.c_str(), word_break);
-  std::map<std::uint32_t, starlark::ucd::word_break_type> expected;
+  std::map<char32_t, starlark::ucd::word_break_type> expected;
   for (std::size_t i = 0; i <= max_unicode; ++i) {
     expected[i] = starlark::ucd::word_break_type::kOther;
   }

@@ -16,11 +16,11 @@ class utf8_reverse_reader {
   explicit utf8_reverse_reader(std::string_view input, bool strict);
   std::size_t pos() const;
   std::size_t pending() const;
-  std::uint32_t peek_code_point();
-  std::uint32_t read_code_point();
+  char32_t peek_code_point();
+  char32_t read_code_point();
 
  private:
-  std::uint32_t read_code_point(bool move_forward);
+  char32_t read_code_point(bool move_forward);
 
   std::string_view input;
   std::size_t input_pos;

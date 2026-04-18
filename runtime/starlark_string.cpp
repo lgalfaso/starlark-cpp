@@ -558,7 +558,7 @@ struct case_convertion {
   std::size_t pos;
 };
 
-bool test_final_sigma_before(const std::vector<std::uint32_t>& code_points, std::size_t start) {
+bool test_final_sigma_before(const std::vector<char32_t>& code_points, std::size_t start) {
   for (auto pos = start; pos > 0; --pos) {
     if (is_Cased(code_points[pos - 1])) {
       return true;
@@ -570,7 +570,7 @@ bool test_final_sigma_before(const std::vector<std::uint32_t>& code_points, std:
   return false;
 }
 
-bool test_final_sigma_after(const std::vector<std::uint32_t>& code_points, std::size_t start) {
+bool test_final_sigma_after(const std::vector<char32_t>& code_points, std::size_t start) {
   for (auto pos = start + 1; pos < code_points.size(); ++pos) {
     if (is_Cased(code_points[pos])) {
       return false;
@@ -582,7 +582,7 @@ bool test_final_sigma_after(const std::vector<std::uint32_t>& code_points, std::
   return true;
 }
 
-std::string merge_parts(const std::vector<case_convertion>& parts, const std::vector<std::uint32_t>& code_points) {
+std::string merge_parts(const std::vector<case_convertion>& parts, const std::vector<char32_t>& code_points) {
   std::string result;
   for (const auto& part : parts) {
     result += part.prefix;
@@ -599,7 +599,7 @@ std::string merge_parts(const std::vector<case_convertion>& parts, const std::ve
 }
 
 std::string to_title_string(std::string_view value, bool& found_cased) {
-  std::vector<std::uint32_t> code_points;
+  std::vector<char32_t> code_points;
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
     auto code_point = reader.read_code_point();
@@ -781,7 +781,7 @@ int64_t starlark_string::count(std::string_view sub, int64_t start, int64_t end)
   return count;
 }
 
-bool starlark_string::endswith(std::vector<std::string_view> ends, int64_t start, int64_t end) const {
+bool starlark_string::endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const {
   if (start < 0) {
     start = std::max<int64_t>(start + value.size(), 0);
   }
@@ -1228,7 +1228,7 @@ bool starlark_string::isupper() const {
 
 starlark_obj* starlark_string::lower(context& ctx) {
   std::vector<case_convertion> parts;
-  std::vector<std::uint32_t> code_points;
+  std::vector<char32_t> code_points;
   utf8_reader reader(value, false, false);
   std::size_t pos = 0;
   parts.emplace_back();
@@ -1278,7 +1278,7 @@ starlark_obj* starlark_string::upper(context& ctx) {
 
 starlark_obj* starlark_string::capitalize(context& ctx) {
   std::vector<case_convertion> parts;
-  std::vector<std::uint32_t> code_points;
+  std::vector<char32_t> code_points;
   utf8_reader reader(value, false, false);
   std::size_t pos = 0;
   parts.emplace_back();

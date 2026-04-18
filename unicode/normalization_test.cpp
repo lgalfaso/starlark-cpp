@@ -27,16 +27,16 @@ using testing::SizeIs;
 namespace {
 
 struct test_case {
-  std::vector<std::uint32_t> source;
-  std::vector<std::uint32_t> NFC;
-  std::vector<std::uint32_t> NFD;
-  std::vector<std::uint32_t> NFKC;
-  std::vector<std::uint32_t> NFKD;
+  std::vector<char32_t> source;
+  std::vector<char32_t> NFC;
+  std::vector<char32_t> NFD;
+  std::vector<char32_t> NFKC;
+  std::vector<char32_t> NFKD;
   std::string line;
   int part;
 };
 
-void read_column(char** line, std::vector<std::uint32_t>& column) {
+void read_column(char** line, std::vector<char32_t>& column) {
   int code, length;
   do {
     int count = std::sscanf(*line, "%x%n", &code, &length);
@@ -84,7 +84,7 @@ std::vector<test_case> read_file(const char* file) {
   return result;
 }
 
-std::string utf8_encode(const std::vector<std::uint32_t>& code_points) {
+std::string utf8_encode(const std::vector<char32_t>& code_points) {
   std::string result;
   for (auto c : code_points) {
     utf8_encode_code_point(c, result, true, false);
@@ -93,10 +93,10 @@ std::string utf8_encode(const std::vector<std::uint32_t>& code_points) {
 }
 
 TEST(Normalization, Empty) {
-  EXPECT_EQ(std::vector<std::uint32_t>{}, to_nfc_x({}));
-  EXPECT_EQ(std::vector<std::uint32_t>{}, to_nfd_x({}));
-  EXPECT_EQ(std::vector<std::uint32_t>{}, to_nfkc_x({}));
-  EXPECT_EQ(std::vector<std::uint32_t>{}, to_nfkd_x({}));
+  EXPECT_EQ(std::vector<char32_t>{}, to_nfc_x({}));
+  EXPECT_EQ(std::vector<char32_t>{}, to_nfd_x({}));
+  EXPECT_EQ(std::vector<char32_t>{}, to_nfkc_x({}));
+  EXPECT_EQ(std::vector<char32_t>{}, to_nfkd_x({}));
 }
 
 TEST(Normalization, UTF8) {
@@ -182,13 +182,13 @@ TEST(Normalization, UCD) {
   }
 
   // Check all assigned code points not in Part 1.
-  for (std::uint32_t i = 0; i <= 0x10FFFF; ++i) {
+  for (char32_t i = 0; i <= 0x10FFFF; ++i) {
     if (is_assigned(i) && !part1[i]) {
-      std::vector<std::uint32_t> source = {i};
-      EXPECT_EQ(source, to_nfc_x(source)) << "Source: " << i;
-      EXPECT_EQ(source, to_nfd_x(source)) << "Source: " << i;
-      EXPECT_EQ(source, to_nfkc_x(source)) << "Source: " << i;
-      EXPECT_EQ(source, to_nfkd_x(source)) << "Source: " << i;
+      std::vector<char32_t> source = {i};
+      EXPECT_EQ(source, to_nfc_x(source));
+      EXPECT_EQ(source, to_nfd_x(source));
+      EXPECT_EQ(source, to_nfkc_x(source));
+      EXPECT_EQ(source, to_nfkd_x(source));
     }
   }
 }

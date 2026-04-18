@@ -54,7 +54,7 @@ std::vector<std::vector<std::string>> read_file(const char* file) {
 
 namespace {
 
-std::uint32_t parse_code_point(const std::string& input) {
+char32_t parse_code_point(const std::string& input) {
   int code_point;
   int count = std::sscanf(input.c_str(), "%x", &code_point);
   if (count != 1) {
@@ -63,7 +63,7 @@ std::uint32_t parse_code_point(const std::string& input) {
   return code_point;
 }
 
-std::pair<std::uint32_t, std::uint32_t> parse_code_point_or_range(const std::string& input) {
+std::pair<char32_t, char32_t> parse_code_point_or_range(const std::string& input) {
   int start, end;
   int count = std::sscanf(input.c_str(), "%x..%x", &start, &end);
   if (count == 0) {
@@ -75,7 +75,7 @@ std::pair<std::uint32_t, std::uint32_t> parse_code_point_or_range(const std::str
   return std::make_pair(start, end);
 }
 
-void parse_code_point_sequence(std::vector<std::uint32_t>& code_points, const std::string& input) {
+void parse_code_point_sequence(std::vector<char32_t>& code_points, const std::string& input) {
   auto copy = input;
   while (!copy.empty()) {
     code_points.push_back(parse_code_point(copy));
@@ -88,7 +88,7 @@ void parse_code_point_sequence(std::vector<std::uint32_t>& code_points, const st
   }
 }
 
-std::uint32_t parse_decimal_value(const std::string& input) {
+int parse_decimal_value(const std::string& input) {
   int code_point;
   int count = std::sscanf(input.c_str(), "%d", &code_point);
   if (count != 1) {
@@ -99,8 +99,7 @@ std::uint32_t parse_decimal_value(const std::string& input) {
 
 }  // namespace
 
-void read_raw_code_points(const char* file,
-                          std::set<std::uint32_t>& set) {
+void read_raw_code_points(const char* file, std::set<char32_t>& set) {
   auto content = read_file(file);
   for (const auto& entry : content) {
     if (entry.size() != 1) {
@@ -111,8 +110,7 @@ void read_raw_code_points(const char* file,
 }
 
 void read_all_code_points(const char* file,
-    std::map<std::string,
-             std::set<std::pair<std::uint32_t, std::uint32_t>>>& set,
+    std::map<std::string, std::set<std::pair<char32_t, char32_t>>>& set,
     const std::set<std::string>& properties) {
   auto content = read_file(file);
   for (const auto& entry : content) {
@@ -132,15 +130,15 @@ void read_all_code_points(const char* file,
   }
 }
 
-void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_record>& unicode_data) {
+void read_unicode_data(const char* file, std::map<char32_t, unicode_data_record>& unicode_data) {
   auto content = read_file(file);
-  std::uint32_t previous_code_point = 0;
+  char32_t previous_code_point = 0;
   for (auto& entry : content) {
     if (entry.size() < 15) {
       exit(1);
     }
-    std::uint32_t code_point = parse_code_point(entry[0]);
-    std::uint32_t ccc = parse_decimal_value(entry[3]);
+    char32_t code_point = parse_code_point(entry[0]);
+    int ccc = parse_decimal_value(entry[3]);
 
     auto character_decomposition = entry[5];
     bool canonical = character_decomposition.empty() || character_decomposition[0] != '<';
@@ -148,19 +146,19 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
       // If there is a tag, then remove it.
       character_decomposition.erase(0, character_decomposition.find(" ") + 1);
     }
-    std::vector<std::uint32_t> decomposition;
+    std::vector<char32_t> decomposition;
     parse_code_point_sequence(decomposition, character_decomposition);
 
     bool is_digit = !entry[6].empty() || !entry[7].empty();
-    std::uint32_t uppercase_mapping = 0x110000;
+    char32_t uppercase_mapping = 0x110000;
     if (!entry[12].empty()) {
       uppercase_mapping = parse_code_point(entry[12]);
     }
-    std::uint32_t lowercase_mapping = 0x110000;
+    char32_t lowercase_mapping = 0x110000;
     if (!entry[13].empty()) {
       lowercase_mapping = parse_code_point(entry[13]);
     }
-    std::uint32_t titlecase_mapping = 0x110000;
+    char32_t titlecase_mapping = 0x110000;
     if (!entry[14].empty()) {
       titlecase_mapping = parse_code_point(entry[14]);
     }
@@ -202,22 +200,22 @@ void read_unicode_data(const char* file, std::map<std::uint32_t, unicode_data_re
   }
 }
 
-void read_special_casing(const char* file, std::map<std::uint32_t, special_casing_record>& special_casing) {
+void read_special_casing(const char* file, std::map<char32_t, special_casing_record>& special_casing) {
   auto content = read_file(file);
   for (auto& entry : content) {
     if (entry.size() < 5) {
       exit(1);
     }
-    std::uint32_t code_point = parse_code_point(entry[0]);
-    std::vector<std::uint32_t> lower;
+    char32_t code_point = parse_code_point(entry[0]);
+    std::vector<char32_t> lower;
     auto element = entry[1];
     element.erase(0, element.find_first_not_of(" "));
     parse_code_point_sequence(lower, element);
-    std::vector<std::uint32_t> title;
+    std::vector<char32_t> title;
     element = entry[2];
     element.erase(0, element.find_first_not_of(" "));
     parse_code_point_sequence(title, element);
-    std::vector<std::uint32_t> upper;
+    std::vector<char32_t> upper;
     element = entry[3];
     element.erase(0, element.find_first_not_of(" "));
     parse_code_point_sequence(upper, element);
@@ -239,7 +237,7 @@ void read_special_casing(const char* file, std::map<std::uint32_t, special_casin
   }
 }
 
-void read_word_break(const char* file, std::map<std::pair<std::uint32_t, std::uint32_t>, std::string>& word_break) {
+void read_word_break(const char* file, std::map<std::pair<char32_t, char32_t>, std::string>& word_break) {
   auto content = read_file(file);
   for (const auto& entry : content) {
     if (entry.size() < 2) {

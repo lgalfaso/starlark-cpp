@@ -58,37 +58,37 @@ enum class word_break_type {
   kOther,
 };
 
-bool is_assigned(std::uint32_t code_point);
+bool is_assigned(char32_t code_point);
 
-bool is_printable(std::uint32_t code_point);
+bool is_printable(char32_t code_point);
 
-bool is_compatibility_decomposition(std::uint32_t code_point);
+bool is_compatibility_decomposition(char32_t code_point);
 
-bool is_alpha(std::uint32_t code_point);
+bool is_alpha(char32_t code_point);
 
-bool is_digit(std::uint32_t code_point);
+bool is_digit(char32_t code_point);
 
-bool is_numeric(std::uint32_t code_point);
+bool is_numeric(char32_t code_point);
 
-bool is_space(std::uint32_t code_point);
+bool is_space(char32_t code_point);
 
-std::span<const std::uint32_t> decomposition(std::uint32_t code_point);
+std::span<const char32_t> decomposition(char32_t code_point);
 
-int ccc(std::uint32_t code_point);
+int ccc(char32_t code_point);
 
-std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs);
+std::optional<char32_t> canonical_composition(char32_t lhs, char32_t rhs);
 
 // TODO(lmirelmann): Should be possible to output the encoded bytes un a string_view. This will
 // make the execution of whomever need this much faster as it would not need to re-encode things
-// multiple times. It hsould also sabe a few bytes as keeping the code points takes more space
+// multiple times. It should also sabe a few bytes as keeping the code points takes more space
 // than keeping the encoded bytes.
-std::span<const std::uint32_t> to_upper(std::uint32_t code_point);
+std::span<const char32_t> to_upper(char32_t code_point);
 
-std::span<const std::uint32_t> to_title(std::uint32_t code_point);
+std::span<const char32_t> to_title(char32_t code_point);
 
-std::pair<std::span<const std::uint32_t>, std::optional<std::span<const std::uint32_t>>> to_lower(std::uint32_t code_point);
+std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>> to_lower(char32_t code_point);
 
-word_break_type word_break(std::uint32_t code_point);
+word_break_type word_break(char32_t code_point);
 
 )CPP";
 
@@ -135,7 +135,7 @@ std::set<std::string> numeric_properties = {
 
 #define FWRITE(STR, OUTPUT) fwrite(STR, sizeof(char), std::strlen(STR), OUTPUT)
 
-void print_in_multiple_lines(const char* characters, int& count, uint32_t to_print, FILE* output) {
+void print_in_multiple_lines(const char* characters, int& count, int to_print, FILE* output) {
   while (to_print != 0) {
     if (count % CODEPOINTS_PER_LINE == 0) {
       if (count != 0) {
@@ -143,7 +143,7 @@ void print_in_multiple_lines(const char* characters, int& count, uint32_t to_pri
       }
       FWRITE("    \"", output);
     }
-    uint32_t will_print = std::min<uint32_t>(CODEPOINTS_PER_LINE - (count % CODEPOINTS_PER_LINE), to_print);
+    int will_print = std::min<int>(CODEPOINTS_PER_LINE - (count % CODEPOINTS_PER_LINE), to_print);
     fwrite(characters, sizeof(char), will_print, output);
     count += will_print;
     to_print -= will_print;
@@ -152,25 +152,25 @@ void print_in_multiple_lines(const char* characters, int& count, uint32_t to_pri
 
 void print_code_points(
       FILE* output,
-      const std::set<std::pair<std::uint32_t, std::uint32_t>>& set,
+      const std::set<std::pair<char32_t, char32_t>>& set,
                       const std::string& fn) {
   if (set.size() == 0) {
     fprintf(output,
-            "bool %s(std::uint32_t code_point) {\n"
+            "bool %s(char32_t code_point) {\n"
             "  return false;\n"
             "}\n\n",
             fn.c_str());
     return;
   }
 
-  std::vector<std::vector<std::pair<std::uint32_t, std::uint32_t>>> blocks;
+  std::vector<std::vector<std::pair<char32_t, char32_t>>> blocks;
   {
     // Split into chunks. Each chunk will be a single bitset.
     // There are some oportunities to tweak this number to balance the binary size and speed.
     constexpr int MAX_GAP_SIZE = (1 << 16) - 1;
 
     bool create_new_block = true;
-    std::uint32_t previous_max = 0;
+    char32_t previous_max = 0;
     for (const auto& cps : set) {
       if (create_new_block ||
           cps.first - previous_max > MAX_GAP_SIZE ||
@@ -195,7 +195,7 @@ void print_code_points(
       }
       fprintf(output, "constexpr const char* %s_bitset_%lu =\n", fn.c_str(), pos);
       int count = 0;
-      std::uint32_t previous_min = mini_block.back().second + 1;
+      char32_t previous_min = mini_block.back().second + 1;
       for (auto it = mini_block.rbegin(); it < mini_block.rend(); ++it) {
         auto [min_cp, max_cp] = *it;
         print_in_multiple_lines(zeros_string.c_str(), count, previous_min - max_cp - 1, output);
@@ -207,7 +207,7 @@ void print_code_points(
   }
   {
     // Print the functions that check for the code points.
-    fprintf(output, "bool %s(std::uint32_t code_point) {\n", fn.c_str());
+    fprintf(output, "bool %s(char32_t code_point) {\n", fn.c_str());
     bool add_blank_line = false;
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
@@ -244,10 +244,10 @@ void print_code_points(
   }
 }
 
-void print_decomposition(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  FWRITE("std::span<const std::uint32_t> decomposition(std::uint32_t code_point) {\n", output);
-  std::map<std::uint32_t, std::uint32_t> entries;
-  std::vector<std::uint32_t> elements;
+void print_decomposition(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  FWRITE("std::span<const char32_t> decomposition(char32_t code_point) {\n", output);
+  std::map<char32_t, char32_t> entries;
+  std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
     const auto& dc = entry.second.character_decomposition_mapping;
     if (dc.size() != 0) {
@@ -257,7 +257,7 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t, starlark::u
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_dc_index = {", entries.size());
+  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_dc_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -267,7 +267,7 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t, starlark::u
     ++pos;
   }
   FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_dc{", elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_dc{", elements.size());
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
@@ -283,21 +283,21 @@ void print_decomposition(FILE* output, const std::map<std::uint32_t, starlark::u
   FWRITE("    if (dc_candidate != all_dc_index.begin()) {\n", output);
   FWRITE("      begin = (--dc_candidate)->second;\n", output);
   FWRITE("    }\n", output);
-  FWRITE("    return std::span<const std::uint32_t>(all_dc).subspan(begin, end - begin);\n", output);
+  FWRITE("    return std::span<const char32_t>(all_dc).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return std::span<const std::uint32_t>{};\n", output);
+  FWRITE("  return std::span<const char32_t>{};\n", output);
   FWRITE("}\n\n", output);
 }
 
-void print_ccc(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  FWRITE("int ccc(std::uint32_t code_point) {\n", output);
-  std::map<std::uint32_t, int> entries;
+void print_ccc(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  FWRITE("int ccc(char32_t code_point) {\n", output);
+  std::map<char32_t, int> entries;
   for (const auto& entry : unicode_data) {
     if (entry.second.canonical_combining_class != 0) {
       entries[entry.first] = entry.second.canonical_combining_class;
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, int, %zu> all_ccc = {", entries.size());
+  fprintf(output, "  static constexpr cnt::flat_map<char32_t, int, %zu> all_ccc = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -314,10 +314,10 @@ void print_ccc(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicod
   FWRITE("}\n\n", output);
 }
 
-void print_canonical_composition(FILE* output, const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
-               const std::set<std::uint32_t>& comp_exclusions) {
-  FWRITE("std::optional<std::uint32_t> canonical_composition(std::uint32_t lhs, std::uint32_t rhs) {\n", output);
-  std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> entries;
+void print_canonical_composition(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
+               const std::set<char32_t>& comp_exclusions) {
+  FWRITE("std::optional<char32_t> canonical_composition(char32_t lhs, char32_t rhs) {\n", output);
+  std::map<std::pair<char32_t, char32_t>, char32_t> entries;
   for (const auto& entry : unicode_data) {
     if (entry.second.canonical_combining_class == 0 && entry.second.canonical_character_decomposition_mapping && !comp_exclusions.contains(entry.first)) {
       auto& cc = entry.second.character_decomposition_mapping;
@@ -334,7 +334,7 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t, sta
       entries[std::make_pair(cc[0], cc[1])] = entry.first;
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t, %zu> all_cc = {", entries.size());
+  fprintf(output, "  static constexpr cnt::flat_map<std::pair<char32_t, char32_t>, char32_t, %zu> all_cc = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -352,12 +352,12 @@ void print_canonical_composition(FILE* output, const std::map<std::uint32_t, sta
 }
 
 void print_to_upper(FILE* output,
-                    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
-                    const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::span<const std::uint32_t> to_upper(std::uint32_t code_point) {\n", output);
-  FWRITE("  static constexpr std::array<std::uint32_t, 1> default_value{0x110000};\n", output);
-  std::map<std::uint32_t, std::uint32_t> entries;
-  std::vector<std::uint32_t> elements;
+                    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
+                    const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
+  FWRITE("std::span<const char32_t> to_upper(char32_t code_point) {\n", output);
+  FWRITE("  static constexpr std::array<char32_t, 1> default_value{0x110000};\n", output);
+  std::map<char32_t, char32_t> entries;
+  std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -391,7 +391,7 @@ void print_to_upper(FILE* output,
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_upper_index = {", entries.size());
+  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_upper_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -401,7 +401,7 @@ void print_to_upper(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_upper{", elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_upper{", elements.size());
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
@@ -417,19 +417,19 @@ void print_to_upper(FILE* output,
   FWRITE("    if (upper_candidate != all_upper_index.begin()) {\n", output);
   FWRITE("      begin = (--upper_candidate)->second;\n", output);
   FWRITE("    }\n", output);
-  FWRITE("    return std::span<const std::uint32_t>(all_upper).subspan(begin, end - begin);\n", output);
+  FWRITE("    return std::span<const char32_t>(all_upper).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return std::span<const std::uint32_t>(default_value);\n", output);
+  FWRITE("  return std::span<const char32_t>(default_value);\n", output);
   FWRITE("}\n\n", output);
 }
 
 void print_to_title(FILE* output,
-                    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
-                    const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::span<const std::uint32_t> to_title(std::uint32_t code_point) {\n", output);
-  FWRITE("  static constexpr std::array<std::uint32_t, 1> default_value{0x110000};\n", output);
-  std::map<std::uint32_t, std::uint32_t> entries;
-  std::vector<std::uint32_t> elements;
+                    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
+                    const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
+  FWRITE("std::span<const char32_t> to_title(char32_t code_point) {\n", output);
+  FWRITE("  static constexpr std::array<char32_t, 1> default_value{0x110000};\n", output);
+  std::map<char32_t, char32_t> entries;
+  std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -463,7 +463,7 @@ void print_to_title(FILE* output,
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_title_index = {", entries.size());
+  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_title_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -473,7 +473,7 @@ void print_to_title(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_title{", elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_title{", elements.size());
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
@@ -489,21 +489,21 @@ void print_to_title(FILE* output,
   FWRITE("    if (title_candidate != all_title_index.begin()) {\n", output);
   FWRITE("      begin = (--title_candidate)->second;\n", output);
   FWRITE("    }\n", output);
-  FWRITE("    return std::span<const std::uint32_t>(all_title).subspan(begin, end - begin);\n", output);
+  FWRITE("    return std::span<const char32_t>(all_title).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return std::span<const std::uint32_t>(default_value);\n", output);
+  FWRITE("  return std::span<const char32_t>(default_value);\n", output);
   FWRITE("}\n\n", output);
 }
 
 void print_to_lower(FILE* output,
-                    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data,
-                    const std::map<std::uint32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::pair<std::span<const std::uint32_t>, std::optional<std::span<const std::uint32_t>>> to_lower(std::uint32_t code_point) {\n", output);
-  FWRITE("  static constexpr std::array<std::uint32_t, 1> default_value{0x110000};\n", output);
-  std::map<std::uint32_t, std::uint32_t> entries;
-  std::vector<std::uint32_t> elements;
-  std::map<std::uint32_t, std::uint32_t> conditional_entries;
-  std::vector<std::uint32_t> conditional_elements;
+                    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
+                    const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
+  FWRITE("std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>> to_lower(char32_t code_point) {\n", output);
+  FWRITE("  static constexpr std::array<char32_t, 1> default_value{0x110000};\n", output);
+  std::map<char32_t, char32_t> entries;
+  std::vector<char32_t> elements;
+  std::map<char32_t, char32_t> conditional_entries;
+  std::vector<char32_t> conditional_elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -551,7 +551,7 @@ void print_to_lower(FILE* output,
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> all_lower_index = {", entries.size());
+  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_lower_index = {", entries.size());
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
@@ -561,7 +561,7 @@ void print_to_lower(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> all_lower{", elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_lower{", elements.size());
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
@@ -572,7 +572,7 @@ void print_to_lower(FILE* output,
   }
   FWRITE("\n  };\n", output);
 
-  fprintf(output, "  static constexpr cnt::flat_map<std::uint32_t, std::uint32_t, %zu> conditional_all_lower_index = {", conditional_entries.size());
+  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> conditional_all_lower_index = {", conditional_entries.size());
   pos = 0;
   for (const auto& entry : conditional_entries) {
     if (pos % 6 == 0) {
@@ -582,7 +582,7 @@ void print_to_lower(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<std::uint32_t, %zu> conditional_all_lower{", conditional_elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> conditional_all_lower{", conditional_elements.size());
   pos = 0;
   for (const auto& element : conditional_elements) {
     if (pos % 12 == 0) {
@@ -599,7 +599,7 @@ void print_to_lower(FILE* output,
   FWRITE("    if (lower_candidate != all_lower_index.begin()) {\n", output);
   FWRITE("      begin = (--lower_candidate)->second;\n", output);
   FWRITE("    }\n", output);
-  FWRITE("    auto entries = std::span<const std::uint32_t>(all_lower).subspan(begin, end - begin);\n", output);
+  FWRITE("    auto entries = std::span<const char32_t>(all_lower).subspan(begin, end - begin);\n", output);
   FWRITE("    if (auto conditional_lower_candidate = conditional_all_lower_index.find(code_point); conditional_lower_candidate != conditional_all_lower_index.end()) {\n", output);
 
   FWRITE("      std::size_t conditional_begin = 0;\n", output);
@@ -607,21 +607,21 @@ void print_to_lower(FILE* output,
   FWRITE("      if (conditional_lower_candidate != conditional_all_lower_index.begin()) {\n", output);
   FWRITE("        conditional_begin = (--conditional_lower_candidate)->second;\n", output);
   FWRITE("      }\n", output);
-  FWRITE("      auto conditional_entries = std::span<const std::uint32_t>(conditional_all_lower).subspan(conditional_begin, conditional_end - conditional_begin);\n", output);
-  FWRITE("      return std::pair<std::span<const uint32_t>, std::optional<std::span<const std::uint32_t>>>(entries, conditional_entries);\n", output);
+  FWRITE("      auto conditional_entries = std::span<const char32_t>(conditional_all_lower).subspan(conditional_begin, conditional_end - conditional_begin);\n", output);
+  FWRITE("      return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, conditional_entries);\n", output);
 
   FWRITE("    }\n", output);
-  FWRITE("    return std::pair<std::span<const uint32_t>, std::optional<std::span<const std::uint32_t>>>(entries, {});\n", output);
+  FWRITE("    return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, {});\n", output);
   FWRITE("  }\n", output);
-  FWRITE("  return std::pair<std::span<const uint32_t>, std::optional<std::span<const std::uint32_t>>>(default_value, {});\n", output);
+  FWRITE("  return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(default_value, {});\n", output);
   FWRITE("}\n\n", output);
 }
 
 
 void print_word_break(FILE* output,
-                      const std::map<std::pair<std::uint32_t, std::uint32_t>, std::string>& word_break) {
-  FWRITE("word_break_type word_break(std::uint32_t code_point) {\n", output);
-  fprintf(output, "  static constexpr cnt::flat_map<std::pair<std::uint32_t, std::uint32_t>, word_break_type, %zu> all_word_break = {", word_break.size());
+                      const std::map<std::pair<char32_t, char32_t>, std::string>& word_break) {
+  FWRITE("word_break_type word_break(char32_t code_point) {\n", output);
+  fprintf(output, "  static constexpr cnt::flat_map<std::pair<char32_t, char32_t>, word_break_type, %zu> all_word_break = {", word_break.size());
   int pos = 0;
   for (const auto& entry : word_break) {
     if (pos % 6 == 0) {
@@ -631,7 +631,7 @@ void print_word_break(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  FWRITE("  auto up_bound = all_word_break.upper_bound(std::pair<std::uint32_t, std::uint32_t>(code_point, 0x110000));\n", output);
+  FWRITE("  auto up_bound = all_word_break.upper_bound(std::pair<char32_t, char32_t>(code_point, 0x110000));\n", output);
   FWRITE("  if (up_bound == all_word_break.begin()) {\n", output);
   FWRITE("    return word_break_type::kOther;\n", output);
   FWRITE("  }\n", output);
@@ -643,10 +643,10 @@ void print_word_break(FILE* output,
   FWRITE("}\n\n", output);
 }
 
-std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::set<std::uint32_t>& input) {
-  std::set<std::pair<std::uint32_t, std::uint32_t>> result;
-  std::uint32_t min = 0;
-  std::uint32_t previous = 0;
+std::set<std::pair<char32_t, char32_t>> create_ranges(const std::set<char32_t>& input) {
+  std::set<std::pair<char32_t, char32_t>> result;
+  char32_t min = 0;
+  char32_t previous = 0;
   bool first = true;
   for (const auto& entry : input) {
     if (first) {
@@ -665,17 +665,17 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::set<s
 }
 
 template<typename T>
-std::set<std::pair<std::uint32_t, std::uint32_t>> create_ranges(const std::map<std::uint32_t, T>& input) {
-  std::set<std::uint32_t> keys;
+std::set<std::pair<char32_t, char32_t>> create_ranges(const std::map<char32_t, T>& input) {
+  std::set<char32_t> keys;
   for (const auto& entry : input) {
     keys.insert(entry.first);
   }
   return create_ranges(keys);
 }
 
-std::set<std::pair<std::uint32_t, std::uint32_t>> compatibility_set(
-    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  std::set<std::uint32_t> keys;
+std::set<std::pair<char32_t, char32_t>> compatibility_set(
+    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<char32_t> keys;
   for (const auto& entry : unicode_data) {
     if (!entry.second.canonical_character_decomposition_mapping) {
       keys.insert(entry.first);
@@ -684,9 +684,9 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> compatibility_set(
   return create_ranges(keys);
 }
 
-std::set<std::pair<std::uint32_t, std::uint32_t>> printable_set(
-    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  std::set<std::uint32_t> keys;
+std::set<std::pair<char32_t, char32_t>> printable_set(
+    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<char32_t> keys;
   for (const auto& entry : unicode_data) {
     if (entry.second.general_category[0] != 'C' && entry.second.general_category[0] != 'Z') {
       keys.insert(entry.first);
@@ -696,9 +696,9 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> printable_set(
   return create_ranges(keys);
 }
 
-std::set<std::pair<std::uint32_t, std::uint32_t>> alpha_set(
-    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  std::set<std::uint32_t> keys;
+std::set<std::pair<char32_t, char32_t>> alpha_set(
+    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<char32_t> keys;
   for (const auto& entry : unicode_data) {
     if (entry.second.general_category == "Lm" ||
         entry.second.general_category == "Lt" ||
@@ -711,9 +711,9 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> alpha_set(
   return create_ranges(keys);
 }
 
-std::set<std::pair<std::uint32_t, std::uint32_t>> digits_set(
-    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  std::set<std::uint32_t> keys;
+std::set<std::pair<char32_t, char32_t>> digits_set(
+    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<char32_t> keys;
   for (const auto& entry : unicode_data) {
     if (entry.second.is_digit) {
       keys.insert(entry.first);
@@ -722,11 +722,10 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> digits_set(
   return create_ranges(keys);
 }
 
-std::set<std::pair<std::uint32_t, std::uint32_t>> numeric_set(
+std::set<std::pair<char32_t, char32_t>> numeric_set(
     const std::map<std::string,
-             std::set<std::pair<std::uint32_t,
-                                  std::uint32_t>>>& extracted_numeric_properties) {
-  std::set<std::uint32_t> keys;
+             std::set<std::pair<char32_t, char32_t>>>& extracted_numeric_properties) {
+  std::set<char32_t> keys;
   for (const auto& entry : extracted_numeric_properties) {
     for (auto r : entry.second) {
       for (int i = r.first; i <= r.second; ++i) {
@@ -737,9 +736,9 @@ std::set<std::pair<std::uint32_t, std::uint32_t>> numeric_set(
   return create_ranges(keys);
 }
 
-std::set<std::pair<std::uint32_t, std::uint32_t>> space_set(
-    const std::map<std::uint32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  std::set<std::uint32_t> keys;
+std::set<std::pair<char32_t, char32_t>> space_set(
+    const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  std::set<char32_t> keys;
   for (const auto& entry : unicode_data) {
     if (entry.second.general_category == "Zs" ||
         entry.second.bidirectional_category == "WS" ||
@@ -766,11 +765,11 @@ void write_header(const char* output_file,
   fprintf(h_output, HPP_HEADER, header_guard.c_str(), header_guard.c_str());
 
   for (const auto& normalization_property : normalization_properties) {
-    fprintf(h_output, "bool is_%s_nm(std::uint32_t);\n\n",
+    fprintf(h_output, "bool is_%s_nm(char32_t);\n\n",
             normalization_property.c_str());
   }
   for (const auto& binary_property : binary_unicode_properties) {
-    fprintf(h_output, "bool is_%s(std::uint32_t);\n\n",
+    fprintf(h_output, "bool is_%s(char32_t);\n\n",
             binary_property.c_str());
   }
 
@@ -793,10 +792,10 @@ void write_impl(const char* derived_core_properties_file,
   fprintf(cc_output, CPP_HEADER, include_h);
 
   {
-    std::map<std::uint32_t, starlark::ucd::unicode_data_record> unicode_data;
-    std::map<std::uint32_t, starlark::ucd::special_casing_record> special_casing;
-    std::map<std::pair<std::uint32_t, std::uint32_t>, std::string> word_break;
-    std::set<std::uint32_t> comp_exclusions;
+    std::map<char32_t, starlark::ucd::unicode_data_record> unicode_data;
+    std::map<char32_t, starlark::ucd::special_casing_record> special_casing;
+    std::map<std::pair<char32_t, char32_t>, std::string> word_break;
+    std::set<char32_t> comp_exclusions;
     starlark::ucd::read_unicode_data(unicode_data_file, unicode_data);
     starlark::ucd::read_special_casing(special_casing_file, special_casing);
     starlark::ucd::read_word_break(word_break_file, word_break);
@@ -818,8 +817,7 @@ void write_impl(const char* derived_core_properties_file,
   }
   {
     std::map<std::string,
-             std::set<std::pair<std::uint32_t,
-                                  std::uint32_t>>> binary_properties;
+             std::set<std::pair<char32_t, char32_t>>> binary_properties;
     starlark::ucd::read_all_code_points(derived_normalization_props,
                               binary_properties,
                               normalization_properties);
@@ -853,8 +851,7 @@ void write_impl(const char* derived_core_properties_file,
   }
   {
     std::map<std::string,
-             std::set<std::pair<std::uint32_t,
-                                  std::uint32_t>>> extracted_numeric_properties;
+             std::set<std::pair<char32_t, char32_t>>> extracted_numeric_properties;
     starlark::ucd::read_all_code_points(derived_numeric_type,
                               extracted_numeric_properties,
                               numeric_properties);

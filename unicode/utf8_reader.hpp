@@ -12,9 +12,9 @@ namespace starlark {
 namespace unicode {
 
 // Whether the code point is within the Unicode range.
-bool is_in_range(std::uint32_t code_point);
+bool is_in_range(char32_t code_point);
 
-bool is_surrogate(std::uint32_t code_point);
+bool is_surrogate(char32_t code_point);
 
 bool is_utf8_continue(char input);
 
@@ -27,21 +27,21 @@ class utf8_reader {
   std::size_t pending() const;
   std::size_t pos() const;
   char peek(std::size_t delta = 0) const;
-  std::uint32_t peek_code_point();
+  char32_t peek_code_point();
   void skip(std::size_t delta = 1);
-  std::uint32_t read_code_point();
+  char32_t read_code_point();
   bool next(std::string_view candidate);
   bool capture(std::string_view candidate);
 
   // Unicode replacement character.
-  static constexpr std::uint32_t kReplacementCharacter = 0xfffdu;
+  static constexpr char32_t kReplacementCharacter = 0xfffdu;
   // Unicode byte order mark.
-  static constexpr std::uint32_t kBomCharacter = 0xfeffu;
+  static constexpr char32_t kBomCharacter = 0xfeffu;
   // Unicode maximum Unicode code point.
-  static constexpr std::uint32_t kMaxCodePoint = 0x10'ffffu;
+  static constexpr char32_t kMaxCodePoint = 0x10'ffffu;
 
  private:
-  std::uint32_t read_code_point(bool move_forward);
+  char32_t read_code_point(bool move_forward);
 
   std::string_view input;
   std::size_t input_pos = 0;

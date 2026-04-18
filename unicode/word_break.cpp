@@ -15,7 +15,7 @@ using ::starlark::ucd::is_Extended_Pictographic;
 
 // TODO(lmirelmann): It should be possible to create a version of this that generates one element at a time.
 // Based on Unicode Standard Annex #29, revision 47.
-void word_break(const std::vector<std::uint32_t>& code_points, std::vector<std::uint64_t>& output) {
+void word_break(const std::vector<char32_t>& code_points, std::vector<std::uint64_t>& output) {
   if (code_points.empty()) {
     return;
   }

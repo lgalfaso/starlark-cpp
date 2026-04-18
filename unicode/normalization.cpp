@@ -15,23 +15,23 @@ namespace unicode {
 
 namespace {
 
-bool is_korean_leading(std::uint32_t c) {
+bool is_korean_leading(char32_t c) {
   return c >= 0x1100 && c <= 0x1112;
 }
 
-bool is_korean_vowel(std::uint32_t c) {
+bool is_korean_vowel(char32_t c) {
   return c >= 0x1161 && c <= 0x1175;
 }
 
-bool is_korean_trailing(std::uint32_t c) {
+bool is_korean_trailing(char32_t c) {
   return c >= 0x11A8 && c <= 0x11C2;
 }
 
-std::vector<std::uint32_t> compose(const std::vector<std::uint32_t>& input) {
+std::vector<char32_t> compose(const std::vector<char32_t>& input) {
   if (input.empty()) {
     return input;
   }
-  std::vector<std::uint32_t> result;
+  std::vector<char32_t> result;
   result.push_back(input.front());
   int starter_pos = 0;
   int last_ccc = 0;
@@ -94,7 +94,7 @@ std::vector<std::uint32_t> compose(const std::vector<std::uint32_t>& input) {
   return result;
 }
 
-bool decompose_korean(std::vector<std::uint32_t>& output, std::uint32_t c) {
+bool decompose_korean(std::vector<char32_t>& output, char32_t c) {
   if (c < 0xAC00 || 0xD7A3 < c) {
     return false;
   }
@@ -108,7 +108,7 @@ bool decompose_korean(std::vector<std::uint32_t>& output, std::uint32_t c) {
   return true;
 }
 
-void do_nfd(std::vector<std::uint32_t>& output, std::uint32_t c) {
+void do_nfd(std::vector<char32_t>& output, char32_t c) {
   if (decompose_korean(output, c)) {
     return;
   }
@@ -126,7 +126,7 @@ void do_nfd(std::vector<std::uint32_t>& output, std::uint32_t c) {
   }
 }
 
-void do_nfkd(std::vector<std::uint32_t>& output, std::uint32_t c) {
+void do_nfkd(std::vector<char32_t>& output, char32_t c) {
   if (decompose_korean(output, c)) {
     return;
   }
@@ -140,7 +140,7 @@ void do_nfkd(std::vector<std::uint32_t>& output, std::uint32_t c) {
   }
 }
 
-void sort_non_starters(std::vector<std::uint32_t>& code_points) {
+void sort_non_starters(std::vector<char32_t>& code_points) {
   auto begin = code_points.begin();
   for (auto it = code_points.begin(); it != code_points.end(); ++it) {
     if (ucd::ccc(*it) == 0) {
@@ -154,7 +154,7 @@ void sort_non_starters(std::vector<std::uint32_t>& code_points) {
 }  // namespace
 
 std::string to_nfc(std::string_view input) {
-  std::vector<std::uint32_t> code_points;
+  std::vector<char32_t> code_points;
   // This needs to be strict as we only have the tables for this version of Unicode.
   utf8_reader reader(input, true, false);
   bool qc = true;
@@ -170,7 +170,7 @@ std::string to_nfc(std::string_view input) {
   if (qc) {
     return std::string{input};
   }
-  std::vector<std::uint32_t> result_cp = to_nfc_x(code_points);
+  std::vector<char32_t> result_cp = to_nfc_x(code_points);
   std::string result;
   for (auto c : result_cp) {
     utf8_encode_code_point(c, result, true, false);
@@ -179,7 +179,7 @@ std::string to_nfc(std::string_view input) {
 }
 
 std::string to_nfd(std::string_view input) {
-  std::vector<std::uint32_t> code_points;
+  std::vector<char32_t> code_points;
   utf8_reader reader(input, true, false);
   bool qc = true;
   int last_ccc = 0;
@@ -194,7 +194,7 @@ std::string to_nfd(std::string_view input) {
   if (qc) {
     return std::string{input};
   }
-  std::vector<std::uint32_t> result_cp = to_nfd_x(code_points);
+  std::vector<char32_t> result_cp = to_nfd_x(code_points);
   std::string result;
   for (auto c : result_cp) {
     utf8_encode_code_point(c, result, true, false);
@@ -203,7 +203,7 @@ std::string to_nfd(std::string_view input) {
 }
 
 std::string to_nfkc(std::string_view input) {
-  std::vector<std::uint32_t> code_points;
+  std::vector<char32_t> code_points;
   utf8_reader reader(input, true, false);
   bool qc = true;
   int last_ccc = 0;
@@ -218,7 +218,7 @@ std::string to_nfkc(std::string_view input) {
   if (qc) {
     return std::string{input};
   }
-  std::vector<std::uint32_t> result_cp = to_nfkc_x(code_points);
+  std::vector<char32_t> result_cp = to_nfkc_x(code_points);
   std::string result;
   for (auto c : result_cp) {
     utf8_encode_code_point(c, result, true, false);
@@ -227,7 +227,7 @@ std::string to_nfkc(std::string_view input) {
 }
 
 std::string to_nfkd(std::string_view input) {
-  std::vector<std::uint32_t> code_points;
+  std::vector<char32_t> code_points;
   utf8_reader reader(input, true, false);
   bool qc = true;
   int last_ccc = 0;
@@ -242,7 +242,7 @@ std::string to_nfkd(std::string_view input) {
   if (qc) {
     return std::string{input};
   }
-  std::vector<std::uint32_t> result_cp = to_nfkd_x(code_points);
+  std::vector<char32_t> result_cp = to_nfkd_x(code_points);
   std::string result;
   for (auto c : result_cp) {
     utf8_encode_code_point(c, result, true, false);
@@ -250,12 +250,12 @@ std::string to_nfkd(std::string_view input) {
   return result;
 }
 
-std::vector<std::uint32_t> to_nfc_x(const std::vector<std::uint32_t>& input) {
+std::vector<char32_t> to_nfc_x(const std::vector<char32_t>& input) {
   return compose(to_nfd_x(input));
 }
 
-std::vector<std::uint32_t> to_nfd_x(const std::vector<std::uint32_t>& input) {
-  std::vector<std::uint32_t> result;
+std::vector<char32_t> to_nfd_x(const std::vector<char32_t>& input) {
+  std::vector<char32_t> result;
   for (auto c : input) {
     do_nfd(result, c);
   }
@@ -263,12 +263,12 @@ std::vector<std::uint32_t> to_nfd_x(const std::vector<std::uint32_t>& input) {
   return result;
 }
 
-std::vector<std::uint32_t> to_nfkc_x(const std::vector<std::uint32_t>& input) {
+std::vector<char32_t> to_nfkc_x(const std::vector<char32_t>& input) {
   return compose(to_nfkd_x(input));
 }
 
-std::vector<std::uint32_t> to_nfkd_x(const std::vector<std::uint32_t>& input) {
-  std::vector<std::uint32_t> result;
+std::vector<char32_t> to_nfkd_x(const std::vector<char32_t>& input) {
+  std::vector<char32_t> result;
   for (auto c : input) {
     do_nfkd(result, c);
   }

@@ -8,7 +8,7 @@
 namespace starlark {
 namespace unicode {
 
-void word_break(const std::vector<std::uint32_t>& code_points, std::vector<std::uint64_t>& output);
+void word_break(const std::vector<char32_t>& code_points, std::vector<std::uint64_t>& output);
 
 }  // namespace unicode
 }  // namespace starlark

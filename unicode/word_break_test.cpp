@@ -20,13 +20,13 @@ using testing::SizeIs;
 
 namespace {
 
-std::vector<std::tuple<std::vector<std::uint32_t>, std::vector<std::uint64_t>, std::string>>
+std::vector<std::tuple<std::vector<char32_t>, std::vector<std::uint64_t>, std::string>>
 read_unicode_word_break_tests(const char* file) {
   auto content = starlark::ucd::read_file(file);
-  std::vector<std::tuple<std::vector<std::uint32_t>, std::vector<std::uint64_t>, std::string>> result;
+  std::vector<std::tuple<std::vector<char32_t>, std::vector<std::uint64_t>, std::string>> result;
   for (const auto& entry : content) {
     std::uint64_t pos = 0;
-    std::vector<std::uint32_t> code_points;
+    std::vector<char32_t> code_points;
     std::vector<std::uint64_t> break_points;
     std::string pending = entry.front();
     pending.erase(0, pending.find_first_not_of(" \t"));
