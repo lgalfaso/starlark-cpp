@@ -724,28 +724,27 @@ status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& er
   }
 }
 
-// TODO(lmirelmann): Change this to return `status_or<int64_t>`.
-status to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
+status_or<int64_t> to_int64_with_clamping_for_index(const starlark_obj& iidx, error_fn& error_callback) {
   switch (iidx.numeric_type()) {
     case starlark_numeric_type::kInt64:
-      idx = iidx.as_int64();
+      return status_or<int64_t>(iidx.as_int64());
       break;
     case starlark_numeric_type::kBigInt:
       if (!iidx.as_bigint().fits_in_int64()) {
         if (iidx.as_bigint().sign()) {
-          idx = std::numeric_limits<int64_t>::min();
+          return status_or<int64_t>(std::numeric_limits<int64_t>::min());
         } else {
-          idx = std::numeric_limits<int64_t>::max();
+          return status_or<int64_t>(std::numeric_limits<int64_t>::max());
         }
       } else {
-        idx = iidx.as_bigint().as_int64();
+        return status_or<int64_t>(iidx.as_bigint().as_int64());
       }
       break;
     default:
       error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
-      return error_status();
+      return status_or<int64_t>(status_code::kError);
   }
-  return ok_status();
+  return status_or<int64_t>(status_code::kError);
 }
 
 status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {

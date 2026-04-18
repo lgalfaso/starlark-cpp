@@ -258,7 +258,7 @@ starlark::result::status one_pos_arg(const starlark_obj::pos_args_t& pos_args, c
 starlark::result::status n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, int pos_args_count, error_fn& error_callback, std::string_view fn_name);
 starlark::result::status zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
 starlark::result::status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& error_callback);
-starlark::result::status to_int64_with_clamping_for_index(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
+starlark::result::status_or<int64_t> to_int64_with_clamping_for_index(const starlark_obj& iidx, error_fn& error_callback);
 starlark::result::status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback);
 
 }  // namespace runtime
