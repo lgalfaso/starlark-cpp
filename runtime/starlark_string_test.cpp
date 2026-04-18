@@ -464,6 +464,7 @@ TEST(StarlarkString, Len) {
 
   EXPECT_EQ(0, starlark_string(""sv).len(true, error_callback));
   EXPECT_EQ(3, starlark_string("abc"sv).len(true, error_callback));
+  EXPECT_EQ(5, starlark_string("\u2028\u0231abc"sv).len(true, error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -475,10 +476,82 @@ TEST(StarlarkString, Index) {
 
   EXPECT_EQ(str.index(starlark_integer(-3), ctx, error_callback)->repr(), "\"a\"");
   EXPECT_EQ(str.index(starlark_integer(-2), ctx, error_callback)->repr(), "\"b\"");
-  EXPECT_EQ(str.index(starlark_integer(-1), ctx, error_callback)->repr(), "\"c\"");
-  EXPECT_EQ(str.index(starlark_integer(0), ctx, error_callback)->repr(), "\"a\"");
-  EXPECT_EQ(str.index(starlark_integer(1), ctx, error_callback)->repr(), "\"b\"");
+  EXPECT_EQ(str.index(*ctx.minus_one(), ctx, error_callback)->repr(), "\"c\"");
+  EXPECT_EQ(str.index(*ctx.zero(), ctx, error_callback)->repr(), "\"a\"");
+  EXPECT_EQ(str.index(*ctx.one(), ctx, error_callback)->repr(), "\"b\"");
   EXPECT_EQ(str.index(starlark_integer(2), ctx, error_callback)->repr(), "\"c\"");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkString, IndexUnicode) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("Περιπτώσεις"sv);
+
+  EXPECT_EQ(str.index(starlark_integer(0), ctx, error_callback)->str(), "Π");
+  EXPECT_EQ(str.index(starlark_integer(1), ctx, error_callback)->str(), "ε");
+  EXPECT_EQ(str.index(starlark_integer(2), ctx, error_callback)->str(), "ρ");
+  EXPECT_EQ(str.index(starlark_integer(3), ctx, error_callback)->str(), "ι");
+  EXPECT_EQ(str.index(starlark_integer(4), ctx, error_callback)->str(), "π");
+  EXPECT_EQ(str.index(starlark_integer(5), ctx, error_callback)->str(), "τ");
+  EXPECT_EQ(str.index(starlark_integer(6), ctx, error_callback)->str(), "ώ");
+  EXPECT_EQ(str.index(starlark_integer(7), ctx, error_callback)->str(), "σ");
+  EXPECT_EQ(str.index(starlark_integer(8), ctx, error_callback)->str(), "ε");
+  EXPECT_EQ(str.index(starlark_integer(9), ctx, error_callback)->str(), "ι");
+  EXPECT_EQ(str.index(starlark_integer(10), ctx, error_callback)->str(), "ς");
+}
+
+TEST(StarlarkString, IndexLargeStrings) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  std::string_view value = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  starlark_string str(value);
+
+  for (int i = 0; i < value.size(); ++i) {
+    EXPECT_EQ(str.index(starlark_integer(i), ctx, error_callback)->str(), value.substr(i, 1));
+  }
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkString, IndexLargeStringsUnicode) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  std::string_view value = "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις ";
+  starlark_string str(value);
+  std::array<std::string_view, 12> elements = {
+    "Π", "ε", "ρ", "ι", "π", "τ", "ώ", "σ", "ε", "ι", "ς", " ",
+  };
+
+  auto len = str.len(true, error_callback);
+  EXPECT_EQ(len, 720);
+  for (int i = 0; i < len; ++i) {
+    EXPECT_EQ(str.index(starlark_integer(i), ctx, error_callback)->str(), elements[i % 12]);
+  }
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -616,6 +689,64 @@ TEST(StarlarkString, SliceRange) {
   test(ctx.one(), ctx.one(), ctx.none_value(), "", "", "", "", "", "");
   test(ctx.one(), ctx.one(), ctx.minus_one(), "", "", "", "", "", "");
   test(ctx.one(), ctx.one(), ctx.one(), "", "", "", "", "", "");
+}
+
+TEST(StarlarkString, SliceRangeUnicode) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  std::string_view value = "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις "
+                           "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις ";
+  starlark_string str(value);
+
+  auto len = str.len(true, error_callback);
+  EXPECT_EQ(len, 720);
+  for (int i = 0; i < len; i += 12) {
+    EXPECT_EQ(str.slice_range(starlark_integer(i), starlark_integer(i + 12), *ctx.none_value(), ctx, error_callback)->str(), "Περιπτώσεις ") << i;
+  }
+  EXPECT_EQ(str.slice_range(starlark_integer(0), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠΠ");
+  EXPECT_EQ(str.slice_range(starlark_integer(1), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "εεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεε");
+  EXPECT_EQ(str.slice_range(starlark_integer(2), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρρ");
+  EXPECT_EQ(str.slice_range(starlark_integer(3), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιι");
+  EXPECT_EQ(str.slice_range(starlark_integer(4), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ππππππππππππππππππππππππππππππππππππππππππππππππππππππππππππ");
+  EXPECT_EQ(str.slice_range(starlark_integer(5), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ");
+  EXPECT_EQ(str.slice_range(starlark_integer(6), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώώ");
+  EXPECT_EQ(str.slice_range(starlark_integer(7), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "σσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσ");
+  EXPECT_EQ(str.slice_range(starlark_integer(8), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "εεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεεε");
+  EXPECT_EQ(str.slice_range(starlark_integer(9), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιιι");
+  EXPECT_EQ(str.slice_range(starlark_integer(10), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "ςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςςς");
+  EXPECT_EQ(str.slice_range(starlark_integer(11), *ctx.none_value(), starlark_integer(12), ctx, error_callback)->str(), "                                                            ");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkString, SliceRangeUnicodeWithStep) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  std::string_view value = "Περιπτώσεις";
+  starlark_string str(value);
+
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(-5), ctx, error_callback)->str(), "ςτΠ");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(-4), ctx, error_callback)->str(), "ςώρ");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(-3), ctx, error_callback)->str(), "ςσπε");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(-2), ctx, error_callback)->str(), "ςεώπρΠ");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(-1), ctx, error_callback)->str(), "ςιεσώτπιρεΠ");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(1), ctx, error_callback)->str(), "Περιπτώσεις");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(2), ctx, error_callback)->str(), "Πρπώες");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(3), ctx, error_callback)->str(), "Πιώι");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(4), ctx, error_callback)->str(), "Ππε");
+  EXPECT_EQ(str.slice_range(*ctx.none_value(), *ctx.none_value(), starlark_integer(5), ctx, error_callback)->str(), "Πτς");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkString, SliceRangeBoolStart) {

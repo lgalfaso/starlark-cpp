@@ -85,6 +85,8 @@ starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_ob
 starlark_obj* starlark_string_fn_title(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_upper(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
+constexpr std::string::size_type starlark_string::index_step;
+
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::method_refs() {
   static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
     new std::map<std::string, starlark_obj::fn*, std::less<>>{
@@ -140,8 +142,13 @@ const std::vector<std::string>& starlark_string::attributes() {
   return *result;
 }
 
-starlark_string::starlark_string(std::string&& value) : value(value) {}
-starlark_string::starlark_string(std::string_view value) : value(value) {}
+starlark_string::starlark_string(std::string&& value) : value(std::forward<std::string>(value)) {
+  build_index();
+}
+
+starlark_string::starlark_string(std::string_view value) : value(value) {
+  build_index();
+}
 
 std::string_view starlark_string::type() const {
   return starlark_types::string_t;
@@ -164,7 +171,7 @@ std::string starlark_string::str() const {
 }
 
 int64_t starlark_string::len(bool produce_error, error_fn& error_callback) const {
-  return value.size();
+  return size;
 }
 
 bool starlark_string::inner_repr(printer& print, printer_action action) const {
@@ -721,15 +728,15 @@ starlark_obj* starlark_string::percent_equals_assign(const starlark_obj& other, 
 }
 
 starlark_obj* starlark_string::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
-  auto idx = inner_index(other, value.size(), error_callback);
+  auto idx = inner_index(other, size, error_callback);
   if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), value.substr(*idx, 1));
+  return Arena::Create<starlark_string>(&ctx.arena(), element_at(*idx));
 }
 
 starlark_obj* starlark_string::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  auto slice_result = inner_slice_range(start, stop, stride, value.size(), error_callback);
+  auto slice_result = inner_slice_range(start, stop, stride, size, error_callback);
   if (!slice_result.ok()) {
     return nullptr;
   }
@@ -740,11 +747,11 @@ starlark_obj* starlark_string::slice_range(const starlark_obj& start, const star
   decltype(value) result;
   if (i_stride > 0) {
     for (auto i = i_start; i < i_end; i += i_stride) {
-      result += value[i];
+      result += element_at(i);
     }
   } else {
     for (auto i = i_start; i > i_end; i += i_stride) {
-      result += value[i];
+      result += element_at(i);
     }
   }
   return Arena::Create<starlark_string>(&ctx.arena(), result);
@@ -756,14 +763,14 @@ std::string_view starlark_string::as_string() const {
 
 int64_t starlark_string::count(std::string_view sub, int64_t start, int64_t end) const {
   if (start < 0) {
-    start = std::max<int64_t>(start + value.size(), 0);
+    start = std::max<int64_t>(start + size, 0);
   } else {
-    start = std::min<int64_t>(start, value.size());
+    start = std::min<int64_t>(start, size);
   }
   if (end < 0) {
-    end = std::max<int64_t>(end + value.size(), 0);
+    end = std::max<int64_t>(end + size, 0);
   } else {
-    end = std::min<int64_t>(end, value.size());
+    end = std::min<int64_t>(end, size);
   }
   if (start > end) {
     start = end + 1;
@@ -783,12 +790,12 @@ int64_t starlark_string::count(std::string_view sub, int64_t start, int64_t end)
 
 bool starlark_string::endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const {
   if (start < 0) {
-    start = std::max<int64_t>(start + value.size(), 0);
+    start = std::max<int64_t>(start + size, 0);
   }
   if (end < 0) {
-    end = std::max<int64_t>(end + value.size(), 0);
+    end = std::max<int64_t>(end + size, 0);
   } else {
-    end = std::min<int64_t>(end, value.size());
+    end = std::min<int64_t>(end, size);
   }
   if (start > end) {
     return false;
@@ -804,12 +811,12 @@ bool starlark_string::endswith(const std::vector<std::string_view>& ends, int64_
 
 bool starlark_string::startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const {
   if (start < 0) {
-    start = std::max<int64_t>(start + value.size(), 0);
+    start = std::max<int64_t>(start + size, 0);
   }
   if (end < 0) {
-    end = std::max<int64_t>(end + value.size(), 0);
+    end = std::max<int64_t>(end + size, 0);
   } else {
-    end = std::min<int64_t>(end, value.size());
+    end = std::min<int64_t>(end, size);
   }
   if (start > end) {
     return false;
@@ -825,12 +832,12 @@ bool starlark_string::startswith(const std::vector<std::string_view>& begins, in
 
 int64_t starlark_string::find(std::string_view sub, int64_t start, int64_t end) const {
   if (start < 0) {
-    start = std::max<int64_t>(start + value.size(), 0);
+    start = std::max<int64_t>(start + size, 0);
   }
   if (end < 0) {
-    end = std::max<int64_t>(end + value.size(), 0);
+    end = std::max<int64_t>(end + size, 0);
   } else {
-    end = std::min<int64_t>(end, value.size());
+    end = std::min<int64_t>(end, size);
   }
   if (start > end) {
     return -1;
@@ -846,12 +853,12 @@ int64_t starlark_string::find(std::string_view sub, int64_t start, int64_t end) 
 
 int64_t starlark_string::rfind(std::string_view sub, int64_t start, int64_t end) const {
   if (start < 0) {
-    start = std::max<int64_t>(start + value.size(), 0);
+    start = std::max<int64_t>(start + size, 0);
   }
   if (end < 0) {
-    end = std::max<int64_t>(end + value.size(), 0);
+    end = std::max<int64_t>(end + size, 0);
   } else {
-    end = std::min<int64_t>(end, value.size());
+    end = std::min<int64_t>(end, size);
   }
   if (start > end) {
     return -1;
@@ -1348,10 +1355,57 @@ void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* othe
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() const {
-  if (value.length() == 0) {
+  if (value.empty()) {
     return 0;
   }
   return static_cast<int64_t>(siphash(value.data(), value.length(), 0x243F6A8885A308D3, 0x13198A2E03707344));
+}
+
+void starlark_string::build_index() {
+  // TODO(lmirelmann): This makes the assumption that value is well formed.
+  utf8_reader reader(value, false, false);
+  std::string::size_type code_point_count = 0;
+  while (reader.pending()) {
+    if (code_point_count && (code_point_count % index_step == 0)) {
+      value_index.push_back(reader.pos());
+    }
+    reader.read_code_point();
+    ++code_point_count;
+  }
+  size = code_point_count;
+}
+
+std::string_view starlark_string::element_at(std::size_t element) const {
+  assert(element < size);
+  auto big_step = element / index_step;
+  auto small_step = element % index_step;
+  utf8_reader reader(value, false, false);
+  if (big_step) {
+    reader.skip(value_index[big_step - 1]);
+  }
+  while (small_step) {
+    small_step--;
+    reader.read_code_point();
+  }
+  auto start = reader.pos();
+  reader.read_code_point();
+  std::string_view mirror = value;
+  return mirror.substr(start, reader.pos() - start);
+}
+
+char32_t starlark_string::ord_at(std::size_t element) const {
+  assert(element < size);
+  auto big_step = element / index_step;
+  auto small_step = element % index_step;
+  utf8_reader reader(value, false, false);
+  if (big_step) {
+    reader.skip(value_index[big_step - 1]);
+  }
+  while (small_step) {
+    small_step--;
+    reader.read_code_point();
+  }
+  return reader.read_code_point();
 }
 
 namespace {

@@ -82,8 +82,14 @@ class starlark_string : public starlark_obj {
  private:
   static const std::map<std::string, fn*, std::less<>>& method_refs();
   static const std::vector<std::string>& attributes();
+  void build_index();
+  std::string_view element_at(std::size_t element) const;
+  char32_t ord_at(std::size_t element) const;
 
+  std::string::size_type size;
   std::string value;
+  std::vector<std::string::size_type> value_index;
+  static constexpr std::string::size_type index_step = 64;
 };
 
 }  // namespace runtime
