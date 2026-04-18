@@ -1,11 +1,13 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2025-2026 Lucas Mirelmann
 
 #include "runtime/starlark_range.hpp"
 
 #include <format>
 #include <limits>
+#include <stdckdint.h>
 #include <string>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
@@ -141,10 +143,30 @@ starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starl
   auto i_end = std::get<1>(*slice_result);
   auto i_stride = std::get<2>(*slice_result);
 
-  // TODO(lmirelmann): Check that none of these overflow/underflow.
-  auto r_step = this->state.step * i_stride;
-  auto r_start = this->state.start + this->state.step * i_start;
-  auto r_end = this->state.start + this->state.step * i_end;
+  int64_t r_step;
+  if (ckd_mul(&r_step, this->state.step, i_stride)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return nullptr;
+  }
+  int64_t tmp;
+  if (ckd_mul(&tmp, this->state.step, i_start)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return nullptr;
+  }
+  int64_t r_start;
+  if (ckd_add(&r_start, this->state.start, tmp)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return nullptr;
+  }
+  if (ckd_mul(&tmp, this->state.step, i_end)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return nullptr;
+  }
+  int64_t r_end;
+  if (ckd_add(&r_end, this->state.start, tmp)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return nullptr;
+  }
   return Arena::Create<starlark_range>(&ctx.arena(), r_start, r_end, r_step);
 }
 

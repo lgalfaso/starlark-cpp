@@ -536,6 +536,20 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "starlark_range_overflow_test",
+    size = "small",
+    srcs = ["starlark_range_overflow_test.cpp"],
+    deps = [
+        ":starlark_function_builder_impl",
+        ":starlark_numeric_impl",
+        ":starlark_object_impl",
+        ":starlark_range",
+        ":starlark_testing",
+        "@googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "starlark_set",
     srcs = ["starlark_set.cpp"],
