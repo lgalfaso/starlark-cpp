@@ -1075,13 +1075,13 @@ starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj
   return static_cast<starlark_bytes*>(this_obj)->strip(*cutset, ctx);
 }
 
-starlark_bytes::bytes_elems::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state) : bytes(bytes), state(state) {}
+starlark_bytes::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state) : bytes(bytes), state(state) {}
 
-std::string_view starlark_bytes::bytes_elems::bytes_elems::type() const {
+std::string_view starlark_bytes::bytes_elems::type() const {
   return "bytes.elems";
 }
 
-bool starlark_bytes::bytes_elems::bytes_elems::truthy() const {
+bool starlark_bytes::bytes_elems::truthy() const {
   return state.len > 0;
 }
 
