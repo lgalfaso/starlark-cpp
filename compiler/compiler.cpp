@@ -1,6 +1,8 @@
-// Copyright 2024-2025 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
 #include "compiler/compiler.hpp"
+
+#include <cassert>
 
 #include <functional>
 #include <map>
@@ -292,7 +294,7 @@ void bytecode_generator::enter_identifier_for_assignment(const Identifier* ident
       break;
     }
     default:
-      break;
+      assert(false);
   }
 }
 
@@ -311,7 +313,7 @@ void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression
       mutable_block()->add_op_code()->mutable_unary_not();
       break;
     default:
-      break;
+      assert(false);
   }
 }
 
@@ -324,8 +326,28 @@ void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expressi
     case BinaryExpr::AND:
       mutable_block()->add_op_code()->mutable_jump_if_false_or_pop();
       break;
-    default:
+    case BinaryExpr::EQUALS_EQUALS:
+    case BinaryExpr::BANG_EQUALS:
+    case BinaryExpr::LESS_THAN:
+    case BinaryExpr::GREATER_THAN:
+    case BinaryExpr::LESS_THAN_EQUALS:
+    case BinaryExpr::GREATER_THAN_EQUALS:
+    case BinaryExpr::IN:
+    case BinaryExpr::NOT_IN:
+    case BinaryExpr::PIPE:
+    case BinaryExpr::HAT:
+    case BinaryExpr::AMPERSAND:
+    case BinaryExpr::LESS_THAN_LESS_THAN:
+    case BinaryExpr::GREATER_THAN_GREATER_THAN:
+    case BinaryExpr::MINUS:
+    case BinaryExpr::PLUS:
+    case BinaryExpr::STAR:
+    case BinaryExpr::PERCENT:
+    case BinaryExpr::SLASH:
+    case BinaryExpr::SLASH_SLASH:
       break;
+    default:
+      assert(false);
   }
 }
 
@@ -395,7 +417,7 @@ void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_express
       mutable_block()->add_op_code()->mutable_binary_slash_slash();
       break;
     default:
-      break;
+      assert(false);
   }
   binary_op_mid_pos.erase(binary_expression);
 }
@@ -455,7 +477,7 @@ void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_e
       break;
     }
     default:
-      break;
+      assert(false);
   }
 }
 
@@ -468,7 +490,7 @@ void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression
       mutable_block()->add_op_code()->mutable_slice_range();
       break;
     default:
-      break;
+      assert(false);
   }
 }
 
@@ -525,7 +547,7 @@ void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* s
           break;
         }
         default:
-          break;
+          assert(false);
       }
       break;
     case SliceExpr::kSlice:
@@ -579,11 +601,11 @@ void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* s
           break;
         }
         default:
-          break;
+          assert(false);
       }
       break;
     default:
-      break;
+      assert(false);
   }
 }
 
@@ -780,7 +802,7 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
         variadic_named_arg = true;
         break;
       case Argument::ARGUMENT_TYPE_NOT_SET:
-        break;
+        assert(false);
     }
   }
   auto* call = mutable_block()->add_op_code()->mutable_call();
