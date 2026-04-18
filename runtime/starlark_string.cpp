@@ -53,7 +53,6 @@ namespace runtime {
 
 starlark_obj* starlark_string_fn_capitalize(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
-starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
@@ -92,7 +91,6 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::me
     new std::map<std::string, starlark_obj::fn*, std::less<>>{
       {"capitalize", starlark_string_fn_capitalize},
       {"count", starlark_string_fn_count},
-      {"elem_ords", starlark_string_fn_elem_ords},
       {"elems", starlark_string_fn_elems},
       {"endswith", starlark_string_fn_endswith},
       {"find", starlark_string_fn_find},
@@ -1393,21 +1391,6 @@ std::string_view starlark_string::element_at(std::size_t element) const {
   return mirror.substr(start, reader.pos() - start);
 }
 
-char32_t starlark_string::ord_at(std::size_t element) const {
-  assert(element < size);
-  auto big_step = element / index_step;
-  auto small_step = element % index_step;
-  utf8_reader reader(value, false, false);
-  if (big_step) {
-    reader.skip(value_index[big_step - 1]);
-  }
-  while (small_step) {
-    small_step--;
-    reader.read_code_point();
-  }
-  return reader.read_code_point();
-}
-
 namespace {
 
 status_or<std::string_view> string_as_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
@@ -1484,12 +1467,6 @@ starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   return create_integer(static_cast<starlark_string*>(this_obj)->count(*sub, start_end->first, start_end->second), ctx);
-}
-
-starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
 }
 
 starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

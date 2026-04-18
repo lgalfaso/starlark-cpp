@@ -84,7 +84,6 @@ class starlark_string : public starlark_obj {
   static const std::vector<std::string>& attributes();
   void build_index();
   std::string_view element_at(std::size_t element) const;
-  char32_t ord_at(std::size_t element) const;
 
   std::string::size_type size;
   std::string value;
