@@ -579,6 +579,7 @@ cc_library(
         ":siphash",
         ":starlark_numeric",
         ":starlark_object",
+        ":starlark_range",
         ":starlark_tuple",
         ":starlark_types",
         "//bigint:number",
@@ -610,6 +611,20 @@ cc_test(
         ":starlark_string",
         ":starlark_testing",
         ":starlark_tuple",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "starlark_string_elems_test",
+    size = "small",
+    srcs = ["starlark_string_elems_test.cpp"],
+    deps = [
+        ":starlark_function_builder_impl",
+        ":starlark_numeric_impl",
+        ":starlark_object_impl",
+        ":starlark_string",
+        ":starlark_testing",
         "@googletest//:gtest_main",
     ],
 )

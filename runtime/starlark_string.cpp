@@ -84,6 +84,25 @@ starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_ob
 starlark_obj* starlark_string_fn_title(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_upper(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
+namespace {
+
+void append_for_repr(std::string& output, std::string_view input) {
+  utf8_reader reader(input, false, false);
+  // TODO(lmirelmann): Would be nice to avoid calling the read twice just to be able to handle the error case.
+  while (reader.pending()) {
+    auto code_point = reader.peek_code_point();
+    if (code_point != utf8_reader::kReplacementCharacter) {
+      write_printable(reader.peek_code_point(), /*allow_non_ascii_printable=*/ true, output);
+      reader.read_code_point();
+    } else {
+      output += input[reader.pos()];
+      reader.skip();
+    }
+  }
+}
+
+}  // namespace
+
 constexpr std::string::size_type starlark_string::index_step;
 
 const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::method_refs() {
@@ -179,19 +198,7 @@ bool starlark_string::inner_repr(printer& print, printer_action action) const {
   // - Check whether the original value can be used just adding quotes
   // - Keep the value of `result` in a mutable field
   std::string result = "\"";
-  utf8_reader reader(value, false, false);
-  while (reader.pending()) {
-    // TODO(lmirelmann): Would be nice to avoid calling the read twice just to be able to
-    // handle the error case.
-    auto code_point = reader.peek_code_point();
-    if (code_point != utf8_reader::kReplacementCharacter) {
-      write_printable(reader.peek_code_point(), /*allow_non_ascii_printable=*/ true, result);
-      reader.read_code_point();
-    } else {
-      result += value[reader.pos()];
-      reader.skip();
-    }
-  }
+  append_for_repr(result, value);
   result += "\"";
   print.append(result);
   return false;
@@ -697,6 +704,14 @@ std::string_view strip_impl(std::string_view value, std::string_view cutset, str
     }
   }
   return value.substr(start, count - start);
+}
+
+status_or<std::string_view> string_as_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
+  if (element->type() != starlark_types::string_t) {
+    error_callback.add_error(error_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
+    return status_or<std::string_view>(status_code::kError);
+  }
+  return status_or<std::string_view>(element->as_string());
 }
 
 }  // namespace
@@ -1336,6 +1351,120 @@ starlark_obj* starlark_string::removesuffix(std::string_view sub, context& ctx) 
   return this;
 }
 
+starlark_obj* starlark_string::elems(context& ctx) const {
+  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, size, 1));
+}
+
+starlark_string::string_elems::string_elems(const starlark_string* str, range_state state) : str(str), state(state) {}
+
+std::string_view starlark_string::string_elems::type() const {
+  return "string.elems";
+}
+
+bool starlark_string::string_elems::truthy() const {
+  return state.len > 0;
+}
+
+bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_fn& error_callback) const {
+  // TODO(lmirelmann): This error can be improved.
+  auto entry = string_as_string(&other, "in", 1, error_callback);
+  if (!entry.ok()) {
+    return false;
+  }
+  for (std::string::size_type i = 0; i < state.len; ++i) {
+    if (str->element_at(state.start + i * state.step) == *entry) {
+      return true;
+    }
+  }
+  return false;
+}
+
+int64_t starlark_string::string_elems::len(bool produce_error, error_fn& error_callback) const {
+  return state.len;
+}
+
+starlark_iterator* starlark_string::string_elems::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
+  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), str, state.start, state.step, state.len, ctx);
+}
+
+starlark_obj* starlark_string::string_elems::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  auto idx = inner_index(other, state.len, error_callback);
+  if (!idx.ok()) {
+    return nullptr;
+  }
+  return Arena::Create<starlark_string>(&ctx.arena(), str->element_at(state.start + (*idx) * state.step));
+}
+
+starlark_obj* starlark_string::string_elems::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
+  auto slice_result = inner_slice_range(start, stop, stride, state.len, error_callback);
+  if (!slice_result.ok()) {
+    return nullptr;
+  }
+  auto i_start = std::get<0>(*slice_result);
+  auto i_end = std::get<1>(*slice_result);
+  auto i_stride = std::get<2>(*slice_result);
+
+  // TODO(lmirelmann): Check that none of these overflow/underflow.
+  auto r_step = this->state.step * i_stride;
+  auto r_start = this->state.start + this->state.step * i_start;
+  auto r_end = this->state.start + this->state.step * i_end;
+  return Arena::Create<string_elems>(&ctx.arena(), str, calculate_state(r_start, r_end, r_step));
+}
+
+bool starlark_string::string_elems::inner_repr(printer& print, printer_action action) const {
+  assert(action == printer_action::kPrintTop);
+  std::string result = "\"";
+  if (state.step > 0) {
+    for (auto i = state.start; i < state.end; i += state.step) {
+      append_for_repr(result, str->element_at(i));
+    }
+  } else {
+    for (auto i = state.start; i > state.end; i += state.step) {
+      append_for_repr(result, str->element_at(i));
+    }
+  }
+  result += "\".elems()";
+  print.append(result);
+  return false;
+}
+
+bool starlark_string::string_elems::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
+  if (type() != other->type()) {
+    return false;
+  }
+  const string_elems* e_other = static_cast<const string_elems*>(other);
+  if (state.len != e_other->state.len) {
+    return false;
+  }
+  for (std::string::size_type i = 0; i < state.len; ++i) {
+    if (str->element_at(state.start + i * state.step) != e_other->str->element_at(e_other->state.start + i * e_other->state.step)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::variant<int64_t, starlark_obj::pending_hash> starlark_string::string_elems::inner_hash() const {
+  return -1;
+}
+
+starlark_string::starlark_elems_iterator::starlark_elems_iterator(const starlark_string* str, int64_t current_pos, int64_t step, int64_t remaining, context& ctx)
+  : str(str), current_pos(current_pos), step(step), remaining(remaining), ctx(ctx) {}
+
+
+bool starlark_string::starlark_elems_iterator::has_next() const {
+  return remaining > 0;
+}
+
+starlark_obj* starlark_string::starlark_elems_iterator::next() {
+  auto result = Arena::Create<starlark_string>(&ctx.arena(), str->element_at(current_pos));
+  current_pos += step;
+  remaining--;
+  return result;
+}
+
+void starlark_string::starlark_elems_iterator::end_iterator() {}
+
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
@@ -1392,14 +1521,6 @@ std::string_view starlark_string::element_at(std::size_t element) const {
 }
 
 namespace {
-
-status_or<std::string_view> string_as_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
-  if (element->type() != starlark_types::string_t) {
-    error_callback.add_error(error_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
-    return status_or<std::string_view>(status_code::kError);
-  }
-  return status_or<std::string_view>(element->as_string());
-}
 
 status_or<std::vector<std::string_view>> string_or_tuple_as_vector_of_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
   std::vector<std::string_view> result;
@@ -1470,9 +1591,12 @@ starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!no_arg(pos_args, named_args, error_callback, "string.elems").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->elems(ctx);
 }
 
 starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

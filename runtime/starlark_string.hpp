@@ -9,6 +9,7 @@
 #include <string_view>
 #include <vector>
 
+#include "runtime/starlark_range.hpp"
 #include "runtime/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
@@ -72,6 +73,44 @@ class starlark_string : public starlark_obj {
 
   starlark_obj* removeprefix(std::string_view sub, context& ctx);
   starlark_obj* removesuffix(std::string_view sub, context& ctx);
+  starlark_obj* elems(context& ctx) const;
+
+  class string_elems : public starlark_obj {
+   public:
+    string_elems(const starlark_string* str, range_state state);
+    std::string_view type() const override;
+    bool truthy() const override;
+
+    bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
+    int64_t len(bool produce_error, error_fn& error_callback) const override;
+    starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
+    starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
+    starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
+
+   protected:
+    bool inner_repr(printer& print, printer_action action) const override;
+    bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
+    std::variant<int64_t, pending_hash> inner_hash() const override;
+
+   private:
+    const starlark_string* str;
+    const range_state state;
+  };
+
+  class starlark_elems_iterator : public starlark_iterator {
+   public:
+    starlark_elems_iterator(const starlark_string* str, int64_t current_pos, int64_t step, int64_t remaining, context& ctx);
+    bool has_next() const override;
+    starlark_obj* next() override;
+    void end_iterator() override;
+
+   private:
+    const starlark_string* str;
+    int64_t current_pos;
+    const int64_t step;
+    int64_t remaining;
+    context& ctx;
+  };
 
  protected:
   bool inner_repr(printer& print, printer_action action) const override;
