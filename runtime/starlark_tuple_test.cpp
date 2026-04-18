@@ -833,4 +833,15 @@ TEST(StarlarkTuple, SliceRangeZeroStride) {
   EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
 }
 
+TEST(StarlarkTuple, DotError) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_tuple tuple(0);
+
+  EXPECT_EQ(nullptr, tuple.dot("count", ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'tuple' object has no attribute 'count'");
+}
+
 }  // namespace
