@@ -1396,19 +1396,11 @@ starlark_obj* starlark_string::string_elems::index(const starlark_obj& other, co
 }
 
 starlark_obj* starlark_string::string_elems::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  auto slice_result = inner_slice_range(start, stop, stride, state.len, error_callback);
+  auto slice_result = inner_slice_range_range(start, stop, stride, state.start, state.end, state.step, state.len, error_callback);
   if (!slice_result.ok()) {
     return nullptr;
   }
-  auto i_start = std::get<0>(*slice_result);
-  auto i_end = std::get<1>(*slice_result);
-  auto i_stride = std::get<2>(*slice_result);
-
-  // TODO(lmirelmann): Check that none of these overflow/underflow.
-  auto r_step = this->state.step * i_stride;
-  auto r_start = this->state.start + this->state.step * i_start;
-  auto r_end = this->state.start + this->state.step * i_end;
-  return Arena::Create<string_elems>(&ctx.arena(), str, calculate_state(r_start, r_end, r_step));
+  return Arena::Create<string_elems>(&ctx.arena(), str, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)));
 }
 
 bool starlark_string::string_elems::inner_repr(printer& print, printer_action action) const {
