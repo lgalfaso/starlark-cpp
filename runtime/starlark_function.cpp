@@ -224,11 +224,14 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     return pos_args[0];
   }
   if (pos_args.front()->type() == starlark_types::string_t) {
+    // If in the future we do not allow strings to have invalid Unicode sequences, then all this can be replaced with
+    // return Arena::Create<starlark_bytes>(&ctx.arena(), pos_args.front()->as_string());
     std::string result;
     utf8_reader reader(pos_args.front()->as_string(), false, false);
     while (reader.pending()) {
       utf8_encode_code_point(reader.read_code_point(), result, false, true);
     }
+    // TODO(lmirelmann): Check that the result is within the maximum allowed.
     return Arena::Create<starlark_bytes>(&ctx.arena(), result);
   }
   auto* it = pos_args.front()->get_iterator(false, ctx, error_callback);
