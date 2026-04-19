@@ -93,6 +93,7 @@ cc_library(
         ":error_fn",
         ":error_messages",
         ":levenshtein",
+        ":options",
         ":starlark_types",
         "//bigint:number",
         "//containers:linked_hash_map",

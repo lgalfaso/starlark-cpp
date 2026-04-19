@@ -81,7 +81,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
         return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(max_sequence_size()));
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       int64_t int_value = value.at(0);

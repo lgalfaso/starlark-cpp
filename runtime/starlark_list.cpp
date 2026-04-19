@@ -190,7 +190,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
         return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(max_sequence_size()));
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       int64_t int_value = value.at(0);
@@ -262,7 +262,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
         return this;
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(max_sequence_size()));
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       int64_t int_value = value.at(0);

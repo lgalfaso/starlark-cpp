@@ -135,39 +135,11 @@ starlark_obj* starlark_range::index(const starlark_obj& other, context& ctx, err
 }
 
 starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  auto slice_result = inner_slice_range(start, stop, stride, state.len, error_callback);
+  auto slice_result = inner_slice_range_range(start, stop, stride, state.start, state.end, state.step, state.len, error_callback);
   if (!slice_result.ok()) {
     return nullptr;
   }
-  auto i_start = std::get<0>(*slice_result);
-  auto i_end = std::get<1>(*slice_result);
-  auto i_stride = std::get<2>(*slice_result);
-
-  int64_t r_step;
-  if (ckd_mul(&r_step, this->state.step, i_stride)) {
-    error_callback.add_error(error_overflow_too_many_digits());
-    return nullptr;
-  }
-  int64_t tmp;
-  if (ckd_mul(&tmp, this->state.step, i_start)) {
-    error_callback.add_error(error_overflow_too_many_digits());
-    return nullptr;
-  }
-  int64_t r_start;
-  if (ckd_add(&r_start, this->state.start, tmp)) {
-    error_callback.add_error(error_overflow_too_many_digits());
-    return nullptr;
-  }
-  if (ckd_mul(&tmp, this->state.step, i_end)) {
-    error_callback.add_error(error_overflow_too_many_digits());
-    return nullptr;
-  }
-  int64_t r_end;
-  if (ckd_add(&r_end, this->state.start, tmp)) {
-    error_callback.add_error(error_overflow_too_many_digits());
-    return nullptr;
-  }
-  return Arena::Create<starlark_range>(&ctx.arena(), r_start, r_end, r_step);
+  return Arena::Create<starlark_range>(&ctx.arena(), std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result));
 }
 
 starlark_range::starlark_range_iterator::starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, context& ctx)

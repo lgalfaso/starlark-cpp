@@ -254,7 +254,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
         return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(max_string_length()));
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);

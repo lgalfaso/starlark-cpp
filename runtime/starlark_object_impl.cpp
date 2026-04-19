@@ -12,8 +12,11 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
-context::context(Arena& arena) :
+context::context(Arena& arena) : context(arena, runtime_options{}) {}
+
+context::context(Arena& arena, const runtime_options& options) :
   arena_(arena),
+  options_(options),
   false_value_(Arena::Create<starlark_bool>(&arena, false)),
   true_value_(Arena::Create<starlark_bool>(&arena, true)),
   none_value_(Arena::Create<starlark_none>(&arena)),
@@ -57,6 +60,10 @@ starlark_obj* context::empty_string() const {
 
 Arena& context::arena() {
   return arena_;
+}
+
+const runtime_options& context::options() {
+  return options_;
 }
 
 }  // namespace runtime

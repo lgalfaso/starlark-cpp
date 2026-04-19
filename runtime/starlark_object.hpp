@@ -17,6 +17,7 @@
 #include "containers/linked_hash_map.hpp"
 #include "google/protobuf/arena.h"
 #include "runtime/error_fn.hpp"
+#include "runtime/options.hpp"
 #include "status_or/status.hpp"
 
 #pragma GCC visibility push(default)
@@ -126,6 +127,7 @@ struct starlark_equals_to {
 class context {
  public:
   explicit context(google::protobuf::Arena& arena);
+  context(google::protobuf::Arena& arena, const runtime_options& options);
   starlark_obj* false_value() const;
   starlark_obj* true_value() const;
   starlark_obj* none_value() const;
@@ -136,9 +138,11 @@ class context {
   starlark_obj* empty_string() const;
   // TODO(lmirelmann): Do not expose the arena.
   google::protobuf::Arena& arena();
+  const runtime_options& options();
 
  private:
   google::protobuf::Arena& arena_;
+  const runtime_options options_;
   starlark_obj* false_value_;
   starlark_obj* true_value_;
   starlark_obj* none_value_;
@@ -237,6 +241,7 @@ class starlark_obj {
   virtual void inner_freeze(std::vector<starlark_obj*>& to_freeze);
   starlark::result::status_or<int64_t> inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const;
   starlark::result::status_or<std::tuple<int64_t, int64_t, int64_t>> inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const;
+  starlark::result::status_or<std::tuple<int64_t, int64_t, int64_t>> inner_slice_range_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t original_start, int64_t original_end, int64_t original_stride, int64_t original_length, error_fn& error_callback) const;
 
  private:
   static const std::map<std::string, fn*, std::less<>>& method_refs();

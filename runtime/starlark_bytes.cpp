@@ -8,6 +8,7 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <stdckdint.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -177,7 +178,12 @@ starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other,
     error_callback.add_error(error_no_concat(this_obj.type(), other.type()));
     return nullptr;
   }
-  // TODO(lmirelmann): Check that the value length would not go over the limit.
+  std::size_t expected_length;
+  if (ckd_add(&expected_length, this_obj.as_string().length(),  other.as_string().length()) ||
+      expected_length > ctx.options().max_string_length) {
+    error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+    return nullptr;
+  }
   std::string value{this_obj.as_string()};
   value += other.as_string();
   return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(value));
@@ -189,11 +195,18 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
       if (this_obj.as_string().empty()) {
         return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
-      auto multiplier = other.as_int64();
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
       std::string result;
-      for (int64_t i = 0; i < multiplier; ++i) {
-        result += this_obj.as_string();
+      auto multiplier = other.as_int64();
+      if (multiplier > 0) {
+        std::size_t expected_length;
+        if (ckd_mul(&expected_length, this_obj.as_string().length(), multiplier) ||
+            expected_length > ctx.options().max_string_length) {
+          error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+          return nullptr;
+        }
+        for (int64_t i = 0; i < multiplier; ++i) {
+          result += this_obj.as_string();
+        }
       }
       return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
     }
@@ -206,12 +219,17 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
         return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(max_string_length()));
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);
+      std::size_t expected_length;
+      if (ckd_mul(&expected_length, this_obj.as_string().length(), int_value) ||
+          expected_length > ctx.options().max_string_length) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+        return nullptr;
+      }
       std::string result;
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
       for (int64_t i = 0; i < int_value; ++i) {
         result += this_obj.as_string();
       }
@@ -1119,19 +1137,11 @@ starlark_obj* starlark_bytes::bytes_elems::index(const starlark_obj& other, cont
 }
 
 starlark_obj* starlark_bytes::bytes_elems::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  auto slice_result = inner_slice_range(start, stop, stride, state.len, error_callback);
+  auto slice_result = inner_slice_range_range(start, stop, stride, state.start, state.end, state.step, state.len, error_callback);
   if (!slice_result.ok()) {
     return nullptr;
   }
-  auto i_start = std::get<0>(*slice_result);
-  auto i_end = std::get<1>(*slice_result);
-  auto i_stride = std::get<2>(*slice_result);
-
-  // TODO(lmirelmann): Check that none of these overflow/underflow.
-  auto r_step = this->state.step * i_stride;
-  auto r_start = this->state.start + this->state.step * i_start;
-  auto r_end = this->state.start + this->state.step * i_end;
-  return Arena::Create<bytes_elems>(&ctx.arena(), bytes, calculate_state(r_start, r_end, r_step));
+  return Arena::Create<bytes_elems>(&ctx.arena(), bytes, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)));
 }
 
 bool starlark_bytes::bytes_elems::inner_repr(printer& print, printer_action action) const {

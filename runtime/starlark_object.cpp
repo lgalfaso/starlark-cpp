@@ -7,6 +7,7 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <stdckdint.h>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -607,6 +608,42 @@ status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range
     i_end = std::min<int64_t>(i_end, upper);
   }
   return status_or<std::tuple<int64_t, int64_t, int64_t>>(std::make_tuple(i_start, i_end, i_stride));
+}
+
+starlark::result::status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t original_start, int64_t original_end, int64_t original_stride, int64_t original_length, error_fn& error_callback) const {
+  auto slice_result = inner_slice_range(start, stop, stride, original_length, error_callback);
+  if (!slice_result.ok()) {
+    return slice_result;
+  }
+  auto i_start = std::get<0>(*slice_result);
+  auto i_end = std::get<1>(*slice_result);
+  auto i_stride = std::get<2>(*slice_result);
+
+  int64_t r_stride;
+  if (ckd_mul(&r_stride, original_stride, i_stride)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+  }
+  int64_t tmp;
+  if (ckd_mul(&tmp, original_stride, i_start)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+  }
+  int64_t r_start;
+  if (ckd_add(&r_start, original_start, tmp)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+  }
+  if (ckd_mul(&tmp, original_stride, i_end)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+  }
+  int64_t r_end;
+  if (ckd_add(&r_end, original_start, tmp)) {
+    error_callback.add_error(error_overflow_too_many_digits());
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+  }
+  return status_or<std::tuple<int64_t, int64_t, int64_t>>(std::make_tuple(r_start, r_end, r_stride));
 }
 
 size_t starlark_hash_op::operator()(const starlark_obj* value) const {
