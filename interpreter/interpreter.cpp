@@ -148,6 +148,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.push_back(Arena::Create<starlark_float>(&ctx.arena(), op_code.const_float().value()));
         break;
       case OpCode::kConstString:
+        // TODO(lmirelmann): Check that the string is not larger than the maximum allowed.
         stack.push_back(Arena::Create<starlark_string>(&ctx.arena(), op_code.const_string().value()));
         break;
       case OpCode::kConstBytes:
