@@ -2,13 +2,13 @@
 
 #include "runtime/starlark_bytes.hpp"
 
+#include <stdckdint.h>
 #include <cassert>
 
 #include <algorithm>
 #include <functional>
 #include <limits>
 #include <map>
-#include <stdckdint.h>
 #include <string>
 #include <utility>
 #include <vector>
