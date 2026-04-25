@@ -12,7 +12,7 @@ message Block {
 }
 
 message OpCode {
-  // next_id: 106
+  // next_id: 107
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -20,6 +20,7 @@ message OpCode {
     ConstInt const_int = 67;
     ConstFloat const_float = 2;
     ConstString const_string = 3;
+    ConstString const_string_view = 106;
     ConstBytes const_bytes = 4;
     ConstNone const_none = 59;
 

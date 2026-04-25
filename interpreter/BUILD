@@ -1,6 +1,6 @@
 # Copyright 2025 Lucas Mirelmann
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
 cc_library(
     name = "frame",
@@ -81,4 +81,12 @@ cc_library(
         ],
     ) for f in glob(["interpreter_tests/*.star"])
 ]
+
+cc_binary(
+    name = "interpreter_main",
+    srcs = ["interpreter_main.cpp"],
+    deps = [
+        ":interpreter",
+    ],
+)
 

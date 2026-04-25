@@ -814,7 +814,7 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
 
 void bytecode_generator::enter_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
-    mutable_block()->add_op_code()->mutable_const_string()->set_value(argument->named_argument().identifier().nfkc_name());
+    mutable_block()->add_op_code()->mutable_const_string_view()->set_value(argument->named_argument().identifier().nfkc_name());
   }
 }
 
