@@ -434,7 +434,7 @@ number&& number::operator-(const number& other) && {
 }
 
 // static.
-void number::mult_op(const nbase a, const nbase b, nbase* high, nbase* low) {
+inline void number::mult_op(const nbase a, const nbase b, nbase* high, nbase* low) {
   using u128 = unsigned __int128;
   u128 result = u128(a) * b;
   *low = result;

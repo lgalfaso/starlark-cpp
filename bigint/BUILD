@@ -86,3 +86,13 @@ cc_binary(
         "@google_benchmark//:benchmark",
     ],
 )
+
+cc_binary(
+    name = "number_karatsuba_benchmark",
+    testonly = True,
+    srcs = ["number_karatsuba_benchmark.cpp"],
+    deps = [
+        ":number",
+        "@google_benchmark//:benchmark",
+    ],
+)
