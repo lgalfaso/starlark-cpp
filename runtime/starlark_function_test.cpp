@@ -592,6 +592,43 @@ TEST(StarlarkBytes, FromStringInvalidUnicodeSequence) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkBytes, FromStringOverflowNoOverflow) {
+  Arena arena;
+  context ctx(arena, runtime_options{.max_string_length = 20});
+  error_handler error_callback;
+
+  starlark_string str("abc\xf0\x{f1}def01234567"sv);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+
+  auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "b\"abc\\xef\\xbf\\xbd\\xef\\xbf\\xbddef01234567\"");
+
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBytes, FromStringOverflowOverflow) {
+  Arena arena;
+  context ctx(arena, runtime_options{.max_string_length = 20});
+  error_handler error_callback;
+
+  // The only way to make the new bytes longer is to use invalid sequences that will
+  // force the output to be larger. If the logic were to change, then this condition
+  // can be removed.
+  starlark_string str("abc\xf0\x{f1}def012345678"sv);
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+
+  auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
+}
+
 TEST(StarlarkBytes, List) {
   starlark_integer zero(0);
   starlark_integer one(1);

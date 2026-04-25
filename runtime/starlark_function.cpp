@@ -231,7 +231,10 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     while (reader.pending()) {
       utf8_encode_code_point(reader.read_code_point(), result, false, true);
     }
-    // TODO(lmirelmann): Check that the result is within the maximum allowed.
+    if (result.length() > ctx.options().max_string_length) {
+      error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+      return nullptr;
+    }
     return Arena::Create<starlark_bytes>(&ctx.arena(), result);
   }
   auto* it = pos_args.front()->get_iterator(false, ctx, error_callback);
