@@ -118,6 +118,7 @@ class error_handler : public error_fn {
 
 frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
   std::vector<starlark_obj*> stack;
+  std::vector<std::string_view> sv_stack;
   std::vector<std::vector<frame*>> frame_stacks;
   std::vector<std::pair<int, int>> call_stack;
   int instruction_ptr = 0;
@@ -151,7 +152,11 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         // TODO(lmirelmann): Check that the string is not larger than the maximum allowed.
         stack.push_back(Arena::Create<starlark_string>(&ctx.arena(), op_code.const_string().value()));
         break;
+      case OpCode::kConstStringView:
+        sv_stack.push_back(op_code.const_string_view().value());
+        break;
       case OpCode::kConstBytes:
+        // TODO(lmirelmann): Check that the string is not larger than the maximum allowed.
         stack.push_back(Arena::Create<starlark_bytes>(&ctx.arena(), op_code.const_bytes().value()));
         break;
       case OpCode::kMakeList:
@@ -178,8 +183,8 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         starlark_obj* candidate_dict = stack[stack.size() - 1 - op_code.add_to_dictionary().number_of_elements() * 2];
         assert(candidate_dict->type() == starlark_types::dict_t);
         starlark_dictionary* dict = static_cast<starlark_dictionary*>(candidate_dict);
-        assert(op_code.add_to_list().number_of_elements() < std::numeric_limits<decltype(op_code.add_to_list().number_of_elements())>::max() / 2);
-        assert(stack.size() >= op_code.add_to_list().number_of_elements() * 2);
+        assert(op_code.add_to_dictionary().number_of_elements() < std::numeric_limits<decltype(op_code.add_to_list().number_of_elements())>::max() / 2);
+        assert(stack.size() >= op_code.add_to_dictionary().number_of_elements() * 2);
         for (int i = 0; i < op_code.add_to_dictionary().number_of_elements(); ++i) {
           auto* key = stack[stack.size() - 2 * op_code.add_to_dictionary().number_of_elements() + 2 * i];
           if (!dict->insert(key, stack[stack.size() - 2 * op_code.add_to_dictionary().number_of_elements() + 2 * i + 1], error_callback).first &&
@@ -194,6 +199,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       }
       case OpCode::kMakeTuple: {
+        // TODO(lmirelmann): Check that the tuple is not larger than the maximum allowed.
         assert(stack.size() >= op_code.make_tuple().number_of_elements());
         starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), op_code.make_tuple().number_of_elements());
         for (int i = op_code.make_tuple().number_of_elements(); i > 0; --i) {
@@ -382,24 +388,22 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       case OpCode::kCall: {
         // TODO(lmirelmann): Implement recursion detection.
         int args_count = op_code.call().positional_arguments_count() +
-            2 * op_code.call().named_arguments_count() +
+            op_code.call().named_arguments_count() +
             (op_code.call().has_variadic_positional_argument() ? 1 : 0) +
             (op_code.call().has_variadic_named_argument() ? 1 : 0);
         assert(stack.size() >= args_count + 1);
+        assert(sv_stack.size() >= op_code.call().named_arguments_count());
         starlark_obj::pos_args_t pos_args;
         starlark_obj::named_args_t named_args;
         for (int i = 0; i < op_code.call().positional_arguments_count(); ++i) {
           pos_args.push_back(stack[stack.size() - args_count + i]);
         }
         for (int i = 0; i < op_code.call().named_arguments_count(); ++i) {
-          auto* key = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i];
-          auto* value = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * i + 1];
-          assert(key->type() == starlark_types::string_t);
-          // TODO(lmirelmann): Avoid the generation of starlark_string.
-          named_args.insert(key->as_string(), value);
+          auto* value = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + i];
+          named_args.insert(sv_stack[sv_stack.size() - op_code.call().named_arguments_count() + i], value);
         }
         if (op_code.call().has_variadic_positional_argument()) {
-          auto* iterable = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + 2 * op_code.call().named_arguments_count()];
+          auto* iterable = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + op_code.call().named_arguments_count()];
           auto* it = iterable->get_iterator(true, ctx, error_callback);
           if (it == nullptr) {
             break;
@@ -440,6 +444,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
           it->end_iterator();
         }
         stack.resize(stack.size() - args_count, nullptr);
+        sv_stack.resize(sv_stack.size() - op_code.call().named_arguments_count(), std::string_view{});
         stack.back() = stack.back()->call(pos_args, named_args, ctx, error_callback);
         break;
       }
