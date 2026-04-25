@@ -221,7 +221,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     return nullptr;
   }
   if (pos_args.front()->type() == starlark_types::bytes_t) {
-    return pos_args[0];
+    return pos_args.front();
   }
   if (pos_args.front()->type() == starlark_types::string_t) {
     // If in the future we do not allow strings to have invalid Unicode sequences, then all this can be replaced with
