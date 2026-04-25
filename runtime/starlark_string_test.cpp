@@ -294,6 +294,33 @@ TEST(StarlarkString, PlusEqualsAssignNotList) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to string");
 }
 
+TEST(StarlarkString, PlusEqualsAssignOverflow) {
+  starlark_string str_1("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"sv);
+  starlark_string str_2("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789X"sv);
+  Arena arena;
+  context ctx(arena, starlark::runtime::runtime_options{.max_string_length = 200 });
+  error_handler error_callback;
+
+  auto* result = str_1.plus_equals_assign(str_2, ctx, error_callback);
+
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 200 elements");
+}
+
+TEST(StarlarkString, PlusEqualsAssignOverflowNoOverflow) {
+  starlark_string str_1("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"sv);
+  starlark_string str_2("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"sv);
+  Arena arena;
+  context ctx(arena, starlark::runtime::runtime_options{.max_string_length = 200 });
+  error_handler error_callback;
+
+  auto* result = str_1.plus_equals_assign(str_2, ctx, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+}
+
 TEST(StarlarkString, BinaryStar) {
   starlark_bigint minus_two(-2);
   starlark_integer minus_one(-1);
@@ -444,6 +471,60 @@ TEST(StarlarkString, StarEqualsAssignReverse) {
   EXPECT_EQ(result_4->str(), "");
   ASSERT_NE(result_5, nullptr);
   EXPECT_EQ(result_5->str(), "");
+}
+
+TEST(StarlarkString, StarEqualsAssignOverflow) {
+  starlark_string str("0"sv);
+  starlark_integer number(201);
+  Arena arena;
+  context ctx(arena, starlark::runtime::runtime_options{.max_string_length = 200 });
+  error_handler error_callback;
+
+  auto* result = str.star_equals_assign(number, ctx, error_callback);
+
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 200 elements");
+}
+
+TEST(StarlarkString, StarEqualsAssignOverflowNoOverflow) {
+  starlark_string str("0"sv);
+  starlark_integer number(200);
+  Arena arena;
+  context ctx(arena, starlark::runtime::runtime_options{.max_string_length = 200 });
+  error_handler error_callback;
+
+  auto* result = str.star_equals_assign(number, ctx, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+}
+
+TEST(StarlarkString, StarEqualsAssignOverflowBigint) {
+  starlark_string str("0"sv);
+  starlark_bigint number(201);
+  Arena arena;
+  context ctx(arena, starlark::runtime::runtime_options{.max_string_length = 200 });
+  error_handler error_callback;
+
+  auto* result = str.star_equals_assign(number, ctx, error_callback);
+
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 200 elements");
+}
+
+TEST(StarlarkString, StarEqualsAssignOverflowNoOverflowBigint) {
+  starlark_string str("0"sv);
+  starlark_bigint number(200);
+  Arena arena;
+  context ctx(arena, starlark::runtime::runtime_options{.max_string_length = 200 });
+  error_handler error_callback;
+
+  auto* result = str.star_equals_assign(number, ctx, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
 }
 
 TEST(StarlarkString, StarEqualsAssignNotInt) {

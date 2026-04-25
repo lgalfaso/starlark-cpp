@@ -41,6 +41,7 @@ std::string_view error_convert_float_infinity_to_integer();
 std::string_view error_convert_float_nan_to_integer();
 std::string error_interpreted_as_integer(std::string_view type);
 std::string error_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type);
+std::string error_argument_interpreted_as_string(std::string_view argument_name, std::string_view type);
 
 std::string error_dictionary_key_not_found(std::string_view key);
 std::string error_dictionary_update_sequence(int64_t position, int64_t actual, int64_t expected);

@@ -2,6 +2,7 @@
 
 #include "runtime/starlark_string.hpp"
 
+#include <stdckdint.h>
 #include <cassert>
 
 #include <algorithm>
@@ -225,7 +226,12 @@ starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other
     error_callback.add_error(error_no_concat(this_obj.type(), other.type()));
     return nullptr;
   }
-  // TODO(lmirelmann): Check that the value length would not go over the limit.
+  std::size_t expected_size;
+  if (ckd_add(&expected_size, this_obj.as_string().size(), other.as_string().size()) ||
+      expected_size > ctx.options().max_string_length) {
+    error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+    return nullptr;
+  }
   std::string result{this_obj.as_string()};
   result += other.as_string();
   return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
@@ -237,11 +243,18 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       if (this_obj.as_string().empty()) {
         return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
       auto multiplier = other.as_int64();
       std::string result;
-      for (int64_t i = 0; i < multiplier; ++i) {
-        result += this_obj.as_string();
+      if (multiplier > 0) {
+        std::size_t expected_size;
+        if (ckd_mul(&expected_size, this_obj.as_string().size(), multiplier) ||
+            expected_size > ctx.options().max_string_length) {
+          error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+          return nullptr;
+        }
+        for (int64_t i = 0; i < multiplier; ++i) {
+          result += this_obj.as_string();
+        }
       }
       return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
     }
@@ -258,7 +271,12 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      std::size_t expected_size;
+      if (ckd_mul(&expected_size, this_obj.as_string().size(), int_value) ||
+          expected_size > ctx.options().max_string_length) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+        return nullptr;
+      }
       std::string result;
       for (int64_t i = 0; i < int_value; ++i) {
         result += this_obj.as_string();

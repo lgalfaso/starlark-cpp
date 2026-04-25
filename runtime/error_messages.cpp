@@ -121,6 +121,10 @@ std::string error_argument_interpreted_as_integer(std::string_view argument_name
   return std::format("TypeError: parameter '{}' cannot be interpreted as an integer ({})", argument_name, type);
 }
 
+std::string error_argument_interpreted_as_string(std::string_view argument_name, std::string_view type) {
+  return std::format("TypeError: parameter '{}' cannot be interpreted as an string ({})", argument_name, type);
+}
+
 std::string error_dictionary_key_not_found(std::string_view key) {
   return std::format("KeyError: {}", key);
 }
