@@ -1393,7 +1393,6 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() 
 }
 
 void starlark_string::build_index() {
-  // TODO(lmirelmann): This makes the assumption that value is well formed.
   utf8_reader reader(value, false, false);
   std::string::size_type code_point_count = 0;
   while (reader.pending()) {
