@@ -216,7 +216,7 @@ starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): The Python version of `bytes` can take zero arguments and returns `b''`. It is not clear whether this is desired in this case.
+  // The Python version of `bytes` can take zero arguments and returns `b''`. The spec mandates that this parameter is mandatory.
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bytes_f).ok()) {
     return nullptr;
   }
@@ -326,7 +326,7 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
   const auto& attributes = pos_args.front()->dir();
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), attributes.size());
   for (const auto& attribute : attributes) {
-    // TODO(lmirelmann): This recreates the strings for every call. This can be quite wasteful. Given that this method is not called a lot, then maybe this is ok.
+    // This recreates the strings for every call, and can be quite wasteful. Given that this method is rarely called, then maybe this is ok.
     result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), attribute));
   }
   return result;
