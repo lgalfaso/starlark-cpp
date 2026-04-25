@@ -631,9 +631,30 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  std::string sep = " ";
+  for (auto& [key, value] : named_args) {
+    if (key == "sep") {
+      assert(value != nullptr);
+      if (value->type() != starlark_types::string_t) {
+        error_callback.add_error(error_argument_interpreted_as_string("sep", value->type()));
+        return nullptr;
+      }
+      sep = value->str();
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
+  }
+  bool first = true;
+  for (const auto* element : pos_args) {
+    if (!first) {
+      ctx.options().out << sep;
+    }
+    first = false;
+    ctx.options().out << element->str();
+  }
+  ctx.options().out << "\n";
+  return ctx.none_value();
 }
 
 starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

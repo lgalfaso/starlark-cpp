@@ -34,7 +34,6 @@ cc_test(
 
 cc_library(
     name = "options",
-    srcs = ["options.cpp"],
     hdrs = ["options.hpp"],
 )
 

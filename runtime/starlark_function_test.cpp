@@ -32,6 +32,7 @@ using ::starlark::runtime::context;
 using ::starlark::runtime::create_float;
 using ::starlark::runtime::create_integer;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_function;
@@ -2533,6 +2534,117 @@ TEST(StarlarkOrd, NamedArguments) {
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: ord() takes no keyword arguments", error_callback.messages[0]);
+}
+
+TEST(StarlarkPrint, NoArguments) {
+  std::basic_ostringstream<char> out;
+  Arena arena;
+  context ctx(arena, runtime_options{.out = out});
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::none_t);
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(out.str(), "\n");
+}
+
+TEST(StarlarkPrint, OneArguments) {
+  std::basic_ostringstream<char> out;
+  Arena arena;
+  context ctx(arena, runtime_options{.out = out});
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+
+  auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::none_t);
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(out.str(), "0\n");
+}
+
+TEST(StarlarkPrint, TwoArguments) {
+  std::basic_ostringstream<char> out;
+  Arena arena;
+  context ctx(arena, runtime_options{.out = out});
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::none_t);
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(out.str(), "0 1\n");
+}
+
+TEST(StarlarkPrint, NamedArguments) {
+  std::string s_sep("sep");
+  starlark_string sep(", "sv);
+  std::basic_ostringstream<char> out;
+  Arena arena;
+  context ctx(arena, runtime_options{.out = out});
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_sep, &sep);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::none_t);
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(out.str(), "0, 1\n");
+}
+
+TEST(StarlarkPrint, NamedArgumentsSepAsNone) {
+  std::string s_sep("sep");
+  std::basic_ostringstream<char> out;
+  Arena arena;
+  context ctx(arena, runtime_options{.out = out});
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_sep, ctx.none_value());
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'sep' cannot be interpreted as an string (NoneType)");
+}
+
+TEST(StarlarkPrint, NamedArgumentsEnd) {
+  std::string s_end("end");
+  starlark_string end(", "sv);
+  std::basic_ostringstream<char> out;
+  Arena arena;
+  context ctx(arena, runtime_options{.out = out});
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_end, &end);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'end'");
 }
 
 TEST(StarlarkRange, OneArgument) {
