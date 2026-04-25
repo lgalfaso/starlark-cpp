@@ -78,7 +78,7 @@ int ccc(char32_t code_point);
 
 std::optional<char32_t> canonical_composition(char32_t lhs, char32_t rhs);
 
-// TODO(lmirelmann): Should be possible to output the encoded bytes un a string_view. This will
+// TODO(lmirelmann): Should be possible to output the encoded bytes as a string_view. This will
 // make the execution of whomever need this much faster as it would not need to re-encode things
 // multiple times. It should also sabe a few bytes as keeping the code points takes more space
 // than keeping the encoded bytes.
