@@ -18,6 +18,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::runtime::context;
+using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_integer;
@@ -311,6 +312,48 @@ TEST(StarlarkTuple, BinaryPlus) {
   EXPECT_EQ(result->str(), "(0, 1)");
 }
 
+TEST(StarlarkTuple, BinaryPlusOverflowNoOverflow) {
+  starlark_tuple tuple_1(0);
+  starlark_tuple tuple_2(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena, runtime_options{.max_sequence_size = 20});
+
+  for (int i = 0; i < 10; ++i) {
+    tuple_1.add(ctx.zero());
+    tuple_2.add(ctx.one());
+  }
+
+  auto* result = tuple_1.binary_plus(tuple_2, ctx, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(tuple_1.str(), "(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)");
+  EXPECT_EQ(tuple_2.str(), "(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)");
+  EXPECT_EQ(result->str(), "(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)");
+}
+
+TEST(StarlarkTuple, BinaryPlusOverflowOverflow) {
+  starlark_tuple tuple_1(0);
+  starlark_tuple tuple_2(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena, runtime_options{.max_sequence_size = 19});
+
+  for (int i = 0; i < 10; ++i) {
+    tuple_1.add(ctx.zero());
+    tuple_2.add(ctx.one());
+  }
+
+  auto* result = tuple_1.binary_plus(tuple_2, ctx, error_callback);
+
+  ASSERT_EQ(result, nullptr);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 19 elements");
+  EXPECT_EQ(tuple_1.str(), "(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)");
+  EXPECT_EQ(tuple_2.str(), "(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)");
+}
+
 TEST(StarlarkTuple, BinaryPlusNotList) {
   starlark_list list(0);
   starlark_tuple tuple(0);
@@ -423,6 +466,70 @@ TEST(StarlarkTuple, BinaryStarReverse) {
   EXPECT_EQ(result_3->str(), "()");
   ASSERT_NE(result_4, nullptr);
   EXPECT_EQ(result_4->str(), "()");
+}
+
+TEST(StarlarkTuple, BinaryStarOverflowNoOverflow) {
+  starlark_integer param(20);
+  starlark_tuple tuple(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena, runtime_options{.max_sequence_size = 20});
+
+  tuple.add(ctx.zero());
+
+  auto* result = tuple.binary_star(param, ctx, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkTuple, BinaryStarOverflowOverflow) {
+  starlark_integer param(21);
+  starlark_tuple tuple(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena, runtime_options{.max_sequence_size = 20});
+
+  tuple.add(ctx.zero());
+
+  auto* result = tuple.binary_star(param, ctx, error_callback);
+
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
+}
+
+TEST(StarlarkTuple, BinaryStarOverflowNoOverflowBigint) {
+  starlark_bigint param(20);
+  starlark_tuple tuple(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena, runtime_options{.max_sequence_size = 20});
+
+  tuple.add(ctx.zero());
+
+  auto* result = tuple.binary_star(param, ctx, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->str(), "(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkTuple, BinaryStarOverflowOverflowBigint) {
+  starlark_bigint param(21);
+  starlark_tuple tuple(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena, runtime_options{.max_sequence_size = 20});
+
+  tuple.add(ctx.zero());
+
+  auto* result = tuple.binary_star(param, ctx, error_callback);
+
+  ASSERT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
 }
 
 TEST(StarlarkTuple, BinaryStarNotInt) {

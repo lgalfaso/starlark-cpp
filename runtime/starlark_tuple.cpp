@@ -2,6 +2,8 @@
 
 #include "runtime/starlark_tuple.hpp"
 
+#include <stdckdint.h>
+
 #include <algorithm>
 #include <bit>
 #include <string>
@@ -38,11 +40,16 @@ starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other,
     error_callback.add_error(error_no_concat(this_obj.type(), other.type(), this_obj.type()));
     return nullptr;
   }
-  // TODO(lmirelmann): Check the result size.
   const starlark_tuple& t_other = static_cast<const starlark_tuple&>(other);
   const auto& this_values = inspect_tuple(this_obj);
   const auto& other_values = inspect_tuple(t_other);
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), this_values.size() + other_values.size());
+  std::size_t expected_size;
+  if (ckd_add(&expected_size, this_values.size(), other_values.size()) ||
+      expected_size > ctx.options().max_sequence_size) {
+    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    return nullptr;
+  }
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
   for (auto& key : this_values) {
     result->add(key);
   }
@@ -63,8 +70,13 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
       if (value <= 0) {
         return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), value * this_values.size());
+      std::size_t expected_size;
+      if (ckd_mul(&expected_size, this_values.size(), value) ||
+          expected_size > ctx.options().max_sequence_size) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        return nullptr;
+      }
+      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
       for (int64_t i = 0; i < value; ++i) {
         for (auto& key : this_values) {
           result->add(key);
@@ -85,8 +97,13 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
         return nullptr;
       }
       int64_t int_value = value.at(0);
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), int_value * this_values.size());
+      std::size_t expected_size;
+      if (ckd_mul(&expected_size, this_values.size(), int_value) ||
+          expected_size > ctx.options().max_sequence_size) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        return nullptr;
+      }
+      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
       for (int64_t i = 0; i < int_value; ++i) {
         for (auto& key : this_values) {
           result->add(key);
