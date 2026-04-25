@@ -1255,7 +1255,7 @@ TEST(StarlarkEnumerate, InvalidStart) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string).");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string)");
 }
 
 TEST(StarlarkEnumerate, InvalidNamedArgument) {
@@ -1280,7 +1280,7 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'end'.");
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'end'");
 }
 
 TEST(StarlarkEnumerate, TooFewPosArguments) {

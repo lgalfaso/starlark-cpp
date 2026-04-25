@@ -118,7 +118,7 @@ std::string error_interpreted_as_integer(std::string_view type) {
 }
 
 std::string error_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type) {
-  return std::format("TypeError: parameter '{}' cannot be interpreted as an integer ({}).", argument_name, type);
+  return std::format("TypeError: parameter '{}' cannot be interpreted as an integer ({})", argument_name, type);
 }
 
 std::string error_dictionary_key_not_found(std::string_view key) {
@@ -174,7 +174,7 @@ std::string error_no_keyword(std::string_view fn_name) {
 }
 
 std::string error_unknown_argument(std::string_view argument_name) {
-  return std::format("Unknown named argument '{}'.", argument_name);
+  return std::format("Unknown named argument '{}'", argument_name);
 }
 
 std::string error_no_pos_args(std::string_view fn_name, int64_t actual) {
