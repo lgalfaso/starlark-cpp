@@ -635,7 +635,6 @@ std::string to_title_string(std::string_view value, bool& found_cased) {
     auto cased = is_Cased(code_point);
     found_cased |= cased;
     if (first_letter_of_word && cased) {
-      found_cased = true;
       auto new_code_points = to_title(code_point);
       for (const auto& c : new_code_points) {
         utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);

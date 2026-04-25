@@ -867,9 +867,11 @@ TEST(StarlarkString, Interpolation) {
   starlark_float minus_nan(std::strtod("-nan", nullptr));
   starlark_string small_string("abc"sv);
   starlark_list list_one_two(2);
+  Arena arena;
+  context ctx(arena);
   error_handler error_callback;
-  list_one_two.append(&one, error_callback);
-  list_one_two.append(&two, error_callback);
+  list_one_two.append(&one, ctx, error_callback);
+  list_one_two.append(&two, ctx, error_callback);
 
   test("%s", &one, "1");
   test("abc%sdef", &one, "abc1def");

@@ -6,6 +6,7 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <stdckdint.h>
 #include <string>
 #include <vector>
 
@@ -149,16 +150,15 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, context& ctx
     return nullptr;
   }
   const starlark_list& l_other = static_cast<const starlark_list&>(other);
-  // TODO(lmirelmann): Check the result size.
+  std::size_t expected_size;
+  if (ckd_add(&expected_size, values.size(), l_other.values.size()) ||
+      expected_size > ctx.options().max_sequence_size) {
+    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    return nullptr;
+  }
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values.size() + l_other.values.size());
-  // TODO(lmirelmann): It should be possible to insert the entire thing using one call to `std::vector::insert`, but
-  // this would slightly break the fact that `add` is the only one adding elements.
-  for (auto& key : values) {
-    result->unsafe_append(key);
-  }
-  for (auto& key : l_other.values) {
-    result->unsafe_append(key);
-  }
+  result->values.insert(result->values.end(), values.begin(), values.end());
+  result->values.insert(result->values.end(), l_other.values.begin(), l_other.values.end());
   return result;
 }
 
@@ -172,12 +172,15 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
       if (value <= 0) {
         return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_list>(&ctx.arena(), value * values.size());
+      std::size_t expected_size;
+      if (ckd_mul(&expected_size, values.size(), value) ||
+          expected_size > ctx.options().max_sequence_size) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        return nullptr;
+      }
+      auto* result = Arena::Create<starlark_list>(&ctx.arena(), expected_size);
       for (int64_t i = 0; i < value; ++i) {
-        for (auto& key : values) {
-          result->unsafe_append(key);
-        }
+        result->values.insert(result->values.end(), values.begin(), values.end());
       }
       return result;
     }
@@ -194,12 +197,15 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
         return nullptr;
       }
       int64_t int_value = value.at(0);
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
-      auto* result = Arena::Create<starlark_list>(&ctx.arena(), int_value * values.size());
+      std::size_t expected_size;
+      if (ckd_mul(&expected_size, values.size(), int_value) ||
+          expected_size > ctx.options().max_sequence_size) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        return nullptr;
+      }
+      auto* result = Arena::Create<starlark_list>(&ctx.arena(), expected_size);
       for (int64_t i = 0; i < int_value; ++i) {
-        for (auto& key : values) {
-          result->unsafe_append(key);
-        }
+        result->values.insert(result->values.end(), values.begin(), values.end());
       }
       return result;
     }
@@ -218,7 +224,12 @@ starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, conte
     return nullptr;
   }
   const starlark_list& l_other = static_cast<const starlark_list&>(other);
-  // TODO(lmirelmann): Check the result size.
+  std::size_t expected_size;
+  if (ckd_add(&expected_size, values.size(), l_other.values.size()) ||
+      expected_size > ctx.options().max_sequence_size) {
+    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    return nullptr;
+  }
   // This needs to be able to handle the case `a += a`
   for (int i = 0, e = l_other.values.size(); i < e; ++i) {
     unsafe_append(l_other.values[i]);
@@ -241,7 +252,12 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
         return this;
       }
       auto original_size = values.size();
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      std::size_t expected_size;
+      if (ckd_mul(&expected_size, original_size, value) ||
+          expected_size > ctx.options().max_sequence_size) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        return nullptr;
+      }
       for (int64_t i = 1; i < value; ++i) {
         for (int j = 0; j < original_size; ++j) {
           unsafe_append(values[j]);
@@ -267,7 +283,12 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       }
       int64_t int_value = value.at(0);
       auto original_size = values.size();
-      // TODO(lmirelmann): Check whether the size will be over the maximum allowed.
+      std::size_t expected_size;
+      if (ckd_mul(&expected_size, original_size, int_value) ||
+          expected_size > ctx.options().max_sequence_size) {
+        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        return nullptr;
+      }
       for (int64_t i = 1; i < int_value; ++i) {
         for (int j = 0; j < original_size; ++j) {
           unsafe_append(values[j]);
@@ -327,11 +348,14 @@ starlark_obj* starlark_list::slice_range(const starlark_obj& start, const starla
   return result;
 }
 
-status starlark_list::append(starlark_obj* element, error_fn& error_callback) {
+status starlark_list::append(starlark_obj* element, context& ctx, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
     return error_status();
   }
-  // TODO(lmirelmann): Check that the number of elements does not go over the maximum.
+  if (values.size() == ctx.options().max_sequence_size) {
+    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    return error_status();
+  }
   values.push_back(element);
   return ok_status();
 }
@@ -513,7 +537,7 @@ starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::list_t);
-  if (!static_cast<starlark_list*>(this_obj)->append(pos_args.front(), error_callback).ok()) {
+  if (!static_cast<starlark_list*>(this_obj)->append(pos_args.front(), ctx, error_callback).ok()) {
     return nullptr;
   }
   return ctx.none_value();

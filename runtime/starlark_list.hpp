@@ -35,7 +35,7 @@ class starlark_list : public starlark_obj {
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;
   starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
 
-  starlark::result::status append(starlark_obj* element, error_fn& error_callback);
+  starlark::result::status append(starlark_obj* element, context& ctx, error_fn& error_callback);
   starlark::result::status clear(error_fn& error_callback);
   starlark::result::status extend(starlark_obj* other, context& ctx, error_fn& error_callback);
   starlark_obj* index(starlark_obj* element, int64_t start, int64_t end, context& ctx, error_fn& error_callback) const;

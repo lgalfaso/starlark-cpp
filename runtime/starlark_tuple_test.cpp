@@ -284,10 +284,12 @@ TEST(StarlarkTuple, Freeze) {
   starlark_integer one(1);
   starlark_list list(0);
   starlark_tuple tuple(0);
+  Arena arena;
+  context ctx(arena);
 
   tuple.add(&list);
   tuple.freeze();
-  list.append(&one, error_callback);
+  list.append(&one, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
 }
