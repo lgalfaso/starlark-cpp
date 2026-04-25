@@ -3935,7 +3935,7 @@ TEST(StarlarkString, JoinString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'string' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can only join an iterable");
   EXPECT_EQ(str.str(), "abc");
 }
 

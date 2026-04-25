@@ -322,6 +322,10 @@ std::string_view error_empty_separator() {
   return "ValueError: empty separator";
 }
 
+std::string_view error_can_only_join_on_iterable() {
+  return "TypeError: can only join an iterable";
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

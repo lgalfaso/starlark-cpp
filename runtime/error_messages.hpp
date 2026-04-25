@@ -102,6 +102,7 @@ std::string_view error_substring_not_found();
 std::string error_non_iterable(std::string_view fn_name);
 
 std::string_view error_empty_separator();
+std::string_view error_can_only_join_on_iterable();
 
 }  // namespace runtime
 }  // namespace starlark
