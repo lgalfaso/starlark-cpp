@@ -1,6 +1,7 @@
 # Copyright 2024-2025 Lucas Mirelmann
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -94,5 +95,16 @@ cc_binary(
     deps = [
         ":number",
         "@google_benchmark//:benchmark",
+    ],
+)
+
+cc_fuzz_test(
+    name = "number_div_fuzz_test",
+    srcs = ["number_div_fuzz_test.cpp"],
+    deps = [
+        ":number",
+    ],
+    dicts = [
+      "dictionaries/numbers.dict",
     ],
 )
