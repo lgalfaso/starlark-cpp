@@ -237,20 +237,20 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       }
       case OpCode::kJumpIfFalse:
         if (!stack.back()->truthy()) {
-          instruction_ptr = op_code.jump_if_false().address();
+          instruction_ptr += op_code.jump_if_false().address_delta() - 1;
         }
         stack.pop_back();
         break;
       case OpCode::kJumpIfTrueOrPop:
         if (stack.back()->truthy()) {
-          instruction_ptr = op_code.jump_if_true_or_pop().address();
+          instruction_ptr += op_code.jump_if_true_or_pop().address_delta() - 1;
         } else {
           stack.pop_back();
         }
         break;
       case OpCode::kJumpIfFalseOrPop:
         if (!stack.back()->truthy()) {
-          instruction_ptr = op_code.jump_if_false_or_pop().address();
+          instruction_ptr += op_code.jump_if_false_or_pop().address_delta() - 1;
         } else {
           stack.pop_back();
         }
@@ -461,7 +461,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         if (it->has_next()) {
           stack.push_back(it->next());
         } else {
-          instruction_ptr = op_code.for_iterator().address();
+          instruction_ptr += op_code.for_iterator().address_delta() - 1;
         }
         break;
       }
@@ -472,7 +472,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         frame_stacks.back().back()->iterators.pop_back();
         break;
       case OpCode::kGoto:
-        instruction_ptr = op_code.goto_().address();
+        instruction_ptr += op_code.goto_().address_delta() - 1;
         break;
       case OpCode::kIndexMember: {
         assert(stack.size() >= 2);

@@ -353,12 +353,16 @@ void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expressi
 
 void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_expression) {
   switch (binary_expression->operator_()) {
-    case BinaryExpr::OR:
-      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression])->mutable_jump_if_true_or_pop()->set_address(block().op_code_size());
+    case BinaryExpr::OR: {
+      auto op_pos = binary_op_mid_pos[binary_expression];
+      mutable_block()->mutable_op_code(op_pos)->mutable_jump_if_true_or_pop()->set_address_delta(block().op_code_size() - op_pos);
       break;
-    case BinaryExpr::AND:
-      mutable_block()->mutable_op_code(binary_op_mid_pos[binary_expression])->mutable_jump_if_false_or_pop()->set_address(block().op_code_size());
+    }
+    case BinaryExpr::AND: {
+      auto op_pos = binary_op_mid_pos[binary_expression];
+      mutable_block()->mutable_op_code(op_pos)->mutable_jump_if_false_or_pop()->set_address_delta(block().op_code_size() - op_pos);
       break;
+    }
     case BinaryExpr::EQUALS_EQUALS:
       mutable_block()->add_op_code()->mutable_binary_equals_equals();
       break;
@@ -697,7 +701,8 @@ void bytecode_generator::mid_if_expression(const IfExpr* if_expression) {
     if_expression_op_mid_pos[if_expression] = op_code_size;
     mutable_block()->add_op_code()->mutable_jump_if_false();
   } else {
-    mutable_block()->mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_jump_if_false()->set_address(op_code_size + 1);
+    auto op_pos = if_expression_op_mid_pos[if_expression];
+    mutable_block()->mutable_op_code(op_pos)->mutable_jump_if_false()->set_address_delta(op_code_size + 1 - op_pos);
     if_expression_op_mid_pos[if_expression] = op_code_size;
     mutable_block()->add_op_code()->mutable_goto_();
   }
@@ -705,7 +710,8 @@ void bytecode_generator::mid_if_expression(const IfExpr* if_expression) {
 
 void bytecode_generator::exit_if_expression(const IfExpr* if_expression) {
   auto op_code_size = block().op_code_size();
-  mutable_block()->mutable_op_code(if_expression_op_mid_pos[if_expression])->mutable_goto_()->set_address(op_code_size);
+  auto op_pos = if_expression_op_mid_pos[if_expression];
+  mutable_block()->mutable_op_code(op_pos)->mutable_goto_()->set_address_delta(op_code_size - op_pos);
   if_expression_op_mid_pos.erase(if_expression);
 }
 
@@ -727,16 +733,16 @@ void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
 void bytecode_generator::exit_for_statement(const ForStmt* for_statement) {
   auto op_code_size = block().op_code_size();
   auto begin_address = for_statement_op_mid_pos[for_statement] + 1;
-  mutable_block()->add_op_code()->mutable_goto_()->set_address(begin_address);
-  mutable_block()->mutable_op_code(for_statement_op_mid_pos[for_statement] + 1)->mutable_for_iterator()->set_address(op_code_size + 1);
+  mutable_block()->add_op_code()->mutable_goto_()->set_address_delta(begin_address - op_code_size);
+  mutable_block()->mutable_op_code(begin_address)->mutable_for_iterator()->set_address_delta(op_code_size + 1 - begin_address);
   mutable_block()->add_op_code()->mutable_end_iterator();
 
   // Fix `break` and `continue` statements.
   for (auto i : for_statement_op_break.back()) {
-    mutable_block()->mutable_op_code(i)->mutable_goto_()->set_address(op_code_size + 1);
+    mutable_block()->mutable_op_code(i)->mutable_goto_()->set_address_delta(op_code_size + 1 - i);
   }
   for (auto i : for_statement_op_continue.back()) {
-    mutable_block()->mutable_op_code(i)->mutable_goto_()->set_address(begin_address);
+    mutable_block()->mutable_op_code(i)->mutable_goto_()->set_address_delta(begin_address - i);
   }
 
   // Cleanup.
@@ -762,7 +768,7 @@ void bytecode_generator::enter_if_statement(const IfStmt* if_statement) {
 void bytecode_generator::exit_if_statement(const IfStmt* if_statement) {
   auto op_code_size = block().op_code_size();
   for (auto pos : if_statement_to_fix_to_the_end.back()) {
-    mutable_block()->mutable_op_code(pos)->mutable_goto_()->set_address(op_code_size);
+    mutable_block()->mutable_op_code(pos)->mutable_goto_()->set_address_delta(op_code_size - pos);
   }
   if_statement_to_fix_to_the_end.pop_back();
 }
@@ -774,7 +780,8 @@ void bytecode_generator::enter_then(const RepeatedPtrField<Statement>* then) {
 
 void bytecode_generator::exit_then(const RepeatedPtrField<Statement>* then) {
   auto op_code_size = block().op_code_size();
-  mutable_block()->mutable_op_code(if_statement_then[then])->mutable_jump_if_false()->set_address(op_code_size + 1);
+  auto op_pos = if_statement_then[then];
+  mutable_block()->mutable_op_code(op_pos)->mutable_jump_if_false()->set_address_delta(op_code_size + 1 - op_pos);
   mutable_block()->add_op_code()->mutable_goto_();
   if_statement_to_fix_to_the_end.back().push_back(op_code_size);
 
@@ -925,12 +932,14 @@ void bytecode_generator::fix_comp_clause(const RepeatedPtrField<CompClause>& cla
     const auto& clause = *it;
     if (clause.comp_clause_type_case() == CompClause::kForClause) {
       auto begin_address = comprehension_comp_clause.back()[clauses_count - clause_pos - 1];
-      mutable_block()->add_op_code()->mutable_goto_()->set_address(begin_address);
-      mutable_block()->mutable_op_code(begin_address)->mutable_for_iterator()->set_address(block().op_code_size());
+      auto op_pos = block().op_code_size();
+      mutable_block()->add_op_code()->mutable_goto_()->set_address_delta(begin_address - op_pos);
+      mutable_block()->mutable_op_code(begin_address)->mutable_for_iterator()->set_address_delta(block().op_code_size() - begin_address);
       mutable_block()->add_op_code()->mutable_end_iterator();
     } else {
-      mutable_block()->mutable_op_code(comprehension_comp_clause.back()[clauses_count - clause_pos - 1])
-          ->mutable_jump_if_false()->set_address(block().op_code_size());
+      auto op_pos = comprehension_comp_clause.back()[clauses_count - clause_pos - 1];
+      mutable_block()->mutable_op_code(op_pos)
+          ->mutable_jump_if_false()->set_address_delta(block().op_code_size() - op_pos);
     }
     clause_pos++;
   }

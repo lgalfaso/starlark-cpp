@@ -63,9 +63,9 @@ TEST(CompilerBytecode, TestCase) {
   std::set<std::string, std::less<>> binding{};
   compiler star_compiler(binding);
   options opt {
+    .allow_top_level_rebinding = true,
     .allow_top_level_for = true,
     .allow_top_level_if = true,
-    .allow_top_level_rebinding = true,
   };
   logger logging;
   Arena arena;

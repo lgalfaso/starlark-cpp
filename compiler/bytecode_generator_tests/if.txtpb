@@ -3,99 +3,99 @@ block {
   op_code { create_frame { block_type: MODULE_BLOCK } }                                     #  1
   op_code { create_frame { block_type: FILE_BLOCK } }                                       #  2
   op_code { load { frame: 2 pos_in_frame: 1 } }                                             #  3
-  op_code { jump_if_false { address: 8 } }                                                  #  4
+  op_code { jump_if_false { address_delta: 4 } }                                            #  4
   op_code { load { frame: 2 pos_in_frame: 0 } }                                             #  5
   op_code { pop {} }                                                                        #  6
-  op_code { goto { address: 8 } }                                                           #  7
+  op_code { goto { address_delta: 1 } }                                                     #  7
 
 
   op_code { load { frame: 2 pos_in_frame: 0 } }                                             #  8
-  op_code { jump_if_false { address: 13 } }                                                 #  9
+  op_code { jump_if_false { address_delta: 4 } }                                            #  9
   op_code { const_int { value: 0 } }                                                        # 10
   op_code { pop { } }                                                                       # 11
-  op_code { goto { address: 15 } }                                                          # 12
+  op_code { goto { address_delta: 3 } }                                                     # 12
   op_code { load { frame: 2 pos_in_frame: 1 } }                                             # 13
   op_code { pop { } }                                                                       # 14
 
   op_code { const_string: { value: "a" } }                                                  # 15
-  op_code { jump_if_false { address: 20 } }                                                 # 16
+  op_code { jump_if_false { address_delta: 4 } }                                            # 16
   op_code { const_int { value: 1 } }                                                        # 17
   op_code { pop { } }                                                                       # 18
-  op_code { goto { address: 25 } }                                                          # 19
+  op_code { goto { address_delta: 6 } }                                                     # 19
   op_code { const_string: { value: "b" } }                                                  # 20
-  op_code { jump_if_false { address: 25 } }                                                 # 21
+  op_code { jump_if_false { address_delta: 4 } }                                            # 21
   op_code { const_int { value: 2 } }                                                        # 22
   op_code { pop { } }                                                                       # 23
-  op_code { goto { address: 25 } }                                                          # 24
+  op_code { goto { address_delta: 1 } }                                                     # 24
 
 
   op_code { const_string: { value: "a" } }                                                  # 25
-  op_code { jump_if_false { address: 30 } }                                                 # 26
+  op_code { jump_if_false { address_delta: 4 } }                                            # 26
   op_code { const_int { value: 1 } }                                                        # 27
   op_code { pop { } }                                                                       # 28
-  op_code { goto { address: 37 } }                                                          # 29
+  op_code { goto { address_delta: 8 } }                                                     # 29
   op_code { const_string: { value: "b" } }                                                  # 30
-  op_code { jump_if_false { address: 35 } }                                                 # 31
+  op_code { jump_if_false { address_delta: 4 } }                                            # 31
   op_code { const_int { value: 2 } }                                                        # 32
   op_code { pop { } }                                                                       # 33
-  op_code { goto { address: 37 } }                                                          # 34
+  op_code { goto { address_delta: 3 } }                                                     # 34
   op_code { const_int { value: 3 } }                                                        # 35
   op_code { pop { } }                                                                       # 36
 
   op_code { const_string { value: "a" } }                                                   # 37
-  op_code { jump_if_false { address: 42 } }                                                 # 38
+  op_code { jump_if_false { address_delta: 4 } }                                            # 38
   op_code { const_int { value: 1 } }                                                        # 39
   op_code { pop { } }                                                                       # 40
-  op_code { goto { address: 52 } }                                                          # 41
+  op_code { goto { address_delta: 11 } }                                                    # 41
   op_code { const_string { value: "b" } }                                                   # 42
-  op_code { jump_if_false { address: 47 } }                                                 # 43
+  op_code { jump_if_false { address_delta: 4 } }                                            # 43
   op_code { const_int { value: 2 } }                                                        # 44
   op_code { pop { } }                                                                       # 45
-  op_code { goto { address: 52 } }                                                          # 46
+  op_code { goto { address_delta: 6 } }                                                     # 46
   op_code { const_string { value: "c" } }                                                   # 47
-  op_code { jump_if_false { address: 52 } }                                                 # 48
+  op_code { jump_if_false { address_delta: 4 } }                                            # 48
   op_code { const_int { value: 3 } }                                                        # 49
   op_code { pop { } }                                                                       # 50
-  op_code { goto { address: 52 } }                                                          # 51
+  op_code { goto { address_delta: 1 } }                                                     # 51
 
   op_code { const_string { value: "a" } }                                                   # 52
-  op_code { jump_if_false { address: 57 } }                                                 # 53
+  op_code { jump_if_false { address_delta: 4 } }                                            # 53
   op_code { const_int { value: 1 } }                                                        # 54
   op_code { pop { } }                                                                       # 55
-  op_code { goto { address: 69 } }                                                          # 56
+  op_code { goto { address_delta: 13 } }                                                    # 56
   op_code { const_string { value: "b" } }                                                   # 57
-  op_code { jump_if_false { address: 62 } }                                                 # 58
+  op_code { jump_if_false { address_delta: 4 } }                                            # 58
   op_code { const_int { value: 2 } }                                                        # 59
   op_code { pop { } }                                                                       # 60
-  op_code { goto { address: 69 } }                                                          # 61
+  op_code { goto { address_delta: 8 } }                                                     # 61
   op_code { const_string { value: "c" } }                                                   # 62
-  op_code { jump_if_false { address: 67 } }                                                 # 63
+  op_code { jump_if_false { address_delta: 4 } }                                            # 63
   op_code { const_int { value: 3 } }                                                        # 64
   op_code { pop { } }                                                                       # 65
-  op_code { goto { address: 69 } }                                                          # 66
+  op_code { goto { address_delta: 3 } }                                                     # 66
   op_code { const_int { value: 4 } }                                                        # 67
   op_code { pop { } }                                                                       # 68
 
   op_code { const_string { value: "a" } }                                                   # 69
-  op_code { jump_if_false { address: 89 } }                                                 # 70
+  op_code { jump_if_false { address_delta: 19 } }                                           # 70
   op_code { const_string { value: "b" } }                                                   # 71
-  op_code { jump_if_false { address: 81 } }                                                 # 72
+  op_code { jump_if_false { address_delta: 9 } }                                            # 72
   op_code { const_string { value: "c" } }                                                   # 73
-  op_code { jump_if_false { address: 78 } }                                                 # 74
+  op_code { jump_if_false { address_delta: 4 } }                                            # 74
   op_code { const_int { value: 5 } }                                                        # 75
   op_code { pop { } }                                                                       # 76
-  op_code { goto { address: 80 } }                                                          # 77
+  op_code { goto { address_delta: 3 } }                                                     # 77
   op_code { const_int { value: 6 } }                                                        # 78
   op_code { pop { } }                                                                       # 79
-  op_code { goto { address: 88 } }                                                          # 80
+  op_code { goto { address_delta: 8 } }                                                     # 80
   op_code { const_string { value: "d" } }                                                   # 81
-  op_code { jump_if_false { address: 86 } }                                                 # 82
+  op_code { jump_if_false { address_delta: 4 } }                                            # 82
   op_code { const_int { value: 7 } }                                                        # 83
   op_code { pop { } }                                                                       # 84
-  op_code { goto { address: 88 } }                                                          # 85
+  op_code { goto { address_delta: 3 } }                                                     # 85
   op_code { const_int { value: 8 } }                                                        # 86
   op_code { pop { } }                                                                       # 87
-  op_code { goto { address: 91 } }                                                          # 88
+  op_code { goto { address_delta: 3 } }                                                     # 88
   op_code { const_int { value: 9 } }                                                        # 89
   op_code { pop { } }                                                                       # 90
 

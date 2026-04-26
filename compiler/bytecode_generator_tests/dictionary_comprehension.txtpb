@@ -8,12 +8,12 @@ block {
   op_code { const_int { value: 0 } }                                                     #   6
   op_code { add_to_list { number_of_elements: 1 } }                                      #   7
   op_code { get_iterator { } }                                                           #   8
-  op_code { for_iterator { address: 15 } }                                               #   9
+  op_code { for_iterator { address_delta: 6 } }                                          #   9
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         #  10
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  11
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  12
   op_code { add_to_dictionary { number_of_elements: 1 } }                                #  13
-  op_code { goto { address: 9 } }                                                        #  14
+  op_code { goto { address_delta: -5 } }                                                 #  14
   op_code { end_iterator { } }                                                           #  15
   op_code { pop_frame { } }                                                              #  16
   op_code { pop { } }                                                                    #  17
@@ -24,20 +24,20 @@ block {
   op_code { const_int { value: 1 } }                                                     #  21
   op_code { add_to_list { number_of_elements: 1 } }                                      #  22
   op_code { get_iterator { } }                                                           #  23
-  op_code { for_iterator { address: 38 } }                                               #  24
+  op_code { for_iterator { address_delta: 14 } }                                         #  24
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         #  25
   op_code { make_list { reserve_size: 1 } }                                              #  26
   op_code { const_int { value: 2 } }                                                     #  27
   op_code { add_to_list { number_of_elements: 1 } }                                      #  28
   op_code { get_iterator { } }                                                           #  29
-  op_code { for_iterator { address: 36 } }                                               #  30
+  op_code { for_iterator { address_delta: 6 } }                                          #  30
   op_code { store { frame: 0 pos_in_frame: 1 } }                                         #  31
   op_code { load { frame: 0 pos_in_frame: 1 } }                                          #  32
   op_code { load { frame: 0 pos_in_frame: 1 } }                                          #  33
   op_code { add_to_dictionary { number_of_elements: 1 } }                                #  34
-  op_code { goto { address: 30 } }                                                       #  35
+  op_code { goto { address_delta: -5 } }                                                 #  35
   op_code { end_iterator { } }                                                           #  36
-  op_code { goto { address: 24 } }                                                       #  37
+  op_code { goto { address_delta: -13 } }                                                #  37
   op_code { end_iterator { } }                                                           #  38
   op_code { pop_frame { } }                                                              #  39
   op_code { pop { } }                                                                    #  40
@@ -50,28 +50,28 @@ block {
   op_code { const_int { value: 5 } }                                                     #  46
   op_code { add_to_list { number_of_elements: 3 } }                                      #  47
   op_code { get_iterator { } }                                                           #  48
-  op_code { for_iterator { address: 71 } }                                               #  49
+  op_code { for_iterator { address_delta: 22 } }                                         #  49
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         #  50
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  51
   op_code { const_int { value: 2 } }                                                     #  52
   op_code { binary_percent { } }                                                         #  53
   op_code { const_int { value: 0 } }                                                     #  54
   op_code { binary_equals_equals { } }                                                   #  55
-  op_code { jump_if_false { address: 70 } }                                              #  56
+  op_code { jump_if_false { address_delta: 14 } }                                        #  56
   op_code { make_list { reserve_size: 3 } }                                              #  57
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  58
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  59
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  60
   op_code { add_to_list { number_of_elements: 3 } }                                      #  61
   op_code { get_iterator { } }                                                           #  62
-  op_code { for_iterator { address: 69 } }                                               #  63
+  op_code { for_iterator { address_delta: 6 } }                                          #  63
   op_code { store { frame: 0 pos_in_frame: 1 } }                                         #  64
   op_code { load { frame: 0 pos_in_frame: 1 } }                                          #  65
   op_code { load { frame: 0 pos_in_frame: 1 } }                                          #  66
   op_code { add_to_dictionary { number_of_elements: 1 } }                                #  67
-  op_code { goto { address: 63 } }                                                       #  68
+  op_code { goto { address_delta: -5 } }                                                 #  68
   op_code { end_iterator { } }                                                           #  69
-  op_code { goto { address: 49 } }                                                       #  70
+  op_code { goto { address_delta: -21 } }                                                #  70
   op_code { end_iterator { } }                                                           #  71
   op_code { pop_frame { } }                                                              #  72
   op_code { pop { } }                                                                    #  73
@@ -82,13 +82,13 @@ block {
   op_code { const_int { value: 0 } }                                                     #  77
   op_code { add_to_list { number_of_elements: 1 } }                                      #  78
   op_code { get_iterator { } }                                                           #  79
-  op_code { for_iterator { address: 87 } }                                               #  80
+  op_code { for_iterator { address_delta: 7 } }                                          #  80
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         #  81
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  82
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          #  83
   op_code { dot_member { member: "y" } }                                                 #  84
   op_code { add_to_dictionary { number_of_elements: 1 } }                                #  85
-  op_code { goto { address: 80 } }                                                       #  86
+  op_code { goto { address_delta: -6 } }                                                 #  86
   op_code { end_iterator { } }                                                           #  87
   op_code { pop_frame { } }                                                              #  88
   op_code { pop { } }                                                                    #  89
@@ -103,21 +103,21 @@ block {
   op_code { const_int { value: 2 } }                                                     #  97
   op_code { add_to_list { number_of_elements: 3 } }                                      #  98
   op_code { get_iterator { } }                                                           #  99
-  op_code { for_iterator { address: 106 } }                                              # 100
+  op_code { for_iterator { address_delta: 6 } }                                          # 100
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         # 101
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 102
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 103
   op_code { add_to_dictionary { number_of_elements: 1 } }                                # 104
-  op_code { goto { address: 100 } }                                                      # 105
+  op_code { goto { address_delta: -5 } }                                                 # 105
   op_code { end_iterator { } }                                                           # 106
   op_code { pop_frame { } }                                                              # 107
   op_code { get_iterator { } }                                                           # 108
-  op_code { for_iterator { address: 115 } }                                              # 109
+  op_code { for_iterator { address_delta: 6 } }                                          # 109
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         # 110
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 111
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 112
   op_code { add_to_dictionary { number_of_elements: 1 } }                                # 113
-  op_code { goto { address: 109 } }                                                      # 114
+  op_code { goto { address_delta: -5 } }                                                 # 114
   op_code { end_iterator { } }                                                           # 115
   op_code { pop_frame { } }                                                              # 116
   op_code { pop { } }                                                                    # 117
@@ -130,29 +130,29 @@ block {
   op_code { load { frame: 1 pos_in_frame: 0 } }                                          # 123
   op_code { add_to_list { number_of_elements: 1} }                                       # 124
   op_code { get_iterator { } }                                                           # 125
-  op_code { for_iterator { address: 132 } }                                              # 126
+  op_code { for_iterator { address_delta: 6 } }                                          # 126
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         # 127
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 128
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 129
   op_code { add_to_dictionary { number_of_elements: 1 } }                                # 130
-  op_code { goto { address: 126 } }                                                      # 131
+  op_code { goto { address_delta: -5 } }                                                 # 131
   op_code { end_iterator { } }                                                           # 132
   op_code { pop_frame { } }                                                              # 133
   op_code { get_iterator { } }                                                           # 134
-  op_code { for_iterator { address: 149 } }                                              # 135
+  op_code { for_iterator { address_delta: 14 } }                                         # 135
   op_code { store { frame: 0 pos_in_frame: 1 } }                                         # 136
   op_code { make_list { reserve_size: 1 } }                                              # 137
   op_code { const_int { value: 0 } }                                                     # 138
   op_code { add_to_list { number_of_elements: 1 } }                                      # 139
   op_code { get_iterator { } }                                                           # 140
-  op_code { for_iterator { address: 147 } }                                              # 141
+  op_code { for_iterator { address_delta: 6 } }                                          # 141
   op_code { store { frame: 0 pos_in_frame: 0 } }                                         # 142
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 143
   op_code { load { frame: 0 pos_in_frame: 0 } }                                          # 144
   op_code { add_to_dictionary { number_of_elements: 1 } }                                # 145
-  op_code { goto { address: 141 } }                                                      # 146
+  op_code { goto { address_delta: -5 } }                                                 # 146
   op_code { end_iterator { } }                                                           # 147
-  op_code { goto { address: 135 } }                                                      # 148
+  op_code { goto { address_delta: -13 } }                                                # 148
   op_code { end_iterator { } }                                                           # 149
   op_code { pop_frame { } }                                                              # 150
   op_code { pop { } }                                                                    # 151

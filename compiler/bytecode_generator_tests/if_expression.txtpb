@@ -2,12 +2,12 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "False" symbol: "None" symbol: "True" } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { load { frame: 2 pos_in_frame: 1 } }  # 3
-  op_code { jump_if_false { address: 7 } }       # 4
-  op_code { load { frame: 2 pos_in_frame: 2 } }  # 5
-  op_code { goto { address: 8 } }                # 6
-  op_code { load { frame: 2 pos_in_frame: 0 } }  # 7
-  op_code { pop { } }                            # 8
+  op_code { load { frame: 2 pos_in_frame: 1 } }   # 3
+  op_code { jump_if_false { address_delta: 3 } }  # 4
+  op_code { load { frame: 2 pos_in_frame: 2 } }   # 5
+  op_code { goto { address_delta: 2 } }           # 6
+  op_code { load { frame: 2 pos_in_frame: 0 } }   # 7
+  op_code { pop { } }                             # 8
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

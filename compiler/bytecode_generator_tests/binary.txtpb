@@ -2,15 +2,15 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { const_int { value: 0 } }                #  3
-  op_code { jump_if_true_or_pop { address: 6 } }    #  4
-  op_code { const_int { value: 1 } }                #  5
-  op_code { pop {} }                                #  6
+  op_code { const_int { value: 0 } }                     #  3
+  op_code { jump_if_true_or_pop { address_delta: 2 } }   #  4
+  op_code { const_int { value: 1 } }                     #  5
+  op_code { pop {} }                                     #  6
 
-  op_code { const_int { value: 0 } }                #  7
-  op_code { jump_if_false_or_pop { address: 10 } }  #  8
-  op_code { const_int { value: 1 } }                #  9
-  op_code { pop {} }                                # 10
+  op_code { const_int { value: 0 } }                     #  7
+  op_code { jump_if_false_or_pop { address_delta: 2 } }  #  8
+  op_code { const_int { value: 1 } }                     #  9
+  op_code { pop {} }                                     # 10
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }

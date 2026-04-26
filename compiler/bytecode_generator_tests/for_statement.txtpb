@@ -8,11 +8,11 @@ block {
   op_code { const_int { value: 2 } }                                              #  6
   op_code { add_to_list { number_of_elements: 3 } }                               #  7
   op_code { get_iterator {} }                                                     #  8
-  op_code { for_iterator { address: 14 } }                                        #  9
+  op_code { for_iterator { address_delta: 5 } }                                   #  9
   op_code { store { frame: 1 pos_in_frame: 0 } }                                  # 10
   op_code { const_string { value: "abc" } }                                       # 11
   op_code { pop {} }                                                              # 12
-  op_code { goto { address: 9 } }                                                 # 13
+  op_code { goto { address_delta: -4 } }                                          # 13
   op_code { end_iterator {} }                                                     # 14
 
 
@@ -25,13 +25,13 @@ block {
   op_code { make_tuple { number_of_elements: 2 } }                                # 21
   op_code { add_to_list { number_of_elements: 2 } }                               # 22
   op_code { get_iterator {} }                                                     # 23
-  op_code { for_iterator { address: 31 } }                                        # 24
+  op_code { for_iterator { address_delta: 7 } }                                   # 24
   op_code { unpack { number_of_elements: 2 } }                                    # 25
   op_code { store { frame: 1 pos_in_frame: 0 } }                                  # 26
   op_code { store { frame: 1 pos_in_frame: 1 } }                                  # 27
   op_code { const_string { value: "def" } }                                       # 28
   op_code { pop {} }                                                              # 29
-  op_code { goto { address: 24 } }                                                # 30
+  op_code { goto { address_delta: -6 } }                                          # 30
   op_code { end_iterator {} }                                                     # 31
 
 
@@ -41,12 +41,12 @@ block {
   op_code { const_int { value: 2 } }                                              # 35
   op_code { add_to_list { number_of_elements: 3 } }                               # 36
   op_code { get_iterator {} }                                                     # 37
-  op_code { for_iterator { address: 44 } }                                        # 38
+  op_code { for_iterator { address_delta: 6 } }                                   # 38
   op_code { load { frame: 1 pos_in_frame: 0 } }                                   # 39
   op_code { assign_dot_member { member: 'b' } }                                   # 40
   op_code { const_string { value: "ghi" } }                                       # 41
   op_code { pop {} }                                                              # 42
-  op_code { goto { address: 38 } }                                                # 43
+  op_code { goto { address_delta: -5 } }                                          # 43
   op_code { end_iterator {} }                                                     # 44
 
   op_code { make_list { reserve_size: 2 } }                                       # 45
@@ -58,13 +58,13 @@ block {
   op_code { make_tuple { number_of_elements: 2 } }                                # 51
   op_code { add_to_list { number_of_elements: 2 } }                               # 52
   op_code { get_iterator { } }                                                    # 53
-  op_code { for_iterator { address: 61 } }                                        # 54
+  op_code { for_iterator { address_delta: 7 } }                                   # 54
   op_code { unpack { number_of_elements: 2 } }                                    # 55
   op_code { store { frame: 1 pos_in_frame: 0 } }                                  # 56
   op_code { store { frame: 1 pos_in_frame: 1 } }                                  # 57
   op_code { const_string { value: "jkl" } }                                       # 58
   op_code { pop { } }                                                             # 59
-  op_code { goto { address: 54 } }                                                # 60
+  op_code { goto { address_delta: -6 } }                                          # 60
   op_code { end_iterator { } }                                                    # 61
 
   op_code { pop_frame { } }                                                       # 62

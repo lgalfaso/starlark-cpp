@@ -186,7 +186,7 @@ message BinarySlash {}
 message BinarySlashSlash {}
 
 message JumpAddress {
-  uint32 address = 1;
+  int32 address_delta = 1;
 }
 
 message MakeTuple {
@@ -214,7 +214,7 @@ message PosInFrame {
 
 message GetIterator {}
 message ForIterator {
-  uint32 address = 1;
+  int32 address_delta = 1;
 }
 message EndIterator {}
 
