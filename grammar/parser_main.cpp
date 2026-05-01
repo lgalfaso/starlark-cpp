@@ -15,7 +15,7 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::ast::File;
-using ::starlark::grammar::options;
+using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::parser;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::logger;
@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
       extra_symbols = bzl_symbols;
     }
     parser star_parser(starlark_program,
-                       options{
+                       grammar_options{
                            .escaped_octal_and_hex_char_are_ascii = false,
                            .require_load_statements_first = !is_build_or_workspace,
                            .allow_variadic_arguments = !is_build_or_workspace,

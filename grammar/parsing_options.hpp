@@ -12,7 +12,7 @@
 namespace starlark {
 namespace grammar {
 
-options get_parsing_options(std::string_view starlark_program);
+grammar_options get_parsing_options(std::string_view starlark_program);
 
 }  // namespace grammar
 }  // namespace starlark

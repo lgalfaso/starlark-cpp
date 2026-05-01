@@ -29,7 +29,7 @@ struct parsing_block {
 class parser {
  public:
   parser(std::string_view input, starlark::logging::logger& logging);
-  parser(std::string_view input, const options& opts, const std::set<std::string, std::less<>>& bindings, starlark::logging::logger& logging);
+  parser(std::string_view input, const grammar_options& opts, const std::set<std::string, std::less<>>& bindings, starlark::logging::logger& logging);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
@@ -56,7 +56,7 @@ class parser {
   void resolve(starlark::ast::Expression* test, int base_frame);
   bool is_top_level_block() const;
 
-  options opts;
+  grammar_options opts;
   lexer lex;
   starlark::logging::logger& logging;
   std::set<std::string, std::less<>> base_bindings;

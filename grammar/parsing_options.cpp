@@ -5,8 +5,8 @@
 namespace starlark {
 namespace grammar {
 
-options get_parsing_options(std::string_view starlark_program) {
-  return grammar::options{
+grammar_options get_parsing_options(std::string_view starlark_program) {
+  return grammar_options{
     .allow_top_level_rebinding = starlark_program.contains("options.allow_top_level_rebinding"),
   };
 }

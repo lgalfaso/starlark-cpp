@@ -22,7 +22,7 @@ class interpreter {
  public:
   interpreter();
   frame* run(std::string_view starlark_program,
-      const starlark::grammar::options& grammar_options,
+      const starlark::grammar::grammar_options& g_options,
       const std::map<std::string, starlark::runtime::starlark_obj*, std::less<>>& custom_binding,
       google::protobuf::Arena& arena,
       starlark::logging::logger& logging);

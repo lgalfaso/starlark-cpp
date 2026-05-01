@@ -22,7 +22,7 @@ class compiler {
   explicit compiler(std::set<std::string, std::less<>> &binding);
   starlark::bytecode::Program* compile(
       std::string_view starlark_program,
-      starlark::grammar::options options,
+      starlark::grammar::grammar_options options,
       starlark::logging::logger& logging,
       google::protobuf::Arena& arena);
 

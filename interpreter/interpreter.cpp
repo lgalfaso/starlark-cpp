@@ -37,7 +37,7 @@ using ::starlark::bytecode::BlockType;
 using ::starlark::bytecode::OpCode;
 using ::starlark::bytecode::Program;
 using ::starlark::compiler::compiler;
-using ::starlark::grammar::options;
+using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::predeclared_symbols;
 using ::starlark::logging::logger;
 using ::starlark::runtime::context;
@@ -693,7 +693,7 @@ interpreter::interpreter() {}
 
 // TODO(lmirelmann): There has to be a way to define the runtime options.
 frame* interpreter::run(std::string_view starlark_code,
-                        const options& grammar_options,
+                        const grammar_options& g_options,
                         const std::map<std::string, starlark_obj*, std::less<>>& custom_binding,
                         Arena& arena, logger& logging) {
   std::set<std::string, std::less<>> binding;
@@ -701,7 +701,7 @@ frame* interpreter::run(std::string_view starlark_code,
     binding.insert(key);
   }
   class compiler star_compiler(binding);
-  Program* starlark_program = star_compiler.compile(starlark_code, grammar_options, logging, arena);
+  Program* starlark_program = star_compiler.compile(starlark_code, g_options, logging, arena);
   if (starlark_program == nullptr) {
     return nullptr;
   }

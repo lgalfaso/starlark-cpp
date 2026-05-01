@@ -248,10 +248,10 @@ struct frame {
 
 }  // namespace
 
-parser::parser(std::string_view input, logger& logging) : parser(input, options{}, {}, logging) {
+parser::parser(std::string_view input, logger& logging) : parser(input, grammar_options{}, {}, logging) {
 }
 
-parser::parser(std::string_view input, const options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging)
+parser::parser(std::string_view input, const grammar_options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging)
     : opts(opts), lex(input, opts, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
   const auto& symbols = predeclared_symbols();
   base_bindings.insert(symbols.begin(), symbols.end());

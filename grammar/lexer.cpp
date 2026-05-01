@@ -142,9 +142,9 @@ int isoctal(int c) {
 
 }  // namespace
 
-lexer::lexer(std::string_view input, logger& logging) : lexer(input, options{}, logging) {}
+lexer::lexer(std::string_view input, logger& logging) : lexer(input, grammar_options{}, logging) {}
 
-lexer::lexer(std::string_view input, const options& opts, logger& logging) :
+lexer::lexer(std::string_view input, const grammar_options& opts, logger& logging) :
     opts(opts), input(input), source_code(input, false, true), current(token_type::kBof, get_position(), get_position()), indent_stack(1), logging(logging) {}
 
 const token& lexer::current_token() const {

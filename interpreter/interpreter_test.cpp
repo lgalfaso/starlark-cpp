@@ -21,7 +21,7 @@
 #include "third-party/defer.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::grammar::options;
+using ::starlark::grammar::grammar_options;
 using ::starlark::interpreter::frame;
 using ::starlark::interpreter::interpreter;
 using ::starlark::logging::logger;
@@ -105,7 +105,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
   logger logging;
   Arena arena2;
 
-  frame* result = runner.run(source_code->str(), options{}, {}, arena2, logging);
+  frame* result = runner.run(source_code->str(), grammar_options{}, {}, arena2, logging);
   if (result != nullptr) {
     error_callback.add_error("Program executed without errors, it was expected that it would fail.");
     return nullptr;
@@ -145,7 +145,7 @@ TEST(Interpreter, TestCase) {
   custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
   custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
 
-  frame* result = runner.run(starlark_code, options{}, custom_binding, arena, logging);
+  frame* result = runner.run(starlark_code, grammar_options{}, custom_binding, arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
 }
 

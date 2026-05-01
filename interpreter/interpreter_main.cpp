@@ -12,7 +12,7 @@
 #include "third-party/defer.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::grammar::options;
+using ::starlark::grammar::grammar_options;
 using ::starlark::interpreter::interpreter;
 using ::starlark::logging::logger;
 
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
   logger logging;
   Arena arena;
 
-  if (runner.run(starlark_code, options{}, {}, arena, logging) == nullptr) {
+  if (runner.run(starlark_code, grammar_options{}, {}, arena, logging) == nullptr) {
     print_logs(logging);
   }
 }

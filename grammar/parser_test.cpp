@@ -14,7 +14,7 @@
 
 using google::protobuf::Arena;
 using starlark::ast::File;
-using starlark::grammar::options;
+using starlark::grammar::grammar_options;
 using starlark::grammar::parser;
 using starlark::logging::LogLevel;
 using starlark::logging::logger;
@@ -24,7 +24,7 @@ using testing::SizeIs;
 
 namespace {
 
-void checkInvalid(std::string_view program, const options& opts) {
+void checkInvalid(std::string_view program, const grammar_options& opts) {
   logger logging;
   logging.set_level(LogLevel::LOG_LEVEL_ERROR);
   parser star_parser(program, opts, {}, logging);
@@ -37,19 +37,19 @@ TEST(Parser, NoFunctionDefinition) {
   checkInvalid(R"starlark(
 def foo():
   pass
-)starlark", options{ .allow_function_definitions = false, });
+)starlark", grammar_options{ .allow_function_definitions = false, });
   checkInvalid(R"starlark(
 foo = lambda: True
-)starlark", options{ .allow_function_definitions = false, });
+)starlark", grammar_options{ .allow_function_definitions = false, });
 }
 
 TEST(Parser, VaradicArguments) {
   checkInvalid(R"starlark(
 foo(*[1,2,3])
-)starlark", options{ .allow_variadic_arguments = false, });
+)starlark", grammar_options{ .allow_variadic_arguments = false, });
   checkInvalid(R"starlark(
 foo(**{'a': 1, 'b': 2, 'c': 3})
-)starlark", options{ .allow_variadic_arguments = false, });
+)starlark", grammar_options{ .allow_variadic_arguments = false, });
 }
 
 }  // namespace

@@ -11,7 +11,7 @@
 namespace starlark {
 namespace grammar {
 
-struct options {
+struct grammar_options {
   // Whether when parsing a string, to allow octal or hex escape sequences
   // for characters in the 128-255 rangei (ASCII characters are always
   // allowed). Enabling this option has the undesirable side-effect that

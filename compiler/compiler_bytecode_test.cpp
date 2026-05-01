@@ -21,7 +21,7 @@ using ::google::protobuf::Message;
 using ::protobuf_matchers::EqualsProto;
 using ::starlark::bytecode::Program;
 using ::starlark::compiler::compiler;
-using ::starlark::grammar::options;
+using ::starlark::grammar::grammar_options;
 using ::starlark::logging::logger;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
@@ -62,7 +62,7 @@ TEST(CompilerBytecode, TestCase) {
   // We are only using the predeclared symbols.
   std::set<std::string, std::less<>> binding{};
   compiler star_compiler(binding);
-  options opt {
+  grammar_options opt {
     .allow_top_level_rebinding = true,
     .allow_top_level_for = true,
     .allow_top_level_if = true,

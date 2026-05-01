@@ -21,7 +21,7 @@ namespace grammar {
 class lexer {
  public:
   lexer(std::string_view input, starlark::logging::logger& logging);
-  lexer(std::string_view input, const options& options, starlark::logging::logger& logging);
+  lexer(std::string_view input, const grammar_options& options, starlark::logging::logger& logging);
   const token& current_token() const;
   void next_token();
   const std::vector<std::pair<starlark::logging::Position, starlark::logging::Position>>& comments() const;
@@ -42,7 +42,7 @@ class lexer {
   void newline();
   starlark::logging::Position get_position() const;
 
-  options opts;
+  grammar_options opts;
   std::size_t current_line = 0;
   std::size_t last_begin_of_line = 0;
   std::size_t indent_ignore = 0;

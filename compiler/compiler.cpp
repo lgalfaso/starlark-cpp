@@ -50,7 +50,7 @@ using ::starlark::bytecode::BlockType;
 using ::starlark::bytecode::Program;
 using ::starlark::grammar::ast_listener;
 using ::starlark::grammar::ast_listener_base;
-using ::starlark::grammar::options;
+using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::parser;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::logger;
@@ -957,7 +957,7 @@ const Block& bytecode_generator::block() const {
 
 compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(binding) {}
 
-Program* compiler::compile(std::string_view starlark_program, options opt, logger& logging, Arena& arena) {
+Program* compiler::compile(std::string_view starlark_program, grammar_options opt, logger& logging, Arena& arena) {
   logger_wrap logging_wrap(logging);
   parser star_parser(starlark_program,
                      opt,
