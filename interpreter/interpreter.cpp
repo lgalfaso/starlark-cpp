@@ -125,15 +125,11 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
   int instruction_ptr = 0;
   int block_ptr = 0;
 
-  if (starlark_program == nullptr) {
-    return nullptr;
-  }
   starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
   error_handler error_callback(block_ptr, instruction_ptr, starlark_program->block(0).op_code_size() - 1, log);
-
   frame* result = nullptr;
   while (true) {
-    auto& op_code = starlark_program->block(block_ptr).op_code(instruction_ptr);
+    const auto& op_code = starlark_program->block(block_ptr).op_code(instruction_ptr);
     instruction_ptr++;
     switch (op_code.op_code_case()) {
       case OpCode::kConstNone:
