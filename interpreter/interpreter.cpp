@@ -119,6 +119,7 @@ class error_handler : public error_fn {
 frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
   std::vector<starlark_obj*> stack;
   std::vector<std::string_view> sv_stack;
+  // TODO(lmirelmann): Can this be made to be `std::vector<std::vector<frame*>*> frame_stacks;` ?
   std::vector<std::vector<frame*>> frame_stacks;
   std::vector<std::pair<int, int>> call_stack;
   int instruction_ptr = 0;
@@ -711,6 +712,7 @@ frame* interpreter::run(std::string_view starlark_code,
   global_context["True"] = ctx.true_value();
   global_context["False"] = ctx.false_value();
   global_context["None"] = ctx.none_value();
+  // TODO(lmirelmann): Replace `min`, `max` and `sorted` with variations that do not use the stack.
   global_context[starlark_built_in_functions::abs_f] = create_function(ctx, nullptr, starlark_fn_abs, starlark_built_in_functions::abs_f);
   global_context[starlark_built_in_functions::all_f] = create_function(ctx, nullptr, starlark_fn_all, starlark_built_in_functions::all_f);
   global_context[starlark_built_in_functions::any_f] = create_function(ctx, nullptr, starlark_fn_any, starlark_built_in_functions::any_f);
