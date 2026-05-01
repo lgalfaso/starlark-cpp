@@ -1078,6 +1078,7 @@ TEST(StarlarkList, Subscript) {
   EXPECT_EQ(list.index(starlark_integer(-2), ctx, error_callback)->repr(), "1");
   EXPECT_EQ(list.index(starlark_bigint(-2), ctx, error_callback)->repr(), "1");
   EXPECT_EQ(list.index(starlark_integer(-1), ctx, error_callback)->repr(), "2");
+  EXPECT_EQ(list.index(starlark_bigint(-1), ctx, error_callback)->repr(), "2");
   EXPECT_EQ(list.index(starlark_integer(0), ctx, error_callback)->repr(), "0");
   EXPECT_EQ(list.index(starlark_bigint(0), ctx, error_callback)->repr(), "0");
   EXPECT_EQ(list.index(starlark_integer(1), ctx, error_callback)->repr(), "1");
@@ -1204,7 +1205,7 @@ TEST(StarlarkList, IndexAssign) {
   list.append(&two, ctx, error_callback);
 
   list.index_assign(starlark_integer(-3), three, error_callback);
-  list.index_assign(starlark_integer(1), four, error_callback);
+  list.index_assign(*ctx.one(), four, error_callback);
   EXPECT_EQ("[3, 4, 2]", list.str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
@@ -1272,7 +1273,7 @@ TEST(StarlarkList, IndexAssignWithFreeze) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
   list.freeze();
-  list.index_assign(starlark_integer(0), one, error_callback);
+  list.index_assign(*ctx.zero(), one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
 }
