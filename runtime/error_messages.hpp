@@ -110,6 +110,7 @@ std::string error_unexpected_keyword_argument(std::string_view fn_name, std::str
 std::string error_missing_positional_argument(std::string_view fn_name, std::string_view argument_name);
 std::string error_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name);
 
+std::string error_empty_iterator(std::string_view fn_name);
 }  // namespace runtime
 }  // namespace starlark
 

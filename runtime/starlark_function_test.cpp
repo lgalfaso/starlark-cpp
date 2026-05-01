@@ -2396,6 +2396,678 @@ TEST(StarlarkList, NamedArguments) {
   EXPECT_EQ("TypeError: list() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkMax, NoPosArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: max expected at least 1 argument, got 0", error_callback.messages[0]);
+}
+
+TEST(StarlarkMax, OnePosArgsEmpty) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: max() iterable argument is empty");
+}
+
+TEST(StarlarkMax, OnePosArgOneElement) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.one(), ctx, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::int_t, result->type());
+  EXPECT_EQ(result->as_int64(), 1);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMax, OnePosArgManyElements) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.zero(), ctx, error_callback);
+  list.append(ctx.one(), ctx, error_callback);
+  list.append(ctx.minus_one(), ctx, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::int_t, result->type());
+  EXPECT_EQ(result->as_int64(), 1);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMax, OnePosArgsNotComparable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.one(), ctx, error_callback);
+  list.append(ctx.empty_string(), ctx, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'string'");
+}
+
+TEST(StarlarkMax, OnePosArgsNotIterable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+}
+
+TEST(StarlarkMax, OnePosArgsWithKey) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(&one, ctx, error_callback);
+  list.append(&two, ctx, error_callback);
+  list.append(&three, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "three");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_1) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.one(), ctx, error_callback);
+  list.append(&two, ctx, error_callback);
+  list.append(&three, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_2) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(&two, ctx, error_callback);
+  list.append(ctx.one(), ctx, error_callback);
+  list.append(&three, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMax, OnePosArgsResultOfKeyAreNotComparable) {
+  std::string s_key("key");
+  starlark_tuple tuple(0);
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  tuple.add(&list);
+  tuple.add(&list);
+  pos_args.push_back(&tuple);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+}
+
+TEST(StarlarkMax, TwoPosArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::int_t, result->type());
+  EXPECT_EQ(result->as_int64(), 1);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMax, TwoPosArgsNotComparable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.false_value());
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
+}
+
+TEST(StarlarkMax, ManyPosArgsWithKey) {
+  std::string s_key("key");
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&two);
+  pos_args.push_back(&three);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "three");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMax, TwoPosArgsWithKeyErrorInKeyCall_1) {
+  std::string s_key("key");
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(&two);
+  pos_args.push_back(&three);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMax, TwoPosArgsWithKeyErrorInKeyCall_2) {
+  std::string s_key("key");
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&two);
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(&three);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMax, TwoPosArgsResultOfKeyAreNotComparable) {
+  std::string s_key("key");
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+}
+
+TEST(StarlarkMax, UnknownNamedArguments) {
+  std::string s_one("1");
+  starlark_integer one(1);
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
+  pos_args.push_back(&list);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+
+  EXPECT_EQ(nullptr, starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkMin, NoPosArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: min expected at least 1 argument, got 0", error_callback.messages[0]);
+}
+
+TEST(StarlarkMin, OnePosArgsEmpty) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "ValueError: min() iterable argument is empty");
+}
+
+TEST(StarlarkMin, OnePosArgOneElement) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.one(), ctx, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::int_t, result->type());
+  EXPECT_EQ(result->as_int64(), 1);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMin, OnePosArgManyElements) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.zero(), ctx, error_callback);
+  list.append(ctx.minus_one(), ctx, error_callback);
+  list.append(ctx.one(), ctx, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::int_t, result->type());
+  EXPECT_EQ(result->as_int64(), -1);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMin, OnePosArgsNotComparable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.one(), ctx, error_callback);
+  list.append(ctx.empty_string(), ctx, error_callback);
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'string'");
+}
+
+TEST(StarlarkMin, OnePosArgsNotIterable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+}
+
+TEST(StarlarkMin, OnePosArgsWithKey) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(&three, ctx, error_callback);
+  list.append(&one, ctx, error_callback);
+  list.append(&two, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "one");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_1) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(ctx.one(), ctx, error_callback);
+  list.append(&two, ctx, error_callback);
+  list.append(&three, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_2) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(&two, ctx, error_callback);
+  list.append(ctx.one(), ctx, error_callback);
+  list.append(&three, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMin, OnePosArgsResultOfKeyAreNotComparable) {
+  std::string s_key("key");
+  starlark_tuple tuple(0);
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  tuple.add(&list);
+  tuple.add(&list);
+  pos_args.push_back(&tuple);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+}
+
+TEST(StarlarkMin, TwoPosArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(ctx.minus_one());
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::int_t, result->type());
+  EXPECT_EQ(result->as_int64(), -1);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMin, TwoPosArgsNotComparable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.false_value());
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
+}
+
+TEST(StarlarkMin, ManyPosArgsWithKey) {
+  std::string s_key("key");
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&three);
+  pos_args.push_back(&one);
+  pos_args.push_back(&two);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "one");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMin, TwoPosArgsWithKeyErrorInKeyCall_1) {
+  std::string s_key("key");
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(&two);
+  pos_args.push_back(&three);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMin, TwoPosArgsWithKeyErrorInKeyCall_2) {
+  std::string s_key("key");
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&two);
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(&three);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+}
+
+TEST(StarlarkMin, TwoPosArgsResultOfKeyAreNotComparable) {
+  std::string s_key("key");
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+}
+
+TEST(StarlarkMin, UnknownNamedArguments) {
+  std::string s_one("1");
+  starlark_integer one(1);
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_one, &one);
+  pos_args.push_back(&list);
+  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.one());
+
+  EXPECT_EQ(nullptr, starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkOrd, NoPosArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: ord() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
 TEST(StarlarkOrd, FromString) {
   starlark_string str("😃"sv);
   Arena arena;

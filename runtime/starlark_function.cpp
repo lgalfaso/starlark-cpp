@@ -589,15 +589,191 @@ starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!min_args(pos_args, error_callback, starlark_built_in_functions::max_f, 1).ok()) {
+    return nullptr;
+  }
+  starlark_obj* key_fn = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "key") {
+      assert(value != nullptr);
+      key_fn = const_cast<starlark_obj*>(value);
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
+  }
+  if (pos_args.size() > 1) {
+    starlark_obj* candidate = pos_args.front();
+    if (key_fn == nullptr) {
+      for (std::size_t pos = 1; pos < pos_args.size(); ++pos) {
+        auto cmp = candidate->cmp(*pos_args[pos], "<", error_callback);
+        if (!cmp.ok()) {
+          return nullptr;
+        }
+        if (*cmp < 0) {
+          candidate = pos_args[pos];
+        }
+      }
+    } else {
+      const starlark_obj* candidate_key = key_fn->call({pos_args.front()}, {}, ctx, error_callback);
+      if (candidate_key == nullptr) {
+        return nullptr;
+      }
+      for (std::size_t pos = 1; pos < pos_args.size(); ++pos) {
+        const starlark_obj* element_key = key_fn->call({pos_args[pos]}, {}, ctx, error_callback);
+        if (element_key == nullptr) {
+          return nullptr;
+        }
+        auto cmp = candidate_key->cmp(*element_key, "<", error_callback);
+        if (!cmp.ok()) {
+          return nullptr;
+        }
+        if (*cmp < 0) {
+          candidate = pos_args[pos];
+        }
+      }
+    }
+    return candidate;
+  }
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  if (!it->has_next()) {
+    it->end_iterator();
+    error_callback.add_error(error_empty_iterator(starlark_built_in_functions::max_f));
+    return nullptr;
+  }
+  starlark_obj* candidate = it->next();
+  if (key_fn == nullptr) {
+    while (it->has_next()) {
+      auto* element = it->next();
+      auto cmp = candidate->cmp(*element, "<", error_callback);
+      if (!cmp.ok()) {
+        return nullptr;
+      }
+      if (*cmp < 0) {
+        candidate = element;
+      }
+    }
+  } else {
+    const starlark_obj* candidate_key = key_fn->call({candidate}, {}, ctx, error_callback);
+    if (candidate_key == nullptr) {
+      return nullptr;
+    }
+    while (it->has_next()) {
+      auto* element = it->next();
+      const starlark_obj* element_key = key_fn->call({element}, {}, ctx, error_callback);
+      if (element_key == nullptr) {
+        return nullptr;
+      }
+      auto cmp = candidate_key->cmp(*element_key, "<", error_callback);
+      if (!cmp.ok()) {
+        return nullptr;
+      }
+      if (*cmp < 0) {
+        candidate = element;
+      }
+    }
+  }
+  it->end_iterator();
+  return candidate;
 }
 
 starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (!min_args(pos_args, error_callback, starlark_built_in_functions::min_f, 1).ok()) {
+    return nullptr;
+  }
+  starlark_obj* key_fn = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "key") {
+      assert(value != nullptr);
+      key_fn = const_cast<starlark_obj*>(value);
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
+  }
+  if (pos_args.size() > 1) {
+    starlark_obj* candidate = pos_args.front();
+    if (key_fn == nullptr) {
+      for (std::size_t pos = 1; pos < pos_args.size(); ++pos) {
+        starlark_obj* element = pos_args[pos];
+        auto cmp = candidate->cmp(*element, "<", error_callback);
+        if (!cmp.ok()) {
+          return nullptr;
+        }
+        if (*cmp > 0) {
+          candidate = element;
+        }
+      }
+    } else {
+      const starlark_obj* candidate_key = key_fn->call({pos_args.front()}, {}, ctx, error_callback);
+      if (candidate_key == nullptr) {
+        return nullptr;
+      }
+      for (std::size_t pos = 1; pos < pos_args.size(); ++pos) {
+        starlark_obj* element = pos_args[pos];
+        const starlark_obj* element_key = key_fn->call({element}, {}, ctx, error_callback);
+        if (element_key == nullptr) {
+          return nullptr;
+        }
+        auto cmp = candidate_key->cmp(*element_key, "<", error_callback);
+        if (!cmp.ok()) {
+          return nullptr;
+        }
+        if (*cmp > 0) {
+          candidate = element;
+          candidate_key = element_key;
+        }
+      }
+    }
+    return candidate;
+  }
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  if (!it->has_next()) {
+    it->end_iterator();
+    error_callback.add_error(error_empty_iterator(starlark_built_in_functions::min_f));
+    return nullptr;
+  }
+  starlark_obj* candidate = it->next();
+  if (key_fn == nullptr) {
+    while (it->has_next()) {
+      auto* element = it->next();
+      auto cmp = candidate->cmp(*element, "<", error_callback);
+      if (!cmp.ok()) {
+        return nullptr;
+      }
+      if (*cmp > 0) {
+        candidate = element;
+      }
+    }
+  } else {
+    const starlark_obj* candidate_key = key_fn->call({candidate}, {}, ctx, error_callback);
+    if (candidate_key == nullptr) {
+      return nullptr;
+    }
+    while (it->has_next()) {
+      auto* element = it->next();
+      const starlark_obj* element_key = key_fn->call({element}, {}, ctx, error_callback);
+      if (element_key == nullptr) {
+        return nullptr;
+      }
+      auto cmp = candidate_key->cmp(*element_key, "<", error_callback);
+      if (!cmp.ok()) {
+        return nullptr;
+      }
+      if (*cmp > 0) {
+        candidate = element;
+        candidate_key = element_key;
+      }
+    }
+  }
+  it->end_iterator();
+  return candidate;
 }
 
 starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

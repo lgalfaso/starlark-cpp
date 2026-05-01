@@ -350,6 +350,10 @@ std::string error_missing_keyword_only_argument(std::string_view fn_name, std::s
   return std::format("TypeError: {}() missing required keyword-only argument '{}'", fn_name, argument_name);
 }
 
+std::string error_empty_iterator(std::string_view fn_name) {
+  return std::format("ValueError: {}() iterable argument is empty", fn_name);
+}
+
 }  // namespace runtime
 }  // namespace starlark
 
