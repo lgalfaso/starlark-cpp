@@ -1296,13 +1296,12 @@ bool starlark_string::string_elems::truthy() const {
 }
 
 bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  // TODO(lmirelmann): This error can be improved.
-  auto entry = string_as_string(&other, "in", 1, error_callback);
-  if (!entry.ok()) {
+  if (other.type() != starlark_types::string_t) {
+    error_callback.add_error(error_in_type_requires_type(type(), starlark_types::string_t, other.type()));
     return false;
   }
   for (std::string::size_type i = 0; i < state.len; ++i) {
-    if (str->element_at(state.start + i * state.step) == *entry) {
+    if (str->element_at(state.start + i * state.step) == other.as_string()) {
       return true;
     }
   }

@@ -167,7 +167,7 @@ TEST(StarlarkStringElems, BinaryInWithBoolean) {
 
   EXPECT_FALSE(starlark_string(""sv).elems(ctx)->binary_in(*ctx.true_value(), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: in() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.elems>' requires string as left operand, not bool");
 }
 
 TEST(StarlarkStringElems, GetIterator) {
