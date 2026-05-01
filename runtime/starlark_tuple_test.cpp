@@ -211,6 +211,11 @@ TEST(StarlarkTuple, UnpackError) {
   }
 }
 
+void cmp_helper(starlark::result::status_or<int> cmp, auto matcher) {
+  ASSERT_TRUE(cmp.ok());
+  EXPECT_THAT(*cmp, matcher);
+}
+
 TEST(StarlarkTuple, Order) {
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -227,35 +232,35 @@ TEST(StarlarkTuple, Order) {
   tuple5.add(&zero);
   error_handler error_callback;
 
-  EXPECT_THAT(tuple1.cmp(tuple1, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(tuple1.cmp(tuple2, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(tuple1.cmp(tuple3, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(tuple1.cmp(tuple4, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(tuple1.cmp(tuple5, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple1.cmp(tuple1, "cmp", error_callback), Eq(0));
+  cmp_helper(tuple1.cmp(tuple2, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple1.cmp(tuple3, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple1.cmp(tuple4, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple1.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple2.cmp(tuple1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple2.cmp(tuple2, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(tuple2.cmp(tuple3, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(tuple2.cmp(tuple4, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(tuple2.cmp(tuple5, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple2.cmp(tuple1, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple2.cmp(tuple2, "cmp", error_callback), Eq(0));
+  cmp_helper(tuple2.cmp(tuple3, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple2.cmp(tuple4, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple2.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple3.cmp(tuple1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple3.cmp(tuple2, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple3.cmp(tuple3, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(tuple3.cmp(tuple4, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(tuple3.cmp(tuple5, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple3.cmp(tuple1, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple3.cmp(tuple2, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple3.cmp(tuple3, "cmp", error_callback), Eq(0));
+  cmp_helper(tuple3.cmp(tuple4, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple3.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple4.cmp(tuple1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple4.cmp(tuple2, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple4.cmp(tuple3, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple4.cmp(tuple4, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(tuple4.cmp(tuple5, "cmp", error_callback), Lt(0));
+  cmp_helper(tuple4.cmp(tuple1, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple4.cmp(tuple2, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple4.cmp(tuple3, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple4.cmp(tuple4, "cmp", error_callback), Eq(0));
+  cmp_helper(tuple4.cmp(tuple5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(tuple5.cmp(tuple1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple2, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple3, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple4, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(tuple5.cmp(tuple5, "cmp", error_callback), Eq(0));
+  cmp_helper(tuple5.cmp(tuple1, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple5.cmp(tuple2, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple5.cmp(tuple3, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple5.cmp(tuple4, "cmp", error_callback), Gt(0));
+  cmp_helper(tuple5.cmp(tuple5, "cmp", error_callback), Eq(0));
 }
 
 TEST(StarlarkTuple, OrderError) {
@@ -263,7 +268,8 @@ TEST(StarlarkTuple, OrderError) {
   starlark_integer one(1);
   starlark_tuple tuple(0);
 
-  EXPECT_FALSE(tuple.cmp(one, "<", error_callback));
+  auto cmp = tuple.cmp(one, "<", error_callback);
+  ASSERT_FALSE(cmp.ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'tuple' and 'int'");
 }

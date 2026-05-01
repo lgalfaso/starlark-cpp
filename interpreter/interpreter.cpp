@@ -324,28 +324,44 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, "<", error_callback) < 0 ? ctx.true_value() : ctx.false_value());
+        auto cmp = stack.back()->cmp(*element, "<", error_callback);
+        if (!cmp.ok()) {
+          break;
+        }
+        stack.back() = (*cmp < 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryLessThanEquals: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, "<=", error_callback) <= 0 ? ctx.true_value() : ctx.false_value());
+        auto cmp = stack.back()->cmp(*element, "<=", error_callback);
+        if (!cmp.ok()) {
+          break;
+        }
+        stack.back() = (*cmp <= 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryGreaterThan: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, ">", error_callback) > 0 ? ctx.true_value() : ctx.false_value());
+        auto cmp = stack.back()->cmp(*element, ">", error_callback);
+        if (!cmp.ok()) {
+          break;
+        }
+        stack.back() = (*cmp > 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryGreaterThanEquals: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->cmp(*element, ">=", error_callback) >= 0 ? ctx.true_value() : ctx.false_value());
+        auto cmp = stack.back()->cmp(*element, ">=", error_callback);
+        if (!cmp.ok()) {
+          break;
+        }
+        stack.back() = (*cmp >= 0 ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryIn: {

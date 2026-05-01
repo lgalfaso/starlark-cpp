@@ -247,6 +247,11 @@ TEST(StarlarkList, UnpackError) {
   }
 }
 
+void cmp_helper(starlark::result::status_or<int> cmp, auto matcher) {
+  ASSERT_TRUE(cmp.ok());
+  EXPECT_THAT(*cmp, matcher);
+}
+
 TEST(StarlarkList, Order) {
   starlark_integer zero(0);
   starlark_integer one(1);
@@ -266,35 +271,35 @@ TEST(StarlarkList, Order) {
   list5.append(&one, ctx, error_callback);
   list5.append(&zero, ctx, error_callback);
 
-  EXPECT_THAT(list1.cmp(list1, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(list1.cmp(list2, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(list1.cmp(list3, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(list1.cmp(list4, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(list1.cmp(list5, "cmp", error_callback), Lt(0));
+  cmp_helper(list1.cmp(list1, "cmp", error_callback), Eq(0));
+  cmp_helper(list1.cmp(list2, "cmp", error_callback), Lt(0));
+  cmp_helper(list1.cmp(list3, "cmp", error_callback), Lt(0));
+  cmp_helper(list1.cmp(list4, "cmp", error_callback), Lt(0));
+  cmp_helper(list1.cmp(list5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(list2.cmp(list1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list2.cmp(list2, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(list2.cmp(list3, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(list2.cmp(list4, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(list2.cmp(list5, "cmp", error_callback), Lt(0));
+  cmp_helper(list2.cmp(list1, "cmp", error_callback), Gt(0));
+  cmp_helper(list2.cmp(list2, "cmp", error_callback), Eq(0));
+  cmp_helper(list2.cmp(list3, "cmp", error_callback), Lt(0));
+  cmp_helper(list2.cmp(list4, "cmp", error_callback), Lt(0));
+  cmp_helper(list2.cmp(list5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(list3.cmp(list1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list3.cmp(list2, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list3.cmp(list3, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(list3.cmp(list4, "cmp", error_callback), Lt(0));
-  EXPECT_THAT(list3.cmp(list5, "cmp", error_callback), Lt(0));
+  cmp_helper(list3.cmp(list1, "cmp", error_callback), Gt(0));
+  cmp_helper(list3.cmp(list2, "cmp", error_callback), Gt(0));
+  cmp_helper(list3.cmp(list3, "cmp", error_callback), Eq(0));
+  cmp_helper(list3.cmp(list4, "cmp", error_callback), Lt(0));
+  cmp_helper(list3.cmp(list5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(list4.cmp(list1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list4.cmp(list2, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list4.cmp(list3, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list4.cmp(list4, "cmp", error_callback), Eq(0));
-  EXPECT_THAT(list4.cmp(list5, "cmp", error_callback), Lt(0));
+  cmp_helper(list4.cmp(list1, "cmp", error_callback), Gt(0));
+  cmp_helper(list4.cmp(list2, "cmp", error_callback), Gt(0));
+  cmp_helper(list4.cmp(list3, "cmp", error_callback), Gt(0));
+  cmp_helper(list4.cmp(list4, "cmp", error_callback), Eq(0));
+  cmp_helper(list4.cmp(list5, "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(list5.cmp(list1, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list5.cmp(list2, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list5.cmp(list3, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list5.cmp(list4, "cmp", error_callback), Gt(0));
-  EXPECT_THAT(list5.cmp(list5, "cmp", error_callback), Eq(0));
+  cmp_helper(list5.cmp(list1, "cmp", error_callback), Gt(0));
+  cmp_helper(list5.cmp(list2, "cmp", error_callback), Gt(0));
+  cmp_helper(list5.cmp(list3, "cmp", error_callback), Gt(0));
+  cmp_helper(list5.cmp(list4, "cmp", error_callback), Gt(0));
+  cmp_helper(list5.cmp(list5, "cmp", error_callback), Eq(0));
 }
 
 TEST(StarlarkList, OrderError) {
@@ -302,7 +307,7 @@ TEST(StarlarkList, OrderError) {
   starlark_integer one(1);
   starlark_list list(0);
 
-  EXPECT_FALSE(list.cmp(one, "<", error_callback));
+  EXPECT_FALSE(list.cmp(one, "<", error_callback).ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'list' and 'int'");
 }

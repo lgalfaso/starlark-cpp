@@ -175,20 +175,25 @@ TEST(StarlarkBytes, Hash) {
   EXPECT_EQ(0x5622cc50881d8b5b, starlark_bytes("abcdefghijklmnopqrstuvwxyz0123456789@!"sv).hash());
 }
 
+void cmp_helper(starlark::result::status_or<int> cmp, auto matcher) {
+  ASSERT_TRUE(cmp.ok());
+  EXPECT_THAT(*cmp, matcher);
+}
+
 TEST(StarlarkBytes, Order) {
   error_handler error_callback;
 
-  EXPECT_THAT(starlark_bytes(""sv).cmp(starlark_bytes(""sv), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_bytes(""sv).cmp(starlark_bytes("a"sv), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_bytes("a"sv).cmp(starlark_bytes("a"sv), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_bytes("a"sv).cmp(starlark_bytes(""sv), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_bytes("a"sv).cmp(starlark_bytes("b"sv), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_bytes("b"sv).cmp(starlark_bytes("a"sv), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_bytes(""sv).cmp(starlark_bytes(""sv), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_bytes(""sv).cmp(starlark_bytes("a"sv), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_bytes("a"sv).cmp(starlark_bytes("a"sv), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_bytes("a"sv).cmp(starlark_bytes(""sv), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_bytes("a"sv).cmp(starlark_bytes("b"sv), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_bytes("b"sv).cmp(starlark_bytes("a"sv), "cmp", error_callback), Gt(0));
 }
 
 TEST(StarlarkBytes, OrderErrors) {
   error_handler error_callback;
-  EXPECT_FALSE(starlark_bytes(""sv).cmp(starlark_string(""sv), "<", error_callback));
+  EXPECT_FALSE(starlark_bytes(""sv).cmp(starlark_string(""sv), "<", error_callback).ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'bytes' and 'string'");
 }

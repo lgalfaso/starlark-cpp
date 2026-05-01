@@ -89,7 +89,7 @@ class order_comparator {
   };
   void add_task(pending_task_type task_type);
   void add_task(const starlark_obj* lhs, const starlark_obj* rhs);
-  int run(std::string_view op, error_fn& error_callback);
+  starlark::result::status_or<int> run(std::string_view op, error_fn& error_callback);
 
  private:
   struct pending_task {
@@ -169,7 +169,7 @@ class starlark_obj {
   virtual const std::vector<std::string>& dir() const;
   virtual const std::map<std::string, fn*, std::less<>>& methods_meta() const;
   bool equals(const starlark_obj& other) const;
-  int cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
+  starlark::result::status_or<int> cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;
   void freeze();
   virtual starlark_obj* call(const pos_args_t& pos_args, const named_args_t& named_args, context& ctx, error_fn& error_callback);

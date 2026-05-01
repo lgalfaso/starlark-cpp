@@ -97,7 +97,7 @@ void order_comparator::add_task(const starlark_obj* lhs, const starlark_obj* rhs
   });
 }
 
-int order_comparator::run(std::string_view op, error_fn& error_callback) {
+status_or<int> order_comparator::run(std::string_view op, error_fn& error_callback) {
   while (!tasks.empty()) {
     auto top = tasks.back();
     tasks.pop_back();
@@ -106,14 +106,14 @@ int order_comparator::run(std::string_view op, error_fn& error_callback) {
         top.lhs->inner_cmp(*this, top.rhs, op, error_callback);
         break;
       case pending_task_type::kLessThan:
-        return -1;
+        return status_or<int>(-1);
       case pending_task_type::kGreaterThan:
-        return 1;
+        return status_or<int>(1);
       case pending_task_type::kFail:
-        return 0;
+        return status_or<int>(status_code::kError);
     }
   }
-  return 0;
+  return status_or<int>(0);
 }
 
 starlark_iterator::~starlark_iterator() {}
@@ -171,7 +171,7 @@ bool starlark_obj::equals(const starlark_obj& other) const {
   return cmp.run();
 }
 
-int starlark_obj::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
+status_or<int> starlark_obj::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
   order_comparator cmp;
   cmp.add_task(this, &other);
   return cmp.run(op, error_callback);

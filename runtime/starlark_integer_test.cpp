@@ -143,47 +143,54 @@ TEST(StarlarkInteger, UnaryMinusEdgeCase) {
   EXPECT_EQ("9223372036854775808", result->str());
 }
 
+void cmp_helper(starlark::result::status_or<int> cmp, auto matcher) {
+  ASSERT_TRUE(cmp.ok());
+  EXPECT_THAT(*cmp, matcher);
+}
+
 TEST(StarlarkInteger, OrderVsBigInt) {
   error_handler error_callback;
 
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(-2), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(-1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(0), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_bigint(-2), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_bigint(-1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_bigint(0), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(-1), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(0), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_bigint(-1), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_bigint(0), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(0), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_bigint(0), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_bigint(1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(1), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_bigint(1), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_bigint(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_bigint(2), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_bigint(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_bigint(0), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_bigint(1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_bigint(2), "cmp", error_callback), Eq(0));
 
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_bigint(number::one() << 64), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_bigint(number::one() << 64), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkInteger, OrderVsBool) {
   error_handler error_callback;
   starlark_bool obj_true(true);
 
-  EXPECT_THAT(starlark_integer(1).cmp(obj_true, "<", error_callback), Eq(0));
+  auto cmp = starlark_integer(1).cmp(obj_true, "<", error_callback);
+  ASSERT_FALSE(cmp.ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
 }
@@ -191,52 +198,53 @@ TEST(StarlarkInteger, OrderVsBool) {
 TEST(StarlarkBigint, OrderVsFloat) {
   error_handler error_callback;
 
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_float(-2), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_float(-1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_float(0), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-2).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_float(-2), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_float(-1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_float(0), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-2).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_float(-1), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_float(0), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_float(-1), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_float(0), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(0), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(0), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_float(0), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_float(1), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_float(0), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_float(1), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_float(2), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_float(0), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_float(1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(2).cmp(starlark_float(2), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_float(-2), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_float(0), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_float(1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(2).cmp(starlark_float(2), "cmp", error_callback), Eq(0));
 
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(-std::numeric_limits<double>::infinity()), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(std::numeric_limits<double>::infinity()), "cmp", error_callback), Lt(0));
-  EXPECT_THAT(starlark_integer(0).cmp(starlark_float(NAN), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(-std::numeric_limits<double>::infinity()), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(-1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(1), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(std::numeric_limits<double>::infinity()), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(0).cmp(starlark_float(NAN), "cmp", error_callback), Lt(0));
 
-  EXPECT_THAT(starlark_integer(-1).cmp(starlark_float(-1.25), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(1).cmp(starlark_float(1.25), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer(-1).cmp(starlark_float(-1.25), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(1).cmp(starlark_float(1.25), "cmp", error_callback), Lt(0));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkInteger, OrderExact) {
   error_handler error_callback;
 
-  EXPECT_THAT(starlark_integer((1L<<53)+1).cmp(starlark_float((1L<<53)+1), "cmp", error_callback), Gt(0));
-  EXPECT_THAT(starlark_integer(std::numeric_limits<int64_t>::min()).cmp(starlark_float(std::numeric_limits<int64_t>::min()), "cmp", error_callback), Eq(0));
-  EXPECT_THAT(starlark_integer(std::numeric_limits<int64_t>::max()).cmp(starlark_float(std::numeric_limits<int64_t>::max()), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_integer((1L<<53)+1).cmp(starlark_float((1L<<53)+1), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_integer(std::numeric_limits<int64_t>::min()).cmp(starlark_float(std::numeric_limits<int64_t>::min()), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_integer(std::numeric_limits<int64_t>::max()).cmp(starlark_float(std::numeric_limits<int64_t>::max()), "cmp", error_callback), Lt(0));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

@@ -43,8 +43,11 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::testing::error_handler;
 using ::std::literals::string_view_literals::operator""sv;
+using ::testing::Eq;
 using ::testing::Gt;
+using ::testing::IsEmpty;
 using ::testing::Lt;
+using ::testing::SizeIs;
 
 namespace {
 
@@ -112,13 +115,22 @@ TEST(StarlarkBool, Equals) {
   EXPECT_FALSE(starlark_bool(true).equals(starlark_tuple(0)));
 }
 
+void cmp_helper(starlark::result::status_or<int> cmp, auto matcher) {
+  ASSERT_TRUE(cmp.ok());
+  EXPECT_THAT(*cmp, matcher);
+}
+
 TEST(StarlarkBool, Cmp) {
   error_handler error_callback;
-
-  EXPECT_EQ(0, starlark_bool(false).cmp(starlark_bool(false), "cmp", error_callback));
-  EXPECT_THAT(starlark_bool(false).cmp(starlark_bool(true), "cmp", error_callback), Lt(0));
-  EXPECT_EQ(0, starlark_bool(true).cmp(starlark_bool(true), "cmp", error_callback));
-  EXPECT_THAT(starlark_bool(true).cmp(starlark_bool(false), "cmp", error_callback), Gt(0));
+  cmp_helper(starlark_bool(false).cmp(starlark_bool(false), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_bool(false).cmp(starlark_bool(true), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_bool(true).cmp(starlark_bool(true), "cmp", error_callback), Eq(0));
+  cmp_helper(starlark_bool(true).cmp(starlark_bool(false), "cmp", error_callback), Gt(0));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  auto cmp = starlark_bool(true).cmp(starlark_none(), "cmp", error_callback);
+  ASSERT_FALSE(cmp.ok());
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: 'cmp' not supported between instances of 'bool' and 'NoneType'");
 }
 
 TEST(StarlarkBool, Hash) {
