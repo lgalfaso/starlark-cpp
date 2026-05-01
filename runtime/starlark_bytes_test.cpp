@@ -3577,7 +3577,7 @@ TEST(StarlarkBytes, JoinBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bytes' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: can only join an iterable");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 

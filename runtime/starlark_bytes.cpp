@@ -841,10 +841,9 @@ starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj:
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
 
-  auto it = pos_args.front()->get_iterator(true, ctx, error_callback);
+  auto it = pos_args.front()->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
-    // TODO(lmirelmann): The error is not exactly the same, Python produces the following error:
-    // `TypeError: can only join an iterable`
+    error_callback.add_error(error_can_only_join_on_iterable());
     return nullptr;
   }
   std::vector<std::string_view> elements;
