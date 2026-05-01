@@ -92,9 +92,9 @@ TEST(StarlarkBytesElems, Index) {
 
   EXPECT_EQ(elems->index(starlark_integer(-3), ctx, error_callback)->repr(), "b\"a\"");
   EXPECT_EQ(elems->index(starlark_integer(-2), ctx, error_callback)->repr(), "b\"b\"");
-  EXPECT_EQ(elems->index(starlark_integer(-1), ctx, error_callback)->repr(), "b\"c\"");
-  EXPECT_EQ(elems->index(starlark_integer(0), ctx, error_callback)->repr(), "b\"a\"");
-  EXPECT_EQ(elems->index(starlark_integer(1), ctx, error_callback)->repr(), "b\"b\"");
+  EXPECT_EQ(elems->index(*ctx.minus_one(), ctx, error_callback)->repr(), "b\"c\"");
+  EXPECT_EQ(elems->index(*ctx.zero(), ctx, error_callback)->repr(), "b\"a\"");
+  EXPECT_EQ(elems->index(*ctx.one(), ctx, error_callback)->repr(), "b\"b\"");
   EXPECT_EQ(elems->index(starlark_integer(2), ctx, error_callback)->repr(), "b\"c\"");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
