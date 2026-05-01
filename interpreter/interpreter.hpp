@@ -11,6 +11,7 @@
 #include "grammar/options.hpp"
 #include "interpreter/frame.hpp"
 #include "logging/logging.hpp"
+#include "runtime/options.hpp"
 #include "runtime/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
@@ -23,6 +24,7 @@ class interpreter {
   interpreter();
   frame* run(std::string_view starlark_program,
       const starlark::grammar::grammar_options& g_options,
+      const starlark::runtime::runtime_options& r_options,
       const std::map<std::string, starlark::runtime::starlark_obj*, std::less<>>& custom_binding,
       google::protobuf::Arena& arena,
       starlark::logging::logger& logging);

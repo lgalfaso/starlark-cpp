@@ -1,4 +1,4 @@
-// Copyright 2025 Lucas Mirelmann
+// Copyright 2025-2026 Lucas Mirelmann
 
 #include <fcntl.h>
 
@@ -27,10 +27,12 @@ using ::starlark::interpreter::interpreter;
 using ::starlark::logging::logger;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_types;
+using ::starlark::runtime::to_int64_with_clamping;
 using ::starlark::testing::error_handler;
 using ::testing::SizeIs;
 
@@ -71,18 +73,39 @@ starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_
 }
 
 starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  auto log2_max_bigint = ctx.options().log2_max_bigint;
+  auto max_sequence_size = ctx.options().max_sequence_size;
+  auto max_string_length = ctx.options().max_string_length;
   starlark_obj* error = nullptr;
   for (auto& [key, value] : named_args) {
+    if (value == nullptr) {
+      error_callback.add_error(std::format("invalid '{}' parameter (nullptr).", key));
+      return nullptr;
+    }
     if (key == "error_message") {
-      if (value == nullptr) {
-        error_callback.add_error("invalid 'error_message' parameter (nullptr).");
-        return nullptr;
-      }
       if (value->type() != starlark_types::string_t) {
-        error_callback.add_error(std::format("invalid 'error_message' parameter ({}).", value->type()));
+        error_callback.add_error(std::format("invalid '{}' parameter ({}).", key, value->type()));
         return nullptr;
       }
       error = value;
+    } else if (key == "log2_max_bigint") {
+      auto r = to_int64_with_clamping(*value, error_callback);
+      if (!r.ok()) {
+        return nullptr;
+      }
+      log2_max_bigint = *r;
+    } else if (key == "max_sequence_size") {
+      auto r = to_int64_with_clamping(*value, error_callback);
+      if (!r.ok()) {
+        return nullptr;
+      }
+      max_sequence_size = *r;
+    } else if (key == "max_string_length") {
+      auto r = to_int64_with_clamping(*value, error_callback);
+      if (!r.ok()) {
+        return nullptr;
+      }
+      max_string_length = *r;
     } else {
       error_callback.add_error(std::format("Unknown named argument '{}'.", key));
       return nullptr;
@@ -105,7 +128,14 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
   logger logging;
   Arena arena2;
 
-  frame* result = runner.run(source_code->str(), grammar_options{}, {}, arena2, logging);
+  std::basic_ostringstream<char> out;
+  runtime_options r_options = runtime_options{
+    .log2_max_bigint = log2_max_bigint,
+    .max_sequence_size = max_sequence_size,
+    .max_string_length = max_string_length,
+    .out = out,
+  };
+  frame* result = runner.run(source_code->str(), grammar_options{}, r_options, {}, arena2, logging);
   if (result != nullptr) {
     error_callback.add_error("Program executed without errors, it was expected that it would fail.");
     return nullptr;
@@ -145,7 +175,7 @@ TEST(Interpreter, TestCase) {
   custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
   custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
 
-  frame* result = runner.run(starlark_code, grammar_options{}, custom_binding, arena, logging);
+  frame* result = runner.run(starlark_code, grammar_options{}, runtime_options{}, custom_binding, arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
 }
 

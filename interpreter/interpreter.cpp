@@ -16,6 +16,7 @@
 #include "interpreter/frame.hpp"
 #include "interpreter/function.hpp"
 #include "runtime/error_fn.hpp"
+#include "runtime/error_messages.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
@@ -43,6 +44,8 @@ using ::starlark::logging::logger;
 using ::starlark::runtime::context;
 using ::starlark::runtime::create_function;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::error_max_sequence_length;
+using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_functions;
@@ -128,6 +131,38 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
   starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
   error_handler error_callback(block_ptr, instruction_ptr, starlark_program->block(0).op_code_size() - 1, log);
   frame* result = nullptr;
+
+  // Limit checks.
+  for (const auto& block : starlark_program->block()) {
+    for (const auto& op : block.op_code()) {
+      switch (op.op_code_case()) {
+        case OpCode::kConstString:
+          // TODO(lmirelmann): This error will not show up the specific string that has the issue as
+          // we are not pointing to the actual ip and block. The right approach would be to be
+          // able to produce the errors using the op code information.
+          if (op.const_string().value().length() > ctx.options().max_string_length) {
+            error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+            return nullptr;
+          }
+          break;
+        case OpCode::kConstBytes:
+          if (op.const_bytes().value().length() > ctx.options().max_string_length) {
+            error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+            return nullptr;
+          }
+          break;
+        case OpCode::kMakeTuple:
+          if (op.make_tuple().number_of_elements() > ctx.options().max_sequence_size) {
+            error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+            return nullptr;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   while (true) {
     const auto& op_code = starlark_program->block(block_ptr).op_code(instruction_ptr);
     instruction_ptr++;
@@ -146,14 +181,12 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         stack.push_back(Arena::Create<starlark_float>(&ctx.arena(), op_code.const_float().value()));
         break;
       case OpCode::kConstString:
-        // TODO(lmirelmann): Check that the string is not larger than the maximum allowed.
         stack.push_back(Arena::Create<starlark_string>(&ctx.arena(), op_code.const_string().value()));
         break;
       case OpCode::kConstStringView:
         sv_stack.push_back(op_code.const_string_view().value());
         break;
       case OpCode::kConstBytes:
-        // TODO(lmirelmann): Check that the string is not larger than the maximum allowed.
         stack.push_back(Arena::Create<starlark_bytes>(&ctx.arena(), op_code.const_bytes().value()));
         break;
       case OpCode::kMakeList:
@@ -196,7 +229,6 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
         break;
       }
       case OpCode::kMakeTuple: {
-        // TODO(lmirelmann): Check that the tuple is not larger than the maximum allowed.
         assert(stack.size() >= op_code.make_tuple().number_of_elements());
         starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), op_code.make_tuple().number_of_elements());
         for (int i = op_code.make_tuple().number_of_elements(); i > 0; --i) {
@@ -704,9 +736,9 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
 // TODO(lmirelmann): There has to be a way to define the loader.
 interpreter::interpreter() {}
 
-// TODO(lmirelmann): There has to be a way to define the runtime options.
 frame* interpreter::run(std::string_view starlark_code,
                         const grammar_options& g_options,
+                        const runtime_options& r_options,
                         const std::map<std::string, starlark_obj*, std::less<>>& custom_binding,
                         Arena& arena, logger& logging) {
   std::set<std::string, std::less<>> binding;
@@ -718,7 +750,7 @@ frame* interpreter::run(std::string_view starlark_code,
   if (starlark_program == nullptr) {
     return nullptr;
   }
-  context ctx(arena);
+  context ctx(arena, r_options);
 
   std::map<std::string, starlark_obj*, std::less<>> global_context;
   global_context["True"] = ctx.true_value();
