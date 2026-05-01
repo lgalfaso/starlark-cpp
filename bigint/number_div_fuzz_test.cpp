@@ -14,7 +14,7 @@ void NumberDivFuzzing(const char* data, size_t size) {
   if (size < 2) {
     return;
   }
-  
+
   // Split data in half to create two strings
   size_t half = size / 2;
   std::string_view str1(reinterpret_cast<const char*>(data), half);
@@ -31,14 +31,14 @@ void NumberDivFuzzing(const char* data, size_t size) {
       std::cout << "A != B*C + D" << std::endl;
       std::cout << "A (n1) = " << n1.hex() << std::endl;
       std::cout << "B (n2) = " << n2.hex() << std::endl;
-      __builtin_trap(); // Bug found! Invariant violated.
+      __builtin_trap();  // Bug found! Invariant violated.
     }
 
     if (n2.abs_cmp(remainder) <= 0) {
       std::cout << "abs(C) <= abc(D)" << std::endl;
       std::cout << "A (n1) = " << n1.hex() << std::endl;
       std::cout << "B (n2) = " << n2.hex() << std::endl;
-      __builtin_trap(); // Bug found! Invariant violated.
+      __builtin_trap();  // Bug found! Invariant violated.
     }
   }
 }
