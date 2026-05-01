@@ -104,6 +104,11 @@ std::string error_non_iterable(std::string_view fn_name);
 
 std::string_view error_empty_separator();
 std::string_view error_can_only_join_on_iterable();
+std::string error_in_type_requires_type(std::string_view base, std::string_view required, std::string_view actual);
+std::string error_multiple_values_for_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_missing_positional_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name);
 
 }  // namespace runtime
 }  // namespace starlark

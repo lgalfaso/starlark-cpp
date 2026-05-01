@@ -330,6 +330,26 @@ std::string_view error_can_only_join_on_iterable() {
   return "TypeError: can only join an iterable";
 }
 
+std::string error_in_type_requires_type(std::string_view base, std::string_view required, std::string_view actual) {
+  return std::format("TypeError: 'in <{}>' requires {} as left operand, not {}", base, required, actual);
+}
+
+std::string error_multiple_values_for_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("TypeError: {}() got multiple values for argument '{}'", fn_name, argument_name);
+}
+
+std::string error_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("TypeError: {}() got an unexpected keyword argument '{}'", fn_name, argument_name);
+}
+
+std::string error_missing_positional_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("TypeError: {}() missing required positional argument '{}'", fn_name, argument_name);
+}
+
+std::string error_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("TypeError: {}() missing required keyword-only argument '{}'", fn_name, argument_name);
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

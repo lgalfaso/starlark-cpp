@@ -7,13 +7,19 @@
 #include <utility>
 #include <vector>
 
+#include "runtime/error_messages.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::runtime::context;
+using ::starlark::runtime::error_arguments_exactly;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::error_missing_keyword_only_argument;
+using ::starlark::runtime::error_missing_positional_argument;
+using ::starlark::runtime::error_multiple_values_for_argument;
+using ::starlark::runtime::error_unexpected_keyword_argument;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
@@ -42,6 +48,9 @@ interpreter_function::interpreter_function(
       instruction_ptr(instruction_ptr),
       block_ptr(block_ptr) {
   default_parameters = nullptr;
+  for (std::size_t i = 0; i < function_signature->param().size(); ++i) {
+    named_argument_index[function_signature->param(i).name()] = i;
+  }
 }
 
 
@@ -51,7 +60,6 @@ starlark_obj* interpreter_function::call(
       context& ctx,
       error_fn& error_callback) {
   auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
-  // TODO(lmirelmann): Move the errors.
   starlark_obj::pos_args_t args;
   starlark_obj::named_args_t kwargs;
   int next_positional_param = 0;
@@ -75,44 +83,36 @@ starlark_obj* interpreter_function::call(
     } else if (function_signature->has_star_argument()) {
       args.push_back(param);
     } else {
-      error_callback.add_error(std::format(
-          "TypeError: {}() takes {} positional arguments but {} were given",
+      error_callback.add_error(error_arguments_exactly(
           function_signature->fn_name(),
-          number_positional_params,
-          pos_args.size()));
+          pos_args.size(),
+          number_positional_params));
       return nullptr;
     }
   }
   // Process the named arguments.
   for (auto& kwparam : named_args) {
-    bool found = false;
-    // TODO(lmirelmann): Should be possible to define the reverse-lookup once.
-    for (int i = 0; i < function_signature->param().size(); ++i) {
-      if (function_signature->param(i).name() == kwparam.first) {
-        found = true;
-        if (filled_elements[i]) {
-          error_callback.add_error(std::format(
-              "TypeError: {}() got multiple values for argument '{}'",
-              function_signature->fn_name(),
-              kwparam.first));
-          return nullptr;
-        }
-        new_frame->elements[i] = kwparam.second;
-        filled_elements[i] = true;
-        break;
-      }
-    }
-    if (!found) {
+    auto it = named_argument_index.find(kwparam.first);
+    if (it == named_argument_index.end()) {
       if (function_signature->has_star_star_argument()) {
         kwargs.insert(kwparam.first, kwparam.second);
       } else {
-        error_callback.add_error(std::format(
-            "TypeError: {}() got an unexpected keyword argument '{}'",
+        error_callback.add_error(error_unexpected_keyword_argument(
             function_signature->fn_name(),
             kwparam.first));
         return nullptr;
       }
+      continue;
     }
+    auto pos = it->second;
+    if (filled_elements[pos]) {
+      error_callback.add_error(error_multiple_values_for_argument(
+          function_signature->fn_name(),
+          kwparam.first));
+      return nullptr;
+    }
+    new_frame->elements[pos] = kwparam.second;
+    filled_elements[pos] = true;
   }
   // Put the default arguments, and check that all the slots are filled.
   int default_argument_pos = 0;
@@ -121,15 +121,12 @@ starlark_obj* interpreter_function::call(
       if (function_signature->param(i).default_initialization()) {
         new_frame->elements[i] = default_arguments[default_argument_pos];
       } else {
-        // TODO(lmirelmann): This error is not the same as Python, but good enough.
         if (i < number_positional_params) {
-          error_callback.add_error(std::format(
-              "TypeError: {}() missing required positional argument '{}'",
+          error_callback.add_error(error_missing_positional_argument(
               function_signature->fn_name(),
               function_signature->param(i).name()));
         } else {
-          error_callback.add_error(std::format(
-              "TypeError: {}() missing required keyword-only argument '{}'",
+          error_callback.add_error(error_missing_keyword_only_argument(
               function_signature->fn_name(),
               function_signature->param(i).name()));
         }

@@ -48,7 +48,7 @@ def foo():
   pass
 
 foo(1)
-""", error_message = "TypeError: foo() takes 0 positional arguments but 1 were given")
+""", error_message = "TypeError: foo expected 0 arguments, got 1")
 
 assert_fail("""
 def foo(a):
