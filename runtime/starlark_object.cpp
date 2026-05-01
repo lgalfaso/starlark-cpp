@@ -811,6 +811,17 @@ status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int
   return ok_status();
 }
 
+int64_t calculate_len(int64_t start, int64_t end, int64_t step) {
+  assert(step != 0);
+  if (step > 0 && start < end) {
+    return (end - 1 - start) / step + 1;
+  } else if (step < 0 && start > end) {
+    return (start - 1 - end) / -step + 1;
+  } else {
+    return 0;
+  }
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

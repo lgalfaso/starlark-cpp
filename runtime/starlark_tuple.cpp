@@ -257,7 +257,7 @@ starlark_obj* starlark_tuple::slice_range(const starlark_obj& start, const starl
   auto i_start = std::get<0>(*slice_result);
   auto i_end = std::get<1>(*slice_result);
   auto i_stride = std::get<2>(*slice_result);
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), calculate_len(i_start, i_end, i_stride));
   if (i_stride > 0) {
     for (auto i = i_start; i < i_end; i += i_stride) {
       result->values.push_back(values[i]);

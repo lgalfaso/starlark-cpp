@@ -335,8 +335,7 @@ starlark_obj* starlark_list::slice_range(const starlark_obj& start, const starla
   auto i_end = std::get<1>(*slice_result);
   auto i_stride = std::get<2>(*slice_result);
 
-  // TODO(lmirelmann): Pre-calculate the size.
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), calculate_len(i_start, i_end, i_stride));
   if (i_stride > 0) {
     for (auto i = i_start; i < i_end; i += i_stride) {
       result->values.push_back(values[i]);

@@ -17,21 +17,6 @@ using ::google::protobuf::Arena;
 namespace starlark {
 namespace runtime {
 
-namespace {
-
-int64_t calculate_len(int64_t start, int64_t end, int64_t step) {
-  assert(step != 0);
-  if (step > 0 && start < end) {
-    return (end - 1 - start) / step + 1;
-  } else if (step < 0 && start > end) {
-    return (start - 1 - end) / -step + 1;
-  } else {
-    return 0;
-  }
-}
-
-}  // namespace
-
 starlark_range::starlark_range(int64_t start, int64_t end, int64_t step) : state(calculate_state(start, end, step)) {}
 
 std::string_view starlark_range::type() const {
