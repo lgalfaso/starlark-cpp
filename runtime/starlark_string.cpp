@@ -1411,6 +1411,7 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() 
 }
 
 void starlark_string::build_index() {
+  // TODO(lmirelmann): Build the index lazy, but still have a way to know what the size of the string is.
   utf8_reader reader(value, false, false);
   std::string::size_type code_point_count = 0;
   while (reader.pending()) {
