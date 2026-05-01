@@ -31,6 +31,7 @@ interpreter_function::interpreter_function(
     std::vector<std::pair<int, int>>& call_stack,
     int& instruction_ptr,
     int& block_ptr) :
+      starlark::runtime::starlark_function(function_signature->fn_name()),
       entrypoint(entrypoint),
       default_arguments(default_arguments),
       function_signature(function_signature),
@@ -162,6 +163,11 @@ starlark_obj* interpreter_function::call(
   block_ptr = entrypoint;
   instruction_ptr = 0;
   return ctx.none_value();
+}
+
+bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& comp, const starlark_obj* other) const {
+  // TODO(lmirelmann): Implement.
+  return false;
 }
 
 }  // namespace interpreter

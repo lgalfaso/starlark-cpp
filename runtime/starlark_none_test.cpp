@@ -20,6 +20,7 @@
 #include "runtime/starlark_range.hpp"
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_string.hpp"
+#include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
@@ -40,6 +41,7 @@ using ::starlark::runtime::starlark_range;
 using ::starlark::runtime::starlark_set;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::testing::starlark_testing_function;
 using ::std::literals::string_view_literals::operator""sv;
 
 namespace {
@@ -47,13 +49,6 @@ namespace {
 starlark_obj* base_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   return nullptr;
 }
-
-class starlark_testing_function : public starlark_function {
- public:
-  starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override {
-    return starlark_obj::call(pos_args, named_args, ctx, error_callback);
-  }
-};
 
 TEST(StarlarkNone, Type) {
   EXPECT_EQ("NoneType", starlark_none{}.type());

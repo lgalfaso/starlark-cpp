@@ -117,6 +117,8 @@ starlark_obj* starlark_built_in_function::call(const starlark_obj::pos_args_t& p
   return native_fn(this_obj, pos_args, named_args, ctx, error_callback);
 }
 
+starlark_function::starlark_function(std::string_view fn_name) : fn_name(fn_name) {}
+
 std::string_view starlark_function::type() const {
   return starlark_types::function_t;
 }
@@ -131,11 +133,6 @@ bool starlark_function::inner_repr(printer& print, printer_action action) const 
 
 bool starlark_function::truthy() const {
   return true;
-}
-
-bool starlark_function::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  // TODO(lmirelmann): Implement.
-  return false;
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_function::inner_hash() const {

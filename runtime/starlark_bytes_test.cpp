@@ -44,6 +44,7 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
+using ::starlark::testing::starlark_testing_function;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Eq;
 using ::testing::Gt;
@@ -52,13 +53,6 @@ using ::testing::Lt;
 using ::testing::SizeIs;
 
 namespace {
-
-class starlark_testing_function : public starlark_function {
- public:
-  starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override {
-    return starlark_obj::call(pos_args, named_args, ctx, error_callback);
-  }
-};
 
 TEST(StarlarkBytes, Type) {
   EXPECT_EQ("bytes", starlark_bytes(""sv).type());

@@ -73,6 +73,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
+        ":starlark_function",
     ],
 )
 
@@ -185,6 +186,7 @@ cc_test(
         ":starlark_range",
         ":starlark_set",
         ":starlark_string",
+        ":starlark_testing",
         ":starlark_tuple",
         "@googletest//:gtest_main",
     ],

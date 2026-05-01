@@ -32,6 +32,9 @@ class interpreter_function : public starlark::runtime::starlark_function {
       starlark::runtime::context& ctx,
       starlark::runtime::error_fn& error_callback) override;
 
+ protected:
+  bool inner_equals(starlark::runtime::equals_comparator& comp, const starlark::runtime::starlark_obj* other) const override;
+
  private:
   int entrypoint;
   std::vector<starlark::runtime::starlark_obj*> default_arguments;

@@ -49,6 +49,7 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
+using ::starlark::testing::starlark_testing_function;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
@@ -76,13 +77,6 @@ starlark_obj* base2_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& p
   }
   return nullptr;
 }
-
-class starlark_testing_function : public starlark_function {
- public:
-  starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override {
-    return starlark_obj::call(pos_args, named_args, ctx, error_callback);
-  }
-};
 
 class FnTest : public ::testing::Test {
  protected:

@@ -49,13 +49,15 @@ struct starlark_built_in_functions {
 
 class starlark_function : public starlark_obj {
  public:
+  starlark_function(std::string_view fn_name);
   std::string_view type() const override;
   bool truthy() const override;
   starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override = 0;
 
  protected:
+  const std::string fn_name;
+
   bool inner_repr(printer& print, printer_action action) const override;
-  bool inner_equals(equals_comparator& comp, const starlark_obj* other) const override;
   std::variant<int64_t, pending_hash> inner_hash() const override;
 };
 
