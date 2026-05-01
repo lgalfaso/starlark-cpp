@@ -33,7 +33,7 @@ assert_eq(list((1, 2)), [1, 2])
 # TODO(lmirelmann): min
 assert_eq(ord(b'\xff'), 255)
 assert_eq(ord("😃"), 128515)
-# TODO(lmirelmann): print
+assert_succeed("""print("abc")""", print = "abc\n")
 assert_eq(list(range(3, 8, 2)), [3, 5, 7])
 assert_eq(repr([1, 2]), "[1, 2]")
 assert_eq(reversed(range(5)), [4, 3, 2, 1, 0])

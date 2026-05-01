@@ -130,6 +130,8 @@ class starlark_string : public starlark_obj {
   static constexpr std::string::size_type index_step = 64;
 };
 
+void append_for_repr(std::string& output, std::string_view input);
+
 }  // namespace runtime
 }  // namespace starlark
 

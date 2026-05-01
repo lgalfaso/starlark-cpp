@@ -85,8 +85,6 @@ starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_ob
 starlark_obj* starlark_string_fn_title(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_upper(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
-namespace {
-
 void append_for_repr(std::string& output, std::string_view input) {
   utf8_reader reader(input, false, false);
   // TODO(lmirelmann): Would be nice to avoid calling the read twice just to be able to handle the error case.
@@ -101,8 +99,6 @@ void append_for_repr(std::string& output, std::string_view input) {
     }
   }
 }
-
-}  // namespace
 
 constexpr std::string::size_type starlark_string::index_step;
 
