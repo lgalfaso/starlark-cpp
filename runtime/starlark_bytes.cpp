@@ -708,8 +708,6 @@ status_or<std::vector<std::string_view>> bytes_int_or_tuple_as_vector_of_bytes(c
   if (element->type() == starlark_types::tuple_t) {
     auto* tuple = static_cast<const starlark_tuple*>(element);
     for (int i = 0; i < tuple->size(); ++i) {
-      // TODO(lmirelmann): The error is not the same, it should be
-      // TypeError: tuple for endswith must only contain str, not int
       auto entry = bytes_or_int_as_bytes(tuple->at(i), error_callback);
       if (!entry.ok()) {
         return status_or<std::vector<std::string_view>>(status_code::kError);
