@@ -113,6 +113,9 @@ TEST(StarlarkFunction, Hash) {
   EXPECT_EQ(0, starlark_built_in_function(nullptr, base_fn, "").hash());
   EXPECT_EQ(-5056436948751091085, starlark_built_in_function(nullptr, base_fn, "fn_name").hash());
   EXPECT_EQ(-342786463226536281, starlark_built_in_function(nullptr, base_fn, "some_fn").hash());
+  EXPECT_EQ(0, starlark_testing_function("").hash());
+  EXPECT_EQ(-8419484683692405967, starlark_testing_function("fn_name").hash());
+  EXPECT_EQ(-4071090497886085033, starlark_testing_function("some_fn").hash());
 }
 
 TEST(StarlarkFunction, Equals) {

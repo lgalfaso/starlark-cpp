@@ -136,8 +136,10 @@ bool starlark_function::truthy() const {
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_function::inner_hash() const {
-  // TODO(lmirelmann): Implement.
-  return 0;
+  if (fn_name.length() == 0) {
+    return 0;
+  }
+  return static_cast<int64_t>(siphash(fn_name.data(), fn_name.length(), 0xC0AC29B7C97C50DD, 0x3F84D5B5B5470917));
 }
 
 starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark_obj*>& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
