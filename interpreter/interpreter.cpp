@@ -122,7 +122,9 @@ class error_handler : public error_fn {
 frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
   std::vector<starlark_obj*> stack;
   std::vector<std::string_view> sv_stack;
-  // TODO(lmirelmann): Can this be made to be `std::vector<std::vector<frame*>*> frame_stacks;` ?
+  // If recursion is not allowed, then it is possible to replace this with `std::vector<std::vector<frame*>*> frame_stacks;`.
+  // Doing so would prevent the copying of a std::vector during a call. Given that there is a chance that recursion will be allowed,
+  // this is kept as is. If at a future point in time this were to change, and recursion were never be allowed, then this can be revisited.
   std::vector<std::vector<frame*>> frame_stacks;
   std::vector<std::pair<int, int>> call_stack;
   int instruction_ptr = 0;
@@ -704,8 +706,10 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
       }
       case OpCode::kReturn: {
         assert(frame_stacks.size() >= 2);
+        assert(!frame_stacks.back().empty());
         assert(call_stack.size() >= 1);
         assert(stack.size() >= 2);
+        frame_stacks.back().pop_back();
         frame_stacks.pop_back();
         block_ptr = call_stack.back().first;
         instruction_ptr = call_stack.back().second;
