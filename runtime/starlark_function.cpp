@@ -594,7 +594,9 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
   for (auto& [key, value] : named_args) {
     if (key == "key") {
       assert(value != nullptr);
-      key_fn = const_cast<starlark_obj*>(value);
+      if (value->type() != starlark_types::none_t) {
+        key_fn = const_cast<starlark_obj*>(value);
+      }
     } else {
       error_callback.add_error(error_unknown_argument(key));
       return nullptr;
@@ -686,7 +688,9 @@ starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_ar
   for (auto& [key, value] : named_args) {
     if (key == "key") {
       assert(value != nullptr);
-      key_fn = const_cast<starlark_obj*>(value);
+      if (value->type() != starlark_types::none_t) {
+        key_fn = const_cast<starlark_obj*>(value);
+      }
     } else {
       error_callback.add_error(error_unknown_argument(key));
       return nullptr;

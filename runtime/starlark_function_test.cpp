@@ -2522,6 +2522,31 @@ TEST(StarlarkMax, OnePosArgsWithKey) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkMax, OnePosArgsWithKeyAsNone) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(&one, ctx, error_callback);
+  list.append(&two, ctx, error_callback);
+  list.append(&three, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, ctx.none_value());
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "two");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_1) {
   std::string s_key("key");
   starlark_list list(0);
@@ -2642,6 +2667,29 @@ TEST(StarlarkMax, ManyPosArgsWithKey) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(starlark_types::string_t, result->type());
   EXPECT_EQ(result->as_string(), "three");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMax, ManyPosArgsWithKeyAsNone) {
+  std::string s_key("key");
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&one);
+  pos_args.push_back(&two);
+  pos_args.push_back(&three);
+  named_args.insert(s_key, ctx.none_value());
+
+  auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "two");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -2851,6 +2899,33 @@ TEST(StarlarkMin, OnePosArgsWithKey) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkMin, OnePosArgsWithKeyAsNone) {
+  std::string s_key("key");
+  starlark_list list(0);
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  starlark_string four("four"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  list.append(&three, ctx, error_callback);
+  list.append(&four, ctx, error_callback);
+  list.append(&one, ctx, error_callback);
+  list.append(&two, ctx, error_callback);
+  pos_args.push_back(&list);
+  named_args.insert(s_key, ctx.none_value());
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "four");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_1) {
   std::string s_key("key");
   starlark_list list(0);
@@ -2972,6 +3047,31 @@ TEST(StarlarkMin, ManyPosArgsWithKey) {
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(starlark_types::string_t, result->type());
   EXPECT_EQ(result->as_string(), "one");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkMin, ManyPosArgsWithKeyAsNone) {
+  std::string s_key("key");
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  starlark_string four("four"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&three);
+  pos_args.push_back(&four);
+  pos_args.push_back(&one);
+  pos_args.push_back(&two);
+  named_args.insert(s_key, ctx.none_value());
+
+  auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(starlark_types::string_t, result->type());
+  EXPECT_EQ(result->as_string(), "four");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
