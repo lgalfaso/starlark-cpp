@@ -51,7 +51,8 @@ int main(int argc, char* argv[]) {
   logger logging;
   Arena arena;
 
-  if (runner.run(starlark_code, grammar_options{}, runtime_options{}, {}, arena, logging) == nullptr) {
+  // TODO(lmirelmann): This should use the module name that comes from the module loader.
+  if (runner.run(starlark_code, argv[1], grammar_options{}, runtime_options{}, {}, arena, logging) == nullptr) {
     print_logs(logging);
   }
 }

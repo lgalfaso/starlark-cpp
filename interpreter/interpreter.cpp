@@ -119,7 +119,7 @@ class error_handler : public error_fn {
   logger& log;
 };
 
-frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
+frame* run_program(Program* starlark_program, std::string_view module_name, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
   std::vector<starlark_obj*> stack;
   std::vector<std::string_view> sv_stack;
   // If recursion is not allowed, then it is possible to replace this with `std::vector<std::vector<frame*>*> frame_stacks;`.
@@ -697,6 +697,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
             op_code.make_function().entrypoint(),
             std::move(default_values),
             &starlark_program->block(op_code.make_function().entrypoint()).function_signature(),
+            module_name,
             &starlark_program->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
             frame_stacks,
             call_stack,
@@ -741,6 +742,7 @@ frame* run_program(Program* starlark_program, std::map<std::string, starlark_obj
 interpreter::interpreter() {}
 
 frame* interpreter::run(std::string_view starlark_code,
+                        std::string_view module_name,
                         const grammar_options& g_options,
                         const runtime_options& r_options,
                         const std::map<std::string, starlark_obj*, std::less<>>& custom_binding,
@@ -794,7 +796,7 @@ frame* interpreter::run(std::string_view starlark_code,
   for (const auto& kv : custom_binding) {
     global_context.insert(kv);
   }
-  return run_program(starlark_program, global_context, ctx, logging);
+  return run_program(starlark_program, module_name, global_context, ctx, logging);
 }
 
 }  // namespace interpreter

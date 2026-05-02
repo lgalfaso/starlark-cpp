@@ -22,6 +22,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
       int entrypoint,
       std::vector<starlark::runtime::starlark_obj*>&& default_arguments,
       const starlark::bytecode::FunctionSignature* function_signature,
+      std::string_view module_name,
       const google::protobuf::RepeatedPtrField<std::string>* frame_names,
       std::vector<std::vector<frame*>>& frame_stacks,
       std::vector<std::pair<int, int>>& call_stack,

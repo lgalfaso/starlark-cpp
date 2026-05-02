@@ -117,17 +117,14 @@ starlark_obj* starlark_built_in_function::call(const starlark_obj::pos_args_t& p
   return native_fn(this_obj, pos_args, named_args, ctx, error_callback);
 }
 
-starlark_function::starlark_function(std::string_view fn_name) : fn_name(fn_name) {}
+starlark_function::starlark_function(std::string_view fn_name, std::string_view module_name) : fn_name(fn_name), module_name(module_name) {}
 
 std::string_view starlark_function::type() const {
   return starlark_types::function_t;
 }
 
 bool starlark_function::inner_repr(printer& print, printer_action action) const {
-  // TODO(lmirelmann): Replace `FUNCTION_NAME` and `MODULE` with the correct values. Eg:
-  //     <function cc_fuzz_test from @@rules_fuzzing+//fuzzing/private:fuzz_test.bzl>
-  //     <function _starlark_proto_encoder_rule_impl from //grammar:starlark_proto_encoder.bzl>
-  print.append("<function $FUNCTION_NAME from $MODULE>");
+  print.append(std::format("<function {} from {}>", fn_name, module_name));
   return false;
 }
 

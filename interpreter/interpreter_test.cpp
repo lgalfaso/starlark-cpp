@@ -137,7 +137,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
     .max_string_length = max_string_length,
     .out = out,
   };
-  frame* result = runner.run(source_code->str(), grammar_options{}, r_options, {}, arena2, logging);
+  frame* result = runner.run(source_code->str(), "//:assert_module.star", grammar_options{}, r_options, {}, arena2, logging);
   if (result != nullptr) {
     error_callback.add_error("Program executed without errors, it was expected that it would fail.");
     return nullptr;
@@ -218,7 +218,7 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
     .max_string_length = max_string_length,
     .out = out,
   };
-  frame* result = runner.run(source_code->str(), grammar_options{}, r_options, {}, arena2, logging);
+  frame* result = runner.run(source_code->str(), "//:assert_module.star", grammar_options{}, r_options, {}, arena2, logging);
   if (result == nullptr) {
     error_callback.add_error("Program executed with errors, it was expected that it would succeed.");
     return nullptr;
@@ -257,7 +257,7 @@ TEST(Interpreter, TestCase) {
   custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
   custom_binding["assert_succeed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_succeed_fn, "assert_succeed");
 
-  frame* result = runner.run(starlark_code, grammar_options{}, runtime_options{}, custom_binding, arena, logging);
+  frame* result = runner.run(starlark_code, argv[1], grammar_options{}, runtime_options{}, custom_binding, arena, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
 }
 
