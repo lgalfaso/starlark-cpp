@@ -3790,6 +3790,235 @@ TEST(StarlarkSet, NamedArguments) {
   EXPECT_EQ("TypeError: set() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkSorted, NoArguments) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: sorted() takes exactly one argument (0 given)", error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, OneArgumentsEmptyTuple) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_tuple tuple(0);
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&tuple);
+  starlark_obj::named_args_t named_args;
+  auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "[]");
+}
+
+TEST(StarlarkSorted, OneArguments) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  starlark_string one("one"sv);
+  starlark_string two("two"sv);
+  starlark_string three("three"sv);
+  starlark_string four("four"sv);
+  starlark_string five("five"sv);
+  starlark_string six("six"sv);
+  starlark_string seven("seven"sv);
+  list.append(&one, ctx, error_callback);
+  list.append(&two, ctx, error_callback);
+  list.append(&three, ctx, error_callback);
+  list.append(&four, ctx, error_callback);
+  list.append(&five, ctx, error_callback);
+  list.append(&six, ctx, error_callback);
+  list.append(&seven, ctx, error_callback);
+  std::string s_key("key");
+  std::string s_reverse("reverse");
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&list);
+  {
+    starlark_obj::named_args_t named_args;
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"five\", \"four\", \"one\", \"seven\", \"six\", \"three\", \"two\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_key, ctx.none_value());
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"five\", \"four\", \"one\", \"seven\", \"six\", \"three\", \"two\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"one\", \"two\", \"six\", \"four\", \"five\", \"three\", \"seven\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_reverse, ctx.false_value());
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"five\", \"four\", \"one\", \"seven\", \"six\", \"three\", \"two\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_reverse, ctx.false_value());
+    named_args.insert(s_key, ctx.none_value());
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"five\", \"four\", \"one\", \"seven\", \"six\", \"three\", \"two\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_reverse, ctx.false_value());
+    named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"one\", \"two\", \"six\", \"four\", \"five\", \"three\", \"seven\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_reverse, ctx.true_value());
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"two\", \"three\", \"six\", \"seven\", \"one\", \"four\", \"five\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_reverse, ctx.true_value());
+    named_args.insert(s_key, ctx.none_value());
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"two\", \"three\", \"six\", \"seven\", \"one\", \"four\", \"five\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+  {
+    starlark_obj::named_args_t named_args;
+    named_args.insert(s_reverse, ctx.true_value());
+    named_args.insert(s_key, create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+    auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), "[\"seven\", \"three\", \"five\", \"four\", \"six\", \"two\", \"one\"]");
+    EXPECT_EQ(list.str(), "[\"one\", \"two\", \"three\", \"four\", \"five\", \"six\", \"seven\"]");
+  }
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkSorted, OneArgumentsReverseNone) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_tuple tuple(0);
+  std::string s_reverse("reverse");
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&tuple);
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_reverse, ctx.none_value());
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: sorted() argument reversed must be bool, not NoneType", error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, OneArgumentsUnknownNamedArgument) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_tuple tuple(0);
+  std::string s_foo("foo");
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&tuple);
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_foo, ctx.none_value());
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("Unknown named argument 'foo'", error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, OneArgumentsNotIterable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(ctx.zero());
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, OneArgumentsNotComparable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_tuple tuple(0);
+
+  tuple.add(ctx.zero());
+  tuple.add(ctx.false_value());
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&tuple);
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: '<' not supported between instances of 'bool' and 'int'", error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, OneArgumentsManyElementsNotComparable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_tuple tuple(0);
+
+  tuple.add(ctx.zero());
+  tuple.add(ctx.false_value());
+  tuple.add(ctx.one());
+  tuple.add(ctx.true_value());
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&tuple);
+  starlark_obj::named_args_t named_args;
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: '<' not supported between instances of 'bool' and 'int'", error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, TwoArguments) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+  pos_args.push_back(&list);
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: sorted() takes exactly one argument (2 given)", error_callback.messages[0]);
+}
+
 TEST(StarlarkStr, String) {
   Arena arena;
   context ctx(arena);

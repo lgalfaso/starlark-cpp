@@ -945,9 +945,71 @@ starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  if (pos_args.size() != 1) {
+    error_callback.add_error(error_arguments_exactly_one(starlark_built_in_functions::sorted_f, pos_args.size()));
+    return nullptr;
+  }
+  starlark_obj* key_fn = nullptr;
+  bool reverse = false;
+  for (auto& [key, value] : named_args) {
+    assert(value != nullptr);
+    if (key == "key") {
+      if (value->type() != starlark_types::none_t) {
+        key_fn = const_cast<starlark_obj*>(value);
+      }
+    } else if (key == "reverse") {
+      if (value->type() != starlark_types::bool_t) {
+        error_callback.add_error(error_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reversed", starlark_types::bool_t, value->type()));
+        return nullptr;
+      }
+      reverse = value->truthy();
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
+  }
+
+  // Retrieve the elements.
+  std::vector<std::pair<starlark_obj*, starlark_obj*>> elems;
+  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
+  if (it == nullptr) {
+    return nullptr;
+  }
+  while (it->has_next()) {
+    starlark_obj* element = it->next();
+    starlark_obj* element_key = element;
+    if (key_fn != nullptr) {
+      element_key = key_fn->call({element}, {}, ctx, error_callback);
+    }
+    elems.emplace_back(element_key, element);
+  }
+
+  // Sort and manybe revert.
+  bool found_error = false;
+  std::stable_sort(elems.begin(), elems.end(), [&error_callback, &found_error](const std::pair<starlark_obj*, starlark_obj*>& lhs, const std::pair<starlark_obj*, starlark_obj*>& rhs) -> bool {
+    if (found_error) {
+      return false;
+    }
+    auto cmp = lhs.first->cmp(*rhs.first, "<", error_callback);
+    if (!cmp.ok()) {
+      found_error = true;
+      return false;
+    }
+    return *cmp < 0;
+  });
+  if (found_error) {
+    return nullptr;
+  }
+  if (reverse) {
+    std::reverse(elems.begin(), elems.end());
+  }
+
+  // Create the output.
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), elems.size());
+  for (auto& elem : elems) {
+    result->unsafe_append(elem.second);
+  }
+  return result;
 }
 
 starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

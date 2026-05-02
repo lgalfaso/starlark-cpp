@@ -310,6 +310,10 @@ std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, s
   return std::format("TypeError: {}() argument {} must be {}, not {}", fn_name, arg_num, expected_type, actual_type);
 }
 
+std::string error_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type) {
+  return std::format("TypeError: {}() argument {} must be {}, not {}", fn_name, arg_name, expected_type, actual_type);
+}
+
 std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type) {
   return std::format("TypeError: tuple for {} must only contain {}, not {}", fn_name, expected_type, actual_type);
 }
