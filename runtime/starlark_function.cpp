@@ -402,6 +402,7 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
       return create_float(fvalue, ctx);
     }
     case starlark_numeric_type::kNotNumeric:
+    default:
       if (value->type() == starlark_types::string_t) {
         auto svalue = value->as_string();
         errno = 0;
