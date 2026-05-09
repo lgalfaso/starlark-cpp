@@ -13,4 +13,5 @@ assert_eq(() < (1,), True)
 assert_eq((1,) < (), False)
 assert_eq([] < [1], True)
 assert_eq([1] < [], False)
+assert_fail("a1 = False < 1", error_message = "TypeError: '<' not supported between instances of 'bool' and 'int'")
 
