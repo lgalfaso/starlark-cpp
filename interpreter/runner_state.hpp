@@ -4,6 +4,7 @@
 #define INTERPRETER_RUNNER_STATE_HPP_
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "interpreter/frame.hpp"

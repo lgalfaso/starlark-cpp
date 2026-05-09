@@ -179,6 +179,110 @@ def bar():
   EXPECT_EQ(result->elements[0]->str(), "this is foo - this is bar - this is foo - this is also bar - ");
 }
 
+TEST(Interpreter, ModuleLoadingWithRecursion_1) {
+  std::string starlark_code = R"starlark(
+load(":foo.star", "foo")
+
+foo()
+)starlark";
+
+  std::string foo_module_code = R"starlark(
+load(":bar.star", "bar")
+def foo():
+  return "this is foo - " + bar()
+)starlark";
+
+  std::string bar_module_code = R"starlark(
+load(":foo.star", "foo")
+
+def bar():
+  return "this is bar"
+
+def shell():
+  return "this is bar:shell - " + foo()
+)starlark";
+
+  interpreter runner;
+  logger logging;
+
+  std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>> modules;
+  std::map<std::string, starlark_obj*, std::less<>> custom_binding;
+  modules.try_emplace("main", starlark_code, custom_binding);
+  modules.try_emplace(":foo.star", foo_module_code, custom_binding);
+  modules.try_emplace(":bar.star", bar_module_code, custom_binding);
+  kv_module_loader loader{modules};
+
+  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :foo.star\n|   :bar.star\n+-> :foo.star\n");
+}
+
+TEST(Interpreter, ModuleLoadingWithRecursion_2) {
+  std::string starlark_code = R"starlark(
+load(":foo.star", "foo")
+
+foo()
+)starlark";
+
+  std::string foo_module_code = R"starlark(
+load(":foo.star", "foo")
+abc = foo
+)starlark";
+
+  interpreter runner;
+  logger logging;
+
+  std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>> modules;
+  std::map<std::string, starlark_obj*, std::less<>> custom_binding;
+  modules.try_emplace("main", starlark_code, custom_binding);
+  modules.try_emplace(":foo.star", foo_module_code, custom_binding);
+  kv_module_loader loader{modules};
+
+  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :foo.star\n+-> :foo.star\n");
+}
+
+TEST(Interpreter, ModuleLoadingWithRecursion_3) {
+  std::string starlark_code = R"starlark(
+load(":a.star", "a")
+
+a()
+)starlark";
+
+  std::string a_module_code = R"starlark(
+load(":b.star", "b")
+load(":c.star", "c")
+a = c
+)starlark";
+  std::string b_module_code = R"starlark(
+load(":a.star", "a")
+load(":c.star", "c")
+b = c
+)starlark";
+  std::string c_module_code = R"starlark(
+c = "Hi"
+)starlark";
+
+  interpreter runner;
+  logger logging;
+
+  std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>> modules;
+  std::map<std::string, starlark_obj*, std::less<>> custom_binding;
+  modules.try_emplace("main", starlark_code, custom_binding);
+  modules.try_emplace(":a.star", a_module_code, custom_binding);
+  modules.try_emplace(":b.star", b_module_code, custom_binding);
+  modules.try_emplace(":c.star", c_module_code, custom_binding);
+  kv_module_loader loader{modules};
+
+  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :a.star\n|   :b.star\n+-> :a.star\n");
+}
+
 class bad_module_loader : public kv_module_loader {
  public:
   explicit bad_module_loader(const std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>>& values)

@@ -776,6 +776,28 @@ frame* run_program(
   return result;
 }
 
+std::string report_recursion_in_modules(const std::vector<std::string>& module_lookup, std::size_t initial_pos) {
+  std::string result;
+
+  for (std::size_t i = 0; i < initial_pos; ++i) {
+    result += "    ";
+    result += module_lookup[i];
+    result += "\n";
+  }
+  result += "+-> ";
+  result += module_lookup[initial_pos];
+  result += "\n";
+  for (std::size_t i = initial_pos + 1; i < module_lookup.size(); ++i) {
+    result += "|   ";
+    result += module_lookup[i];
+    result += "\n";
+  }
+  result += "+-> ";
+  result += module_lookup[initial_pos];
+  result += "\n";
+  return result;
+}
+
 }  // namespace
 
 interpreter::interpreter() {}
@@ -797,6 +819,9 @@ frame* interpreter::run(module_loader& loader,
     .program = nullptr,
   });
   frame* last_frame = nullptr;
+  std::vector<std::string> module_lookup;
+  std::map<std::string, std::size_t, std::less<>> module_processing;
+  bool module_reduction = false;
   while (!to_run.empty()) {
     // It would be nice not to have to retrieve the module every single time, but `module_info*` in
     // `module_loader` is not stable between runs.
@@ -812,8 +837,28 @@ frame* interpreter::run(module_loader& loader,
     }
     if ((*mod_info)->ready()) {
       to_run.pop_back();
+      module_reduction = true;
       continue;
     }
+
+    // Begin - Find out whether there are recursions in modules.
+    std::string_view c_name = (*mod_info)->cannonical_name();
+    auto module_processing_it = module_processing.find(c_name);
+    if (module_processing_it != module_processing.end() &&
+        (!module_reduction || module_processing_it->second + 1 != module_lookup.size())) {
+      logging.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR,
+                  std::format("LoadError: Recursion found during module lookup\n{}", report_recursion_in_modules(module_lookup, module_processing[std::string{c_name}])),
+                  entry.caller_module_name,
+                  starlark::logging::Position::default_instance());
+      return nullptr;
+    }
+    if (module_processing_it == module_processing.end()) {
+      module_processing[std::string{c_name}] = module_lookup.size();
+      module_lookup.push_back(std::string{c_name});
+    }
+    module_reduction = false;
+    // End - Find out whether there are recursions in modules.
+
     if (entry.program == nullptr) {
       std::set<std::string, std::less<>> binding;
       for (const auto& [key, value] : (*mod_info)->custom_binding()) {
@@ -827,7 +872,6 @@ frame* interpreter::run(module_loader& loader,
       entry.program = starlark_program;
       auto deps = get_dependencies(entry.program);
       bool needs_work = false;
-      // TODO(lmirelmann): Detect recursions.
       for (const auto& dep : deps) {
         to_run.push_back(dependency{
           .module_name = std::string{dep},
@@ -854,6 +898,9 @@ frame* interpreter::run(module_loader& loader,
     }
     (*mod_info)->loaded(last_frame, entry.program);
     to_run.pop_back();
+    module_processing.erase(std::string{c_name});
+    module_lookup.pop_back();
+    module_reduction = true;
   }
   return last_frame;
 }
