@@ -13,11 +13,36 @@ cc_library(
 )
 
 cc_library(
+    name = "module_loader",
+    srcs = ["module_loader.cpp"],
+    hdrs = [
+        "module_loader.hpp",
+        "builtin.star",
+    ],
+    deps = [
+        ":frame",
+        "//proto:starlark_bytecode_cc_proto",
+        "//runtime:starlark_object",
+    ],
+)
+
+cc_library(
+    name = "runner_state",
+    hdrs = ["runner_state.hpp"],
+    deps = [
+        ":frame",
+        "//proto:starlark_bytecode_cc_proto",
+        "//runtime:starlark_object",
+    ],
+)
+
+cc_library(
     name = "function",
     srcs = ["function.cpp"],
     hdrs = ["function.hpp"],
     deps = [
         ":frame",
+        ":runner_state",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_dictionary",
         "//runtime:starlark_function",
@@ -34,6 +59,8 @@ cc_library(
     deps = [
         ":frame",
         ":function",
+        ":module_loader",
+        ":runner_state",
         "//compiler",
         "//runtime:starlark_bigint",
         "//runtime:starlark_bool",
@@ -51,6 +78,7 @@ cc_library(
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
         "//runtime:starlark_types",
+        "@bazel_tools//tools/cpp/runfiles",
     ],
 )
 
@@ -81,6 +109,15 @@ cc_library(
         ],
     ) for f in glob(["interpreter_tests/*.star"])
 ]
+
+cc_test(
+    name = "module_test",
+    srcs = ["module_test.cpp"],
+    deps = [
+        ":interpreter",
+        "@googletest//:gtest_main",
+    ],
+)
 
 cc_binary(
     name = "interpreter_main",

@@ -139,6 +139,9 @@ class context {
   // TODO(lmirelmann): Do not expose the arena.
   google::protobuf::Arena& arena();
   const runtime_options& options();
+  // TODO(lmirelmann): This could be made type safe, but would need to change many things to be templates.
+  void* runner_context();
+  void runner_context(void* r_context);
 
  private:
   google::protobuf::Arena& arena_;
@@ -151,6 +154,7 @@ class context {
   starlark_obj* one_;
   starlark_obj* empty_bytes_;
   starlark_obj* empty_string_;
+  void* runner_context_;
 };
 
 class starlark_obj {

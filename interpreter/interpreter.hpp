@@ -6,11 +6,11 @@
 #include <functional>
 #include <map>
 #include <string>
-#include <vector>
 
 #include "grammar/options.hpp"
 #include "interpreter/frame.hpp"
 #include "logging/logging.hpp"
+#include "interpreter/module_loader.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_object.hpp"
 
@@ -22,13 +22,14 @@ namespace interpreter {
 class interpreter {
  public:
   interpreter();
-  frame* run(std::string_view starlark_program,
+  frame* run(module_loader& loader,
       std::string_view module_name,
       const starlark::grammar::grammar_options& g_options,
       const starlark::runtime::runtime_options& r_options,
-      const std::map<std::string, starlark::runtime::starlark_obj*, std::less<>>& custom_binding,
-      google::protobuf::Arena& arena,
       starlark::logging::logger& logging);
+
+ private:
+  void add_base_global_context(std::map<std::string, starlark::runtime::starlark_obj*, std::less<>>& global_context, starlark::runtime::context& ctx) const;
 };
 
 }  // namespace interpreter

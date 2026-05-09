@@ -22,12 +22,10 @@ class interpreter_function : public starlark::runtime::starlark_function {
       int entrypoint,
       std::vector<starlark::runtime::starlark_obj*>&& default_arguments,
       const starlark::bytecode::FunctionSignature* function_signature,
+      starlark::bytecode::Program* program,
       std::string_view module_name,
       const google::protobuf::RepeatedPtrField<std::string>* frame_names,
-      std::vector<std::vector<frame*>>& frame_stacks,
-      std::vector<std::pair<int, int>>& call_stack,
-      int& instruction_ptr,
-      int& block_ptr);
+      const std::vector<frame*>& frame_stack);
   starlark::runtime::starlark_obj* call(
       const starlark::runtime::starlark_obj::pos_args_t& pos_args,
       const starlark::runtime::starlark_obj::named_args_t& named_args,
@@ -44,11 +42,8 @@ class interpreter_function : public starlark::runtime::starlark_function {
   std::map<std::string_view, std::size_t> named_argument_index;
   const google::protobuf::RepeatedPtrField<std::string>* frame_names;
   std::vector<frame*> frame_stack;
-  std::vector<std::vector<frame*>>& frame_stacks;
-  std::vector<std::pair<int, int>>& call_stack;
-  int& instruction_ptr;
-  int& block_ptr;
   starlark::runtime::starlark_obj* default_parameters;
+  std::pair<starlark::bytecode::Program*, std::string> current_program;
 };
 
 }  // namespace interpreter

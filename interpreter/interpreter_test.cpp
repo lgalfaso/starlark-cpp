@@ -10,6 +10,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "bigint/number.hpp"
@@ -25,6 +26,7 @@ using ::google::protobuf::Arena;
 using ::starlark::grammar::grammar_options;
 using ::starlark::interpreter::frame;
 using ::starlark::interpreter::interpreter;
+using ::starlark::interpreter::kv_module_loader;
 using ::starlark::logging::logger;
 using ::starlark::runtime::append_for_repr;
 using ::starlark::runtime::context;
@@ -75,6 +77,7 @@ starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_
 }
 
 starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static char module_name[] = "//:assert_module.star";
   auto log2_max_bigint = ctx.options().log2_max_bigint;
   auto max_sequence_size = ctx.options().max_sequence_size;
   auto max_string_length = ctx.options().max_string_length;
@@ -128,7 +131,6 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
   }
   interpreter runner;
   logger logging;
-  Arena arena2;
 
   std::basic_ostringstream<char> out;
   runtime_options r_options = runtime_options{
@@ -137,7 +139,10 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
     .max_string_length = max_string_length,
     .out = out,
   };
-  frame* result = runner.run(source_code->str(), "//:assert_module.star", grammar_options{}, r_options, {}, arena2, logging);
+  std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
+  modules.try_emplace(module_name, source_code->str(), std::map<std::string, starlark_obj*, std::less<>>{});
+  kv_module_loader loader{modules};
+  frame* result = runner.run(loader, module_name, grammar_options{}, r_options, logging);
   if (result != nullptr) {
     error_callback.add_error("Program executed without errors, it was expected that it would fail.");
     return nullptr;
@@ -156,6 +161,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
 }
 
 starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static char module_name[] = "//:assert_module.star";
   auto log2_max_bigint = ctx.options().log2_max_bigint;
   auto max_sequence_size = ctx.options().max_sequence_size;
   auto max_string_length = ctx.options().max_string_length;
@@ -209,7 +215,6 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
   }
   interpreter runner;
   logger logging;
-  Arena arena2;
 
   std::basic_ostringstream<char> out;
   runtime_options r_options = runtime_options{
@@ -218,7 +223,10 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
     .max_string_length = max_string_length,
     .out = out,
   };
-  frame* result = runner.run(source_code->str(), "//:assert_module.star", grammar_options{}, r_options, {}, arena2, logging);
+  std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
+  modules.try_emplace(module_name, source_code->str(), std::map<std::string, starlark_obj*, std::less<>>{});
+  kv_module_loader loader{modules};
+  frame* result = runner.run(loader, module_name, grammar_options{}, r_options, logging);
   if (result == nullptr) {
     error_callback.add_error("Program executed with errors, it was expected that it would succeed.");
     return nullptr;
@@ -252,12 +260,16 @@ TEST(Interpreter, TestCase) {
   interpreter runner;
   logger logging;
   Arena arena;
+
+  std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
   std::map<std::string, starlark_obj*, std::less<>> custom_binding;
   custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
   custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
   custom_binding["assert_succeed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_succeed_fn, "assert_succeed");
+  modules.try_emplace(argv[1], starlark_code, custom_binding);
+  kv_module_loader loader{modules};
 
-  frame* result = runner.run(starlark_code, argv[1], grammar_options{}, runtime_options{}, custom_binding, arena, logging);
+  frame* result = runner.run(loader, argv[1], grammar_options{}, runtime_options{}, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
 }
 

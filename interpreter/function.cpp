@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "interpreter/runner_state.hpp"
 #include "runtime/error_messages.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
@@ -32,22 +33,17 @@ interpreter_function::interpreter_function(
     int entrypoint,
     std::vector<starlark::runtime::starlark_obj*>&& default_arguments,
     const starlark::bytecode::FunctionSignature* function_signature,
+    starlark::bytecode::Program* program,
     std::string_view module_name,
     const google::protobuf::RepeatedPtrField<std::string>* frame_names,
-    std::vector<std::vector<frame*>>& frame_stacks,
-    std::vector<std::pair<int, int>>& call_stack,
-    int& instruction_ptr,
-    int& block_ptr) :
+    const std::vector<frame*>& frame_stack) :
       starlark::runtime::starlark_function(function_signature->fn_name(), module_name),
       entrypoint(entrypoint),
       default_arguments(default_arguments),
       function_signature(function_signature),
       frame_names(frame_names),
-      frame_stack(frame_stacks.back()),
-      frame_stacks(frame_stacks),
-      call_stack(call_stack),
-      instruction_ptr(instruction_ptr),
-      block_ptr(block_ptr) {
+      frame_stack(frame_stack),
+      current_program(program, module_name) {
   default_parameters = nullptr;
   for (std::size_t i = 0; i < function_signature->param().size(); ++i) {
     named_argument_index[function_signature->param(i).name()] = i;
@@ -155,11 +151,14 @@ starlark_obj* interpreter_function::call(
     new_frame->elements[function_signature->param().size() - 1] = dict;
   }
 
-  frame_stacks.push_back(frame_stack);
-  frame_stacks.back().push_back(new_frame);
-  call_stack.push_back(std::make_pair(block_ptr, instruction_ptr));
-  block_ptr = entrypoint;
-  instruction_ptr = 0;
+  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
+  state->frame_stacks.push_back(frame_stack);
+  state->frame_stacks.back().push_back(new_frame);
+  state->call_stack.push_back(std::make_pair(state->block_ptr, state->instruction_ptr));
+  state->block_ptr = entrypoint;
+  state->instruction_ptr = 0;
+  state->current_program_stack.push_back(state->current_program);
+  state->current_program = &current_program;
   return ctx.none_value();
 }
 

@@ -1,6 +1,8 @@
-// Copyright 2024-2025 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
 #include "interpreter/interpreter.hpp"
+
+#include <iostream>
 
 #include <functional>
 #include <limits>
@@ -15,6 +17,7 @@
 #include "compiler/compiler.hpp"
 #include "interpreter/frame.hpp"
 #include "interpreter/function.hpp"
+#include "interpreter/runner_state.hpp"
 #include "runtime/error_fn.hpp"
 #include "runtime/error_messages.hpp"
 #include "runtime/starlark_bigint.hpp"
@@ -101,41 +104,49 @@ frame* create_frame(Arena& arena, const RepeatedPtrField<std::string>* names) {
 
 class error_handler : public error_fn {
  public:
-  error_handler(int& block_ptr, int& instruction_ptr, int instruction_ptr_value, logger& log) :
-      block_ptr(block_ptr), instruction_ptr(instruction_ptr), instruction_ptr_value(instruction_ptr_value),
+  error_handler(runner_state& state,
+                std::pair<Program*, std::string>* base_program,
+                int instruction_ptr_value,
+                logger& log) :
+      state(state),
+      base_program(base_program),
+      instruction_ptr_value(instruction_ptr_value),
       log(log) {}
 
   void add_error(std::string_view error_msg) override {
-    // TODO(lmirelmann): Do not have the module name nor the position.
-    log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, "", starlark::logging::Position::default_instance());
-    block_ptr = 0;
-    instruction_ptr = instruction_ptr_value;
+    // TODO(lmirelmann): Do not have the position.
+    log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program->second, starlark::logging::Position::default_instance());
+    state.block_ptr = 0;
+    state.instruction_ptr = instruction_ptr_value;
+    state.current_program = base_program;
   }
 
  private:
-  int& block_ptr;
-  int& instruction_ptr;
+  runner_state& state;
+  std::pair<Program*, std::string>* base_program;
   const int instruction_ptr_value;
   logger& log;
 };
 
-frame* run_program(Program* starlark_program, std::string_view module_name, std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx, logger& log) {
+frame* run_program(
+    module_loader& loader,
+    std::pair<Program*, std::string>& starlark_program,
+    std::map<std::string, starlark_obj*, std::less<>>& global_context,
+    context& ctx,
+    logger& log) {
   std::vector<starlark_obj*> stack;
   std::vector<std::string_view> sv_stack;
-  // If recursion is not allowed, then it is possible to replace this with `std::vector<std::vector<frame*>*> frame_stacks;`.
-  // Doing so would prevent the copying of a std::vector during a call. Given that there is a chance that recursion will be allowed,
-  // this is kept as is. If at a future point in time this were to change, and recursion were never be allowed, then this can be revisited.
-  std::vector<std::vector<frame*>> frame_stacks;
-  std::vector<std::pair<int, int>> call_stack;
-  int instruction_ptr = 0;
-  int block_ptr = 0;
+  runner_state state;
+  state.current_program = &starlark_program;
+  ctx.runner_context(&state);
 
-  starlark_program->mutable_block(0)->add_op_code()->mutable_fail();
-  error_handler error_callback(block_ptr, instruction_ptr, starlark_program->block(0).op_code_size() - 1, log);
+  // TODO(lmirelmann): Maybe add the fail to another module?
+  starlark_program.first->mutable_block(0)->add_op_code()->mutable_fail();
+  error_handler error_callback(state, &starlark_program, starlark_program.first->block(0).op_code_size() - 1, log);
   frame* result = nullptr;
 
   // Limit checks.
-  for (const auto& block : starlark_program->block()) {
+  for (const auto& block : starlark_program.first->block()) {
     for (const auto& op : block.op_code()) {
       switch (op.op_code_case()) {
         case OpCode::kConstString:
@@ -166,8 +177,8 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
   }
 
   while (true) {
-    const auto& op_code = starlark_program->block(block_ptr).op_code(instruction_ptr);
-    instruction_ptr++;
+    const auto& op_code = state.current_program->first->block(state.block_ptr).op_code(state.instruction_ptr);
+    state.instruction_ptr++;
     switch (op_code.op_code_case()) {
       case OpCode::kConstNone:
         stack.push_back(ctx.none_value());
@@ -242,18 +253,18 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
       }
       case OpCode::kStore: {
         assert(!stack.empty());
-        assert(frame_stacks.back().size() > op_code.store().frame());
-        assert(frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.store().frame()]->elements.size() > op_code.store().pos_in_frame());
-        frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.store().frame()]->elements[op_code.store().pos_in_frame()] = stack.back();
+        assert(state.frame_stacks.back().size() > op_code.store().frame());
+        assert(state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.store().frame()]->elements.size() > op_code.store().pos_in_frame());
+        state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.store().frame()]->elements[op_code.store().pos_in_frame()] = stack.back();
         stack.pop_back();
         break;
       }
       case OpCode::kLoad: {
-        assert(frame_stacks.back().size() > op_code.load().frame());
-        assert(frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.load().frame()]->elements.size() > op_code.load().pos_in_frame());
-        auto* value = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.load().frame()]->elements[op_code.load().pos_in_frame()];
+        assert(state.frame_stacks.back().size() > op_code.load().frame());
+        assert(state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.load().frame()]->elements.size() > op_code.load().pos_in_frame());
+        auto* value = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.load().frame()]->elements[op_code.load().pos_in_frame()];
         if (value == nullptr) {
-          const auto& name = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.load().frame()]->names->Get(op_code.load().pos_in_frame());
+          const auto& name = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.load().frame()]->names->Get(op_code.load().pos_in_frame());
           error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));
           break;
         }
@@ -268,20 +279,20 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
       }
       case OpCode::kJumpIfFalse:
         if (!stack.back()->truthy()) {
-          instruction_ptr += op_code.jump_if_false().address_delta() - 1;
+          state.instruction_ptr += op_code.jump_if_false().address_delta() - 1;
         }
         stack.pop_back();
         break;
       case OpCode::kJumpIfTrueOrPop:
         if (stack.back()->truthy()) {
-          instruction_ptr += op_code.jump_if_true_or_pop().address_delta() - 1;
+          state.instruction_ptr += op_code.jump_if_true_or_pop().address_delta() - 1;
         } else {
           stack.pop_back();
         }
         break;
       case OpCode::kJumpIfFalseOrPop:
         if (!stack.back()->truthy()) {
-          instruction_ptr += op_code.jump_if_false_or_pop().address_delta() - 1;
+          state.instruction_ptr += op_code.jump_if_false_or_pop().address_delta() - 1;
         } else {
           stack.pop_back();
         }
@@ -289,7 +300,7 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
       case OpCode::kCreateFrame:
         switch (op_code.create_frame().block_type()) {
           case BlockType::PREDECLARED_BLOCK: {
-            assert(frame_stacks.empty());
+            assert(state.frame_stacks.empty());
             auto* global_frame = create_frame(ctx.arena(), &op_code.create_frame().symbol());
             int count = 0;
             for (const auto& symbol : op_code.create_frame().symbol()) {
@@ -302,25 +313,25 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
                 count++;
               }
             }
-            frame_stacks.push_back({});
-            frame_stacks.back().push_back(global_frame);
+            state.frame_stacks.push_back({});
+            state.frame_stacks.back().push_back(global_frame);
             break;
           }
           case BlockType::MODULE_BLOCK:
             assert(result == nullptr);
             result = create_frame(ctx.arena(), &op_code.create_frame().symbol());
-            frame_stacks.back().push_back(result);
+            state.frame_stacks.back().push_back(result);
             break;
           case BlockType::FUNCTION_BLOCK:
             // This frame will be created by the function call.
             break;
           default:
-            frame_stacks.back().push_back(create_frame(ctx.arena(), &op_code.create_frame().symbol()));
+            state.frame_stacks.back().push_back(create_frame(ctx.arena(), &op_code.create_frame().symbol()));
             break;
         }
         break;
       case OpCode::kPopFrame:
-        frame_stacks.back().pop_back();
+        state.frame_stacks.back().pop_back();
         break;
       case OpCode::kPop:
         stack.pop_back();
@@ -496,30 +507,30 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
         break;
       }
       case OpCode::kGetIterator:
-        assert(!frame_stacks.back().empty());
+        assert(!state.frame_stacks.back().empty());
         assert(!stack.empty());
-        frame_stacks.back().back()->iterators.push_back(stack.back()->get_iterator(true, ctx, error_callback));
+        state.frame_stacks.back().back()->iterators.push_back(stack.back()->get_iterator(true, ctx, error_callback));
         stack.pop_back();
         break;
       case OpCode::kForIterator: {
-        assert(!frame_stacks.back().empty());
-        assert(!frame_stacks.back().back()->iterators.empty());
-        auto* it = frame_stacks.back().back()->iterators.back();
+        assert(!state.frame_stacks.back().empty());
+        assert(!state.frame_stacks.back().back()->iterators.empty());
+        auto* it = state.frame_stacks.back().back()->iterators.back();
         if (it->has_next()) {
           stack.push_back(it->next());
         } else {
-          instruction_ptr += op_code.for_iterator().address_delta() - 1;
+          state.instruction_ptr += op_code.for_iterator().address_delta() - 1;
         }
         break;
       }
       case OpCode::kEndIterator:
-        assert(!frame_stacks.back().empty());
-        assert(!frame_stacks.back().back()->iterators.empty());
-        frame_stacks.back().back()->iterators.back()->end_iterator();
-        frame_stacks.back().back()->iterators.pop_back();
+        assert(!state.frame_stacks.back().empty());
+        assert(!state.frame_stacks.back().back()->iterators.empty());
+        state.frame_stacks.back().back()->iterators.back()->end_iterator();
+        state.frame_stacks.back().back()->iterators.pop_back();
         break;
       case OpCode::kGoto:
-        instruction_ptr += op_code.goto_().address_delta() - 1;
+        state.instruction_ptr += op_code.goto_().address_delta() - 1;
         break;
       case OpCode::kIndexMember: {
         assert(stack.size() >= 2);
@@ -552,22 +563,22 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
         element->dot_assign(op_code.assign_dot_member().member(), *value, error_callback);
         break;
       }
-#define COMPOUND_ASSIGN(op, op_method, method)                                                                                                                           \
-      case op: {                                                                                                                                                         \
-        assert(stack.size() >= 1);                                                                                                                                       \
-        assert(frame_stacks.back().size() > op_code.op_method().frame());                                                                                                \
-        assert(frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements.size() > op_code.op_method().pos_in_frame());                 \
-        auto* value = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()];                   \
-        if (value == nullptr) {                                                                                                                                          \
-          const auto& name = frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->names->Get(op_code.op_method().pos_in_frame());          \
-          error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));                   \
-          break;                                                                                                                                                         \
-        }                                                                                                                                                                \
-        auto* element = stack.back();                                                                                                                                    \
-        stack.pop_back();                                                                                                                                                \
-        auto* result = value->method(*element, ctx, error_callback);                                                                                                     \
-        frame_stacks.back()[frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()] = result;                        \
-        break;                                                                                                                                                           \
+#define COMPOUND_ASSIGN(op, op_method, method)                                                                                                                                 \
+      case op: {                                                                                                                                                               \
+        assert(stack.size() >= 1);                                                                                                                                             \
+        assert(state.frame_stacks.back().size() > op_code.op_method().frame());                                                                                                \
+        assert(state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements.size() > op_code.op_method().pos_in_frame());           \
+        auto* value = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()];             \
+        if (value == nullptr) {                                                                                                                                                \
+          const auto& name = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.op_method().frame()]->names->Get(op_code.op_method().pos_in_frame());    \
+          error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));                         \
+          break;                                                                                                                                                               \
+        }                                                                                                                                                                      \
+        auto* element = stack.back();                                                                                                                                          \
+        stack.pop_back();                                                                                                                                                      \
+        auto* result = value->method(*element, ctx, error_callback);                                                                                                           \
+        state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()] = result;                  \
+        break;                                                                                                                                                                 \
       }
       COMPOUND_ASSIGN(OpCode::kAssignPlusEquals, assign_plus_equals, plus_equals_assign)
       COMPOUND_ASSIGN(OpCode::kAssignMinusEquals, assign_minus_equals, minus_equals_assign)
@@ -696,28 +707,60 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
             &ctx.arena(),
             op_code.make_function().entrypoint(),
             std::move(default_values),
-            &starlark_program->block(op_code.make_function().entrypoint()).function_signature(),
-            module_name,
-            &starlark_program->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
-            frame_stacks,
-            call_stack,
-            instruction_ptr,
-            block_ptr));
+            &state.current_program->first->block(op_code.make_function().entrypoint()).function_signature(),
+            state.current_program->first,
+            state.current_program->second,
+            &state.current_program->first->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
+            state.frame_stacks.back()));
         break;
       }
       case OpCode::kReturn: {
-        assert(frame_stacks.size() >= 2);
-        assert(!frame_stacks.back().empty());
-        assert(call_stack.size() >= 1);
+        assert(state.frame_stacks.size() >= 2);
+        assert(!state.frame_stacks.back().empty());
+        assert(state.call_stack.size() >= 1);
         assert(stack.size() >= 2);
-        frame_stacks.back().pop_back();
-        frame_stacks.pop_back();
-        block_ptr = call_stack.back().first;
-        instruction_ptr = call_stack.back().second;
-        call_stack.pop_back();
+        state.frame_stacks.back().pop_back();
+        state.frame_stacks.pop_back();
+        state.block_ptr = state.call_stack.back().first;
+        state.instruction_ptr = state.call_stack.back().second;
+        state.call_stack.pop_back();
         auto* result = stack.back();
         stack.pop_back();
         stack.back() = result;
+        state.current_program = state.current_program_stack.back();
+        state.current_program_stack.pop_back();
+        break;
+      }
+      case OpCode::kLoadModule: {
+        auto mod_info = loader.load_module(op_code.load_module().module(), starlark_program.second);
+        if (!mod_info.ok()) {
+          error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", op_code.load_module().module()));
+          // It is quite hard to make this happen, but still possible.
+          return nullptr;
+        }
+        if (!(*mod_info)->ready()) {
+          error_callback.add_error(std::format("LoadError: Module '{}' is not ready to be used", op_code.load_module().module()));
+          // It is quite hard to make this happen, but still possible.
+          return nullptr;
+        }
+        auto* module_frame = (*mod_info)->get().first;
+        assert(module_frame != nullptr);
+        for (const auto& value : op_code.load_module().value()) {
+          assert(state.frame_stacks.back().size() > value.pos().frame());
+          assert(state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - value.pos().frame()]->elements.size() > value.pos().pos_in_frame());
+          bool found = false;
+          for (int i = 0; i < module_frame->names->size(); ++i) {
+            if (value.remote_symbol() == module_frame->names->Get(i)) {
+              assert(module_frame->elements[i] != nullptr);
+              state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - value.pos().frame()]->elements[value.pos().pos_in_frame()] = module_frame->elements[i];
+              found = true;
+            }
+          }
+          if (!found) {
+            error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", op_code.load_module().module(), value.remote_symbol()));
+            return nullptr;
+          }
+        }
         break;
       }
       case OpCode::kEnd:
@@ -725,11 +768,8 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
         return result;
       case OpCode::kFail:
         return nullptr;
-      case OpCode::kLoadModule:
-
       case OpCode::OP_CODE_NOT_SET:
-        // TODO(lmirelmann): Implement the other instructions.
-        error_callback.add_error(std::format("Unknown op-code: {}", op_code.ShortDebugString()));
+        error_callback.add_error(std::format("Unknown op-code: {}", std::to_underlying(op_code.op_code_case())));
         return nullptr;
     }
   }
@@ -738,31 +778,91 @@ frame* run_program(Program* starlark_program, std::string_view module_name, std:
 
 }  // namespace
 
-// TODO(lmirelmann): There has to be a way to define the loader.
 interpreter::interpreter() {}
 
-frame* interpreter::run(std::string_view starlark_code,
+frame* interpreter::run(module_loader& loader,
                         std::string_view module_name,
                         const grammar_options& g_options,
                         const runtime_options& r_options,
-                        const std::map<std::string, starlark_obj*, std::less<>>& custom_binding,
-                        Arena& arena, logger& logging) {
-  std::set<std::string, std::less<>> binding;
-  for (const auto& [key, value] : custom_binding) {
-    binding.insert(key);
-  }
-  class compiler star_compiler(binding);
-  Program* starlark_program = star_compiler.compile(starlark_code, g_options, logging, arena);
-  if (starlark_program == nullptr) {
-    return nullptr;
-  }
-  context ctx(arena, r_options);
+                        logger& logging) {
+  struct dependency {
+    std::string module_name;
+    std::string caller_module_name;
+    Program* program;
+  };
+  std::vector<dependency> to_run;
+  to_run.push_back(dependency{
+    .module_name = std::string{module_name},
+    .caller_module_name = "",
+    .program = nullptr,
+  });
+  frame* last_frame = nullptr;
+  while (!to_run.empty()) {
+    // It would be nice not to have to retrieve the module every single time, but `module_info*` in
+    // `module_loader` is not stable between runs.
+    auto& entry = to_run.back();
+    auto mod_info = loader.load_module(entry.module_name, entry.caller_module_name);
+    if (!mod_info.ok()) {
+      // TODO(lmirelmann): This should point to the part where the `load` statement is.
+      logging.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR,
+                  std::format("ModuleNotFoundError: No module named '{}'", entry.module_name),
+                  entry.caller_module_name,
+                  starlark::logging::Position::default_instance());
+      return nullptr;
+    }
+    if ((*mod_info)->ready()) {
+      to_run.pop_back();
+      continue;
+    }
+    if (entry.program == nullptr) {
+      std::set<std::string, std::less<>> binding;
+      for (const auto& [key, value] : (*mod_info)->custom_binding()) {
+        binding.insert(key);
+      }
+      class compiler star_compiler(binding);
+      Program* starlark_program = star_compiler.compile((*mod_info)->source_code(), g_options, logging, (*mod_info)->arena());
+      if (starlark_program == nullptr) {
+        return nullptr;
+      }
+      entry.program = starlark_program;
+      auto deps = get_dependencies(entry.program);
+      bool needs_work = false;
+      // TODO(lmirelmann): Detect recursions.
+      for (const auto& dep : deps) {
+        to_run.push_back(dependency{
+          .module_name = std::string{dep},
+          .caller_module_name = std::string{(*mod_info)->cannonical_name()},
+          .program = nullptr,
+        });
+        needs_work = true;
+      }
+      if (needs_work) {
+        continue;
+      }
+    }
+    context ctx((*mod_info)->arena(), r_options);
 
-  std::map<std::string, starlark_obj*, std::less<>> global_context;
+    std::map<std::string, starlark_obj*, std::less<>> global_context;
+    add_base_global_context(global_context, ctx);
+    for (const auto& kv : (*mod_info)->custom_binding()) {
+      global_context.insert(kv);
+    }
+    auto current_program = std::make_pair(entry.program, std::string{(*mod_info)->cannonical_name()});
+    last_frame = run_program(loader, current_program, global_context, ctx, logging);
+    if (last_frame == nullptr) {
+      return nullptr;
+    }
+    (*mod_info)->loaded(last_frame, entry.program);
+    to_run.pop_back();
+  }
+  return last_frame;
+}
+
+void interpreter::add_base_global_context(std::map<std::string, starlark_obj*, std::less<>>& global_context, starlark::runtime::context& ctx) const {
+  // TODO(lmirelmann): Remove commented code once `min`, `max` and `sorted` are reimplemented in a compatible way.
   global_context["True"] = ctx.true_value();
   global_context["False"] = ctx.false_value();
   global_context["None"] = ctx.none_value();
-  // TODO(lmirelmann): Replace `min`, `max` and `sorted` with variations that do not use the stack.
   global_context[starlark_built_in_functions::abs_f] = create_function(ctx, nullptr, starlark_fn_abs, starlark_built_in_functions::abs_f);
   global_context[starlark_built_in_functions::all_f] = create_function(ctx, nullptr, starlark_fn_all, starlark_built_in_functions::all_f);
   global_context[starlark_built_in_functions::any_f] = create_function(ctx, nullptr, starlark_fn_any, starlark_built_in_functions::any_f);
@@ -780,23 +880,19 @@ frame* interpreter::run(std::string_view starlark_code,
   global_context[starlark_built_in_functions::int_f] = create_function(ctx, nullptr, starlark_fn_int, starlark_built_in_functions::int_f);
   global_context[starlark_built_in_functions::len_f] = create_function(ctx, nullptr, starlark_fn_len, starlark_built_in_functions::len_f);
   global_context[starlark_built_in_functions::list_f] = create_function(ctx, nullptr, starlark_fn_list, starlark_built_in_functions::list_f);
-  global_context[starlark_built_in_functions::max_f] = create_function(ctx, nullptr, starlark_fn_max, starlark_built_in_functions::max_f);
-  global_context[starlark_built_in_functions::min_f] = create_function(ctx, nullptr, starlark_fn_min, starlark_built_in_functions::min_f);
+  // global_context[starlark_built_in_functions::max_f] = create_function(ctx, nullptr, starlark_fn_max, starlark_built_in_functions::max_f);
+  // global_context[starlark_built_in_functions::min_f] = create_function(ctx, nullptr, starlark_fn_min, starlark_built_in_functions::min_f);
   global_context[starlark_built_in_functions::ord_f] = create_function(ctx, nullptr, starlark_fn_ord, starlark_built_in_functions::ord_f);
   global_context[starlark_built_in_functions::print_f] = create_function(ctx, nullptr, starlark_fn_print, starlark_built_in_functions::print_f);
   global_context[starlark_built_in_functions::range_f] = create_function(ctx, nullptr, starlark_fn_range, starlark_built_in_functions::range_f);
   global_context[starlark_built_in_functions::repr_f] = create_function(ctx, nullptr, starlark_fn_repr, starlark_built_in_functions::repr_f);
   global_context[starlark_built_in_functions::reversed_f] = create_function(ctx, nullptr, starlark_fn_reversed, starlark_built_in_functions::reversed_f);
   global_context[starlark_built_in_functions::set_f] = create_function(ctx, nullptr, starlark_fn_set, starlark_built_in_functions::set_f);
-  global_context[starlark_built_in_functions::sorted_f] = create_function(ctx, nullptr, starlark_fn_sorted, starlark_built_in_functions::sorted_f);
+  // global_context[starlark_built_in_functions::sorted_f] = create_function(ctx, nullptr, starlark_fn_sorted, starlark_built_in_functions::sorted_f);
   global_context[starlark_built_in_functions::str_f] = create_function(ctx, nullptr, starlark_fn_str, starlark_built_in_functions::str_f);
   global_context[starlark_built_in_functions::tuple_f] = create_function(ctx, nullptr, starlark_fn_tuple, starlark_built_in_functions::tuple_f);
   global_context[starlark_built_in_functions::type_f] = create_function(ctx, nullptr, starlark_fn_type, starlark_built_in_functions::type_f);
   global_context[starlark_built_in_functions::zip_f] = create_function(ctx, nullptr, starlark_fn_zip, starlark_built_in_functions::zip_f);
-  for (const auto& kv : custom_binding) {
-    global_context.insert(kv);
-  }
-  return run_program(starlark_program, module_name, global_context, ctx, logging);
 }
 
 }  // namespace interpreter
