@@ -35,6 +35,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
 
  protected:
   bool inner_equals(starlark::runtime::equals_comparator& comp, const starlark::runtime::starlark_obj* other) const override;
+  void inner_freeze(std::vector<starlark::runtime::starlark_obj*>& to_freeze) override;
 
  private:
   int entrypoint;

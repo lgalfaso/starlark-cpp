@@ -167,6 +167,12 @@ bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& co
   return false;
 }
 
+void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
+  for (auto* element : default_arguments) {
+    to_freeze.push_back(element);
+  }
+}
+
 }  // namespace interpreter
 }  // namespace starlark
 

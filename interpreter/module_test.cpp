@@ -358,5 +358,58 @@ def foo():
   EXPECT_EQ(logging.begin()->message(), "LoadError: Module ':foo.star' is not ready to be used");
 }
 
+TEST(Interpreter, ObjectsInModuleAreFrozen_1) {
+  std::string starlark_code = R"starlark(
+load(":foo.star", "foo")
+
+foo.append(1)
+)starlark";
+
+  std::string foo_module_code = R"starlark(
+foo = []
+)starlark";
+
+  interpreter runner;
+  logger logging;
+
+  std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>> modules;
+  std::map<std::string, starlark_obj*, std::less<>> custom_binding;
+  modules.try_emplace("main", starlark_code, custom_binding);
+  modules.try_emplace(":foo.star", foo_module_code, custom_binding);
+  kv_module_loader loader{modules};
+
+  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ(logging.begin()->message(), "TypeError: trying to mutate a frozen list value");
+}
+
+TEST(Interpreter, ObjectsInModuleAreFrozen_2) {
+  std::string starlark_code = R"starlark(
+load(":foo.star", "foo")
+
+foo()
+)starlark";
+
+  std::string foo_module_code = R"starlark(
+def foo(x = []):
+  x.append(1)
+)starlark";
+
+  interpreter runner;
+  logger logging;
+
+  std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>> modules;
+  std::map<std::string, starlark_obj*, std::less<>> custom_binding;
+  modules.try_emplace("main", starlark_code, custom_binding);
+  modules.try_emplace(":foo.star", foo_module_code, custom_binding);
+  kv_module_loader loader{modules};
+
+  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  ASSERT_THAT(logging, SizeIs(1));
+  EXPECT_EQ(logging.begin()->message(), "TypeError: trying to mutate a frozen list value");
+}
+
 }  // namespace
 

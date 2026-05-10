@@ -87,7 +87,11 @@ void module_info::loaded(frame* base_frame, const Program* program) {
   assert(frame_and_program.second == nullptr);
   frame_and_program.first = base_frame;
   frame_and_program.second = program;
-  // TODO(lmirelmann): Freeze.
+  for (auto& element : base_frame->elements) {
+    if (element != nullptr) {
+      element->freeze();
+    }
+  }
 }
 
 std::pair<frame*, const starlark::bytecode::Program*>& module_info::get() {
