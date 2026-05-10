@@ -630,6 +630,7 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
         }
         if (*cmp < 0) {
           candidate = pos_args[pos];
+          candidate_key = element_key;
         }
       }
     }
@@ -673,6 +674,7 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
       }
       if (*cmp < 0) {
         candidate = element;
+        candidate_key = element_key;
       }
     }
   }
