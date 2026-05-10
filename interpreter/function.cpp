@@ -108,25 +108,39 @@ starlark_obj* interpreter_function::call(
           kwparam.first));
       return nullptr;
     }
-    new_frame->elements[pos] = kwparam.second;
+    new_frame->elements[function_signature->param(pos).pos().pos_in_frame()] = kwparam.second;
     filled_elements[pos] = true;
   }
-  // Put the default arguments, and check that all the slots are filled.
+  // Put the default arguments, and check that all the slots are filled on positional arguments.
   int default_argument_pos = 0;
-  for (int i = 0; i < number_of_standard_params; ++i) {
+  for (int i = 0; i < number_positional_params; ++i) {
     if (!filled_elements[i]) {
       if (function_signature->param(i).default_initialization()) {
-        new_frame->elements[i] = default_arguments[default_argument_pos];
+        new_frame->elements[function_signature->param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
       } else {
-        if (i < number_positional_params) {
-          error_callback.add_error(error_missing_positional_argument(
-              function_signature->fn_name(),
-              function_signature->param(i).name()));
-        } else {
-          error_callback.add_error(error_missing_keyword_only_argument(
-              function_signature->fn_name(),
-              function_signature->param(i).name()));
-        }
+        error_callback.add_error(error_missing_positional_argument(
+            function_signature->fn_name(),
+            function_signature->param(i).name()));
+        return nullptr;
+      }
+    }
+    if (function_signature->param(i).default_initialization()) {
+      default_argument_pos++;
+    }
+  }
+  // Put the default arguments, and check that all the slots are filled on keyword-only arguments.
+  auto keyword_only_parameter_start = number_positional_params;
+  if (function_signature->has_star_argument()) {
+    keyword_only_parameter_start++;
+  }
+  for (int i = keyword_only_parameter_start; i < keyword_only_parameter_start + function_signature->keyword_only_parameter_count(); ++i) {
+    if (!filled_elements[i]) {
+      if (function_signature->param(i).default_initialization()) {
+        new_frame->elements[function_signature->param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
+      } else {
+        error_callback.add_error(error_missing_keyword_only_argument(
+            function_signature->fn_name(),
+            function_signature->param(i).name()));
         return nullptr;
       }
     }
@@ -140,7 +154,7 @@ starlark_obj* interpreter_function::call(
     for (auto* element : args) {
       tuple->add(element);
     }
-    new_frame->elements[number_of_standard_params] = tuple;
+    new_frame->elements[function_signature->param(number_positional_params).pos().pos_in_frame()] = tuple;
   }
   // Fill **kwargs.
   if (function_signature->has_star_star_argument()) {
@@ -148,7 +162,7 @@ starlark_obj* interpreter_function::call(
     for (auto& element : kwargs) {
       dict->insert(Arena::Create<starlark_string>(&ctx.arena(), element.first), element.second, error_callback);
     }
-    new_frame->elements[function_signature->param().size() - 1] = dict;
+    new_frame->elements[function_signature->param(function_signature->param().size() - 1).pos().pos_in_frame()] = dict;
   }
 
   runner_state* state = static_cast<runner_state*>(ctx.runner_context());
@@ -171,6 +185,60 @@ void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   for (auto* element : default_arguments) {
     to_freeze.push_back(element);
   }
+}
+
+starlark_obj* starlark_fn_max_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
+  auto mod_info = state->loader->load_module(builtin_star_module, "");
+  if (!mod_info.ok() || !(*mod_info)->ready()) {
+    // This should never happen.
+    error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", builtin_star_module));
+    return nullptr;
+  }
+  for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
+    if ((*mod_info)->get().first->names->Get(i) == "max_impl") {
+      return (*mod_info)->get().first->elements[i]->call(pos_args, named_args, ctx, error_callback);
+    }
+  }
+  // This should never happen.
+  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, "max_impl"));
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_min_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
+  auto mod_info = state->loader->load_module(builtin_star_module, "");
+  if (!mod_info.ok() || !(*mod_info)->ready()) {
+    // This should never happen.
+    error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", builtin_star_module));
+    return nullptr;
+  }
+  for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
+    if ((*mod_info)->get().first->names->Get(i) == "min_impl") {
+      return (*mod_info)->get().first->elements[i]->call(pos_args, named_args, ctx, error_callback);
+    }
+  }
+  // This should never happen.
+  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, "max_impl"));
+  return nullptr;
+}
+
+starlark_obj* starlark_fn_sorted_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
+  auto mod_info = state->loader->load_module(builtin_star_module, "");
+  if (!mod_info.ok() || !(*mod_info)->ready()) {
+    // This should never happen.
+    error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", builtin_star_module));
+    return nullptr;
+  }
+  for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
+    if ((*mod_info)->get().first->names->Get(i) == "sorted_impl") {
+      return (*mod_info)->get().first->elements[i]->call(pos_args, named_args, ctx, error_callback);
+    }
+  }
+  // This should never happen.
+  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, "max_impl"));
+  return nullptr;
 }
 
 }  // namespace interpreter

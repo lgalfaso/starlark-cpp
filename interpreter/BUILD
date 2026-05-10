@@ -20,8 +20,10 @@ cc_library(
         "builtin.star",
     ],
     deps = [
+        ":built_in_functions",
         ":frame",
         "//proto:starlark_bytecode_cc_proto",
+        "//runtime:starlark_function",
         "//runtime:starlark_object",
     ],
 )
@@ -31,6 +33,7 @@ cc_library(
     hdrs = ["runner_state.hpp"],
     deps = [
         ":frame",
+        ":module_loader",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_object",
     ],
@@ -49,6 +52,16 @@ cc_library(
         "//runtime:starlark_object",
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
+    ],
+)
+
+cc_library(
+    name = "built_in_functions",
+    srcs = ["built_in_functions.cpp"],
+    hdrs = ["built_in_functions.hpp"],
+    deps = [
+        "//runtime:starlark_function",
+        "//runtime:starlark_object",
     ],
 )
 

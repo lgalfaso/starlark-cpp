@@ -15,6 +15,7 @@
 
 #include "bigint/number.hpp"
 #include "compiler/compiler.hpp"
+#include "interpreter/built_in_functions.hpp"
 #include "interpreter/frame.hpp"
 #include "interpreter/function.hpp"
 #include "interpreter/runner_state.hpp"
@@ -72,15 +73,12 @@ using ::starlark::runtime::starlark_fn_hash;
 using ::starlark::runtime::starlark_fn_int;
 using ::starlark::runtime::starlark_fn_len;
 using ::starlark::runtime::starlark_fn_list;
-using ::starlark::runtime::starlark_fn_max;
-using ::starlark::runtime::starlark_fn_min;
 using ::starlark::runtime::starlark_fn_ord;
 using ::starlark::runtime::starlark_fn_print;
 using ::starlark::runtime::starlark_fn_range;
 using ::starlark::runtime::starlark_fn_repr;
 using ::starlark::runtime::starlark_fn_reversed;
 using ::starlark::runtime::starlark_fn_set;
-using ::starlark::runtime::starlark_fn_sorted;
 using ::starlark::runtime::starlark_fn_str;
 using ::starlark::runtime::starlark_fn_tuple;
 using ::starlark::runtime::starlark_fn_type;
@@ -138,6 +136,7 @@ frame* run_program(
   std::vector<std::string_view> sv_stack;
   runner_state state;
   state.current_program = &starlark_program;
+  state.loader = &loader;
   ctx.runner_context(&state);
 
   // TODO(lmirelmann): Maybe add the fail to another module?
@@ -906,7 +905,6 @@ frame* interpreter::run(module_loader& loader,
 }
 
 void interpreter::add_base_global_context(std::map<std::string, starlark_obj*, std::less<>>& global_context, starlark::runtime::context& ctx) const {
-  // TODO(lmirelmann): Remove commented code once `min`, `max` and `sorted` are reimplemented in a compatible way.
   global_context["True"] = ctx.true_value();
   global_context["False"] = ctx.false_value();
   global_context["None"] = ctx.none_value();
@@ -927,15 +925,15 @@ void interpreter::add_base_global_context(std::map<std::string, starlark_obj*, s
   global_context[starlark_built_in_functions::int_f] = create_function(ctx, nullptr, starlark_fn_int, starlark_built_in_functions::int_f);
   global_context[starlark_built_in_functions::len_f] = create_function(ctx, nullptr, starlark_fn_len, starlark_built_in_functions::len_f);
   global_context[starlark_built_in_functions::list_f] = create_function(ctx, nullptr, starlark_fn_list, starlark_built_in_functions::list_f);
-  // global_context[starlark_built_in_functions::max_f] = create_function(ctx, nullptr, starlark_fn_max, starlark_built_in_functions::max_f);
-  // global_context[starlark_built_in_functions::min_f] = create_function(ctx, nullptr, starlark_fn_min, starlark_built_in_functions::min_f);
+  global_context[starlark_built_in_functions::max_f] = create_function(ctx, nullptr, starlark_fn_max_impl, starlark_built_in_functions::max_f);
+  global_context[starlark_built_in_functions::min_f] = create_function(ctx, nullptr, starlark_fn_min_impl, starlark_built_in_functions::min_f);
   global_context[starlark_built_in_functions::ord_f] = create_function(ctx, nullptr, starlark_fn_ord, starlark_built_in_functions::ord_f);
   global_context[starlark_built_in_functions::print_f] = create_function(ctx, nullptr, starlark_fn_print, starlark_built_in_functions::print_f);
   global_context[starlark_built_in_functions::range_f] = create_function(ctx, nullptr, starlark_fn_range, starlark_built_in_functions::range_f);
   global_context[starlark_built_in_functions::repr_f] = create_function(ctx, nullptr, starlark_fn_repr, starlark_built_in_functions::repr_f);
   global_context[starlark_built_in_functions::reversed_f] = create_function(ctx, nullptr, starlark_fn_reversed, starlark_built_in_functions::reversed_f);
   global_context[starlark_built_in_functions::set_f] = create_function(ctx, nullptr, starlark_fn_set, starlark_built_in_functions::set_f);
-  // global_context[starlark_built_in_functions::sorted_f] = create_function(ctx, nullptr, starlark_fn_sorted, starlark_built_in_functions::sorted_f);
+  global_context[starlark_built_in_functions::sorted_f] = create_function(ctx, nullptr, starlark_fn_sorted_impl, starlark_built_in_functions::sorted_f);
   global_context[starlark_built_in_functions::str_f] = create_function(ctx, nullptr, starlark_fn_str, starlark_built_in_functions::str_f);
   global_context[starlark_built_in_functions::tuple_f] = create_function(ctx, nullptr, starlark_fn_tuple, starlark_built_in_functions::tuple_f);
   global_context[starlark_built_in_functions::type_f] = create_function(ctx, nullptr, starlark_fn_type, starlark_built_in_functions::type_f);

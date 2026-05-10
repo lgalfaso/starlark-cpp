@@ -18,6 +18,8 @@
 namespace starlark {
 namespace interpreter {
 
+static const char builtin_star_module[] = "@@//:builtin.star";
+
 class module_info {
  public:
   typedef std::map<std::string, starlark::runtime::starlark_obj*, std::less<>> bindings_t;
@@ -41,6 +43,7 @@ class module_info {
 
 class module_loader {
  public:
+  module_loader();
   starlark::result::status_or<module_info*> load_module(std::string_view module_name, std::string_view caller_module_name);
 
  protected:
@@ -49,6 +52,8 @@ class module_loader {
 
  private:
   std::map<std::string, module_info> modules;
+  module_info::bindings_t custom_binding;
+  google::protobuf::Arena arena;
 };
 
 class kv_module_loader : public module_loader {

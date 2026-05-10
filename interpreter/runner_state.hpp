@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "interpreter/frame.hpp"
+#include "interpreter/module_loader.hpp"
 #include "runtime/starlark_object.hpp"
 
 #pragma GCC visibility push(default)
@@ -25,6 +26,7 @@ struct runner_state {
   int instruction_ptr = 0;
   int block_ptr = 0;
   std::pair<starlark::bytecode::Program*, std::string>* current_program = nullptr;
+  module_loader* loader = nullptr;
 };
 
 }  // namespace interpreter

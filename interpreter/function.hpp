@@ -48,6 +48,10 @@ class interpreter_function : public starlark::runtime::starlark_function {
   std::pair<starlark::bytecode::Program*, std::string> current_program;
 };
 
+starlark::runtime::starlark_obj* starlark_fn_max_impl(starlark::runtime::starlark_obj* this_obj, const starlark::runtime::starlark_obj::pos_args_t& pos_args, const starlark::runtime::starlark_obj::named_args_t& named_args, starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
+starlark::runtime::starlark_obj* starlark_fn_min_impl(starlark::runtime::starlark_obj* this_obj, const starlark::runtime::starlark_obj::pos_args_t& pos_args, const starlark::runtime::starlark_obj::named_args_t& named_args, starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
+starlark::runtime::starlark_obj* starlark_fn_sorted_impl(starlark::runtime::starlark_obj* this_obj, const starlark::runtime::starlark_obj::pos_args_t& pos_args, const starlark::runtime::starlark_obj::named_args_t& named_args, starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
+
 }  // namespace interpreter
 }  // namespace starlark
 

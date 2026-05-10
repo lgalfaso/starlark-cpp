@@ -8,9 +8,13 @@
 #include <utility>
 #include <string>
 
+#include "interpreter/built_in_functions.hpp"
+#include "runtime/starlark_function.hpp"
+
 using ::google::protobuf::Arena;
 using ::starlark::bytecode::OpCode;
 using ::starlark::bytecode::Program;
+using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_obj;
 
 namespace starlark {
@@ -18,9 +22,7 @@ namespace interpreter {
 
 namespace {
 
-const char builtin_star_module[] = "@@//:builtin.star";
-
-const unsigned char builtin_star[] = {
+const char builtin_star[] = {
     #embed "interpreter/builtin.star"
 };
 
@@ -59,8 +61,7 @@ module_info::module_info(std::string_view c_name, std::string_view source, const
     cannonical_name_(c_name),
     source_code_(source),
     custom_binding_(bindings),
-    frame_and_program(nullptr, nullptr) {
-}
+    frame_and_program(nullptr, nullptr) {}
 
 bool module_info::ready() const {
   return frame_and_program.first != nullptr;
@@ -98,8 +99,24 @@ std::pair<frame*, const starlark::bytecode::Program*>& module_info::get() {
   return frame_and_program;
 }
 
+module_loader::module_loader() {
+  custom_binding["inner_max"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_inner_max, "inner_max");
+  custom_binding["inner_min"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_inner_min, "inner_min");
+  custom_binding["inner_sorted"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_inner_sorted, "inner_sorted");
+}
+
 starlark::result::status_or<module_info*> module_loader::load_module(std::string_view module_name, std::string_view caller_module_name) {
-  // TODO(lmirelmann): If this is one of the built-in modules, then use it.
+  // If this is one of the built-in modules, then use it.
+  if (module_name == builtin_star_module) {
+    std::string c_name{module_name};
+    auto it = modules.find(c_name);
+    if (it != modules.end()) {
+      return starlark::result::status_or<module_info*>(&it->second);
+    }
+    auto result = modules.try_emplace(c_name, module_name, builtin_star, custom_binding);
+    return starlark::result::status_or<module_info*>(&result.first->second);
+  }
+
   auto c_name = cannonical_name(module_name, caller_module_name);
   auto it = modules.find(c_name);
   if (it != modules.end()) {
