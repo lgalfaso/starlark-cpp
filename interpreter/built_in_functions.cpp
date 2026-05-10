@@ -4,6 +4,9 @@
 
 #include <cassert>
 
+#include <vector>
+#include <utility>
+
 #include "runtime/error_messages.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_list.hpp"
