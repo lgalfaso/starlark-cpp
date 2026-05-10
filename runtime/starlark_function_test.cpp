@@ -3916,6 +3916,21 @@ TEST(StarlarkSorted, OneArgumentsEmptyTuple) {
   EXPECT_EQ(result->str(), "[]");
 }
 
+TEST(StarlarkSorted, OneArgumentsElementIsEditableAfterSorting) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&list);
+  starlark_obj::named_args_t named_args;
+  auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "[]");
+  list.append(ctx.one(), ctx, error_callback);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 TEST(StarlarkSorted, OneArguments) {
   Arena arena;
   context ctx(arena);
@@ -4033,7 +4048,7 @@ TEST(StarlarkSorted, OneArgumentsReverseNone) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: sorted() argument reversed must be bool, not NoneType", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: sorted() argument reverse must be bool, not NoneType", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, OneArgumentsUnknownNamedArgument) {

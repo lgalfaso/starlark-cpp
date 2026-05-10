@@ -965,7 +965,7 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
       }
     } else if (key == "reverse") {
       if (value->type() != starlark_types::bool_t) {
-        error_callback.add_error(error_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reversed", starlark_types::bool_t, value->type()));
+        error_callback.add_error(error_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reverse", starlark_types::bool_t, value->type()));
         return nullptr;
       }
       reverse = value->truthy();
@@ -989,6 +989,7 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
     }
     elems.emplace_back(element_key, element);
   }
+  it->end_iterator();
 
   // Sort and manybe revert.
   bool found_error = false;
