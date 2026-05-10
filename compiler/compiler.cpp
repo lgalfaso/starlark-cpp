@@ -880,9 +880,8 @@ void bytecode_generator::mid_def_or_lambda_expression(std::string_view fn_name, 
         }
         break;
       case Parameter::kStar:
-        if (param.identifier().name().empty()) {
-          keyword_only_mode = true;
-        } else {
+        keyword_only_mode = true;
+        if (!param.identifier().name().empty()) {
           has_star_argument = true;
         }
         break;

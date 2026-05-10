@@ -1,6 +1,6 @@
 block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "print" } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo1" symbol: "foo2" symbol: "foo3" symbol: "foo4" symbol: "foo5" symbol: "foo6" symbol: "foo7" } }
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo1" symbol: "foo2" symbol: "foo3" symbol: "foo4" symbol: "foo5" symbol: "foo6" symbol: "foo7" symbol: "foo8" } }
   op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { make_function { entrypoint: 1 default_values_count: 0 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
@@ -18,6 +18,8 @@ block {
   op_code { const_int: { value: 2 } }
   op_code { make_function: { entrypoint: 7 default_values_count: 1 } }
   op_code { store { frame: 1 pos_in_frame: 6 } }
+  op_code { make_function: { entrypoint: 8 default_values_count: 0 } }
+  op_code { store { frame: 1 pos_in_frame: 7 } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
@@ -79,3 +81,15 @@ block {
   op_code { return { } }
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } param { name: "c" pos { frame: 0 pos_in_frame: 2 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 2 fn_name: "foo7" }
 }
+block {
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
+  op_code { load { frame: 3 pos_in_frame: 0 } }
+  op_code { load { frame: 0 pos_in_frame: 1 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } }
+  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } }
+  op_code { pop { } }
+  op_code { const_none { } }
+  op_code { return { } }
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 1 fn_name: "foo8" }
+}
+
