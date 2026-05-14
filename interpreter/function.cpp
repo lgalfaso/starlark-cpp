@@ -187,7 +187,9 @@ void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   }
 }
 
-starlark_obj* starlark_fn_max_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+namespace {
+
+starlark_obj* starlark_fn_trampoline(std::string_view fn_name, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   runner_state* state = static_cast<runner_state*>(ctx.runner_context());
   auto mod_info = state->loader->load_module(builtin_star_module, "");
   if (!mod_info.ok() || !(*mod_info)->ready()) {
@@ -196,49 +198,27 @@ starlark_obj* starlark_fn_max_impl(starlark_obj* this_obj, const starlark_obj::p
     return nullptr;
   }
   for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
-    if ((*mod_info)->get().first->names->Get(i) == "max_impl") {
+    if ((*mod_info)->get().first->names->Get(i) == fn_name) {
       return (*mod_info)->get().first->elements[i]->call(pos_args, named_args, ctx, error_callback);
     }
   }
   // This should never happen.
-  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, "max_impl"));
+  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, fn_name));
   return nullptr;
+}
+
+}  // namespace
+
+starlark_obj* starlark_fn_max_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  return starlark_fn_trampoline("max_impl", pos_args, named_args, ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_min_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
-  auto mod_info = state->loader->load_module(builtin_star_module, "");
-  if (!mod_info.ok() || !(*mod_info)->ready()) {
-    // This should never happen.
-    error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", builtin_star_module));
-    return nullptr;
-  }
-  for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
-    if ((*mod_info)->get().first->names->Get(i) == "min_impl") {
-      return (*mod_info)->get().first->elements[i]->call(pos_args, named_args, ctx, error_callback);
-    }
-  }
-  // This should never happen.
-  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, "max_impl"));
-  return nullptr;
+  return starlark_fn_trampoline("min_impl", pos_args, named_args, ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_sorted_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
-  auto mod_info = state->loader->load_module(builtin_star_module, "");
-  if (!mod_info.ok() || !(*mod_info)->ready()) {
-    // This should never happen.
-    error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", builtin_star_module));
-    return nullptr;
-  }
-  for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
-    if ((*mod_info)->get().first->names->Get(i) == "sorted_impl") {
-      return (*mod_info)->get().first->elements[i]->call(pos_args, named_args, ctx, error_callback);
-    }
-  }
-  // This should never happen.
-  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, "max_impl"));
-  return nullptr;
+  return starlark_fn_trampoline("sorted_impl", pos_args, named_args, ctx, error_callback);
 }
 
 }  // namespace interpreter
