@@ -3,6 +3,7 @@
 #include "unicode/utf8_reader.hpp"
 
 #include <bit>
+#include <utility>
 
 #include "unicode/ucd_code_points.hpp"
 

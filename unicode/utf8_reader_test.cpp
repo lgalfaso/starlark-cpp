@@ -7,6 +7,7 @@
 #include <limits>
 #include <random>
 #include <string>
+#include <utility>
 
 #include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
