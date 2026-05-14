@@ -139,7 +139,7 @@ class context {
   // TODO(lmirelmann): Do not expose the arena.
   google::protobuf::Arena& arena();
   const runtime_options& options();
-  // TODO(lmirelmann): This could be made type safe, but would need to change many things to be templates.
+  // This could be made type safe, but would need to change many things to be templates.
   void* runner_context();
   void runner_context(void* r_context);
 
