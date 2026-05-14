@@ -110,7 +110,7 @@ class error_handler : public error_fn {
       result.mutable_block()->Add()->add_op_code()->mutable_fail();
       return result;
     });
-    static std::pair<Program*, std::string> base_program = std::make_pair<Program*, std::string>(&fail_program, "@@//:fail.star");
+    static std::pair<Program*, std::string> base_program{&fail_program, "@@//:fail.star"};
 
     // TODO(lmirelmann): Do not have the position.
     log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program->second, starlark::logging::Position::default_instance());
