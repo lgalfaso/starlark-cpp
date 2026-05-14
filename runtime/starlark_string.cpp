@@ -349,48 +349,44 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
         case 'd':
           switch (n_element->numeric_type()) {
             case starlark_numeric_type::kInt64:
+            default:
               result += std::format("{:d}", n_element->as_int64());
               break;
             case starlark_numeric_type::kBigInt:
               result += n_element->as_bigint().to_string(10, false);
-              break;
-            default:
               break;
           }
           break;
         case 'o':
           switch (n_element->numeric_type()) {
             case starlark_numeric_type::kInt64:
+            default:
               result += std::format("{:o}", n_element->as_int64());
               break;
             case starlark_numeric_type::kBigInt:
               result += n_element->as_bigint().to_string(8, false);
-              break;
-            default:
               break;
           }
           break;
         case 'x':
           switch (n_element->numeric_type()) {
             case starlark_numeric_type::kInt64:
+            default:
               result += std::format("{:x}", n_element->as_int64());
               break;
             case starlark_numeric_type::kBigInt:
               result += n_element->as_bigint().to_string(16, false);
-              break;
-            default:
               break;
           }
           break;
         case 'X':
           switch (n_element->numeric_type()) {
             case starlark_numeric_type::kInt64:
+            default:
               result += std::format("{:X}", n_element->as_int64());
               break;
             case starlark_numeric_type::kBigInt:
               result += n_element->as_bigint().to_string(16, true);
-              break;
-            default:
               break;
           }
           break;
