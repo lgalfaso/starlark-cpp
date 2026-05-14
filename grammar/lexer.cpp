@@ -585,18 +585,14 @@ void lexer::read_string() {
         }
         // This is a lot of extra work to report the right column.
         auto ch = source_code.peek_code_point();
-        if (ch == unicode::utf8_reader::kReplacementCharacter) {
+        if (ch.first == unicode::utf8_reader::kReplacementCharacter) {
           found_errors = true;
           result += source_code.peek();
           source_code.skip();
         } else {
-          auto start = get_position();
-          utf8_encode_code_point(ch, result, false, false);
-          // TODO(lmirelmann): Would be nice to avoid doing this extra read, but keep on handling the error case.
-          source_code.read_code_point();
-
-          auto end_pos = source_code.pos();
-          last_begin_of_line += (end_pos - start.pos() - 1);
+          utf8_encode_code_point(ch.first, result, false, false);
+          source_code.skip(ch.second);
+          last_begin_of_line += ch.second - 1;
           // If the character ccc is not 0, then this is a non-starter, and could be skipped. Given that
           // it is showing as another character, then will count it.
         }
@@ -680,17 +676,15 @@ std::string lexer::read_identifier_or_keyword() {
   bool first = true;
 
   while (!source_code.empty()) {
-    auto start = source_code.pos();
     auto ch = source_code.peek_code_point();
-    if ((first && (ch == '_' || ucd::is_XID_Start(ch))) ||
-        (!first && ucd::is_XID_Continue(ch))) {
-      utf8_encode_code_point(ch, result, false, false);
-      source_code.read_code_point();
+    if ((first && (ch.first == '_' || ucd::is_XID_Start(ch.first))) ||
+        (!first && ucd::is_XID_Continue(ch.first))) {
+      utf8_encode_code_point(ch.first, result, false, false);
+      source_code.skip(ch.second);
     } else {
       break;
     }
-    auto end = source_code.pos();
-    last_begin_of_line += (end - start - 1);
+    last_begin_of_line += ch.second - 1;
     // If the character ccc is not 0, then this is a non-starter, and could be skipped. Given that
     // it is showing as another character, then will count it.
     first = false;

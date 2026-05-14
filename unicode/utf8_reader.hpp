@@ -27,7 +27,7 @@ class utf8_reader {
   std::size_t pending() const;
   std::size_t pos() const;
   char peek(std::size_t delta = 0) const;
-  char32_t peek_code_point();
+  std::pair<char32_t, int> peek_code_point();
   void skip(std::size_t delta = 1);
   char32_t read_code_point();
   bool next(std::string_view candidate);
@@ -41,7 +41,7 @@ class utf8_reader {
   static constexpr char32_t kMaxCodePoint = 0x10'ffffu;
 
  private:
-  char32_t read_code_point(bool move_forward);
+  std::pair<char32_t, int> read_code_point(bool move_forward);
 
   std::string_view input;
   std::size_t input_pos = 0;

@@ -17,9 +17,9 @@ using starlark::unicode::utf8_reader;
 namespace {
 
 TEST(SourceTest, BOM) {
-  EXPECT_EQ('a', utf8_reader("a", true, true).peek_code_point());
-  EXPECT_EQ('a', utf8_reader("\xef\xbb\x{bf}a", true, true).peek_code_point());
-  EXPECT_EQ(0xfeff, utf8_reader("\xef\xbb\x{bf}a", true, false).peek_code_point());
+  EXPECT_EQ('a', utf8_reader("a", true, true).read_code_point());
+  EXPECT_EQ('a', utf8_reader("\xef\xbb\x{bf}a", true, true).read_code_point());
+  EXPECT_EQ(0xfeff, utf8_reader("\xef\xbb\x{bf}a", true, false).read_code_point());
 }
 
 TEST(SourceTest, Peek) {
@@ -33,188 +33,188 @@ TEST(SourceTest, Peek) {
 }
 
 TEST(SourceTest, PeekCodepoint) {
-  EXPECT_EQ('a', utf8_reader("a", true, true).peek_code_point());
-  EXPECT_EQ(0x234, utf8_reader("\xc8\xb4", true, true).peek_code_point());
-  EXPECT_EQ(0x1234, utf8_reader("\xe1\x88\xb4", true, true).peek_code_point());
-  EXPECT_EQ(0x12345, utf8_reader("\xf0\x92\x8d\x85", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair('a', 1), utf8_reader("a", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0x234, 2), utf8_reader("\xc8\xb4", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0x1234, 3), utf8_reader("\xe1\x88\xb4", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0x12345, 4), utf8_reader("\xf0\x92\x8d\x85", true, true).peek_code_point());
 
   // Too short
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xc8", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xe1\x88", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\x92\x8d", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 0), utf8_reader("", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xc8", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xe1\x88", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xf0\x92\x8d", true, true).peek_code_point());
 
   // Invalid first byte
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf8\xbf\xbf\xbf\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xfc\xbf\xbf\xbf\xbf\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xfe\xbf\xbf\xbf\xbf\xbf\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xff\xbf\xbf\xbf\xbf\xbf\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xf8\xbf\xbf\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xfc\xbf\xbf\xbf\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xfe\xbf\xbf\xbf\xbf\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xff\xbf\xbf\xbf\xbf\xbf\xbf\xbf", true, true).peek_code_point());
 
   // Invalid follow-up byte
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xc8\x34", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xc8\xf4", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xe1\x08\xb4", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xe1\xc8\xb4", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xe1\x88\x34", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xe1\x88\xf4", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\x12\x8d\x85", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\xd2\x8d\x85", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\x92\x0d\x85", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\x92\xcd\x85", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\x92\x8d\x05", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\x92\x8d\xc5", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xc8\x34", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xc8\xf4", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xe1\x08\xb4", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xe1\xc8\xb4", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 2), utf8_reader("\xe1\x88\x34", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 2), utf8_reader("\xe1\x88\xf4", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xf0\x12\x8d\x85", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 1), utf8_reader("\xf0\xd2\x8d\x85", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 2), utf8_reader("\xf0\x92\x0d\x85", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 2), utf8_reader("\xf0\x92\xcd\x85", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xf0\x92\x8d\x05", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xf0\x92\x8d\xc5", true, true).peek_code_point());
 
   // The largest possible Unicode character, 0x10FFFF.
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf4\x90\x80\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf4\x8f\xbf\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kMaxCodePoint, utf8_reader("\xf4\x8f\xbf\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 4), utf8_reader("\xf4\x90\x80\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 4), utf8_reader("\xf4\x8f\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kMaxCodePoint, 4), utf8_reader("\xf4\x8f\xbf\xbf", false, true).peek_code_point());
 }
 
 TEST(SourceTest, OverlongEncoding) {
   // Overlong encoding.
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xc0\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xc1\xbf", true, true).peek_code_point());
-  EXPECT_EQ(0x7f, utf8_reader("\x7f", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xe0\x9f\xbf", true, true).peek_code_point());
-  EXPECT_EQ(0x7ff, utf8_reader("\xdf\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xf0\x8f\xbf\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xef\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 2), utf8_reader("\xc0\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 2), utf8_reader("\xc1\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0x7f, 1), utf8_reader("\x7f", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xe0\x9f\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0x7ff, 2), utf8_reader("\xdf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 4), utf8_reader("\xf0\x8f\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xef\xbf\xbf", true, true).peek_code_point());
 }
 
 TEST(SourceTest, SurrogatesAreaStrict) {
   // The range 0xD800-0xDFFF is invalid in strict mode and valid otherwise.
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa0\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa0\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa1\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa1\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa2\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa2\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa3\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa3\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa4\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa4\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa5\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa5\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa6\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa6\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa7\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa7\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa8\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa8\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa9\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xa9\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xaa\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xaa\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xab\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xab\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xac\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xac\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xad\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xad\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xae\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xae\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xaf\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xaf\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb0\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb0\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb1\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb1\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb2\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb2\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb3\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb3\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb4\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb4\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb5\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb5\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb6\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb6\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb7\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb7\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb8\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb8\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb9\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xb9\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xba\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xba\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbb\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbb\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbc\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbc\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbd\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbd\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbe\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbe\xbf", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbf\x80", true, true).peek_code_point());
-  EXPECT_EQ(utf8_reader::kReplacementCharacter, utf8_reader("\xed\xbf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa0\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa0\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa1\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa1\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa2\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa2\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa3\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa3\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa4\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa4\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa5\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa5\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa6\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa6\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa7\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa7\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa8\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa8\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa9\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xa9\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xaa\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xaa\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xab\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xab\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xac\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xac\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xad\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xad\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xae\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xae\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xaf\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xaf\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb0\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb0\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb1\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb1\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb2\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb2\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb3\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb3\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb4\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb4\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb5\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb5\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb6\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb6\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb7\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb7\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb8\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb8\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb9\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xb9\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xba\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xba\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbb\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbb\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbc\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbc\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbd\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbd\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbe\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbe\xbf", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbf\x80", true, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(utf8_reader::kReplacementCharacter, 3), utf8_reader("\xed\xbf\xbf", true, true).peek_code_point());
 }
 
 TEST(SourceTest, SurrogatesAreaNonStrict) {
-  EXPECT_EQ(0xD800, utf8_reader("\xed\xa0\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD83F, utf8_reader("\xed\xa0\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xD840, utf8_reader("\xed\xa1\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD87F, utf8_reader("\xed\xa1\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xD880, utf8_reader("\xed\xa2\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD8BF, utf8_reader("\xed\xa2\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xD8C0, utf8_reader("\xed\xa3\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD8FF, utf8_reader("\xed\xa3\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xD900, utf8_reader("\xed\xa4\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD93F, utf8_reader("\xed\xa4\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xD940, utf8_reader("\xed\xa5\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD97F, utf8_reader("\xed\xa5\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xD980, utf8_reader("\xed\xa6\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD9BF, utf8_reader("\xed\xa6\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xD9C0, utf8_reader("\xed\xa7\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xD9FF, utf8_reader("\xed\xa7\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDA00, utf8_reader("\xed\xa8\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDA3F, utf8_reader("\xed\xa8\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDA40, utf8_reader("\xed\xa9\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDA7F, utf8_reader("\xed\xa9\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDA80, utf8_reader("\xed\xaa\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDABF, utf8_reader("\xed\xaa\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDAC0, utf8_reader("\xed\xab\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDAFF, utf8_reader("\xed\xab\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDB00, utf8_reader("\xed\xac\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDB3F, utf8_reader("\xed\xac\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDB40, utf8_reader("\xed\xad\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDB7F, utf8_reader("\xed\xad\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDB80, utf8_reader("\xed\xae\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDBBF, utf8_reader("\xed\xae\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDBC0, utf8_reader("\xed\xaf\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDBFF, utf8_reader("\xed\xaf\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDC00, utf8_reader("\xed\xb0\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDC3F, utf8_reader("\xed\xb0\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDC40, utf8_reader("\xed\xb1\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDC7F, utf8_reader("\xed\xb1\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDC80, utf8_reader("\xed\xb2\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDCBF, utf8_reader("\xed\xb2\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDCC0, utf8_reader("\xed\xb3\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDCFF, utf8_reader("\xed\xb3\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDD00, utf8_reader("\xed\xb4\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDD3F, utf8_reader("\xed\xb4\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDD40, utf8_reader("\xed\xb5\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDD7F, utf8_reader("\xed\xb5\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDD80, utf8_reader("\xed\xb6\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDDBF, utf8_reader("\xed\xb6\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDDC0, utf8_reader("\xed\xb7\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDDFF, utf8_reader("\xed\xb7\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDE00, utf8_reader("\xed\xb8\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDE3F, utf8_reader("\xed\xb8\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDE40, utf8_reader("\xed\xb9\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDE7F, utf8_reader("\xed\xb9\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDE80, utf8_reader("\xed\xba\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDEBF, utf8_reader("\xed\xba\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDEC0, utf8_reader("\xed\xbb\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDEFF, utf8_reader("\xed\xbb\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDF00, utf8_reader("\xed\xbc\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDF3F, utf8_reader("\xed\xbc\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDF40, utf8_reader("\xed\xbd\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDF7F, utf8_reader("\xed\xbd\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDF80, utf8_reader("\xed\xbe\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDFBF, utf8_reader("\xed\xbe\xbf", false, true).peek_code_point());
-  EXPECT_EQ(0xDFC0, utf8_reader("\xed\xbf\x80", false, true).peek_code_point());
-  EXPECT_EQ(0xDFFF, utf8_reader("\xed\xbf\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD800, 3), utf8_reader("\xed\xa0\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD83F, 3), utf8_reader("\xed\xa0\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD840, 3), utf8_reader("\xed\xa1\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD87F, 3), utf8_reader("\xed\xa1\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD880, 3), utf8_reader("\xed\xa2\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD8BF, 3), utf8_reader("\xed\xa2\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD8C0, 3), utf8_reader("\xed\xa3\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD8FF, 3), utf8_reader("\xed\xa3\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD900, 3), utf8_reader("\xed\xa4\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD93F, 3), utf8_reader("\xed\xa4\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD940, 3), utf8_reader("\xed\xa5\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD97F, 3), utf8_reader("\xed\xa5\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD980, 3), utf8_reader("\xed\xa6\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD9BF, 3), utf8_reader("\xed\xa6\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD9C0, 3), utf8_reader("\xed\xa7\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xD9FF, 3), utf8_reader("\xed\xa7\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDA00, 3), utf8_reader("\xed\xa8\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDA3F, 3), utf8_reader("\xed\xa8\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDA40, 3), utf8_reader("\xed\xa9\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDA7F, 3), utf8_reader("\xed\xa9\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDA80, 3), utf8_reader("\xed\xaa\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDABF, 3), utf8_reader("\xed\xaa\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDAC0, 3), utf8_reader("\xed\xab\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDAFF, 3), utf8_reader("\xed\xab\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDB00, 3), utf8_reader("\xed\xac\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDB3F, 3), utf8_reader("\xed\xac\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDB40, 3), utf8_reader("\xed\xad\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDB7F, 3), utf8_reader("\xed\xad\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDB80, 3), utf8_reader("\xed\xae\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDBBF, 3), utf8_reader("\xed\xae\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDBC0, 3), utf8_reader("\xed\xaf\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDBFF, 3), utf8_reader("\xed\xaf\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDC00, 3), utf8_reader("\xed\xb0\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDC3F, 3), utf8_reader("\xed\xb0\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDC40, 3), utf8_reader("\xed\xb1\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDC7F, 3), utf8_reader("\xed\xb1\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDC80, 3), utf8_reader("\xed\xb2\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDCBF, 3), utf8_reader("\xed\xb2\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDCC0, 3), utf8_reader("\xed\xb3\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDCFF, 3), utf8_reader("\xed\xb3\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDD00, 3), utf8_reader("\xed\xb4\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDD3F, 3), utf8_reader("\xed\xb4\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDD40, 3), utf8_reader("\xed\xb5\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDD7F, 3), utf8_reader("\xed\xb5\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDD80, 3), utf8_reader("\xed\xb6\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDDBF, 3), utf8_reader("\xed\xb6\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDDC0, 3), utf8_reader("\xed\xb7\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDDFF, 3), utf8_reader("\xed\xb7\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDE00, 3), utf8_reader("\xed\xb8\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDE3F, 3), utf8_reader("\xed\xb8\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDE40, 3), utf8_reader("\xed\xb9\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDE7F, 3), utf8_reader("\xed\xb9\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDE80, 3), utf8_reader("\xed\xba\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDEBF, 3), utf8_reader("\xed\xba\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDEC0, 3), utf8_reader("\xed\xbb\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDEFF, 3), utf8_reader("\xed\xbb\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDF00, 3), utf8_reader("\xed\xbc\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDF3F, 3), utf8_reader("\xed\xbc\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDF40, 3), utf8_reader("\xed\xbd\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDF7F, 3), utf8_reader("\xed\xbd\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDF80, 3), utf8_reader("\xed\xbe\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDFBF, 3), utf8_reader("\xed\xbe\xbf", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDFC0, 3), utf8_reader("\xed\xbf\x80", false, true).peek_code_point());
+  EXPECT_EQ(std::make_pair(0xDFFF, 3), utf8_reader("\xed\xbf\xbf", false, true).peek_code_point());
 }
 
 TEST(SourceTest, Skip) {
@@ -410,9 +410,9 @@ TEST(UTF8Reader, AllCharacters) {
     utf8_reader reader(std::string_view(source, 3 + length), true, true);
     std::string encoded;
     utf8_encode_code_point(code_point, encoded, true, false);
-    if (reader.peek_code_point() != code_point ||
+    if (reader.peek_code_point().first != code_point ||
         (code_point == utf8_reader::kReplacementCharacter && length != 3)) {
-      EXPECT_EQ(reader.peek_code_point(), 0xFFFD);
+      EXPECT_EQ(reader.peek_code_point(), std::make_pair(0xFFFD, length));
       EXPECT_NE(encoded, std::string(&source[3], length));
     } else {
       EXPECT_EQ(encoded, std::string(&source[3], length));

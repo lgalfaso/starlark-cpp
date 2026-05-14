@@ -24,7 +24,7 @@ TEST(EncodeTest, AllCharacterStrictNoSurrogates) {
     } else if (0xd800 <= i && i <= 0xdfff) {  // Surrogates area
       EXPECT_EQ("", encoded);
     } else {
-      EXPECT_EQ(i, utf8_reader(encoded, false, false).peek_code_point());
+      EXPECT_EQ(i, utf8_reader(encoded, false, false).read_code_point());
     }
   }
 }
@@ -36,7 +36,7 @@ TEST(EncodeTest, AllCharacterStrictWithSurrogates) {
     if (!starlark::ucd::is_assigned(i)) {
       EXPECT_EQ("\xef\xbf\xbd", encoded);
     } else {
-      EXPECT_EQ(i, utf8_reader(encoded, false, false).peek_code_point());
+      EXPECT_EQ(i, utf8_reader(encoded, false, false).read_code_point());
     }
   }
 }
@@ -48,7 +48,7 @@ TEST(EncodeTest, AllCharacterNotStrictNoSurrogates) {
     if (0xd800 <= i && i <= 0xdfff) {  // Surrogates area
       EXPECT_EQ("", encoded);
     } else {
-      EXPECT_EQ(i, utf8_reader(encoded, false, false).peek_code_point());
+      EXPECT_EQ(i, utf8_reader(encoded, false, false).read_code_point());
     }
   }
 }
@@ -57,7 +57,7 @@ TEST(EncodeTest, AllCharacterNotStrictWithSurrogates) {
   for (int i = 0; i <= 0x10'ffff; ++i) {
     std::string encoded;
     utf8_encode_code_point(i, encoded, false, true);
-    EXPECT_EQ(i, utf8_reader(encoded, false, false).peek_code_point());
+    EXPECT_EQ(i, utf8_reader(encoded, false, false).read_code_point());
   }
 }
 

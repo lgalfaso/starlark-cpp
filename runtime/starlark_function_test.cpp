@@ -783,7 +783,7 @@ TEST(StarlarkChr, FromInt) {
     auto* result = starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     ASSERT_EQ(starlark_types::string_t, result->type());
-    EXPECT_EQ(i, utf8_reader(result->str(), false, false).peek_code_point());
+    EXPECT_EQ(i, utf8_reader(result->str(), false, false).read_code_point());
   }
   for (int i = 0; i <= 0x10FFFF; ++i) {
     starlark_obj::pos_args_t pos_args;
@@ -794,7 +794,7 @@ TEST(StarlarkChr, FromInt) {
     auto* result = starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     ASSERT_EQ(starlark_types::string_t, result->type());
-    EXPECT_EQ(i, utf8_reader(result->str(), false, false).peek_code_point());
+    EXPECT_EQ(i, utf8_reader(result->str(), false, false).read_code_point());
   }
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }

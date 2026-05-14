@@ -87,12 +87,11 @@ starlark_obj* starlark_string_fn_upper(starlark_obj* this_obj, const starlark_ob
 
 void append_for_repr(std::string& output, std::string_view input) {
   utf8_reader reader(input, false, false);
-  // TODO(lmirelmann): Would be nice to avoid calling the read twice just to be able to handle the error case.
   while (reader.pending()) {
     auto code_point = reader.peek_code_point();
-    if (code_point != utf8_reader::kReplacementCharacter) {
-      write_printable(reader.peek_code_point(), /*allow_non_ascii_printable=*/ true, output);
-      reader.read_code_point();
+    if (code_point.first != utf8_reader::kReplacementCharacter) {
+      write_printable(code_point.first, /*allow_non_ascii_printable=*/ true, output);
+      reader.skip(code_point.second);
     } else {
       output += input[reader.pos()];
       reader.skip();
@@ -190,7 +189,7 @@ int64_t starlark_string::len(bool produce_error, error_fn& error_callback) const
 
 bool starlark_string::inner_repr(printer& print, printer_action action) const {
   assert(action == printer_action::kPrintTop);
-  // TODO(lmirelmann): If this function were to be executed a lot, then there are a
+  // If this function were to be executed a lot, then there are a
   // few things that can we can try:
   // - Check whether the original value can be used just adding quotes
   // - Keep the value of `result` in a mutable field
@@ -952,17 +951,17 @@ starlark_obj* starlark_string::split(int64_t maxsplit, context& ctx) const {
     maxsplit = std::numeric_limits<int64_t>::max();
   }
   utf8_reader reader(value, false, false);
-  while (reader.pending() && is_space(reader.peek_code_point())) {
-    reader.read_code_point();
+  for (auto cp = reader.peek_code_point(); reader.pending() && is_space(cp.first); cp = reader.peek_code_point()) {
+    reader.skip(cp.second);
   }
   while (reader.pending() && maxsplit > 0) {
     auto start = reader.pos();
-    while (reader.pending() && !is_space(reader.peek_code_point())) {
-      reader.read_code_point();
+    for (auto cp = reader.peek_code_point(); reader.pending() && !is_space(cp.first); cp = reader.peek_code_point()) {
+      reader.skip(cp.second);
     }
     result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), value.substr(start, reader.pos() - start)));
-    while (reader.pending() && is_space(reader.peek_code_point())) {
-      reader.read_code_point();
+    for (auto cp = reader.peek_code_point(); reader.pending() && is_space(cp.first); cp = reader.peek_code_point()) {
+      reader.skip(cp.second);
     }
     maxsplit--;
   }
@@ -997,8 +996,8 @@ starlark_obj* starlark_string::split(std::string_view sep, int64_t maxsplit, con
 
 starlark_obj* starlark_string::lstrip(context& ctx) const {
   utf8_reader reader(value, false, false);
-  while (reader.pending() && is_space(reader.peek_code_point())) {
-    reader.read_code_point();
+  for (auto cp = reader.peek_code_point(); reader.pending() && is_space(cp.first); cp = reader.peek_code_point()) {
+    reader.skip(cp.second);
   }
   return Arena::Create<starlark_string>(&ctx.arena(), value.substr(reader.pos()));
 }
@@ -1021,8 +1020,8 @@ starlark_obj* starlark_string::rstrip(std::string_view cutset, context& ctx) con
 
 starlark_obj* starlark_string::strip(context& ctx) const {
   utf8_reader reader(value, false, false);
-  while (reader.pending() && is_space(reader.peek_code_point())) {
-    reader.read_code_point();
+  for (auto cp = reader.peek_code_point(); reader.pending() && is_space(cp.first); cp = reader.peek_code_point()) {
+    reader.skip(cp.second);
   }
   utf8_reverse_reader reverse_reader(value, false);
   while (reverse_reader.pos() > reader.pos() && is_space(reverse_reader.peek_code_point())) {
