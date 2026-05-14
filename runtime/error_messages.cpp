@@ -358,6 +358,30 @@ std::string error_empty_iterator(std::string_view fn_name) {
   return std::format("ValueError: {}() iterable argument is empty", fn_name);
 }
 
+std::string error_unexpected_in_field_name(std::string_view unexpected) {
+  return std::format("ValueError: unexpected '{}' in field name", unexpected);
+}
+
+std::string_view error_switch_from_manual_to_automatic_numbering() {
+  return "ValueError: cannot switch from manual field specification to automatic field numbering";
+}
+
+std::string error_single_format_element_in_string(std::string_view format_element) {
+  return std::format("ValueError: Single '{}' encountered in format string", format_element);
+}
+
+std::string error_expected_format_element_before_end_of_string(std::string_view format_element) {
+  return std::format("ValueError: expected '{}' before end of string", format_element);
+}
+
+std::string error_positional_argument_out_of_range(std::string_view pos_argument) {
+  return std::format("IndexError: Replacement index {} out of range for positional args tuple", pos_argument);
+}
+
+std::string error_positional_argument_out_of_range(std::size_t pos_argument) {
+  return std::format("IndexError: Replacement index {} out of range for positional args tuple", pos_argument);
+}
+
 }  // namespace runtime
 }  // namespace starlark
 

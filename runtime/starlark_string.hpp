@@ -70,6 +70,7 @@ class starlark_string : public starlark_obj {
   starlark_obj* title(context& ctx);
   starlark_obj* upper(context& ctx);
   starlark_obj* capitalize(context& ctx);
+  starlark_obj* format(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
   starlark_obj* removeprefix(std::string_view sub, context& ctx);
   starlark_obj* removesuffix(std::string_view sub, context& ctx);

@@ -1098,6 +1098,89 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%d", &tuple, "TypeError: not enough arguments for format string");
   test_with_error("%d", &tuple_one_two, "TypeError: not all arguments converted during string formatting");
   test_with_error("%d %d", &list_one_two, "TypeError: not enough arguments for format string");
+  test_with_error("¢¢¢¢¢%y", &one, "ValueError: unsupported format character 'y' (0x79) at index 6");
+}
+
+TEST(StarlarkString, FormatNoFormat) {
+  auto test = [](std::string_view to_interpolate, std::string_view expected) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_string str(to_interpolate);
+    starlark_tuple tuple(0);
+
+    auto* result = str.format({}, {}, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "");
+  test("abc", "abc");
+  test("{{", "{");
+}
+
+TEST(StarlarkString, Format) {
+  auto test = [](std::string_view to_interpolate, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, std::string_view expected) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_string str(to_interpolate);
+
+    auto* result = str.format(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result) << error_callback.messages[0];
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+  auto test_with_error = [](std::string_view to_interpolate, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, std::string_view expected_error) {
+    Arena arena;
+    context ctx(arena);
+    error_handler error_callback;
+    starlark_string str(to_interpolate);
+
+    auto* result = str.format(pos_args, named_args, ctx, error_callback);
+    ASSERT_EQ(nullptr, result);
+    ASSERT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], expected_error);
+  };
+
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_string def("def"sv);
+  starlark_obj::pos_args_t empty_pos;
+  starlark_obj::pos_args_t with_zero;
+  starlark_obj::pos_args_t with_zero_one;
+  starlark_obj::named_args_t empty_names;
+  starlark_obj::named_args_t with_abc;
+
+  with_zero.push_back(ctx.zero());
+  with_zero_one.push_back(ctx.zero());
+  with_zero_one.push_back(ctx.one());
+  with_abc.insert("abc", &def);
+
+  test("{}", with_zero, empty_names, "0");
+  test("abc{}def", with_zero, empty_names, "abc0def");
+  test("abc{}def", with_zero_one, empty_names, "abc0def");
+  test("abc{}def{}ghi", with_zero_one, empty_names, "abc0def1ghi");
+  test("abc{0}def{1}ghi", with_zero_one, empty_names, "abc0def1ghi");
+  test("abc{1}def{0}ghi", with_zero_one, empty_names, "abc1def0ghi");
+  test("abc{1}def{0}ghi", with_zero_one, with_abc, "abc1def0ghi");
+  test("xyz{abc}qwe", with_zero_one, with_abc, "xyzdefqwe");
+  test("abc{0000}def{1}ghi", with_zero_one, empty_names, "abc0def1ghi");
+  test_with_error("{", empty_pos, empty_names, "ValueError: Single '{' encountered in format string");
+  test_with_error("{0", empty_pos, empty_names, "ValueError: expected '}' before end of string");
+  test_with_error("{0a}", empty_pos, empty_names, "ValueError: unexpected 'a' in field name");
+  test_with_error("{0}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
+  test_with_error("{18446744073709551616}", empty_pos, empty_names, "IndexError: Replacement index 18446744073709551616 out of range for positional args tuple");
+  test_with_error("{abc}", empty_pos, empty_names, "KeyError: abc");
+  test_with_error("{$}", empty_pos, empty_names, "ValueError: unexpected '$' in field name");
+  test_with_error("{a!}", empty_pos, empty_names, "ValueError: unexpected '!' in field name");
+  test_with_error("{}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
+  test_with_error("{}{0}", empty_pos, empty_names, "ValueError: cannot switch from manual field specification to automatic field numbering");
 }
 
 TEST(StarlarkString, CountNoArguments) {

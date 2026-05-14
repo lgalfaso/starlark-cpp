@@ -112,6 +112,14 @@ std::string error_missing_positional_argument(std::string_view fn_name, std::str
 std::string error_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name);
 
 std::string error_empty_iterator(std::string_view fn_name);
+
+std::string error_unexpected_in_field_name(std::string_view unexpected);
+std::string_view error_switch_from_manual_to_automatic_numbering();
+std::string error_single_format_element_in_string(std::string_view format_element);
+std::string error_expected_format_element_before_end_of_string(std::string_view format_element);
+std::string error_positional_argument_out_of_range(std::string_view pos_argument);
+std::string error_positional_argument_out_of_range(std::size_t pos_argument);
+
 }  // namespace runtime
 }  // namespace starlark
 

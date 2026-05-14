@@ -287,24 +287,26 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
   }
 }
 
-status parse_interpolation(std::string_view format, std::vector<std::string>& parts, std::vector<std::pair<char, std::size_t>>& convertions, error_fn& error_callback) {
+status parse_interpolation(std::string_view format, std::vector<std::string>& parts, std::vector<std::pair<char32_t, std::size_t>>& convertions, error_fn& error_callback) {
   bool last_is_percent = false;
   parts.emplace_back();
   std::size_t pos = 0;
-  // TODO(lmirelmann): This is not the right position as this is not taking into consideration Unicode chars.
-  for (const auto& c : format) {
+  utf8_reader reader{format, false, false};
+  while (reader.pending()) {
+    auto start = reader.pos();
+    auto cp = reader.read_code_point();
     if (last_is_percent) {
-      if (c == '%') {
-        parts.back() += c;
+      if (cp == '%') {
+        parts.back() += format.substr(start, reader.pos() - start);
       } else {
-        convertions.push_back(std::make_pair(c, pos));
+        convertions.push_back(std::make_pair(cp, pos));
         parts.emplace_back();
       }
       last_is_percent = false;
-    } else if (c == '%') {
+    } else if (cp == '%') {
       last_is_percent = true;
     } else {
-      parts.back() += c;
+      parts.back() += format.substr(start, reader.pos() - start);
     }
     ++pos;
   }
@@ -315,7 +317,7 @@ status parse_interpolation(std::string_view format, std::vector<std::string>& pa
   return ok_status();
 }
 
-status interpolation_convertion(std::string& result, const starlark_obj& element, char format, std::size_t index, context& ctx, error_fn& error_callback) {
+status interpolation_convertion(std::string& result, const starlark_obj& element, char32_t format, std::size_t index, context& ctx, error_fn& error_callback) {
   switch (format) {
     case 's':
       result += element.str();
@@ -450,9 +452,98 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
   return ok_status();
 }
 
+status parse_format(std::string_view format, std::vector<std::string>& parts, std::vector<std::string>& names, error_fn& error_callback) {
+  enum class state_t {
+    kText,
+    kLastElementWasCurlyBraces,
+    kName,
+    kNumber,
+  };
+  bool has_blanks = false;
+  bool has_numbers = false;
+  state_t state = state_t::kText;
+  parts.emplace_back();
+  utf8_reader reader{format, false, false};
+  while (reader.pending()) {
+    auto start = reader.pos();
+    auto cp = reader.read_code_point();
+    switch (state) {
+      case state_t::kText:
+        if (cp == '{') {
+          state = state_t::kLastElementWasCurlyBraces;
+        } else {
+          parts.back() += format.substr(start, reader.pos() - start);
+        }
+        break;
+      case state_t::kLastElementWasCurlyBraces:
+        if (cp == '{') {
+          parts.back() += format.substr(start, reader.pos() - start);
+          state = state_t::kText;
+        } else if (cp == '}') {
+          names.emplace_back();
+          parts.emplace_back();
+          state = state_t::kText;
+          has_blanks = true;
+        } else if ('0' <= cp && cp <= '9') {
+          // In Python, the logic is much more complex as it allows any character with Unicode General Category Nd
+          has_numbers = true;
+          names.emplace_back();
+          names.back() += format.substr(start, reader.pos() - start);
+          state = state_t::kNumber;
+        } else if (cp == '_' || ucd::is_XID_Start(cp)) {
+          names.emplace_back();
+          names.back() += format.substr(start, reader.pos() - start);
+          state = state_t::kName;
+        } else {
+          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          return error_status();
+        }
+        break;
+      case state_t::kName:
+        if (cp == '}') {
+          parts.emplace_back();
+          state = state_t::kText;
+        } else if (ucd::is_XID_Continue(cp)) {
+          names.back() += cp;
+        } else {
+          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          return error_status();
+        }
+        break;
+      case state_t::kNumber:
+        if (cp == '}') {
+          parts.emplace_back();
+          state = state_t::kText;
+        } else if ('0' <= cp && cp <= '9') {
+          names.back() += format.substr(start, reader.pos() - start);
+        } else {
+          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          return error_status();
+        }
+        break;
+    }
+  }
+  if (has_blanks && has_numbers) {
+    error_callback.add_error(error_switch_from_manual_to_automatic_numbering());
+    return error_status();
+  }
+  switch (state) {
+    default:
+    case state_t::kText:
+      return ok_status();
+    case state_t::kLastElementWasCurlyBraces:
+      error_callback.add_error(error_single_format_element_in_string("{"));
+      return error_status();
+    case state_t::kName:
+    case state_t::kNumber:
+      error_callback.add_error(error_expected_format_element_before_end_of_string("}"));
+      return error_status();
+  }
+}
+
 starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   std::vector<std::string> parts;
-  std::vector<std::pair<char, std::size_t>> convertions;
+  std::vector<std::pair<char32_t, std::size_t>> convertions;
   if (!parse_interpolation(this_obj.as_string(), parts, convertions, error_callback).ok()) {
     return nullptr;
   }
@@ -1267,6 +1358,51 @@ starlark_obj* starlark_string::capitalize(context& ctx) {
   return Arena::Create<starlark_string>(&ctx.arena(), merge_parts(parts, code_points));
 }
 
+starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  std::vector<std::string> parts;
+  std::vector<std::string> names;
+  if (!parse_format(value, parts, names, error_callback).ok()) {
+    return nullptr;
+  }
+  std::string result;
+  std::size_t automatic_numbering = 0;
+  for (std::size_t i = 0; i < names.size(); ++i) {
+    result += parts[i];
+    const auto& name = names[i];
+    if (name.empty()) {
+      if (pos_args.size() <= automatic_numbering) {
+        error_callback.add_error(error_positional_argument_out_of_range(automatic_numbering));
+        return nullptr;
+      }
+      result += pos_args[automatic_numbering]->str();
+      automatic_numbering++;
+    } else if ('0' <= name[0] && name[0] <= '9') {
+      // This is making the assumption that the numbers are always in 0..9 instead of being of Unicode General Cathegory Nd.
+      errno = 0;
+      char* end;
+      std::int64_t int_value = std::strtol(name.c_str(), &end, 10);
+      if (errno == ERANGE || end != &*name.end()) {
+        error_callback.add_error(error_positional_argument_out_of_range(name));
+        return nullptr;
+      }
+      if (int_value < 0 || int_value >= pos_args.size()) {
+        error_callback.add_error(error_positional_argument_out_of_range(name));
+        return nullptr;
+      }
+      result += pos_args[int_value]->str();
+    } else {
+      auto it = named_args.find(name);
+      if (it == named_args.end()) {
+        error_callback.add_error(error_dictionary_key_not_found(name));
+        return nullptr;
+      }
+      result += it->second->str();
+    }
+  }
+  result += parts.back();
+  return Arena::Create<starlark_string>(&ctx.arena(), result);
+}
+
 starlark_obj* starlark_string::removeprefix(std::string_view sub, context& ctx) {
   if (value.starts_with(sub)) {
     return Arena::Create<starlark_string>(&ctx.arena(), value.substr(sub.length()));
@@ -1559,9 +1695,9 @@ starlark_obj* starlark_string_fn_find(starlark_obj* this_obj, const starlark_obj
 }
 
 starlark_obj* starlark_string_fn_format(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): Implement.
-  error_callback.add_error("Unimplemented");
-  return nullptr;
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->format(pos_args, named_args, ctx, error_callback);
 }
 
 starlark_obj* starlark_string_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
