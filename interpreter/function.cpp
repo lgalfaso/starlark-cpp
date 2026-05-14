@@ -29,6 +29,32 @@ using ::starlark::runtime::starlark_tuple;
 namespace starlark {
 namespace interpreter {
 
+std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs) {
+  auto c = lhs->entrypoint <=> rhs->entrypoint;
+  if (c != 0) {
+    return c;
+  }
+  c = lhs->current_program.first <=> rhs->current_program.first;
+  if (c != 0) {
+    return c;
+  }
+  c = lhs->frame_stack.size() <=> rhs->frame_stack.size();
+  if (c != 0) {
+    return c;
+  }
+  for (std::size_t i = 0; i < lhs->frame_stack.size(); ++i) {
+    c = lhs->frame_stack[i] <=> rhs->frame_stack[i];
+    if (c != 0) {
+      return c;
+    }
+  }
+  return c;
+}
+
+bool less_fn::operator()(const interpreter_function* lhs, const interpreter_function* rhs) const {
+  return cmp_fn(lhs, rhs) < 0;
+}
+
 interpreter_function::interpreter_function(
     int entrypoint,
     std::vector<starlark::runtime::starlark_obj*>&& default_arguments,
@@ -56,15 +82,13 @@ starlark_obj* interpreter_function::call(
       context& ctx,
       error_fn& error_callback) {
   runner_state* state = static_cast<runner_state*>(ctx.runner_context());
-  // TODO(lmirelmann): This is an O(n) operation, this should be improved if it becomes an issue.
   if (!ctx.options().allow_recursion) {
-    for (const auto* other : state->call_fns) {
-      if (equals(*other)) {
-        error_callback.add_error(std::format("Error: function '{}' called recursively", fn_name));
-        return nullptr;
-      }
+    if (state->fns_in_stack.contains(this)) {
+      error_callback.add_error(std::format("Error: function '{}' called recursively", fn_name));
+      return nullptr;
     }
   }
+  state->fns_in_stack[this]++;
   state->call_fns.push_back(this);
   auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
   starlark_obj::pos_args_t args;
@@ -190,16 +214,7 @@ bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& co
     return false;
   }
   const interpreter_function* f_other = reinterpret_cast<const interpreter_function*>(other);
-  if (entrypoint != f_other->entrypoint) {
-    return false;
-  }
-  if (current_program.first != f_other->current_program.first) {
-    return false;
-  }
-  if (frame_stack != f_other->frame_stack) {
-    return false;
-  }
-  return true;
+  return cmp_fn(this, f_other) == 0;
 }
 
 void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {

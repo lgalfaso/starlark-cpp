@@ -16,6 +16,11 @@
 namespace starlark {
 namespace interpreter {
 
+class interpreter_function;
+struct less_fn {
+  bool operator()(const interpreter_function* lhs, const interpreter_function* rhs) const;
+};
+
 struct runner_state {
   // If recursion is not allowed, then it is possible to replace this with `std::vector<std::vector<frame*>*> frame_stacks;`.
   // Doing so would prevent the copying of a std::vector during a call. Given that there is a chance that recursion will be allowed,
@@ -27,7 +32,8 @@ struct runner_state {
   int block_ptr = 0;
   std::pair<starlark::bytecode::Program*, std::string>* current_program = nullptr;
   module_loader* loader = nullptr;
-  std::vector<starlark::runtime::starlark_obj*> call_fns;
+  std::vector<interpreter_function*> call_fns;
+  std::map<interpreter_function*, int, less_fn> fns_in_stack;
 };
 
 }  // namespace interpreter

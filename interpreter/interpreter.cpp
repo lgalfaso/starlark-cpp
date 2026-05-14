@@ -724,6 +724,9 @@ frame* run_program(
         stack.back() = result;
         state.current_program = state.current_program_stack.back();
         state.current_program_stack.pop_back();
+        if (--state.fns_in_stack[state.call_fns.back()] == 0) {
+          state.fns_in_stack.erase(state.call_fns.back());
+        }
         state.call_fns.pop_back();
         break;
       }
