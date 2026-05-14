@@ -102,27 +102,25 @@ frame* create_frame(Arena& arena, const RepeatedPtrField<std::string>* names) {
 
 class error_handler : public error_fn {
  public:
-  error_handler(runner_state& state,
-                std::pair<Program*, std::string>* base_program,
-                int instruction_ptr_value,
-                logger& log) :
-      state(state),
-      base_program(base_program),
-      instruction_ptr_value(instruction_ptr_value),
-      log(log) {}
+  error_handler(runner_state& state, logger& log) : state(state), log(log) {}
 
   void add_error(std::string_view error_msg) override {
+    static Program fail_program = std::invoke([] -> Program {
+      Program result;
+      result.mutable_block()->Add()->add_op_code()->mutable_fail();
+      return result;
+    });
+    static std::pair<Program*, std::string> base_program = std::make_pair<Program*, std::string>(&fail_program, "@@//:fail.star");
+
     // TODO(lmirelmann): Do not have the position.
     log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program->second, starlark::logging::Position::default_instance());
     state.block_ptr = 0;
-    state.instruction_ptr = instruction_ptr_value;
-    state.current_program = base_program;
+    state.instruction_ptr = 0;
+    state.current_program = &base_program;
   }
 
  private:
   runner_state& state;
-  std::pair<Program*, std::string>* base_program;
-  const int instruction_ptr_value;
   logger& log;
 };
 
@@ -135,13 +133,12 @@ frame* run_program(
   std::vector<starlark_obj*> stack;
   std::vector<std::string_view> sv_stack;
   runner_state state;
+
   state.current_program = &starlark_program;
   state.loader = &loader;
   ctx.runner_context(&state);
 
-  // TODO(lmirelmann): Maybe add the fail to another module?
-  starlark_program.first->mutable_block(0)->add_op_code()->mutable_fail();
-  error_handler error_callback(state, &starlark_program, starlark_program.first->block(0).op_code_size() - 1, log);
+  error_handler error_callback(state, log);
   frame* result = nullptr;
 
   // Limit checks.
