@@ -22,10 +22,13 @@
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
+#include "unicode/encode.hpp"
+#include "unicode/ucd_code_points.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
+using ::starlark::runtime::append_for_repr;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
@@ -46,6 +49,8 @@ using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
 using ::starlark::testing::starlark_testing_function;
+using ::starlark::ucd::is_printable;
+using ::starlark::unicode::utf8_encode_code_point;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Contains;
 using ::testing::Eq;
@@ -70,7 +75,6 @@ TEST(StarlarkString, Str) {
 }
 
 TEST(StarlarkString, Repr) {
-  // TODO(lmirelmann): Would be nice to have a test that checks the encoding of all characters.
   EXPECT_EQ("\"abcdef\"", starlark_string("abcdef"sv).repr());
   EXPECT_EQ("\"'\"", starlark_string("'"sv).repr());
   EXPECT_EQ("\"'\\\"\"", starlark_string("'\""sv).repr());
@@ -84,6 +88,34 @@ TEST(StarlarkString, Repr) {
   EXPECT_EQ("\"\\U000101c7\"", starlark_string("\360\220\207\207"sv).repr());
   EXPECT_EQ("\"\xf0\"", starlark_string(std::string("🙂"sv).substr(0, 1)).repr());
   EXPECT_EQ("\"\\ufeff\"", starlark_string("\xef\xbb\xbf"sv).repr());
+}
+
+TEST(StarlarkString, AppendForRepr) {
+  for (int i = 0; i <= 0x10'ffff; ++i) {
+    std::string test_case;
+    utf8_encode_code_point(i, test_case, /*strict*/ false, /*encode_surrogate*/ true);
+    std::string actual;
+    append_for_repr(actual, test_case);
+    if (i == '"') {
+      EXPECT_EQ(actual, "\\\"");
+    } else if (i == '\\') {
+      EXPECT_EQ(actual, "\\\\");
+    } else if (i == '\n') {
+      EXPECT_EQ(actual, "\\n");
+    } else if (i == '\r') {
+      EXPECT_EQ(actual, "\\r");
+    } else if (i == '\t') {
+      EXPECT_EQ(actual, "\\t");
+    } else if (is_printable(i)) {
+      EXPECT_EQ(actual, test_case);
+    } else if (i <= 0xff) {
+      EXPECT_EQ(actual, std::format("\\x{:02x}", i));
+    } else if (i <= 0xffff) {
+      EXPECT_EQ(actual, std::format("\\u{:04x}", i));
+    } else {
+      EXPECT_EQ(actual, std::format("\\U{:08x}", i));
+    }
+  }
 }
 
 TEST(StarlarkString, Truthy) {
