@@ -75,7 +75,7 @@ cc_fuzz_test(
         "//grammar/lexer_fuzz_test_corpus:corpus_filegroup",
     ],
     dicts = [
-        "lexer_fuzz_test_dictionary/lexical_elements.dict",
+        "//grammar/lexer_fuzz_test_dictionary:lexical_elements.dict",
     ],
     deps = [
         ":lexer",
@@ -224,7 +224,7 @@ cc_fuzz_test(
         "//grammar/parser_fuzz_test_corpus:corpus_filegroup",
     ],
     dicts = [
-        "lexer_fuzz_test_dictionary/lexical_elements.dict",
+        "//grammar/lexer_fuzz_test_dictionary:lexical_elements.dict",
     ],
     deps = [
         ":parser",
