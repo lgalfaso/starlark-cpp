@@ -440,7 +440,6 @@ frame* run_program(
       BINARY_OP(OpCode::kBinarySlashSlash, binary_slash_slash)
 #undef BINARY_OP
       case OpCode::kCall: {
-        // TODO(lmirelmann): Implement recursion detection.
         int args_count = op_code.call().positional_arguments_count() +
             op_code.call().named_arguments_count() +
             (op_code.call().has_variadic_positional_argument() ? 1 : 0) +
@@ -725,6 +724,7 @@ frame* run_program(
         stack.back() = result;
         state.current_program = state.current_program_stack.back();
         state.current_program_stack.pop_back();
+        state.call_fns.pop_back();
         break;
       }
       case OpCode::kLoadModule: {

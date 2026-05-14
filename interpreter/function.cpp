@@ -50,12 +50,22 @@ interpreter_function::interpreter_function(
   }
 }
 
-
 starlark_obj* interpreter_function::call(
       const starlark_obj::pos_args_t& pos_args,
       const starlark_obj::named_args_t& named_args,
       context& ctx,
       error_fn& error_callback) {
+  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
+  // TODO(lmirelmann): This is an O(n) operation, this should be improved if it becomes an issue.
+  if (!ctx.options().allow_recursion) {
+    for (const auto* other : state->call_fns) {
+      if (equals(*other)) {
+        error_callback.add_error(std::format("Error: function '{}' called recursively", fn_name));
+        return nullptr;
+      }
+    }
+  }
+  state->call_fns.push_back(this);
   auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
   starlark_obj::pos_args_t args;
   starlark_obj::named_args_t kwargs;
@@ -165,7 +175,6 @@ starlark_obj* interpreter_function::call(
     new_frame->elements[function_signature->param(function_signature->param().size() - 1).pos().pos_in_frame()] = dict;
   }
 
-  runner_state* state = static_cast<runner_state*>(ctx.runner_context());
   state->frame_stacks.push_back(frame_stack);
   state->frame_stacks.back().push_back(new_frame);
   state->call_stack.push_back(std::make_pair(state->block_ptr, state->instruction_ptr));

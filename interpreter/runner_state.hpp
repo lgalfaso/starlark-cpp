@@ -27,6 +27,7 @@ struct runner_state {
   int block_ptr = 0;
   std::pair<starlark::bytecode::Program*, std::string>* current_program = nullptr;
   module_loader* loader = nullptr;
+  std::vector<starlark::runtime::starlark_obj*> call_fns;
 };
 
 }  // namespace interpreter

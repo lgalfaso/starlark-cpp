@@ -81,6 +81,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
   auto log2_max_bigint = ctx.options().log2_max_bigint;
   auto max_sequence_size = ctx.options().max_sequence_size;
   auto max_string_length = ctx.options().max_string_length;
+  auto allow_recursion = ctx.options().allow_recursion;
   starlark_obj* error = nullptr;
   for (auto& [key, value] : named_args) {
     if (value == nullptr) {
@@ -111,6 +112,8 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
         return nullptr;
       }
       max_string_length = *r;
+    } else if (key == "allow_recursion") {
+      allow_recursion = value->truthy();
     } else {
       error_callback.add_error(std::format("Unknown named argument '{}'.", key));
       return nullptr;
@@ -138,6 +141,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
     .max_sequence_size = max_sequence_size,
     .max_string_length = max_string_length,
     .out = out,
+    .allow_recursion = allow_recursion,
   };
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
   modules.try_emplace(module_name, source_code->str(), std::map<std::string, starlark_obj*, std::less<>>{});
@@ -165,6 +169,7 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
   auto log2_max_bigint = ctx.options().log2_max_bigint;
   auto max_sequence_size = ctx.options().max_sequence_size;
   auto max_string_length = ctx.options().max_string_length;
+  auto allow_recursion = ctx.options().allow_recursion;
   starlark_obj* print = nullptr;
   for (auto& [key, value] : named_args) {
     if (value == nullptr) {
@@ -195,6 +200,8 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
         return nullptr;
       }
       max_string_length = *r;
+    } else if (key == "allow_recursion") {
+      allow_recursion = value->truthy();
     } else {
       error_callback.add_error(std::format("Unknown named argument '{}'.", key));
       return nullptr;
@@ -222,6 +229,7 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
     .max_sequence_size = max_sequence_size,
     .max_string_length = max_string_length,
     .out = out,
+    .allow_recursion = allow_recursion,
   };
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
   modules.try_emplace(module_name, source_code->str(), std::map<std::string, starlark_obj*, std::less<>>{});

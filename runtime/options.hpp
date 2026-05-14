@@ -18,6 +18,7 @@ struct runtime_options {
   std::size_t max_sequence_size = std::numeric_limits<int32_t>::max();
   std::size_t max_string_length = std::numeric_limits<int32_t>::max();
   std::ostream& out = std::cout;
+  bool allow_recursion = false;
 };
 
 }  // namespace runtime
