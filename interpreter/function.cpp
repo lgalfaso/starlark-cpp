@@ -177,8 +177,20 @@ starlark_obj* interpreter_function::call(
 }
 
 bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& comp, const starlark_obj* other) const {
-  // TODO(lmirelmann): Implement.
-  return false;
+  if (other->type() != type()) {
+    return false;
+  }
+  const interpreter_function* f_other = reinterpret_cast<const interpreter_function*>(other);
+  if (entrypoint != f_other->entrypoint) {
+    return false;
+  }
+  if (current_program.first != f_other->current_program.first) {
+    return false;
+  }
+  if (frame_stack != f_other->frame_stack) {
+    return false;
+  }
+  return true;
 }
 
 void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
