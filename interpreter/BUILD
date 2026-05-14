@@ -1,6 +1,7 @@
 # Copyright 2025 Lucas Mirelmann
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 
 cc_library(
     name = "frame",
@@ -135,6 +136,20 @@ cc_test(
 cc_binary(
     name = "interpreter_main",
     srcs = ["interpreter_main.cpp"],
+    deps = [
+        ":interpreter",
+    ],
+)
+
+cc_fuzz_test(
+    name = "interpreter_fuzz_test",
+    srcs = ["interpreter_fuzz_test.cpp"],
+    corpus = [
+        "//grammar/lexer_fuzz_test_corpus:corpus_filegroup",
+    ],
+    dicts = [
+        "//grammar/lexer_fuzz_test_dictionary:lexical_elements.dict",
+    ],
     deps = [
         ":interpreter",
     ],
