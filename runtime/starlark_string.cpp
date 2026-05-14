@@ -30,6 +30,9 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::result::error_status;
+using ::starlark::result::ok_status;
+using ::starlark::result::status;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
 using ::starlark::ucd::is_Case_Ignorable;
@@ -284,10 +287,11 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
   }
 }
 
-bool parse_interpolation(std::string_view format, std::vector<std::string>& parts, std::vector<std::pair<char, std::size_t>>& convertions, error_fn& error_callback) {
+status parse_interpolation(std::string_view format, std::vector<std::string>& parts, std::vector<std::pair<char, std::size_t>>& convertions, error_fn& error_callback) {
   bool last_is_percent = false;
   parts.emplace_back();
   std::size_t pos = 0;
+  // TODO(lmirelmann): This is not the right position as this is not taking into consideration Unicode chars.
   for (const auto& c : format) {
     if (last_is_percent) {
       if (c == '%') {
@@ -306,11 +310,12 @@ bool parse_interpolation(std::string_view format, std::vector<std::string>& part
   }
   if (last_is_percent) {
     error_callback.add_error(error_incomplete_format());
+    return error_status();
   }
-  return !last_is_percent;
+  return ok_status();
 }
 
-bool interpolation_convertion(std::string& result, const starlark_obj& element, char format, std::size_t index, context& ctx, error_fn& error_callback) {
+status interpolation_convertion(std::string& result, const starlark_obj& element, char format, std::size_t index, context& ctx, error_fn& error_callback) {
   switch (format) {
     case 's':
       result += element.str();
@@ -331,12 +336,12 @@ bool interpolation_convertion(std::string& result, const starlark_obj& element, 
         case starlark_numeric_type::kFloat:
           n_element = create_integer_from_float(element.as_float(), ctx, error_callback);
           if (n_element == nullptr) {
-            return false;
+            return error_status();
           }
           break;
         default:
           error_callback.add_error(error_format_integer_is_required(format, element.type()));
-          return false;
+          return error_status();
       }
       switch (format) {
         case 'd':
@@ -410,7 +415,7 @@ bool interpolation_convertion(std::string& result, const starlark_obj& element, 
           break;
         default:
           error_callback.add_error(error_format_real_is_required(format, element.type()));
-          return false;
+          return error_status();
       }
       if (std::isfinite(float_value)) {
         switch (format) {
@@ -440,15 +445,15 @@ bool interpolation_convertion(std::string& result, const starlark_obj& element, 
     }
     default:
       error_callback.add_error(error_unsupported_format_character(format, index));
-      return false;
+      return error_status();
   }
-  return true;
+  return ok_status();
 }
 
 starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   std::vector<std::string> parts;
   std::vector<std::pair<char, std::size_t>> convertions;
-  if (!parse_interpolation(this_obj.as_string(), parts, convertions, error_callback)) {
+  if (!parse_interpolation(this_obj.as_string(), parts, convertions, error_callback).ok()) {
     return nullptr;
   }
   std::string result = parts[0];
@@ -457,7 +462,7 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
       error_callback.add_error(error_not_enough_arguments_for_format_string());
       return nullptr;
     }
-    if (!interpolation_convertion(result, other, convertions[0].first, convertions[0].second, ctx, error_callback)) {
+    if (!interpolation_convertion(result, other, convertions[0].first, convertions[0].second, ctx, error_callback).ok()) {
       return nullptr;
     }
     result += parts[1];
@@ -475,7 +480,7 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
   }
 
   for (std::size_t i = 0; i < convertions.size(); ++i) {
-    if (!interpolation_convertion(result, *t_other.at(i), convertions[i].first, convertions[i].second, ctx, error_callback)) {
+    if (!interpolation_convertion(result, *t_other.at(i), convertions[i].first, convertions[i].second, ctx, error_callback).ok()) {
       return nullptr;
     }
     result += parts[i + 1];
