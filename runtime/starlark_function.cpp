@@ -991,7 +991,7 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
   }
   it->end_iterator();
 
-  // Sort and manybe revert.
+  // Sort and maybe revert.
   bool found_error = false;
   std::stable_sort(elems.begin(), elems.end(), [&error_callback, &found_error](const std::pair<starlark_obj*, starlark_obj*>& lhs, const std::pair<starlark_obj*, starlark_obj*>& rhs) -> bool {
     if (found_error) {
