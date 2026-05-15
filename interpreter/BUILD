@@ -101,6 +101,7 @@ cc_library(
     srcs = ["interpreter_test_runner.cpp"],
     hdrs = ["interpreter_test_runner.hpp"],
     testonly = True,
+    visibility = ["//visibility:public"],
     deps = [
         ":interpreter",
         "//runtime:starlark_bigint",

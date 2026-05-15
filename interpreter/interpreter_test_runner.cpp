@@ -228,6 +228,48 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
   return ctx.none_value();
 }
 
+starlark_obj* assert_true_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!named_args.empty()) {
+    error_callback.add_error("assert_true does not take any named arguments.");
+    return nullptr;
+  }
+  if (pos_args.size() != 1) {
+    error_callback.add_error("assert_true takes only 1 positional argument.");
+    return nullptr;
+  }
+  auto* actual = pos_args[0];
+  if (actual == nullptr) {
+    error_callback.add_error("invalid 'actual' parameter (nullptr).");
+    return nullptr;
+  }
+  if (!actual->equals(*ctx.true_value())) {
+    error_callback.add_error(std::format("Actual: {}\nExpected: {}\n", actual->repr(), ctx.true_value()->repr()));
+    return nullptr;
+  }
+  return ctx.none_value();
+}
+
+starlark_obj* assert_false_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!named_args.empty()) {
+    error_callback.add_error("assert_false does not take any named arguments.");
+    return nullptr;
+  }
+  if (pos_args.size() != 1) {
+    error_callback.add_error("assert_false takes only 1 positional argument.");
+    return nullptr;
+  }
+  auto* actual = pos_args[0];
+  if (actual == nullptr) {
+    error_callback.add_error("invalid 'actual' parameter (nullptr).");
+    return nullptr;
+  }
+  if (!actual->equals(*ctx.false_value())) {
+    error_callback.add_error(std::format("Actual: {}\nExpected: {}\n", actual->repr(), ctx.false_value()->repr()));
+    return nullptr;
+  }
+  return ctx.none_value();
+}
+
 }  // namespace
 
 namespace starlark {
@@ -242,6 +284,8 @@ frame* run_test(std::string_view starlark_code, logger& logging) {
   custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
   custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
   custom_binding["assert_succeed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_succeed_fn, "assert_succeed");
+  custom_binding["assert_true"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_true_fn, "assert_true");
+  custom_binding["assert_false"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_false_fn, "assert_false");
   modules.try_emplace("main", starlark_code, custom_binding);
   kv_module_loader loader{modules};
 
