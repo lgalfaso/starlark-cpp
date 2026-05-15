@@ -630,11 +630,14 @@ std::string merge_parts(const std::vector<case_convertion>& parts, const std::ve
 
 std::string to_title_string(std::string_view value, bool& found_cased) {
   std::vector<char32_t> code_points;
+  std::vector<std::size_t> code_points_pos;
   utf8_reader reader(value, false, false);
   while (reader.pending()) {
+    code_points_pos.push_back(reader.pos());
     auto code_point = reader.read_code_point();
     code_points.push_back(code_point);
   }
+  code_points_pos.push_back(reader.pos());
   std::vector<std::uint64_t> word_boundaries;
   word_break(code_points, word_boundaries);
 
@@ -654,27 +657,25 @@ std::string to_title_string(std::string_view value, bool& found_cased) {
     found_cased |= cased;
     if (first_letter_of_word && cased) {
       auto new_code_points = to_title(code_point);
-      for (const auto& c : new_code_points) {
-        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
+      if (new_code_points.has_value()) {
+        parts.back().prefix += new_code_points.value();
+      } else {
+        parts.back().prefix += value.substr(code_points_pos[pos], code_points_pos[pos + 1] - code_points_pos[pos]);
       }
       first_letter_of_word = false;
     } else {
       auto new_code_points = to_lower(code_point);
-      if (new_code_points.second.has_value()) {
-        for (const auto& c : new_code_points.first) {
-          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().else_condition, true, false);
-        }
-        for (const auto& c : new_code_points.second.value()) {
-          utf8_encode_code_point(c, parts.back().if_condition, true, false);
-        }
+      if (!new_code_points.has_value()) {
+        parts.back().prefix += value.substr(code_points_pos[pos], code_points_pos[pos + 1] - code_points_pos[pos]);
+      } else if (!new_code_points->second.has_value()) {
+        parts.back().prefix += new_code_points.value().first;
+      } else {
+        parts.back().else_condition += new_code_points.value().first;
+        parts.back().if_condition += new_code_points.value().second.value();
         parts.back().condition = case_condition::kFinalSigma;
         parts.back().pos = pos;
         parts.emplace_back();
         parts.back().condition = case_condition::kNone;
-      } else {
-        for (const auto& c : new_code_points.first) {
-          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
-        }
       }
     }
   }
@@ -1270,25 +1271,23 @@ starlark_obj* starlark_string::lower(context& ctx) {
   std::size_t pos = 0;
   parts.emplace_back();
   parts.back().condition = case_condition::kNone;
+  std::string_view value_view = value;
   while (reader.pending()) {
+    auto begin = reader.pos();
     auto code_point = reader.read_code_point();
     code_points.push_back(code_point);
     auto new_code_points = to_lower(code_point);
-    if (new_code_points.second.has_value()) {
-      for (const auto& c : new_code_points.first) {
-        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().else_condition, true, false);
-      }
-      for (const auto& c : new_code_points.second.value()) {
-        utf8_encode_code_point(c, parts.back().if_condition, true, false);
-      }
+    if (!new_code_points.has_value()) {
+      parts.back().prefix += value_view.substr(begin, reader.pos() - begin);
+    } else if (!new_code_points->second.has_value()) {
+      parts.back().prefix += new_code_points.value().first;
+    } else {
+      parts.back().else_condition += new_code_points.value().first;
+      parts.back().if_condition += new_code_points.value().second.value();
       parts.back().condition = case_condition::kFinalSigma;
       parts.back().pos = pos;
       parts.emplace_back();
       parts.back().condition = case_condition::kNone;
-    } else {
-      for (const auto& c : new_code_points.first) {
-        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
-      }
     }
     pos++;
   }
@@ -1303,11 +1302,15 @@ starlark_obj* starlark_string::title(context& ctx) {
 starlark_obj* starlark_string::upper(context& ctx) {
   std::string result;
   utf8_reader reader(value, false, false);
+  std::string_view value_view = value;
   while (reader.pending()) {
+    auto begin = reader.pos();
     auto code_point = reader.read_code_point();
     auto new_code_points = to_upper(code_point);
-    for (const auto& c : new_code_points) {
-      utf8_encode_code_point(c == 0x110000 ? code_point : c, result, true, false);
+    if (new_code_points.has_value()) {
+      result += new_code_points.value();
+    } else {
+      result += value_view.substr(begin, reader.pos() - begin);
     }
   }
   return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
@@ -1321,32 +1324,32 @@ starlark_obj* starlark_string::capitalize(context& ctx) {
   parts.emplace_back();
   parts.back().condition = case_condition::kNone;
   bool is_first = true;
+  std::string_view value_view = value;
   while (reader.pending()) {
+    auto begin = reader.pos();
     auto code_point = reader.read_code_point();
     code_points.push_back(code_point);
     if (is_first) {
       auto new_code_points = to_title(code_point);
-      for (const auto& c : new_code_points) {
-        utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
+      if (new_code_points.has_value()) {
+        parts.back().prefix += new_code_points.value();
+      } else {
+        parts.back().prefix += value_view.substr(begin, reader.pos() - begin);
       }
       is_first = false;
     } else {
       auto new_code_points = to_lower(code_point);
-      if (new_code_points.second.has_value()) {
-        for (const auto& c : new_code_points.first) {
-          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().else_condition, true, false);
-        }
-        for (const auto& c : new_code_points.second.value()) {
-          utf8_encode_code_point(c, parts.back().if_condition, true, false);
-        }
+      if (!new_code_points.has_value()) {
+        parts.back().prefix += value_view.substr(begin, reader.pos() - begin);
+      } else if (!new_code_points->second.has_value()) {
+        parts.back().prefix += new_code_points.value().first;
+      } else {
+        parts.back().else_condition += new_code_points.value().first;
+        parts.back().if_condition += new_code_points.value().second.value();
         parts.back().condition = case_condition::kFinalSigma;
         parts.back().pos = pos;
         parts.emplace_back();
         parts.back().condition = case_condition::kNone;
-      } else {
-        for (const auto& c : new_code_points.first) {
-          utf8_encode_code_point(c == 0x110000 ? code_point : c, parts.back().prefix, true, false);
-        }
       }
     }
     pos++;
