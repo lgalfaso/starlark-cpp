@@ -96,6 +96,27 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "interpreter_test_runner",
+    srcs = ["interpreter_test_runner.cpp"],
+    hdrs = ["interpreter_test_runner.hpp"],
+    testonly = True,
+    deps = [
+        ":interpreter",
+        "//runtime:starlark_bigint",
+        "//runtime:starlark_bool",
+        "//runtime:starlark_bytes",
+        "//runtime:starlark_dictionary",
+        "//runtime:starlark_float",
+        "//runtime:starlark_integer",
+        "//runtime:starlark_list",
+        "//runtime:starlark_none",
+        "//runtime:starlark_string",
+        "//runtime:starlark_testing",
+        "//runtime:starlark_tuple",
+    ],
+)
+
 [
     cc_test(
         name = "interpreter_test_" + f.replace("/", "_"),
@@ -107,18 +128,7 @@ cc_library(
             f,
         ],
         deps = [
-            ":interpreter",
-            "//runtime:starlark_bigint",
-            "//runtime:starlark_bool",
-            "//runtime:starlark_bytes",
-            "//runtime:starlark_dictionary",
-            "//runtime:starlark_float",
-            "//runtime:starlark_integer",
-            "//runtime:starlark_list",
-            "//runtime:starlark_none",
-            "//runtime:starlark_string",
-            "//runtime:starlark_testing",
-            "//runtime:starlark_tuple",
+            ":interpreter_test_runner",
             "@googletest//:gtest_main",
         ],
     ) for f in glob(["interpreter_tests/*.star"])
