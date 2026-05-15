@@ -3,6 +3,7 @@
 #ifndef INTERPRETER_RUNNER_STATE_HPP_
 #define INTERPRETER_RUNNER_STATE_HPP_
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
