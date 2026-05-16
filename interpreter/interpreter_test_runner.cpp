@@ -275,7 +275,7 @@ starlark_obj* assert_false_fn(starlark_obj* this_obj, const starlark_obj::pos_ar
 namespace starlark {
 namespace interpreter_runner {
 
-frame* run_test(std::string_view starlark_code, logger& logging) {
+frame* run_test(std::map<std::string_view, std::string_view> programs, logger& logging) {
   class interpreter runner;
   Arena arena;
 
@@ -286,7 +286,9 @@ frame* run_test(std::string_view starlark_code, logger& logging) {
   custom_binding["assert_succeed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_succeed_fn, "assert_succeed");
   custom_binding["assert_true"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_true_fn, "assert_true");
   custom_binding["assert_false"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_false_fn, "assert_false");
-  modules.try_emplace("main", starlark_code, custom_binding);
+  for (const auto& [k, v] : programs) {
+    modules.try_emplace(std::string{k}, v, custom_binding);
+  }
   kv_module_loader loader{modules};
 
   return runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);

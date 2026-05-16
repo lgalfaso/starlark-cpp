@@ -3,6 +3,7 @@
 #ifndef INTERPRETER_TEST_RUNNER_HPP_
 #define INTERPRETER_TEST_RUNNER_HPP_
 
+#include <map>
 #include <string_view>
 
 #include "interpreter/frame.hpp"
@@ -13,7 +14,7 @@
 namespace starlark {
 namespace interpreter_runner {
 
-starlark::interpreter::frame* run_test(std::string_view program, starlark::logging::logger& logging);
+starlark::interpreter::frame* run_test(std::map<std::string_view, std::string_view> programs, starlark::logging::logger& logging);
 
 }  // namespace interpreter_runner
 }  // namespace starlark

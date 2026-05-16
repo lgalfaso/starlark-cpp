@@ -2,6 +2,8 @@
 
 #include <fcntl.h>
 
+#include <iostream>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
@@ -25,6 +27,35 @@ std::string print_logs(logger& logging) {
   return result;
 }
 
+std::map<std::string_view, std::string_view> split_test_case(std::string_view source) {
+  std::string begin_module = "## Begin module";
+  std::string end_module = "## End module";
+
+  std::map<std::string_view, std::string_view> result;
+  std::size_t start = 0;
+  for (auto it = source.find(begin_module, start); it != std::string_view::npos; it = source.find(begin_module, start)) {
+    auto begin_quote = source.find_first_of("\"'", it);
+    if (begin_quote == std::string_view::npos) {
+      std::cerr << "Invalid module\n";
+      exit(1);
+    }
+    auto end_quote = source.find(source[begin_quote], begin_quote + 1);
+    if (end_quote == std::string_view::npos) {
+      std::cerr << "Invalid module name\n";
+      exit(1);
+    }
+    auto it_end = source.find(end_module, end_quote);
+    if (it_end == std::string_view::npos) {
+      std::cerr << "Invalid module end\n";
+      exit(1);
+    }
+    result[source.substr(begin_quote + 1, end_quote - begin_quote - 1)] = source.substr(it, it_end - it);
+    start = it_end + end_module.size();
+  }
+  result["main"] = source.substr(start);
+  return result;
+}
+
 TEST(Interpreter, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(2));
@@ -41,7 +72,7 @@ TEST(Interpreter, TestCase) {
   }
 
   logger logging;
-  frame* result = run_test(starlark_code, logging);
+  frame* result = run_test(split_test_case(starlark_code), logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);
 }
 
