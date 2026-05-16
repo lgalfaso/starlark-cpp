@@ -173,6 +173,7 @@ bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
       }
       return false;
     case printer_action::kPrintRecursion:
+    default:
       print.append("(...)");
       return false;
   }
