@@ -73,6 +73,32 @@ starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_
   return ctx.none_value();
 }
 
+starlark_obj* assert_ne_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!named_args.empty()) {
+    error_callback.add_error("assert_ne does not take any named arguments.");
+    return nullptr;
+  }
+  if (pos_args.size() != 2) {
+    error_callback.add_error("assert_ne takes only 2 positional arguments.");
+    return nullptr;
+  }
+  auto* actual = pos_args[0];
+  if (actual == nullptr) {
+    error_callback.add_error("invalid 'actual' parameter (nullptr).");
+    return nullptr;
+  }
+  auto* expected = pos_args[1];
+  if (expected == nullptr) {
+    error_callback.add_error("invalid 'expected' parameter (nullptr).");
+    return nullptr;
+  }
+  if (actual->equals(*expected)) {
+    error_callback.add_error(std::format("Actual: {}\nExpected: {}\n", actual->repr(), expected->repr()));
+    return nullptr;
+  }
+  return ctx.none_value();
+}
+
 status_or<runtime_options> parse_runtime_options(starlark_obj** error, starlark_obj** print, std::ostream& out, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   auto log2_max_bigint = ctx.options().log2_max_bigint;
   auto max_sequence_size = ctx.options().max_sequence_size;
