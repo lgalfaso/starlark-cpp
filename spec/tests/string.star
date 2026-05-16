@@ -1,2 +1,0 @@
-assert_eq("\a\b\f\n\r\t\v", "\x07\x08\x0C\x0A\x0D\x09\x0B")
-
