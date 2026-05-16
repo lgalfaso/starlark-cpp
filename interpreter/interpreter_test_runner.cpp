@@ -308,6 +308,7 @@ frame* run_test(std::map<std::string_view, std::string_view> programs, logger& l
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
   std::map<std::string, starlark_obj*, std::less<>> custom_binding;
   custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
+  custom_binding["assert_ne"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_ne_fn, "assert_eq");
   custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
   custom_binding["assert_succeed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_succeed_fn, "assert_succeed");
   custom_binding["assert_true"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_true_fn, "assert_true");
