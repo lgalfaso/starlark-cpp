@@ -1,0 +1,18 @@
+def foo(): pass
+bar = lambda: True
+
+assert_eq(type(None), "NoneType")
+assert_eq(type(0), "int")
+assert_eq(type(0.0), "float")
+assert_eq(type(""), "string")
+assert_eq(type("abc".elems()), "string.elems")
+assert_eq(type(b""), "bytes")
+assert_eq(type(b"abc".elems()), "bytes.elems")
+assert_eq(type([]), "list")
+assert_eq(type(()), "tuple")
+assert_eq(type({}), "dict")
+assert_eq(type(set()), "set")
+assert_eq(type(type), "builtin_function_or_method")
+assert_eq(type(foo), "function")
+assert_eq(type(bar), "function")
+assert_eq(type([].append), "builtin_function_or_method")

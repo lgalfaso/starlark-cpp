@@ -1,4 +1,3 @@
-assert_eq(type(None), "NoneType")
 assert_true(not None)
 assert_false(True if None else False)
 assert_succeed("{None: None}")
