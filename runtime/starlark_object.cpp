@@ -576,7 +576,7 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
 status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, int64_t len, error_fn& error_callback) const {
   /*
   This implementation does not fully folllow the same logic as Bazel and aligns better with Python.
-  The discrepancies are not significant and mostly impact the representation of `range` for some adge cases.
+  The discrepancies are not significant and mostly impact the representation of `range` for some edge cases.
   Eg, for `range(-3, -2, 1)[-2:-1:-3]`, Bazel returns `range(-3, -3, -3)` and Python returns `range(-4, -3, -3)`.
   These two ranges are equal, and the difference is only visible by calling `str`.
   */
