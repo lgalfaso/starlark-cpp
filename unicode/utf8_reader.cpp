@@ -58,60 +58,17 @@ char utf8_reader::peek(std::size_t delta) const {
   return input[input_pos + delta];
 }
 
-std::pair<char32_t, int> utf8_reader::peek_code_point() {
-  return read_code_point(false);
-}
-
-void utf8_reader::skip(std::size_t delta) {
-  if (delta >= pending()) {
-    input_pos = input.length();
-  } else {
-    input_pos += delta;
-  }
-}
-
-char32_t utf8_reader::read_code_point() {
-  return read_code_point(true).first;
-}
-
-bool utf8_reader::next(string_view candidate) {
-  if (pending() < candidate.length()) {
-    return false;
-  }
-  if (input.substr(input_pos, candidate.length()) == candidate) {
-    return true;
-  }
-  return false;
-}
-
-bool utf8_reader::capture(string_view candidate) {
-  if (pending() < candidate.length()) {
-    return false;
-  }
-  if (input.substr(input_pos, candidate.length()) == candidate) {
-    input_pos += candidate.length();
-    return true;
-  }
-  return false;
-}
-
-std::pair<char32_t, int> utf8_reader::read_code_point(bool move_forward) {
+std::pair<char32_t, int> utf8_reader::peek_code_point() const {
   if (empty()) {
     return std::make_pair(kReplacementCharacter, 0);
   }
   const unsigned char current_char = input[input_pos];
   int length = std::countl_one(current_char);
   if (length > pending()) {
-    if (move_forward) {
-      input_pos += 1;
-    }
     return std::make_pair(kReplacementCharacter, 1);
   }
   for (int i = 1; i < length; ++i) {
     if (!is_utf8_continue(input[input_pos + i])) {
-      if (move_forward) {
-        input_pos += i;
-      }
       return std::make_pair(kReplacementCharacter, i);
     }
   }
@@ -160,10 +117,42 @@ std::pair<char32_t, int> utf8_reader::read_code_point(bool move_forward) {
   if ((strict && (!ucd::is_assigned(candidate) || is_surrogate(candidate))) || !is_in_range(candidate)) {
     candidate = kReplacementCharacter;
   }
-  if (move_forward) {
-    input_pos += length;
-  }
   return std::make_pair(candidate, length);
+}
+
+void utf8_reader::skip(std::size_t delta) {
+  if (delta >= pending()) {
+    input_pos = input.length();
+  } else {
+    input_pos += delta;
+  }
+}
+
+char32_t utf8_reader::read_code_point() {
+  auto result = peek_code_point();
+  skip(result.second);
+  return result.first;
+}
+
+bool utf8_reader::next(string_view candidate) {
+  if (pending() < candidate.length()) {
+    return false;
+  }
+  if (input.substr(input_pos, candidate.length()) == candidate) {
+    return true;
+  }
+  return false;
+}
+
+bool utf8_reader::capture(string_view candidate) {
+  if (pending() < candidate.length()) {
+    return false;
+  }
+  if (input.substr(input_pos, candidate.length()) == candidate) {
+    input_pos += candidate.length();
+    return true;
+  }
+  return false;
 }
 
 }  // namespace unicode
