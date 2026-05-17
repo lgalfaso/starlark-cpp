@@ -47,7 +47,6 @@ using ::starlark::ucd::to_lower;
 using ::starlark::ucd::to_title;
 using ::starlark::ucd::to_upper;
 using ::starlark::unicode::replacement_character_utf8;
-using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 using ::starlark::unicode::utf8_reverse_reader;
 using ::starlark::unicode::word_break;
