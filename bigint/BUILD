@@ -32,6 +32,7 @@ cc_test(
         ":number_stream_for_test",
         "@googletest//:gtest_main",
     ],
+    shard_count = 48,
 )
 
 cc_test(

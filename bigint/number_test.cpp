@@ -4,6 +4,7 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -1349,6 +1350,13 @@ TEST(Number, ParseNumber) {
             parse_number("0o77777777777777777777777777777777777777777777777777777777777777777777777777777777", nullptr, 0).to_string(8, false));
   EXPECT_EQ("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
             parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", nullptr, 0).to_string(16, false));
+}
+
+TEST(Number, StreamOperator) {
+  std::basic_ostringstream<char> out;
+  auto n = parse_number("0x1234567890abcdefABCDEF", nullptr, 0);
+  out << n;
+  EXPECT_EQ(out.str(), "22007822917795467892608495");
 }
 
 }  // namespace
