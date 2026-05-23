@@ -392,6 +392,11 @@ TEST(Number, Shift) {
             "1234567890abcdef000000000"_number << -64);
   EXPECT_EQ("123456789"_number,
             "1234567890abcdef0000000000"_number << -68);
+
+  EXPECT_EQ("-1234567890abcdef"_number,
+            "-1234567890abcdef0"_number >> 4);
+  EXPECT_EQ("-1234567890abcdf"_number,
+            "-1234567890abcdef0"_number >> 8);
 }
 
 TEST(Number, GCD) {

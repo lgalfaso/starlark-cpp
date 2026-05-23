@@ -663,6 +663,7 @@ number& number::karatsuba(const number& other,
 }
 
 void number::shift(int pos) {
+  bool needs_fix = sign() && countr_zero() < pos;
   int big_steps = pos / kBitsInBase;
   pos -= big_steps * kBitsInBase;
   if (pos < 0) {
@@ -687,6 +688,9 @@ void number::shift(int pos) {
     values_.back() >>= pos;
   }
   normalize();
+  if (needs_fix) {
+    *this -= one();
+  }
 }
 
 number& number::operator>>=(int pos) {
