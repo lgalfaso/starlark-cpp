@@ -2,11 +2,13 @@
 
 #include <fcntl.h>
 
-#include <iostream>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
+
+#include <iostream>
+#include <map>
+#include <string>
 
 #include "interpreter/frame.hpp"
 #include "interpreter/interpreter_test_runner.hpp"
