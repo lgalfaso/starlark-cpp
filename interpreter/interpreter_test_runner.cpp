@@ -1,5 +1,7 @@
 // Copyright 2025-2026 Lucas Mirelmann
 
+#include "interpreter/interpreter_test_runner.hpp"
+
 #include <fcntl.h>
 
 #include <format>

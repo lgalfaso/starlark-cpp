@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef INTERPRETER_TEST_RUNNER_HPP_
-#define INTERPRETER_TEST_RUNNER_HPP_
+#ifndef INTERPRETER_INTERPRETER_TEST_RUNNER_HPP_
+#define INTERPRETER_INTERPRETER_TEST_RUNNER_HPP_
 
 #include <map>
 #include <string_view>
@@ -21,5 +21,5 @@ starlark::interpreter::frame* run_test(std::map<std::string_view, std::string_vi
 
 #pragma GCC visibility pop
 
-#endif  // INTERPRETER_TEST_RUNNER_HPP_
+#endif  // INTERPRETER_INTERPRETER_TEST_RUNNER_HPP_
 

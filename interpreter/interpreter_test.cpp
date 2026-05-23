@@ -6,6 +6,9 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
+#include <map>
+#include <string>
+
 #include "interpreter/frame.hpp"
 #include "interpreter/interpreter_test_runner.hpp"
 #include "third-party/defer.hpp"
