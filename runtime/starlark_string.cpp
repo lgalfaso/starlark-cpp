@@ -56,7 +56,10 @@ namespace starlark {
 namespace runtime {
 
 starlark_obj* starlark_string_fn_capitalize(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_string_fn_codepoint_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
@@ -73,9 +76,9 @@ starlark_obj* starlark_string_fn_join(starlark_obj* this_obj, const starlark_obj
 starlark_obj* starlark_string_fn_lower(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_lstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
-starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_removeprefix(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_removesuffix(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_rindex(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_string_fn_rpartition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
@@ -131,7 +134,10 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::me
   static const std::map<std::string, starlark_obj::fn*, std::less<>>* result =
     new std::map<std::string, starlark_obj::fn*, std::less<>>{
       {"capitalize", starlark_string_fn_capitalize},
+      {"codepoint_ords", starlark_string_fn_codepoint_ords},
+      {"codepoints", starlark_string_fn_codepoints},
       {"count", starlark_string_fn_count},
+      {"elem_ords", starlark_string_fn_elem_ords},
       {"elems", starlark_string_fn_elems},
       {"endswith", starlark_string_fn_endswith},
       {"find", starlark_string_fn_find},
@@ -148,9 +154,9 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_string::me
       {"lower", starlark_string_fn_lower},
       {"lstrip", starlark_string_fn_lstrip},
       {"partition", starlark_string_fn_partition},
-      {"replace", starlark_string_fn_replace},
       {"removeprefix", starlark_string_fn_removeprefix},
       {"removesuffix", starlark_string_fn_removesuffix},
+      {"replace", starlark_string_fn_replace},
       {"rfind", starlark_string_fn_rfind},
       {"rindex", starlark_string_fn_rindex},
       {"rpartition", starlark_string_fn_rpartition},
@@ -1472,13 +1478,37 @@ starlark_obj* starlark_string::removesuffix(std::string_view sub, context& ctx) 
 }
 
 starlark_obj* starlark_string::elems(context& ctx) const {
-  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, size, 1));
+  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, size, 1), false, false);
 }
 
-starlark_string::string_elems::string_elems(const starlark_string* str, range_state state) : str(str), state(state) {}
+starlark_obj* starlark_string::elem_ords(context& ctx) const {
+  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, size, 1), false, true);
+}
+
+starlark_obj* starlark_string::codepoints(context& ctx) const {
+  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, size, 1), true, false);
+}
+
+starlark_obj* starlark_string::codepoint_ords(context& ctx) const {
+  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, size, 1), true, true);
+}
+
+starlark_string::string_elems::string_elems(const starlark_string* str, range_state state, bool is_cp, bool ords) : str(str), state(state), is_cp(is_cp), ords(ords) {}
 
 std::string_view starlark_string::string_elems::type() const {
-  return "string.elems";
+  if (is_cp) {
+    if (ords) {
+      return "string.codepoint_ords";
+    } else {
+      return "string.codepoints";
+    }
+  } else {
+    if (ords) {
+      return "string.elem_ords";
+    } else {
+      return "string.elems";
+    }
+  }
 }
 
 bool starlark_string::string_elems::truthy() const {
@@ -1486,13 +1516,38 @@ bool starlark_string::string_elems::truthy() const {
 }
 
 bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  if (other.type() != starlark_types::string_t) {
-    error_callback.add_error(error_in_type_requires_type(type(), starlark_types::string_t, other.type()));
-    return false;
-  }
-  for (std::string::size_type i = 0; i < state.len; ++i) {
-    if (str->element_at(state.start + i * state.step) == other.as_string()) {
-      return true;
+  if (ords) {
+    int64_t value;
+    switch (other.numeric_type()) {
+      case starlark_numeric_type::kInt64:
+        value = other.as_int64();
+        break;
+      case starlark_numeric_type::kBigInt: {
+        auto& bvalue = other.as_bigint();
+        if (bvalue.sign() || bvalue.bit_size() > 21) {
+          return false;
+        }
+        value = bvalue.at(0);
+        break;
+      }
+      default:
+        error_callback.add_error(error_in_type_requires_type(type(), starlark_types::int_t, other.type()));
+        return false;
+    }
+    for (std::string::size_type i = 0; i < state.len; ++i) {
+      if (str->ord_element_at(state.start + i * state.step) == value) {
+        return true;
+      }
+    }
+  } else {
+    if (other.type() != starlark_types::string_t) {
+      error_callback.add_error(error_in_type_requires_type(type(), starlark_types::string_t, other.type()));
+      return false;
+    }
+    for (std::string::size_type i = 0; i < state.len; ++i) {
+      if (str->element_at(state.start + i * state.step) == other.as_string()) {
+        return true;
+      }
     }
   }
   return false;
@@ -1503,7 +1558,7 @@ int64_t starlark_string::string_elems::len(bool produce_error, error_fn& error_c
 }
 
 starlark_iterator* starlark_string::string_elems::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), str, state.start, state.step, state.len, ctx);
+  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), str, state.start, state.step, state.len, ords, ctx);
 }
 
 starlark_obj* starlark_string::string_elems::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -1511,7 +1566,11 @@ starlark_obj* starlark_string::string_elems::index(const starlark_obj& other, co
   if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), str->element_at(state.start + (*idx) * state.step));
+  if (ords) {
+    return create_integer(str->ord_element_at(state.start + (*idx) * state.step), ctx);
+  } else {
+    return Arena::Create<starlark_string>(&ctx.arena(), str->element_at(state.start + (*idx) * state.step));
+  }
 }
 
 starlark_obj* starlark_string::string_elems::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
@@ -1519,7 +1578,7 @@ starlark_obj* starlark_string::string_elems::slice_range(const starlark_obj& sta
   if (!slice_result.ok()) {
     return nullptr;
   }
-  return Arena::Create<string_elems>(&ctx.arena(), str, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)));
+  return Arena::Create<string_elems>(&ctx.arena(), str, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)), is_cp, ords);
 }
 
 bool starlark_string::string_elems::inner_repr(printer& print, printer_action action) const {
@@ -1534,7 +1593,19 @@ bool starlark_string::string_elems::inner_repr(printer& print, printer_action ac
       append_for_repr(result, str->element_at(i));
     }
   }
-  result += "\".elems()";
+  if (is_cp) {
+    if (ords) {
+      result += "\".codepoint_ords()";
+    } else {
+      result += "\".codepoints()";
+    }
+  } else {
+    if (ords) {
+      result += "\".elem_ords()";
+    } else {
+      result += "\".elems()";
+    }
+  }
   print.append(result);
   return false;
 }
@@ -1559,8 +1630,8 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_string::string_elems:
   return -1;
 }
 
-starlark_string::starlark_elems_iterator::starlark_elems_iterator(const starlark_string* str, int64_t current_pos, int64_t step, int64_t remaining, context& ctx)
-  : str(str), current_pos(current_pos), step(step), remaining(remaining), ctx(ctx) {}
+starlark_string::starlark_elems_iterator::starlark_elems_iterator(const starlark_string* str, int64_t current_pos, int64_t step, int64_t remaining, bool ords, context& ctx)
+  : str(str), current_pos(current_pos), step(step), remaining(remaining), ords(ords), ctx(ctx) {}
 
 
 bool starlark_string::starlark_elems_iterator::has_next() const {
@@ -1568,7 +1639,12 @@ bool starlark_string::starlark_elems_iterator::has_next() const {
 }
 
 starlark_obj* starlark_string::starlark_elems_iterator::next() {
-  auto result = Arena::Create<starlark_string>(&ctx.arena(), str->element_at(current_pos));
+  starlark_obj* result;
+  if (ords) {
+    result = create_integer(str->ord_element_at(current_pos), ctx);
+  } else {
+    result = Arena::Create<starlark_string>(&ctx.arena(), str->element_at(current_pos));
+  }
   current_pos += step;
   remaining--;
   return result;
@@ -1629,6 +1705,10 @@ std::string_view starlark_string::element_at(std::size_t element) const {
   reader.read_code_point();
   std::string_view mirror = value;
   return mirror.substr(start, reader.pos() - start);
+}
+
+char32_t starlark_string::ord_element_at(std::size_t element) const {
+  return utf8_reader(element_at(element), false, false).read_code_point();
 }
 
 namespace {
@@ -1708,6 +1788,33 @@ starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_ob
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
   return static_cast<starlark_string*>(this_obj)->elems(ctx);
+}
+
+starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!no_arg(pos_args, named_args, error_callback, "string.elem_ords").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->elem_ords(ctx);
+}
+
+starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!no_arg(pos_args, named_args, error_callback, "string.codepoints").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->codepoints(ctx);
+}
+
+starlark_obj* starlark_string_fn_codepoint_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!no_arg(pos_args, named_args, error_callback, "string.codepoint_ords").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::string_t);
+  return static_cast<starlark_string*>(this_obj)->codepoint_ords(ctx);
 }
 
 starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

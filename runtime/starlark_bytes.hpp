@@ -38,6 +38,7 @@ class starlark_bytes : public starlark_obj {
 
   int64_t count(std::string_view sub, int64_t start, int64_t end) const;
   starlark_obj* elems(context& ctx) const;
+  starlark_obj* elem_ords(context& ctx) const;
   bool endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const;
   int64_t find(std::string_view sub, int64_t start, int64_t end) const;
   starlark_obj* join(const std::vector<std::string_view>& elements, context& ctx) const;
@@ -59,7 +60,7 @@ class starlark_bytes : public starlark_obj {
 
   class bytes_elems : public starlark_obj {
    public:
-    bytes_elems(const starlark_bytes* bytes, range_state state);
+    bytes_elems(const starlark_bytes* bytes, range_state state, bool ords);
     std::string_view type() const override;
     bool truthy() const override;
 
@@ -77,11 +78,12 @@ class starlark_bytes : public starlark_obj {
    private:
     const starlark_bytes* bytes;
     const range_state state;
+    const bool ords;
   };
 
   class starlark_elems_iterator : public starlark_iterator {
    public:
-    starlark_elems_iterator(const starlark_bytes* bytes, int64_t current_pos, int64_t step, int64_t remaining, context& ctx);
+    starlark_elems_iterator(const starlark_bytes* bytes, int64_t current_pos, int64_t step, int64_t remaining, bool ords, context& ctx);
     bool has_next() const override;
     starlark_obj* next() override;
     void end_iterator() override;
@@ -91,6 +93,7 @@ class starlark_bytes : public starlark_obj {
     int64_t current_pos;
     const int64_t step;
     int64_t remaining;
+    const bool ords;
     context& ctx;
   };
 

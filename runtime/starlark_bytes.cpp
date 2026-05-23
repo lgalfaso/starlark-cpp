@@ -34,6 +34,7 @@ namespace runtime {
 
 starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
+starlark_obj* starlark_bytes_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_bytes_fn_find(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 starlark_obj* starlark_bytes_fn_index(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
@@ -67,6 +68,7 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_bytes::met
     new std::map<std::string, starlark_obj::fn*, std::less<>>{
       {"count", starlark_bytes_fn_count},
       {"elems", starlark_bytes_fn_elems},
+      {"elem_ords", starlark_bytes_fn_elem_ords},
       {"endswith", starlark_bytes_fn_endswith},
       {"find", starlark_bytes_fn_find},
       {"index", starlark_bytes_fn_index},
@@ -320,7 +322,11 @@ int64_t starlark_bytes::count(std::string_view sub, int64_t start, int64_t end) 
 }
 
 starlark_obj* starlark_bytes::elems(context& ctx) const {
-  return Arena::Create<starlark_bytes::bytes_elems>(&ctx.arena(), this, calculate_state(0, value.size(), 1));
+  return Arena::Create<starlark_bytes::bytes_elems>(&ctx.arena(), this, calculate_state(0, value.size(), 1), false);
+}
+
+starlark_obj* starlark_bytes::elem_ords(context& ctx) const {
+  return Arena::Create<starlark_bytes::bytes_elems>(&ctx.arena(), this, calculate_state(0, value.size(), 1), true);
 }
 
 bool starlark_bytes::endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const {
@@ -770,6 +776,15 @@ starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj
   return static_cast<starlark_bytes*>(this_obj)->elems(ctx);
 }
 
+starlark_obj* starlark_bytes_fn_elem_ords(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!no_arg(pos_args, named_args, error_callback, "bytes.elem_ords").ok()) {
+    return nullptr;
+  }
+  assert(this_obj != nullptr);
+  assert(this_obj->type() == starlark_types::bytes_t);
+  return static_cast<starlark_bytes*>(this_obj)->elem_ords(ctx);
+}
+
 starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!no_named_args(named_args, error_callback, "bytes.endswith").ok() ||
       !min_args(pos_args, error_callback, "endswith", 1).ok() ||
@@ -1090,10 +1105,14 @@ starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj
   return static_cast<starlark_bytes*>(this_obj)->strip(*cutset, ctx);
 }
 
-starlark_bytes::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state) : bytes(bytes), state(state) {}
+starlark_bytes::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state, bool ords) : bytes(bytes), state(state), ords(ords) {}
 
 std::string_view starlark_bytes::bytes_elems::type() const {
-  return "bytes.elems";
+  if (ords) {
+    return "bytes.elem_ords";
+  } else {
+    return "bytes.elems";
+  }
 }
 
 bool starlark_bytes::bytes_elems::truthy() const {
@@ -1122,7 +1141,7 @@ int64_t starlark_bytes::bytes_elems::len(bool produce_error, error_fn& error_cal
 }
 
 starlark_iterator* starlark_bytes::bytes_elems::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), bytes, state.start, state.step, state.len, ctx);
+  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), bytes, state.start, state.step, state.len, ords, ctx);
 }
 
 starlark_obj* starlark_bytes::bytes_elems::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -1130,7 +1149,11 @@ starlark_obj* starlark_bytes::bytes_elems::index(const starlark_obj& other, cont
   if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(state.start + (*idx) * state.step, 1));
+  if (ords) {
+    return create_integer(static_cast<unsigned char>(bytes->value[state.start + (*idx) * state.step]), ctx);
+  } else {
+    return Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(state.start + (*idx) * state.step, 1));
+  }
 }
 
 starlark_obj* starlark_bytes::bytes_elems::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
@@ -1138,7 +1161,7 @@ starlark_obj* starlark_bytes::bytes_elems::slice_range(const starlark_obj& start
   if (!slice_result.ok()) {
     return nullptr;
   }
-  return Arena::Create<bytes_elems>(&ctx.arena(), bytes, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)));
+  return Arena::Create<bytes_elems>(&ctx.arena(), bytes, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)), ords);
 }
 
 bool starlark_bytes::bytes_elems::inner_repr(printer& print, printer_action action) const {
@@ -1153,7 +1176,11 @@ bool starlark_bytes::bytes_elems::inner_repr(printer& print, printer_action acti
       write_printable(bytes->value[i], /*allow_non_ascii_printable=*/ false, result);
     }
   }
-  result += "\".elems()";
+  if (ords) {
+    result += "\".elem_ords()";
+  } else {
+    result += "\".elems()";
+  }
   print.append(result);
   return false;
 }
@@ -1178,16 +1205,20 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::bytes_elems::i
   return -1;
 }
 
-starlark_bytes::starlark_elems_iterator::starlark_elems_iterator(const starlark_bytes* bytes, int64_t current_pos, int64_t step, int64_t remaining, context& ctx)
-  : bytes(bytes), current_pos(current_pos), step(step), remaining(remaining), ctx(ctx) {}
-
+starlark_bytes::starlark_elems_iterator::starlark_elems_iterator(const starlark_bytes* bytes, int64_t current_pos, int64_t step, int64_t remaining, bool ords, context& ctx)
+  : bytes(bytes), current_pos(current_pos), step(step), remaining(remaining), ords(ords), ctx(ctx) {}
 
 bool starlark_bytes::starlark_elems_iterator::has_next() const {
   return remaining > 0;
 }
 
 starlark_obj* starlark_bytes::starlark_elems_iterator::next() {
-  auto result = Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(current_pos, 1));
+  starlark_obj* result;
+  if (ords) {
+    result = create_integer(static_cast<unsigned char>(bytes->value[current_pos]), ctx);
+  } else {
+    result = Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(current_pos, 1));
+  }
   current_pos += step;
   remaining--;
   return result;

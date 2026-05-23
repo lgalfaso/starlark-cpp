@@ -75,10 +75,13 @@ class starlark_string : public starlark_obj {
   starlark_obj* removeprefix(std::string_view sub, context& ctx);
   starlark_obj* removesuffix(std::string_view sub, context& ctx);
   starlark_obj* elems(context& ctx) const;
+  starlark_obj* elem_ords(context& ctx) const;
+  starlark_obj* codepoints(context& ctx) const;
+  starlark_obj* codepoint_ords(context& ctx) const;
 
   class string_elems : public starlark_obj {
    public:
-    string_elems(const starlark_string* str, range_state state);
+    string_elems(const starlark_string* str, range_state state, bool is_cp, bool ords);
     std::string_view type() const override;
     bool truthy() const override;
 
@@ -96,11 +99,13 @@ class starlark_string : public starlark_obj {
    private:
     const starlark_string* str;
     const range_state state;
+    const bool is_cp;
+    const bool ords;
   };
 
   class starlark_elems_iterator : public starlark_iterator {
    public:
-    starlark_elems_iterator(const starlark_string* str, int64_t current_pos, int64_t step, int64_t remaining, context& ctx);
+    starlark_elems_iterator(const starlark_string* str, int64_t current_pos, int64_t step, int64_t remaining, bool ords, context& ctx);
     bool has_next() const override;
     starlark_obj* next() override;
     void end_iterator() override;
@@ -108,8 +113,9 @@ class starlark_string : public starlark_obj {
    private:
     const starlark_string* str;
     int64_t current_pos;
-    const int64_t step;
+    const const int64_t step;
     int64_t remaining;
+    const bool ords;
     context& ctx;
   };
 
@@ -124,6 +130,7 @@ class starlark_string : public starlark_obj {
   static const std::vector<std::string>& attributes();
   void build_index();
   std::string_view element_at(std::size_t element) const;
+  char32_t ord_element_at(std::size_t element) const;
 
   std::string::size_type size;
   std::string value;
