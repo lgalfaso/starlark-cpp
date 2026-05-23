@@ -86,6 +86,14 @@ TEST(UcdTest, IsXIdContinue) {
   }
 }
 
+TEST(UcdTest, All_XIdStart_Are_XIdContinue) {
+  for (int i = 0; i <= max_unicode; ++i) {
+    if (starlark::ucd::is_XID_Start(i)) {
+      EXPECT_TRUE(starlark::ucd::is_XID_Continue(i));
+    }
+  }
+}
+
 TEST(UcdTest, IsSpace) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(4));
