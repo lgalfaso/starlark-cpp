@@ -180,6 +180,7 @@ TEST(StarlarkFloat, OrderVsFloat) {
   error_handler error_callback;
 
   cmp_helper(starlark_float(-std::numeric_limits<double>::infinity()).cmp(starlark_float(-1e50), "cmp", error_callback), Lt(0));
+  cmp_helper(starlark_float(-std::numeric_limits<double>::infinity()).cmp(starlark_float(-std::numeric_limits<double>::infinity()), "cmp", error_callback), Eq(0));
   cmp_helper(starlark_float(-1e50).cmp(starlark_float(-1), "cmp", error_callback), Lt(0));
   cmp_helper(starlark_float(-1).cmp(starlark_float(-1e-50), "cmp", error_callback), Lt(0));
   cmp_helper(starlark_float(-1e-50).cmp(starlark_float(0.0), "cmp", error_callback), Lt(0));
