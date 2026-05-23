@@ -312,9 +312,14 @@ double to_double(const number& value) {
     double result = static_cast<double>(value.at(0));
     return value.sign() ? -result : result;
   }
-  // We are taking one extra digit to make sure that the value is rounded up if the last bit is a one.
-  auto digits = std::numeric_limits<double>::digits + 1;
-  double relevant_digits = value.bits(bit_size - digits, digits);
+  // We are taking two extra bits to make sure that the value is rounded up if the last bit is a one.
+  auto digits = std::numeric_limits<double>::digits + 2;
+  auto relevant_bits = value.bits(bit_size - digits, digits);
+  // And if there is any `1` in the remaining bits, then add one more.
+  if ((relevant_bits & 3) == 2 && value.countr_zero() + digits < bit_size) {
+    relevant_bits++;
+  }
+  double relevant_digits = relevant_bits;
   double unsigned_result = std::ldexp(relevant_digits, bit_size - digits);
   return value.sign() ? -unsigned_result : unsigned_result;
 }
