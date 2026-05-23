@@ -276,29 +276,16 @@ starlark_obj* starlark_fn_chr(starlark_obj* this_obj, const starlark_obj::pos_ar
   std::string result;
   auto* value = pos_args.front();
   switch (value->numeric_type()) {
-    case starlark_numeric_type::kInt64: {
-      auto ivalue = value->as_int64();
-      if (ivalue < 0 || 0x10ffff < ivalue) {
-        error_callback.add_error(error_unicode_in_range());
+    case starlark_numeric_type::kInt64:
+      if (!chr_fn(result, value->as_int64(), error_callback).ok()) {
         return nullptr;
       }
-      utf8_encode_code_point(ivalue, result, false, true);
       break;
-    }
-    case starlark_numeric_type::kBigInt: {
-      const auto& bvalue = value->as_bigint();
-      if (bvalue.sign() || bvalue.bit_size() > 21) {
-        error_callback.add_error(error_unicode_in_range());
+    case starlark_numeric_type::kBigInt:
+      if (!chr_fn(result, value->as_bigint(), error_callback).ok()) {
         return nullptr;
       }
-      auto ivalue = bvalue.at(0);
-      if (0x10ffff < ivalue) {
-        error_callback.add_error(error_unicode_in_range());
-        return nullptr;
-      }
-      utf8_encode_code_point(ivalue, result, false, true);
       break;
-    }
     default:
       error_callback.add_error(error_interpreted_as_integer(value->type()));
       return nullptr;

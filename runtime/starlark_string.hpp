@@ -132,6 +132,8 @@ class starlark_string : public starlark_obj {
 };
 
 void append_for_repr(std::string& output, std::string_view input);
+starlark::result::status chr_fn(std::string& output, int64_t input, error_fn& error_callback);
+starlark::result::status chr_fn(std::string& output, const starlark::bigint::number& input, error_fn& error_callback);
 
 }  // namespace runtime
 }  // namespace starlark

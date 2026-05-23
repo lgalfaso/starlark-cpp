@@ -47,6 +47,7 @@ using ::starlark::ucd::to_lower;
 using ::starlark::ucd::to_title;
 using ::starlark::ucd::to_upper;
 using ::starlark::unicode::replacement_character_utf8;
+using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 using ::starlark::unicode::utf8_reverse_reader;
 using ::starlark::unicode::word_break;
@@ -99,6 +100,29 @@ void append_for_repr(std::string& output, std::string_view input) {
       reader.skip();
     }
   }
+}
+
+status chr_fn(std::string& output, int64_t input, error_fn& error_callback) {
+  if (input < 0 || 0x10ffff < input) {
+    error_callback.add_error(error_unicode_in_range());
+    return error_status();
+  }
+  utf8_encode_code_point(input, output, false, true);
+  return ok_status();
+}
+
+status chr_fn(std::string& output, const starlark::bigint::number& input, error_fn& error_callback) {
+  if (input.sign() || input.bit_size() > 21) {
+    error_callback.add_error(error_unicode_in_range());
+    return error_status();
+  }
+  auto ivalue = input.at(0);
+  if (0x10ffff < ivalue) {
+    error_callback.add_error(error_unicode_in_range());
+    return error_status();
+  }
+  utf8_encode_code_point(ivalue, output, false, true);
+  return ok_status();
 }
 
 constexpr std::string::size_type starlark_string::index_step;
@@ -324,7 +348,38 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
     case 'r':
       result += element.repr();
       break;
+    case 'c':
+      switch (element.numeric_type()) {
+        case starlark_numeric_type::kInt64:
+          if (!chr_fn(result, element.as_int64(), error_callback).ok()) {
+            return error_status();
+          }
+          break;
+        case starlark_numeric_type::kBigInt:
+          if (!chr_fn(result, element.as_bigint(), error_callback).ok()) {
+            return error_status();
+          }
+          break;
+        case starlark_numeric_type::kNotNumeric: {
+          if (element.type() != starlark_types::string_t) {
+            error_callback.add_error(error_integer_or_unicode_character(element.type()));
+            return error_status();
+          }
+          auto len = element.len(false, error_callback);
+          if (len != 1) {
+            error_callback.add_error(error_integer_or_unicode_character_type_and_length(element.type(), len));
+            return error_status();
+          }
+          result += element.as_string();
+          break;
+        }
+        default:
+          error_callback.add_error(error_integer_or_unicode_character(element.type()));
+          return error_status();
+      }
+      break;
     case 'd':
+    case 'i':
     case 'o':
     case 'x':
     case 'X': {
@@ -346,6 +401,7 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
       }
       switch (format) {
         case 'd':
+        case 'i':
           switch (n_element->numeric_type()) {
             case starlark_numeric_type::kInt64:
             default:

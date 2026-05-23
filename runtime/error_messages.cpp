@@ -302,6 +302,14 @@ std::string error_format_real_is_required(char format, std::string_view type) {
   return std::format("TypeError: %{} format: a real number is required, not {}", format, type);
 }
 
+std::string error_integer_or_unicode_character(std::string_view type) {
+  return std::format("TypeError: %c requires an int or a unicode character, not {}", type);
+}
+
+std::string error_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len) {
+  return std::format("TypeError: %c requires an int or a unicode character, not {} of length {}", type, len);
+}
+
 std::string error_integer_or_like(std::string_view type, std::string_view other_type) {
   return std::format("TypeError: argument should be integer or {}-like object, not '{}'", type, other_type);
 }

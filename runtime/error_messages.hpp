@@ -94,6 +94,8 @@ std::string_view error_not_all_arguments_converted_during_string_formatting();
 std::string error_unsupported_format_character(char c, std::size_t pos);
 std::string error_format_integer_is_required(char format, std::string_view type);
 std::string error_format_real_is_required(char format, std::string_view type);
+std::string error_integer_or_unicode_character(std::string_view type);
+std::string error_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len);
 
 std::string error_integer_or_like(std::string_view type, std::string_view other_type);
 std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type);

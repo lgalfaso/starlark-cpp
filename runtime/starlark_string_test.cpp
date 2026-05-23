@@ -970,6 +970,9 @@ TEST(StarlarkString, Interpolation) {
   starlark_tuple tuple_tuple(1);
   tuple_tuple.add(&tuple);
   starlark_integer small_int(123);
+  starlark_integer mid_int(123456789);
+  starlark_bigint small_big_int(parse_number("123", nullptr, 0));
+  starlark_bigint mid_big_int(parse_number("1234567", nullptr, 0));
   starlark_bigint big_int(parse_number("123456789012345678901234567890", nullptr, 0));
   starlark_bigint huge_int(number::one() << 2000);
   starlark_float big_float(1e100);
@@ -977,6 +980,8 @@ TEST(StarlarkString, Interpolation) {
   starlark_float minus_inf(std::strtod("-inf", nullptr));
   starlark_float plus_nan(std::strtod("+nan", nullptr));
   starlark_float minus_nan(std::strtod("-nan", nullptr));
+  starlark_string char_string("a"sv);
+  starlark_string char_unicode_string("Ω"sv);
   starlark_string small_string("abc"sv);
   starlark_list list_one_two(2);
   Arena arena;
@@ -991,6 +996,24 @@ TEST(StarlarkString, Interpolation) {
   test("abc%sdef%sghi", &tuple_one_two, "abc1def2ghi");
   test(" XXX %r XXX", &tuple_tuple, " XXX () XXX");
 
+  test("%c", &small_int, "{");
+  test("%c", &small_big_int, "{");
+  test_with_error("%c", &mid_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", &mid_big_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", &big_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", &huge_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", & big_float, "TypeError: %c requires an int or a unicode character, not float");
+  test_with_error("%c", &plus_inf, "TypeError: %c requires an int or a unicode character, not float");
+  test_with_error("%c", &minus_inf, "TypeError: %c requires an int or a unicode character, not float");
+  test_with_error("%c", &plus_nan, "TypeError: %c requires an int or a unicode character, not float");
+  test_with_error("%c", &minus_nan, "TypeError: %c requires an int or a unicode character, not float");
+  test_with_error("%c", ctx.empty_string(), "TypeError: %c requires an int or a unicode character, not string of length 0");
+  test_with_error("%c", ctx.empty_bytes(), "TypeError: %c requires an int or a unicode character, not bytes");
+  test_with_error("%c", ctx.false_value(), "TypeError: %c requires an int or a unicode character, not bool");
+  test("%c", &char_string, "a");
+  test("%c", &char_unicode_string, "Ω");
+  test_with_error("%c", &small_string, "TypeError: %c requires an int or a unicode character, not string of length 3");
+
   test("%d", &small_int, "123");
   test("%d", &big_int, "123456789012345678901234567890");
   test("%d", &huge_int, "114813069527425452423283320117768198402231770208869520047764273682576626139237031385665948631650626991844596463898746277344711896086305533142593135616665318539129989145312280000688779148240044871428926990063486244781615463646388363947317026040466353970904996558162398808944629605623311649536164221970332681344168908984458505602379484807914058900934776500429002716706625830522008132236281291761267883317206598995396418127021779858404042159853183251540889433902091920554957783589672039160081957216630582755380425583726015528348786419432054508915275783882625175435528800822842770817965453762184851149029376");
@@ -1000,6 +1023,16 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%d", &plus_nan, "ValueError: cannot convert float NaN to integer");
   test_with_error("%d", &minus_nan, "ValueError: cannot convert float NaN to integer");
   test_with_error("%d", &small_string, "TypeError: %d format: an integer is required, not string");
+
+  test("%i", &small_int, "123");
+  test("%i", &big_int, "123456789012345678901234567890");
+  test("%i", &huge_int, "114813069527425452423283320117768198402231770208869520047764273682576626139237031385665948631650626991844596463898746277344711896086305533142593135616665318539129989145312280000688779148240044871428926990063486244781615463646388363947317026040466353970904996558162398808944629605623311649536164221970332681344168908984458505602379484807914058900934776500429002716706625830522008132236281291761267883317206598995396418127021779858404042159853183251540889433902091920554957783589672039160081957216630582755380425583726015528348786419432054508915275783882625175435528800822842770817965453762184851149029376");
+  test("%i", & big_float, "10000000000000000159028911097599180468360808563945281389781327557747838772170381060813469985856815104");
+  test_with_error("%i", &plus_inf, "OverflowError: cannot convert float infinity to integer");
+  test_with_error("%i", &minus_inf, "OverflowError: cannot convert float infinity to integer");
+  test_with_error("%i", &plus_nan, "ValueError: cannot convert float NaN to integer");
+  test_with_error("%i", &minus_nan, "ValueError: cannot convert float NaN to integer");
+  test_with_error("%i", &small_string, "TypeError: %i format: an integer is required, not string");
 
   test("%o", &small_int, "173");
   test("%o", &big_int, "143564417755415637016711617605322");
