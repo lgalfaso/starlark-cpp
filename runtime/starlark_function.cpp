@@ -319,6 +319,7 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  // TODO(lmirelmann): The parameter `start` could be a named parameter or a positional parameter.
   starlark_obj* start = nullptr;
   for (auto& [key, value] : named_args) {
     if (key == "start") {
@@ -470,6 +471,7 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  // TODO(lmirelmann): The parameter `base` can be a named or positional parameter.
   if (!no_named_args(named_args, error_callback, starlark_built_in_functions::int_f).ok()) {
     return nullptr;
   }
