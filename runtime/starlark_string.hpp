@@ -113,7 +113,7 @@ class starlark_string : public starlark_obj {
    private:
     const starlark_string* str;
     int64_t current_pos;
-    const const int64_t step;
+    const int64_t step;
     int64_t remaining;
     const bool ords;
     context& ctx;
