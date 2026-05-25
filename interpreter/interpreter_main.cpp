@@ -60,6 +60,8 @@ int main(int argc, char* argv[]) {
 
   if (runner.run(loader, module_name, grammar_options{}, runtime_options{}, logging) == nullptr) {
     print_logs(logging);
+    return 1;
   }
+  return 0;
 }
 
