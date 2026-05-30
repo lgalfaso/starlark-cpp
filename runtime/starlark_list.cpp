@@ -575,7 +575,7 @@ starlark_obj* starlark_list_fn_index(starlark_obj* this_obj, const starlark_obj:
     return nullptr;
   }
   int64_t start = 0;
-  int64_t end = -1;
+  int64_t end = std::numeric_limits<int64_t>::max();
   if (pos_args.size() >= 2) {
     if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback).ok()) {
       return nullptr;
