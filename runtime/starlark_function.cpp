@@ -567,6 +567,10 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       }
     }
     auto svalue = value->as_string();
+    if (svalue.empty()) {
+      error_callback.add_error(error_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
+      return nullptr;
+    }
     const char* end;
     auto result = parse_number(svalue, &end, base);
     if (end != (&svalue.back() + 1)) {

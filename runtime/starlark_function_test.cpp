@@ -2394,6 +2394,20 @@ TEST(StarlarkInt, FromStringNotAbleToParseInFull) {
   EXPECT_EQ("ValueError: invalid literal for int() with base 10: '123abc'", error_callback.messages[0]);
 }
 
+TEST(StarlarkInt, FromStringEmpty) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.empty_string());
+
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("ValueError: invalid literal for int() with base 10: ''", error_callback.messages[0]);
+}
+
 TEST(StarlarkInt, FromList) {
   starlark_list list(0);
   Arena arena;
