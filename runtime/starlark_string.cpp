@@ -550,13 +550,13 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
           names.emplace_back();
           names.back() += format.substr(start, reader.pos() - start);
           state = state_t::kNumber;
-        } else if (cp == '_' || ucd::is_XID_Start(cp)) {
+        } else if (cp == '!' || cp == '.' || cp == ':' || cp == '[') {  // https://github.com/python/cpython/issues/150626
+          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          return error_status();
+        } else {
           names.emplace_back();
           names.back() += format.substr(start, reader.pos() - start);
           state = state_t::kName;
-        } else {
-          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
-          return error_status();
         }
         break;
       case state_t::kLastElementWasCloseCurlyBraces:
@@ -572,11 +572,11 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
         if (cp == '}') {
           parts.emplace_back();
           state = state_t::kText;
-        } else if (ucd::is_XID_Continue(cp)) {
-          names.back() += cp;
-        } else {
+        } else if (cp == '!' || cp == '.' || cp == ':' || cp == '[' || cp == '{') {  // https://github.com/python/cpython/issues/150626
           error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
           return error_status();
+        } else {
+          names.back() += cp;
         }
         break;
       case state_t::kNumber:

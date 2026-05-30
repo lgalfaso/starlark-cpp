@@ -1190,11 +1190,13 @@ TEST(StarlarkString, Format) {
   starlark_obj::pos_args_t with_zero_one;
   starlark_obj::named_args_t empty_names;
   starlark_obj::named_args_t with_abc;
+  starlark_obj::named_args_t with_dollar;
 
   with_zero.push_back(ctx.zero());
   with_zero_one.push_back(ctx.zero());
   with_zero_one.push_back(ctx.one());
   with_abc.insert("abc", &def);
+  with_dollar.insert("$", &def);
 
   test("{}", with_zero, empty_names, "0");
   test("abc{}def", with_zero, empty_names, "abc0def");
@@ -1213,7 +1215,8 @@ TEST(StarlarkString, Format) {
   test_with_error("{0}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
   test_with_error("{18446744073709551616}", empty_pos, empty_names, "IndexError: Replacement index 18446744073709551616 out of range for positional args tuple");
   test_with_error("{abc}", empty_pos, empty_names, "KeyError: abc");
-  test_with_error("{$}", empty_pos, empty_names, "ValueError: unexpected '$' in field name");
+  test("{$}", empty_pos, with_dollar, "def");
+  test_with_error("{:}", empty_pos, empty_names, "ValueError: unexpected ':' in field name");
   test_with_error("{a!}", empty_pos, empty_names, "ValueError: unexpected '!' in field name");
   test_with_error("{}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
   test_with_error("{}{0}", empty_pos, empty_names, "ValueError: cannot switch from manual field specification to automatic field numbering");
