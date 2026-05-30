@@ -103,7 +103,9 @@ status_or<int> order_comparator::run(std::string_view op, error_fn& error_callba
     tasks.pop_back();
     switch (top.type) {
       case pending_task_type::kEvaluate:
-        top.lhs->inner_cmp(*this, top.rhs, op, error_callback);
+        if (executed_tasks.insert(top).second) {
+          top.lhs->inner_cmp(*this, top.rhs, op, error_callback);
+        }
         break;
       case pending_task_type::kLessThan:
         return status_or<int>(-1);
@@ -114,6 +116,14 @@ status_or<int> order_comparator::run(std::string_view op, error_fn& error_callba
     }
   }
   return status_or<int>(0);
+}
+
+size_t order_comparator::pending_task_hash::operator()(const pending_task task) const {
+  return hash_fn(task.lhs) ^ hash_fn(task.rhs);
+}
+
+bool order_comparator::pending_task_equals_to::operator()(const pending_task& lhs, const pending_task& rhs) const {
+  return (lhs.lhs == rhs.lhs && lhs.rhs == rhs.rhs);
 }
 
 starlark_iterator::~starlark_iterator() {}

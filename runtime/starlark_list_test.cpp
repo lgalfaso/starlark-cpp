@@ -302,6 +302,38 @@ TEST(StarlarkList, Order) {
   cmp_helper(list5.cmp(list5, "cmp", error_callback), Eq(0));
 }
 
+TEST(StarlarkList, OrderCycle) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_list list(3);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  list.append(&zero, ctx, error_callback);
+  list.append(&list, ctx, error_callback);
+  list.append(&one, ctx, error_callback);
+  cmp_helper(list.cmp(list, "cmp", error_callback), Eq(0));
+}
+
+TEST(StarlarkList, OrderCycleBis) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_list list1(3);
+  starlark_list list2(3);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  list1.append(&zero, ctx, error_callback);
+  list1.append(&list2, ctx, error_callback);
+  list1.append(&one, ctx, error_callback);
+  list2.append(&zero, ctx, error_callback);
+  list2.append(&list1, ctx, error_callback);
+  list2.append(&one, ctx, error_callback);
+  cmp_helper(list1.cmp(list2, "cmp", error_callback), Eq(0));
+}
+
 TEST(StarlarkList, OrderError) {
   error_handler error_callback;
   starlark_integer one(1);
