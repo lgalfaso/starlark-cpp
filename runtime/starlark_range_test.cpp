@@ -149,6 +149,8 @@ TEST(StarlarkRange, Equals) {
   test(0, 99, 2, 0, 100, 2, true);
   test(0, 100, 2, 0, 101, 2, false);
   test(0, 0, 2, 100, 100, 2, true);
+  test(0, 5, 10, 0, 5, 11, true);
+  test(0, 5, 1, 1, 6, 1, false);
   EXPECT_FALSE(starlark_range(0, 100, 1).equals(starlark_none()));
 }
 

@@ -48,10 +48,19 @@ bool starlark_range::inner_equals(equals_comparator& comp, const starlark_obj* o
     return false;
   }
   auto* rother = static_cast<const starlark_range*>(other);
-  if (state.len == 0) {
-    return rother->state.len == 0;
+  if (state.len != rother->state.len) {
+    return false;
   }
-  return state.start == rother->state.start && state.step == rother->state.step && state.len == rother->state.len;
+  if (state.len == 0) {
+    return true;
+  }
+  if (state.start != rother->state.start) {
+    return false;
+  }
+  if (state.len == 1) {
+    return true;
+  }
+  return state.step == rother->state.step;
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_range::inner_hash() const {
