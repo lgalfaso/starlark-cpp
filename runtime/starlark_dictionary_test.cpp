@@ -276,6 +276,33 @@ TEST(StarlarkDictionary, InsertFreezed) {
   EXPECT_THAT(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
 }
 
+TEST(StarlarkDictionary, Membership) {
+  starlark_dictionary dict;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  dict.insert(&zero, &zero, error_callback);
+
+  EXPECT_TRUE(dict.binary_in(zero, error_callback));
+  EXPECT_FALSE(dict.binary_in(one, error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkDictionary, MembershipNotHashable) {
+  starlark_dictionary dict;
+  starlark_list list(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  EXPECT_FALSE(dict.binary_in(list, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_THAT(error_callback.messages[0], "TypeError: cannot use 'list' as a dict key (unhashable type: 'list')");
+}
+
 TEST(StarlarkDictionary, BinaryPipe) {
   starlark_integer zero(0);
   starlark_integer one(1);

@@ -205,12 +205,31 @@ TEST(StarlarkDictionary, UnpackError) {
   }
 }
 
-TEST(StarlarkSet, BinaryInWithUnhashable) {
-  starlark_set set_1;
-  starlark_set set_2;
+TEST(StarlarkSet, Membership) {
+  starlark_set set;
+  starlark_integer zero(0);
+  starlark_integer one(1);
   error_handler error_callback;
-  EXPECT_FALSE(set_1.binary_in(set_2, error_callback));
-  EXPECT_THAT(error_callback.messages, SizeIs(0));
+  Arena arena;
+  context ctx(arena);
+
+  set.add(&zero, error_callback);
+
+  EXPECT_TRUE(set.binary_in(zero, error_callback));
+  EXPECT_FALSE(set.binary_in(one, error_callback));
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkSet, MembershipNotHashable) {
+  starlark_set set;
+  starlark_list list(0);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  EXPECT_FALSE(set.binary_in(list, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_THAT(error_callback.messages[0], "TypeError: cannot use 'list' as a set element (unhashable type: 'list')");
 }
 
 TEST(StarlarkSet, Freeze) {

@@ -146,6 +146,10 @@ bool starlark_dictionary::truthy() const {
 }
 
 bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn& error_callback) const {
+  if (other.hash() == -1) {
+    error_callback.add_error(error_unhashable_key(type(), other.type()));
+    return false;
+  }
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`.
   return values_.contains(&const_cast<starlark_obj&>(other));
 }
