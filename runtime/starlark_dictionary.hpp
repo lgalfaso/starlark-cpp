@@ -26,6 +26,7 @@ class starlark_dictionary : public starlark_obj {
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
+  void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   std::pair<bool, bool> insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback);
   starlark_obj* binary_pipe(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;

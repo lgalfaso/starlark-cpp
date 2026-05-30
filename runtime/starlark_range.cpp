@@ -7,6 +7,7 @@
 #include <format>
 #include <limits>
 #include <string>
+#include <vector>
 
 #include "runtime/error_messages.hpp"
 #include "runtime/starlark_numeric.hpp"
@@ -21,6 +22,20 @@ starlark_range::starlark_range(int64_t start, int64_t end, int64_t step) : state
 
 std::string_view starlark_range::type() const {
   return starlark_types::range_t;
+}
+
+void starlark_range::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
+  if (number_of_elements != state.len) {
+    if (state.len < number_of_elements) {
+      error_callback.add_error(error_unpack_too_few(state.len, number_of_elements));
+    } else {
+      error_callback.add_error(error_unpack_too_many(state.len, number_of_elements));
+    }
+    return;
+  }
+  for (auto i = state.len; i > 0; --i) {
+    consumer.push_back(create_integer(state.start + (i - 1) * state.step, ctx));
+  }
 }
 
 int64_t starlark_range::len(bool produce_error, error_fn& error_callback) const {

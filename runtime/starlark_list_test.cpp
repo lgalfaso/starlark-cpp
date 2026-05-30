@@ -201,17 +201,17 @@ TEST(StarlarkList, Unpack) {
   Arena arena;
   context ctx(arena);
 
-  list.unpack(0, stack, error_callback);
+  list.unpack(0, stack, ctx, error_callback);
   EXPECT_THAT(stack, SizeIs(0));
 
   list.append(&one, ctx, error_callback);
-  list.unpack(1, stack, error_callback);
+  list.unpack(1, stack, ctx, error_callback);
   ASSERT_THAT(stack, SizeIs(1));
   EXPECT_THAT(stack[0], &one);
 
   stack.clear();
   list.append(&none, ctx, error_callback);
-  list.unpack(2, stack, error_callback);
+  list.unpack(2, stack, ctx, error_callback);
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
   EXPECT_THAT(stack[1], &one);
@@ -231,7 +231,7 @@ TEST(StarlarkList, UnpackError) {
     std::vector<starlark_obj*> consumer;
     error_handler error_callback;
 
-    list.unpack(3, consumer, error_callback);
+    list.unpack(3, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
@@ -240,7 +240,7 @@ TEST(StarlarkList, UnpackError) {
     std::vector<starlark_obj*> consumer;
     error_handler error_callback;
 
-    list.unpack(1, consumer, error_callback);
+    list.unpack(1, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");

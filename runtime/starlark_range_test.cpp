@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 
 #include <limits>
+#include <vector>
 
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_integer.hpp"
@@ -78,6 +79,47 @@ TEST(StarlarkRange, Repr) {
 
 TEST(StarlarkRange, Hash) {
   EXPECT_EQ(starlark_range(0, 100, 1).hash(), -1);
+}
+
+TEST(StarlarkDictionary, Unpack) {
+  starlark_integer one(100);
+  starlark_integer two(102);
+  starlark_range range(100, 104, 2);
+  std::vector<starlark_obj*> stack;
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  range.unpack(2, stack, ctx, error_callback);
+  ASSERT_THAT(stack, SizeIs(2));
+  EXPECT_TRUE(stack[0]->equals(two));
+  EXPECT_TRUE(stack[1]->equals(one));
+}
+
+TEST(StarlarkDictionary, UnpackError) {
+  starlark_range range(100, 104, 2);
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    range.unpack(3, consumer, ctx, error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
+  }
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    range.unpack(1, consumer, ctx, error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
+  }
 }
 
 TEST(StarlarkRange, Len) {

@@ -214,7 +214,7 @@ bool starlark_tuple::truthy() const {
   return !values.empty();
 }
 
-void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) {
+void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   if (number_of_elements != values.size()) {
     if (values.size() < number_of_elements) {
       error_callback.add_error(error_unpack_too_few(values.size(), number_of_elements));

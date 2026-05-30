@@ -10,6 +10,7 @@
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_float.hpp"
 #include "runtime/starlark_integer.hpp"
+#include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_set.hpp"
 #include "runtime/starlark_testing.hpp"
@@ -21,6 +22,7 @@ using ::starlark::runtime::context;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_integer;
+using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_set;
@@ -146,6 +148,61 @@ TEST(StarlarkSet, EqualsInDifferentOrder) {
   set_3.add(&none, error_callback);
   EXPECT_TRUE(set_1.equals(set_2));
   EXPECT_TRUE(set_1.equals(set_3));
+}
+
+TEST(StarlarkDictionary, Unpack) {
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_set set;
+  std::vector<starlark_obj*> stack;
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  set.unpack(0, stack, ctx, error_callback);
+  EXPECT_THAT(stack, SizeIs(0));
+
+  set.add(&one, error_callback);
+  set.unpack(1, stack, ctx, error_callback);
+  ASSERT_THAT(stack, SizeIs(1));
+  EXPECT_THAT(stack[0], &one);
+
+  stack.clear();
+  set.add(&two, error_callback);
+  set.unpack(2, stack, ctx, error_callback);
+  ASSERT_THAT(stack, SizeIs(2));
+  EXPECT_THAT(stack[0], &two);
+  EXPECT_THAT(stack[1], &one);
+}
+
+TEST(StarlarkDictionary, UnpackError) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_set set;
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  set.add(&zero, error_callback);
+  set.add(&one, error_callback);
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    set.unpack(3, consumer, ctx, error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
+  }
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    set.unpack(1, consumer, ctx, error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
+  }
 }
 
 TEST(StarlarkSet, BinaryInWithUnhashable) {

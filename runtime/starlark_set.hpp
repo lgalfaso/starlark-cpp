@@ -27,6 +27,7 @@ class starlark_set : public starlark_obj {
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
+  void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) override;
   bool contains(starlark_obj* obj) const;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_and(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;

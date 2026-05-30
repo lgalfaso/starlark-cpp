@@ -23,7 +23,7 @@ class starlark_list : public starlark_obj {
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;
-  void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) override;
+  void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   starlark_obj* binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   starlark_obj* binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;

@@ -167,19 +167,22 @@ TEST(StarlarkTuple, Unpack) {
   starlark_integer one(1);
   starlark_tuple tuple(0);
   std::vector<starlark_obj*> stack;
+
+  Arena arena;
+  context ctx(arena);
   error_handler error_callback;
 
-  tuple.unpack(0, stack, error_callback);
+  tuple.unpack(0, stack, ctx, error_callback);
   EXPECT_THAT(stack, SizeIs(0));
 
   tuple.add(&one);
-  tuple.unpack(1, stack, error_callback);
+  tuple.unpack(1, stack, ctx, error_callback);
   ASSERT_THAT(stack, SizeIs(1));
   EXPECT_THAT(stack[0], &one);
 
   stack.clear();
   tuple.add(&none);
-  tuple.unpack(2, stack, error_callback);
+  tuple.unpack(2, stack, ctx, error_callback);
   ASSERT_THAT(stack, SizeIs(2));
   EXPECT_THAT(stack[0], &none);
   EXPECT_THAT(stack[1], &one);
@@ -189,13 +192,16 @@ TEST(StarlarkTuple, UnpackError) {
   starlark_integer zero(0);
   starlark_integer one(1);
   starlark_tuple tuple(0);
+  Arena arena;
+  context ctx(arena);
+
   tuple.add(&zero);
   tuple.add(&one);
   {
     std::vector<starlark_obj*> consumer;
     error_handler error_callback;
 
-    tuple.unpack(3, consumer, error_callback);
+    tuple.unpack(3, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
@@ -204,7 +210,7 @@ TEST(StarlarkTuple, UnpackError) {
     std::vector<starlark_obj*> consumer;
     error_handler error_callback;
 
-    tuple.unpack(1, consumer, error_callback);
+    tuple.unpack(1, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
     EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");

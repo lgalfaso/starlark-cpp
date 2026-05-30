@@ -91,6 +91,20 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_set::metho
   return method_refs();
 }
 
+void starlark_set::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
+  if (number_of_elements != values.size()) {
+    if (values.size() < number_of_elements) {
+      error_callback.add_error(error_unpack_too_few(values.size(), number_of_elements));
+    } else {
+      error_callback.add_error(error_unpack_too_many(values.size(), number_of_elements));
+    }
+    return;
+  }
+  for (auto it = values.rbegin(); it != values.rend(); ++it) {
+    consumer.push_back(*it);
+  }
+}
+
 int64_t starlark_set::len(bool produce_error, error_fn& error_callback) const {
   return values.size();
 }

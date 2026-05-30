@@ -271,7 +271,7 @@ starlark_obj* starlark_obj::call(const starlark_obj::pos_args_t& pos_args, const
   return nullptr;
 }
 
-void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback) {
+void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_unpackable(type()));
 }
 

@@ -187,7 +187,7 @@ class starlark_obj {
   int64_t hash() const;
   void freeze();
   virtual starlark_obj* call(const pos_args_t& pos_args, const named_args_t& named_args, context& ctx, error_fn& error_callback);
-  virtual void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, error_fn& error_callback);
+  virtual void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback);
 
   virtual starlark_obj* unary_plus(context& ctx, error_fn& error_callback) const;
   virtual starlark_obj* unary_minus(context& ctx, error_fn& error_callback) const;

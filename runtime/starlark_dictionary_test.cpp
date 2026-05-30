@@ -175,6 +175,62 @@ TEST(StarlarkDictionary, Hash) {
   EXPECT_EQ(dict.hash(), -1);
 }
 
+TEST(StarlarkDictionary, Unpack) {
+  starlark_none none;
+  starlark_integer one(1);
+  starlark_integer two(2);
+  starlark_dictionary dict;
+  std::vector<starlark_obj*> stack;
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  dict.unpack(0, stack, ctx, error_callback);
+  EXPECT_THAT(stack, SizeIs(0));
+
+  dict.insert(&one, &none, error_callback);
+  dict.unpack(1, stack, ctx, error_callback);
+  ASSERT_THAT(stack, SizeIs(1));
+  EXPECT_THAT(stack[0], &one);
+
+  stack.clear();
+  dict.insert(&two, &none, error_callback);
+  dict.unpack(2, stack, ctx, error_callback);
+  ASSERT_THAT(stack, SizeIs(2));
+  EXPECT_THAT(stack[0], &two);
+  EXPECT_THAT(stack[1], &one);
+}
+
+TEST(StarlarkDictionary, UnpackError) {
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_dictionary dict;
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+
+  dict.insert(&zero, &zero, error_callback);
+  dict.insert(&one, &one, error_callback);
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    dict.unpack(3, consumer, ctx, error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
+  }
+  {
+    std::vector<starlark_obj*> consumer;
+    error_handler error_callback;
+
+    dict.unpack(1, consumer, ctx, error_callback);
+    ASSERT_THAT(consumer, IsEmpty());
+    EXPECT_THAT(error_callback.messages, SizeIs(1));
+    EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
+  }
+}
+
 TEST(StarlarkDictionary, InsertingUsingUnhashableKey) {
   starlark_dictionary dict;
   starlark_list list(0);

@@ -482,9 +482,11 @@ TEST(StarlarkInteger, Membership) {
 TEST(StarlarkInteger, Unpack) {
   starlark_integer zero(0);
   error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
   std::vector<starlark_obj*> consumer;
 
-  zero.unpack(0, consumer, error_callback);
+  zero.unpack(0, consumer, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: cannot unpack non-iterable int object");
 }

@@ -270,7 +270,7 @@ frame* run_program(
       case OpCode::kUnpack: {
         starlark_obj* element = stack.back();
         stack.pop_back();
-        element->unpack(op_code.unpack().number_of_elements(), stack, error_callback);
+        element->unpack(op_code.unpack().number_of_elements(), stack, ctx, error_callback);
         break;
       }
       case OpCode::kJumpIfFalse:

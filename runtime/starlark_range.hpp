@@ -4,6 +4,7 @@
 #define RUNTIME_STARLARK_RANGE_HPP_
 
 #include <string>
+#include <vector>
 
 #include "runtime/starlark_object.hpp"
 
@@ -24,6 +25,7 @@ class starlark_range : public starlark_obj {
   starlark_range(int64_t start, int64_t end, int64_t step);
   std::string_view type() const override;
   bool truthy() const override;
+  void unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) override;
   bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
   int64_t len(bool produce_error, error_fn& error_callback) const override;
   starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
