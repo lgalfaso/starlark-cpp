@@ -29,7 +29,7 @@ using ::starlark::runtime::starlark_tuple;
 namespace starlark {
 namespace interpreter {
 
-std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs) {
+std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs, bool compare_stack) {
   auto c = lhs->entrypoint <=> rhs->entrypoint;
   if (c != 0) {
     return c;
@@ -38,21 +38,23 @@ std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_f
   if (c != 0) {
     return c;
   }
-  c = lhs->frame_stack.size() <=> rhs->frame_stack.size();
-  if (c != 0) {
-    return c;
-  }
-  for (std::size_t i = 0; i < lhs->frame_stack.size(); ++i) {
-    c = lhs->frame_stack[i] <=> rhs->frame_stack[i];
+  if (compare_stack) {
+    c = lhs->frame_stack.size() <=> rhs->frame_stack.size();
     if (c != 0) {
       return c;
+    }
+    for (std::size_t i = 0; i < lhs->frame_stack.size(); ++i) {
+      c = lhs->frame_stack[i] <=> rhs->frame_stack[i];
+      if (c != 0) {
+        return c;
+      }
     }
   }
   return c;
 }
 
 bool less_fn::operator()(const interpreter_function* lhs, const interpreter_function* rhs) const {
-  return cmp_fn(lhs, rhs) < 0;
+  return cmp_fn(lhs, rhs, false) < 0;
 }
 
 interpreter_function::interpreter_function(
@@ -214,7 +216,7 @@ bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& co
     return false;
   }
   const interpreter_function* f_other = reinterpret_cast<const interpreter_function*>(other);
-  return cmp_fn(this, f_other) == 0;
+  return cmp_fn(this, f_other, true) == 0;
 }
 
 void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {

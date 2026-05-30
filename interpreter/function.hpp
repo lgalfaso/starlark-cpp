@@ -51,7 +51,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
   starlark::runtime::starlark_obj* default_parameters;
   std::pair<starlark::bytecode::Program*, std::string> current_program;
 
-  friend std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs);
+  friend std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs, bool compare_stack);
 };
 
 starlark::runtime::starlark_obj* starlark_fn_max_impl(starlark::runtime::starlark_obj* this_obj, const starlark::runtime::starlark_obj::pos_args_t& pos_args, const starlark::runtime::starlark_obj::named_args_t& named_args, starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
