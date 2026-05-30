@@ -2,7 +2,9 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "b" symbol: "c" symbol: "d" symbol: "e" symbol: "f" symbol: "g" symbol: "h" symbol: "i" symbol: "j" symbol: "k" symbol: "l" } }
   op_code { create_frame { block_type: FILE_BLOCK } }
+  op_code { make_list: { reserve_size: 1 } }
   op_code { const_int { value: 1 } }
+  op_code { add_to_list: { number_of_elements: 1 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 2 } }
   op_code { assign_plus_equals { frame: 1 pos_in_frame: 1 } }
@@ -26,6 +28,17 @@ block {
   op_code { assign_less_less_equals { frame: 1 pos_in_frame: 10 } }
   op_code { const_int { value: 12 } }
   op_code { assign_star_equals { frame: 1 pos_in_frame: 11 } }
+
+  op_code { const_int: { value: 2 } }
+  op_code { load: { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int: { value: 0 } }
+  op_code { assign_index_member: { } }
+
+  op_code { load: { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int: { value: 0 } }
+  op_code { const_int: { value: 3 } }
+  op_code { assign_index_member_plus_equals: { } }
+
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

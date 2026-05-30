@@ -1,0 +1,22 @@
+block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "d" symbol: "x" } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
+  op_code { make_dictionary { reserve_size: 2 } }
+  op_code { const_int { value: 1 } }
+  op_code { const_int { value: 2 } }
+  op_code { const_int { value: 3 } }
+  op_code { const_int { value: 4 } }
+  op_code { add_to_dictionary { number_of_elements: 2 } }
+  op_code { store { frame: 1 pos_in_frame: 0 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { unpack { number_of_elements: 2 } }
+  op_code { store { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 0 } }
+  op_code { assign_index_member { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { end { } }
+}

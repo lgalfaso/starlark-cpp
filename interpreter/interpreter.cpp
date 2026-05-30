@@ -590,11 +590,11 @@ frame* run_program(
 #define INDEX_ASSIGN(op, method)                                                                                                                                         \
       case op: {                                                                                                                                                         \
         assert(stack.size() >= 3);                                                                                                                                       \
+        auto* value = stack.back();                                                                                                                                      \
+        stack.pop_back();                                                                                                                                                \
         auto* index = stack.back();                                                                                                                                      \
         stack.pop_back();                                                                                                                                                \
         auto* container = stack.back();                                                                                                                                  \
-        stack.pop_back();                                                                                                                                                \
-        auto* value = stack.back();                                                                                                                                      \
         stack.pop_back();                                                                                                                                                \
         auto* element = container->index(*index, ctx, error_callback);                                                                                                   \
         if (element == nullptr) {                                                                                                                                        \
@@ -622,14 +622,14 @@ frame* run_program(
 #define DOT_ASSIGN(op, op_method, method)                                                                                                                                \
       case op: {                                                                                                                                                         \
         assert(stack.size() >= 2);                                                                                                                                       \
+        auto* value = stack.back();                                                                                                                                      \
+        stack.pop_back();                                                                                                                                                \
         auto* element = stack.back();                                                                                                                                    \
         stack.pop_back();                                                                                                                                                \
         auto* field = element->dot(op_code.op_method().member(), ctx, error_callback);                                                                                   \
         if (field == nullptr) {                                                                                                                                          \
           break;                                                                                                                                                         \
         }                                                                                                                                                                \
-        auto* value = stack.back();                                                                                                                                      \
-        stack.pop_back();                                                                                                                                                \
         auto* result = field->method(*value, ctx, error_callback);                                                                                                       \
         if (result == nullptr) {                                                                                                                                         \
           break;                                                                                                                                                         \
@@ -649,9 +649,26 @@ frame* run_program(
       DOT_ASSIGN(OpCode::kAssignDotMemberLessLessEquals, assign_dot_member_less_less_equals, less_less_equals_assign)
       DOT_ASSIGN(OpCode::kAssignDotMemberGreaterGreaterEquals, assign_dot_member_greater_greater_equals, greater_greater_equals_assign)
 #undef DOT_ASSIGN
+      case OpCode::kAssignSliceRange: {
+        assert(stack.size() >= 5);
+        auto* stride = stack.back();
+        stack.pop_back();
+        auto* stop = stack.back();
+        stack.pop_back();
+        auto* start = stack.back();
+        stack.pop_back();
+        auto* container = stack.back();
+        stack.pop_back();
+        auto* element = stack.back();
+        stack.pop_back();
+        container->slice_range_assign(*start, *stop, *stride, *element, ctx, error_callback);
+        break;
+      }
 #define ASSIGN_RANGE(op, method)                                                                                                                                         \
       case op: {                                                                                                                                                         \
         assert(stack.size() >= 5);                                                                                                                                       \
+        auto* element = stack.back();                                                                                                                                    \
+        stack.pop_back();                                                                                                                                                \
         auto* stride = stack.back();                                                                                                                                     \
         stack.pop_back();                                                                                                                                                \
         auto* stop = stack.back();                                                                                                                                       \
@@ -660,12 +677,9 @@ frame* run_program(
         stack.pop_back();                                                                                                                                                \
         auto* container = stack.back();                                                                                                                                  \
         stack.pop_back();                                                                                                                                                \
-        auto* element = stack.back();                                                                                                                                    \
-        stack.pop_back();                                                                                                                                                \
         container->method(*start, *stop, *stride, *element, ctx, error_callback);                                                                                        \
         break;                                                                                                                                                           \
       }
-      ASSIGN_RANGE(OpCode::kAssignSliceRange, slice_range_assign)
       ASSIGN_RANGE(OpCode::kAssignSliceRangePlusEquals, slice_range_plus_equals_assign)
       ASSIGN_RANGE(OpCode::kAssignSliceRangeMinusEquals, slice_range_minus_equals_assign)
       ASSIGN_RANGE(OpCode::kAssignSliceRangeStarEquals, slice_range_star_equals_assign)

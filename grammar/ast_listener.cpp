@@ -484,17 +484,31 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
           break;
         case message_type::kAssignStatement:
           listener.enter_assign_statement(top.assign_statement);
-          to_process.push_back(message{
-            .expression = &top.assign_statement->lhs(),
-            .type = message_type::kExpression,
-            .op = message_type_op::kEnter,
-            .for_assignment = top.assign_statement->op(),
-          });
-          to_process.push_back(message{
-            .expression = &top.assign_statement->rhs(),
-            .type = message_type::kExpression,
-            .op = message_type_op::kEnter,
-          });
+          if (top.assign_statement->op() == AssignStmt::EQUALS) {
+            to_process.push_back(message{
+              .expression = &top.assign_statement->lhs(),
+              .type = message_type::kExpression,
+              .op = message_type_op::kEnter,
+              .for_assignment = top.assign_statement->op(),
+            });
+            to_process.push_back(message{
+              .expression = &top.assign_statement->rhs(),
+              .type = message_type::kExpression,
+              .op = message_type_op::kEnter,
+            });
+          } else {
+            to_process.push_back(message{
+              .expression = &top.assign_statement->rhs(),
+              .type = message_type::kExpression,
+              .op = message_type_op::kEnter,
+            });
+            to_process.push_back(message{
+              .expression = &top.assign_statement->lhs(),
+              .type = message_type::kExpression,
+              .op = message_type_op::kEnter,
+              .for_assignment = top.assign_statement->op(),
+            });
+          }
           break;
         case message_type::kExpressionStatement:
           listener.enter_expression_statement(top.expression_statement);

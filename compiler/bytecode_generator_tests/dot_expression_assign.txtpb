@@ -7,38 +7,38 @@ block {
   op_code { const_int { value: 1 } }
   op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member { member: "a" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 2 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_plus_equals { member: "b" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 3 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_minus_equals { member: "c" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 4 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_slash_equals { member: "d" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 5 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_slash_slash_equals { member: "e" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 6 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_percent_equals { member: "f" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 7 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_ampersand_equals { member: "g" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 8 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_pipe_equals { member: "h" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 9 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_hat_equals { member: "i" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 10 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_greater_greater_equals { member: "j" } }
+  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 11 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { assign_dot_member_less_less_equals { member: "k" } }
-  op_code { const_int { value: 12 } }
   op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { const_int { value: 12 } }
   op_code { assign_dot_member_star_equals { member: "l" } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

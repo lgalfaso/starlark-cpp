@@ -75,7 +75,7 @@ class bytecode_generator : public ast_listener_base {
   void enter_string_value(std::string_view string_value) override;
   void enter_bytes_value(std::string_view bytes_value) override;
   void enter_identifier(const Identifier* identifier) override;
-  void enter_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) override;
+  void exit_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) override;
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
   void mid_binary_expression(const BinaryExpr* binary_expression) override;
   void exit_binary_expression(const BinaryExpr* binary_expression) override;
@@ -83,6 +83,7 @@ class bytecode_generator : public ast_listener_base {
   void exit_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) override;
   void exit_slice_expression(const SliceExpr* slice_expression) override;
   void exit_slice_expression_for_assignment(const SliceExpr* slice_expression, AssignStmt::AssignOperator op) override;
+  void exit_assign_statement(const AssignStmt* assign_statement) override;
 
   void exit_tuple(const Tuple* tuple) override;
   void enter_tuple_for_assignment(const Tuple* tuple) override;
@@ -219,83 +220,13 @@ void bytecode_generator::enter_identifier(const Identifier* identifier) {
   id_op->set_pos_in_frame(identifier->pos_in_frame());
 }
 
-void bytecode_generator::enter_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {
-  switch (op) {
-    case AssignStmt::EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_store();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::PLUS_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_plus_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::MINUS_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_minus_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::STAR_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_star_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::SLASH_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::SLASH_SLASH_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_slash_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::PERCENT_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_percent_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::AMPERSAND_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_ampersand_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::PIPE_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_pipe_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::HAT_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_hat_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::LESS_LESS_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_less_less_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    case AssignStmt::GREATER_GREATER_EQUALS: {
-      auto* id_op = mutable_block()->add_op_code()->mutable_assign_greater_greater_equals();
-      id_op->set_frame(identifier->frame());
-      id_op->set_pos_in_frame(identifier->pos_in_frame());
-      break;
-    }
-    default:
-      assert(false);
+void bytecode_generator::exit_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {
+  if (op != AssignStmt::EQUALS) {
+    return;
   }
+  auto* id_op = mutable_block()->add_op_code()->mutable_store();
+  id_op->set_frame(identifier->frame());
+  id_op->set_pos_in_frame(identifier->pos_in_frame());
 }
 
 void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression) {
@@ -431,59 +362,12 @@ void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
 }
 
 void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) {
-  switch (op) {
-    case AssignStmt::EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::PLUS_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_plus_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::MINUS_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_minus_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::STAR_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_star_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::SLASH_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_slash_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::SLASH_SLASH_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_slash_slash_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::PERCENT_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_percent_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::AMPERSAND_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_ampersand_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::PIPE_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_pipe_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::HAT_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_hat_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::LESS_LESS_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_less_less_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    case AssignStmt::GREATER_GREATER_EQUALS: {
-      mutable_block()->add_op_code()->mutable_assign_dot_member_greater_greater_equals()->set_member(dot_expression->identifier().nfkc_name());
-      break;
-    }
-    default:
-      assert(false);
+  if (op != AssignStmt::EQUALS) {
+    return;
   }
+  mutable_block()->add_op_code()->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
 }
+
 
 void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression) {
   switch (slice_expression->slice_type_case()) {
@@ -499,117 +383,268 @@ void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression
 }
 
 void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* slice_expression, AssignStmt::AssignOperator op) {
+  if (op != AssignStmt::EQUALS) {
+    return;
+  }
   switch (slice_expression->slice_type_case()) {
     case SliceExpr::kIndex:
-      switch (op) {
-        case AssignStmt::EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member();
-          break;
-        }
-        case AssignStmt::PLUS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_plus_equals();
-          break;
-        }
-        case AssignStmt::MINUS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_minus_equals();
-          break;
-        }
-        case AssignStmt::STAR_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_star_equals();
-          break;
-        }
-        case AssignStmt::SLASH_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_slash_equals();
-          break;
-        }
-        case AssignStmt::SLASH_SLASH_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_slash_slash_equals();
-          break;
-        }
-        case AssignStmt::PERCENT_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_percent_equals();
-          break;
-        }
-        case AssignStmt::AMPERSAND_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_ampersand_equals();
-          break;
-        }
-        case AssignStmt::PIPE_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_pipe_equals();
-          break;
-        }
-        case AssignStmt::HAT_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_hat_equals();
-          break;
-        }
-        case AssignStmt::LESS_LESS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_less_less_equals();
-          break;
-        }
-        case AssignStmt::GREATER_GREATER_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_index_member_greater_greater_equals();
-          break;
-        }
-        default:
-          assert(false);
-      }
+      mutable_block()->add_op_code()->mutable_assign_index_member();
       break;
     case SliceExpr::kSlice:
-      switch (op) {
-        case AssignStmt::EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range();
-          break;
-        }
-        case AssignStmt::PLUS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_plus_equals();
-          break;
-        }
-        case AssignStmt::MINUS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_minus_equals();
-          break;
-        }
-        case AssignStmt::STAR_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_star_equals();
-          break;
-        }
-        case AssignStmt::SLASH_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_slash_equals();
-          break;
-        }
-        case AssignStmt::SLASH_SLASH_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_slash_slash_equals();
-          break;
-        }
-        case AssignStmt::PERCENT_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_percent_equals();
-          break;
-        }
-        case AssignStmt::AMPERSAND_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_ampersand_equals();
-          break;
-        }
-        case AssignStmt::PIPE_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_pipe_equals();
-          break;
-        }
-        case AssignStmt::HAT_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_hat_equals();
-          break;
-        }
-        case AssignStmt::LESS_LESS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_less_less_equals();
-          break;
-        }
-        case AssignStmt::GREATER_GREATER_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_slice_range_greater_greater_equals();
-          break;
-        }
-        default:
-          assert(false);
-      }
+      mutable_block()->add_op_code()->mutable_assign_slice_range();
       break;
     default:
       assert(false);
+  }
+}
+
+void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statement) {
+  const Expression& expression = assign_statement->lhs();
+  switch (expression.expression_type_case()) {
+    case Expression::kIdentifier: {
+      const auto& identifier = expression.identifier();
+      switch (assign_statement->op()) {
+        case AssignStmt::EQUALS:
+          break;
+        case AssignStmt::PLUS_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_plus_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::MINUS_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_minus_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::STAR_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_star_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::SLASH_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::SLASH_SLASH_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_slash_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::PERCENT_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_percent_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::AMPERSAND_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_ampersand_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::PIPE_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_pipe_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::HAT_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_hat_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::LESS_LESS_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_less_less_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        case AssignStmt::GREATER_GREATER_EQUALS: {
+          auto* id_op = mutable_block()->add_op_code()->mutable_assign_greater_greater_equals();
+          id_op->set_frame(identifier.frame());
+          id_op->set_pos_in_frame(identifier.pos_in_frame());
+          break;
+        }
+        default:
+          assert(false);
+      }
+      break;
+    }
+    case Expression::kSliceExpression: {
+      const auto& slice_expression = expression.slice_expression();
+      switch (slice_expression.slice_type_case()) {
+        case SliceExpr::kIndex:
+          switch (assign_statement->op()) {
+            case AssignStmt::EQUALS:
+              break;
+            case AssignStmt::PLUS_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_plus_equals();
+              break;
+            }
+            case AssignStmt::MINUS_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_minus_equals();
+              break;
+            }
+            case AssignStmt::STAR_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_star_equals();
+              break;
+            }
+            case AssignStmt::SLASH_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_slash_equals();
+              break;
+            }
+            case AssignStmt::SLASH_SLASH_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_slash_slash_equals();
+              break;
+            }
+            case AssignStmt::PERCENT_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_percent_equals();
+              break;
+            }
+            case AssignStmt::AMPERSAND_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_ampersand_equals();
+              break;
+            }
+            case AssignStmt::PIPE_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_pipe_equals();
+              break;
+            }
+            case AssignStmt::HAT_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_hat_equals();
+              break;
+            }
+            case AssignStmt::LESS_LESS_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_less_less_equals();
+              break;
+            }
+            case AssignStmt::GREATER_GREATER_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_index_member_greater_greater_equals();
+              break;
+            }
+            default:
+              assert(false);
+          }
+          break;
+        case SliceExpr::kSlice:
+          switch (assign_statement->op()) {
+            case AssignStmt::EQUALS:
+              break;
+            case AssignStmt::PLUS_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_plus_equals();
+              break;
+            }
+            case AssignStmt::MINUS_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_minus_equals();
+              break;
+            }
+            case AssignStmt::STAR_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_star_equals();
+              break;
+            }
+            case AssignStmt::SLASH_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_slash_equals();
+              break;
+            }
+            case AssignStmt::SLASH_SLASH_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_slash_slash_equals();
+              break;
+            }
+            case AssignStmt::PERCENT_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_percent_equals();
+              break;
+            }
+            case AssignStmt::AMPERSAND_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_ampersand_equals();
+              break;
+            }
+            case AssignStmt::PIPE_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_pipe_equals();
+              break;
+            }
+            case AssignStmt::HAT_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_hat_equals();
+              break;
+            }
+            case AssignStmt::LESS_LESS_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_less_less_equals();
+              break;
+            }
+            case AssignStmt::GREATER_GREATER_EQUALS: {
+              mutable_block()->add_op_code()->mutable_assign_slice_range_greater_greater_equals();
+              break;
+            }
+            default:
+              assert(false);
+          }
+          break;
+        default:
+          assert(false);
+      }
+      break;
+    }
+    case Expression::kDotExpression: {
+      const auto& dot_expression = expression.dot_expression();
+      switch (assign_statement->op()) {
+        case AssignStmt::EQUALS:
+          break;
+        case AssignStmt::PLUS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_plus_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::MINUS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_minus_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::STAR_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_star_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::SLASH_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_slash_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::SLASH_SLASH_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_slash_slash_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::PERCENT_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_percent_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::AMPERSAND_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_ampersand_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::PIPE_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_pipe_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::HAT_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_hat_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::LESS_LESS_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_less_less_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        case AssignStmt::GREATER_GREATER_EQUALS: {
+          mutable_block()->add_op_code()->mutable_assign_dot_member_greater_greater_equals()->set_member(dot_expression.identifier().nfkc_name());
+          break;
+        }
+        default:
+          assert(false);
+      }
+      break;
+    }
+    default:
+      break;
   }
 }
 
