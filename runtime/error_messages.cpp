@@ -326,6 +326,10 @@ std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_
   return std::format("TypeError: tuple for {} must only contain {}, not {}", fn_name, expected_type, actual_type);
 }
 
+std::string error_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type) {
+  return std::format("TypeError: {} first arg must be str or a tuple of str, not {}", fn_name, actual_type);
+}
+
 std::string_view error_substring_not_found() {
   return "ValueError: substring not found";
 }
@@ -388,6 +392,10 @@ std::string error_positional_argument_out_of_range(std::string_view pos_argument
 
 std::string error_positional_argument_out_of_range(std::size_t pos_argument) {
   return std::format("IndexError: Replacement index {} out of range for positional args tuple", pos_argument);
+}
+
+std::string_view error_non_string_with_base() {
+  return "TypeError: int() can't convert non-string with explicit base";
 }
 
 }  // namespace runtime

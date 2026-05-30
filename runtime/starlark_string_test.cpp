@@ -1873,6 +1873,90 @@ TEST(StarlarkString, EndswithTupleWithOneEntry) {
   test("abc", "aabc", false);
 }
 
+TEST(StarlarkString, EndswithTupleWithTwoEntries) {
+  auto test = [](std::string_view element, std::string_view entry1, std::string_view entry2, bool expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_tuple tuple(1);
+    starlark_string param1(entry1);
+    starlark_string param2(entry2);
+    tuple.add(&param1);
+    tuple.add(&param2);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&tuple);
+    auto* method = str.dot("endswith", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->truthy(), expected);
+  };
+
+  test("", "", "", true);
+  test("", "a", "", true);
+  test("abc", "c", "", true);
+  test("abc", "abc", "", true);
+  test("abc", "", "", true);
+  test("abc", "a", "", true);
+  test("abc", "aabc", "", true);
+
+  test("", "", "a", true);
+  test("", "a", "a", false);
+  test("abc", "c", "a", true);
+  test("abc", "abc", "a", true);
+  test("abc", "", "a", true);
+  test("abc", "a", "a", false);
+  test("abc", "aabc", "a", false);
+
+  test("", "", "c", true);
+  test("", "a", "c", false);
+  test("abc", "c", "c", true);
+  test("abc", "abc", "c", true);
+  test("abc", "", "c", true);
+  test("abc", "a", "c", true);
+  test("abc", "aabc", "c", true);
+
+  test("", "", "abc", true);
+  test("", "a", "abc", false);
+  test("abc", "c", "abc", true);
+  test("abc", "abc", "abc", true);
+  test("abc", "", "abc", true);
+  test("abc", "a", "abc", true);
+  test("abc", "aabc", "abc", true);
+
+  test("", "", "aabc", true);
+  test("", "a", "aabc", false);
+  test("abc", "c", "aabc", true);
+  test("abc", "abc", "aabc", true);
+  test("abc", "", "aabc", true);
+  test("abc", "a", "aabc", false);
+  test("abc", "aabc", "aabc", false);
+}
+
+TEST(StarlarkString, EndswithList) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+  auto* method = str.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith first arg must be str or a tuple of str, not list");
+}
+
 TEST(StarlarkString, EndswithBytes) {
   error_handler error_callback;
   Arena arena;
@@ -1891,7 +1975,7 @@ TEST(StarlarkString, EndswithBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith() argument 1 must be string, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith first arg must be str or a tuple of str, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2403,6 +2487,28 @@ TEST(StarlarkString, StartswithTupleWithOneEntry) {
   test("abc", "abcc", false);
 }
 
+TEST(StarlarkString, StartswithList) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_list list(0);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+  auto* method = str.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith first arg must be str or a tuple of str, not list");
+  EXPECT_EQ(str.str(), "abc");
+}
+
 TEST(StarlarkString, StartswithBytes) {
   error_handler error_callback;
   Arena arena;
@@ -2421,7 +2527,7 @@ TEST(StarlarkString, StartswithBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith() argument 1 must be string, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith first arg must be str or a tuple of str, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 

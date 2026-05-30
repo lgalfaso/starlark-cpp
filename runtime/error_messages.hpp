@@ -101,6 +101,7 @@ std::string error_integer_or_like(std::string_view type, std::string_view other_
 std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type);
 std::string error_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type);
 std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type);
+std::string error_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type);
 
 std::string_view error_substring_not_found();
 std::string error_non_iterable(std::string_view fn_name);
@@ -121,6 +122,7 @@ std::string error_single_format_element_in_string(std::string_view format_elemen
 std::string error_expected_format_element_before_end_of_string(std::string_view format_element);
 std::string error_positional_argument_out_of_range(std::string_view pos_argument);
 std::string error_positional_argument_out_of_range(std::size_t pos_argument);
+std::string_view error_non_string_with_base();
 
 }  // namespace runtime
 }  // namespace starlark

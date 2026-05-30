@@ -1727,7 +1727,7 @@ status_or<std::vector<std::string_view>> string_or_tuple_as_vector_of_string(con
     }
   } else {
     if (element->type() != starlark_types::string_t) {
-      error_callback.add_error(error_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
+      error_callback.add_error(error_string_or_tuple_of_string(fn_name, element->type()));
       return status_or<std::vector<std::string_view>>(status_code::kError);
     }
     result.emplace_back(element->as_string());

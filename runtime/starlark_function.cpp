@@ -319,7 +319,6 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): The parameter `start` could be a named parameter or a positional parameter.
   starlark_obj* start = nullptr;
   for (auto& [key, value] : named_args) {
     if (key == "start") {
@@ -334,9 +333,23 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
       return nullptr;
     }
   }
-  if (pos_args.size() != 1) {
-    error_callback.add_error(error_arguments_exactly_one(starlark_built_in_functions::enumerate_f, pos_args.size()));
+  if (!min_args(pos_args, error_callback, starlark_built_in_functions::enumerate_f, 1).ok() ||
+      !max_args(pos_args, error_callback, starlark_built_in_functions::enumerate_f, 2).ok()) {
     return nullptr;
+  }
+  if (pos_args.size() == 2) {
+    if (start != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument(
+          starlark_built_in_functions::enumerate_f,
+          "start"));
+      return nullptr;
+    }
+    auto* value = pos_args[1];
+    if (value->type() != starlark_types::int_t) {
+      error_callback.add_error(error_argument_interpreted_as_integer("start", value->type()));
+      return nullptr;
+    }
+    start = value;
   }
   auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
@@ -471,37 +484,59 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // TODO(lmirelmann): The parameter `base` can be a named or positional parameter.
-  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::int_f).ok()) {
-    return nullptr;
+  starlark_obj* base_param = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "base") {
+      assert(value != nullptr);
+      if (value->type() != starlark_types::int_t) {
+        error_callback.add_error(error_argument_interpreted_as_integer("base", value->type()));
+        return nullptr;
+      }
+      base_param = value;
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
   }
   if (pos_args.size() != 1 && pos_args.size() != 2) {
     error_callback.add_error(error_arguments_one_or_two(starlark_built_in_functions::int_f, pos_args.size()));
     return nullptr;
   }
   auto* value = pos_args.front();
+  if (value->type() != starlark_types::string_t && base_param != nullptr) {
+    error_callback.add_error(error_non_string_with_base());
+    return nullptr;
+  }
   if (value->type() == starlark_types::int_t) {
-    if (pos_args.size() == 2) {
+    if (pos_args.size() >= 2) {
       error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
       return nullptr;
     }
     return value;
   } else if (value->type() == starlark_types::float_t) {
-    if (pos_args.size() == 2) {
+    if (pos_args.size() >= 2) {
       error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
       return nullptr;
     }
     return create_integer_from_float(value->as_float(), ctx, error_callback);
   } else if (value->type() == starlark_types::bool_t) {
-    if (pos_args.size() == 2) {
+    if (pos_args.size() >= 2) {
       error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
       return nullptr;
     }
     return value->truthy() ? ctx.one() : ctx.zero();
   } else if (value->type() == starlark_types::string_t) {
     int base = 10;
-    if (pos_args.size() == 2) {
-      auto* base_param = pos_args[1];
+    if (base_param != nullptr && pos_args.size() >= 2) {
+      error_callback.add_error(error_multiple_values_for_argument(
+          starlark_built_in_functions::int_f,
+          "base"));
+      return nullptr;
+    }
+    if (pos_args.size() >= 2) {
+      base_param = pos_args[1];
+    }
+    if (base_param != nullptr) {
       switch (base_param->numeric_type()) {
         case starlark_numeric_type::kInt64: {
           auto ibase = base_param->as_int64();

@@ -1208,7 +1208,7 @@ TEST(StarlarkEnumerate, FromIterable) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkEnumerate, FromIterableWithStart) {
+TEST(StarlarkEnumerate, FromIterableWithStartAsNamedArgument) {
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
@@ -1233,7 +1233,31 @@ TEST(StarlarkEnumerate, FromIterableWithStart) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkEnumerate, InvalidStart) {
+TEST(StarlarkEnumerate, FromIterableWithStartAsPositionalArgument) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  list.append(&s_one, ctx, error_callback);
+  list.append(&s_two, ctx, error_callback);
+  list.append(&s_three, ctx, error_callback);
+  pos_args.push_back(&list);
+  starlark_integer start(100);
+  pos_args.push_back(&start);
+
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(100, \"one\"), (101, \"two\"), (102, \"three\")]");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkEnumerate, InvalidStartAsNamedArgument) {
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
@@ -1256,6 +1280,56 @@ TEST(StarlarkEnumerate, InvalidStart) {
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string)");
+}
+
+TEST(StarlarkEnumerate, InvalidStartAsPositionalArgument) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  list.append(&s_one, ctx, error_callback);
+  list.append(&s_two, ctx, error_callback);
+  list.append(&s_three, ctx, error_callback);
+  pos_args.push_back(&list);
+  starlark_string start("100"sv);
+  pos_args.push_back(&start);
+
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string)");
+}
+
+TEST(StarlarkEnumerate, StartAsNamedArgumentAndPositionalArgument) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  std::string s_start("start");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  list.append(&s_one, ctx, error_callback);
+  list.append(&s_two, ctx, error_callback);
+  list.append(&s_three, ctx, error_callback);
+  pos_args.push_back(&list);
+  starlark_integer start(100);
+  named_args.insert(s_start, &start);
+  pos_args.push_back(&start);
+
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() got multiple values for argument 'start'");
 }
 
 TEST(StarlarkEnumerate, InvalidNamedArgument) {
@@ -1294,10 +1368,33 @@ TEST(StarlarkEnumerate, TooFewPosArguments) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate expected at least 1 argument, got 0");
 }
 
-TEST(StarlarkEnumerate, TooManyPosArguments) {
+TEST(StarlarkEnumerate, TwoPosArguments) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  list.append(&s_one, ctx, error_callback);
+  list.append(&s_two, ctx, error_callback);
+  list.append(&s_three, ctx, error_callback);
+  pos_args.push_back(&list);
+  pos_args.push_back(ctx.one());
+
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(1, \"one\"), (2, \"two\"), (3, \"three\")]");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkEnumerate, ThreePosArguments) {
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
@@ -1313,11 +1410,12 @@ TEST(StarlarkEnumerate, TooManyPosArguments) {
   list.append(&s_three, ctx, error_callback);
   pos_args.push_back(&list);
   pos_args.push_back(&list);
+  pos_args.push_back(&list);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate expected at most 2 argument, got 3");
 }
 
 TEST(StarlarkEnumerate, NotIterable) {
@@ -1949,7 +2047,7 @@ TEST(StarlarkInt, FromInt) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkInt, FromIntWithBase) {
+TEST(StarlarkInt, FromIntWithBaseAsPositionalArgument) {
   starlark_integer one(1);
   starlark_integer two(2);
   Arena arena;
@@ -1960,6 +2058,24 @@ TEST(StarlarkInt, FromIntWithBase) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&two);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromIntWithBaseAsNamedArgument) {
+  starlark_integer one(1);
+  starlark_integer two(2);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&one);
+  std::string s_base("base"sv);
+  named_args.insert(s_base, &two);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2010,7 +2126,7 @@ TEST(StarlarkInt, FromFloatNaN) {
   EXPECT_EQ("ValueError: cannot convert float NaN to integer", error_callback.messages[0]);
 }
 
-TEST(StarlarkInt, FromFloatWithBase) {
+TEST(StarlarkInt, FromFloatWithBaseWithPositionalArgument) {
   starlark_float value(1e70);
   starlark_integer two(2);
   Arena arena;
@@ -2021,6 +2137,24 @@ TEST(StarlarkInt, FromFloatWithBase) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
   pos_args.push_back(&two);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromFloatWithBaseWithNamedArgument) {
+  starlark_float value(1e70);
+  starlark_integer two(2);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&value);
+  std::string s_base("base"sv);
+  named_args.insert(s_base, &two);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2046,7 +2180,7 @@ TEST(StarlarkInt, FromBool) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkInt, FromBoolWithBase) {
+TEST(StarlarkInt, FromBoolWithBaseAsPositionalArgument) {
   starlark_bool value(true);
   starlark_integer two(2);
   Arena arena;
@@ -2057,6 +2191,24 @@ TEST(StarlarkInt, FromBoolWithBase) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
   pos_args.push_back(&two);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromBoolWithBaseAsNamedArgument) {
+  starlark_bool value(true);
+  starlark_integer two(2);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&value);
+  std::string s_base("base"sv);
+  named_args.insert(s_base, &two);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2093,6 +2245,7 @@ TEST(StarlarkInt, FromStringWithBase) {
     context ctx(arena);
     error_handler error_callback;
 
+    std::string s_base("base");
     starlark_string str(value);
     starlark_integer ibase(base);
     starlark_bigint bbase(base);
@@ -2100,18 +2253,33 @@ TEST(StarlarkInt, FromStringWithBase) {
     starlark_obj::named_args_t named_args1;
     starlark_obj::pos_args_t pos_args2;
     starlark_obj::named_args_t named_args2;
+    starlark_obj::pos_args_t pos_args3;
+    starlark_obj::named_args_t named_args3;
+    starlark_obj::pos_args_t pos_args4;
+    starlark_obj::named_args_t named_args4;
     pos_args1.push_back(&str);
     pos_args1.push_back(&ibase);
     pos_args2.push_back(&str);
     pos_args2.push_back(&bbase);
+    pos_args3.push_back(&str);
+    named_args3.insert(s_base, &ibase);
+    pos_args4.push_back(&str);
+    named_args4.insert(s_base, &bbase);
 
     auto* result1 = starlark_fn_int(nullptr, pos_args1, named_args1, ctx, error_callback);
     auto* result2 = starlark_fn_int(nullptr, pos_args2, named_args2, ctx, error_callback);
+    auto* result3 = starlark_fn_int(nullptr, pos_args3, named_args3, ctx, error_callback);
+    auto* result4 = starlark_fn_int(nullptr, pos_args4, named_args4, ctx, error_callback);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
     ASSERT_NE(nullptr, result1) << value;
     ASSERT_NE(nullptr, result2);
+    ASSERT_NE(nullptr, result3);
+    ASSERT_NE(nullptr, result4);
 
     EXPECT_EQ(result1->str(), expected);
     EXPECT_EQ(result2->str(), expected);
+    EXPECT_EQ(result3->str(), expected);
+    EXPECT_EQ(result4->str(), expected);
   };
 
   test("123", 10, "123");
@@ -2135,17 +2303,22 @@ TEST(StarlarkInt, FromStringWithBase) {
 }
 
 template <typename T>
-void test_invalid_base(int base) {
+void test_invalid_base(int base, bool positional) {
   starlark_string str("1"sv);
   T ibase(base);
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
+  std::string s_base("base"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
-  pos_args.push_back(&ibase);
+  if (positional) {
+    pos_args.push_back(&ibase);
+  } else {
+    named_args.insert(s_base, &ibase);
+  }
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2153,17 +2326,25 @@ void test_invalid_base(int base) {
 }
 
 TEST(StarlarkInt, FromStringInvalidBase) {
-  test_invalid_base<starlark_integer>(-1);
-  test_invalid_base<starlark_bigint>(-1);
-  test_invalid_base<starlark_integer>(1);
-  test_invalid_base<starlark_bigint>(1);
-  test_invalid_base<starlark_integer>(37);
-  test_invalid_base<starlark_bigint>(37);
-  test_invalid_base<starlark_integer>(100);
-  test_invalid_base<starlark_bigint>(100);
+  test_invalid_base<starlark_integer>(-1, false);
+  test_invalid_base<starlark_integer>(-1, true);
+  test_invalid_base<starlark_bigint>(-1, false);
+  test_invalid_base<starlark_bigint>(-1, true);
+  test_invalid_base<starlark_integer>(1, false);
+  test_invalid_base<starlark_integer>(1, true);
+  test_invalid_base<starlark_bigint>(1, false);
+  test_invalid_base<starlark_bigint>(1, true);
+  test_invalid_base<starlark_integer>(37, false);
+  test_invalid_base<starlark_integer>(37, true);
+  test_invalid_base<starlark_bigint>(37, false);
+  test_invalid_base<starlark_bigint>(37, true);
+  test_invalid_base<starlark_integer>(100, false);
+  test_invalid_base<starlark_integer>(100, true);
+  test_invalid_base<starlark_bigint>(100, false);
+  test_invalid_base<starlark_bigint>(100, true);
 }
 
-TEST(StarlarkInt, FromStringBaseNotInt) {
+TEST(StarlarkInt, FromStringBaseNotIntAsPositionalArgument) {
   starlark_string str("1"sv);
   starlark_list list(0);
   Arena arena;
@@ -2178,6 +2359,24 @@ TEST(StarlarkInt, FromStringBaseNotInt) {
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ("TypeError: 'list' object cannot be interpreted as an integer", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, FromStringBaseNotIntAsNamedArgument) {
+  starlark_string str("1"sv);
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  std::string s_base("base");
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  named_args.insert(s_base, &list);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: parameter 'base' cannot be interpreted as an integer (list)", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromStringNotAbleToParseInFull) {
@@ -2223,7 +2422,26 @@ TEST(StarlarkInt, TooFewPosArgs) {
   EXPECT_EQ("TypeError: int() takes one or two argument (0 given)", error_callback.messages[0]);
 }
 
-TEST(StarlarkInt, TooManyPosArgs) {
+TEST(StarlarkInt, BaseAsNamedAndPositionalArgument) {
+  starlark_string str("123"sv);
+  starlark_integer base(10);
+  std::string s_base("base");
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  pos_args.push_back(&base);
+  named_args.insert(s_base, &base);
+
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: int() got multiple values for argument 'base'", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, ThreePosArgs) {
   starlark_string str(""sv);
   Arena arena;
   context ctx(arena);
@@ -2254,7 +2472,7 @@ TEST(StarlarkInt, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, List) {
