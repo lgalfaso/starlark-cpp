@@ -2895,6 +2895,28 @@ TEST(StarlarkString, FindStartAsBool) {
   EXPECT_EQ(str.str(), "banana");
 }
 
+TEST(StarlarkString, FindTwoArgumentWithNone) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abab"sv);
+  starlark_string param1("ab"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  pos_args.push_back(ctx.none_value());
+  auto* method = str.dot("find", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->as_int64(), 0);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 TEST(StarlarkString, FindTwoArgument) {
   auto test = [](std::string_view element, std::string_view sub, int64_t start,  int64_t expected) {
     error_handler error_callback;
@@ -2923,6 +2945,89 @@ TEST(StarlarkString, FindTwoArgument) {
   for a in range(-5, 6):
       print('  test("abab", "ab", {}, {});'.format(a, "abab".find("ab", a)))
   */
+  test("abab", "ab", -5, 0);
+  test("abab", "ab", -4, 0);
+  test("abab", "ab", -3, 2);
+  test("abab", "ab", -2, 2);
+  test("abab", "ab", -1, -1);
+  test("abab", "ab", 0, 0);
+  test("abab", "ab", 1, 2);
+  test("abab", "ab", 2, 2);
+  test("abab", "ab", 3, -1);
+  test("abab", "ab", 4, -1);
+  test("abab", "ab", 5, -1);
+}
+
+TEST(StarlarkString, FindThreeArgumentStartAsNone) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t end, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param3(end);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(ctx.none_value());
+    pos_args.push_back(&param3);
+    auto* method = str.dot("find", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->as_int64(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "", -1, 0);
+  test("", "", 0, 0);
+  test("", "", 1, 0);
+
+  test("abab", "ab", -5, -1);
+  test("abab", "ab", -4, -1);
+  test("abab", "ab", -3, -1);
+  test("abab", "ab", -2, 0);
+  test("abab", "ab", -1, 0);
+  test("abab", "ab", 0, -1);
+  test("abab", "ab", 1, -1);
+  test("abab", "ab", 2, 0);
+  test("abab", "ab", 3, 0);
+  test("abab", "ab", 4, 0);
+  test("abab", "ab", 5, 0);
+}
+
+TEST(StarlarkString, FindThreeArgumentEndAsNone) {
+  auto test = [](std::string_view element, std::string_view sub, int64_t start, int64_t expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_string param1(sub);
+    starlark_integer param2(start);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(&param1);
+    pos_args.push_back(&param2);
+    pos_args.push_back(ctx.none_value());
+    auto* method = str.dot("find", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->as_int64(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "", -1, 0);
+  test("", "", 0, 0);
+  test("", "", 1, -1);
   test("abab", "ab", -5, 0);
   test("abab", "ab", -4, 0);
   test("abab", "ab", -3, 2);
