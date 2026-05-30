@@ -5704,6 +5704,7 @@ TEST(StarlarkString, UpperWithNoArguments) {
   test("A", "A");
   test("abc", "ABC");
   test("ABC", "ABC");
+  test("aeiou", "AEIOU");
   test("abc1234", "ABC1234");
   test("ABC1234", "ABC1234");
   test("hello world!", "HELLO WORLD!");

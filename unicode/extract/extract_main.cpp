@@ -382,12 +382,7 @@ void print_to_upper(FILE* output,
       // If there is a condition, check whether the condition would cause issues.
       if (!special_case.conditions.empty() &&
           (special_case.upper.size() != 1 || special_case.upper.front() != entry.second.uppercase_mapping)) {
-        for (const auto& condition : special_case.conditions) {
-          // If this is a language ID, then ignore as we only support the root language.
-          // The only languages that currently have special casings are Lithuanian, Turkish and Azeri.
-          if (condition == "lt" || condition == "tr" || condition == "az") {
-            break;
-          }
+        if (!special_case.conditions.empty()) {
           // We have a case that there is a condition and this condition would not produce the same sequence.
           // This is somethign that we are currently not supporting, so abort.
           exit(1);
@@ -453,12 +448,7 @@ void print_to_title(FILE* output,
       // If there is a condition, check whether the condition would cause issues.
       if (!special_case.conditions.empty() &&
           (special_case.title.size() != 1 || special_case.title.front() != entry.second.titlecase_mapping)) {
-        for (const auto& condition : special_case.conditions) {
-          // If this is a language ID, then ignore as we only support the root language.
-          // The only languages that currently have special casings are Lithuanian, Turkish and Azeri.
-          if (condition == "lt" || condition == "tr" || condition == "az") {
-            break;
-          }
+        if (!special_case.conditions.empty()) {
           // We have a case that there is a condition and this condition would not produce the same sequence.
           // This is somethign that we are currently not supporting, so abort.
           exit(1);
@@ -528,12 +518,6 @@ void print_to_lower(FILE* output,
           (special_case.lower.size() != 1 || special_case.lower.front() != entry.second.lowercase_mapping)) {
         bool skip = false;
         for (const auto& condition : special_case.conditions) {
-          // If this is a language ID, then ignore as we only support the root language.
-          // The only languages that currently have special casings are Lithuanian, Turkish and Azeri.
-          if (condition == "lt" || condition == "tr" || condition == "az") {
-            skip = true;
-            break;
-          }
           if (condition == "Final_Sigma") {
             continue;
           }

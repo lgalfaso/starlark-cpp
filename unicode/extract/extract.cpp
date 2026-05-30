@@ -228,12 +228,23 @@ void read_special_casing(const char* file, std::map<char32_t, special_casing_rec
       condition_str.erase(0, pos);
       condition_str.erase(0, condition_str.find_first_not_of(" "));
     }
-    special_casing.emplace(code_point, special_casing_record{
-      .lower = lower,
-      .title = title,
-      .upper = upper,
-      .conditions = condition,
-    });
+    bool skip = false;
+    for (const auto& c : condition) {
+      // If this is a language ID, then ignore as we only support the root language.
+      // The only languages that currently have special casings are Lithuanian, Turkish and Azeri.
+      if (c == "lt" || c == "tr" || c == "az") {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip) {
+      special_casing.emplace(code_point, special_casing_record{
+        .lower = lower,
+        .title = title,
+        .upper = upper,
+        .conditions = condition,
+      });
+    }
   }
 }
 
