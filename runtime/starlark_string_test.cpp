@@ -1152,6 +1152,7 @@ TEST(StarlarkString, FormatNoFormat) {
   test("", "");
   test("abc", "abc");
   test("{{", "{");
+  test("}}", "}");
 }
 
 TEST(StarlarkString, Format) {
@@ -1205,6 +1206,8 @@ TEST(StarlarkString, Format) {
   test("xyz{abc}qwe", with_zero_one, with_abc, "xyzdefqwe");
   test("abc{0000}def{1}ghi", with_zero_one, empty_names, "abc0def1ghi");
   test_with_error("{", empty_pos, empty_names, "ValueError: Single '{' encountered in format string");
+  test_with_error("}", empty_pos, empty_names, "ValueError: Single '}' encountered in format string");
+  test_with_error("}abc", empty_pos, empty_names, "ValueError: Single '}' encountered in format string");
   test_with_error("{0", empty_pos, empty_names, "ValueError: expected '}' before end of string");
   test_with_error("{0a}", empty_pos, empty_names, "ValueError: unexpected 'a' in field name");
   test_with_error("{0}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");

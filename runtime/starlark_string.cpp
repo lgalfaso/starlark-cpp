@@ -512,7 +512,8 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
 status parse_format(std::string_view format, std::vector<std::string>& parts, std::vector<std::string>& names, error_fn& error_callback) {
   enum class state_t {
     kText,
-    kLastElementWasCurlyBraces,
+    kLastElementWasOpenCurlyBraces,
+    kLastElementWasCloseCurlyBraces,
     kName,
     kNumber,
   };
@@ -527,12 +528,14 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
     switch (state) {
       case state_t::kText:
         if (cp == '{') {
-          state = state_t::kLastElementWasCurlyBraces;
+          state = state_t::kLastElementWasOpenCurlyBraces;
+        } else if (cp == '}') {
+          state = state_t::kLastElementWasCloseCurlyBraces;
         } else {
           parts.back() += format.substr(start, reader.pos() - start);
         }
         break;
-      case state_t::kLastElementWasCurlyBraces:
+      case state_t::kLastElementWasOpenCurlyBraces:
         if (cp == '{') {
           parts.back() += format.substr(start, reader.pos() - start);
           state = state_t::kText;
@@ -553,6 +556,15 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
           state = state_t::kName;
         } else {
           error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          return error_status();
+        }
+        break;
+      case state_t::kLastElementWasCloseCurlyBraces:
+        if (cp == '}') {
+          parts.back() += format.substr(start, reader.pos() - start);
+          state = state_t::kText;
+        } else {
+          error_callback.add_error(error_single_format_element_in_string("}"));
           return error_status();
         }
         break;
@@ -588,8 +600,11 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
     default:
     case state_t::kText:
       return ok_status();
-    case state_t::kLastElementWasCurlyBraces:
+    case state_t::kLastElementWasOpenCurlyBraces:
       error_callback.add_error(error_single_format_element_in_string("{"));
+      return error_status();
+    case state_t::kLastElementWasCloseCurlyBraces:
+      error_callback.add_error(error_single_format_element_in_string("}"));
       return error_status();
     case state_t::kName:
     case state_t::kNumber:
