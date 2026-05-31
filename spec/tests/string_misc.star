@@ -13,3 +13,15 @@ check('µ', (True, True, False, False))
 check('¼', (True, False, False, False))
 check('\u3405', (True, True, False, False))
 
+assert_fail('''
+''.isalnum('')
+''')
+assert_fail('''
+''.isalpha('')
+''')
+assert_fail('''
+''.isdigit('')
+''')
+assert_fail('''
+''.isspace('')
+''')
