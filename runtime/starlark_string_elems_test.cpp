@@ -370,7 +370,7 @@ TEST(StarlarkStringElems, BinaryIn) {
   EXPECT_TRUE(starlark_string("Περιπτώσεις"sv).codepoints(ctx)->binary_in(starlark_string("ε"sv), error_callback));
   EXPECT_FALSE(starlark_string("Περιπτώσεις"sv).codepoints(ctx)->binary_in(starlark_string("Πε"sv), error_callback));
 
-  EXPECT_TRUE(starlark_string("a"sv).elem_ords(ctx)->binary_in(starlark_integer(97), error_callback));
+  EXPECT_FALSE(starlark_string(""sv).elem_ords(ctx)->binary_in(starlark_integer(97), error_callback));
   EXPECT_TRUE(starlark_string("a"sv).elem_ords(ctx)->binary_in(starlark_bigint(97), error_callback));
   EXPECT_TRUE(starlark_string("ab"sv).elem_ords(ctx)->binary_in(starlark_integer(97), error_callback));
   EXPECT_TRUE(starlark_string("ab"sv).elem_ords(ctx)->binary_in(starlark_bigint(97), error_callback));
@@ -379,7 +379,7 @@ TEST(StarlarkStringElems, BinaryIn) {
   EXPECT_TRUE(starlark_string("Περιπτώσεις"sv).elem_ords(ctx)->binary_in(starlark_integer(949), error_callback));
   EXPECT_TRUE(starlark_string("Περιπτώσεις"sv).elem_ords(ctx)->binary_in(starlark_bigint(949), error_callback));
 
-  EXPECT_TRUE(starlark_string("a"sv).codepoint_ords(ctx)->binary_in(starlark_integer(97), error_callback));
+  EXPECT_FALSE(starlark_string(""sv).codepoint_ords(ctx)->binary_in(starlark_integer(97), error_callback));
   EXPECT_TRUE(starlark_string("a"sv).codepoint_ords(ctx)->binary_in(starlark_bigint(97), error_callback));
   EXPECT_FALSE(starlark_string("a"sv).codepoint_ords(ctx)->binary_in(starlark_bigint(parse_number("0x10000000000000061", nullptr, 0)), error_callback));
   EXPECT_TRUE(starlark_string("ab"sv).codepoint_ords(ctx)->binary_in(starlark_integer(97), error_callback));
