@@ -571,6 +571,54 @@ TEST(StarlarkString, StarEqualsAssignNotInt) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
 }
 
+TEST(StarlarkString, LshiftInt) {
+  starlark_string str("abc"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  auto* result = str.binary_lshift(*ctx.one(), ctx, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<: 'string' and 'int'");
+}
+
+TEST(StarlarkString, RshiftInt) {
+  starlark_string str("abc"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  auto* result = str.binary_rshift(*ctx.one(), ctx, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>: 'string' and 'int'");
+}
+
+TEST(StarlarkString, SlashInt) {
+  starlark_string str("abc"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  auto* result = str.binary_slash(*ctx.one(), ctx, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /: 'string' and 'int'");
+}
+
+TEST(StarlarkString, SlashSlashInt) {
+  starlark_string str("abc"sv);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  auto* result = str.binary_slash_slash(*ctx.one(), ctx, error_callback);
+  EXPECT_EQ(result, nullptr);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'string' and 'int'");
+}
+
 TEST(StarlarkString, Len) {
   error_handler error_callback;
 
@@ -4836,7 +4884,7 @@ TEST(StarlarkString, ReplaceWithTwoArgumentsOldAsBool) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.true_value());
-  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.empty_string());
   auto* method = str.dot("replace", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4880,20 +4928,39 @@ TEST(StarlarkString, ReplaceWithThreeArguments) {
     starlark_string param1(old);
     starlark_string param2(new_);
     starlark_integer param3(count);
+    starlark_bigint param3_bis(count);
 
-    starlark_obj::pos_args_t pos_args;
-    starlark_obj::named_args_t named_args;
-    pos_args.push_back(&param1);
-    pos_args.push_back(&param2);
-    pos_args.push_back(&param3);
-    auto* method = str.dot("replace", ctx, error_callback);
-    ASSERT_NE(nullptr, method);
-    EXPECT_THAT(error_callback.messages, IsEmpty());
+    {
+      starlark_obj::pos_args_t pos_args;
+      starlark_obj::named_args_t named_args;
+      pos_args.push_back(&param1);
+      pos_args.push_back(&param2);
+      pos_args.push_back(&param3);
+      auto* method = str.dot("replace", ctx, error_callback);
+      ASSERT_NE(nullptr, method);
+      EXPECT_THAT(error_callback.messages, IsEmpty());
 
-    auto* result = method->call(pos_args, named_args, ctx, error_callback);
-    ASSERT_NE(nullptr, result);
-    EXPECT_EQ(result->type(), starlark_types::string_t);
-    EXPECT_EQ(result->as_string(), expected);
+      auto* result = method->call(pos_args, named_args, ctx, error_callback);
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::string_t);
+      EXPECT_EQ(result->as_string(), expected);
+    }
+    {
+      starlark_obj::pos_args_t pos_args;
+      starlark_obj::named_args_t named_args;
+      pos_args.push_back(&param1);
+      pos_args.push_back(&param2);
+      pos_args.push_back(&param3_bis);
+      auto* method = str.dot("replace", ctx, error_callback);
+      ASSERT_NE(nullptr, method);
+      EXPECT_THAT(error_callback.messages, IsEmpty());
+
+      auto* result = method->call(pos_args, named_args, ctx, error_callback);
+      ASSERT_NE(nullptr, result);
+      EXPECT_EQ(result->type(), starlark_types::string_t);
+      EXPECT_EQ(result->as_string(), expected);
+    }
+
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
@@ -4936,6 +5003,60 @@ TEST(StarlarkString, ReplaceWithThreeArguments) {
   test("ayxyb", "y", "yy", 1, "ayyxyb");
 }
 
+TEST(StarlarkString, ReplaceWithThreeArgumentsCountAsBigint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string param1("b"sv);
+  starlark_string param2("x"sv);
+  starlark_bigint param3(parse_number("327941723984723847123984712398471239847123", nullptr, 0));
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  pos_args.push_back(&param2);
+  pos_args.push_back(&param3);
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::string_t);
+  EXPECT_EQ(result->as_string(), "axc");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithThreeArgumentsCountAsNegativeBigint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string param1("b"sv);
+  starlark_string param2("x"sv);
+  starlark_bigint param3(parse_number("-327941723984723847123984712398471239847123", nullptr, 0));
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  pos_args.push_back(&param2);
+  pos_args.push_back(&param3);
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::string_t);
+  EXPECT_EQ(result->as_string(), "axc");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
 TEST(StarlarkString, ReplaceWithThreeArgumentsCountAsBool) {
   error_handler error_callback;
   Arena arena;
@@ -4967,8 +5088,8 @@ TEST(StarlarkString, ReplaceWithFourArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
-  pos_args.push_back(ctx.zero());
+  pos_args.push_back(ctx.empty_string());
+  pos_args.push_back(ctx.empty_string());
   pos_args.push_back(ctx.zero());
   pos_args.push_back(ctx.zero());
   auto* method = str.dot("replace", ctx, error_callback);
@@ -7005,7 +7126,7 @@ TEST(StarlarkString, SplitlinesNoArguments) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->type(), starlark_types::list_t);
-    EXPECT_EQ(result->repr(), expected);
+    EXPECT_EQ(result->repr(), expected) << element;
   };
 
   test("", "[]");
@@ -7014,6 +7135,9 @@ TEST(StarlarkString, SplitlinesNoArguments) {
   test("ab\nc", "[\"ab\", \"c\"]");
   test("\n\n", "[\"\", \"\"]");
   test("abc\r\ndef\r\n", "[\"abc\", \"def\"]");
+
+  test("abc\ndef\rghi\r\njkl\vmno\fpqr\x1cstu\x1dvwx\x{1e}yza\u0085bcd\u2028efg\u2029hij",
+       "[\"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqr\", \"stu\", \"vwx\", \"yza\", \"bcd\", \"efg\", \"hij\"]");
 }
 
 TEST(StarlarkString, SplitlinesOneArguments) {
