@@ -1,0 +1,115 @@
+assert_fail('''
+'abc'.startswith()
+''')
+
+
+assert_true("".startswith(""))
+assert_false("".startswith("a"))
+assert_true("abc".startswith("a"))
+assert_true("abc".startswith("abc"))
+assert_true("abc".startswith(""))
+assert_false("abc".startswith("c"))
+assert_false("abc".startswith("abcc"))
+
+assert_false('abc'.startswith(()))
+assert_true("".startswith(("")))
+assert_false("".startswith(("a")))
+assert_true("abc".startswith(("a")))
+assert_true("abc".startswith(("abc")))
+assert_true("abc".startswith(("")))
+assert_false("abc".startswith(("c")))
+assert_false("abc".startswith(("abcc")))
+
+assert_fail('''
+'abc'.startswith([])
+''')
+assert_fail('''
+'abc'.startswith(b'')
+''')
+assert_fail('''
+'abc'.startswith((b''))
+''')
+
+assert_true("".startswith("", 0))
+assert_false("".startswith("", 1))
+assert_false("".startswith("a", 0))
+assert_false("".startswith("a", 1))
+assert_true("abc".startswith("a", 0))
+assert_false("abc".startswith("a", 2))
+assert_false("abc".startswith("a", 3))
+assert_true("abc".startswith("abc", 0))
+assert_false("abc".startswith("abc", 1))
+assert_false("abc".startswith("abc", -1))
+assert_false("abc".startswith("abc", -2))
+assert_true("abc".startswith("abc", -3))
+assert_true("abc".startswith("abc", -4))
+assert_true("abc".startswith("", 0))
+assert_true("abc".startswith("", 2))
+assert_true("abc".startswith("", 3))
+assert_false("abc".startswith("", 4))
+assert_false("abc".startswith("c", 0))
+assert_true("abc".startswith("c", 2))
+assert_false("abc".startswith("c", 3))
+assert_false("abc".startswith("abcc", -1))
+assert_false("abc".startswith("abcc", 0))
+assert_false("abc".startswith("abcc", 3))
+
+assert_fail('''
+'abc'.startswith('', True)
+''')
+
+assert_true("abc".startswith("a", None))
+assert_false("abc".startswith("b", None))
+
+assert_true("".startswith("", 0, -1))
+assert_true("".startswith("", 0, 0))
+assert_false("".startswith("", 1, 0))
+assert_false("".startswith("a", 0, 1))
+assert_false("".startswith("a", 1, 1))
+assert_true("abc".startswith("a", 0, 3))
+assert_true("abc".startswith("a", 0, 2))
+assert_false("abc".startswith("a", 1, 3))
+assert_false("abc".startswith("a", 1, 2))
+assert_false("abc".startswith("c", 0, 3))
+assert_true("abc".startswith("c", 2, 3))
+assert_false("abc".startswith("c", 3, 3))
+assert_false("abc".startswith("c", 1, 2))
+assert_true("abc".startswith("b", 1, 2))
+assert_false("abc".startswith("abc", 0, -1))
+assert_true("abc".startswith("ab", 0, -1))
+assert_false("abc".startswith("abc", 0, 2))
+assert_true("abc".startswith("abc", 0, 3))
+assert_true("abc".startswith("abc", 0, 4))
+assert_false("abc".startswith("abc", 1, 3))
+assert_false("abc".startswith("abc", -1, 4))
+assert_false("abc".startswith("abc", -2, 10))
+assert_true("abc".startswith("", 0, 3))
+assert_true("abc".startswith("", 2, 3))
+assert_false("abc".startswith("", 2, 1))
+assert_true("abc".startswith("", 3, 3))
+assert_false("abc".startswith("", 4, 3))
+assert_true("abc".startswith("a", 0, 3))
+assert_true("abc".startswith("a", 0, 1))
+assert_false("abc".startswith("a", 3, 3))
+assert_false("abc".startswith("aabc", -1, 2))
+assert_false("abc".startswith("aabc", 0, 4))
+assert_false("abc".startswith("aabc", 3, 3))
+
+assert_fail('''
+'abc'.starswith('', 0, True)
+''')
+
+
+assert_true("abc".startswith("a", 0, None))
+assert_false("abc".startswith("a", 1, None))
+assert_false("abc".startswith("b", 0, None))
+assert_true("abc".startswith("b", 1, None))
+
+assert_fail('''
+'abc'.startswith('', None, None, None)
+''')
+
+assert_fail('''
+'abc'startswith('', start = 0)
+''')
+
