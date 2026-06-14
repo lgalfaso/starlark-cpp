@@ -30,11 +30,14 @@ using ::starlark::ast::DictExpr;
 using ::starlark::ast::DotExpr;
 using ::starlark::ast::Expression;
 using ::starlark::ast::File;
+using ::starlark::ast::FloatValue;
 using ::starlark::ast::ForClause;
 using ::starlark::ast::ForStmt;
 using ::starlark::ast::Identifier;
+using ::starlark::ast::IfClause;
 using ::starlark::ast::IfExpr;
 using ::starlark::ast::IfStmt;
+using ::starlark::ast::IntValue;
 using ::starlark::ast::LambdaExpr;
 using ::starlark::ast::ListComp;
 using ::starlark::ast::ListExpr;
@@ -43,6 +46,7 @@ using ::starlark::ast::Parameter;
 using ::starlark::ast::ReturnStmt;
 using ::starlark::ast::SliceExpr;
 using ::starlark::ast::Statement;
+using ::starlark::ast::StringValue;
 using ::starlark::ast::Tuple;
 using ::starlark::ast::UnaryExpr;
 using ::starlark::bytecode::Block;
@@ -69,11 +73,11 @@ class bytecode_generator : public ast_listener_base {
   void enter_load_statement(const LoadStmt* load_statement) override;
   void exit_expression_statement(const Expression* statement) override;
   void enter_none_value() override;
-  void enter_int_value(std::int64_t int_value) override;
-  void enter_big_int_value(std::string_view big_int_value) override;
-  void enter_float_value(double float_value) override;
-  void enter_string_value(std::string_view string_value) override;
-  void enter_bytes_value(std::string_view bytes_value) override;
+  void enter_int_value(const IntValue* int_value) override;
+  void enter_big_int_value(const StringValue* big_int_value) override;
+  void enter_float_value(const FloatValue* float_value) override;
+  void enter_string_value(const StringValue* string_value) override;
+  void enter_bytes_value(const StringValue* bytes_value) override;
   void enter_identifier(const Identifier* identifier) override;
   void exit_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) override;
   void exit_unary_expression(const UnaryExpr* unary_expression) override;
@@ -98,7 +102,7 @@ class bytecode_generator : public ast_listener_base {
   void enter_dictionary_comprehension(const DictComp* dictionary_comprehension) override;
   void exit_dictionary_comprehension(const DictComp* dictionary_comprehension) override;
   void mid_for_clause(const ForClause* for_clause) override;
-  void exit_if_clause(const Expression* if_clause) override;
+  void exit_if_clause(const IfClause* if_clause) override;
 
   void mid_if_expression(const IfExpr* if_expression) override;
   void exit_if_expression(const IfExpr* if_expression) override;
@@ -194,24 +198,24 @@ void bytecode_generator::enter_none_value() {
   mutable_block()->add_op_code()->mutable_const_none();
 }
 
-void bytecode_generator::enter_int_value(std::int64_t int_value) {
-  mutable_block()->add_op_code()->mutable_const_int()->set_value(int_value);
+void bytecode_generator::enter_int_value(const IntValue* int_value) {
+  mutable_block()->add_op_code()->mutable_const_int()->set_value(int_value->value());
 }
 
-void bytecode_generator::enter_big_int_value(std::string_view big_int_value) {
-  mutable_block()->add_op_code()->mutable_const_big_int()->set_value(big_int_value);
+void bytecode_generator::enter_big_int_value(const StringValue* big_int_value) {
+  mutable_block()->add_op_code()->mutable_const_big_int()->set_value(big_int_value->value());
 }
 
-void bytecode_generator::enter_float_value(double float_value) {
-  mutable_block()->add_op_code()->mutable_const_float()->set_value(float_value);
+void bytecode_generator::enter_float_value(const FloatValue* float_value) {
+  mutable_block()->add_op_code()->mutable_const_float()->set_value(float_value->value());
 }
 
-void bytecode_generator::enter_string_value(std::string_view string_value) {
-  mutable_block()->add_op_code()->mutable_const_string()->set_value(string_value);
+void bytecode_generator::enter_string_value(const StringValue* string_value) {
+  mutable_block()->add_op_code()->mutable_const_string()->set_value(string_value->value());
 }
 
-void bytecode_generator::enter_bytes_value(std::string_view bytes_value) {
-  mutable_block()->add_op_code()->mutable_const_bytes()->set_value(bytes_value);
+void bytecode_generator::enter_bytes_value(const StringValue* bytes_value) {
+  mutable_block()->add_op_code()->mutable_const_bytes()->set_value(bytes_value->value());
 }
 
 void bytecode_generator::enter_identifier(const Identifier* identifier) {
@@ -724,7 +728,7 @@ void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
   mutable_block()->add_op_code()->mutable_for_iterator();
 }
 
-void bytecode_generator::exit_if_clause(const Expression* if_clause) {
+void bytecode_generator::exit_if_clause(const IfClause* if_clause) {
   comprehension_comp_clause.back().push_back(block().op_code_size());
   mutable_block()->add_op_code()->mutable_jump_if_false();
 }

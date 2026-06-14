@@ -1,3 +1,4 @@
+module_binding: "a"
 statement {
   assign_statement {
     lhs {
@@ -6,26 +7,42 @@ statement {
         nfkc_name: "a"
         frame: 1
         pos_in_frame: 0
+        pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
       }
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
     }
     op: EQUALS
     rhs {
-      int_value: 1
+      int_value {
+        value: 1
+        pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
+      }
+      pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
     }
+    op_pif { start { row: 1 column: 3 pos: 2 } end { row: 1 column: 4 pos: 3 } }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 6 pos: 5 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 6 pos: 5 } }
 }
 statement {
   expression_statement {
     dictionary_expression {
+      pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 3 pos: 8 } }
     }
+    pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 3 pos: 8 } }
   }
+  pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 3 pos: 8 } }
 }
 statement {
   expression_statement {
     dictionary_expression {
       entry {
         key {
-          string_value: "a"
+          string_value {
+            value: "a"
+            pif { start { row: 3 column: 2 pos: 10 } end { row: 3 column: 5 pos: 13 } }
+          }
+          pif { start { row: 3 column: 2 pos: 10 } end { row: 3 column: 5 pos: 13 } }
         }
         value {
           identifier {
@@ -33,18 +50,28 @@ statement {
             nfkc_name: "a"
             frame: 1
             pos_in_frame: 0
+            pif { start { row: 3 column: 7 pos: 15 } end { row: 3 column: 8 pos: 16 } }
           }
+          pif { start { row: 3 column: 7 pos: 15 } end { row: 3 column: 8 pos: 16 } }
         }
+        pif { start { row: 3 column: 2 pos: 10 } end { row: 3 column: 8 pos: 16 } }
       }
+      pif { start { row: 3 column: 1 pos: 9 } end { row: 3 column: 9 pos: 17 } }
     }
+    pif { start { row: 3 column: 1 pos: 9 } end { row: 3 column: 9 pos: 17 } }
   }
+  pif { start { row: 3 column: 1 pos: 9 } end { row: 3 column: 9 pos: 17 } }
 }
 statement {
   expression_statement {
     dictionary_expression {
       entry {
         key {
-          string_value: "a"
+          string_value {
+            value: "a"
+            pif { start { row: 4 column: 2 pos: 19 } end { row: 4 column: 5 pos: 22 } }
+          }
+          pif { start { row: 4 column: 2 pos: 19 } end { row: 4 column: 5 pos: 22 } }
         }
         value {
           identifier {
@@ -52,10 +79,17 @@ statement {
             nfkc_name: "a"
             frame: 1
             pos_in_frame: 0
+            pif { start { row: 4 column: 7 pos: 24 } end { row: 4 column: 8 pos: 25 } }
           }
+          pif { start { row: 4 column: 7 pos: 24 } end { row: 4 column: 8 pos: 25 } }
         }
+        pif { start { row: 4 column: 2 pos: 19 } end { row: 4 column: 8 pos: 25 } }
       }
+      pif { start { row: 4 column: 1 pos: 18 } end { row: 4 column: 10 pos: 27 } }
     }
+    pif { start { row: 4 column: 1 pos: 18 } end { row: 4 column: 10 pos: 27 } }
   }
+  pif { start { row: 4 column: 1 pos: 18 } end { row: 4 column: 10 pos: 27 } }
 }
-module_binding: "a"
+pif { start { row: 1 column: 1 pos: 0 } end { row: 4 column: 10 pos: 27 } }
+

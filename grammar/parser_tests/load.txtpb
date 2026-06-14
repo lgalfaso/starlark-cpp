@@ -15,9 +15,12 @@ statement {
         frame: 0
         pos_in_frame: 0
       }
+      pif { start { row: 1 column: 13 pos: 12 } end { row: 1 column: 20 pos: 19 } }
       remote_name: "bar_1"
     }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 21 pos: 20 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 21 pos: 20 } }
 }
 statement {
   load_statement {
@@ -30,8 +33,11 @@ statement {
         pos_in_frame: 1
       }
       remote_name: "bar_2"
+      pif { start { row: 2 column: 13 pos: 33 } end { row: 2 column: 20 pos: 40 } }
     }
+    pif { start { row: 2 column: 1 pos: 21 } end { row: 2 column: 22 pos: 42 } }
   }
+  pif { start { row: 2 column: 1 pos: 21 } end { row: 2 column: 22 pos: 42 } }
 }
 statement {
   load_statement {
@@ -42,10 +48,14 @@ statement {
         nfkc_name: "man_1"
         frame: 0
         pos_in_frame: 2
+        pif { start { row: 3 column: 13 pos: 55 } end { row: 3 column: 18 pos: 60 } }
       }
       remote_name: "bar"
+      pif { start { row: 3 column: 13 pos: 55 } end { row: 3 column: 26 pos: 68 } }
     }
+    pif { start { row: 3 column: 1 pos: 43 } end { row: 3 column: 27 pos: 69 } }
   }
+  pif { start { row: 3 column: 1 pos: 43 } end { row: 3 column: 27 pos: 69 } }
 }
 statement {
   load_statement {
@@ -56,8 +66,10 @@ statement {
         nfkc_name: "man_2"
         frame: 0
         pos_in_frame: 3
+        pif { start { row: 4 column: 13 pos: 82 } end { row: 4 column: 18 pos: 87 } }
       }
       remote_name: "bar"
+      pif { start { row: 4 column: 13 pos: 82 } end { row: 4 column: 26 pos: 95 } }
     }
     load_param {
       local_name {
@@ -65,10 +77,14 @@ statement {
         nfkc_name: "x_1"
         frame: 0
         pos_in_frame: 5
+        pif { start { row: 4 column: 28 pos: 97 } end { row: 4 column: 31 pos: 100 } }
       }
       remote_name: "y"
+      pif { start { row: 4 column: 28 pos: 97 } end { row: 4 column: 37 pos: 106 } }
     }
+    pif { start { row: 4 column: 1 pos: 70 } end { row: 4 column: 38 pos: 107 } }
   }
+  pif { start { row: 4 column: 1 pos: 70 } end { row: 4 column: 38 pos: 107 } }
 }
 statement {
   load_statement {
@@ -79,8 +95,10 @@ statement {
         nfkc_name: "man_3"
         frame: 0
         pos_in_frame: 4
+        pif { start { row: 5 column: 13 pos: 120 } end { row: 5 column: 18 pos: 125 } }
       }
       remote_name: "bar"
+      pif { start { row: 5 column: 13 pos: 120 } end { row: 5 column: 26 pos: 133 } }
     }
     load_param {
       local_name {
@@ -88,9 +106,13 @@ statement {
         nfkc_name: "x_2"
         frame: 0
         pos_in_frame: 6
+        pif { start { row: 5 column: 28 pos: 135 } end { row: 5 column: 31 pos: 138 } }
       }
       remote_name: "y"
+      pif { start { row: 5 column: 28 pos: 135 } end { row: 5 column: 37 pos: 144 } }
     }
+    pif { start { row: 5 column: 1 pos: 108 } end { row: 5 column: 40 pos: 147 } }
   }
+  pif { start { row: 5 column: 1 pos: 108 } end { row: 5 column: 40 pos: 147 } }
 }
-
+pif { start { row: 1 column: 1 pos: 0 } end { row: 5 column: 40 pos: 147 } }

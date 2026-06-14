@@ -1,3 +1,5 @@
+module_binding: "a"
+module_binding: "foo"
 statement {
   assign_statement {
     lhs {
@@ -6,14 +8,21 @@ statement {
         nfkc_name: "a"
         frame: 1
         pos_in_frame: 0
+        pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
       }
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
     }
     op: EQUALS
     rhs {
       list_expression {
+        pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 7 pos: 6 } }
       }
+      pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 7 pos: 6 } }
     }
+    op_pif { start { row: 1 column: 3 pos: 2 } end { row: 1 column: 4 pos: 3 } }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 7 pos: 6 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 7 pos: 6 } }
 }
 statement {
   def_statement {
@@ -22,6 +31,7 @@ statement {
       nfkc_name: "foo"
       frame: 1
       pos_in_frame: 1
+      pif { start { row: 2 column: 5 pos: 11 } end { row: 2 column: 8 pos: 14 } }
     }
     statement {
       assign_statement {
@@ -31,17 +41,28 @@ statement {
             nfkc_name: "a"
             frame: 0
             pos_in_frame: 0
+            pif { start { row: 3 column: 3 pos: 20 } end { row: 3 column: 4 pos: 21 } }
           }
+          pif { start { row: 3 column: 3 pos: 20 } end { row: 3 column: 4 pos: 21 } }
         }
         op: EQUALS
         rhs {
           list_expression {
             element {
-              int_value: 1
+              int_value {
+                value: 1
+                pif { start { row: 3 column: 8 pos: 25 } end { row: 3 column: 9 pos: 26 } }
+              }
+              pif { start { row: 3 column: 8 pos: 25 } end { row: 3 column: 9 pos: 26 } }
             }
+            pif { start { row: 3 column: 7 pos: 24 } end { row: 3 column: 10 pos: 27 } }
           }
+          pif { start { row: 3 column: 7 pos: 24 } end { row: 3 column: 10 pos: 27 } }
         }
+        op_pif { start { row: 3 column: 5 pos: 22 } end { row: 3 column: 6 pos: 23 } }
+        pif { start { row: 3 column: 3 pos: 20 } end { row: 3 column: 10 pos: 27 } }
       }
+      pif { start { row: 3 column: 3 pos: 20 } end { row: 3 column: 10 pos: 27 } }
     }
     statement {
       return_statement {
@@ -51,13 +72,17 @@ statement {
             nfkc_name: "a"
             frame: 0
             pos_in_frame: 0
+            pif { start { row: 4 column: 10 pos: 37 } end { row: 4 column: 11 pos: 38 } }
           }
+          pif { start { row: 4 column: 10 pos: 37 } end { row: 4 column: 11 pos: 38 } }
         }
+        pif { start { row: 4 column: 3 pos: 30 } end { row: 4 column: 11 pos: 38 } }
       }
+      pif { start { row: 4 column: 3 pos: 30 } end { row: 4 column: 11 pos: 38 } }
     }
     function_binding: "a"
+    pif { start { row: 2 column: 1 pos: 7 } end { row: 4 column: 11 pos: 38 } }
   }
+  pif { start { row: 2 column: 1 pos: 7 } end { row: 4 column: 11 pos: 38 } }
 }
-module_binding: "a"
-module_binding: "foo"
-
+pif { start { row: 1 column: 1 pos: 0 } end { row: 4 column: 11 pos: 38 } }

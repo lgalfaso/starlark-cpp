@@ -66,7 +66,6 @@ class parser {
   bool found_non_load = false;
   std::vector<std::pair<std::set<std::string, std::less<>>, std::set<starlark::ast::Identifier*>>> parse_parameter_identifiers;
   std::vector<parsing_block> parser_blocks;
-  std::map<starlark::ast::Identifier*, starlark::logging::Position> identifier_positions;
 };
 
 }  // namespace grammar

@@ -13,3 +13,6 @@ def baz(*, a, b):
 
 def shell(x = man):
   print(x)
+
+def zoo(**x):
+  pass

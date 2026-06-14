@@ -8,13 +8,22 @@ statement {
         nfkc_name: "a"
         frame: 1
         pos_in_frame: 0
+        pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
       }
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
     }
     op: EQUALS
     rhs {
-      int_value: 1
+      int_value {
+        value: 1
+        pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
+      }
+      pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
     }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 6 pos: 5 } }
+    op_pif { start { row: 1 column: 3 pos: 2 } end { row: 1 column: 4 pos: 3 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 6 pos: 5 } }
 }
 statement {
   assign_statement {
@@ -24,13 +33,21 @@ statement {
         nfkc_name: "b"
         frame: 1
         pos_in_frame: 1
+        pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 2 pos: 7 } }
       }
+      pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 2 pos: 7 } }
     }
     op: EQUALS
     rhs {
-      list_expression { }
+      list_expression {
+        pif { start { row: 2 column: 5 pos: 10 } end { row: 2 column: 7 pos: 12 } }
+      }
+      pif { start { row: 2 column: 5 pos: 10 } end { row: 2 column: 7 pos: 12 } }
     }
+    pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 7 pos: 12 } }
+    op_pif { start { row: 2 column: 3 pos: 8 } end { row: 2 column: 4 pos: 9 } }
   }
+  pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 7 pos: 12 } }
 }
 statement {
   expression_statement {
@@ -41,7 +58,9 @@ statement {
           nfkc_name: "a"
           frame: 1
           pos_in_frame: 0
+          pif { start { row: 3 column: 1 pos: 13 } end { row: 3 column: 2 pos: 14 } }
         }
+        pif { start { row: 3 column: 1 pos: 13 } end { row: 3 column: 2 pos: 14 } }
       }
       operator: IN
       rhs {
@@ -50,10 +69,16 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 3 column: 6 pos: 18 } end { row: 3 column: 7 pos: 19 } }
         }
+        pif { start { row: 3 column: 6 pos: 18 } end { row: 3 column: 7 pos: 19 } }
       }
+      pif { start { row: 3 column: 1 pos: 13 } end { row: 3 column: 7 pos: 19 } }
+      op_pif { start { row: 3 column: 3 pos: 15 } end { row: 3 column: 5 pos: 17 } }
     }
+    pif { start { row: 3 column: 1 pos: 13 } end { row: 3 column: 7 pos: 19 } }
   }
+  pif { start { row: 3 column: 1 pos: 13 } end { row: 3 column: 7 pos: 19 } }
 }
 statement {
   expression_statement {
@@ -64,7 +89,9 @@ statement {
           nfkc_name: "a"
           frame: 1
           pos_in_frame: 0
+          pif { start { row: 4 column: 1 pos: 20 } end { row: 4 column: 2 pos: 21 } }
         }
+        pif { start { row: 4 column: 1 pos: 20 } end { row: 4 column: 2 pos: 21 } }
       }
       operator: NOT_IN
       rhs {
@@ -73,8 +100,15 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 4 column: 10 pos: 29 } end { row: 4 column: 11 pos: 30 } }
         }
+        pif { start { row: 4 column: 10 pos: 29 } end { row: 4 column: 11 pos: 30 } }
       }
+      pif { start { row: 4 column: 1 pos: 20 } end { row: 4 column: 11 pos: 30 } }
+      op_pif { start { row: 4 column: 3 pos: 22 } end { row: 4 column: 9 pos: 28 } }
     }
+    pif { start { row: 4 column: 1 pos: 20 } end { row: 4 column: 11 pos: 30 } }
   }
+  pif { start { row: 4 column: 1 pos: 20 } end { row: 4 column: 11 pos: 30 } }
 }
+pif { start { row: 1 column: 1 pos: 0 } end { row: 4 column: 11 pos: 30 } }

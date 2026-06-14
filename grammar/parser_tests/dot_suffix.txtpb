@@ -1,36 +1,52 @@
 module_binding: "bar"
 module_binding: "foo"
 statement {
-  assign_statement: {
+  assign_statement {
     lhs {
       identifier {
         name: "bar"
         nfkc_name: "bar"
         frame: 1
         pos_in_frame: 0
+        pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 4 pos: 3 } }
       }
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 4 pos: 3 } }
     }
     op: EQUALS
     rhs {
-      list_expression { }
+      list_expression {
+        pif { start { row: 1 column: 7 pos: 6 } end { row: 1 column: 9 pos: 8 } }
+      }
+      pif { start { row: 1 column: 7 pos: 6 } end { row: 1 column: 9 pos: 8 } }
     }
+    op_pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 9 pos: 8 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 9 pos: 8 } }
 }
 statement {
-  assign_statement: {
+  assign_statement {
     lhs {
       identifier {
         name: "foo"
         nfkc_name: "foo"
         frame: 1
         pos_in_frame: 1
+        pif { start { row: 2 column: 1 pos: 9 } end { row: 2 column: 4 pos: 12 } }
       }
+      pif { start { row: 2 column: 1 pos: 9 } end { row: 2 column: 4 pos: 12 } }
     }
     op: EQUALS
     rhs {
-      list_expression { }
+      list_expression {
+        pif { start { row: 2 column: 7 pos: 15 } end { row: 2 column: 9 pos: 17 } }
+      }
+      pif { start { row: 2 column: 7 pos: 15 } end { row: 2 column: 9 pos: 17 } }
     }
+    op_pif { start { row: 2 column: 5 pos: 13 } end { row: 2 column: 6 pos: 14 } }
+    pif { start { row: 2 column: 1 pos: 9 } end { row: 2 column: 9 pos: 17 } }
   }
+  pif { start { row: 2 column: 1 pos: 9 } end { row: 2 column: 9 pos: 17 } }
 }
 statement {
   expression_statement {
@@ -41,14 +57,20 @@ statement {
           nfkc_name: "foo"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 3 column: 1 pos: 18 } end { row: 3 column: 4 pos: 21 } }
         }
+        pif { start { row: 3 column: 1 pos: 18 } end { row: 3 column: 4 pos: 21 } }
       }
       identifier {
         name: "bar"
         nfkc_name: "bar"
+        pif { start { row: 3 column: 5 pos: 22 } end { row: 3 column: 8 pos: 25 } }
       }
+      pif { start { row: 3 column: 1 pos: 18 } end { row: 3 column: 8 pos: 25 } }
     }
+    pif { start { row: 3 column: 1 pos: 18 } end { row: 3 column: 8 pos: 25 } }
   }
+  pif { start { row: 3 column: 1 pos: 18 } end { row: 3 column: 8 pos: 25 } }
 }
 statement {
   expression_statement {
@@ -61,18 +83,28 @@ statement {
               nfkc_name: "foo"
               frame: 1
               pos_in_frame: 1
+              pif { start { row: 4 column: 1 pos: 26 } end { row: 4 column: 4 pos: 29 } }
             }
+            pif { start { row: 4 column: 1 pos: 26 } end { row: 4 column: 4 pos: 29 } }
           }
           identifier {
             name: "bar"
             nfkc_name: "bar"
+            pif { start { row: 4 column: 5 pos: 30 } end { row: 4 column: 8 pos: 33 } }
           }
+          pif { start { row: 4 column: 1 pos: 26 } end { row: 4 column: 8 pos: 33 } }
         }
+        pif { start { row: 4 column: 1 pos: 26 } end { row: 4 column: 8 pos: 33 } }
       }
       identifier {
         name: "baz"
         nfkc_name: "baz"
+        pif { start { row: 4 column: 9 pos: 34 } end { row: 4 column: 12 pos: 37 } }
       }
+      pif { start { row: 4 column: 1 pos: 26 } end { row: 4 column: 12 pos: 37 } }
     }
+    pif { start { row: 4 column: 1 pos: 26 } end { row: 4 column: 12 pos: 37 } }
   }
+  pif { start { row: 4 column: 1 pos: 26 } end { row: 4 column: 12 pos: 37 } }
 }
+pif { start { row: 1 column: 1 pos: 0 } end { row: 4 column: 12 pos: 37 } }

@@ -5,3 +5,7 @@ def foo():
   for (a,) in [(1,)]:
     print(a)
 
+c = ()
+d = (())
+e = ((1,))
+

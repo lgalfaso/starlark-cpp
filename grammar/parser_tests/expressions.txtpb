@@ -2,14 +2,37 @@ statement {
   expression_statement {
     tuple {
       value {
-        int_value: 1
+        int_value {
+          value: 1
+          pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
+        }
+        pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
       }
       value {
-        int_value: 2
+        int_value {
+          value: 2
+          pif { start { row: 1 column: 3 pos: 2 } end { row: 1 column: 4 pos: 3 } }
+        }
+        pif { start { row: 1 column: 3 pos: 2 } end { row: 1 column: 4 pos: 3 } }
       }
       value {
-        int_value: 3
+        int_value {
+          value: 3
+          pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
+        }
+        pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
       }
+      value {
+        big_int_value {
+          value: "734732849723984372498723948723987412398734298"
+          pif { start { row: 1 column: 7 pos: 6 } end { row: 1 column: 52 pos: 51 } }
+        }
+        pif { start { row: 1 column: 7 pos: 6 } end { row: 1 column: 52 pos: 51 } }
+      }
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 52 pos: 51 } }
     }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 52 pos: 51 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 52 pos: 51 } }
 }
+pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 52 pos: 51 } }

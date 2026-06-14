@@ -21,11 +21,14 @@ using starlark::ast::ElseIf;
 using starlark::ast::Entry;
 using starlark::ast::Expression;
 using starlark::ast::File;
+using starlark::ast::FloatValue;
 using starlark::ast::ForClause;
 using starlark::ast::ForStmt;
 using starlark::ast::Identifier;
+using starlark::ast::IfClause;
 using starlark::ast::IfExpr;
 using starlark::ast::IfStmt;
+using starlark::ast::IntValue;
 using starlark::ast::LambdaExpr;
 using starlark::ast::ListComp;
 using starlark::ast::ListExpr;
@@ -35,6 +38,7 @@ using starlark::ast::PassStmt;
 using starlark::ast::ReturnStmt;
 using starlark::ast::SliceExpr;
 using starlark::ast::Statement;
+using starlark::ast::StringValue;
 using starlark::ast::Tuple;
 using starlark::ast::UnaryExpr;
 
@@ -124,18 +128,18 @@ struct message {
     const CallExpr* call_expression;
     const SliceExpr* slice_expression;
     const Identifier* identifier;
-    std::int64_t int_value;
-    std::string_view big_int_value;
-    const double float_value;
-    std::string_view string_value;
-    std::string_view bytes_value;
+    const IntValue* int_value;
+    const StringValue* big_int_value;
+    const FloatValue* float_value;
+    const StringValue* string_value;
+    const StringValue* bytes_value;
     const ListExpr* list_expression;
     const ListComp* list_comprehension;
     const DictExpr* dictionary_expression;
     const DictComp* dictionary_comprehension;
     const CompClause* comp_clause;
     const ForClause* for_clause;
-    const Expression* if_clause;
+    const IfClause* if_clause;
     const Entry* map_entry;
   };
   message_type type;
@@ -216,16 +220,16 @@ void ast_listener_base::enter_identifier_for_assignment(const Identifier* identi
 void ast_listener_base::exit_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {}
 void ast_listener_base::enter_none_value() {}
 void ast_listener_base::exit_none_value() {}
-void ast_listener_base::enter_int_value(std::int64_t int_value) {}
-void ast_listener_base::exit_int_value(std::int64_t int_value) {}
-void ast_listener_base::enter_big_int_value(std::string_view big_int_value) {}
-void ast_listener_base::exit_big_int_value(std::string_view big_int_value) {}
-void ast_listener_base::enter_float_value(double float_value) {}
-void ast_listener_base::exit_float_value(double float_value) {}
-void ast_listener_base::enter_string_value(std::string_view string_value) {}
-void ast_listener_base::exit_string_value(std::string_view string_value) {}
-void ast_listener_base::enter_bytes_value(std::string_view bytes_value) {}
-void ast_listener_base::exit_bytes_value(std::string_view bytes_value) {}
+void ast_listener_base::enter_int_value(const IntValue* int_value) {}
+void ast_listener_base::exit_int_value(const IntValue* int_value) {}
+void ast_listener_base::enter_big_int_value(const StringValue* big_int_value) {}
+void ast_listener_base::exit_big_int_value(const StringValue* big_int_value) {}
+void ast_listener_base::enter_float_value(const FloatValue* float_value) {}
+void ast_listener_base::exit_float_value(const FloatValue* float_value) {}
+void ast_listener_base::enter_string_value(const StringValue* string_value) {}
+void ast_listener_base::exit_string_value(const StringValue* string_value) {}
+void ast_listener_base::enter_bytes_value(const StringValue* bytes_value) {}
+void ast_listener_base::exit_bytes_value(const StringValue* bytes_value) {}
 void ast_listener_base::enter_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::exit_list_expression(const ListExpr* list_expression) {}
 void ast_listener_base::enter_list_expression_for_assignment(const ListExpr* list_expression) {}
@@ -241,8 +245,8 @@ void ast_listener_base::exit_comp_clause(const CompClause* comp_clause) {}
 void ast_listener_base::enter_for_clause(const ForClause* for_clause) {}
 void ast_listener_base::mid_for_clause(const ForClause* for_clause) {}
 void ast_listener_base::exit_for_clause(const ForClause* for_clause) {}
-void ast_listener_base::enter_if_clause(const Expression* if_clause) {}
-void ast_listener_base::exit_if_clause(const Expression* if_clause) {}
+void ast_listener_base::enter_if_clause(const IfClause* if_clause) {}
+void ast_listener_base::exit_if_clause(const IfClause* if_clause) {}
 void ast_listener_base::enter_map_entry(const Entry* map_entry) {}
 void ast_listener_base::exit_map_entry(const Entry* map_entry) {}
 
@@ -638,35 +642,35 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
               break;
             case Expression::kIntValue:
               to_process.push_back(message{
-                .int_value = top.expression->int_value(),
+                .int_value = &top.expression->int_value(),
                 .type = message_type::kIntValue,
                 .op = message_type_op::kEnter,
               });
               break;
             case Expression::kBigIntValue:
               to_process.push_back(message{
-                .big_int_value = top.expression->big_int_value(),
+                .big_int_value = &top.expression->big_int_value(),
                 .type = message_type::kBigIntValue,
                 .op = message_type_op::kEnter,
               });
               break;
             case Expression::kFloatValue:
               to_process.push_back(message{
-                .float_value = top.expression->float_value(),
+                .float_value = &top.expression->float_value(),
                 .type = message_type::kFloatValue,
                 .op = message_type_op::kEnter,
               });
               break;
             case Expression::kStringValue:
               to_process.push_back(message{
-                .string_value = top.expression->string_value(),
+                .string_value = &top.expression->string_value(),
                 .type = message_type::kStringValue,
                 .op = message_type_op::kEnter,
               });
               break;
             case Expression::kBytesValue:
               to_process.push_back(message{
-                .bytes_value = top.expression->bytes_value(),
+                .bytes_value = &top.expression->bytes_value(),
                 .type = message_type::kBytesValue,
                 .op = message_type_op::kEnter,
               });
@@ -1010,7 +1014,7 @@ void ast_walker::walk(const File* starlark_file, ast_listener& listener) {
         case message_type::kIfClause:
           listener.enter_if_clause(top.if_clause);
           to_process.push_back(message{
-            .expression = top.if_clause,
+            .expression = &top.if_clause->test(),
             .type = message_type::kExpression,
             .op = message_type_op::kEnter,
           });

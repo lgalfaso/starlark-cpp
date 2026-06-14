@@ -3,18 +3,27 @@ module_binding: "foo"
 statement {
   assign_statement {
     lhs {
-          identifier {
-            name: "cpu"
-            nfkc_name: "cpu"
-            frame: 1
-            pos_in_frame: 0
-          }
+      identifier {
+        name: "cpu"
+        nfkc_name: "cpu"
+        frame: 1
+        pos_in_frame: 0
+        pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 4 pos: 3 } }
+      }
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 4 pos: 3 } }
     }
     op: EQUALS
     rhs {
-          string_value: "win32"
+      string_value {
+        value: "win32"
+        pif { start { row: 1 column: 7 pos: 6 } end { row: 1 column: 14 pos: 13 } }
+      }
+      pif { start { row: 1 column: 7 pos: 6 } end { row: 1 column: 14 pos: 13 } }
     }
+    op_pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 14 pos: 13 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 14 pos: 13 } }
 }
 statement {
   expression_statement {
@@ -22,20 +31,39 @@ statement {
       lhs {
         binary_expression {
           lhs {
-            int_value: 1
+            int_value {
+              value: 1
+              pif { start { row: 2 column: 1 pos: 14 } end { row: 2 column: 2 pos: 15 } }
+            }
+            pif { start { row: 2 column: 1 pos: 14 } end { row: 2 column: 2 pos: 15 } }
           }
           operator: PLUS
           rhs {
-            int_value: 2
+            int_value {
+              value: 2
+              pif { start { row: 2 column: 5 pos: 18 } end { row: 2 column: 6 pos: 19 } }
+            }
+            pif { start { row: 2 column: 5 pos: 18 } end { row: 2 column: 6 pos: 19 } }
           }
+          op_pif { start { row: 2 column: 3 pos: 16 } end { row: 2 column: 4 pos: 17 } }
+          pif { start { row: 2 column: 1 pos: 14 } end { row: 2 column: 6 pos: 19 } }
         }
+        pif { start { row: 2 column: 1 pos: 14 } end { row: 2 column: 6 pos: 19 } }
       }
       operator: PLUS
       rhs {
-        int_value: 3
+        int_value {
+          value: 3
+          pif { start { row: 2 column: 9 pos: 22 } end { row: 2 column: 10 pos: 23 } }
+        }
+        pif { start { row: 2 column: 9 pos: 22 } end { row: 2 column: 10 pos: 23 } }
       }
+      op_pif { start { row: 2 column: 7 pos: 20 } end { row: 2 column: 8 pos: 21 } }
+      pif { start { row: 2 column: 1 pos: 14 } end { row: 2 column: 10 pos: 23 } }
     }
+    pif { start { row: 2 column: 1 pos: 14 } end { row: 2 column: 10 pos: 23 } }
   }
+  pif { start { row: 2 column: 1 pos: 14 } end { row: 2 column: 10 pos: 23 } }
 }
 statement {
   expression_statement {
@@ -43,28 +71,54 @@ statement {
       lhs {
         binary_expression {
           lhs {
-            int_value: 1
+            int_value {
+              value: 1
+              pif { start { row: 3 column: 1 pos: 24 } end { row: 3 column: 2 pos: 25 } }
+            }
+            pif { start { row: 3 column: 1 pos: 24 } end { row: 3 column: 2 pos: 25 } }
           }
           operator: STAR
           rhs {
-            int_value: 2
+            int_value {
+              value: 2
+              pif { start { row: 3 column: 5 pos: 28 } end { row: 3 column: 6 pos: 29 } }
+            }
+            pif { start { row: 3 column: 5 pos: 28 } end { row: 3 column: 6 pos: 29 } }
           }
+          op_pif { start { row: 3 column: 3 pos: 26 } end { row: 3 column: 4 pos: 27 } }
+          pif { start { row: 3 column: 1 pos: 24 } end { row: 3 column: 6 pos: 29 } }
         }
+        pif { start { row: 3 column: 1 pos: 24 } end { row: 3 column: 6 pos: 29 } }
       }
       operator: PLUS
       rhs {
         binary_expression {
           lhs {
-            int_value: 3
+            int_value {
+              value: 3
+              pif { start { row: 3 column: 9 pos: 32 } end { row: 3 column: 10 pos: 33 } }
+            }
+            pif { start { row: 3 column: 9 pos: 32 } end { row: 3 column: 10 pos: 33 } }
           }
           operator: STAR
           rhs {
-            int_value: 4
+            int_value {
+              value: 4
+              pif { start { row: 3 column: 13 pos: 36 } end { row: 3 column: 14 pos: 37 } }
+            }
+            pif { start { row: 3 column: 13 pos: 36 } end { row: 3 column: 14 pos: 37 } }
           }
+          op_pif { start { row: 3 column: 11 pos: 34 } end { row: 3 column: 12 pos: 35 } }
+          pif { start { row: 3 column: 9 pos: 32 } end { row: 3 column: 14 pos: 37 } }
         }
+        pif { start { row: 3 column: 9 pos: 32 } end { row: 3 column: 14 pos: 37 } }
       }
+      op_pif { start { row: 3 column: 7 pos: 30 } end { row: 3 column: 8 pos: 31 } }
+      pif { start { row: 3 column: 1 pos: 24 } end { row: 3 column: 14 pos: 37 } }
     }
+    pif { start { row: 3 column: 1 pos: 24 } end { row: 3 column: 14 pos: 37 } }
   }
+  pif { start { row: 3 column: 1 pos: 24 } end { row: 3 column: 14 pos: 37 } }
 }
 statement {
   def_statement {
@@ -73,6 +127,7 @@ statement {
       nfkc_name: "foo"
       frame: 1
       pos_in_frame: 1
+      pif { start { row: 4 column: 5 pos: 42 } end { row: 4 column: 8 pos: 45 } }
     }
     statement {
       if_statement {
@@ -81,7 +136,11 @@ statement {
             lhs {
               binary_expression {
                 lhs {
-                  string_value: "win32"
+                  string_value {
+                    value: "win32"
+                    pif { start { row: 5 column: 6 pos: 54 } end { row: 5 column: 13 pos: 61 } }
+                  }
+                  pif { start { row: 5 column: 6 pos: 54 } end { row: 5 column: 13 pos: 61 } }
                 }
                 operator: IN
                 rhs {
@@ -90,15 +149,24 @@ statement {
                     nfkc_name: "cpu"
                     frame: 2
                     pos_in_frame: 0
+                    pif { start { row: 5 column: 17 pos: 65 } end { row: 5 column: 20 pos: 68 } }
                   }
+                  pif { start { row: 5 column: 17 pos: 65 } end { row: 5 column: 20 pos: 68 } }
                 }
+                op_pif { start { row: 5 column: 14 pos: 62 } end { row: 5 column: 16 pos: 64 } }
+                pif { start { row: 5 column: 6 pos: 54 } end { row: 5 column: 20 pos: 68 } }
               }
+              pif { start { row: 5 column: 6 pos: 54 } end { row: 5 column: 20 pos: 68 } }
             }
             operator: OR
             rhs {
               binary_expression {
                 lhs {
-                  string_value: "win64"
+                  string_value {
+                    value: "win64"
+                    pif { start { row: 5 column: 24 pos: 72 } end { row: 5 column: 31 pos: 79 } }
+                  }
+                  pif { start { row: 5 column: 24 pos: 72 } end { row: 5 column: 31 pos: 79 } }
                 }
                 operator: IN
                 rhs {
@@ -107,17 +175,32 @@ statement {
                     nfkc_name: "cpu"
                     frame: 2
                     pos_in_frame: 0
+                    pif { start { row: 5 column: 35 pos: 83 } end { row: 5 column: 38 pos: 86 } }
                   }
+                  pif { start { row: 5 column: 35 pos: 83 } end { row: 5 column: 38 pos: 86 } }
                 }
+                op_pif { start { row: 5 column: 32 pos: 80 } end { row: 5 column: 34 pos: 82 } }
+                pif { start { row: 5 column: 24 pos: 72 } end { row: 5 column: 38 pos: 86 } }
               }
+              pif { start { row: 5 column: 24 pos: 72 } end { row: 5 column: 38 pos: 86 } }
             }
+            op_pif { start { row: 5 column: 21 pos: 69 } end { row: 5 column: 23 pos: 71 } }
+            pif { start { row: 5 column: 6 pos: 54 } end { row: 5 column: 38 pos: 86 } }
           }
+          pif { start { row: 5 column: 6 pos: 54 } end { row: 5 column: 38 pos: 86 } }
         }
         statement {
           pass_statement {
+            pif { start { row: 6 column: 5 pos: 92 } end { row: 6 column: 9 pos: 96 } }
           }
+          pif { start { row: 6 column: 5 pos: 92 } end { row: 6 column: 9 pos: 96 } }
         }
+        pif { start { row: 5 column: 3 pos: 51 } end { row: 6 column: 9 pos: 96 } }
       }
+      pif { start { row: 5 column: 3 pos: 51 } end { row: 6 column: 9 pos: 96 } }
     }
+    pif { start { row: 4 column: 1 pos: 38 } end { row: 6 column: 9 pos: 96 } }
   }
+  pif { start { row: 4 column: 1 pos: 38 } end { row: 6 column: 9 pos: 96 } }
 }
+pif { start { row: 1 column: 1 pos: 0 } end { row: 6 column: 9 pos: 96 } }

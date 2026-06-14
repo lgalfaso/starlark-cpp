@@ -1,8 +1,13 @@
 file_binding: "fn"
 statement {
   expression_statement {
-    string_value: "Some comment"
+    string_value {
+      value: "Some comment"
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 19 pos: 18 } }
+    }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 19 pos: 18 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 19 pos: 18 } }
 }
 statement {
   load_statement {
@@ -15,6 +20,10 @@ statement {
         pos_in_frame: 0
       }
       remote_name: "fn"
+      pif { start { row: 2 column: 16 pos: 34 } end { row: 2 column: 20 pos: 38 } }
     }
+    pif { start { row: 2 column: 1 pos: 19 } end { row: 2 column: 21 pos: 39 } }
   }
+  pif { start { row: 2 column: 1 pos: 19 } end { row: 2 column: 21 pos: 39 } }
 }
+pif { start { row: 1 column: 1 pos: 0 } end { row: 2 column: 21 pos: 39 } }

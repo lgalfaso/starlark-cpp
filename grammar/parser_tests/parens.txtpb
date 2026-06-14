@@ -1,3 +1,8 @@
+module_binding: "a"
+module_binding: "b"
+module_binding: "c"
+module_binding: "d"
+module_binding: "e"
 statement {
   assign_statement {
     lhs {
@@ -6,13 +11,22 @@ statement {
         nfkc_name: "a"
         frame: 1
         pos_in_frame: 0
+        pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
       }
+      pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 2 pos: 1 } }
     }
     op: EQUALS
     rhs {
-      int_value: 1
+      int_value {
+        value: 1
+        pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
+      }
+      pif { start { row: 1 column: 5 pos: 4 } end { row: 1 column: 6 pos: 5 } }
     }
+    op_pif { start { row: 1 column: 3 pos: 2 } end { row: 1 column: 4 pos: 3 } }
+    pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 6 pos: 5 } }
   }
+  pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 6 pos: 5 } }
 }
 statement {
   assign_statement {
@@ -22,13 +36,22 @@ statement {
         nfkc_name: "b"
         frame: 1
         pos_in_frame: 1
+        pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 2 pos: 7 } }
       }
+      pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 2 pos: 7 } }
     }
     op: EQUALS
     rhs {
-      int_value: 1
+      int_value {
+        value: 1
+        pif { start { row: 2 column: 5 pos: 10 } end { row: 2 column: 6 pos: 11 } }
+      }
+      pif { start { row: 2 column: 5 pos: 10 } end { row: 2 column: 6 pos: 11 } }
     }
+    op_pif { start { row: 2 column: 3 pos: 8 } end { row: 2 column: 4 pos: 9 } }
+    pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 6 pos: 11 } }
   }
+  pif { start { row: 2 column: 1 pos: 6 } end { row: 2 column: 6 pos: 11 } }
 }
 statement {
   assign_statement {
@@ -38,13 +61,22 @@ statement {
         nfkc_name: "c"
         frame: 1
         pos_in_frame: 2
+        pif { start { row: 3 column: 1 pos: 12 } end { row: 3 column: 2 pos: 13 } }
       }
+      pif { start { row: 3 column: 1 pos: 12 } end { row: 3 column: 2 pos: 13 } }
     }
     op: EQUALS
     rhs {
-      int_value: 1
+      int_value {
+        value: 1
+        pif { start { row: 3 column: 5 pos: 16 } end { row: 3 column: 6 pos: 17 } }
+      }
+      pif { start { row: 3 column: 5 pos: 16 } end { row: 3 column: 6 pos: 17 } }
     }
+    op_pif { start { row: 3 column: 3 pos: 14 } end { row: 3 column: 4 pos: 15 } }
+    pif { start { row: 3 column: 1 pos: 12 } end { row: 3 column: 6 pos: 17 } }
   }
+  pif { start { row: 3 column: 1 pos: 12 } end { row: 3 column: 6 pos: 17 } }
 }
 statement {
   assign_statement {
@@ -54,13 +86,22 @@ statement {
         nfkc_name: "d"
         frame: 1
         pos_in_frame: 3
+        pif { start { row: 4 column: 1 pos: 18 } end { row: 4 column: 2 pos: 19 } }
       }
+      pif { start { row: 4 column: 1 pos: 18 } end { row: 4 column: 2 pos: 19 } }
     }
     op: EQUALS
     rhs {
-      int_value: 1
+      int_value {
+        value: 1
+        pif { start { row: 4 column: 5 pos: 22 } end { row: 4 column: 6 pos: 23 } }
+      }
+      pif { start { row: 4 column: 5 pos: 22 } end { row: 4 column: 6 pos: 23 } }
     }
+    op_pif { start { row: 4 column: 3 pos: 20 } end { row: 4 column: 4 pos: 21 } }
+    pif { start { row: 4 column: 1 pos: 18 } end { row: 4 column: 6 pos: 23 } }
   }
+  pif { start { row: 4 column: 1 pos: 18 } end { row: 4 column: 6 pos: 23 } }
 }
 statement {
   assign_statement {
@@ -70,13 +111,22 @@ statement {
         nfkc_name: "e"
         frame: 1
         pos_in_frame: 4
+        pif { start { row: 5 column: 1 pos: 24 } end { row: 5 column: 2 pos: 25 } }
       }
+      pif { start { row: 5 column: 1 pos: 24 } end { row: 5 column: 2 pos: 25 } }
     }
     op: EQUALS
     rhs {
-      int_value: 1
+      int_value {
+        value: 1
+        pif { start { row: 5 column: 5 pos: 28 } end { row: 5 column: 6 pos: 29 } }
+      }
+      pif { start { row: 5 column: 5 pos: 28 } end { row: 5 column: 6 pos: 29 } }
     }
+    op_pif { start { row: 5 column: 3 pos: 26 } end { row: 5 column: 4 pos: 27 } }
+    pif { start { row: 5 column: 1 pos: 24 } end { row: 5 column: 6 pos: 29 } }
   }
+  pif { start { row: 5 column: 1 pos: 24 } end { row: 5 column: 6 pos: 29 } }
 }
 statement {
   expression_statement {
@@ -87,7 +137,9 @@ statement {
           nfkc_name: "a"
           frame: 1
           pos_in_frame: 0
+          pif { start { row: 6 column: 1 pos: 30 } end { row: 6 column: 2 pos: 31 } }
         }
+        pif { start { row: 6 column: 1 pos: 30 } end { row: 6 column: 2 pos: 31 } }
       }
       if_test {
         identifier {
@@ -95,7 +147,9 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 6 column: 6 pos: 35 } end { row: 6 column: 7 pos: 36 } }
         }
+        pif { start { row: 6 column: 6 pos: 35 } end { row: 6 column: 7 pos: 36 } }
       }
       else_value {
         if_expression {
@@ -105,7 +159,9 @@ statement {
               nfkc_name: "c"
               frame: 1
               pos_in_frame: 2
+              pif { start { row: 6 column: 13 pos: 42 } end { row: 6 column: 14 pos: 43 } }
             }
+            pif { start { row: 6 column: 13 pos: 42 } end { row: 6 column: 14 pos: 43 } }
           }
           if_test {
             identifier {
@@ -113,7 +169,9 @@ statement {
               nfkc_name: "d"
               frame: 1
               pos_in_frame: 3
+              pif { start { row: 6 column: 18 pos: 47 } end { row: 6 column: 19 pos: 48 } }
             }
+            pif { start { row: 6 column: 18 pos: 47 } end { row: 6 column: 19 pos: 48 } }
           }
           else_value {
             identifier {
@@ -121,12 +179,19 @@ statement {
               nfkc_name: "e"
               frame: 1
               pos_in_frame: 4
+              pif { start { row: 6 column: 25 pos: 54 } end { row: 6 column: 26 pos: 55 } }
             }
+            pif { start { row: 6 column: 25 pos: 54 } end { row: 6 column: 26 pos: 55 } }
           }
+          pif { start { row: 6 column: 13 pos: 42 } end { row: 6 column: 26 pos: 55 } }
         }
+        pif { start { row: 6 column: 13 pos: 42 } end { row: 6 column: 26 pos: 55 } }
       }
+      pif { start { row: 6 column: 1 pos: 30 } end { row: 6 column: 26 pos: 55 } }
     }
+    pif { start { row: 6 column: 1 pos: 30 } end { row: 6 column: 26 pos: 55 } }
   }
+  pif { start { row: 6 column: 1 pos: 30 } end { row: 6 column: 26 pos: 55 } }
 }
 statement {
   expression_statement {
@@ -137,7 +202,9 @@ statement {
           nfkc_name: "a"
           frame: 1
           pos_in_frame: 0
+          pif { start { row: 7 column: 1 pos: 56 } end { row: 7 column: 2 pos: 57 } }
         }
+        pif { start { row: 7 column: 1 pos: 56 } end { row: 7 column: 2 pos: 57 } }
       }
       if_test {
         identifier {
@@ -145,7 +212,9 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 7 column: 6 pos: 61 } end { row: 7 column: 7 pos: 62 } }
         }
+        pif { start { row: 7 column: 6 pos: 61 } end { row: 7 column: 7 pos: 62 } }
       }
       else_value {
         if_expression {
@@ -155,7 +224,9 @@ statement {
               nfkc_name: "c"
               frame: 1
               pos_in_frame: 2
+              pif { start { row: 7 column: 14 pos: 69 } end { row: 7 column: 15 pos: 70 } }
             }
+            pif { start { row: 7 column: 14 pos: 69 } end { row: 7 column: 15 pos: 70 } }
           }
           if_test {
             identifier {
@@ -163,7 +234,9 @@ statement {
               nfkc_name: "d"
               frame: 1
               pos_in_frame: 3
+              pif { start { row: 7 column: 19 pos: 74 } end { row: 7 column: 20 pos: 75 } }
             }
+            pif { start { row: 7 column: 19 pos: 74 } end { row: 7 column: 20 pos: 75 } }
           }
           else_value {
             identifier {
@@ -171,12 +244,19 @@ statement {
               nfkc_name: "e"
               frame: 1
               pos_in_frame: 4
+              pif { start { row: 7 column: 26 pos: 81 } end { row: 7 column: 27 pos: 82 } }
             }
+            pif { start { row: 7 column: 26 pos: 81 } end { row: 7 column: 27 pos: 82 } }
           }
+          pif { start { row: 7 column: 14 pos: 69 } end { row: 7 column: 27 pos: 82 } }
         }
+        pif { start { row: 7 column: 13 pos: 68 } end { row: 7 column: 28 pos: 83 } }
       }
+      pif { start { row: 7 column: 1 pos: 56 } end { row: 7 column: 28 pos: 83 } }
     }
+    pif { start { row: 7 column: 1 pos: 56 } end { row: 7 column: 28 pos: 83 } }
   }
+  pif { start { row: 7 column: 1 pos: 56 } end { row: 7 column: 28 pos: 83 } }
 }
 statement {
   expression_statement {
@@ -189,7 +269,9 @@ statement {
               nfkc_name: "a"
               frame: 1
               pos_in_frame: 0
+              pif { start { row: 8 column: 2 pos: 117 } end { row: 8 column: 3 pos: 118 } }
             }
+            pif { start { row: 8 column: 2 pos: 117 } end { row: 8 column: 3 pos: 118 } }
           }
           if_test {
             identifier {
@@ -197,7 +279,9 @@ statement {
               nfkc_name: "b"
               frame: 1
               pos_in_frame: 1
+              pif { start { row: 8 column: 7 pos: 122 } end { row: 8 column: 8 pos: 123 } }
             }
+            pif { start { row: 8 column: 7 pos: 122 } end { row: 8 column: 8 pos: 123 } }
           }
           else_value {
             identifier {
@@ -205,9 +289,13 @@ statement {
               nfkc_name: "c"
               frame: 1
               pos_in_frame: 2
+              pif { start { row: 8 column: 14 pos: 129 } end { row: 8 column: 15 pos: 130 } }
             }
+            pif { start { row: 8 column: 14 pos: 129 } end { row: 8 column: 15 pos: 130 } }
           }
+          pif { start { row: 8 column: 2 pos: 117 } end { row: 8 column: 15 pos: 130 } }
         }
+        pif { start { row: 8 column: 1 pos: 116 } end { row: 8 column: 16 pos: 131 } }
       }
       if_test {
         identifier {
@@ -215,7 +303,9 @@ statement {
           nfkc_name: "d"
           frame: 1
           pos_in_frame: 3
+          pif { start { row: 8 column: 20 pos: 135 } end { row: 8 column: 21 pos: 136 } }
         }
+        pif { start { row: 8 column: 20 pos: 135 } end { row: 8 column: 21 pos: 136 } }
       }
       else_value {
         identifier {
@@ -223,10 +313,15 @@ statement {
           nfkc_name: "e"
           frame: 1
           pos_in_frame: 4
+          pif { start { row: 8 column: 27 pos: 142 } end { row: 8 column: 28 pos: 143 } }
         }
+        pif { start { row: 8 column: 27 pos: 142 } end { row: 8 column: 28 pos: 143 } }
       }
+      pif { start { row: 8 column: 1 pos: 116 } end { row: 8 column: 28 pos: 143 } }
     }
+    pif { start { row: 8 column: 1 pos: 116 } end { row: 8 column: 28 pos: 143 } }
   }
+  pif { start { row: 8 column: 1 pos: 116 } end { row: 8 column: 28 pos: 143 } }
 }
 statement {
   expression_statement {
@@ -239,7 +334,9 @@ statement {
               nfkc_name: "a"
               frame: 2
               pos_in_frame: 0
+              pif { start { row: 10 column: 9 pos: 184 } end { row: 10 column: 10 pos: 185 } }
             }
+            pif { start { row: 10 column: 9 pos: 184 } end { row: 10 column: 10 pos: 185 } }
           }
           if_test {
             identifier {
@@ -247,7 +344,9 @@ statement {
               nfkc_name: "b"
               frame: 2
               pos_in_frame: 1
+              pif { start { row: 10 column: 14 pos: 189 } end { row: 10 column: 15 pos: 190 } }
             }
+            pif { start { row: 10 column: 14 pos: 189 } end { row: 10 column: 15 pos: 190 } }
           }
           else_value {
             identifier {
@@ -255,12 +354,19 @@ statement {
               nfkc_name: "c"
               frame: 2
               pos_in_frame: 2
+              pif { start { row: 10 column: 21 pos: 196 } end { row: 10 column: 22 pos: 197 } }
             }
+            pif { start { row: 10 column: 21 pos: 196 } end { row: 10 column: 22 pos: 197 } }
           }
+          pif { start { row: 10 column: 9 pos: 184 } end { row: 10 column: 22 pos: 197 } }
         }
+        pif { start { row: 10 column: 9 pos: 184 } end { row: 10 column: 22 pos: 197 } }
       }
+      pif { start { row: 10 column: 1 pos: 176 } end { row: 10 column: 22 pos: 197 } }
     }
+    pif { start { row: 10 column: 1 pos: 176 } end { row: 10 column: 22 pos: 197 } }
   }
+  pif { start { row: 10 column: 1 pos: 176 } end { row: 10 column: 22 pos: 197 } }
 }
 statement {
   expression_statement {
@@ -273,7 +379,9 @@ statement {
               nfkc_name: "a"
               frame: 2
               pos_in_frame: 0
+              pif { start { row: 11 column: 10 pos: 207 } end { row: 11 column: 11 pos: 208 } }
             }
+            pif { start { row: 11 column: 10 pos: 207 } end { row: 11 column: 11 pos: 208 } }
           }
           if_test {
             identifier {
@@ -281,7 +389,9 @@ statement {
               nfkc_name: "b"
               frame: 2
               pos_in_frame: 1
+              pif { start { row: 11 column: 15 pos: 212 } end { row: 11 column: 16 pos: 213 } }
             }
+            pif { start { row: 11 column: 15 pos: 212 } end { row: 11 column: 16 pos: 213 } }
           }
           else_value {
             identifier {
@@ -289,12 +399,19 @@ statement {
               nfkc_name: "c"
               frame: 2
               pos_in_frame: 2
+              pif { start { row: 11 column: 22 pos: 219 } end { row: 11 column: 23 pos: 220 } }
             }
+            pif { start { row: 11 column: 22 pos: 219 } end { row: 11 column: 23 pos: 220 } }
           }
+          pif { start { row: 11 column: 10 pos: 207 } end { row: 11 column: 23 pos: 220 } }
         }
+        pif { start { row: 11 column: 9 pos: 206 } end { row: 11 column: 24 pos: 221 } }
       }
+      pif { start { row: 11 column: 1 pos: 198 } end { row: 11 column: 24 pos: 221 } }
     }
+    pif { start { row: 11 column: 1 pos: 198 } end { row: 11 column: 24 pos: 221 } }
   }
+  pif { start { row: 11 column: 1 pos: 198 } end { row: 11 column: 24 pos: 221 } }
 }
 statement {
   expression_statement {
@@ -307,9 +424,13 @@ statement {
               nfkc_name: "a"
               frame: 2
               pos_in_frame: 0
+              pif { start { row: 12 column: 10 pos: 266 } end { row: 12 column: 11 pos: 267 } }
             }
+            pif { start { row: 12 column: 10 pos: 266 } end { row: 12 column: 11 pos: 267 } }
           }
+          pif { start { row: 12 column: 2 pos: 258 } end { row: 12 column: 11 pos: 267 } }
         }
+        pif { start { row: 12 column: 1 pos: 257 } end { row: 12 column: 12 pos: 268 } }
       }
       if_test {
         identifier {
@@ -317,7 +438,9 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 12 column: 16 pos: 272 } end { row: 12 column: 17 pos: 273 } }
         }
+        pif { start { row: 12 column: 16 pos: 272 } end { row: 12 column: 17 pos: 273 } }
       }
       else_value {
         identifier {
@@ -325,10 +448,15 @@ statement {
           nfkc_name: "c"
           frame: 1
           pos_in_frame: 2
+          pif { start { row: 12 column: 23 pos: 279 } end { row: 12 column: 24 pos: 280 } }
         }
+        pif { start { row: 12 column: 23 pos: 279 } end { row: 12 column: 24 pos: 280 } }
       }
+      pif { start { row: 12 column: 1 pos: 257 } end { row: 12 column: 24 pos: 280 } }
     }
+    pif { start { row: 12 column: 1 pos: 257 } end { row: 12 column: 24 pos: 280 } }
   }
+  pif { start { row: 12 column: 1 pos: 257 } end { row: 12 column: 24 pos: 280 } }
 }
 statement {
   expression_statement {
@@ -339,7 +467,9 @@ statement {
           nfkc_name: "a"
           frame: 1
           pos_in_frame: 0
+          pif { start { row: 14 column: 1 pos: 317 } end { row: 14 column: 2 pos: 318 } }
         }
+        pif { start { row: 14 column: 1 pos: 317 } end { row: 14 column: 2 pos: 318 } }
       }
       if_test {
         identifier {
@@ -347,7 +477,9 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 14 column: 6 pos: 322 } end { row: 14 column: 7 pos: 323 } }
         }
+        pif { start { row: 14 column: 6 pos: 322 } end { row: 14 column: 7 pos: 323 } }
       }
       else_value {
         lambda_expression {
@@ -359,7 +491,9 @@ statement {
                   nfkc_name: "c"
                   frame: 2
                   pos_in_frame: 2
+                  pif { start { row: 14 column: 21 pos: 337 } end { row: 14 column: 22 pos: 338 } }
                 }
+                pif { start { row: 14 column: 21 pos: 337 } end { row: 14 column: 22 pos: 338 } }
               }
               if_test {
                 identifier {
@@ -367,7 +501,9 @@ statement {
                   nfkc_name: "d"
                   frame: 2
                   pos_in_frame: 3
+                  pif { start { row: 14 column: 26 pos: 342 } end { row: 14 column: 27 pos: 343 } }
                 }
+                pif { start { row: 14 column: 26 pos: 342 } end { row: 14 column: 27 pos: 343 } }
               }
               else_value {
                 identifier {
@@ -375,14 +511,23 @@ statement {
                   nfkc_name: "e"
                   frame: 2
                   pos_in_frame: 4
+                  pif { start { row: 14 column: 33 pos: 349 } end { row: 14 column: 34 pos: 350 } }
                 }
+                pif { start { row: 14 column: 33 pos: 349 } end { row: 14 column: 34 pos: 350 } }
               }
+              pif { start { row: 14 column: 21 pos: 337 } end { row: 14 column: 34 pos: 350 } }
             }
+            pif { start { row: 14 column: 21 pos: 337 } end { row: 14 column: 34 pos: 350 } }
           }
+          pif { start { row: 14 column: 13 pos: 329 } end { row: 14 column: 34 pos: 350 } }
         }
+        pif { start { row: 14 column: 13 pos: 329 } end { row: 14 column: 34 pos: 350 } }
       }
+      pif { start { row: 14 column: 1 pos: 317 } end { row: 14 column: 34 pos: 350 } }
     }
+    pif { start { row: 14 column: 1 pos: 317 } end { row: 14 column: 34 pos: 350 } }
   }
+  pif { start { row: 14 column: 1 pos: 317 } end { row: 14 column: 34 pos: 350 } }
 }
 statement {
   expression_statement {
@@ -393,7 +538,9 @@ statement {
           nfkc_name: "a"
           frame: 1
           pos_in_frame: 0
+          pif { start { row: 15 column: 1 pos: 351 } end { row: 15 column: 2 pos: 352 } }
         }
+        pif { start { row: 15 column: 1 pos: 351 } end { row: 15 column: 2 pos: 352 } }
       }
       if_test {
         identifier {
@@ -401,7 +548,9 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 15 column: 6 pos: 356 } end { row: 15 column: 7 pos: 357 } }
         }
+        pif { start { row: 15 column: 6 pos: 356 } end { row: 15 column: 7 pos: 357 } }
       }
       else_value {
         lambda_expression {
@@ -413,7 +562,9 @@ statement {
                   nfkc_name: "c"
                   frame: 2
                   pos_in_frame: 2
+                  pif { start { row: 15 column: 22 pos: 372 } end { row: 15 column: 23 pos: 373 } }
                 }
+                pif { start { row: 15 column: 22 pos: 372 } end { row: 15 column: 23 pos: 373 } }
               }
               if_test {
                 identifier {
@@ -421,7 +572,9 @@ statement {
                   nfkc_name: "d"
                   frame: 2
                   pos_in_frame: 3
+                  pif { start { row: 15 column: 27 pos: 377 } end { row: 15 column: 28 pos: 378 } }
                 }
+                pif { start { row: 15 column: 27 pos: 377 } end { row: 15 column: 28 pos: 378 } }
               }
               else_value {
                 identifier {
@@ -429,14 +582,23 @@ statement {
                   nfkc_name: "e"
                   frame: 2
                   pos_in_frame: 4
+                  pif { start { row: 15 column: 34 pos: 384 } end { row: 15 column: 35 pos: 385 } }
                 }
+                pif { start { row: 15 column: 34 pos: 384 } end { row: 15 column: 35 pos: 385 } }
               }
+              pif { start { row: 15 column: 22 pos: 372 } end { row: 15 column: 35 pos: 385 } }
             }
+            pif { start { row: 15 column: 21 pos: 371 } end { row: 15 column: 36 pos: 386 } }
           }
+          pif { start { row: 15 column: 13 pos: 363 } end { row: 15 column: 36 pos: 386 } }
         }
+        pif { start { row: 15 column: 13 pos: 363 } end { row: 15 column: 36 pos: 386 } }
       }
+      pif { start { row: 15 column: 1 pos: 351 } end { row: 15 column: 36 pos: 386 } }
     }
+    pif { start { row: 15 column: 1 pos: 351 } end { row: 15 column: 36 pos: 386 } }
   }
+  pif { start { row: 15 column: 1 pos: 351 } end { row: 15 column: 36 pos: 386 } }
 }
 statement {
   expression_statement {
@@ -447,7 +609,9 @@ statement {
           nfkc_name: "a"
           frame: 1
           pos_in_frame: 0
+          pif { start { row: 16 column: 1 pos: 411 } end { row: 16 column: 2 pos: 412 } }
         }
+        pif { start { row: 16 column: 1 pos: 411 } end { row: 16 column: 2 pos: 412 } }
       }
       if_test {
         identifier {
@@ -455,7 +619,9 @@ statement {
           nfkc_name: "b"
           frame: 1
           pos_in_frame: 1
+          pif { start { row: 16 column: 6 pos: 416 } end { row: 16 column: 7 pos: 417 } }
         }
+        pif { start { row: 16 column: 6 pos: 416 } end { row: 16 column: 7 pos: 417 } }
       }
       else_value {
         lambda_expression {
@@ -467,7 +633,9 @@ statement {
                   nfkc_name: "c"
                   frame: 2
                   pos_in_frame: 2
+                  pif { start { row: 16 column: 22 pos: 432 } end { row: 16 column: 23 pos: 433 } }
                 }
+                pif { start { row: 16 column: 22 pos: 432 } end { row: 16 column: 23 pos: 433 } }
               }
               if_test {
                 identifier {
@@ -475,7 +643,9 @@ statement {
                   nfkc_name: "d"
                   frame: 2
                   pos_in_frame: 3
+                  pif { start { row: 16 column: 27 pos: 437 } end { row: 16 column: 28 pos: 438 } }
                 }
+                pif { start { row: 16 column: 27 pos: 437 } end { row: 16 column: 28 pos: 438 } }
               }
               else_value {
                 identifier {
@@ -483,14 +653,23 @@ statement {
                   nfkc_name: "e"
                   frame: 2
                   pos_in_frame: 4
+                  pif { start { row: 16 column: 34 pos: 444 } end { row: 16 column: 35 pos: 445 } }
                 }
+                pif { start { row: 16 column: 34 pos: 444 } end { row: 16 column: 35 pos: 445 } }
               }
+              pif { start { row: 16 column: 22 pos: 432 } end { row: 16 column: 35 pos: 445 } }
             }
+            pif { start { row: 16 column: 22 pos: 432 } end { row: 16 column: 35 pos: 445 } }
           }
+          pif { start { row: 16 column: 14 pos: 424 } end { row: 16 column: 35 pos: 445 } }
         }
+        pif { start { row: 16 column: 13 pos: 423 } end { row: 16 column: 36 pos: 446 } }
       }
+      pif { start { row: 16 column: 1 pos: 411 } end { row: 16 column: 36 pos: 446 } }
     }
+    pif { start { row: 16 column: 1 pos: 411 } end { row: 16 column: 36 pos: 446 } }
   }
+  pif { start { row: 16 column: 1 pos: 411 } end { row: 16 column: 36 pos: 446 } }
 }
 statement {
   expression_statement {
@@ -503,7 +682,9 @@ statement {
               nfkc_name: "a"
               frame: 1
               pos_in_frame: 0
+              pif { start { row: 17 column: 2 pos: 471 } end { row: 17 column: 3 pos: 472 } }
             }
+            pif { start { row: 17 column: 2 pos: 471 } end { row: 17 column: 3 pos: 472 } }
           }
           if_test {
             identifier {
@@ -511,7 +692,9 @@ statement {
               nfkc_name: "b"
               frame: 1
               pos_in_frame: 1
+              pif { start { row: 17 column: 7 pos: 476 } end { row: 17 column: 8 pos: 477 } }
             }
+            pif { start { row: 17 column: 7 pos: 476 } end { row: 17 column: 8 pos: 477 } }
           }
           else_value {
             lambda_expression {
@@ -521,11 +704,17 @@ statement {
                   nfkc_name: "c"
                   frame: 2
                   pos_in_frame: 2
+                  pif { start { row: 17 column: 22 pos: 491 } end { row: 17 column: 23 pos: 492 } }
                 }
+                pif { start { row: 17 column: 22 pos: 491 } end { row: 17 column: 23 pos: 492 } }
               }
+              pif { start { row: 17 column: 14 pos: 483 } end { row: 17 column: 23 pos: 492 } }
             }
+            pif { start { row: 17 column: 14 pos: 483 } end { row: 17 column: 23 pos: 492 } }
           }
+          pif { start { row: 17 column: 2 pos: 471 } end { row: 17 column: 23 pos: 492 } }
         }
+        pif { start { row: 17 column: 1 pos: 470 } end { row: 17 column: 24 pos: 493 } }
       }
       if_test {
         identifier {
@@ -533,7 +722,9 @@ statement {
           nfkc_name: "d"
           frame: 1
           pos_in_frame: 3
+          pif { start { row: 17 column: 28 pos: 497 } end { row: 17 column: 29 pos: 498 } }
         }
+        pif { start { row: 17 column: 28 pos: 497 } end { row: 17 column: 29 pos: 498 } }
       }
       else_value {
         identifier {
@@ -541,13 +732,14 @@ statement {
           nfkc_name: "e"
           frame: 1
           pos_in_frame: 4
+          pif { start { row: 17 column: 35 pos: 504 } end { row: 17 column: 36 pos: 505 } }
         }
+        pif { start { row: 17 column: 35 pos: 504 } end { row: 17 column: 36 pos: 505 } }
       }
+      pif { start { row: 17 column: 1 pos: 470 } end { row: 17 column: 36 pos: 505 } }
     }
+    pif { start { row: 17 column: 1 pos: 470 } end { row: 17 column: 36 pos: 505 } }
   }
+  pif { start { row: 17 column: 1 pos: 470 } end { row: 17 column: 36 pos: 505 } }
 }
-module_binding: "a"
-module_binding: "b"
-module_binding: "c"
-module_binding: "d"
-module_binding: "e"
+pif { start { row: 1 column: 1 pos: 0 } end { row: 17 column: 36 pos: 505 } }

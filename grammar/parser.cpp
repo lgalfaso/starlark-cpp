@@ -29,6 +29,7 @@ using starlark::ast::Identifier;
 using starlark::ast::IfStmt;
 using starlark::ast::LambdaExpr;
 using starlark::ast::Parameter;
+using starlark::ast::PositionInFile;
 using starlark::ast::Statement;
 using starlark::ast::UnaryExpr;
 using starlark::logging::LogLevel;
@@ -141,11 +142,15 @@ enum class parser_state {
   kParseStatementIf_0,
   kParseStatementIfElif,
   kParseStatementIfElse,
+  kParseStatementIfFinal,
   kParseStatementFor_0,
   kParseStatementFor_1,
   kParseStatementFor_2,
   kParseStatementForFinal,
   kParseStatementExpression_0,
+  kParseStatementAssignFinal,
+  kParseStatementReturnFinal,
+  kParseLoopVariablesFinal,
   kParseSuite,
   kParseSuiteStatementList,
   kParseSimpleStatement,
@@ -153,12 +158,16 @@ enum class parser_state {
   kParseSimpleStatementFinal,
   kParseSmallStatement,
   kParseParameters,
+  kParseParameterFinal,
   kParseExpression,
   kParseExpression_0,
   kParseExpression_1,
+  kParseExpressionFinal,
+  kParseBinaryExpressionFinal,
   kParseTest,
   kParseTest_0,
-  kParseTest_1,
+  kParseIfExpression_1,
+  kParseIfExpressionFinal,
   kParseTestP,
   kParseTestP_0,
   kParseLambda,
@@ -171,6 +180,8 @@ enum class parser_state {
   kParsePrimaryIndex_1,
   kParsePrimaryIndex_2,
   kParsePrimaryIndexFinal,
+  kParseSliceFinal_1,
+  kParseSliceFinal_2,
   kParseOperand,
   kParseOperandExpression_0,
   kParseList,
@@ -185,12 +196,18 @@ enum class parser_state {
   kParseDictFinal,
   kParseEntry,
   kParseEntry_0,
+  kParseEntryFinal,
   kParseCompClauses,
   kParseCompClauses_0,
+  kParseCompClauseFinal,
+  kParseCompClauseForFinal,
+  kParseCompClauseIfFinal,
   kParseArgument,
   kParseArgument_0,
+  kParseArgumentFinal,
   kParseResolveTest,
   kParseResolveExpression,
+  kParseUnaryFinal,
 };
 
 struct frame {
@@ -205,7 +222,6 @@ struct frame {
       Expression* for_loop_variables;
       bool for_loop_variables_first;
     };
-    LambdaExpr* lambda;
     struct {
       Argument* argument;
       Argument* previous_argument;
@@ -229,6 +245,7 @@ struct frame {
       bool found_star_star_parameter;
       bool previous_parameter_was_bare_star;
     };
+    Parameter* parameter;
     struct {
       Expression* expression;
       bool expression_allow_trailing_comma;
@@ -244,6 +261,7 @@ struct frame {
       bool primary_must_be_target = false;
     };
   };
+  Position start;
 };
 
 }  // namespace
@@ -267,12 +285,15 @@ File* parser::parse_file(Arena& arena) {
   create_block({}, {}, result->mutable_module_binding());
   // File block.
   create_block({}, {}, result->mutable_file_binding());
+  *result->mutable_pif()->mutable_start() = lex.current_token().start();
+  *result->mutable_pif()->mutable_end() = lex.current_token().end();
 
   while (lex.current_token().type() != token_type::kEof) {
     if (lex.current_token().type() == token_type::kNewline) {
       lex.next_token();
     } else {
       parse_statement(*result->mutable_statement());
+      *result->mutable_pif()->mutable_end() = result->statement().rbegin()->pif().end();
     }
   }
   assert(parse_parameter_identifiers.empty());
@@ -284,7 +305,6 @@ File* parser::parse_file(Arena& arena) {
   while (!parser_blocks.empty()) {
     drop_block();
   }
-  identifier_positions.clear();
   recover = false;
   found_non_load = false;
   return result;
@@ -424,12 +444,16 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
     frames.pop_back();
     switch (top.state) {
       case parser_state::kParseStatement:
-        if (capture(token_type::kDef)) {
+        if (is_current(token_type::kDef)) {
           found_non_load = true;
           if (!opts.allow_function_definitions) {
             add_error("Function definitions not allowed");
           }
-          DefStmt* def_statement = top.statements->Add()->mutable_def_statement();
+          Statement* statement = top.statements->Add();
+          DefStmt* def_statement = statement->mutable_def_statement();
+          *def_statement->mutable_pif()->mutable_start() = lex.current_token().start();
+          *statement->mutable_pif()->mutable_start() = lex.current_token().start();
+          lex.next_token();
           if (!set_identifier(*def_statement->mutable_function_name())) {
             add_error("Expected an identifier");
             break;
@@ -451,7 +475,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           nested_loops.push_back(0);
           frames.emplace_back(frame{
             .state = parser_state::kParseStatementDefFinal,
-            .def_statement = def_statement,
+            .statement = statement,
           });
           frames.emplace_back(frame{
             .state = parser_state::kParseStatementDef_0,
@@ -466,12 +490,20 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .found_star_star_parameter = false,
             .previous_parameter_was_bare_star = false,
           });
-        } else if (capture(token_type::kIf)) {
+        } else if (is_current(token_type::kIf)) {
           found_non_load = true;
           if (nested_loops.size() == 1 && !opts.allow_top_level_if) {
             add_error("`if` statements are not allowed at the top level");
           }
-          IfStmt* if_statement = top.statements->Add()->mutable_if_statement();
+          Statement* statement = top.statements->Add();
+          IfStmt* if_statement = statement->mutable_if_statement();
+          *statement->mutable_pif()->mutable_start() = lex.current_token().start();
+          *if_statement->mutable_pif()->mutable_start() = lex.current_token().start();
+          lex.next_token();
+          frames.emplace_back(frame{
+            .state = parser_state::kParseStatementIfFinal,
+            .statement = statement,
+          });
           // It is unclear whether the attempt to parse the `elif` and `else` blocks should be
           // defined here or in parse_statement_if_0. This difference is important when there
           // are errors in the parsing and how should we attempt to recover from these errors.
@@ -495,16 +527,21 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::kParseTest,
             .test = if_statement->mutable_test(),
           });
-        } else if (capture(token_type::kFor)) {
+        } else if (is_current(token_type::kFor)) {
           found_non_load = true;
           if (nested_loops.size() == 1 && !opts.allow_top_level_for) {
             add_error("`for` statements are not allowed at the top level");
           }
-          ForStmt* for_statement = top.statements->Add()->mutable_for_statement();
+          Statement* statement = top.statements->Add();
+          ForStmt* for_statement = statement->mutable_for_statement();
+          *for_statement->mutable_pif()->mutable_start() = lex.current_token().start();
+          *statement->mutable_pif()->mutable_start() = lex.current_token().start();
+          lex.next_token();
           Expression* loop_variables = for_statement->mutable_loop_variables();
           nested_loops.back()++;
           frames.emplace_back(frame{
             .state = parser_state::kParseStatementForFinal,
+            .statement = statement,
           });
           frames.emplace_back(frame{
             .state = parser_state::kParseStatementFor_2,
@@ -546,6 +583,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::kParseStatementDefFinal:
+        if (!top.statement->def_statement().statement().empty()) {
+          *top.statement->mutable_def_statement()->mutable_pif()->mutable_end() = top.statement->def_statement().statement().rbegin()->pif().end();
+          *top.statement->mutable_pif()->mutable_end() = top.statement->def_statement().statement().rbegin()->pif().end();
+        }
         drop_block();
         nested_loops.pop_back();
         break;
@@ -559,8 +600,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::kParseStatementIfElif:
-        if (capture(token_type::kElif)) {
+        if (is_current(token_type::kElif)) {
           auto* elif = top.if_statement->add_elif();
+          *elif->mutable_pif()->mutable_start() = lex.current_token().start();
+          lex.next_token();
           frames.emplace_back(top);
           frames.emplace_back(frame{
             .state = parser_state::kParseStatementIf_0,
@@ -584,6 +627,24 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         }
         break;
+      case parser_state::kParseStatementIfFinal:
+        for (auto& elif : *top.statement->mutable_if_statement()->mutable_elif()) {
+          if (!elif.statement().empty()) {
+            *elif.mutable_pif()->mutable_end() = elif.statement().rbegin()->pif().end();
+          }
+        }
+        if (!top.statement->if_statement().else_statement().empty()) {
+          *top.statement->mutable_pif()->mutable_end() = top.statement->if_statement().else_statement().rbegin()->pif().end();
+          *top.statement->mutable_if_statement()->mutable_pif()->mutable_end() = top.statement->if_statement().else_statement().rbegin()->pif().end();
+        } else if (!top.statement->if_statement().elif().empty() &&
+                   !top.statement->if_statement().elif().rbegin()->statement().empty()) {
+          *top.statement->mutable_pif()->mutable_end() = top.statement->if_statement().elif().rbegin()->statement().rbegin()->pif().end();
+          *top.statement->mutable_if_statement()->mutable_pif()->mutable_end() = top.statement->if_statement().elif().rbegin()->statement().rbegin()->pif().end();
+        } else if (!top.statement->if_statement().statement().empty()) {
+          *top.statement->mutable_pif()->mutable_end() = top.statement->if_statement().statement().rbegin()->pif().end();
+          *top.statement->mutable_if_statement()->mutable_pif()->mutable_end() = top.statement->if_statement().statement().rbegin()->pif().end();
+        }
+        break;
       case parser_state::kParseStatementFor_0:
         if (capture(token_type::kComma)) {
           // If there are multiple loop variables, transform it into a tuple.
@@ -591,6 +652,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             Expression* first_test = Arena::Create<Expression>(top.for_loop_variables->GetArena());
             first_test->Swap(top.for_loop_variables);
             first_test->Swap(top.for_loop_variables->mutable_tuple()->add_value());
+            *top.for_loop_variables->mutable_tuple()->mutable_pif()->mutable_start() = top.for_loop_variables->tuple().value(0).pif().start();
+            *top.for_loop_variables->mutable_pif()->mutable_start() = top.for_loop_variables->tuple().value(0).pif().start();
+            frames.emplace_back(frame{
+              .state = parser_state::kParseLoopVariablesFinal,
+              .for_loop_variables = top.for_loop_variables,
+            });
           }
           Expression* loop_variable = top.for_loop_variables->mutable_tuple()->add_value();
           frames.emplace_back(frame{
@@ -631,7 +698,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::kParseStatementForFinal:
+        if (!top.statement->for_statement().statement().empty()) {
+          *top.statement->mutable_for_statement()->mutable_pif()->mutable_end() = top.statement->for_statement().statement().rbegin()->pif().end();
+          *top.statement->mutable_pif()->mutable_end() = top.statement->for_statement().statement().rbegin()->pif().end();
+        }
         nested_loops.back()--;
+        break;
+      case parser_state::kParseLoopVariablesFinal:
+        *top.for_loop_variables->mutable_tuple()->mutable_pif()->mutable_end() = top.for_loop_variables->tuple().value().rbegin()->pif().end();
+        *top.for_loop_variables->mutable_pif()->mutable_end() = top.for_loop_variables->tuple().value().rbegin()->pif().end();
         break;
       case parser_state::kParseSuite:
         if (capture(token_type::kNewline)) {
@@ -703,12 +778,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (nested_loops.size() == 1) {
               add_error("Unexpected RETURN");
             }
-            top.statement->mutable_return_statement();
+            *top.statement->mutable_return_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_return_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
             lex.next_token();
             if (!is_current(token_type::kNewline)) {
               frames.emplace_back(frame{
                 .state = parser_state::kParseResolveExpression,
                 .expression = top.statement->mutable_return_statement()->mutable_expression(),
+              });
+              frames.emplace_back(frame{
+                .state = parser_state::kParseStatementReturnFinal,
+                .statement = top.statement,
               });
               frames.emplace_back(frame{
                 .state = parser_state::kParseExpression,
@@ -725,6 +807,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (nested_loops.size() != 1) {
               add_error("`load` statement not at top level");
             }
+            *top.statement->mutable_load_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
             lex.next_token();
             if (!expect(token_type::kLParen)) {
               break;
@@ -742,6 +826,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               loaded_symbol = true;
               auto* load_param = top.statement->mutable_load_statement()->add_load_param();
+              *load_param->mutable_pif()->mutable_start() = lex.current_token().start();
               if (is_current(token_type::kIdentifier)) {
                 set_identifier(*load_param->mutable_local_name());
                 if (!expect(token_type::kEquals)) {
@@ -757,6 +842,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 add_error(std::string {"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
               }
               load_param->set_remote_name(lex.current_token().string_value());
+              *load_param->mutable_pif()->mutable_end() = lex.current_token().end();
               if (!load_param->has_local_name()) {
                 load_param->mutable_local_name()->set_name(load_param->remote_name());
                 load_param->mutable_local_name()->set_nfkc_name(to_nfkc(load_param->remote_name()));
@@ -778,6 +864,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (!loaded_symbol) {
               add_error("Expect to load at least one symbol");
             }
+            *top.statement->mutable_load_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
             expect(token_type::kRParen);
             break;
           }
@@ -786,7 +874,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (nested_loops.back() == 0) {
               add_error("Unexpected BREAK");
             }
-            top.statement->mutable_break_statement();
+            *top.statement->mutable_break_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_break_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
             lex.next_token();
             break;
           case token_type::kContinue:
@@ -794,16 +885,23 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (nested_loops.back() == 0) {
               add_error("Unexpected CONTINUE");
             }
-            top.statement->mutable_continue_statement();
+            *top.statement->mutable_continue_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_continue_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
             lex.next_token();
             break;
           case token_type::kPass:
             found_non_load = true;
-            top.statement->mutable_pass_statement();
+            *top.statement->mutable_pass_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_pass_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
             lex.next_token();
             break;
           default: {
             found_non_load |= lex.current_token().type() != token_type::kString;
+            *top.statement->mutable_expression_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             frames.emplace_back(frame{
               .state = parser_state::kParseStatementExpression_0,
               .statement = top.statement,
@@ -838,14 +936,22 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             AssignStmt* assign_statement = Arena::Create<AssignStmt>(top.statement->GetArena());
             assign_statement->mutable_lhs()->Swap(top.statement->mutable_expression_statement());
             assign_statement->Swap(top.statement->mutable_assign_statement());
+            *top.statement->mutable_assign_statement()->mutable_pif()->mutable_start() = top.statement->assign_statement().lhs().pif().start();
+            *top.statement->mutable_pif()->mutable_start() = top.statement->assign_statement().lhs().pif().start();
           }
           // Assignements and augmented assignment are considered a binding.
           bind_and_resolve(top.statement->mutable_assign_statement()->mutable_lhs());
           top.statement->mutable_assign_statement()->set_op(op->second);
+          *top.statement->mutable_assign_statement()->mutable_op_pif()->mutable_start() = lex.current_token().start();
+          *top.statement->mutable_assign_statement()->mutable_op_pif()->mutable_end() = lex.current_token().end();
           lex.next_token();
           frames.emplace_back(frame{
             .state = parser_state::kParseResolveExpression,
             .expression = top.statement->mutable_assign_statement()->mutable_rhs(),
+          });
+          frames.emplace_back(frame{
+            .state = parser_state::kParseStatementAssignFinal,
+            .statement = top.statement,
           });
           frames.emplace_back(frame{
             .state = parser_state::kParseExpression,
@@ -853,15 +959,32 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .expression_allow_trailing_comma = false,
           });
         } else {
+          *top.statement->mutable_pif()->mutable_start() = top.statement->expression_statement().pif().start();
+          *top.statement->mutable_pif()->mutable_end() = top.statement->expression_statement().pif().end();
           resolve(top.statement->mutable_expression_statement(), 0);
         }
         break;
       }
+      case parser_state::kParseStatementAssignFinal:
+        *top.statement->mutable_assign_statement()->mutable_pif()->mutable_end() = top.statement->assign_statement().rhs().pif().end();
+        *top.statement->mutable_pif()->mutable_end() = top.statement->assign_statement().rhs().pif().end();
+        break;
+      case parser_state::kParseStatementReturnFinal:
+        *top.statement->mutable_return_statement()->mutable_pif()->mutable_end() = top.statement->return_statement().expression().pif().end();
+        *top.statement->mutable_pif()->mutable_end() = top.statement->return_statement().expression().pif().end();
+        break;
       case parser_state::kParseExpression:
+        *top.expression->mutable_pif()->mutable_start() = lex.current_token().start();
+        frames.emplace_back(frame{
+          .state = parser_state::kParseExpressionFinal,
+          .expression = top.expression,
+          .start = lex.current_token().start(),
+        });
         frames.emplace_back(frame{
           .state = parser_state::kParseExpression_0,
           .expression = top.expression,
           .expression_allow_trailing_comma = top.expression_allow_trailing_comma,
+          .start = top.start,
         });
         frames.emplace_back(frame{
           .state = parser_state::kParseTest,
@@ -872,8 +995,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (is_current(token_type::kComma)) {
           {
             Expression* first_test = Arena::Create<Expression>(top.expression->GetArena());
+            Position start = top.expression->pif().start();
             first_test->Swap(top.expression);
             first_test->Swap(top.expression->mutable_tuple()->add_value());
+            *top.expression->mutable_tuple()->mutable_pif()->mutable_start() = top.start.has_pos() ? top.start : start;
+            *top.expression->mutable_pif()->mutable_start() = start;
           }
           frames.emplace_back(frame{
             .state = parser_state::kParseExpression_1,
@@ -900,13 +1026,21 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::kParseTest,
             .test = top.expression->mutable_tuple()->add_value(),
           });
+        } else {
+          if (!top.expression->tuple().value().empty()) {
+            *top.expression->mutable_tuple()->mutable_pif()->mutable_end() = top.expression->tuple().value().rbegin()->pif().end();
+            *top.expression->mutable_pif()->mutable_end() = top.expression->tuple().value().rbegin()->pif().end();
+          }
         }
+        break;
+      case parser_state::kParseExpressionFinal:
+        *top.expression->mutable_pif()->mutable_start() = top.start;
         break;
       case parser_state::kParseTest:
         if (is_current(token_type::kLambda)) {
           frames.emplace_back(frame{
             .state = parser_state::kParseLambda,
-            .lambda = top.test->mutable_lambda_expression(),
+            .test = top.test,
           });
         } else {
           frames.emplace_back(frame{
@@ -926,9 +1060,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             Expression* new_result = Arena::Create<Expression>(top.test->GetArena());
             new_result->mutable_if_expression()->mutable_if_value()->Swap(top.test);
             new_result->Swap(top.test);
+            *top.test->mutable_if_expression()->mutable_pif()->mutable_start() = top.test->if_expression().if_value().pif().start();
+            *top.test->mutable_pif()->mutable_start() = top.test->if_expression().if_value().pif().start();
           }
           frames.emplace_back(frame{
-            .state = parser_state::kParseTest_1,
+            .state = parser_state::kParseIfExpressionFinal,
+            .test = top.test,
+          });
+          frames.emplace_back(frame{
+            .state = parser_state::kParseIfExpression_1,
             .test = top.test,
           });
           frames.emplace_back(frame{
@@ -938,7 +1078,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         }
         break;
-      case parser_state::kParseTest_1:
+      case parser_state::kParseIfExpression_1:
         if (!expect(token_type::kElse)) {
           break;
         }
@@ -947,19 +1087,32 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           .test = top.test->mutable_if_expression()->mutable_else_value(),
         });
         break;
+      case parser_state::kParseIfExpressionFinal:
+        *top.test->mutable_if_expression()->mutable_pif()->mutable_end() = top.test->if_expression().else_value().pif().end();
+        *top.test->mutable_pif()->mutable_end() = top.test->if_expression().else_value().pif().end();
+        break;
       case parser_state::kParseTestP:
         if (top.test_p_precedence >= MAX_PRECEDENCE) {
           Expression* result_ref = top.test;
           for (;;) {
-            if (capture(token_type::kPlus)) {
+            if (is_current(token_type::kPlus)) {
               result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::PLUS);
-            } else if (capture(token_type::kMinus)) {
+            } else if (is_current(token_type::kMinus)) {
               result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::MINUS);
-            } else if (capture(token_type::kTilde)) {
+            } else if (is_current(token_type::kTilde)) {
               result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::TILDE);
             } else {
               break;
             }
+            *result_ref->mutable_unary_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *result_ref->mutable_pif()->mutable_start() = lex.current_token().start();
+            *result_ref->mutable_unary_expression()->mutable_op_pif()->mutable_start() = lex.current_token().start();
+            *result_ref->mutable_unary_expression()->mutable_op_pif()->mutable_end() = lex.current_token().end();
+            lex.next_token();
+            frames.emplace_back(frame{
+              .state = parser_state::kParseUnaryFinal,
+              .primary = result_ref,
+            });
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
           frames.emplace_back(frame{
@@ -972,10 +1125,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (top.test_p_precedence == operator_precedence().at(token_type::kNot).first) {
           Expression* result_ref = top.test;
           for (;;) {
-            if (!capture(token_type::kNot)) {
+            if (!is_current(token_type::kNot)) {
               break;
             }
             result_ref->mutable_unary_expression()->set_operator_(UnaryExpr::NOT);
+            *result_ref->mutable_unary_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *result_ref->mutable_pif()->mutable_start() = lex.current_token().start();
+            *result_ref->mutable_unary_expression()->mutable_op_pif()->mutable_start() = lex.current_token().start();
+            *result_ref->mutable_unary_expression()->mutable_op_pif()->mutable_end() = lex.current_token().end();
+            lex.next_token();
+            frames.emplace_back(frame{
+              .state = parser_state::kParseUnaryFinal,
+              .primary = result_ref,
+            });
             result_ref = result_ref->mutable_unary_expression()->mutable_test();
           }
           frames.emplace_back(frame{
@@ -1005,7 +1167,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (!top.test_p_0_first) {
             add_error("Comparison operators are not associative. Use parens.");
           }
+          auto token_start = lex.current_token().start();
           lex.next_token();
+          auto token_end = lex.current_token().end();
           if (!expect(token_type::kIn)) {
             break;
           }
@@ -1015,11 +1179,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             new_result->Swap(top.test);
           }
           top.test->mutable_binary_expression()->set_operator_(BinaryExpr::NOT_IN);
+          *top.test->mutable_binary_expression()->mutable_op_pif()->mutable_start() = token_start;
+          *top.test->mutable_binary_expression()->mutable_op_pif()->mutable_end() = token_end;
+          *top.test->mutable_binary_expression()->mutable_pif()->mutable_start() = top.test->binary_expression().lhs().pif().start();
+          *top.test->mutable_pif()->mutable_start() = top.test->binary_expression().lhs().pif().start();
           frames.emplace_back(frame{
             .state = parser_state::kParseTestP_0,
             .test = top.test,
             .test_p_precedence = top.test_p_precedence,
             .test_p_0_first = false,
+          });
+          frames.emplace_back(frame{
+            .state = parser_state::kParseBinaryExpressionFinal,
+            .test = top.test,
           });
           frames.emplace_back(frame{
             .state = parser_state::kParseTestP,
@@ -1035,6 +1207,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (!top.test_p_0_first && top.test_p_precedence == all_operator_precedence.at(token_type::kEqualsEquals).first) {
               add_error("Comparison operators are not associative. Use parens.");
             }
+            auto token_start = lex.current_token().start();
+            auto token_end = lex.current_token().end();
             lex.next_token();
             {
               Expression* new_result = Arena::Create<Expression>(top.test->GetArena());
@@ -1042,11 +1216,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               new_result->Swap(top.test);
             }
             top.test->mutable_binary_expression()->set_operator_(next_op->second.second);
+            *top.test->mutable_binary_expression()->mutable_op_pif()->mutable_start() = token_start;
+            *top.test->mutable_binary_expression()->mutable_op_pif()->mutable_end() = token_end;
+            *top.test->mutable_binary_expression()->mutable_pif()->mutable_start() = top.test->binary_expression().lhs().pif().start();
+            *top.test->mutable_pif()->mutable_start() = top.test->binary_expression().lhs().pif().start();
             frames.emplace_back(frame{
               .state = parser_state::kParseTestP_0,
               .test = top.test,
               .test_p_precedence = top.test_p_precedence,
               .test_p_0_first = false,
+            });
+            frames.emplace_back(frame{
+              .state = parser_state::kParseBinaryExpressionFinal,
+              .test = top.test,
             });
             frames.emplace_back(frame{
               .state = parser_state::kParseTestP,
@@ -1055,6 +1237,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             });
           }
         }
+        break;
+      case parser_state::kParseUnaryFinal:
+        *top.primary->mutable_unary_expression()->mutable_pif()->mutable_end() = top.primary->unary_expression().test().pif().end();
+        *top.primary->mutable_pif()->mutable_end() = top.primary->unary_expression().test().pif().end();
+        break;
+      case parser_state::kParseBinaryExpressionFinal:
+        *top.primary->mutable_binary_expression()->mutable_pif()->mutable_end() = top.primary->binary_expression().rhs().pif().end();
+        *top.primary->mutable_pif()->mutable_end() = top.primary->binary_expression().rhs().pif().end();
         break;
       case parser_state::kParsePrimary:
         frames.emplace_back(frame{
@@ -1073,20 +1263,29 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             Expression* new_result = Arena::Create<Expression>(top.primary->GetArena());
             new_result->mutable_dot_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
+            *top.primary->mutable_dot_expression()->mutable_pif()->mutable_start() = top.primary->dot_expression().primary_expression().pif().start();
+            *top.primary->mutable_pif()->mutable_start() = top.primary->dot_expression().primary_expression().pif().start();
           }
           if (!set_identifier(*top.primary->mutable_dot_expression()->mutable_identifier())) {
             add_error("Expecting IDENTIFIER");
             break;
           }
+          *top.primary->mutable_dot_expression()->mutable_pif()->mutable_end() = top.primary->dot_expression().identifier().pif().end();
+          *top.primary->mutable_pif()->mutable_end() = top.primary->dot_expression().identifier().pif().end();
           frames.emplace_back(top);
         } else if (capture(token_type::kLParen)) {
           {
             Expression* new_result = Arena::Create<Expression>(top.primary->GetArena());
             new_result->mutable_call_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
+            *top.primary->mutable_call_expression()->mutable_pif()->mutable_start() = top.primary->call_expression().primary_expression().pif().start();
+            *top.primary->mutable_pif()->mutable_start() = top.primary->call_expression().primary_expression().pif().start();
           }
           frames.emplace_back(top);
-          if (capture(token_type::kRParen)) {
+          if (is_current(token_type::kRParen)) {
+            *top.primary->mutable_call_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
+            lex.next_token();
             break;
           }
           auto* new_argument = top.primary->mutable_call_expression()->add_argument();
@@ -1106,13 +1305,18 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             Expression* new_result = Arena::Create<Expression>(top.primary->GetArena());
             new_result->mutable_slice_expression()->mutable_primary_expression()->Swap(top.primary);
             new_result->Swap(top.primary);
+            *top.primary->mutable_slice_expression()->mutable_pif()->mutable_start() = top.primary->slice_expression().primary_expression().pif().start();
+            *top.primary->mutable_pif()->mutable_start() = top.primary->slice_expression().primary_expression().pif().start();
           }
           frames.emplace_back(top);
           frames.emplace_back(frame{
             .state = parser_state::kParsePrimaryIndexFinal,
+            .primary = top.primary,
           });
-          if (capture(token_type::kColon)) {
-            top.primary->mutable_slice_expression()->mutable_slice();
+          if (is_current(token_type::kColon)) {
+            *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_end() = lex.current_token().end();
+            lex.next_token();
             frames.emplace_back(frame{
               .state = parser_state::kParsePrimaryIndex_1,
               .primary = top.primary,
@@ -1144,7 +1348,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::kParsePrimaryCall_0:
         if (capture(token_type::kComma)) {
-          if (capture(token_type::kRParen)) {
+          if (is_current(token_type::kRParen)) {
+            *top.primary->mutable_call_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
+            lex.next_token();
             break;
           }
           auto* new_argument = top.primary->mutable_call_expression()->add_argument();
@@ -1160,16 +1367,22 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .previous_argument = top.previous_call_argument,
           });
         } else {
+          *top.primary->mutable_call_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
           expect(token_type::kRParen);
         }
         break;
       case parser_state::kParsePrimaryIndex_0:
-        if (capture(token_type::kColon)) {
+        if (is_current(token_type::kColon)) {
           {
             Expression* expression = Arena::Create<Expression>(top.primary->GetArena());
+            auto start = top.primary->slice_expression().index().pif().start();
             expression->Swap(top.primary->mutable_slice_expression()->mutable_index());
             top.primary->mutable_slice_expression()->mutable_slice()->mutable_start()->Swap(expression);
+            *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_start() = start;
+            *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_end() = lex.current_token().end();
           }
+          lex.next_token();
           frames.emplace_back(frame{
             .state = parser_state::kParsePrimaryIndex_1,
             .primary = top.primary,
@@ -1191,39 +1404,81 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         if (!is_current(token_type::kColon) && !is_current(token_type::kRBracket)) {
           frames.emplace_back(frame{
+            .state = parser_state::kParseSliceFinal_1,
+            .test = top.primary,
+          });
+          frames.emplace_back(frame{
             .state = parser_state::kParseTest,
             .test = top.primary->mutable_slice_expression()->mutable_slice()->mutable_end(),
           });
         }
         break;
       case parser_state::kParsePrimaryIndex_2:
-        if (capture(token_type::kColon) && !is_current(token_type::kRBracket)) {
-          frames.emplace_back(frame{
-            .state = parser_state::kParseTest,
-            .test = top.primary->mutable_slice_expression()->mutable_slice()->mutable_step(),
-          });
+        if (is_current(token_type::kColon)) {
+          *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_end() = lex.current_token().end();
+          lex.next_token();
+          if (!is_current(token_type::kRBracket)) {
+            frames.emplace_back(frame{
+              .state = parser_state::kParseSliceFinal_2,
+              .test = top.primary,
+            });
+            frames.emplace_back(frame{
+              .state = parser_state::kParseTest,
+              .test = top.primary->mutable_slice_expression()->mutable_slice()->mutable_step(),
+            });
+          }
         }
         break;
       case parser_state::kParsePrimaryIndexFinal:
+        *top.primary->mutable_slice_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
+        *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
         expect(token_type::kRBracket);
+        break;
+      case parser_state::kParseSliceFinal_1:
+        *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_end() = top.primary->slice_expression().slice().end().pif().end();
+        break;
+      case parser_state::kParseSliceFinal_2:
+        *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_end() = top.primary->slice_expression().slice().step().pif().end();
         break;
       case parser_state::kParseOperand:
         if (is_current(token_type::kInt)) {
-          top.primary->set_int_value(lex.current_token().int_value());
+          top.primary->mutable_int_value()->set_value(lex.current_token().int_value());
+          *top.primary->mutable_int_value()->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_int_value()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
           lex.next_token();
         } else if (is_current(token_type::kBigInt)) {
-          top.primary->set_big_int_value(lex.current_token().big_int_value().to_string(10, false));
+          top.primary->mutable_big_int_value()->set_value(lex.current_token().big_int_value().to_string(10, false));
+          *top.primary->mutable_big_int_value()->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_big_int_value()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
           lex.next_token();
         } else if (is_current(token_type::kIdentifier)) {
+          *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
           set_identifier(*top.primary->mutable_identifier());
         } else if (is_current(token_type::kFloat)) {
-          top.primary->set_float_value(lex.current_token().double_value());
+          top.primary->mutable_float_value()->set_value(lex.current_token().double_value());
+          *top.primary->mutable_float_value()->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_float_value()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
           lex.next_token();
         } else if (is_current(token_type::kString)) {
-          top.primary->set_string_value(lex.current_token().string_value());
+          top.primary->mutable_string_value()->set_value(lex.current_token().string_value());
+          *top.primary->mutable_string_value()->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_string_value()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
           lex.next_token();
         } else if (is_current(token_type::kBytes)) {
-          top.primary->set_bytes_value(lex.current_token().string_value());
+          top.primary->mutable_bytes_value()->set_value(lex.current_token().string_value());
+          *top.primary->mutable_bytes_value()->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_bytes_value()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
           lex.next_token();
         } else if (is_current(token_type::kLBracket)) {
           frames.emplace_back(frame{
@@ -1235,17 +1490,26 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .state = parser_state::kParseDict,
             .primary = top.primary,
           });
-        } else if (capture(token_type::kLParen)) {
-          if (capture(token_type::kRParen)) {
-            top.primary->mutable_tuple();
+        } else if (is_current(token_type::kLParen)) {
+          auto start = lex.current_token().start();
+          *top.primary->mutable_pif()->mutable_start() = start;
+          lex.next_token();
+          if (is_current(token_type::kRParen)) {
+            *top.primary->mutable_tuple()->mutable_pif()->mutable_start() = start;
+            *top.primary->mutable_tuple()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
+            lex.next_token();
           } else {
             frames.emplace_back(frame{
               .state = parser_state::kParseOperandExpression_0,
+              .expression = top.primary,
+              .start = start,
             });
             frames.emplace_back(frame{
               .state = parser_state::kParseExpression,
               .expression = top.primary,
               .expression_allow_trailing_comma = true,
+              .start = start,
             });
           }
         } else {
@@ -1253,16 +1517,26 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::kParseOperandExpression_0:
+        if (top.expression->expression_type_case() == Expression::kTuple &&
+            top.start.pos() == top.expression->tuple().pif().start().pos()) {
+          *top.expression->mutable_tuple()->mutable_pif()->mutable_end() = lex.current_token().end();
+        }
+        *top.expression->mutable_pif()->mutable_start() = top.start;
+        *top.expression->mutable_pif()->mutable_end() = lex.current_token().end();
         if (!expect(token_type::kRParen)) {
           break;
         }
         break;
       case parser_state::kParseList:
+        *top.primary->mutable_list_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
+        *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
         if (!expect(token_type::kLBracket)) {
           break;
         }
-        if (capture(token_type::kRBracket)) {
-          top.primary->mutable_list_expression();
+        if (is_current(token_type::kRBracket)) {
+          *top.primary->mutable_list_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
+          lex.next_token();
           break;
         }
 
@@ -1285,8 +1559,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kFor:
             {
               Expression* expression = Arena::Create<Expression>(top.primary->GetArena());
+              PositionInFile* pif = Arena::Create<PositionInFile>(top.primary->GetArena());
               expression->Swap(&top.primary->mutable_list_expression()->mutable_element()->at(0));
+              pif->Swap(top.primary->mutable_list_expression()->mutable_pif());
               expression->Swap(top.primary->mutable_list_comprehension()->mutable_test());
+              pif->Swap(top.primary->mutable_list_comprehension()->mutable_pif());
             }
             parser_blocks.back().id_store = top.primary->mutable_list_comprehension()->mutable_comprehension_binding();
             frames.emplace_back(frame{
@@ -1329,19 +1606,26 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         drop_block();
         if (top.primary->expression_type_case() == Expression::kListComprehension) {
           resolve(top.primary->mutable_list_comprehension()->mutable_clause(0)->mutable_for_clause()->mutable_in(), 1);
+          *top.primary->mutable_list_comprehension()->mutable_pif()->mutable_end() = lex.current_token().end();
+        } else {
+          *top.primary->mutable_list_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
         }
-        if (!expect(token_type::kRBracket)) {
-          break;
-        }
+        *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
+        expect(token_type::kRBracket);
         break;
       case parser_state::kParseDict:
+        *top.primary->mutable_dictionary_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
+        *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
         if (!expect(token_type::kLBrace)) {
           break;
         }
-        if (capture(token_type::kRBrace)) {
-          top.primary->mutable_dictionary_expression();
+        if (is_current(token_type::kRBrace)) {
+          *top.primary->mutable_dictionary_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
+          *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
+          lex.next_token();
           break;
         }
+
         create_block({}, {}, nullptr);
         frames.emplace_back(frame{
           .state = parser_state::kParseDictFinal,
@@ -1361,8 +1645,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kFor:
             {
               Entry* entry = Arena::Create<Entry>(top.primary->GetArena());
+              PositionInFile* pif = Arena::Create<PositionInFile>(top.primary->GetArena());
               entry->Swap(&top.primary->mutable_dictionary_expression()->mutable_entry()->at(0));
+              pif->Swap(top.primary->mutable_dictionary_expression()->mutable_pif());
               entry->Swap(top.primary->mutable_dictionary_comprehension()->mutable_entry());
+              pif->Swap(top.primary->mutable_dictionary_comprehension()->mutable_pif());
             }
             parser_blocks.back().id_store = top.primary->mutable_dictionary_comprehension()->mutable_comprehension_binding();
             frames.emplace_back(frame{
@@ -1406,10 +1693,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         drop_block();
         if (top.primary->expression_type_case() == Expression::kDictionaryComprehension) {
           resolve(top.primary->mutable_dictionary_comprehension()->mutable_clause(0)->mutable_for_clause()->mutable_in(), 1);
+          *top.primary->mutable_dictionary_comprehension()->mutable_pif()->mutable_end() = lex.current_token().end();
+        } else {
+          *top.primary->mutable_dictionary_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
         }
+        *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
         expect(token_type::kRBrace);
         break;
       case parser_state::kParseEntry:
+        *top.entry->mutable_pif()->mutable_start() = lex.current_token().start();
+        frames.emplace_back(frame{
+          .state = parser_state::kParseEntryFinal,
+          .entry = top.entry,
+        });
         frames.emplace_back(frame{
           .state = parser_state::kParseEntry_0,
           .entry = top.entry,
@@ -1428,14 +1724,24 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           .test = top.entry->mutable_value(),
         });
         break;
+      case parser_state::kParseEntryFinal:
+        *top.entry->mutable_pif()->mutable_end() = top.entry->value().pif().end();
+        break;
       case parser_state::kParseCompClauses:
-        if (capture(token_type::kFor)) {
+        if (is_current(token_type::kFor)) {
           auto* comp_clause = top.comp_clauses->Add();
           auto* comp_clause_primary = comp_clause->mutable_for_clause()->mutable_loop_variables();
+          *comp_clause->mutable_pif()->mutable_start() = lex.current_token().start();
+          *comp_clause->mutable_for_clause()->mutable_pif()->mutable_start() = lex.current_token().start();
+          lex.next_token();
           frames.emplace_back(frame{
             .state = parser_state::kParseCompClauses,
             .comp_clauses = top.comp_clauses,
             .first_comp_clause = false,
+          });
+          frames.emplace_back(frame{
+            .state = parser_state::kParseCompClauseForFinal,
+            .comp_clause = comp_clause,
           });
           frames.emplace_back(frame{
             .state = parser_state::kParseCompClauses_0,
@@ -1449,19 +1755,26 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .primary = comp_clause_primary,
             .primary_must_be_target = true,
           });
-        } else if (capture(token_type::kIf)) {
+        } else if (is_current(token_type::kIf)) {
           auto* comp_clause = top.comp_clauses->Add();
+          *comp_clause->mutable_pif()->mutable_start() = lex.current_token().start();
+          *comp_clause->mutable_if_clause()->mutable_pif()->mutable_start() = lex.current_token().start();
+          lex.next_token();
           frames.emplace_back(top);
           frames.emplace_back(frame{
             .state = parser_state::kParseResolveTest,
-            .test = comp_clause->mutable_if_clause(),
+            .test = comp_clause->mutable_if_clause()->mutable_test(),
+          });
+          frames.emplace_back(frame{
+            .state = parser_state::kParseCompClauseIfFinal,
+            .comp_clause = comp_clause,
           });
           // Have to avoid parsing this as an `IfExpr`.
           // This is also not allowing a lambda to be used.
           // Context: https://github.com/bazelbuild/bazel/issues/24469
           frames.emplace_back(frame{
             .state = parser_state::kParseTestP,
-            .test = comp_clause->mutable_if_clause(),
+            .test = comp_clause->mutable_if_clause()->mutable_test(),
             .test_p_precedence = 0,
           });
         }
@@ -1473,6 +1786,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             Expression* first_primary = Arena::Create<Expression>(top.comp_clause_primary->GetArena());
             first_primary->Swap(top.comp_clause_primary);
             first_primary->Swap(top.comp_clause_primary->mutable_tuple()->add_value());
+            *top.comp_clause_primary->mutable_tuple()->mutable_pif()->mutable_start() = top.comp_clause_primary->tuple().value(0).pif().start();
+            *top.comp_clause_primary->mutable_pif()->mutable_start() = top.comp_clause_primary->tuple().value(0).pif().start();
+            frames.emplace_back(frame{
+              .state = parser_state::kParseCompClauseFinal,
+              .comp_clause_primary = top.comp_clause_primary,
+            });
           }
           auto* comp_clause_primary = top.comp_clause_primary->mutable_tuple()->add_value();
           frames.emplace_back(frame{
@@ -1507,13 +1826,30 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         }
         break;
+      case parser_state::kParseCompClauseFinal:
+        *top.comp_clause_primary->mutable_tuple()->mutable_pif()->mutable_end() = top.comp_clause_primary->tuple().value().rbegin()->pif().end();
+        *top.comp_clause_primary->mutable_pif()->mutable_end() = top.comp_clause_primary->tuple().value().rbegin()->pif().end();
+        break;
+      case parser_state::kParseCompClauseForFinal:
+        *top.comp_clause->mutable_for_clause()->mutable_pif()->mutable_end() = top.comp_clause->for_clause().in().pif().end();
+        *top.comp_clause->mutable_pif()->mutable_end() = top.comp_clause->for_clause().in().pif().end();
+        break;
+      case parser_state::kParseCompClauseIfFinal:
+        *top.comp_clause->mutable_if_clause()->mutable_pif()->mutable_end() = top.comp_clause->if_clause().test().pif().end();
+        *top.comp_clause->mutable_pif()->mutable_end() = top.comp_clause->if_clause().test().pif().end();
+        break;
       case parser_state::kParseArgument:
+        *top.argument->mutable_pif()->mutable_start() = lex.current_token().start();
+        frames.emplace_back(frame{
+          .state = parser_state::kParseArgumentFinal,
+          .argument = top.argument,
+        });
         // Check that the order is (not all elements must be present, but the order is strict):
         // - positional arguments
         // - keyword arguments
         // - At most one *args
         // - At most one **kwargs
-        if (capture(token_type::kStar)) {
+        if (is_current(token_type::kStar)) {
           if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
@@ -1527,10 +1863,16 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("**kwargs must be the last argument");
           }
           frames.emplace_back(frame{
+            .state = parser_state::kParseExpressionFinal,
+            .expression = top.argument->mutable_star_argument(),
+            .start = lex.current_token().start(),
+          });
+          lex.next_token();
+          frames.emplace_back(frame{
             .state = parser_state::kParseTest,
             .test = top.argument->mutable_star_argument(),
           });
-        } else if (capture(token_type::kStarStar)) {
+        } else if (is_current(token_type::kStarStar)) {
           if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
             add_error("Varadic arguments are not allowed");
@@ -1539,6 +1881,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               top.previous_argument->has_star_star_argument()) {
             add_error("Duplicate **kwargs");
           }
+          frames.emplace_back(frame{
+            .state = parser_state::kParseExpressionFinal,
+            .expression = top.argument->mutable_star_star_argument(),
+            .start = lex.current_token().start(),
+          });
+          lex.next_token();
           frames.emplace_back(frame{
             .state = parser_state::kParseTest,
             .test = top.argument->mutable_star_star_argument(),
@@ -1575,6 +1923,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             id->Swap(top.argument->mutable_value()->mutable_identifier());
             id->Swap(top.argument->mutable_named_argument()->mutable_identifier());
           }
+          *top.argument->mutable_named_argument()->mutable_pif()->mutable_start() = top.argument->named_argument().identifier().pif().start();
           frames.emplace_back(frame{
             .state = parser_state::kParseTest,
             .test = top.argument->mutable_named_argument()->mutable_value(),
@@ -1586,18 +1935,40 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
         }
         break;
+      case parser_state::kParseArgumentFinal:
+        switch (top.argument->argument_type_case()) {
+          case Argument::kValue:
+            *top.argument->mutable_pif()->mutable_end() = top.argument->value().pif().end();
+            break;
+          case Argument::kNamedArgument:
+            *top.argument->mutable_named_argument()->mutable_pif()->mutable_end() = top.argument->named_argument().value().pif().end();
+            *top.argument->mutable_pif()->mutable_end() = top.argument->named_argument().pif().end();
+            break;
+          case Argument::kStarArgument:
+            *top.argument->mutable_pif()->mutable_end() = top.argument->star_argument().pif().end();
+            break;
+          case Argument::kStarStarArgument:
+            *top.argument->mutable_pif()->mutable_end() = top.argument->star_star_argument().pif().end();
+            break;
+          case Argument::ARGUMENT_TYPE_NOT_SET:
+            assert(false);
+            break;
+        }
+        break;
       case parser_state::kParseLambda:
         if (!opts.allow_function_definitions) {
           add_error("Function definitions not allowed");
         }
+        *top.test->mutable_pif()->mutable_start() = lex.current_token().start();
+        *top.test->mutable_lambda_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
         expect(token_type::kLambda);
         frames.emplace_back(frame{
           .state = parser_state::kParseLambda_0,
-          .lambda = top.lambda,
+          .test = top.test,
         });
         frames.emplace_back(frame{
           .state = parser_state::kParseParameters,
-          .parameters = top.lambda->mutable_parameter(),
+          .parameters = top.test->mutable_lambda_expression()->mutable_parameter(),
           .parse_parameters_allow_trailing_comma = false,
           .parse_parameters_first = true,
           .found_star_parameter = false,
@@ -1608,25 +1979,27 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::kParseLambda_0:
         create_block(parse_parameter_identifiers.back().first,
                      parse_parameter_identifiers.back().second,
-                     top.lambda->mutable_function_binding());
+                     top.test->mutable_lambda_expression()->mutable_function_binding());
         parse_parameter_identifiers.pop_back();
         frames.emplace_back(frame{
           .state = parser_state::kParseLambdaFinal,
-          .lambda = top.lambda,
+          .test = top.test,
         });
         if (!expect(token_type::kColon)) {
           break;
         }
         frames.emplace_back(frame{
           .state = parser_state::kParseResolveTest,
-          .test = top.lambda->mutable_test(),
+          .test = top.test->mutable_lambda_expression()->mutable_test(),
         });
         frames.emplace_back(frame{
           .state = parser_state::kParseTest,
-          .test = top.lambda->mutable_test(),
+          .test = top.test->mutable_lambda_expression()->mutable_test(),
         });
         break;
       case parser_state::kParseLambdaFinal:
+        *top.test->mutable_lambda_expression()->mutable_pif()->mutable_end() = top.test->lambda_expression().test().pif().end();
+        *top.test->mutable_pif()->mutable_end() = top.test->lambda_expression().test().pif().end();
         drop_block();
         break;
       case parser_state::kParseParameters:
@@ -1648,6 +2021,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .previous_parameter_was_bare_star = false,
             });
             Parameter* param = top.parameters->Add();
+            *param->mutable_pif()->mutable_start() = lex.current_token().start();
             set_identifier(*param->mutable_identifier());
             if (capture(token_type::kEquals)) {
               frames.emplace_back(frame{
@@ -1655,9 +2029,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 .test = param->mutable_initialization(),
               });
               frames.emplace_back(frame{
+                .state = parser_state::kParseParameterFinal,
+                .parameter = param,
+              });
+              frames.emplace_back(frame{
                 .state = parser_state::kParseTest,
                 .test = param->mutable_initialization(),
               });
+            } else {
+              *param->mutable_pif()->mutable_end() = param->identifier().pif().end();
             }
             if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
               add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
@@ -1665,13 +2045,19 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             // The parameters need to be resolved. The issue is that the block does not yet exists so there
             // is a need to store the Identifiers and resolve them later.
             parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
-          } else if (capture(token_type::kStar)) {
+          } else if (is_current(token_type::kStar)) {
             if (top.found_star_parameter) {
               add_error("* argument may appear only once");
             }
             if (top.found_star_star_parameter) {
               add_error("arguments cannot follow var-keyword argument");
             }
+            Parameter* param = top.parameters->Add();
+            *param->mutable_star()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *param->mutable_star()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *param->mutable_pif()->mutable_start() = lex.current_token().start();
+            *param->mutable_pif()->mutable_end() = lex.current_token().end();
+            lex.next_token();
             frames.emplace_back(frame{
               .state = parser_state::kParseParameters,
               .parameters = top.parameters,
@@ -1681,22 +2067,27 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_star_star_parameter = top.found_star_star_parameter,
               .previous_parameter_was_bare_star = !is_current(token_type::kIdentifier),
             });
-            Parameter* param = top.parameters->Add();
-            param->mutable_star();
             if (is_current(token_type::kIdentifier)) {
+              *param->mutable_star()->mutable_pif()->mutable_end() = lex.current_token().end();
               set_identifier(*param->mutable_identifier());
               if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
                 add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
               }
               parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
-          } else if (capture(token_type::kStarStar)) {
+          } else if (is_current(token_type::kStarStar)) {
             if (top.previous_parameter_was_bare_star) {
               add_error("named arguments must follow bare *");
             }
             if (top.found_star_star_parameter) {
               add_error("arguments cannot follow var-keyword argument");
             }
+            Parameter* param = top.parameters->Add();
+            *param->mutable_star_star()->mutable_pif()->mutable_start() = lex.current_token().start();
+            *param->mutable_star_star()->mutable_pif()->mutable_end() = lex.current_token().end();
+            *param->mutable_pif()->mutable_start() = lex.current_token().start();
+            lex.next_token();
+            *param->mutable_pif()->mutable_end() = lex.current_token().end();
             frames.emplace_back(frame{
               .state = parser_state::kParseParameters,
               .parameters = top.parameters,
@@ -1706,8 +2097,6 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_star_star_parameter = true,
               .previous_parameter_was_bare_star = false,
             });
-            Parameter* param = top.parameters->Add();
-            param->mutable_star_star();
             if (!set_identifier(*param->mutable_identifier())) {
               add_error("Expected identifier after STAR_STAR when parsing parameters");
             } else {
@@ -1729,6 +2118,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             add_error("named arguments must follow bare *");
           }
         }
+        break;
+      case parser_state::kParseParameterFinal:
+        *top.parameter->mutable_pif()->mutable_end() = top.parameter->initialization().pif().end();
         break;
       case parser_state::kParseResolveTest:
         resolve(top.test, 0);
@@ -1809,7 +2201,8 @@ bool parser::set_identifier(Identifier& identifier) {
   auto name = lex.current_token().string_value();
   identifier.set_name(name);
   identifier.set_nfkc_name(to_nfkc(name));
-  identifier_positions[&identifier] = lex.current_token().start();
+  *identifier.mutable_pif()->mutable_start() = lex.current_token().start();
+  *identifier.mutable_pif()->mutable_end() = lex.current_token().end();
   lex.next_token();
   return true;
 }
@@ -1831,7 +2224,7 @@ void parser::drop_block() {
     auto pos = parser_blocks.back().identifiers.find(entry_id->nfkc_name());
     if (pos == parser_blocks.back().identifiers.end()) {
       if (parser_blocks.size() == 1) {
-        add_error(std::format("name '{}' is not defined", entry_id->name()), identifier_positions[entry_id]);
+        add_error(std::format("name '{}' is not defined", entry_id->name()), entry_id->pif().start());
         entry_id->set_frame(-1);
         entry_id->set_pos_in_frame(-1);
       } else {

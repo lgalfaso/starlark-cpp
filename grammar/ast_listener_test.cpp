@@ -373,43 +373,43 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT NoneValue\n";
   }
 
-  void enter_int_value(std::int64_t int_value) override {
-    output += "ENTER IntValue(" + std::to_string(int_value) + ")\n";
+  void enter_int_value(const starlark::ast::IntValue* int_value) override {
+    output += "ENTER IntValue(" + std::to_string(int_value->value()) + ")\n";
   }
 
-  void exit_int_value(std::int64_t int_value) override {
+  void exit_int_value(const starlark::ast::IntValue* int_value) override {
     output += "EXIT IntValue\n";
   }
 
-  void enter_big_int_value(std::string_view big_int_value) override {
-    output += "ENTER BigIntValue(" + starlark::grammar::quoted(big_int_value) + ")\n";
+  void enter_big_int_value(const starlark::ast::StringValue* big_int_value) override {
+    output += "ENTER BigIntValue(" + starlark::grammar::quoted(big_int_value->value()) + ")\n";
   }
 
-  void exit_big_int_value(std::string_view big_int_value) override {
+  void exit_big_int_value(const starlark::ast::StringValue* big_int_value) override {
     output += "EXIT BigIntValue\n";
   }
 
-  void enter_float_value(double float_value) override {
-    output += "ENTER FloatValue(" + std::to_string(float_value) + ")\n";
+  void enter_float_value(const starlark::ast::FloatValue* float_value) override {
+    output += "ENTER FloatValue(" + std::to_string(float_value->value()) + ")\n";
   }
 
-  void exit_float_value(double float_value) override {
+  void exit_float_value(const starlark::ast::FloatValue* float_value) override {
     output += "EXIT FloatValue\n";
   }
 
-  void enter_string_value(std::string_view string_value) override {
-    output += "ENTER StringValue(" + starlark::grammar::quoted(string_value) + ")\n";
+  void enter_string_value(const starlark::ast::StringValue* string_value) override {
+    output += "ENTER StringValue(" + starlark::grammar::quoted(string_value->value()) + ")\n";
   }
 
-  void exit_string_value(std::string_view string_value) override {
+  void exit_string_value(const starlark::ast::StringValue* string_value) override {
     output += "EXIT StringValue\n";
   }
 
-  void enter_bytes_value(std::string_view bytes_value) override {
-    output += "ENTER BytesValue(" + starlark::grammar::quoted(bytes_value) + ")\n";
+  void enter_bytes_value(const starlark::ast::StringValue* bytes_value) override {
+    output += "ENTER BytesValue(" + starlark::grammar::quoted(bytes_value->value()) + ")\n";
   }
 
-  void exit_bytes_value(std::string_view bytes_value) override {
+  void exit_bytes_value(const starlark::ast::StringValue* bytes_value) override {
     output += "EXIT BytesValue\n";
   }
 
@@ -473,11 +473,11 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
     output += "EXIT ForClause\n";
   }
 
-  void enter_if_clause(const starlark::ast::Expression* if_clause) override {
+  void enter_if_clause(const starlark::ast::IfClause* if_clause) override {
     output += "ENTER IfClause\n";
   }
 
-  void exit_if_clause(const starlark::ast::Expression* if_clause) override {
+  void exit_if_clause(const starlark::ast::IfClause* if_clause) override {
     output += "EXIT IfClause\n";
   }
 

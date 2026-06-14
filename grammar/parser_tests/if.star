@@ -22,3 +22,17 @@ def foo():
   elif b: 2
   elif c: 3
   else: 4
+
+  if a:
+    1
+    return
+  elif b:
+    2
+    return
+  elif c:
+    3
+    return
+  else:
+   4
+   return
+
