@@ -1355,6 +1355,59 @@ TEST(Number, ParseNumber) {
             parse_number("0o77777777777777777777777777777777777777777777777777777777777777777777777777777777", nullptr, 0).to_string(8, false));
   EXPECT_EQ("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
             parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", nullptr, 0).to_string(16, false));
+  EXPECT_EQ("b0", parse_number("0b0", nullptr, 16).to_string(16, false));
+  /*`Python
+  for i in range(12, 37):
+      print(f'  EXPECT_EQ("{int('0b216', i)}", parse_number("0b216", nullptr, {i}).to_string(10, false));')
+  */
+  EXPECT_EQ("19314", parse_number("0b216", nullptr, 12).to_string(10, false));
+  EXPECT_EQ("24524", parse_number("0b216", nullptr, 13).to_string(10, false));
+  EXPECT_EQ("30596", parse_number("0b216", nullptr, 14).to_string(10, false));
+  EXPECT_EQ("37596", parse_number("0b216", nullptr, 15).to_string(10, false));
+  EXPECT_EQ("45590", parse_number("0b216", nullptr, 16).to_string(10, false));
+  EXPECT_EQ("54644", parse_number("0b216", nullptr, 17).to_string(10, false));
+  EXPECT_EQ("64824", parse_number("0b216", nullptr, 18).to_string(10, false));
+  EXPECT_EQ("76196", parse_number("0b216", nullptr, 19).to_string(10, false));
+  EXPECT_EQ("88826", parse_number("0b216", nullptr, 20).to_string(10, false));
+  EXPECT_EQ("102780", parse_number("0b216", nullptr, 21).to_string(10, false));
+  EXPECT_EQ("118124", parse_number("0b216", nullptr, 22).to_string(10, false));
+  EXPECT_EQ("134924", parse_number("0b216", nullptr, 23).to_string(10, false));
+  EXPECT_EQ("153246", parse_number("0b216", nullptr, 24).to_string(10, false));
+  EXPECT_EQ("173156", parse_number("0b216", nullptr, 25).to_string(10, false));
+  EXPECT_EQ("194720", parse_number("0b216", nullptr, 26).to_string(10, false));
+  EXPECT_EQ("218004", parse_number("0b216", nullptr, 27).to_string(10, false));
+  EXPECT_EQ("243074", parse_number("0b216", nullptr, 28).to_string(10, false));
+  EXPECT_EQ("269996", parse_number("0b216", nullptr, 29).to_string(10, false));
+  EXPECT_EQ("298836", parse_number("0b216", nullptr, 30).to_string(10, false));
+  EXPECT_EQ("329660", parse_number("0b216", nullptr, 31).to_string(10, false));
+  EXPECT_EQ("362534", parse_number("0b216", nullptr, 32).to_string(10, false));
+  EXPECT_EQ("397524", parse_number("0b216", nullptr, 33).to_string(10, false));
+  EXPECT_EQ("434696", parse_number("0b216", nullptr, 34).to_string(10, false));
+  EXPECT_EQ("474116", parse_number("0b216", nullptr, 35).to_string(10, false));
+  EXPECT_EQ("515850", parse_number("0b216", nullptr, 36).to_string(10, false));
+  /*`Python
+  for i in range(25, 37):
+      print(f'  EXPECT_EQ("{int('0o216', i)}", parse_number("0o216", nullptr, {i}).to_string(10, false));')
+  */
+  EXPECT_EQ("376281", parse_number("0o216", nullptr, 25).to_string(10, false));
+  EXPECT_EQ("423208", parse_number("0o216", nullptr, 26).to_string(10, false));
+  EXPECT_EQ("473883", parse_number("0o216", nullptr, 27).to_string(10, false));
+  EXPECT_EQ("528450", parse_number("0o216", nullptr, 28).to_string(10, false));
+  EXPECT_EQ("587053", parse_number("0o216", nullptr, 29).to_string(10, false));
+  EXPECT_EQ("649836", parse_number("0o216", nullptr, 30).to_string(10, false));
+  EXPECT_EQ("716943", parse_number("0o216", nullptr, 31).to_string(10, false));
+  EXPECT_EQ("788518", parse_number("0o216", nullptr, 32).to_string(10, false));
+  EXPECT_EQ("864705", parse_number("0o216", nullptr, 33).to_string(10, false));
+  EXPECT_EQ("945648", parse_number("0o216", nullptr, 34).to_string(10, false));
+  EXPECT_EQ("1031491", parse_number("0o216", nullptr, 35).to_string(10, false));
+  EXPECT_EQ("1122378", parse_number("0o216", nullptr, 36).to_string(10, false));
+  /*`Python
+  for i in range(34, 37):
+      print(f'  EXPECT_EQ("{int('0x216', i)}", parse_number("0x216", nullptr, {i}).to_string(10, false));')
+  */
+  EXPECT_EQ("1299384", parse_number("0x216", nullptr, 34).to_string(10, false));
+  EXPECT_EQ("1417366", parse_number("0x216", nullptr, 35).to_string(10, false));
+  EXPECT_EQ("1542282", parse_number("0x216", nullptr, 36).to_string(10, false));
 }
 
 TEST(Number, StreamOperator) {

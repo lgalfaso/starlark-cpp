@@ -1008,7 +1008,7 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
   }
   if (input.size() - pos >= 2) {
     auto prefix = input.substr(pos, 2);
-    if (prefix == "0x" || prefix == "0X") {
+    if (base < 34 && (prefix == "0x" || prefix == "0X")) {
       if (base != 0 && base != 16) {
         if (end_ptr != nullptr) {
           *end_ptr = &input[0];
@@ -1017,7 +1017,7 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
       }
       pos += 2;
       base = 16;
-    } else if (prefix == "0b" || prefix == "0B") {
+    } else if (base < 12 && (prefix == "0b" || prefix == "0B")) {
       if (base != 0 && base != 2) {
         if (end_ptr != nullptr) {
           *end_ptr = &input[0];
@@ -1026,7 +1026,7 @@ number parse_number(std::string_view input, const char** end_ptr, int base) {
       }
       pos += 2;
       base = 2;
-    } else if (prefix == "0o" || prefix == "0O") {
+    } else if (base < 25 && (prefix == "0o" || prefix == "0O")) {
       if (base != 0 && base != 8) {
         if (end_ptr != nullptr) {
           *end_ptr = &input[0];
