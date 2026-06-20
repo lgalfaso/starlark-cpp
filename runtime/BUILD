@@ -466,6 +466,19 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "starlark_float_str_test",
+    size = "small",
+    srcs = ["starlark_float_str_test.cpp"],
+    deps = [
+        ":starlark_float",
+        ":starlark_function_builder_impl",
+        ":starlark_numeric_impl",
+        ":starlark_object_impl",
+        "@googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "starlark_list",
     srcs = ["starlark_list.cpp"],
