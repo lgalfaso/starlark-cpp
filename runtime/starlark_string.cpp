@@ -35,6 +35,7 @@ using ::starlark::result::ok_status;
 using ::starlark::result::status;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
+using ::starlark::ucd::decimal_value;
 using ::starlark::ucd::is_Case_Ignorable;
 using ::starlark::ucd::is_Cased;
 using ::starlark::ucd::is_Lowercase;
@@ -509,13 +510,15 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
   return ok_status();
 }
 
-status parse_format(std::string_view format, std::vector<std::string>& parts, std::vector<std::string>& names, error_fn& error_callback) {
+status parse_format(std::string_view format, std::vector<std::string>& parts, std::vector<std::string>& names, std::vector<char>& conversions, error_fn& error_callback) {
   enum class state_t {
     kText,
     kLastElementWasOpenCurlyBraces,
     kLastElementWasCloseCurlyBraces,
     kName,
     kNumber,
+    kLastElementWasExclamationMark,
+    kLastElementWasConversion,
   };
   bool has_blanks = false;
   bool has_numbers = false;
@@ -541,21 +544,30 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
           state = state_t::kText;
         } else if (cp == '}') {
           names.emplace_back();
+          conversions.emplace_back('s');
           parts.emplace_back();
           state = state_t::kText;
           has_blanks = true;
-        } else if ('0' <= cp && cp <= '9') {
-          // In Python, the logic is much more complex as it allows any character with Unicode General Category Nd
+        } else if (auto digit = decimal_value(cp); digit != -1) {
+          // Follow the same logic as Python and allow any character in the Unicode General Category Nd
           has_numbers = true;
           names.emplace_back();
-          names.back() += format.substr(start, reader.pos() - start);
+          // Store this in arabic numerals to make our life simpler.
+          names.back() += ('0' + digit);
+          conversions.emplace_back('s');
           state = state_t::kNumber;
-        } else if (cp == '!' || cp == '.' || cp == ':' || cp == '[') {  // https://github.com/python/cpython/issues/150626
+        } else if (cp == '!') {
+          has_blanks = true;
+          names.emplace_back();
+          conversions.emplace_back('s');
+          state = state_t::kLastElementWasExclamationMark;
+        } else if (cp == '.' || cp == ':' || cp == '[') {  // https://github.com/python/cpython/issues/150626
           error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
           return error_status();
         } else {
           names.emplace_back();
           names.back() += format.substr(start, reader.pos() - start);
+          conversions.emplace_back('s');
           state = state_t::kName;
         }
         break;
@@ -572,7 +584,9 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
         if (cp == '}') {
           parts.emplace_back();
           state = state_t::kText;
-        } else if (cp == '!' || cp == '.' || cp == ':' || cp == '[' || cp == '{') {  // https://github.com/python/cpython/issues/150626
+        } else if (cp == '!') {
+          state = state_t::kLastElementWasExclamationMark;
+        } else if (cp == '.' || cp == ':' || cp == '[' || cp == '{') {  // https://github.com/python/cpython/issues/150626
           error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
           return error_status();
         } else {
@@ -583,10 +597,33 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
         if (cp == '}') {
           parts.emplace_back();
           state = state_t::kText;
-        } else if ('0' <= cp && cp <= '9') {
-          names.back() += format.substr(start, reader.pos() - start);
+        } else if (auto digit = decimal_value(cp); digit != -1) {
+          names.back() += ('0' + digit);
+        } else if (cp == '!') {
+          state = state_t::kLastElementWasExclamationMark;
         } else {
           error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          return error_status();
+        }
+        break;
+      case state_t::kLastElementWasExclamationMark:
+       if (cp == 'r') {
+          conversions.back() = 'r';
+        } else if (cp == 's') {
+          conversions.back() = 's';
+        } else {
+          // We do not support the `a` conversion.
+          error_callback.add_error(error_unknown_conversion(format.substr(start, reader.pos() - start)));
+          return error_status();
+        }
+        state = state_t::kLastElementWasConversion;
+        break;
+      case state_t::kLastElementWasConversion:
+        if (cp == '}') {
+          parts.emplace_back();
+          state = state_t::kText;
+        } else {
+          error_callback.add_error(error_expected_after_conversion());
           return error_status();
         }
         break;
@@ -601,6 +638,7 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
     case state_t::kText:
       return ok_status();
     case state_t::kLastElementWasOpenCurlyBraces:
+    case state_t::kLastElementWasConversion:
       error_callback.add_error(error_single_format_element_in_string("{"));
       return error_status();
     case state_t::kLastElementWasCloseCurlyBraces:
@@ -609,6 +647,9 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
     case state_t::kName:
     case state_t::kNumber:
       error_callback.add_error(error_expected_format_element_before_end_of_string("}"));
+      return error_status();
+    case state_t::kLastElementWasExclamationMark:
+      error_callback.add_error(error_end_of_string_while_looking_for_conversion_specifier());
       return error_status();
   }
 }
@@ -1436,9 +1477,18 @@ starlark_obj* starlark_string::capitalize(context& ctx) {
 starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   std::vector<std::string> parts;
   std::vector<std::string> names;
-  if (!parse_format(value, parts, names, error_callback).ok()) {
+  std::vector<char> conversions;
+  if (!parse_format(value, parts, names, conversions, error_callback).ok()) {
     return nullptr;
   }
+
+  auto append_with_conversion = [](const starlark_obj* element, char conversion, std::string& output) {
+    if (conversion == 'r') {
+      output += element->repr();
+    } else {
+      output += element->str();
+    }
+  };
   std::string result;
   std::size_t automatic_numbering = 0;
   for (std::size_t i = 0; i < names.size(); ++i) {
@@ -1449,7 +1499,7 @@ starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, 
         error_callback.add_error(error_positional_argument_out_of_range(automatic_numbering));
         return nullptr;
       }
-      result += pos_args[automatic_numbering]->str();
+      append_with_conversion(pos_args[automatic_numbering], conversions[i], result);
       automatic_numbering++;
     } else if ('0' <= name[0] && name[0] <= '9') {
       // This is making the assumption that the numbers are always in 0..9 instead of being of Unicode General Cathegory Nd.
@@ -1464,14 +1514,14 @@ starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, 
         error_callback.add_error(error_positional_argument_out_of_range(name));
         return nullptr;
       }
-      result += pos_args[int_value]->str();
+      append_with_conversion(pos_args[int_value], conversions[i], result);
     } else {
       auto it = named_args.find(name);
       if (it == named_args.end()) {
         error_callback.add_error(error_dictionary_key_not_found(name));
         return nullptr;
       }
-      result += it->second->str();
+      append_with_conversion(it->second, conversions[i], result);
     }
   }
   result += parts.back();

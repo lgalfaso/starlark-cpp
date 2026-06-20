@@ -19,6 +19,7 @@ struct unicode_data_record {
   std::vector<char32_t> character_decomposition_mapping;
   std::string general_category;
   std::string bidirectional_category;
+  int decimal_value;
   bool is_digit;
   char32_t uppercase_mapping;
   char32_t lowercase_mapping;

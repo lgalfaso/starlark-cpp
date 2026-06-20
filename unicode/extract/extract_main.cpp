@@ -70,6 +70,8 @@ bool is_digit(char32_t code_point);
 
 bool is_numeric(char32_t code_point);
 
+int32_t decimal_value(char32_t code_point);
+
 bool is_space(char32_t code_point);
 
 std::span<const char32_t> decomposition(char32_t code_point);
@@ -282,6 +284,31 @@ void print_decomposition(FILE* output, const std::map<char32_t, starlark::ucd::u
   FWRITE("    return std::span<const char32_t>(all_dc).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
   FWRITE("  return std::span<const char32_t>{};\n", output);
+  FWRITE("}\n\n", output);
+}
+
+void print_decimal_value(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  FWRITE("int32_t decimal_value(char32_t code_point) {\n", output);
+  std::map<char32_t, int> entries;
+  for (const auto& entry : unicode_data) {
+    if (entry.second.decimal_value != -1) {
+      entries[entry.first] = entry.second.decimal_value;
+    }
+  }
+  fprintf(output, "  static constexpr cnt::flat_map<char32_t, int32_t, %zu> all_decimal_values = {", entries.size());
+  int pos = 0;
+  for (const auto& entry : entries) {
+    if (pos % 6 == 0) {
+      FWRITE("\n   ", output);
+    }
+    fprintf(output, " {0x%05X, %d},", entry.first, entry.second);
+    ++pos;
+  }
+  FWRITE("\n  };\n\n", output);
+  FWRITE("  if (auto decimal_value_candidate = all_decimal_values.find(code_point); decimal_value_candidate != all_decimal_values.end()) {\n", output);
+  FWRITE("    return decimal_value_candidate->second;\n", output);
+  FWRITE("  }\n", output);
+  FWRITE("  return -1;\n", output);
   FWRITE("}\n\n", output);
 }
 
@@ -803,6 +830,7 @@ void write_impl(const char* derived_core_properties_file,
     print_code_points(cc_output, digits_set(unicode_data), "is_digit");
     print_code_points(cc_output, space_set(unicode_data), "is_space");
     print_decomposition(cc_output, unicode_data);
+    print_decimal_value(cc_output, unicode_data);
     print_ccc(cc_output, unicode_data);
     print_canonical_composition(cc_output, unicode_data, comp_exclusions);
     print_to_upper(cc_output, unicode_data, special_casing);

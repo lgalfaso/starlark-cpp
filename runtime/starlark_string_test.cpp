@@ -1236,6 +1236,7 @@ TEST(StarlarkString, Format) {
   starlark_obj::pos_args_t empty_pos;
   starlark_obj::pos_args_t with_zero;
   starlark_obj::pos_args_t with_zero_one;
+  starlark_obj::pos_args_t pos_with_def;
   starlark_obj::named_args_t empty_names;
   starlark_obj::named_args_t with_abc;
   starlark_obj::named_args_t with_dollar;
@@ -1243,6 +1244,7 @@ TEST(StarlarkString, Format) {
   with_zero.push_back(ctx.zero());
   with_zero_one.push_back(ctx.zero());
   with_zero_one.push_back(ctx.one());
+  pos_with_def.push_back(&def);
   with_abc.insert("abc", &def);
   with_dollar.insert("$", &def);
 
@@ -1253,6 +1255,7 @@ TEST(StarlarkString, Format) {
   test("abc{0}def{1}ghi", with_zero_one, empty_names, "abc0def1ghi");
   test("abc{1}def{0}ghi", with_zero_one, empty_names, "abc1def0ghi");
   test("abc{1}def{0}ghi", with_zero_one, with_abc, "abc1def0ghi");
+  test("abc{١}def{٠}ghi", with_zero_one, with_abc, "abc1def0ghi");
   test("xyz{abc}qwe", with_zero_one, with_abc, "xyzdefqwe");
   test("abc{0000}def{1}ghi", with_zero_one, empty_names, "abc0def1ghi");
   test_with_error("{", empty_pos, empty_names, "ValueError: Single '{' encountered in format string");
@@ -1264,8 +1267,17 @@ TEST(StarlarkString, Format) {
   test_with_error("{18446744073709551616}", empty_pos, empty_names, "IndexError: Replacement index 18446744073709551616 out of range for positional args tuple");
   test_with_error("{abc}", empty_pos, empty_names, "KeyError: abc");
   test("{$}", empty_pos, with_dollar, "def");
+  test("{$!s}", empty_pos, with_dollar, "def");
+  test("{$!r}", empty_pos, with_dollar, "\"def\"");
+  test("{!s}", pos_with_def, empty_names, "def");
+  test("{!r}", pos_with_def, empty_names, "\"def\"");
+  test("{0!s}", pos_with_def, empty_names, "def");
+  test("{0!r}", pos_with_def, empty_names, "\"def\"");
   test_with_error("{:}", empty_pos, empty_names, "ValueError: unexpected ':' in field name");
-  test_with_error("{a!}", empty_pos, empty_names, "ValueError: unexpected '!' in field name");
+  test_with_error("{a!}", empty_pos, empty_names, "ValueError: Unknown conversion specifier }");
+  test_with_error("{a!a}", empty_pos, empty_names, "ValueError: Unknown conversion specifier a");
+  test_with_error("{a!", empty_pos, empty_names, "ValueError: end of string while looking for conversion specifier");
+  test_with_error("{a!r", empty_pos, empty_names, "ValueError: Single '{' encountered in format string");
   test_with_error("{}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
   test_with_error("{}{0}", empty_pos, empty_names, "ValueError: cannot switch from manual field specification to automatic field numbering");
 }

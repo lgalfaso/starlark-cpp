@@ -149,6 +149,7 @@ void read_unicode_data(const char* file, std::map<char32_t, unicode_data_record>
     std::vector<char32_t> decomposition;
     parse_code_point_sequence(decomposition, character_decomposition);
 
+    int decimal_value = entry[6].empty() ? -1 : parse_decimal_value(entry[6]);
     bool is_digit = !entry[6].empty() || !entry[7].empty();
     char32_t uppercase_mapping = 0x110000;
     if (!entry[12].empty()) {
@@ -178,6 +179,7 @@ void read_unicode_data(const char* file, std::map<char32_t, unicode_data_record>
             .character_decomposition_mapping = decomposition,
             .general_category = entry[2],
             .bidirectional_category = entry[4],
+            .decimal_value = decimal_value,
             .is_digit = is_digit,
             .uppercase_mapping = uppercase_mapping,
             .lowercase_mapping = lowercase_mapping,
@@ -191,6 +193,7 @@ void read_unicode_data(const char* file, std::map<char32_t, unicode_data_record>
         .character_decomposition_mapping = decomposition,
         .general_category = entry[2],
         .bidirectional_category = entry[4],
+        .decimal_value = decimal_value,
         .is_digit = is_digit,
         .uppercase_mapping = uppercase_mapping,
         .lowercase_mapping = lowercase_mapping,

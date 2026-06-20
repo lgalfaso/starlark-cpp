@@ -122,6 +122,9 @@ std::string error_single_format_element_in_string(std::string_view format_elemen
 std::string error_expected_format_element_before_end_of_string(std::string_view format_element);
 std::string error_positional_argument_out_of_range(std::string_view pos_argument);
 std::string error_positional_argument_out_of_range(std::size_t pos_argument);
+std::string_view error_end_of_string_while_looking_for_conversion_specifier();
+std::string error_unknown_conversion(std::string_view conversion);
+std::string_view error_expected_after_conversion();
 std::string_view error_non_string_with_base();
 
 }  // namespace runtime
