@@ -21,6 +21,7 @@ using ::starlark::runtime::error_missing_keyword_only_argument;
 using ::starlark::runtime::error_missing_positional_argument;
 using ::starlark::runtime::error_multiple_values_for_argument;
 using ::starlark::runtime::error_unexpected_keyword_argument;
+using ::starlark::runtime::order_comparator;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
@@ -217,6 +218,13 @@ bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& co
   }
   const interpreter_function* f_other = reinterpret_cast<const interpreter_function*>(other);
   return cmp_fn(this, f_other, true) == 0;
+}
+
+void interpreter_function::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
+  if (extended && type() == other->type() && equals(*other)) {
+    return;
+  }
+  starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
 }
 
 void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
