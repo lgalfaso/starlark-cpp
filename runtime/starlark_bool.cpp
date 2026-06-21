@@ -40,9 +40,9 @@ bool starlark_bool::inner_equals(equals_comparator& comp, const starlark_obj* ot
     value == other->truthy();
 }
 
-void starlark_bool::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
+void starlark_bool::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   if (other->type() != type()) {
-    starlark_obj::inner_cmp(comp, other, op, error_callback);
+    starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }
   bool other_truth = other->truthy();

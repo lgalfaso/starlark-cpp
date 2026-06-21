@@ -78,6 +78,13 @@ bool starlark_range::inner_equals(equals_comparator& comp, const starlark_obj* o
   return state.step == rother->state.step;
 }
 
+void starlark_range::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
+  if (extended && type() == other->type() && equals(*other)) {
+    return;
+  }
+  starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_range::inner_hash() const {
   // Range is not hashable in Starlark.
   return -1;

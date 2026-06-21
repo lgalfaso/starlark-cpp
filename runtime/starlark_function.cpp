@@ -105,6 +105,13 @@ bool starlark_built_in_function::inner_equals(equals_comparator& comp, const sta
   return fn_name == fother->fn_name && native_fn == fother->native_fn;
 }
 
+void starlark_built_in_function::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
+  if (extended && type() == other->type() && equals(*other)) {
+    return;
+  }
+  starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_built_in_function::inner_hash() const {
   if (fn_name.length() == 0) {
     return 0;

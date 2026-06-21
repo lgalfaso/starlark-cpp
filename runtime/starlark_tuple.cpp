@@ -196,9 +196,9 @@ bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* o
   return true;
 }
 
-void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
+void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   if (other->type() != type()) {
-    starlark_obj::inner_cmp(comp, other, op, error_callback);
+    starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }
   const auto* t_other = static_cast<const starlark_tuple*>(other);
@@ -206,7 +206,7 @@ void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other
     comp.add_task(values.size() > t_other->values.size() ? order_comparator::pending_task_type::kGreaterThan : order_comparator::pending_task_type::kLessThan);
   }
   for (int i = std::min(values.size(), t_other->values.size()) - 1; i >= 0; --i) {
-    comp.add_task(values[i], t_other->values[i]);
+    comp.add_task(values[i], t_other->values[i], true);
   }
 }
 

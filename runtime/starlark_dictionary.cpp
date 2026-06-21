@@ -382,6 +382,13 @@ bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_o
   return true;
 }
 
+void starlark_dictionary::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
+  if (extended && type() == other->type() && equals(*other)) {
+    return;
+  }
+  starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
+}
+
 void starlark_dictionary::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   for (auto& [k, v] : values_) {
     to_freeze.push_back(k);

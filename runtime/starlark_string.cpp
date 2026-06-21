@@ -1691,6 +1691,13 @@ bool starlark_string::string_elems::inner_equals(equals_comparator& comp, const 
   return true;
 }
 
+void starlark_string::string_elems::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
+  if (extended && type() == other->type() && equals(*other)) {
+    return;
+  }
+  starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_string::string_elems::inner_hash() const {
   return -1;
 }
@@ -1722,9 +1729,9 @@ bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* 
          value == other->as_string();
 }
 
-void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
+void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   if (other->type() != type()) {
-    starlark_obj::inner_cmp(comp, other, op, error_callback);
+    starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }
   auto result = value <=> static_cast<const starlark_string*>(other)->value;

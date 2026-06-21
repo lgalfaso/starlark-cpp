@@ -1,0 +1,8 @@
+assert_true(False < True)
+assert_true([] <= [])
+assert_true([{}] <= [{}])
+assert_true([{1: {}}] <= [{1: {}}])
+assert_true([set()] <= [set()])
+assert_true([{1: set()}] <= [{1: set()}])
+assert_fail('''{} <= {}''')
+assert_fail('''set() <= set()''')

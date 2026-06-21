@@ -33,6 +33,13 @@ bool starlark_none::inner_equals(equals_comparator& comp, const starlark_obj* ot
   return type() == other->type();
 }
 
+void starlark_none::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
+  if (extended && type() == other->type() && equals(*other)) {
+    return;
+  }
+  starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
+}
+
 std::variant<int64_t, starlark_obj::pending_hash> starlark_none::inner_hash() const {
   return 0xfca86420;
 }

@@ -34,7 +34,7 @@ starlark_obj* starlark_float::unary_minus(context& ctx, error_fn& error_callback
   return create_float(-value, ctx);
 }
 
-void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
+void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   switch (other->numeric_type()) {
     case starlark_numeric_type::kFloat: {
       if (std::isnan(as_float())) {
@@ -76,7 +76,7 @@ void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other
       break;
     }
     default:
-      starlark_obj::inner_cmp(comp, other, op, error_callback);
+      starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
       break;
   }
 }

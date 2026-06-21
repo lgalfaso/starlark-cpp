@@ -89,11 +89,12 @@ void order_comparator::add_task(pending_task_type task_type) {
   });
 }
 
-void order_comparator::add_task(const starlark_obj* lhs, const starlark_obj* rhs) {
+void order_comparator::add_task(const starlark_obj* lhs, const starlark_obj* rhs, bool extended) {
   tasks.emplace_back(order_comparator::pending_task{
       .type = order_comparator::pending_task_type::kEvaluate,
       .lhs = lhs,
       .rhs = rhs,
+      .extended = extended,
   });
 }
 
@@ -104,7 +105,7 @@ status_or<int> order_comparator::run(std::string_view op, error_fn& error_callba
     switch (top.type) {
       case pending_task_type::kEvaluate:
         if (executed_tasks.insert(top).second) {
-          top.lhs->inner_cmp(*this, top.rhs, op, error_callback);
+          top.lhs->inner_cmp(*this, top.rhs, op, top.extended, error_callback);
         }
         break;
       case pending_task_type::kLessThan:
@@ -183,7 +184,7 @@ bool starlark_obj::equals(const starlark_obj& other) const {
 
 status_or<int> starlark_obj::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
   order_comparator cmp;
-  cmp.add_task(this, &other);
+  cmp.add_task(this, &other, false);
   return cmp.run(op, error_callback);
 }
 
@@ -539,7 +540,7 @@ starlark_numeric_type starlark_obj::numeric_type() const {
   return starlark_numeric_type::kNotNumeric;
 }
 
-void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
+void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   error_callback.add_error(error_incomparable(op, type(), other->type()));
   comp.add_task(order_comparator::pending_task_type::kFail);
 }

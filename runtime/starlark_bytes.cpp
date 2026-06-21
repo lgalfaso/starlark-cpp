@@ -649,9 +649,9 @@ bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* o
       value == (static_cast<const starlark_bytes*>(other))->value;
 }
 
-void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, error_fn& error_callback) const {
+void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   if (other->type() != type()) {
-    starlark_obj::inner_cmp(comp, other, op, error_callback);
+    starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }
   auto result = value <=> static_cast<const starlark_bytes*>(other)->value;
@@ -1199,6 +1199,13 @@ bool starlark_bytes::bytes_elems::inner_equals(equals_comparator& comp, const st
     }
   }
   return true;
+}
+
+void starlark_bytes::bytes_elems::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
+  if (extended && type() == other->type() && equals(*other)) {
+    return;
+  }
+  starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_bytes::bytes_elems::inner_hash() const {
