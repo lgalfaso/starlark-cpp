@@ -14,7 +14,8 @@
 namespace starlark {
 namespace interpreter_runner {
 
-starlark::interpreter::frame* run_test(std::map<std::string_view, std::string_view> programs, starlark::logging::logger& logging);
+starlark::interpreter::frame* run_test(std::map<std::string, std::string> programs, starlark::logging::logger& logging);
+std::map<std::string, std::string> split_test_case(std::string_view source);
 
 }  // namespace interpreter_runner
 }  // namespace starlark

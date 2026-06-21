@@ -39,15 +39,10 @@ using ::starlark::runtime::starlark_types;
 using ::starlark::runtime::to_int64_with_clamping;
 using ::starlark::testing::error_handler;
 
-namespace {
+namespace starlark {
+namespace interpreter_runner {
 
-std::string print_logs(logger& logging) {
-  std::string result;
-  for (const auto& entry : logging) {
-    result += std::format("Error at {}\n{}\n", entry.pos().ShortDebugString(), entry.message());
-  }
-  return result;
-}
+namespace {
 
 starlark_obj* assert_eq_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!named_args.empty()) {
@@ -174,7 +169,6 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
     return nullptr;
   }
 
-  static char module_name[] = "//:assert_module.star";
   if (pos_args.size() != 1) {
     error_callback.add_error("assert_fail takes only 1 positional arguments.");
     return nullptr;
@@ -188,13 +182,16 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
     error_callback.add_error(std::format("invalid 'source_code' parameter ({}).", source_code->type()));
     return nullptr;
   }
-  interpreter runner;
+  class interpreter runner;
   logger logging;
 
+  auto modules_parts = split_test_case(source_code->str());
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
-  modules.try_emplace(module_name, source_code->str(), std::map<std::string, starlark_obj*, std::less<>>{});
+  for (const auto& [module_name, source] : modules_parts) {
+    modules.try_emplace(module_name, source, std::map<std::string, starlark_obj*, std::less<>>{});
+  }
   kv_module_loader loader{modules};
-  frame* result = runner.run(loader, module_name, grammar_options{}, *r_options, logging);
+  frame* result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
   if (result != nullptr) {
     error_callback.add_error("Program executed without errors, it was expected that it would fail.");
     return nullptr;
@@ -220,7 +217,6 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
     return nullptr;
   }
 
-  static char module_name[] = "//:assert_module.star";
   if (pos_args.size() != 1) {
     error_callback.add_error("assert_succeed takes only 1 positional arguments.");
     return nullptr;
@@ -234,13 +230,16 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
     error_callback.add_error(std::format("invalid 'source_code' parameter ({}).", source_code->type()));
     return nullptr;
   }
-  interpreter runner;
+  class interpreter runner;
   logger logging;
 
+  auto modules_parts = split_test_case(source_code->str());
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
-  modules.try_emplace(module_name, source_code->str(), std::map<std::string, starlark_obj*, std::less<>>{});
+  for (const auto& [module_name, source] : modules_parts) {
+    modules.try_emplace(module_name, source, std::map<std::string, starlark_obj*, std::less<>>{});
+  }
   kv_module_loader loader{modules};
-  frame* result = runner.run(loader, module_name, grammar_options{}, *r_options, logging);
+  frame* result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
   if (result == nullptr) {
     error_callback.add_error("Program executed with errors, it was expected that it would succeed.");
     return nullptr;
@@ -300,10 +299,43 @@ starlark_obj* assert_false_fn(starlark_obj* this_obj, const starlark_obj::pos_ar
 
 }  // namespace
 
-namespace starlark {
-namespace interpreter_runner {
+std::map<std::string, std::string> split_test_case(std::string_view source) {
+  std::string begin_module = "## Begin module";
+  std::string end_module = "## End module";
 
-frame* run_test(std::map<std::string_view, std::string_view> programs, logger& logging) {
+  std::map<std::string, std::string> result;
+  auto first_char = source.find_first_not_of("\n\r");
+  if (first_char != std::string_view::npos) {
+    source = source.substr(first_char);
+  }
+  while (source.starts_with(begin_module)) {
+    auto begin_quote = source.find_first_of("\"'");
+    if (begin_quote == std::string_view::npos) {
+      std::cerr << "Invalid module\n";
+      exit(1);
+    }
+    auto end_quote = source.find(source[begin_quote], begin_quote + 1);
+    if (end_quote == std::string_view::npos) {
+      std::cerr << "Invalid module name\n";
+      exit(1);
+    }
+    auto it_end = source.find(end_module, end_quote);
+    if (it_end == std::string_view::npos) {
+      std::cerr << "Invalid module end\n";
+      exit(1);
+    }
+    result[std::string{source.substr(begin_quote + 1, end_quote - begin_quote - 1)}] = source.substr(0, it_end + end_module.size());
+    source = source.substr(it_end + end_module.size());
+    first_char = source.find_first_not_of("\n\r");
+    if (first_char != std::string_view::npos) {
+      source = source.substr(first_char);
+    }
+  }
+  result["main"] = source;
+  return result;
+}
+
+frame* run_test(std::map<std::string, std::string> programs, logger& logging) {
   class interpreter runner;
   Arena arena;
 
@@ -316,7 +348,7 @@ frame* run_test(std::map<std::string_view, std::string_view> programs, logger& l
   custom_binding["assert_true"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_true_fn, "assert_true");
   custom_binding["assert_false"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_false_fn, "assert_false");
   for (const auto& [k, v] : programs) {
-    modules.try_emplace(std::string{k}, v, custom_binding);
+    modules.try_emplace(k, v, custom_binding);
   }
   kv_module_loader loader{modules};
 

@@ -44,7 +44,7 @@ TEST(Interpreter, TestCase) {
   }
 
   logger logging;
-  std::map<std::string_view, std::string_view> programs;
+  std::map<std::string, std::string> programs;
   programs["main"] = starlark_code;
   frame* result = run_test(programs, logging);
   ASSERT_NE(nullptr, result) << print_logs(logging);

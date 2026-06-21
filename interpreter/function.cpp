@@ -223,6 +223,14 @@ void interpreter_function::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
   for (auto* element : default_arguments) {
     to_freeze.push_back(element);
   }
+  for (auto* function_frame : frame_stack) {
+    for (auto* element : function_frame->elements) {
+      if (element == nullptr) {
+        continue;
+      }
+      to_freeze.push_back(element);
+    }
+  }
 }
 
 namespace {
