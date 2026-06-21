@@ -1,6 +1,7 @@
 common --enable_platform_specific_config
 common --cxxopt=-std=c++2b --host_cxxopt=-std=c++2b
-common --cxxopt=-fno-exceptions
+common --cxxopt=-fno-exceptions --host_cxxopt=-fno-exceptions
+common --cxxopt=-fno-rtti --host_cxxopt=-fno-rtti --cxxopt=-DGTEST_HAS_RTTI=0 --host_cxxopt=-DGTEST_HAS_RTTI=0
 
 common:macos --cxxopt=-fconstexpr-steps=40000000
 coverage --cxxopt=-fno-inline
