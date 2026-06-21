@@ -373,6 +373,15 @@ status starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_
   if (!can_modify("append", error_callback)) {
     return error_status();
   }
+  auto other_len = other->len(false, error_callback);
+  if (other_len > 0) {
+    std::size_t expected_size;
+    if (ckd_add(&expected_size, values.size(), other_len) ||
+        expected_size > ctx.options().max_sequence_size) {
+      error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+      return error_status();
+    }
+  }
   if (other->type() == type()) {
     starlark_list* lother = static_cast<starlark_list*>(other);
     for (decltype(values)::size_type i = 0, end = lother->values.size(); i < end; ++i) {
