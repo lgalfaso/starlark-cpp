@@ -107,7 +107,9 @@ TEST(StarlarkFunction, Truthy) {
 }
 
 TEST(StarlarkFunction, Str) {
+  starlark_list list(0);
   EXPECT_EQ("<built-in function fn_name>", starlark_built_in_function(nullptr, base_fn, "fn_name").str());
+  EXPECT_EQ("<built-in method fn_name of list value>", starlark_built_in_function(&list, base_fn, "fn_name").str());
   EXPECT_EQ("<function foo from //:test.star>", starlark_testing_function("foo", "//:test.star").str());
 }
 

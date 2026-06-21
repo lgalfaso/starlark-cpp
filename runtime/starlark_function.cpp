@@ -74,6 +74,10 @@ std::string_view starlark_built_in_function::type() const {
 }
 
 bool starlark_built_in_function::inner_repr(printer& print, printer_action action) const {
+  if (this_obj != nullptr) {
+    print.append(std::format("<built-in method {} of {} value>", fn_name, this_obj->type()));
+    return false;
+  }
   print.append(std::format("<built-in function {}>", fn_name));
   return false;
 }
