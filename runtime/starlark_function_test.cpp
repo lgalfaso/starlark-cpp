@@ -1507,8 +1507,8 @@ TEST(StarlarkFloat, FromInteger) {
   };
 
   test(1, "1.0");
-  test(std::numeric_limits<int64_t>::max(), "9.2233720368547758e+18");
-  test(std::numeric_limits<int64_t>::min(), "-9.2233720368547758e+18");
+  test(std::numeric_limits<int64_t>::max(), "9.223372036854776e+18");
+  test(std::numeric_limits<int64_t>::min(), "-9.223372036854776e+18");
 }
 
 TEST(StarlarkFloat, FromBigint) {
@@ -1527,8 +1527,8 @@ TEST(StarlarkFloat, FromBigint) {
   };
 
   test(1, "1.0");
-  test(std::numeric_limits<int64_t>::max(), "9.2233720368547758e+18");
-  test(std::numeric_limits<int64_t>::min(), "-9.2233720368547758e+18");
+  test(std::numeric_limits<int64_t>::max(), "9.223372036854776e+18");
+  test(std::numeric_limits<int64_t>::min(), "-9.223372036854776e+18");
 }
 
 TEST(StarlarkFloat, FromBigintEdgeCases) {
