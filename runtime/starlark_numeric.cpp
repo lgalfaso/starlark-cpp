@@ -370,41 +370,38 @@ int64_t starlark_mod(int64_t a, int64_t b) {
 }
 
 std::string float_to_string(double value, bool uppercase) {
-  // This tries to follow the same format as Python.
-  std::string result;
-  if (std::isfinite(value)) {
-    result = uppercase ? std::format("{:.17G}", value) : std::format("{:.17g}", value);
-    // The formatting using %g is not the same as the one used by Python.
-    // The following modifications need to be performed after the intial formatting:
-    // - If the value is represented as an integer in non-scientific notation,
-    //   then it has to have one a period and at least one decimal number after the period.
-    // - If after the previous correction, there are more than 17 digit,
-    //   then convert to scientific notation
-    int start = 0;
-    if (result[start] == '-' || result[start] == '+') {
-        ++start;
-    }
-    int count = 0;
-    while (start + count < result.size() && std::isdigit(result[start + count])) {
-      count++;
-    }
-    if (start + count == result.size()) {
-      // If the output is an integer.
-      if (count == 17) {
-        // If the number of significant digits is already the max, convert to scientific notation.
-        result.erase(result.find_last_not_of('0') + 1);
-        if (result.size() > start + 1) {
-          result = result.substr(0, start + 1) + "." + result.substr(start + 1, result.size() - start - 1);
-        }
-        result += uppercase ? "E" : "e";
-        result += std::format("{:+2d}", count - 1);
-      } else {
-        // If not, make sure that the representation is clear that this is a float.
-        result += ".0";
-      }
+  if (std::isnan(value)) {
+    return "nan";
+  }
+  if (std::isinf(value)) {
+    return (value < 0) ? "-inf" : "inf";
+  }
+  if (value == 0.0) {
+    return (std::signbit(value)) ? "-0.0" : "0.0";
+  }
+
+  // Enforce exact scientific notation thresholds.
+  double abs_value = std::abs(value);
+  bool use_scientific = (abs_value < 0.0001 || abs_value >= 10000000000000000.0);
+  auto mode = use_scientific ? std::chars_format::scientific : std::chars_format::fixed;
+
+  std::array<char, 64> buf;
+  auto [ptr, ec] = std::to_chars(buf.data(), buf.data() + buf.size(), value, mode);
+  if (ec != std::errc()) {
+    return "";
+  }
+  std::string result(buf.data(), ptr);
+
+  if (!use_scientific) {
+    if (result.find('.') == std::string::npos) {
+      result += ".0";
     }
   } else {
-    result = std::isnan(value) ? "nan" : std::format("{}", value);
+    if (uppercase) {
+      if (size_t e_pos = result.find('e'); e_pos != std::string::npos) {
+        result[e_pos] = 'E';
+      }
+    }
   }
   return result;
 }
