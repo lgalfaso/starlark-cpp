@@ -508,9 +508,11 @@ TEST(StarlarkBool, NoPosArgs) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, ctx, error_callback));
-  ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bool() takes exactly one argument (0 given)", error_callback.messages[0]);
+  auto* result = starlark_fn_bool(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::bool_t);
+  EXPECT_EQ(result->truthy(), false);
+  ASSERT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBool, MultiplePosArgs) {
@@ -527,7 +529,7 @@ TEST(StarlarkBool, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bool() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: bool expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkBool, NamedArguments) {
@@ -1470,6 +1472,21 @@ TEST(StarlarkFail, NamedArgs) {
   EXPECT_EQ("TypeError: fail() takes no keyword arguments", error_callback.messages[0]);
 }
 
+TEST(StarlarkFloat, NoArgs) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+
+  auto result = starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::float_t);
+  EXPECT_EQ("0.0", result->repr());
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 TEST(StarlarkFloat, FromFloat) {
   auto test = [](double fvalue, std::string_view repr) {
     starlark_float value(fvalue);
@@ -1680,7 +1697,7 @@ TEST(StarlarkFloat, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: float() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: float expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkFloat, NamedArguments) {

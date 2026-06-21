@@ -212,8 +212,11 @@ starlark_obj* starlark_fn_any(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bool_f).ok()) {
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bool_f).ok()) {
     return nullptr;
+  }
+  if (pos_args.empty()) {
+    return ctx.false_value();
   }
   return pos_args.front()->truthy() ? ctx.true_value() : ctx.false_value();
 }
@@ -392,8 +395,11 @@ starlark_obj* starlark_fn_fail(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::float_f).ok()) {
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::float_f).ok()) {
     return nullptr;
+  }
+  if (pos_args.empty()) {
+    return create_float(0.0, ctx);
   }
   auto* value = pos_args.front();
   switch (value->numeric_type()) {
