@@ -1278,6 +1278,7 @@ TEST(StarlarkString, Format) {
   test_with_error("{a!a}", empty_pos, empty_names, "ValueError: Unknown conversion specifier a");
   test_with_error("{a!", empty_pos, empty_names, "ValueError: end of string while looking for conversion specifier");
   test_with_error("{a!r", empty_pos, empty_names, "ValueError: Single '{' encountered in format string");
+  test_with_error("{a!ru", empty_pos, empty_names, "ValueError: expected '}' after conversion specifier");
   test_with_error("{}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
   test_with_error("{}{0}", empty_pos, empty_names, "ValueError: cannot switch from manual field specification to automatic field numbering");
 }
@@ -5116,7 +5117,7 @@ TEST(StarlarkString, ReplaceWithFourArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
-TEST(StarlarkString, ReplaceWithNamedArguments) {
+TEST(StarlarkString, ReplaceWithOldNamedArguments) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -5134,7 +5135,58 @@ TEST(StarlarkString, ReplaceWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.replace() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'old'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithCountNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string old("b"sv);
+  starlark_string new_("x"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&old);
+  pos_args.push_back(&new_);
+  named_args.insert("count", ctx.one());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "axc");
+
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithCountPositionalAndNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string old("b"sv);
+  starlark_string new_("x"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&old);
+  pos_args.push_back(&new_);
+  pos_args.push_back(ctx.one());
+  named_args.insert("count", ctx.one());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() got multiple values for argument 'count'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7398,15 +7450,36 @@ TEST(StarlarkString, SplitlinesWithTwoArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
-TEST(StarlarkString, SplitlinesWithNamedArguments) {
+TEST(StarlarkString, SplitlinesWithKeependsNamedArgument) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
-  starlark_string str("abc"sv);
+  starlark_string str("abc\ndef"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
+  named_args.insert("keepends", ctx.true_value());
+  auto* method = str.dot("splitlines", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "[\"abc\\n\", \"def\"]");
+
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc\ndef");
+}
+
+TEST(StarlarkString, SplitlinesWithKeependsPositionalAndNamedArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc\ndef"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.true_value());
   named_args.insert("keepends", ctx.true_value());
   auto* method = str.dot("splitlines", ctx, error_callback);
   ASSERT_NE(nullptr, method);
@@ -7416,8 +7489,29 @@ TEST(StarlarkString, SplitlinesWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines() takes no keyword arguments");
-  EXPECT_EQ(str.str(), "abc");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines() got multiple values for argument 'keepends'");
+  EXPECT_EQ(str.str(), "abc\ndef");
+}
+
+TEST(StarlarkString, SplitlinesWithUnknownNamedArgument) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc\ndef"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert("unknown", ctx.true_value());
+  auto* method = str.dot("splitlines", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
+  EXPECT_EQ(str.str(), "abc\ndef");
 }
 
 TEST(StarlarkString, ElemsWithNoArguments) {

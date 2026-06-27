@@ -2085,8 +2085,24 @@ starlark_obj* starlark_string_fn_partition(starlark_obj* this_obj, const starlar
 }
 
 starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.replace").ok() ||
-      !min_args(pos_args, error_callback, "replace", 2).ok() ||
+  starlark_obj* count = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "count") {
+      assert(value != nullptr);
+      count = value;
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
+  }
+  if (pos_args.size() >= 3) {
+    if (count != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument("replace", "count"));
+      return nullptr;
+    }
+    count = pos_args[2];
+  }
+  if (!min_args(pos_args, error_callback, "replace", 2).ok() ||
       !max_args(pos_args, error_callback, "replace", 3).ok()) {
     return nullptr;
   }
@@ -2098,15 +2114,15 @@ starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_
   if (!new_.ok()) {
     return nullptr;
   }
-  int64_t count = -1;
-  if (pos_args.size() >= 3) {
-    auto status_or_count = to_int64_with_clamping(*pos_args[2], error_callback);
+  int64_t count_value = -1;
+  if (count != nullptr) {
+    auto status_or_count = to_int64_with_clamping(*count, error_callback);
     if (!status_or_count.ok()) {
       return nullptr;
     }
-    count = *status_or_count;
+    count_value = *status_or_count;
   }
-  return static_cast<starlark_string*>(this_obj)->replace(*old, *new_, count, ctx);
+  return static_cast<starlark_string*>(this_obj)->replace(*old, *new_, count_value, ctx);
 }
 
 starlark_obj* starlark_string_fn_removeprefix(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -2311,20 +2327,38 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, "splitlines").ok()) {
-    return nullptr;
-  }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
-  bool keepends = false;
-  if (!pos_args.empty()) {
-    if (pos_args.front()->type() != starlark_types::bool_t) {
-      error_callback.add_error(error_argument_must_be_type("splitlines", 1, starlark_types::bool_t, pos_args.front()->type()));
+  starlark_obj* keepends = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "keepends") {
+      assert(value != nullptr);
+      keepends = value;
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
       return nullptr;
     }
-    keepends = pos_args.front()->truthy();
   }
-  return static_cast<starlark_string*>(this_obj)->splitlines(keepends, ctx);
+  if (!max_args(pos_args, error_callback, "splitlines", 1).ok()) {
+    return nullptr;
+  }
+  if (pos_args.size() >= 1) {
+    if (keepends != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument("splitlines", "keepends"));
+      return nullptr;
+    }
+    keepends = pos_args.front();
+  }
+  bool keepends_value = false;
+  if (keepends != nullptr) {
+    // Python does not have the restriction that this need to be a bool.
+    if (keepends->type() != starlark_types::bool_t) {
+      error_callback.add_error(error_argument_must_be_type("splitlines", 1, starlark_types::bool_t, keepends->type()));
+      return nullptr;
+    }
+    keepends_value = keepends->truthy();
+  }
+  return static_cast<starlark_string*>(this_obj)->splitlines(keepends_value, ctx);
 }
 
 starlark_obj* starlark_string_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
