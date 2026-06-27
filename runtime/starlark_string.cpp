@@ -913,6 +913,9 @@ int64_t starlark_string::count(std::string_view sub, int64_t start, int64_t end)
   if (start < 0) {
     start = std::max<int64_t>(start + size, 0);
   } else {
+    if (sub.empty() && start > size) {
+      return 0;
+    }
     start = std::min<int64_t>(start, size);
   }
   if (end < 0) {

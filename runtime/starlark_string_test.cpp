@@ -1741,29 +1741,132 @@ TEST(StarlarkString, CountThreeArgumentsEndBool) {
   EXPECT_EQ(str.str(), "banana");
 }
 
-TEST(StarlarkString, CountEmptyStringSameStartAndEnd) {
-  error_handler error_callback;
-  Arena arena;
-  context ctx(arena);
-  starlark_string str("abc"sv);
-  starlark_string empty(""sv);
+TEST(StarlarkString, CountThreeArgumentsEmptyString) {
+  auto test = [](std::string_view element, int start, int end, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+    starlark_integer param2(start);
+    starlark_integer param3(end);
 
-  starlark_obj::pos_args_t pos_args;
-  starlark_obj::named_args_t named_args;
-  pos_args.push_back(&empty);
-  pos_args.push_back(ctx.one());
-  pos_args.push_back(ctx.one());
-  auto* method = str.dot("count", ctx, error_callback);
-  ASSERT_NE(nullptr, method);
-  EXPECT_THAT(error_callback.messages, IsEmpty());
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(ctx.empty_string());
+    pos_args.push_back(&param2);
+    pos_args.push_back(&param3);
+    auto* method = str.dot("count", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
 
-  auto* result = method->call(pos_args, named_args, ctx, error_callback);
-  ASSERT_NE(nullptr, result);
-  EXPECT_EQ(result->type(), starlark_types::int_t);
-  EXPECT_EQ(result->str(), "1");
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->type(), starlark_types::int_t);
+    EXPECT_EQ(result->str(), expected);
+    ASSERT_THAT(error_callback.messages, IsEmpty());
+  };
 
-  ASSERT_THAT(error_callback.messages, IsEmpty());
-  EXPECT_EQ(str.str(), "abc");
+  /*`Python
+  for a in range(-1, 2):
+      for b in range(-1, 2):
+          print(f'  test("", {a}, {b}, "{''.count('', a, b)}");')
+  */
+  test("", -1, -1, "1");
+  test("", -1, 0, "1");
+  test("", -1, 1, "1");
+  test("", 0, -1, "1");
+  test("", 0, 0, "1");
+  test("", 0, 1, "1");
+  test("", 1, -1, "0");
+  test("", 1, 0, "0");
+  test("", 1, 1, "0");
+
+  /*`Python
+  for a in range(-4, 5):
+      for b in range(-4, 5):
+          print(f'  test("abc", {a}, {b}, "{'abc'.count('', a, b)}");')
+  */
+  test("abc", -4, -4, "1");
+  test("abc", -4, -3, "1");
+  test("abc", -4, -2, "2");
+  test("abc", -4, -1, "3");
+  test("abc", -4, 0, "1");
+  test("abc", -4, 1, "2");
+  test("abc", -4, 2, "3");
+  test("abc", -4, 3, "4");
+  test("abc", -4, 4, "4");
+  test("abc", -3, -4, "1");
+  test("abc", -3, -3, "1");
+  test("abc", -3, -2, "2");
+  test("abc", -3, -1, "3");
+  test("abc", -3, 0, "1");
+  test("abc", -3, 1, "2");
+  test("abc", -3, 2, "3");
+  test("abc", -3, 3, "4");
+  test("abc", -3, 4, "4");
+  test("abc", -2, -4, "0");
+  test("abc", -2, -3, "0");
+  test("abc", -2, -2, "1");
+  test("abc", -2, -1, "2");
+  test("abc", -2, 0, "0");
+  test("abc", -2, 1, "1");
+  test("abc", -2, 2, "2");
+  test("abc", -2, 3, "3");
+  test("abc", -2, 4, "3");
+  test("abc", -1, -4, "0");
+  test("abc", -1, -3, "0");
+  test("abc", -1, -2, "0");
+  test("abc", -1, -1, "1");
+  test("abc", -1, 0, "0");
+  test("abc", -1, 1, "0");
+  test("abc", -1, 2, "1");
+  test("abc", -1, 3, "2");
+  test("abc", -1, 4, "2");
+  test("abc", 0, -4, "1");
+  test("abc", 0, -3, "1");
+  test("abc", 0, -2, "2");
+  test("abc", 0, -1, "3");
+  test("abc", 0, 0, "1");
+  test("abc", 0, 1, "2");
+  test("abc", 0, 2, "3");
+  test("abc", 0, 3, "4");
+  test("abc", 0, 4, "4");
+  test("abc", 1, -4, "0");
+  test("abc", 1, -3, "0");
+  test("abc", 1, -2, "1");
+  test("abc", 1, -1, "2");
+  test("abc", 1, 0, "0");
+  test("abc", 1, 1, "1");
+  test("abc", 1, 2, "2");
+  test("abc", 1, 3, "3");
+  test("abc", 1, 4, "3");
+  test("abc", 2, -4, "0");
+  test("abc", 2, -3, "0");
+  test("abc", 2, -2, "0");
+  test("abc", 2, -1, "1");
+  test("abc", 2, 0, "0");
+  test("abc", 2, 1, "0");
+  test("abc", 2, 2, "1");
+  test("abc", 2, 3, "2");
+  test("abc", 2, 4, "2");
+  test("abc", 3, -4, "0");
+  test("abc", 3, -3, "0");
+  test("abc", 3, -2, "0");
+  test("abc", 3, -1, "0");
+  test("abc", 3, 0, "0");
+  test("abc", 3, 1, "0");
+  test("abc", 3, 2, "0");
+  test("abc", 3, 3, "1");
+  test("abc", 3, 4, "1");
+  test("abc", 4, -4, "0");
+  test("abc", 4, -3, "0");
+  test("abc", 4, -2, "0");
+  test("abc", 4, -1, "0");
+  test("abc", 4, 0, "0");
+  test("abc", 4, 1, "0");
+  test("abc", 4, 2, "0");
+  test("abc", 4, 3, "0");
+  test("abc", 4, 4, "0");
 }
 
 TEST(StarlarkString, CountEmptyStringEndBeforeStart) {

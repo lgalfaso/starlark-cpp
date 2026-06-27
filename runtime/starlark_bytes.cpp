@@ -299,6 +299,9 @@ int64_t starlark_bytes::count(std::string_view sub, int64_t start, int64_t end) 
   if (start < 0) {
     start = std::max<int64_t>(start + value.size(), 0);
   } else {
+    if (sub.empty() && start > value.size()) {
+      return 0;
+    }
     start = std::min<int64_t>(start, value.size());
   }
   if (end < 0) {
