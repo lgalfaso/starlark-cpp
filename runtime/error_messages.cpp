@@ -366,6 +366,14 @@ std::string error_missing_keyword_only_argument(std::string_view fn_name, std::s
   return std::format("TypeError: {}() missing required keyword-only argument '{}'", fn_name, argument_name);
 }
 
+std::string error_missing_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("TypeError: {}() missing required argument '{}'", fn_name, argument_name);
+}
+
+std::string error_missing_typed_argument(std::string_view fn_name, std::string_view type_name) {
+  return std::format("TypeError: {}() missing {} argument", fn_name, type_name);
+}
+
 std::string error_empty_iterator(std::string_view fn_name) {
   return std::format("ValueError: {}() iterable argument is empty", fn_name);
 }

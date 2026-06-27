@@ -701,9 +701,11 @@ TEST(StarlarkBytes, NoPosArgs) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
-  ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bytes() takes exactly one argument (0 given)", error_callback.messages[0]);
+  auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->type(), starlark_types::bytes_t);
+  EXPECT_EQ(result->str(), "b\"\"");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBytes, ListWithNone) {
@@ -751,7 +753,7 @@ TEST(StarlarkBytes, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bytes() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: bytes expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, NamedArguments) {
@@ -1212,6 +1214,32 @@ TEST(StarlarkEnumerate, FromIterable) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkEnumerate, FromIterableWithIterableAsNamedArgument) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  std::string s_iterable("iterable");
+  std::string s_start("start");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  list.append(&s_one, ctx, error_callback);
+  list.append(&s_two, ctx, error_callback);
+  list.append(&s_three, ctx, error_callback);
+  starlark_integer start(100);
+  named_args.insert(s_iterable, &list);
+  named_args.insert(s_start, &start);
+
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->repr(), "[(100, \"one\"), (101, \"two\"), (102, \"three\")]");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+}
+
 TEST(StarlarkEnumerate, FromIterableWithStartAsNamedArgument) {
   Arena arena;
   context ctx(arena);
@@ -1310,6 +1338,32 @@ TEST(StarlarkEnumerate, InvalidStartAsPositionalArgument) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string)");
 }
 
+TEST(StarlarkEnumerate, IterableAsNamedArgumentAndPositionalArgument) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  starlark_list list(0);
+  std::string s_iterable("iterable");
+  starlark_string s_one("one"sv);
+  starlark_string s_two("two"sv);
+  starlark_string s_three("three"sv);
+  starlark_integer start(100);
+  list.append(&s_one, ctx, error_callback);
+  list.append(&s_two, ctx, error_callback);
+  list.append(&s_three, ctx, error_callback);
+  pos_args.push_back(&list);
+  pos_args.push_back(&start);
+  named_args.insert(s_iterable, &list);
+
+  auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() got multiple values for argument 'iterable'");
+}
+
 TEST(StarlarkEnumerate, StartAsNamedArgumentAndPositionalArgument) {
   Arena arena;
   context ctx(arena);
@@ -1372,7 +1426,7 @@ TEST(StarlarkEnumerate, TooFewPosArguments) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() missing required argument 'iterable'");
 }
 
 TEST(StarlarkEnumerate, TwoPosArguments) {
@@ -2442,7 +2496,7 @@ TEST(StarlarkInt, FromList) {
   EXPECT_EQ("TypeError: int() argument must be a string, int, bool or a real number, not 'list'", error_callback.messages[0]);
 }
 
-TEST(StarlarkInt, TooFewPosArgs) {
+TEST(StarlarkInt, NoPosArgs) {
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
@@ -2450,9 +2504,28 @@ TEST(StarlarkInt, TooFewPosArgs) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  auto* result = starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "0");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkInt, NoPosArgsAndBase) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_integer base(10);
+  std::string s_base("base");
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_base, &base);
+
+  auto* result = starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() takes one or two argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: int() missing string argument", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, BaseAsNamedAndPositionalArgument) {
@@ -4429,7 +4502,7 @@ TEST(StarlarkStr, String) {
   EXPECT_EQ(result->as_string(), "abc");
 }
 
-TEST(StarlarkStr, TooFewPosArguments) {
+TEST(StarlarkStr, NoPosArguments) {
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
@@ -4437,9 +4510,11 @@ TEST(StarlarkStr, TooFewPosArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
 
-  EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
-  ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: str() takes exactly one argument (0 given)", error_callback.messages[0]);
+  auto* result = starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->type(), starlark_types::string_t);
+  EXPECT_EQ(result->str(), "");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkStr, TooManyPosArguments) {
@@ -4455,7 +4530,7 @@ TEST(StarlarkStr, TooManyPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: str() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: str expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkStr, NamedArguments) {

@@ -226,9 +226,14 @@ starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // The Python version of `bytes` can take zero arguments and returns `b''`. The spec mandates that this parameter is mandatory.
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bytes_f).ok()) {
+  // The Python version of `bytes` can take zero arguments and returns `b''`.
+  // The spec is not clear whether zero arguments is ok, but a strict reading would be that this parameter is mandatory.
+  // See: https://github.com/bazelbuild/starlark/issues/351
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bytes_f).ok()) {
     return nullptr;
+  }
+  if (pos_args.empty()) {
+    return ctx.empty_bytes();
   }
   if (pos_args.front()->type() == starlark_types::bytes_t) {
     return pos_args.front();
@@ -320,6 +325,8 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  // Python has a variation of this that takes zero arguments. This was discussed, but probably will never happen.
+  // Context: https://github.com/bazelbuild/starlark/issues/218
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::dir_f).ok()) {
     return nullptr;
   }
@@ -333,43 +340,56 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  // Bazel allows the first parameter to be named with the name `list`, Python does the same with the name `iterable`, the spec calls this parameter `x`.
+  // Check https://github.com/bazelbuild/starlark/issues/355
+  starlark_obj* iterable = nullptr;
   starlark_obj* start = nullptr;
   for (auto& [key, value] : named_args) {
     if (key == "start") {
       assert(value != nullptr);
-      if (value->type() != starlark_types::int_t) {
-        error_callback.add_error(error_argument_interpreted_as_integer("start", value->type()));
-        return nullptr;
-      }
       start = value;
+    } else if (key == "iterable") {
+      assert(value != nullptr);
+      iterable = value;
     } else {
       error_callback.add_error(error_unknown_argument(key));
       return nullptr;
     }
   }
-  if (!min_args(pos_args, error_callback, starlark_built_in_functions::enumerate_f, 1).ok() ||
-      !max_args(pos_args, error_callback, starlark_built_in_functions::enumerate_f, 2).ok()) {
+  if (!max_args(pos_args, error_callback, starlark_built_in_functions::enumerate_f, 2).ok()) {
     return nullptr;
   }
-  if (pos_args.size() == 2) {
+  if (!pos_args.empty()) {
+    if (iterable != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument(
+          starlark_built_in_functions::enumerate_f,
+          "iterable"));
+      return nullptr;
+    }
+    iterable = pos_args.front();
+  }
+  if (pos_args.size() >= 2) {
     if (start != nullptr) {
       error_callback.add_error(error_multiple_values_for_argument(
           starlark_built_in_functions::enumerate_f,
           "start"));
       return nullptr;
     }
-    auto* value = pos_args[1];
-    if (value->type() != starlark_types::int_t) {
-      error_callback.add_error(error_argument_interpreted_as_integer("start", value->type()));
-      return nullptr;
-    }
-    start = value;
+    start = pos_args[1];
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
+  if (iterable == nullptr) {
+    error_callback.add_error(error_missing_argument(starlark_built_in_functions::enumerate_f, "iterable"));
+    return nullptr;
+  }
+  if (start != nullptr && start->type() != starlark_types::int_t) {
+    error_callback.add_error(error_argument_interpreted_as_integer("start", start->type()));
+    return nullptr;
+  }
+  auto* it = iterable->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, iterable->len(false, error_callback)));
   if (start == nullptr) {
     start = ctx.zero();
   }
@@ -488,6 +508,7 @@ starlark_obj* starlark_fn_hasattr(starlark_obj* this_obj, const starlark_obj::po
 }
 
 starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  // Python allows many things to be hashed, but the Starlark spec is very clear that only string and bytes are alloed in Starlark.
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::hash_f).ok()) {
     return nullptr;
   }
@@ -501,6 +522,7 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  // Python allows the variation with zero parameters, so we allow it here.
   starlark_obj* base_param = nullptr;
   for (auto& [key, value] : named_args) {
     if (key == "base") {
@@ -515,9 +537,25 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       return nullptr;
     }
   }
-  if (pos_args.size() != 1 && pos_args.size() != 2) {
+  if (pos_args.size() > 2) {
     error_callback.add_error(error_arguments_one_or_two(starlark_built_in_functions::int_f, pos_args.size()));
     return nullptr;
+  }
+  if (pos_args.size() >= 2) {
+    if (base_param != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument(
+          starlark_built_in_functions::int_f,
+          "base"));
+      return nullptr;
+    }
+    base_param = pos_args[1];
+  }
+  if (pos_args.empty()) {
+    if (base_param != nullptr) {
+      error_callback.add_error(error_missing_typed_argument(starlark_built_in_functions::int_f, starlark_types::string_t));
+      return nullptr;
+    }
+    return ctx.zero();
   }
   auto* value = pos_args.front();
   if (value->type() != starlark_types::string_t && base_param != nullptr) {
@@ -525,34 +563,13 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
     return nullptr;
   }
   if (value->type() == starlark_types::int_t) {
-    if (pos_args.size() >= 2) {
-      error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
-      return nullptr;
-    }
     return value;
   } else if (value->type() == starlark_types::float_t) {
-    if (pos_args.size() >= 2) {
-      error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
-      return nullptr;
-    }
     return create_integer_from_float(value->as_float(), ctx, error_callback);
   } else if (value->type() == starlark_types::bool_t) {
-    if (pos_args.size() >= 2) {
-      error_callback.add_error(error_convert_non_string_with_base(starlark_built_in_functions::int_f));
-      return nullptr;
-    }
     return value->truthy() ? ctx.one() : ctx.zero();
   } else if (value->type() == starlark_types::string_t) {
     int base = 10;
-    if (base_param != nullptr && pos_args.size() >= 2) {
-      error_callback.add_error(error_multiple_values_for_argument(
-          starlark_built_in_functions::int_f,
-          "base"));
-      return nullptr;
-    }
-    if (pos_args.size() >= 2) {
-      base_param = pos_args[1];
-    }
     if (base_param != nullptr) {
       switch (base_param->numeric_type()) {
         case starlark_numeric_type::kInt64: {
@@ -1065,8 +1082,14 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
 }
 
 starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::str_f).ok()) {
+  // The Python version of `str` can take zero arguments and returns `''`.
+  // The spec is not clear whether zero arguments is ok, but a strict reading would be that this parameter is mandatory.
+  // See: https://github.com/bazelbuild/starlark/issues/351
+  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::str_f).ok()) {
     return nullptr;
+  }
+  if (pos_args.empty()) {
+    return ctx.empty_string();
   }
   return Arena::Create<starlark_string>(&ctx.arena(), pos_args.front()->str());
 }

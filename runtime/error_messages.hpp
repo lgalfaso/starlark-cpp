@@ -113,6 +113,8 @@ std::string error_multiple_values_for_argument(std::string_view fn_name, std::st
 std::string error_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name);
 std::string error_missing_positional_argument(std::string_view fn_name, std::string_view argument_name);
 std::string error_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_missing_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_missing_typed_argument(std::string_view fn_name, std::string_view type_name);
 
 std::string error_empty_iterator(std::string_view fn_name);
 
