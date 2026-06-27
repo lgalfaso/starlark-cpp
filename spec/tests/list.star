@@ -11,3 +11,22 @@ def foo():
   return b
 
 assert_eq(foo(), 6)
+
+
+assert_fail('''+[]''')
+assert_fail('''-[]''')
+assert_fail('''~[]''')
+
+# List are not hashable.
+assert_fail('''
+{[]: 1}
+''')
+# Inmutable lists are also not hashable.
+assert_fail('''
+## Begin module: "//:test1.bzl"
+a = [0, 1, 2]
+## End module
+## Main
+load("//:test1.bzl", "a")
+{a: None}
+''')
