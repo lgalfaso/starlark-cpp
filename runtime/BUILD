@@ -645,6 +645,19 @@ cc_test(
 )
 
 cc_test(
+    name = "starlark_string_repr_test",
+    size = "small",
+    srcs = ["starlark_string_repr_test.cpp"],
+    deps = [
+        ":starlark_function_builder_impl",
+        ":starlark_numeric_impl",
+        ":starlark_object_impl",
+        ":starlark_string",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "starlark_string_elems_test",
     size = "small",
     srcs = ["starlark_string_elems_test.cpp"],
