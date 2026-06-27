@@ -28,6 +28,4 @@ assert_fail('''
 'abc'.splitlines(True, True)
 ''')
 
-assert_fail('''
-'abc'.splitlines(keepends = True)
-''')
+assert_eq('abc'.splitlines(keepends = True), ['abc'])

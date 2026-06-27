@@ -171,10 +171,6 @@ assert_fail('''
 'abc'.rsplit(None, 0, 1)
 ''')
 
-assert_fail('''
-'abc'.split(None, maxsplit=0)
-''')
-assert_fail('''
-'abc'.rsplit(None, maxsplit=0)
-''')
+assert_eq('abc'.split('b', maxsplit=-1), ['a', 'c'])
+assert_eq('abc'.rsplit('b', maxsplit=-1), ['a', 'c'])
 

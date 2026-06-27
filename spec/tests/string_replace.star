@@ -81,6 +81,12 @@ assert_fail('''
 ''')
 
 assert_fail('''
-'abc'.replace('', '', count = 0)
+'abc'.replace('b', new = 'x')
 ''')
+
+assert_eq('abc'.replace('b', 'x', count = 1), 'axc')
+assert_fail('''
+'abc'.replace('b', 'x', 1, count = 1)
+''')
+
 

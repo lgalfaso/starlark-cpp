@@ -1,4 +1,26 @@
-# TODO(lmirelmann): Add simple cases.
+assert_eq(float(), 0.0)
+assert_eq(float(False), 0.0)
+assert_eq(float(True), 1.0)
+assert_fail('''
+float(None)
+''')
+assert_eq(float("1e308"), 1e308)
+assert_fail('''
+float("1e309")
+''')
+assert_fail('''
+float(1 << 1024)
+''')
+
+assert_eq(str(float("NaN")), "nan")
+assert_eq(str(float("+NAN")), "nan")
+assert_eq(str(float("-nan")), "nan")
+assert_eq(str(float("Inf")), "inf")
+assert_eq(str(float("+INF")), "inf")
+assert_eq(str(float("-inf")), "-inf")
+assert_eq(str(float("+InFiNiTy")), "inf")
+assert_eq(str(float("-iNfInItY")), "-inf")
+
 assert_eq(float((1 << 1000) - (1 << 944)), 1.0715086071862673e+301)
 assert_eq(float((1 << 1000) - (1 << 944) - 1), 1.0715086071862673e+301)
 assert_eq(float((1 << 1000) - (1 << 945)), 1.0715086071862673e+301)
