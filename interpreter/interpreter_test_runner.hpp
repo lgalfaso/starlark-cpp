@@ -4,7 +4,7 @@
 #define INTERPRETER_INTERPRETER_TEST_RUNNER_HPP_
 
 #include <map>
-#include <string_view>
+#include <string>
 
 #include "interpreter/frame.hpp"
 #include "logging/logging.hpp"
