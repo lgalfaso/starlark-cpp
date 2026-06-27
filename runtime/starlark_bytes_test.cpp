@@ -4469,20 +4469,116 @@ TEST(StarlarkBytes, SplitWithNamedArguments) {
   Arena arena;
   context ctx(arena);
   starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
-  named_args.insert("maxsplit", ctx.zero());
+  pos_args.push_back(&sep);
+  named_args.insert("maxsplit", ctx.minus_one());
   auto* method = bytes.dot("split", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
-  EXPECT_EQ(nullptr, result);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "[b\"a\", b\"c\"]");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, SplitWithNamedArgumentsSep) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+  EXPECT_EQ(result->str(), "[b\"a\", b\"c\"]");
+}
+
+TEST(StarlarkBytes, SplitWithNamedArgumentsSepDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.split() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'sep'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, SplitWithNamedArgumentsMaxsplitDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  pos_args.push_back(ctx.minus_one());
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, SplitWithNamedArgumentsUnknown) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.insert("unknown", ctx.minus_one());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4772,6 +4868,77 @@ TEST(StarlarkBytes, RsplitTwoArgumentsNoneSeparatorBoolMaxsplit) {
   EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
 }
 
+TEST(StarlarkBytes, RsplitWithNamedArgumentsSep) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+  EXPECT_EQ(result->str(), "[b\"a\", b\"c\"]");
+}
+
+TEST(StarlarkBytes, RsplitWithNamedArgumentsSepDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'sep'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, RsplitWithNamedArgumentsMaxsplitDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  pos_args.push_back(ctx.minus_one());
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
 TEST(StarlarkBytes, RsplitWithThreeArguments) {
   error_handler error_callback;
   Arena arena;
@@ -4795,16 +4962,18 @@ TEST(StarlarkBytes, RsplitWithThreeArguments) {
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
-TEST(StarlarkBytes, RsplitWithNamedArguments) {
+TEST(StarlarkBytes, RsplitWithNamedArgumentsUnknown) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
   starlark_bytes bytes("abc"sv);
+  starlark_bytes sep("b"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
-  named_args.insert("maxsplit", ctx.zero());
+  pos_args.push_back(&sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.insert("unknown", ctx.minus_one());
   auto* method = bytes.dot("rsplit", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4813,7 +4982,7 @@ TEST(StarlarkBytes, RsplitWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.rsplit() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5053,7 +5222,7 @@ TEST(StarlarkBytes, ReplaceWithFourArguments) {
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
-TEST(StarlarkBytes, ReplaceWithNamedArguments) {
+TEST(StarlarkBytes, ReplaceWithOldNamedArguments) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -5071,7 +5240,58 @@ TEST(StarlarkBytes, ReplaceWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.replace() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'old'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithCountNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes old("b"sv);
+  starlark_bytes new_("x"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&old);
+  pos_args.push_back(&new_);
+  named_args.insert("count", ctx.one());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->str(), "b\"axc\"");
+
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithCountPositionalAndNamedArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes old("b"sv);
+  starlark_bytes new_("x"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&old);
+  pos_args.push_back(&new_);
+  pos_args.push_back(ctx.one());
+  named_args.insert("count", ctx.one());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() got multiple values for argument 'count'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
