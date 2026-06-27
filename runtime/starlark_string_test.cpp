@@ -6557,11 +6557,107 @@ TEST(StarlarkString, SplitWithNamedArguments) {
   Arena arena;
   context ctx(arena);
   starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
-  named_args.insert("maxsplit", ctx.zero());
+  pos_args.push_back(&sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = str.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+  EXPECT_EQ(result->str(), "[\"a\", \"c\"]");
+}
+
+TEST(StarlarkString, SplitWithNamedArgumentsSep) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = str.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+  EXPECT_EQ(result->str(), "[\"a\", \"c\"]");
+}
+
+TEST(StarlarkString, SplitWithNamedArgumentsSepDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = str.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'sep'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, SplitWithNamedArgumentsMaxsplitDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  pos_args.push_back(ctx.minus_one());
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = str.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, SplitWithNamedArgumentsUnknown) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.insert("unknown", ctx.minus_one());
   auto* method = str.dot("split", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6570,7 +6666,7 @@ TEST(StarlarkString, SplitWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.split() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6883,16 +6979,89 @@ TEST(StarlarkString, RsplitWithThreeArguments) {
   EXPECT_EQ(str.str(), "abc");
 }
 
-TEST(StarlarkString, RsplitWithNamedArguments) {
+TEST(StarlarkString, RsplitWithNamedArgumentsSep) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
   starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
-  named_args.insert("maxsplit", ctx.zero());
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = str.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_NE(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(str.str(), "abc");
+  EXPECT_EQ(result->str(), "[\"a\", \"c\"]");
+}
+
+TEST(StarlarkString, RsplitWithNamedArgumentsSepDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  named_args.insert("sep", &sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = str.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'sep'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RsplitWithNamedArgumentsMaxsplitDuplicate) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  pos_args.push_back(ctx.minus_one());
+  named_args.insert("maxsplit", ctx.minus_one());
+  auto* method = str.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RsplitWithNamedArgumentsUnknown) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string sep("b"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&sep);
+  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.insert("unknown", ctx.minus_one());
   auto* method = str.dot("rsplit", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6901,7 +7070,7 @@ TEST(StarlarkString, RsplitWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.rsplit() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
   EXPECT_EQ(str.str(), "abc");
 }
 

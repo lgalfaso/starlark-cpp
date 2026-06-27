@@ -2195,34 +2195,53 @@ starlark_obj* starlark_string_fn_rpartition(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.rsplit").ok() ||
-      !max_args(pos_args, error_callback, "rsplit", 2).ok()) {
-    return nullptr;
-  }
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
-    int64_t maxsplit = -1;
-    if (pos_args.size() >= 2) {
-      auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
-      if (!status_or_maxsplit.ok()) {
-        return nullptr;
-      }
-      maxsplit = *status_or_maxsplit;
+  starlark_obj* sep = nullptr;
+  starlark_obj* maxsplit = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "sep") {
+      assert(value != nullptr);
+      sep = value;
+    } else if (key == "maxsplit") {
+      assert(value != nullptr);
+      maxsplit = value;
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
     }
-    return static_cast<starlark_string*>(this_obj)->rsplit(maxsplit, ctx);
   }
-  auto sep = string_as_string(pos_args.front(), "rsplit", 1, error_callback);
-  if (!sep.ok()) {
+  if (!max_args(pos_args, error_callback, "rsplit", 2).ok()) {
     return nullptr;
   }
-  int64_t maxsplit = -1;
+  if (pos_args.size() >= 1) {
+    if (sep != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument("rsplit", "sep"));
+      return nullptr;
+    }
+    sep = pos_args.front();
+  }
   if (pos_args.size() >= 2) {
-    auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+    if (maxsplit != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument("rsplit", "maxsplit"));
+      return nullptr;
+    }
+    maxsplit = pos_args[1];
+  }
+  int64_t maxsplit_value = -1;
+  if (maxsplit != nullptr) {
+    auto status_or_maxsplit = to_int64_with_clamping(*maxsplit, error_callback);
     if (!status_or_maxsplit.ok()) {
       return nullptr;
     }
-    maxsplit = *status_or_maxsplit;
+    maxsplit_value = *status_or_maxsplit;
   }
-  return static_cast<starlark_string*>(this_obj)->rsplit(*sep, maxsplit, ctx, error_callback);
+  if (sep == nullptr || sep->type() == starlark_types::none_t) {
+    return static_cast<starlark_string*>(this_obj)->rsplit(maxsplit_value, ctx);
+  }
+  auto sep_value = string_as_string(sep, "rsplit", 1, error_callback);
+  if (!sep_value.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->rsplit(*sep_value, maxsplit_value, ctx, error_callback);
 }
 
 starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -2242,34 +2261,53 @@ starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!no_named_args(named_args, error_callback, "string.split").ok() ||
-      !max_args(pos_args, error_callback, "split", 2).ok()) {
-    return nullptr;
-  }
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
-    int64_t maxsplit = -1;
-    if (pos_args.size() >= 2) {
-      auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
-      if (!status_or_maxsplit.ok()) {
-        return nullptr;
-      }
-      maxsplit = *status_or_maxsplit;
+  starlark_obj* sep = nullptr;
+  starlark_obj* maxsplit = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "sep") {
+      assert(value != nullptr);
+      sep = value;
+    } else if (key == "maxsplit") {
+      assert(value != nullptr);
+      maxsplit = value;
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
     }
-    return static_cast<starlark_string*>(this_obj)->split(maxsplit, ctx);
   }
-  auto sep = string_as_string(pos_args.front(), "split", 1, error_callback);
-  if (!sep.ok()) {
+  if (!max_args(pos_args, error_callback, "split", 2).ok()) {
     return nullptr;
   }
-  int64_t maxsplit = -1;
+  if (pos_args.size() >= 1) {
+    if (sep != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument("split", "sep"));
+      return nullptr;
+    }
+    sep = pos_args.front();
+  }
   if (pos_args.size() >= 2) {
-    auto status_or_maxsplit = to_int64_with_clamping(*pos_args[1], error_callback);
+    if (maxsplit != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument("split", "maxsplit"));
+      return nullptr;
+    }
+    maxsplit = pos_args[1];
+  }
+  int64_t maxsplit_value = -1;
+  if (maxsplit != nullptr) {
+    auto status_or_maxsplit = to_int64_with_clamping(*maxsplit, error_callback);
     if (!status_or_maxsplit.ok()) {
       return nullptr;
     }
-    maxsplit = *status_or_maxsplit;
+    maxsplit_value = *status_or_maxsplit;
   }
-  return static_cast<starlark_string*>(this_obj)->split(*sep, maxsplit, ctx, error_callback);
+  if (sep == nullptr || sep->type() == starlark_types::none_t) {
+    return static_cast<starlark_string*>(this_obj)->split(maxsplit_value, ctx);
+  }
+  auto sep_value = string_as_string(sep, "split", 1, error_callback);
+  if (!sep_value.ok()) {
+    return nullptr;
+  }
+  return static_cast<starlark_string*>(this_obj)->split(*sep_value, maxsplit_value, ctx, error_callback);
 }
 
 starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
