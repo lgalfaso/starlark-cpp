@@ -8,6 +8,7 @@ assert_eq(b'banana'.find(b''), 0)
 assert_eq(b'banana'.find(b'an'), 1)
 assert_eq(b'banana'.find(b'ban'), 0)
 assert_eq(b'banana'.find(b'bb'), -1)
+assert_eq(b'banana'.find(97), 1)
 
 # Two arguments.
 assert_fail('''b'banana'.find(b'', False)''')
