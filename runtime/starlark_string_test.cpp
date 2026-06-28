@@ -285,7 +285,7 @@ TEST(StarlarkString, BinaryPlus) {
   EXPECT_EQ(result->str(), "abcdef");
 }
 
-TEST(StarlarkString, BinaryPlusNotList) {
+TEST(StarlarkString, BinaryPlusNotString) {
   starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;

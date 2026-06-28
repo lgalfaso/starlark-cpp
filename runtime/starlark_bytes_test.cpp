@@ -255,7 +255,7 @@ TEST(StarlarkBytes, BinaryPlus) {
   EXPECT_EQ(result->str(), "b\"abcdef\"");
 }
 
-TEST(StarlarkBytes, BinaryPlusNotList) {
+TEST(StarlarkBytes, BinaryPlusNotBytes) {
   starlark_bytes bytes("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
@@ -308,7 +308,7 @@ TEST(StarlarkBytes, PlusEqualsAssignOverflowNoOverflow) {
   EXPECT_EQ(result->str(), "b\"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\"");
 }
 
-TEST(StarlarkBytes, PlusEqualsAssignNotList) {
+TEST(StarlarkBytes, PlusEqualsAssignNotBytes) {
   starlark_bytes bytes("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
