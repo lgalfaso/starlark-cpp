@@ -312,7 +312,7 @@ TEST(StarlarkString, PlusEqualsAssign) {
   EXPECT_EQ(result->str(), "abcdef");
 }
 
-TEST(StarlarkString, PlusEqualsAssignNotList) {
+TEST(StarlarkString, PlusEqualsAssignNotString) {
   starlark_string str("abc"sv);
   starlark_tuple tuple(0);
   Arena arena;
