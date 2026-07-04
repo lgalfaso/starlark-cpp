@@ -208,13 +208,13 @@ TEST(StarlarkBytes, BinaryInErrors) {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_string(""sv), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'string'");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'string'");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_float(0), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'float'");
+    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'float'");
   }
   {
     error_handler error_callback;
@@ -987,7 +987,7 @@ TEST(StarlarkBytes, CountNone) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'NoneType'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'NoneType'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -1009,7 +1009,7 @@ TEST(StarlarkBytes, CountFloat) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'float'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'float'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -1031,7 +1031,7 @@ TEST(StarlarkBytes, CountTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -1550,7 +1550,7 @@ TEST(StarlarkBytes, EndswithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'string'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith first arg must be bytes or a tuple of bytes, not string");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -1574,7 +1574,30 @@ TEST(StarlarkBytes, EndswithTupleWithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'string'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'string'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, EndswithTupleWithInt) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_tuple tuple(1);
+  tuple.add(ctx.zero());
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = bytes.dot("endswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -1938,7 +1961,7 @@ TEST(StarlarkBytes, StartswithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'string'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith first arg must be bytes or a tuple of bytes, not string");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -1962,7 +1985,30 @@ TEST(StarlarkBytes, StartswithTupleWithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'string'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'string'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, StartswithTupleWithInt) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_tuple tuple(1);
+  tuple.add(ctx.zero());
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&tuple);
+  auto* method = bytes.dot("startswith", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -2248,7 +2294,7 @@ TEST(StarlarkBytes, FindTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -2278,6 +2324,27 @@ TEST(StarlarkBytes, FindOneArgument) {
   test("banana", "an", "1");
   test("banana", "ban", "0");
   test("banana", "bb", "-1");
+}
+
+TEST(StarlarkBytes, FindInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_integer param1(97);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  auto* method = bytes.dot("find", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->str(), "1");
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBytes, FindStartAsBool) {
@@ -2597,8 +2664,29 @@ TEST(StarlarkBytes, IndexTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, IndexInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_integer param1(97);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  auto* method = bytes.dot("index", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->as_int64(), 1);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBytes, IndexOneArgument) {
@@ -2964,8 +3052,29 @@ TEST(StarlarkBytes, RfindTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, RfindInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_integer param1(97);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  auto* method = bytes.dot("rfind", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->as_int64(), 5);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBytes, RfindOneArgument) {
@@ -3313,8 +3422,29 @@ TEST(StarlarkBytes, RindexTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
+}
+
+TEST(StarlarkBytes, RindexInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("banana"sv);
+  starlark_integer param1(97);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  auto* method = bytes.dot("rindex", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::int_t);
+  EXPECT_EQ(result->as_int64(), 5);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkBytes, RindexOneArgument) {
@@ -3707,7 +3837,32 @@ TEST(StarlarkBytes, JoinEmptyTuple) {
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
-TEST(StarlarkBytes, JoinTupleWithOneElement) {
+TEST(StarlarkBytes, JoinTupleWithOneElementAsBytes) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_tuple param1(1);
+  starlark_bytes b("xyz"sv);
+  param1.add(&b);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  auto* method = bytes.dot("join", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::bytes_t);
+  EXPECT_EQ(result->str(), "b\"xyz\"");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, JoinTupleWithOneElementAsInt) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -3723,11 +3878,10 @@ TEST(StarlarkBytes, JoinTupleWithOneElement) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
-  ASSERT_NE(nullptr, result);
-  EXPECT_EQ(result->type(), starlark_types::bytes_t);
-  EXPECT_EQ(result->str(), "b\"\\x01\"");
+  EXPECT_EQ(nullptr, result);
 
-  ASSERT_THAT(error_callback.messages, IsEmpty());
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -3750,11 +3904,38 @@ TEST(StarlarkBytes, JoinTupleWithOneBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
 TEST(StarlarkBytes, JoinTupleWithTwoElement) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes b1("def"sv);
+  starlark_bytes b2("ghi"sv);
+  starlark_tuple param1(2);
+  param1.add(&b1);
+  param1.add(&b2);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&param1);
+  auto* method = bytes.dot("join", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(result->type(), starlark_types::bytes_t);
+  EXPECT_EQ(result->str(), "b\"defabcghi\"");
+
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, JoinTupleWithInts) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -3771,11 +3952,10 @@ TEST(StarlarkBytes, JoinTupleWithTwoElement) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
-  ASSERT_NE(nullptr, result);
-  EXPECT_EQ(result->type(), starlark_types::bytes_t);
-  EXPECT_EQ(result->str(), "b\"\\x00abc\\x01\"");
+  ASSERT_EQ(nullptr, result);
 
-  ASSERT_THAT(error_callback.messages, IsEmpty());
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -3908,6 +4088,69 @@ TEST(StarlarkBytes, StripOneArgument) {
   test("zzyyxx", "xyz", "", "", "");
 }
 
+TEST(StarlarkBytes, StripWithCutsetAsInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("strip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, RstripWithCutsetAsInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("rstrip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, LstripWithCutsetAsInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("lstrip", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
 TEST(StarlarkBytes, StripWithCutsetAsBool) {
   error_handler error_callback;
   Arena arena;
@@ -3925,7 +4168,7 @@ TEST(StarlarkBytes, StripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -3946,7 +4189,7 @@ TEST(StarlarkBytes, RstripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -3967,7 +4210,7 @@ TEST(StarlarkBytes, LstripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4085,6 +4328,26 @@ TEST(StarlarkBytes, PartitionBytes) {
   test("aaa", "a", "(b\"\", b\"a\", b\"aa\")");
 }
 
+TEST(StarlarkBytes, PartitionInt) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("partition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+}
+
 TEST(StarlarkBytes, PartitionBool) {
   error_handler error_callback;
   Arena arena;
@@ -4102,7 +4365,7 @@ TEST(StarlarkBytes, PartitionBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, PartitionEmptySeparator) {
@@ -4212,7 +4475,27 @@ TEST(StarlarkBytes, RpartitionBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+}
+
+TEST(StarlarkBytes, RpartitionInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("rpartition", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
 }
 
 TEST(StarlarkBytes, RpartitionEmptySeparator) {
@@ -4327,7 +4610,26 @@ TEST(StarlarkBytes, SplitBoolSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+}
+
+TEST(StarlarkBytes, SplitIntegerSeparatorArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
 }
 
 TEST(StarlarkBytes, SplitEmptySeparatorArguments) {
@@ -4462,7 +4764,7 @@ TEST(StarlarkBytes, SplitTwoArgumentsBoolSeparator) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, SplitTwoArgumentsBoolMaxsplit) {
@@ -4754,7 +5056,26 @@ TEST(StarlarkBytes, RsplitBoolSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+}
+
+TEST(StarlarkBytes, RsplitIntegerSeparatorArguments) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+  EXPECT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
 }
 
 TEST(StarlarkBytes, RsplitEmptySeparatorArguments) {
@@ -4889,7 +5210,7 @@ TEST(StarlarkBytes, RsplitTwoArgumentsBoolSeparator) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, RsplitTwoArgumentsBoolMaxsplit) {
@@ -5169,6 +5490,50 @@ TEST(StarlarkBytes, ReplaceWithTwoArguments) {
   test("ayxyb", "y", "yy", "ayyxyyb");
 }
 
+TEST(StarlarkBytes, ReplaceWithTwoArgumentsOldAsInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(ctx.one());
+  pos_args.push_back(ctx.zero());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithTwoArgumentsNewAsInteger) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&bytes);
+  pos_args.push_back(ctx.one());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
 TEST(StarlarkBytes, ReplaceWithTwoArgumentsOldAsBool) {
   error_handler error_callback;
   Arena arena;
@@ -5187,7 +5552,7 @@ TEST(StarlarkBytes, ReplaceWithTwoArgumentsOldAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5199,7 +5564,7 @@ TEST(StarlarkBytes, ReplaceWithTwoArgumentsNewAsBool) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
+  pos_args.push_back(&bytes);
   pos_args.push_back(ctx.true_value());
   auto* method = bytes.dot("replace", ctx, error_callback);
   ASSERT_NE(nullptr, method);
@@ -5209,7 +5574,7 @@ TEST(StarlarkBytes, ReplaceWithTwoArgumentsNewAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes-like object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5286,8 +5651,8 @@ TEST(StarlarkBytes, ReplaceWithThreeArgumentsCountAsBool) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  pos_args.push_back(ctx.zero());
-  pos_args.push_back(ctx.zero());
+  pos_args.push_back(&bytes);
+  pos_args.push_back(&bytes);
   pos_args.push_back(ctx.true_value());
   auto* method = bytes.dot("replace", ctx, error_callback);
   ASSERT_NE(nullptr, method);

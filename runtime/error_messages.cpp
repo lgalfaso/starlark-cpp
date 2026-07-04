@@ -310,8 +310,8 @@ std::string error_integer_or_unicode_character_type_and_length(std::string_view 
   return std::format("TypeError: %c requires an int or a unicode character, not {} of length {}", type, len);
 }
 
-std::string error_integer_or_like(std::string_view type, std::string_view other_type) {
-  return std::format("TypeError: argument should be integer or {}-like object, not '{}'", type, other_type);
+std::string error_integer_or_type(std::string_view type, std::string_view other_type) {
+  return std::format("TypeError: argument should be integer or {} object, not '{}'", type, other_type);
 }
 
 std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type) {
@@ -328,6 +328,14 @@ std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_
 
 std::string error_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type) {
   return std::format("TypeError: {} first arg must be str or a tuple of str, not {}", fn_name, actual_type);
+}
+
+std::string error_bytes_or_tuple_of_bytes(std::string_view fn_name, std::string_view actual_type) {
+  return std::format("TypeError: {} first arg must be bytes or a tuple of bytes, not {}", fn_name, actual_type);
+}
+
+std::string error_type_required(std::string_view expected_type, std::string_view actual_type) {
+  return std::format("TypeError: a {} object is required, not '{}'", expected_type, actual_type);
 }
 
 std::string_view error_substring_not_found() {

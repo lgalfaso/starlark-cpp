@@ -28,6 +28,7 @@ assert_false(b'abc'.endswith((b'a', b'aabc')))
 assert_true(b'abc'.endswith((b'aabc', b'')))
 
 assert_fail('''b'abc'.endswith("")''')
+assert_fail('''b'abc'.endswith(97)''')
 assert_fail('''b'abc'.endswith(("",))''')
 
 # Two arguments.

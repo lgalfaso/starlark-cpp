@@ -161,14 +161,14 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
     }
     case starlark_numeric_type::kNotNumeric: {
       if (other.type() != type()) {
-        error_callback.add_error(error_integer_or_like(type(), other.type()));
+        error_callback.add_error(error_integer_or_type(type(), other.type()));
         return false;
       }
       const starlark_bytes& s_other = static_cast<const starlark_bytes&>(other);
       return value.contains(s_other.value);
     }
     default:
-     error_callback.add_error(error_integer_or_like(type(), other.type()));
+     error_callback.add_error(error_integer_or_type(type(), other.type()));
      return false;
   }
 }
@@ -701,34 +701,35 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
     }
     case starlark_numeric_type::kNotNumeric: {
       if (element->type() != starlark_types::bytes_t) {
-        error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, element->type()));
+        error_callback.add_error(error_integer_or_type(starlark_types::bytes_t, element->type()));
         return status_or<std::string_view>(status_code::kError);
       }
       return status_or<std::string_view>(element->as_string());
     }
     default:
-      error_callback.add_error(error_integer_or_like(starlark_types::bytes_t, element->type()));
+      error_callback.add_error(error_integer_or_type(starlark_types::bytes_t, element->type()));
       return status_or<std::string_view>(status_code::kError);
   }
 }
 
-status_or<std::vector<std::string_view>> bytes_int_or_tuple_as_vector_of_bytes(const starlark_obj* element, error_fn& error_callback) {
+status_or<std::vector<std::string_view>> bytes_or_tuple_as_vector_of_bytes(std::string_view fn_name, const starlark_obj* element, error_fn& error_callback) {
   std::vector<std::string_view> result;
   if (element->type() == starlark_types::tuple_t) {
     auto* tuple = static_cast<const starlark_tuple*>(element);
     for (int i = 0; i < tuple->size(); ++i) {
-      auto entry = bytes_or_int_as_bytes(tuple->at(i), error_callback);
-      if (!entry.ok()) {
+      auto* entry = tuple->at(i);
+      if (entry->type() != starlark_types::bytes_t) {
+        error_callback.add_error(error_type_required(starlark_types::bytes_t, entry->type()));
         return status_or<std::vector<std::string_view>>(status_code::kError);
       }
-      result.emplace_back(*entry);
+      result.emplace_back(entry->as_string());
     }
   } else {
-    auto entry = bytes_or_int_as_bytes(element, error_callback);
-    if (!entry.ok()) {
+    if (element->type() != starlark_types::bytes_t) {
+      error_callback.add_error(error_bytes_or_tuple_of_bytes(fn_name, element->type()));
       return status_or<std::vector<std::string_view>>(status_code::kError);
     }
-    result.emplace_back(*entry);
+    result.emplace_back(element->as_string());
   }
   return status_or<std::vector<std::string_view>>(result);
 }
@@ -796,7 +797,7 @@ starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
-  auto subs = bytes_int_or_tuple_as_vector_of_bytes(pos_args.front(), error_callback);
+  auto subs = bytes_or_tuple_as_vector_of_bytes("endswith", pos_args.front(), error_callback);
   if (!subs.ok()) {
     return nullptr;
   }
@@ -864,12 +865,12 @@ starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj:
   }
   std::vector<std::string_view> elements;
   while (it->has_next()) {
-    auto element = bytes_or_int_as_bytes(it->next(), error_callback);
-    if (!element.ok()) {
+    auto* element = it->next();
+    if (element->type() != starlark_types::bytes_t) {
+      error_callback.add_error(error_type_required(starlark_types::bytes_t, element->type()));
       return nullptr;
-      it->end_iterator();
     }
-    elements.push_back(*element);
+    elements.push_back(element->as_string());
   }
   it->end_iterator();
   return static_cast<starlark_bytes*>(this_obj)->join(elements, ctx);
@@ -884,11 +885,12 @@ starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_ob
   if (pos_args.empty()) {
     return static_cast<starlark_bytes*>(this_obj)->lstrip(ctx);
   }
-  auto cutset = bytes_or_int_as_bytes(pos_args.front(), error_callback);
-  if (!cutset.ok()) {
+  auto* cutset = pos_args.front();
+  if (cutset->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, cutset->type()));
     return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->lstrip(*cutset, ctx);
+  return static_cast<starlark_bytes*>(this_obj)->lstrip(cutset->as_string(), ctx);
 }
 
 starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -898,11 +900,12 @@ starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
 
-  auto separator = bytes_or_int_as_bytes(pos_args.front(), error_callback);
-  if (!separator.ok()) {
+  auto* separator = pos_args.front();
+  if (separator->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, separator->type()));
     return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->partition(*separator, ctx, error_callback);
+  return static_cast<starlark_bytes*>(this_obj)->partition(separator->as_string(), ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -928,12 +931,14 @@ starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_o
       !max_args(pos_args, error_callback, "replace", 3).ok()) {
     return nullptr;
   }
-  auto old = bytes_or_int_as_bytes(pos_args.front(), error_callback);
-  if (!old.ok()) {
+  auto* old = pos_args.front();
+  if (old->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, old->type()));
     return nullptr;
   }
-  auto new_ = bytes_or_int_as_bytes(pos_args[1], error_callback);
-  if (!new_.ok()) {
+  auto* new_ = pos_args[1];
+  if (new_->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, new_->type()));
     return nullptr;
   }
   int64_t count_value = -1;
@@ -944,7 +949,7 @@ starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_o
     }
     count_value = *status_or_count;
   }
-  return static_cast<starlark_bytes*>(this_obj)->replace(*old, *new_, count_value, ctx);
+  return static_cast<starlark_bytes*>(this_obj)->replace(old->as_string(), new_->as_string(), count_value, ctx);
 }
 
 starlark_obj* starlark_bytes_fn_rfind(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -997,11 +1002,12 @@ starlark_obj* starlark_bytes_fn_rpartition(starlark_obj* this_obj, const starlar
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
 
-  auto separator = bytes_or_int_as_bytes(pos_args.front(), error_callback);
-  if (!separator.ok()) {
+  auto* separator = pos_args.front();
+  if (separator->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, separator->type()));
     return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->rpartition(*separator, ctx, error_callback);
+  return static_cast<starlark_bytes*>(this_obj)->rpartition(separator->as_string(), ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1047,11 +1053,11 @@ starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_ob
   if (sep == nullptr || sep->type() == starlark_types::none_t) {
     return static_cast<starlark_bytes*>(this_obj)->rsplit(maxsplit_value, ctx);
   }
-  auto sep_value = bytes_or_int_as_bytes(sep, error_callback);
-  if (!sep_value.ok()) {
+  if (sep->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, sep->type()));
     return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->rsplit(*sep_value, maxsplit_value, ctx, error_callback);
+  return static_cast<starlark_bytes*>(this_obj)->rsplit(sep->as_string(), maxsplit_value, ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1063,11 +1069,12 @@ starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_ob
   if (pos_args.empty()) {
     return static_cast<starlark_bytes*>(this_obj)->rstrip(ctx);
   }
-  auto cutset = bytes_or_int_as_bytes(pos_args.front(), error_callback);
-  if (!cutset.ok()) {
+  auto* cutset = pos_args.front();
+  if (cutset->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, cutset->type()));
     return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->rstrip(*cutset, ctx);
+  return static_cast<starlark_bytes*>(this_obj)->rstrip(cutset->as_string(), ctx);
 }
 
 starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1113,11 +1120,11 @@ starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj
   if (sep == nullptr || sep->type() == starlark_types::none_t) {
     return static_cast<starlark_bytes*>(this_obj)->split(maxsplit_value, ctx);
   }
-  auto sep_value = bytes_or_int_as_bytes(sep, error_callback);
-  if (!sep_value.ok()) {
+  if (sep->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, sep->type()));
     return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->split(*sep_value, maxsplit_value, ctx, error_callback);
+  return static_cast<starlark_bytes*>(this_obj)->split(sep->as_string(), maxsplit_value, ctx, error_callback);
 }
 
 starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1128,7 +1135,7 @@ starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlar
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
-  auto subs = bytes_int_or_tuple_as_vector_of_bytes(pos_args.front(), error_callback);
+  auto subs = bytes_or_tuple_as_vector_of_bytes("startswith", pos_args.front(), error_callback);
   if (!subs.ok()) {
     return nullptr;
   }
@@ -1156,11 +1163,12 @@ starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj
   if (pos_args.empty()) {
     return static_cast<starlark_bytes*>(this_obj)->strip(ctx);
   }
-  auto cutset = bytes_or_int_as_bytes(pos_args.front(), error_callback);
-  if (!cutset.ok()) {
+  auto* cutset = pos_args.front();
+  if (cutset->type() != starlark_types::bytes_t) {
+    error_callback.add_error(error_type_required(starlark_types::bytes_t, cutset->type()));
     return nullptr;
   }
-  return static_cast<starlark_bytes*>(this_obj)->strip(*cutset, ctx);
+  return static_cast<starlark_bytes*>(this_obj)->strip(cutset->as_string(), ctx);
 }
 
 starlark_bytes::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state, bool ords) : bytes(bytes), state(state), ords(ords) {}

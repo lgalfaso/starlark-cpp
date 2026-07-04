@@ -97,11 +97,13 @@ std::string error_format_real_is_required(char format, std::string_view type);
 std::string error_integer_or_unicode_character(std::string_view type);
 std::string error_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len);
 
-std::string error_integer_or_like(std::string_view type, std::string_view other_type);
+std::string error_integer_or_type(std::string_view type, std::string_view other_type);
 std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type);
 std::string error_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type);
 std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type);
 std::string error_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type);
+std::string error_bytes_or_tuple_of_bytes(std::string_view fn_name, std::string_view actual_type);
+std::string error_type_required(std::string_view expected_type, std::string_view actual_type);
 
 std::string_view error_substring_not_found();
 std::string error_non_iterable(std::string_view fn_name);
