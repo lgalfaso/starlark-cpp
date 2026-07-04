@@ -7270,6 +7270,48 @@ TEST(StarlarkString, StripNoArguments) {
   test("\x{E2}\x{80}\x{AF}abcdefghij\x{E2}\x{80}\x{AF}", "abcdefghij", "\x{E2}\x{80}\x{AF}abcdefghij", "abcdefghij\x{E2}\x{80}\x{AF}");
 }
 
+TEST(StarlarkString, StripNoneArgument) {
+  auto test = [](std::string_view element, std::string_view expected, std::string_view rexpected, std::string_view lexpected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_string str(element);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(ctx.none_value());
+    auto* method = str.dot("strip", ctx, error_callback);
+    auto* rmethod = str.dot("rstrip", ctx, error_callback);
+    auto* lmethod = str.dot("lstrip", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    ASSERT_NE(nullptr, rmethod);
+    ASSERT_NE(nullptr, lmethod);
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    auto* rresult = rmethod->call(pos_args, named_args, ctx, error_callback);
+    auto* lresult = lmethod->call(pos_args, named_args, ctx, error_callback);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+    ASSERT_NE(nullptr, result);
+    ASSERT_NE(nullptr, rresult);
+    ASSERT_NE(nullptr, rresult);
+    EXPECT_EQ(result->type(), starlark_types::string_t);
+    EXPECT_EQ(rresult->type(), starlark_types::string_t);
+    EXPECT_EQ(lresult->type(), starlark_types::string_t);
+    EXPECT_EQ(result->as_string(), expected);
+    EXPECT_EQ(rresult->as_string(), rexpected);
+    EXPECT_EQ(lresult->as_string(), lexpected);
+  };
+
+  test("", "", "", "");
+  test(" ", "", "", "");
+  test(" \t", "", "", "");
+  test("  abc  ", "abc", "  abc", "abc  ");
+  test("   abcdefghij  ", "abcdefghij", "   abcdefghij", "abcdefghij  ");
+  test("  abcdefghij   ", "abcdefghij", "  abcdefghij", "abcdefghij   ");
+  test("abcdefghij", "abcdefghij", "abcdefghij", "abcdefghij");
+  test("\x{E2}\x{80}\x{AF}abcdefghij\x{E2}\x{80}\x{AF}", "abcdefghij", "\x{E2}\x{80}\x{AF}abcdefghij", "abcdefghij\x{E2}\x{80}\x{AF}");
+}
+
 TEST(StarlarkString, StripOneArgument) {
   auto test = [](std::string_view element, std::string_view cutset, std::string_view expected, std::string_view rexpected, std::string_view lexpected) {
     error_handler error_callback;

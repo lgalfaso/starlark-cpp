@@ -2063,7 +2063,7 @@ starlark_obj* starlark_string_fn_lstrip(starlark_obj* this_obj, const starlark_o
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
-  if (pos_args.empty()) {
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
     return static_cast<starlark_string*>(this_obj)->lstrip(ctx);
   }
   auto cutset = string_as_string(pos_args.front(), "lstrip", 1, error_callback);
@@ -2269,7 +2269,7 @@ starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_o
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
-  if (pos_args.empty()) {
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
     return static_cast<starlark_string*>(this_obj)->rstrip(ctx);
   }
   auto cutset = string_as_string(pos_args.front(), "rstrip", 1, error_callback);
@@ -2389,7 +2389,7 @@ starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_ob
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::string_t);
-  if (pos_args.empty()) {
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
     return static_cast<starlark_string*>(this_obj)->strip(ctx);
   }
   auto cutset = string_as_string(pos_args.front(), "strip", 1, error_callback);

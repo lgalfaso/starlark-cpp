@@ -1,5 +1,6 @@
 def check_no_arguments(value, expected):
   assert_eq((value.strip(), value.rstrip(), value.lstrip()), expected)
+  assert_eq((value.strip(None), value.rstrip(None), value.lstrip(None)), expected)
 
 check_no_arguments("", ("", "", ""))
 check_no_arguments(" ", ("", "", ""))

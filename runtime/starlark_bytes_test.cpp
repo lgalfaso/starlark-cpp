@@ -4567,6 +4567,34 @@ TEST(StarlarkBytes, SplitNoArguments) {
   test("\x{e2}\x{80}\x{82}a\x{e2}\x{80}\x{82}b\x{e2}\x{80}\x{82}c\x{e2}\x{80}\x{82}", "[b\"\\xe2\\x80\\x82a\\xe2\\x80\\x82b\\xe2\\x80\\x82c\\xe2\\x80\\x82\"]");
 }
 
+TEST(StarlarkBytes, SplitNoneArgument) {
+  auto test = [](std::string_view input, std::string_view expected) {
+    error_handler error_callback;
+    Arena arena;
+    context ctx(arena);
+    starlark_bytes bytes(input);
+
+    starlark_obj::pos_args_t pos_args;
+    starlark_obj::named_args_t named_args;
+    pos_args.push_back(ctx.none_value());
+    auto* method = bytes.dot("split", ctx, error_callback);
+    ASSERT_NE(nullptr, method);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+
+    auto* result = method->call(pos_args, named_args, ctx, error_callback);
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(result->str(), expected);
+    EXPECT_THAT(error_callback.messages, IsEmpty());
+  };
+
+  test("", "[]");
+  test("  ", "[]");
+  test("abc", "[b\"abc\"]");
+  test("  abc  ", "[b\"abc\"]");
+  test("  a  b  c  ", "[b\"a\", b\"b\", b\"c\"]");
+  test("\x{e2}\x{80}\x{82}a\x{e2}\x{80}\x{82}b\x{e2}\x{80}\x{82}c\x{e2}\x{80}\x{82}", "[b\"\\xe2\\x80\\x82a\\xe2\\x80\\x82b\\xe2\\x80\\x82c\\xe2\\x80\\x82\"]");
+}
+
 TEST(StarlarkBytes, SplitNoneSeparatorArguments) {
   auto test = [](std::string_view input, std::string_view expected) {
     error_handler error_callback;

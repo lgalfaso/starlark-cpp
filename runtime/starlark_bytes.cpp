@@ -882,7 +882,7 @@ starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_ob
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
-  if (pos_args.empty()) {
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
     return static_cast<starlark_bytes*>(this_obj)->lstrip(ctx);
   }
   auto* cutset = pos_args.front();
@@ -1066,7 +1066,7 @@ starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_ob
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
-  if (pos_args.empty()) {
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
     return static_cast<starlark_bytes*>(this_obj)->rstrip(ctx);
   }
   auto* cutset = pos_args.front();
@@ -1160,7 +1160,7 @@ starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj
   }
   assert(this_obj != nullptr);
   assert(this_obj->type() == starlark_types::bytes_t);
-  if (pos_args.empty()) {
+  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
     return static_cast<starlark_bytes*>(this_obj)->strip(ctx);
   }
   auto* cutset = pos_args.front();
