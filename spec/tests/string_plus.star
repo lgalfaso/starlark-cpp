@@ -13,3 +13,6 @@ assert_fail("""
 a = "abc" +
      "def"
 """)
+assert_fail("""
+"abc" + b"def"
+""")
