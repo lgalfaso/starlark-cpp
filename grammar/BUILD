@@ -14,11 +14,27 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ast_listener_test_base",
+    srcs = ["ast_listener_test.cpp"],
+    alwayslink = 1,
+    testonly = True,
+    deps = [
+        ":ast_listener",
+        ":parser",
+        ":parsing_options",
+        ":quoted",
+        "//proto:starlark_ast_cc_proto",
+        "//third-party:defer",
+        "@googletest//:gtest",
+        "@protobuf",
+    ],
+)
+
 [
     cc_test(
         name = "ast_listener_test_" + f.replace("/", "_"),
         size = "small",
-        srcs = ["ast_listener_test.cpp"],
         args = [
             "$(location " + f + ")",
             "$(location " + f.replace(".star", ".txt") + ")",
@@ -28,14 +44,8 @@ cc_library(
             f.replace(".star", ".txt"),
         ],
         deps = [
-            ":ast_listener",
-            ":parser",
-            ":parsing_options",
-            ":quoted",
-            "//proto:starlark_ast_cc_proto",
-            "//third-party:defer",
+            ":ast_listener_test_base",
             "@googletest//:gtest_main",
-            "@protobuf",
         ],
     )
     for f in glob(["ast_listener_tests/*.star"])
@@ -129,6 +139,22 @@ cc_binary(
     ],
 )
 
+cc_library(
+    name = "parser_test_check_base",
+    srcs = ["parser_test_check.cpp"],
+    alwayslink = 1,
+    testonly = True,
+    deps = [
+        ":parser",
+        ":parsing_options",
+        "//proto:starlark_ast_cc_proto",
+        "//third-party:defer",
+        "@googletest//:gtest",
+        "@protobuf",
+        "@protobuf-matchers//protobuf-matchers",
+    ],
+)
+
 [[
     starlark_ast_proto_encoder(
         name = "parser_test_encoder_" + f.replace("/", "_"),
@@ -138,7 +164,6 @@ cc_binary(
     cc_test(
         name = "parser_test_" + f.replace("/", "_"),
         size = "small",
-        srcs = ["parser_test_check.cpp"],
         args = [
             "$(location " + f + ")",
             "$(location :parser_test_encoder_" + f.replace("/", "_") + ")",
@@ -148,22 +173,31 @@ cc_binary(
             ":parser_test_encoder_" + f.replace("/", "_"),
         ],
         deps = [
-            ":parser",
-            ":parsing_options",
-            "//proto:starlark_ast_cc_proto",
-            "//third-party:defer",
+            ":parser_test_check_base",
             "@googletest//:gtest_main",
-            "@protobuf",
-            "@protobuf-matchers//protobuf-matchers",
         ],
     ),
 ] for f in glob(["parser_tests/*.star"])]
+
+cc_library(
+    name = "parser_test_valid_base",
+    srcs = ["parser_test_valid.cpp"],
+    alwayslink = 1,
+    testonly = True,
+    deps = [
+        ":parser",
+        ":parsing_options",
+        "//proto:starlark_ast_cc_proto",
+        "//third-party:defer",
+        "@googletest//:gtest",
+        "@protobuf",
+    ],
+)
 
 [
     cc_test(
         name = "parser_test_" + f.replace("/", "_"),
         size = "small",
-        srcs = ["parser_test_valid.cpp"],
         args = [
             "$(location " + f + ")",
         ],
@@ -171,22 +205,31 @@ cc_binary(
             f,
         ],
         deps = [
-            ":parser",
-            ":parsing_options",
-            "//proto:starlark_ast_cc_proto",
-            "//third-party:defer",
+            ":parser_test_valid_base",
             "@googletest//:gtest_main",
-            "@protobuf",
         ],
     )
     for f in glob(["parser_tests_valid/*.star"])
 ]
 
+cc_library(
+    name = "parser_test_invalid_base",
+    srcs = ["parser_test_invalid.cpp"],
+    alwayslink = 1,
+    testonly = True,
+    deps = [
+        ":parser",
+        ":parsing_options",
+        "//proto:starlark_ast_cc_proto",
+        "//third-party:defer",
+        "@googletest//:gtest",
+        "@protobuf",
+    ],
+)
 [
     cc_test(
         name = "parser_test_" + f.replace("/", "_"),
         size = "small",
-        srcs = ["parser_test_invalid.cpp"],
         args = [
             "$(location " + f + ")",
         ],
@@ -194,12 +237,8 @@ cc_binary(
             f,
         ],
         deps = [
-            ":parser",
-            ":parsing_options",
-            "//proto:starlark_ast_cc_proto",
-            "//third-party:defer",
+            ":parser_test_invalid_base",
             "@googletest//:gtest_main",
-            "@protobuf",
         ],
     )
     for f in glob(["parser_tests_invalid/*.star"])

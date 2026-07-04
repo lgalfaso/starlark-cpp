@@ -18,6 +18,20 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "compiler_bytecode_test_base",
+    srcs = ["compiler_bytecode_test.cpp"],
+    alwayslink = 1,
+    testonly = True,
+    deps = [
+        ":compiler",
+        "//proto:starlark_bytecode_cc_proto",
+        "@googletest//:gtest",
+        "@protobuf",
+        "@protobuf-matchers//protobuf-matchers",
+    ],
+)
+
 [[
     starlark_bytecode_proto_encoder(
         name = "compiler_bytecode_test_encoder_" + f.replace("/", "_"),
@@ -27,7 +41,6 @@ cc_library(
     cc_test(
         name = "compiler_bytecode_test_" + f.replace("/", "_"),
         size = "small",
-        srcs = ["compiler_bytecode_test.cpp"],
         args = [
             "$(location " + f + ")",
             "$(location :compiler_bytecode_test_encoder_" + f.replace("/", "_") + ")",
@@ -37,11 +50,8 @@ cc_library(
             ":compiler_bytecode_test_encoder_" + f.replace("/", "_"),
         ],
         deps = [
-            ":compiler",
-            "//proto:starlark_bytecode_cc_proto",
+            ":compiler_bytecode_test_base",
             "@googletest//:gtest_main",
-            "@protobuf",
-            "@protobuf-matchers//protobuf-matchers",
         ],
     ),
 ] for f in glob(["bytecode_generator_tests/*.star"])]
