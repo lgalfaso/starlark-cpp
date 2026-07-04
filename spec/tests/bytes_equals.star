@@ -1,0 +1,5 @@
+assert_true(b"" == b'')
+assert_true(b"abc" == b'abc')
+assert_false(b"abc" == b'')
+assert_false(b"abc" == b'def')
+assert_false(b'' == '')
