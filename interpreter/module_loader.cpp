@@ -124,7 +124,7 @@ starlark::result::status_or<module_info*> module_loader::load_module(std::string
   }
   auto source_and_bindings = inner_load(c_name);
   if (!source_and_bindings.ok()) {
-    return starlark::result::status_or<module_info*>(starlark::result::status_code::kError);
+    return starlark::result::status_or<module_info*>(starlark::result::status_code::kStaticError);
   }
   auto result = modules.try_emplace(c_name, c_name, source_and_bindings->first, source_and_bindings->second);
   return starlark::result::status_or<module_info*>(&result.first->second);
@@ -139,7 +139,7 @@ kv_module_loader::kv_module_loader(const std::map<std::string, std::pair<std::st
 starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> kv_module_loader::inner_load(std::string_view cannonical_name_) {
   auto it = values.find(cannonical_name_);
   if (it == values.end()) {
-    return starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>>(starlark::result::status_code::kError);
+    return starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>>(starlark::result::status_code::kStaticError);
   }
   return starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>>(it->second);
 }

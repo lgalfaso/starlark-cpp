@@ -5,11 +5,12 @@ assert_true(True if (1,) else False)
 
 # Trailing comma is only allowed in parenthesized tuple expression.
 assert_fail("""
-for k, v, in dict().items(): pass
-""")
+def test():
+  for k, v, in dict().items(): pass
+""", allow_static_error = True)
 assert_fail("""
 _ = [(v, k) for k, v, in dict().items()]
-""")
+""", allow_static_error = True)
 assert_succeed("""
 _ = [(v, k) for (k, v,) in dict().items()]
 """)
@@ -22,8 +23,8 @@ assert_fail("""{(0, []): None}""")
 
 # Tuple concatenation.
 assert_eq((1, 2) + (3, 4, 5), (1, 2, 3, 4, 5))
-assert_fail(""" () + []""")
-assert_fail(""" [] + ()""")
+assert_fail("""() + []""")
+assert_fail("""[] + ()""")
 
 # Tuples are sequences.
 def foo():
@@ -34,4 +35,6 @@ def foo():
 assert_eq(foo(), 6)
 
 # Tuples cannot be modified.
-assert_fail("""(1)[0] = 2""")
+assert_fail("""
+a = (1,)
+a[0] = 2""")

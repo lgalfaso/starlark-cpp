@@ -51,11 +51,11 @@ def foo():
   modules.try_emplace(":foo.star", module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_NE(nullptr, result) << print_logs(logging);
-  ASSERT_THAT(result->elements, SizeIs(1));
-  ASSERT_NE(nullptr, result->elements[0]);
-  EXPECT_EQ(result->elements[0]->str(), "Hello from another module");
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_TRUE(result.ok()) << print_logs(logging);
+  ASSERT_THAT((*result)->elements, SizeIs(1));
+  ASSERT_NE(nullptr, (*result)->elements[0]);
+  EXPECT_EQ((*result)->elements[0]->str(), "Hello from another module");
 }
 
 TEST(Interpreter, ModuleLoadingModuleNotFound) {
@@ -73,8 +73,8 @@ a = foo()
   modules.try_emplace("main", starlark_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "ModuleNotFoundError: No module named ':foo.star'");
 }
@@ -99,8 +99,8 @@ def foo():
   modules.try_emplace(":foo.star", module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "LoadError: Module ':foo.star' does not contain the symbol bar");
 }
@@ -135,11 +135,11 @@ def bar():
   modules.try_emplace(":bar.star", bar_module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_NE(nullptr, result) << print_logs(logging);
-  ASSERT_THAT(result->elements, SizeIs(1));
-  ASSERT_NE(nullptr, result->elements[0]);
-  EXPECT_EQ(result->elements[0]->str(), "this is foo - this is bar - this is foo - this is also bar - ");
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_TRUE(result.ok()) << print_logs(logging);
+  ASSERT_THAT((*result)->elements, SizeIs(1));
+  ASSERT_NE(nullptr, (*result)->elements[0]);
+  EXPECT_EQ((*result)->elements[0]->str(), "this is foo - this is bar - this is foo - this is also bar - ");
 }
 
 TEST(Interpreter, MultipleModuleLoading_2) {
@@ -172,11 +172,11 @@ def bar():
   modules.try_emplace(":bar.star", bar_module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_NE(nullptr, result) << print_logs(logging);
-  ASSERT_THAT(result->elements, SizeIs(1));
-  ASSERT_NE(nullptr, result->elements[0]);
-  EXPECT_EQ(result->elements[0]->str(), "this is foo - this is bar - this is foo - this is also bar - ");
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_TRUE(result.ok()) << print_logs(logging);
+  ASSERT_THAT((*result)->elements, SizeIs(1));
+  ASSERT_NE(nullptr, (*result)->elements[0]);
+  EXPECT_EQ((*result)->elements[0]->str(), "this is foo - this is bar - this is foo - this is also bar - ");
 }
 
 TEST(Interpreter, ModuleLoadingWithRecursion_1) {
@@ -212,8 +212,8 @@ def shell():
   modules.try_emplace(":bar.star", bar_module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :foo.star\n|   :bar.star\n+-> :foo.star\n");
 }
@@ -239,8 +239,8 @@ abc = foo
   modules.try_emplace(":foo.star", foo_module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :foo.star\n+-> :foo.star\n");
 }
@@ -277,8 +277,8 @@ c = "Hi"
   modules.try_emplace(":c.star", c_module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :a.star\n|   :b.star\n+-> :a.star\n");
 }
@@ -324,8 +324,8 @@ def foo():
   modules.try_emplace(":foo.star", foo_module_code, custom_binding);
   bad_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "ModuleNotFoundError: Unable to load module named ':foo.star'");
 }
@@ -352,8 +352,8 @@ def foo():
   modules.try_emplace(":bar.star", foo_module_code, custom_binding);
   bad_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "LoadError: Module ':foo.star' is not ready to be used");
 }
@@ -378,8 +378,8 @@ foo = []
   modules.try_emplace(":foo.star", foo_module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "TypeError: trying to mutate a frozen list value");
 }
@@ -405,8 +405,8 @@ def foo(x = []):
   modules.try_emplace(":foo.star", foo_module_code, custom_binding);
   kv_module_loader loader{modules};
 
-  frame* result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
-  ASSERT_EQ(nullptr, result) << print_logs(logging);
+  auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
+  ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
   EXPECT_EQ(logging.begin()->message(), "TypeError: trying to mutate a frozen list value");
 }

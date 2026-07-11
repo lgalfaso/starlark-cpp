@@ -110,6 +110,6 @@ assert_fail('''
 ''')
 
 assert_fail('''
-'abc'startswith('', start = 0)
+'abc'.startswith('', start = 0)
 ''')
 

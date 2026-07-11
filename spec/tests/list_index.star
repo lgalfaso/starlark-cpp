@@ -30,7 +30,7 @@ p.index(11, 1 << 64)
 assert_eq(p.index(5, 1, 3), 2)
 assert_fail('''
 p = [2, 3, 5, 7, 11, 13, 17, 17, 19]
-assert_eq(p.index(5, 1, 2), 2)
+p.index(5, 1, 2)
 ''')
 assert_eq(p.index(5, 1, 1 << 64), 2)
 

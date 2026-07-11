@@ -292,11 +292,11 @@ starlark_iterator* starlark_set::get_iterator(bool produce_error, context& ctx, 
 
 status_or<bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
   if (!can_modify("append", error_callback)) {
-    return status_or<bool>(status_code::kError);
+    return status_or<bool>(status_code::kRuntimeError);
   }
   if (element->hash() == -1) {
     error_callback.add_error(error_unhashable_value(type(), element->type()));
-    return status_or<bool>(status_code::kError);
+    return status_or<bool>(status_code::kRuntimeError);
   }
   return status_or<bool>(values.insert(element).second);
 }
@@ -450,7 +450,7 @@ status starlark_set::intersection_update(const std::vector<starlark_obj*>& other
 status_or<bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx, error_fn& error_callback) const {
   auto* it = other->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
-    return status_or<bool>(status_code::kError);
+    return status_or<bool>(status_code::kRuntimeError);
   }
   bool result = true;
   while (it->has_next()) {
@@ -458,7 +458,7 @@ status_or<bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx, erro
     if (element->hash() == -1) {
       it->end_iterator();
       error_callback.add_error(error_unhashable_value(type(), element->type()));
-      return status_or<bool>(status_code::kError);
+      return status_or<bool>(status_code::kRuntimeError);
     }
     if (values.contains(element)) {
       // Do not terminate early as the spec mandates that we have to check that every element is hashable.
@@ -472,7 +472,7 @@ status_or<bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx, erro
 status_or<bool> starlark_set::issubset(starlark_obj* other, context& ctx, error_fn& error_callback) const {
   auto* it = other->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
-    return status_or<bool>(status_code::kError);
+    return status_or<bool>(status_code::kRuntimeError);
   }
   set_t other_as_set;
   while (it->has_next()) {
@@ -480,7 +480,7 @@ status_or<bool> starlark_set::issubset(starlark_obj* other, context& ctx, error_
     if (element->hash() == -1) {
       it->end_iterator();
       error_callback.add_error(error_unhashable_value(type(), element->type()));
-      return status_or<bool>(status_code::kError);
+      return status_or<bool>(status_code::kRuntimeError);
     }
     if (values.contains(element)) {
       other_as_set.insert(element);
@@ -493,7 +493,7 @@ status_or<bool> starlark_set::issubset(starlark_obj* other, context& ctx, error_
 status_or<bool> starlark_set::issuperset(starlark_obj* other, context& ctx, error_fn& error_callback) const {
   auto* it = other->get_iterator(true, ctx, error_callback);
   if (it == nullptr) {
-    return status_or<bool>(status_code::kError);
+    return status_or<bool>(status_code::kRuntimeError);
   }
   bool result = true;
   while (it->has_next()) {
@@ -501,7 +501,7 @@ status_or<bool> starlark_set::issuperset(starlark_obj* other, context& ctx, erro
     if (element->hash() == -1) {
       it->end_iterator();
       error_callback.add_error(error_unhashable_value(type(), element->type()));
-      return status_or<bool>(status_code::kError);
+      return status_or<bool>(status_code::kRuntimeError);
     }
     if (!values.contains(element)) {
       // Do not terminate early as the spec mandates that we have to check that every element is hashable.

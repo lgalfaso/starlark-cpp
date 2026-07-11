@@ -124,7 +124,7 @@ assert_fail('''b'abc'.startswith(b'', None, None, None)''')
 
 
 # Named arguments.
-assert_fail('''b'abc.startswith(prefix = b'')''')
-assert_fail('''b'abc.startswith(b'', start = 0)''')
-assert_fail('''b'abc.startswith(b'', 0, end = 0)''')
+assert_fail('''b'abc'.startswith(prefix = b'')''')
+assert_fail('''b'abc'.startswith(b'', start = 0)''')
+assert_fail('''b'abc'.startswith(b'', 0, end = 0)''')
 

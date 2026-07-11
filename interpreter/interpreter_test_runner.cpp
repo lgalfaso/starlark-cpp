@@ -97,7 +97,7 @@ starlark_obj* assert_ne_fn(starlark_obj* this_obj, const starlark_obj::pos_args_
   return ctx.none_value();
 }
 
-status_or<runtime_options> parse_runtime_options(starlark_obj** error, starlark_obj** print, std::ostream& out, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+status_or<runtime_options> parse_runtime_options(starlark_obj** error, starlark_obj** print, bool* allow_static_error, std::ostream& out, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   auto log2_max_bigint = ctx.options().log2_max_bigint;
   auto max_sequence_size = ctx.options().max_sequence_size;
   auto max_string_length = ctx.options().max_string_length;
@@ -105,51 +105,57 @@ status_or<runtime_options> parse_runtime_options(starlark_obj** error, starlark_
   for (auto& [key, value] : named_args) {
     if (value == nullptr) {
       error_callback.add_error(std::format("invalid '{}' parameter (nullptr).", key));
-      return status_or<runtime_options>(status_code::kError);
+      return status_or<runtime_options>(status_code::kRuntimeError);
     }
     if (key == "print") {
       if (value->type() != starlark_types::string_t) {
         error_callback.add_error(std::format("invalid '{}' parameter ({}).", key, value->type()));
-        return status_or<runtime_options>(status_code::kError);
+        return status_or<runtime_options>(status_code::kRuntimeError);
       }
       if (print == nullptr) {
         error_callback.add_error(std::format("Unknown named argument '{}'.", key));
-        return status_or<runtime_options>(status_code::kError);
+        return status_or<runtime_options>(status_code::kRuntimeError);
       }
       *print = value;
     } else if (key == "error_message") {
       if (value->type() != starlark_types::string_t) {
         error_callback.add_error(std::format("invalid '{}' parameter ({}).", key, value->type()));
-        return status_or<runtime_options>(status_code::kError);
+        return status_or<runtime_options>(status_code::kRuntimeError);
       }
       if (error == nullptr) {
         error_callback.add_error(std::format("Unknown named argument '{}'.", key));
-        return status_or<runtime_options>(status_code::kError);
+        return status_or<runtime_options>(status_code::kRuntimeError);
       }
       *error = value;
+    } else if (key == "allow_static_error") {
+      if (allow_static_error == nullptr) {
+        error_callback.add_error(std::format("Unknown named argument '{}'.", key));
+        return status_or<runtime_options>(status_code::kRuntimeError);
+      }
+      *allow_static_error = value->truthy();
     } else if (key == "log2_max_bigint") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
-        return status_or<runtime_options>(status_code::kError);
+        return status_or<runtime_options>(status_code::kRuntimeError);
       }
       log2_max_bigint = *r;
     } else if (key == "max_sequence_size") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
-        return status_or<runtime_options>(status_code::kError);
+        return status_or<runtime_options>(status_code::kRuntimeError);
       }
       max_sequence_size = *r;
     } else if (key == "max_string_length") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
-        return status_or<runtime_options>(status_code::kError);
+        return status_or<runtime_options>(status_code::kRuntimeError);
       }
       max_string_length = *r;
     } else if (key == "allow_recursion") {
       allow_recursion = value->truthy();
     } else {
       error_callback.add_error(std::format("Unknown named argument '{}'.", key));
-      return status_or<runtime_options>(status_code::kError);
+      return status_or<runtime_options>(status_code::kRuntimeError);
     }
   }
   runtime_options r_options = runtime_options{
@@ -165,7 +171,8 @@ status_or<runtime_options> parse_runtime_options(starlark_obj** error, starlark_
 starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   std::basic_ostringstream<char> out;
   starlark_obj* error = nullptr;
-  auto r_options = parse_runtime_options(&error, nullptr, out, named_args, ctx, error_callback);
+  bool allow_static_error = false;
+  auto r_options = parse_runtime_options(&error, nullptr, &allow_static_error, out, named_args, ctx, error_callback);
   if (!r_options.ok()) {
     return nullptr;
   }
@@ -192,9 +199,16 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
     modules.try_emplace(module_name, source, std::map<std::string, starlark_obj*, std::less<>>{});
   }
   kv_module_loader loader{modules};
-  frame* result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
-  if (result != nullptr) {
+  auto result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
+  if (result.ok()) {
     error_callback.add_error("Program executed without errors, it was expected that it would fail.");
+    return nullptr;
+  }
+  if (!allow_static_error && result.error() != status_code::kRuntimeError) {
+    error_callback.add_error("Expected a runtime error, but some other found some other error.");
+    for (const auto& error : logging) {
+      error_callback.add_error(error.message());
+    }
     return nullptr;
   }
   if (error != nullptr) {
@@ -213,7 +227,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
 starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   std::basic_ostringstream<char> out;
   starlark_obj* print = nullptr;
-  auto r_options = parse_runtime_options(nullptr, &print, out, named_args, ctx, error_callback);
+  auto r_options = parse_runtime_options(nullptr, &print, nullptr, out, named_args, ctx, error_callback);
   if (!r_options.ok()) {
     return nullptr;
   }
@@ -240,8 +254,8 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
     modules.try_emplace(module_name, source, std::map<std::string, starlark_obj*, std::less<>>{});
   }
   kv_module_loader loader{modules};
-  frame* result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
-  if (result == nullptr) {
+  auto result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
+  if (!result.ok()) {
     error_callback.add_error("Program executed with errors, it was expected that it would succeed.");
     return nullptr;
   }
@@ -336,7 +350,7 @@ std::map<std::string, std::string> split_test_case(std::string_view source) {
   return result;
 }
 
-frame* run_test(std::map<std::string, std::string> programs, logger& logging) {
+status_or<frame*> run_test(std::map<std::string, std::string> programs, logger& logging) {
   class interpreter runner;
   Arena arena;
 

@@ -9,10 +9,11 @@
 
 #include "grammar/options.hpp"
 #include "interpreter/frame.hpp"
-#include "logging/logging.hpp"
 #include "interpreter/module_loader.hpp"
+#include "logging/logging.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_object.hpp"
+#include "status_or/status.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -22,7 +23,7 @@ namespace interpreter {
 class interpreter {
  public:
   interpreter();
-  frame* run(module_loader& loader,
+  starlark::result::status_or<frame*> run(module_loader& loader,
       std::string_view module_name,
       const starlark::grammar::grammar_options& g_options,
       const starlark::runtime::runtime_options& r_options,

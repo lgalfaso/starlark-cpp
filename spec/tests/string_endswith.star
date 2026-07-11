@@ -250,5 +250,5 @@ assert_fail(""""abc".endswith("abc", 0, True)""")
 
 assert_true("abc".endswith("abc", None, None))
 
-assert_fail(""""abc"endswith("abc", 0, 0, 0)""")
+assert_fail(""""abc".endswith("abc", 0, 0, 0)""")
 assert_fail(""""abc".endswith("", start = 0)""")

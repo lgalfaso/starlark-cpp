@@ -46,8 +46,8 @@ TEST(Interpreter, TestCase) {
   logger logging;
   std::map<std::string, std::string> programs;
   programs["main"] = starlark_code;
-  frame* result = run_test(programs, logging);
-  ASSERT_NE(nullptr, result) << print_logs(logging);
+  auto result = run_test(programs, logging);
+  ASSERT_TRUE(result.ok()) << print_logs(logging);
 }
 
 }  // namespace

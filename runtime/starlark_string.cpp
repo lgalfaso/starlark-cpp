@@ -844,7 +844,7 @@ std::string_view strip_impl(std::string_view value, std::string_view cutset, str
 status_or<std::string_view> string_as_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
   if (element->type() != starlark_types::string_t) {
     error_callback.add_error(error_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
-    return status_or<std::string_view>(status_code::kError);
+    return status_or<std::string_view>(status_code::kRuntimeError);
   }
   return status_or<std::string_view>(element->as_string());
 }
@@ -1796,14 +1796,14 @@ status_or<std::vector<std::string_view>> string_or_tuple_as_vector_of_string(con
       auto* entry = tuple->at(i);
       if (entry->type() != starlark_types::string_t) {
         error_callback.add_error(error_tuple_must_contain_type(fn_name, starlark_types::string_t, entry->type()));
-        return status_or<std::vector<std::string_view>>(status_code::kError);
+        return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
       }
       result.emplace_back(entry->as_string());
     }
   } else {
     if (element->type() != starlark_types::string_t) {
       error_callback.add_error(error_string_or_tuple_of_string(fn_name, element->type()));
-      return status_or<std::vector<std::string_view>>(status_code::kError);
+      return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
     }
     result.emplace_back(element->as_string());
   }
@@ -1815,11 +1815,11 @@ status_or<std::pair<int64_t, int64_t>> get_start_and_end(const starlark_obj::pos
   int64_t end = std::numeric_limits<int64_t>::max();
   if (pos_args.size() >= 2) {
     if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback).ok()) {
-      return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+      return status_or<std::pair<int64_t, int64_t>>(status_code::kRuntimeError);
     }
     if (pos_args.size() >= 3) {
       if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback).ok()) {
-        return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+        return status_or<std::pair<int64_t, int64_t>>(status_code::kRuntimeError);
       }
     }
   }

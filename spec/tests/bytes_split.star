@@ -161,7 +161,7 @@ assert_eq(b'abc'.rsplit(sep = b'b', maxsplit = -1), [b'a', b'c'])
 assert_fail('''b'abc'.split(b'b', sep = b'b')''')
 assert_fail('''b'abc'.rsplit(b'b', sep = b'b')''')
 assert_fail('''b'abc'.split(b'b', -1, maxsplit = -1)''')
-assert_fail('''b'abc'.rsplit(b'b', -1, maxsplit = -1))''')
+assert_fail('''b'abc'.rsplit(b'b', -1, maxsplit = -1)''')
 assert_fail('''b'abc'.split(b'b', other = None)''')
 assert_fail('''b'abc'.rsplit(b'b', other = None)''')
 

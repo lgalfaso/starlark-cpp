@@ -46,8 +46,8 @@ TEST(Interpreter, TestCase) {
   }
 
   logger logging;
-  frame* result = run_test(split_test_case(starlark_code), logging);
-  ASSERT_NE(nullptr, result) << print_logs(logging);
+  auto result = run_test(split_test_case(starlark_code), logging);
+  ASSERT_TRUE(result.ok()) << print_logs(logging);
 }
 
 }  // namespace

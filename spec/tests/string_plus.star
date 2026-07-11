@@ -12,7 +12,7 @@ a = ("abc" +
 assert_fail("""
 a = "abc" +
      "def"
-""")
+""", allow_static_error = True)
 assert_fail("""
 "abc" + b"def"
 """)

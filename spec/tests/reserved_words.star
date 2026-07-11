@@ -10,6 +10,6 @@ template = """
 
 assert_succeed(template % "x")
 [
-  assert_fail(template % rw)
+  assert_fail(template % rw, allow_static_error = True)
   for rw in reserved_words
 ]

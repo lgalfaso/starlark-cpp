@@ -12,7 +12,8 @@ namespace result {
 
 enum class status_code {
   kOk,
-  kError,
+  kRuntimeError,
+  kStaticError,
 };
 
 class status {
@@ -52,6 +53,10 @@ class status_or {
 
   T* operator->() {
     return &value;
+  }
+
+  status_code error() const {
+    return code;
   }
 
  private:

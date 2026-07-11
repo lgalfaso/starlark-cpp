@@ -45,6 +45,8 @@ using ::starlark::compiler::compiler;
 using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::predeclared_symbols;
 using ::starlark::logging::logger;
+using ::starlark::result::status_code;
+using ::starlark::result::status_or;
 using ::starlark::runtime::context;
 using ::starlark::runtime::create_function;
 using ::starlark::runtime::error_fn;
@@ -815,7 +817,7 @@ std::string report_recursion_in_modules(const std::vector<std::string>& module_l
 
 interpreter::interpreter() {}
 
-frame* interpreter::run(module_loader& loader,
+status_or<frame*> interpreter::run(module_loader& loader,
                         std::string_view module_name,
                         const grammar_options& g_options,
                         const runtime_options& r_options,
@@ -846,7 +848,7 @@ frame* interpreter::run(module_loader& loader,
                   std::format("ModuleNotFoundError: No module named '{}'", entry.module_name),
                   entry.caller_module_name,
                   starlark::logging::Position::default_instance());
-      return nullptr;
+      return status_or<frame*>(status_code::kStaticError);
     }
     if ((*mod_info)->ready()) {
       to_run.pop_back();
@@ -863,7 +865,7 @@ frame* interpreter::run(module_loader& loader,
                   std::format("LoadError: Recursion found during module lookup\n{}", report_recursion_in_modules(module_lookup, module_processing[std::string{c_name}])),
                   entry.caller_module_name,
                   starlark::logging::Position::default_instance());
-      return nullptr;
+      return status_or<frame*>(status_code::kStaticError);
     }
     if (module_processing_it == module_processing.end()) {
       module_processing[std::string{c_name}] = module_lookup.size();
@@ -880,7 +882,7 @@ frame* interpreter::run(module_loader& loader,
       class compiler star_compiler(binding);
       Program* starlark_program = star_compiler.compile((*mod_info)->source_code(), g_options, logging, (*mod_info)->arena());
       if (starlark_program == nullptr) {
-        return nullptr;
+        return status_or<frame*>(status_code::kStaticError);
       }
       entry.program = starlark_program;
       auto deps = get_dependencies(entry.program);
@@ -907,7 +909,7 @@ frame* interpreter::run(module_loader& loader,
     auto current_program = std::make_pair(entry.program, std::string{(*mod_info)->cannonical_name()});
     last_frame = run_program(loader, current_program, global_context, ctx, logging);
     if (last_frame == nullptr) {
-      return nullptr;
+      return status_or<frame*>(status_code::kRuntimeError);
     }
     (*mod_info)->loaded(last_frame, entry.program);
     to_run.pop_back();
@@ -915,7 +917,7 @@ frame* interpreter::run(module_loader& loader,
     module_lookup.pop_back();
     module_reduction = true;
   }
-  return last_frame;
+  return status_or<frame*>(last_frame);
 }
 
 void interpreter::add_base_global_context(std::map<std::string, starlark_obj*, std::less<>>& global_context, starlark::runtime::context& ctx) const {

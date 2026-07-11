@@ -113,7 +113,7 @@ status_or<int> order_comparator::run(std::string_view op, error_fn& error_callba
       case pending_task_type::kGreaterThan:
         return status_or<int>(1);
       case pending_task_type::kFail:
-        return status_or<int>(status_code::kError);
+        return status_or<int>(status_code::kRuntimeError);
     }
   }
   return status_or<int>(0);
@@ -558,7 +558,7 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
       }
       if (idx < 0 || obj_len <= idx) {
         error_callback.add_error(error_index_out_of_range(type()));
-        return status_or<int64_t>(status_code::kError);
+        return status_or<int64_t>(status_code::kRuntimeError);
       }
       return status_or<int64_t>(idx);
     }
@@ -566,7 +566,7 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
       const auto& idx = other.as_bigint();
       if (!idx.fits_in_int64()) {
         error_callback.add_error(error_index_out_of_range(type()));
-        return status_or<int64_t>(status_code::kError);
+        return status_or<int64_t>(status_code::kRuntimeError);
       }
       auto iidx = idx.as_int64();
       if (idx.sign()) {
@@ -574,13 +574,13 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
       }
       if (iidx < 0 || obj_len <= iidx) {
         error_callback.add_error(error_index_out_of_range(type()));
-        return status_or<int64_t>(status_code::kError);
+        return status_or<int64_t>(status_code::kRuntimeError);
       }
       return status_or<int64_t>(iidx);
     }
     default:
       error_callback.add_error(error_index_integer_or_slice(type(), other.type()));
-      return status_or<int64_t>(status_code::kError);
+      return status_or<int64_t>(status_code::kRuntimeError);
   }
 }
 
@@ -593,21 +593,21 @@ status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range
   */
   int64_t i_stride = 1;
   if (!to_int64_with_clamping_for_index_allow_none(stride, i_stride, error_callback).ok()) {
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   if (i_stride == 0) {
     error_callback.add_error(error_step_non_zero());
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t i_start = i_stride > 0 ? 0 : len - 1;
   int64_t i_end = i_stride > 0 ? len : -len - 1;
   int64_t lower = i_stride > 0 ? 0 : -1;
   int64_t upper = i_stride > 0 ? len : lower + len;
   if (!to_int64_with_clamping_for_index_allow_none(start, i_start, error_callback).ok()) {
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   if (!to_int64_with_clamping_for_index_allow_none(stop, i_end, error_callback).ok()) {
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   if (i_start < 0) {
     i_start = std::max<int64_t>(i_start + len, lower);
@@ -634,26 +634,26 @@ starlark::result::status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj:
   int64_t r_stride;
   if (ckd_mul(&r_stride, original_stride, i_stride)) {
     error_callback.add_error(error_overflow_too_many_digits());
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t tmp;
   if (ckd_mul(&tmp, original_stride, i_start)) {
     error_callback.add_error(error_overflow_too_many_digits());
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t r_start;
   if (ckd_add(&r_start, original_start, tmp)) {
     error_callback.add_error(error_overflow_too_many_digits());
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   if (ckd_mul(&tmp, original_stride, i_end)) {
     error_callback.add_error(error_overflow_too_many_digits());
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t r_end;
   if (ckd_add(&r_end, original_start, tmp)) {
     error_callback.add_error(error_overflow_too_many_digits());
-    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kError);
+    return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   return status_or<std::tuple<int64_t, int64_t, int64_t>>(std::make_tuple(r_start, r_end, r_stride));
 }
@@ -769,7 +769,7 @@ status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& er
       break;
     default:
       error_callback.add_error(error_interpreted_as_integer(iidx.type()));
-      return status_or<int64_t>(status_code::kError);
+      return status_or<int64_t>(status_code::kRuntimeError);
   }
 }
 
@@ -791,9 +791,9 @@ status_or<int64_t> to_int64_with_clamping_for_index(const starlark_obj& iidx, er
       break;
     default:
       error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
-      return status_or<int64_t>(status_code::kError);
+      return status_or<int64_t>(status_code::kRuntimeError);
   }
-  return status_or<int64_t>(status_code::kError);
+  return status_or<int64_t>(status_code::kRuntimeError);
 }
 
 status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {

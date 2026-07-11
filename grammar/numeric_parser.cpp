@@ -44,10 +44,10 @@ status_or<std::string> read_number_over(bool(*match)(char), utf8_reader& input) 
     while (!input.empty() && isdigit(input.peek())) {
       input.skip();
     }
-    return status_or<std::string>(status_code::kError);
+    return status_or<std::string>(status_code::kStaticError);
   }
   if (!accepted_digit) {
-    return status_or<std::string>(status_code::kError);
+    return status_or<std::string>(status_code::kStaticError);
   }
   return status_or<std::string>(std::move(result));
 }
@@ -61,7 +61,7 @@ status_or<std::string> read_number(utf8_reader& input, bool allow_binary_literal
   if (input.capture("0x") || input.capture("0X")) {
     auto number = read_number_over(is_hex_digit, input);
     if (!number.ok()) {
-      return status_or<std::string>(status_code::kError);
+      return status_or<std::string>(status_code::kStaticError);
     }
     if (*number == "0") {
       return status_or<std::string>("0");
@@ -70,7 +70,7 @@ status_or<std::string> read_number(utf8_reader& input, bool allow_binary_literal
   } else if (input.capture("0o") || input.capture("0O")) {
     auto number = read_number_over(is_octal_digit, input);
     if (!number.ok()) {
-      return status_or<std::string>(status_code::kError);
+      return status_or<std::string>(status_code::kStaticError);
     }
     if (*number == "0") {
       return status_or<std::string>("0");
@@ -79,7 +79,7 @@ status_or<std::string> read_number(utf8_reader& input, bool allow_binary_literal
   } else if (input.capture("0b") || input.capture("0B")) {
     auto number = read_number_over(is_binary_digit, input);
     if (!allow_binary_literals || !number.ok()) {
-      return status_or<std::string>(status_code::kError);
+      return status_or<std::string>(status_code::kStaticError);
     }
     if (*number == "0") {
       return status_or<std::string>("0");
@@ -102,7 +102,7 @@ status_or<std::string> read_number(utf8_reader& input, bool allow_binary_literal
       }
       if (next == 'e' || next == 'E') {
         if (!accepted_digit) {
-          return status_or<std::string>(status_code::kError);
+          return status_or<std::string>(status_code::kStaticError);
         }
         if (found_e) {
           break;
@@ -126,7 +126,7 @@ status_or<std::string> read_number(utf8_reader& input, bool allow_binary_literal
       input.skip();
     }
     if (!accepted_digit) {
-      return status_or<std::string>(status_code::kError);
+      return status_or<std::string>(status_code::kStaticError);
     }
   }
   return status_or<std::string>(std::move(result));

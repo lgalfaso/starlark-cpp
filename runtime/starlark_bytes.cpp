@@ -687,7 +687,7 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
       auto other_value = element->as_int64();
       if (other_value < 0 || 255 < other_value) {
         error_callback.add_error(error_byte_in_range());
-        return status_or<std::string_view>(status_code::kError);
+        return status_or<std::string_view>(status_code::kRuntimeError);
       }
       return status_or<std::string_view>(std::string_view(&all_chars[other_value], 1));
     }
@@ -695,20 +695,20 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
       auto& other_value = element->as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
         error_callback.add_error(error_byte_in_range());
-        return status_or<std::string_view>(status_code::kError);
+        return status_or<std::string_view>(status_code::kRuntimeError);
       }
       return status_or<std::string_view>(std::string_view(&all_chars[other_value.at(0)], 1));
     }
     case starlark_numeric_type::kNotNumeric: {
       if (element->type() != starlark_types::bytes_t) {
         error_callback.add_error(error_integer_or_type(starlark_types::bytes_t, element->type()));
-        return status_or<std::string_view>(status_code::kError);
+        return status_or<std::string_view>(status_code::kRuntimeError);
       }
       return status_or<std::string_view>(element->as_string());
     }
     default:
       error_callback.add_error(error_integer_or_type(starlark_types::bytes_t, element->type()));
-      return status_or<std::string_view>(status_code::kError);
+      return status_or<std::string_view>(status_code::kRuntimeError);
   }
 }
 
@@ -720,14 +720,14 @@ status_or<std::vector<std::string_view>> bytes_or_tuple_as_vector_of_bytes(std::
       auto* entry = tuple->at(i);
       if (entry->type() != starlark_types::bytes_t) {
         error_callback.add_error(error_type_required(starlark_types::bytes_t, entry->type()));
-        return status_or<std::vector<std::string_view>>(status_code::kError);
+        return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
       }
       result.emplace_back(entry->as_string());
     }
   } else {
     if (element->type() != starlark_types::bytes_t) {
       error_callback.add_error(error_bytes_or_tuple_of_bytes(fn_name, element->type()));
-      return status_or<std::vector<std::string_view>>(status_code::kError);
+      return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
     }
     result.emplace_back(element->as_string());
   }
@@ -739,11 +739,11 @@ status_or<std::pair<int64_t, int64_t>> get_start_and_end(const starlark_obj::pos
   int64_t end = std::numeric_limits<int64_t>::max();
   if (pos_args.size() >= 2) {
     if (!to_int64_with_clamping_for_index_allow_none(*pos_args[1], start, error_callback).ok()) {
-      return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+      return status_or<std::pair<int64_t, int64_t>>(status_code::kRuntimeError);
     }
     if (pos_args.size() >= 3) {
       if (!to_int64_with_clamping_for_index_allow_none(*pos_args[2], end, error_callback).ok()) {
-        return status_or<std::pair<int64_t, int64_t>>(status_code::kError);
+        return status_or<std::pair<int64_t, int64_t>>(status_code::kRuntimeError);
       }
     }
   }

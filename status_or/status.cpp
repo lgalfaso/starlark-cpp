@@ -16,7 +16,7 @@ status ok_status() {
 }
 
 status error_status() {
-  return status(status_code::kError);
+  return status(status_code::kRuntimeError);
 }
 
 }  // namespace result

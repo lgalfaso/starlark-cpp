@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
   interpreter runner;
   logger logging;
 
-  if (runner.run(loader, module_name, grammar_options{}, runtime_options{}, logging) == nullptr) {
+  if (!runner.run(loader, module_name, grammar_options{}, runtime_options{}, logging).ok()) {
     print_logs(logging);
     return 1;
   }

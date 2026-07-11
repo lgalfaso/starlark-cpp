@@ -7,14 +7,17 @@ assert_eq(a.extend((88, 99)), None)
 assert_eq(a, [1, 2, 3, 5, 6, 1, 2, 3, 5, 6, 88, 99])
 
 assert_fail('''
+a = [1, 2, 3]
 a.extend()
 ''')
 
 assert_fail('''
+a = [1, 2, 3]
 a.extend([], [])
 ''')
 
 assert_fail('''
+a = [1, 2, 3]
 a.extend(True)
 ''')
 

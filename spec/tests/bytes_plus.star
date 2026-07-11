@@ -12,7 +12,7 @@ a = (b'abc' +
 assert_fail('''
 a = b'abc' +
      'def'
-''')
+''', allow_static_error = True)
 assert_fail('''
 b'abc' + ''
 ''')

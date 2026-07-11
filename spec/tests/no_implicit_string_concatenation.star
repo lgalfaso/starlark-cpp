@@ -5,4 +5,4 @@ arguments = [
     "-Wall"
     "-Werror",
 ]
-""")
+""", allow_static_error = True)
