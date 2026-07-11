@@ -46,3 +46,6 @@ def cmp_all():
           assert_eq(a > b, aa > bb)
 
 cmp_all()
+
+
+assert_fail('''1 < True''')

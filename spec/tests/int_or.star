@@ -62748,3 +62748,12 @@ assert_eq(0xffffffffffffffffffffffffffffffffffffffffffffffff, 0xffffffffffffffff
 assert_eq(0xffffffffffffffffffffffffffffffffffffffffffffffff, 0xffffffffffffffffffffffffffffffffffffffffffffffff | 0xfffffffffffffffffffffffffffffffffffffffffffffffe)
 assert_eq(0xffffffffffffffffffffffffffffffffffffffffffffffff, 0xffffffffffffffffffffffffffffffffffffffffffffffff | 0xffffffffffffffffffffffffffffffffffffffffffffffff)
 
+def test():
+  a = 0x2fffffffffffffffffffffffffffffffe
+  a |= 0xffffffffffffffffffffffffffffffffffffffffffffffff
+  assert_eq(a, 0xffffffffffffffffffffffffffffffffffffffffffffffff)
+
+test()
+
+assert_fail('''1 | True''')
+
