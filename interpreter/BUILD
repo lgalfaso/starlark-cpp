@@ -118,10 +118,20 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "interpreter_test_base",
+    srcs = ["interpreter_test.cpp"],
+    alwayslink = 1,
+    testonly = True,
+    deps = [
+        ":interpreter_test_runner",
+        "@googletest//:gtest",
+    ],
+)
+
 [
     cc_test(
         name = "interpreter_test_" + f.replace("/", "_"),
-        srcs = ["interpreter_test.cpp"],
         args = [
             "$(location " + f + ")",
         ],
@@ -129,7 +139,7 @@ cc_library(
             f,
         ],
         deps = [
-            ":interpreter_test_runner",
+            ":interpreter_test_base",
             "@googletest//:gtest_main",
         ],
     ) for f in glob(["interpreter_tests/*.star"])
