@@ -30,7 +30,9 @@ starlark_obj* starlark_fn_inner_max(starlark_obj* this_obj, const starlark_obj::
   assert(pos_args.size() == 2);
   assert(named_args.empty());
   auto* it1 = pos_args.front()->get_iterator(true, ctx, error_callback);
-  assert(it1 != nullptr);
+  if (it1 == nullptr) {
+    return nullptr;
+  }
   if (!it1->has_next()) {
     it1->end_iterator();
     error_callback.add_error(error_empty_iterator(starlark_built_in_functions::max_f));
@@ -64,7 +66,9 @@ starlark_obj* starlark_fn_inner_min(starlark_obj* this_obj, const starlark_obj::
   assert(pos_args.size() == 2);
   assert(named_args.empty());
   auto* it1 = pos_args.front()->get_iterator(true, ctx, error_callback);
-  assert(it1 != nullptr);
+  if (it1 == nullptr) {
+    return nullptr;
+  }
   if (!it1->has_next()) {
     it1->end_iterator();
     error_callback.add_error(error_empty_iterator(starlark_built_in_functions::min_f));
