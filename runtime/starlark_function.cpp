@@ -240,7 +240,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     }
   }
   if (pos_args.size() >= 2) {
-    error_callback.add_error(error_arguments_one_or_two(starlark_built_in_functions::bytes_f, pos_args.size()));
+    error_callback.add_error(error_arguments_too_many(starlark_built_in_functions::bytes_f, pos_args.size(), 1));
     return nullptr;
   }
   if (pos_args.size() >= 1) {

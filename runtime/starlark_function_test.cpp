@@ -753,7 +753,7 @@ TEST(StarlarkBytes, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bytes() takes one or two argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: bytes expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, UnknownNamedArguments) {
