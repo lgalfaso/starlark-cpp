@@ -1105,13 +1105,33 @@ starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_ar
   // The Python version of `str` can take zero arguments and returns `''`.
   // The spec is not clear whether zero arguments is ok, but a strict reading would be that this parameter is mandatory.
   // See: https://github.com/bazelbuild/starlark/issues/351
-  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::str_f).ok()) {
+  starlark_obj* object = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "object") {
+      assert(value != nullptr);
+      object = value;
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
+  }
+  if (pos_args.size() >= 2) {
+    error_callback.add_error(error_arguments_too_many(starlark_built_in_functions::str_f, pos_args.size(), 1));
     return nullptr;
   }
-  if (pos_args.empty()) {
+  if (pos_args.size() >= 1) {
+    if (object != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument(
+          starlark_built_in_functions::str_f,
+          "object"));
+      return nullptr;
+    }
+    object = pos_args.front();
+  }
+  if (object == nullptr) {
     return ctx.empty_string();
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), pos_args.front()->str());
+  return Arena::Create<starlark_string>(&ctx.arena(), object->str());
 }
 
 starlark_obj* starlark_fn_tuple(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {

@@ -4569,6 +4569,41 @@ TEST(StarlarkStr, TooManyPosArguments) {
 }
 
 TEST(StarlarkStr, NamedArguments) {
+  std::string s_object("object");
+  starlark_integer one(1);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_object, &one);
+
+  auto* result = starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(result, nullptr) << error_callback.messages[0];
+  EXPECT_EQ(result->type(), starlark_types::string_t);
+  EXPECT_EQ(result->str(), "1");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkStr, ObjectAsNamedAndPositionalArgument) {
+  starlark_string str("123"sv);
+  std::string s_object("object");
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  named_args.insert(s_object, &str);
+
+  EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: str() got multiple values for argument 'object'", error_callback.messages[0]);
+}
+
+TEST(StarlarkStr, UnknownNamedArguments) {
   std::string s_one("1");
   starlark_integer one(1);
   Arena arena;
@@ -4582,7 +4617,7 @@ TEST(StarlarkStr, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: str() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, NoArguments) {
