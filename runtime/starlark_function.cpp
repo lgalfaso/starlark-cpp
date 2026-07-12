@@ -229,20 +229,40 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
   // The Python version of `bytes` can take zero arguments and returns `b''`.
   // The spec is not clear whether zero arguments is ok, but a strict reading would be that this parameter is mandatory.
   // See: https://github.com/bazelbuild/starlark/issues/351
-  if (!zero_or_one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::bytes_f).ok()) {
+  starlark_obj* source = nullptr;
+  for (auto& [key, value] : named_args) {
+    if (key == "source") {
+      assert(value != nullptr);
+      source = value;
+    } else {
+      error_callback.add_error(error_unknown_argument(key));
+      return nullptr;
+    }
+  }
+  if (pos_args.size() >= 2) {
+    error_callback.add_error(error_arguments_one_or_two(starlark_built_in_functions::bytes_f, pos_args.size()));
     return nullptr;
   }
-  if (pos_args.empty()) {
+  if (pos_args.size() >= 1) {
+    if (source != nullptr) {
+      error_callback.add_error(error_multiple_values_for_argument(
+          starlark_built_in_functions::bytes_f,
+          "source"));
+      return nullptr;
+    }
+    source = pos_args.front();
+  }
+  if (source == nullptr) {
     return ctx.empty_bytes();
   }
-  if (pos_args.front()->type() == starlark_types::bytes_t) {
-    return pos_args.front();
+  if (source->type() == starlark_types::bytes_t) {
+    return source;
   }
-  if (pos_args.front()->type() == starlark_types::string_t) {
+  if (source->type() == starlark_types::string_t) {
     // If in the future we do not allow strings to have invalid Unicode sequences, then all this can be replaced with
-    // return Arena::Create<starlark_bytes>(&ctx.arena(), pos_args.front()->as_string());
+    // return Arena::Create<starlark_bytes>(&ctx.arena(), source->as_string());
     std::string result;
-    utf8_reader reader(pos_args.front()->as_string(), false, false);
+    utf8_reader reader(source->as_string(), false, false);
     while (reader.pending()) {
       utf8_encode_code_point(reader.read_code_point(), result, false, true);
     }
@@ -252,9 +272,9 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     }
     return Arena::Create<starlark_bytes>(&ctx.arena(), result);
   }
-  auto* it = pos_args.front()->get_iterator(false, ctx, error_callback);
+  auto* it = source->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
-    error_callback.add_error(error_convert(pos_args.front()->type(), starlark_types::bytes_t));
+    error_callback.add_error(error_convert(source->type(), starlark_types::bytes_t));
     return nullptr;
   }
   std::string result;

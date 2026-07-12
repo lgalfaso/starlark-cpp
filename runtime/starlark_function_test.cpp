@@ -753,10 +753,10 @@ TEST(StarlarkBytes, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bytes expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("TypeError: bytes() takes one or two argument (2 given)", error_callback.messages[0]);
 }
 
-TEST(StarlarkBytes, NamedArguments) {
+TEST(StarlarkBytes, UnknownNamedArguments) {
   starlark_bytes bytes("def"sv);
   std::string s_one("1");
   starlark_integer one(1);
@@ -773,7 +773,42 @@ TEST(StarlarkBytes, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bytes() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, SourceAsNamedArgument) {
+  starlark_string str("123"sv);
+  std::string s_source("source");
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.insert(s_source, &str);
+
+  auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_NE(result, nullptr);
+  EXPECT_EQ(result->type(), starlark_types::bytes_t);
+  EXPECT_EQ(result->str(), "b\"123\"");
+  ASSERT_THAT(error_callback.messages, IsEmpty());
+}
+
+TEST(StarlarkBytes, SourceAsNamedAndPositionalArgument) {
+  starlark_string str("123"sv);
+  std::string s_source("source");
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&str);
+  named_args.insert(s_source, &str);
+
+  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("TypeError: bytes() got multiple values for argument 'source'", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, FromInt) {
