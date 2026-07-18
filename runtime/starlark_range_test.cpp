@@ -159,10 +159,10 @@ TEST(StarlarkRange, LenHardCases) {
     starlark_range range(start, end, step);
 
     if (valid) {
-      EXPECT_THAT(range.len(true, error_callback), Ge(0));
+      EXPECT_THAT(range.len(true, error_callback), Ge(0)) << "start: " << start << ", end: " << end << ", step: " << step;
       EXPECT_THAT(error_callback.messages, IsEmpty());
     } else {
-      EXPECT_THAT(range.len(true, error_callback), Lt(0));
+      EXPECT_THAT(range.len(true, error_callback), Lt(0)) << "start: " << start << ", end: " << end << ", step: " << step;
       EXPECT_THAT(error_callback.messages, IsEmpty());
     }
   };
@@ -170,11 +170,19 @@ TEST(StarlarkRange, LenHardCases) {
   test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), -2, true);
   test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), -1, true);
   test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 1, false);
-  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 2, true);
-  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), -2, true);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max(), 2, false);
+  test(std::numeric_limits<int64_t>::min() + 1, std::numeric_limits<int64_t>::max(), 2, true);
+  test(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max() - 1, 2, true);
+  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), -2, false);
+  test(std::numeric_limits<int64_t>::max() - 1, std::numeric_limits<int64_t>::min(), -2, true);
+  test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min() + 1, -2, true);
   test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), -1, false);
   test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), 1, true);
   test(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), 2, true);
+
+  error_handler error_callback;
+  EXPECT_EQ(starlark_range(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::min()).len(true, error_callback), 2);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
 TEST(StarlarkRange, Equals) {
