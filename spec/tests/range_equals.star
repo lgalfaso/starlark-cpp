@@ -1,0 +1,11 @@
+assert_true(range(0, 100, 1) == range(0, 100, 1))
+assert_false(range(1, 100, 1) == range(0, 100, 1))
+assert_true(range(0, 100, 2) == range(0, 100, 2))
+assert_false(range(0, 100, 1) == range(0, 100, 2))
+assert_true(range(0, 99, 2) == range(0, 100, 2))
+assert_false(range(0, 100, 2) == range(0, 101, 2))
+assert_true(range(0, 0, 2) == range(100, 100, 2))
+assert_true(range(0, 5, 10) == range(0, 5, 11))
+assert_false(range(0, 5, 1) == range(1, 6, 1))
+assert_false(range(0, 100, 1) == None)
+

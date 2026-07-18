@@ -1,3 +1,8 @@
+# No arguments.
+assert_fail('''type()''')
+
+
+# One argument.
 def foo(): pass
 bar = lambda: True
 
@@ -20,3 +25,13 @@ assert_eq(type(type), "builtin_function_or_method")
 assert_eq(type(foo), "function")
 assert_eq(type(bar), "function")
 assert_eq(type([].append), "builtin_function_or_method")
+assert_eq(type(range(10)), "range")
+
+
+# Two arguments.
+assert_fail('''type([], None)''')
+
+
+# Named arguments.
+assert_fail('''type(object = '')''')
+

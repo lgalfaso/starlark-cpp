@@ -1,0 +1,13 @@
+assert_eq(range(0, 100, 1)[0], 0)
+assert_eq(range(0, 100, 1)[1], 1)
+assert_eq(range(0, 100, 2)[1], 2)
+assert_eq(range(1, 100, 1)[0], 1)
+assert_eq(range(1, 100, 1)[1], 2)
+assert_eq(range(1, 100, 2)[0], 1)
+assert_eq(range(1, 100, 2)[1], 3)
+assert_eq(range(0, 100, 1)[99], 99)
+assert_eq(range(1, 100, 1)[-1], 99)
+assert_eq(range(0, 100, 1)[-100], 0)
+assert_fail('''range(0, 100, 1)[-101]''')
+assert_fail('''range(0, 100, 1)[100]''')
+
