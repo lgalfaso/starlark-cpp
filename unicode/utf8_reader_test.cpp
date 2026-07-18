@@ -457,4 +457,44 @@ TEST(UTF8Reader, AllCharacters) {
   }
 }
 
+TEST(UTF8Reader, AllCombinations) {
+  char source[8];
+  std::string output;
+  std::set<int> total;
+  for (int i = 0; i < 256; ++i) {
+    for (int j = 0; j < 256; ++j) {
+      for (int k = 0; k < 256; ++k) {
+        for (int l = 0; l < 256; ++l) {
+          source[0] = i;
+          source[1] = j;
+          source[2] = k;
+          source[3] = l;
+          utf8_reader reader(std::string_view(source, 4), false, false);
+          auto cp = reader.peek_code_point();
+          if (cp.first == utf8_reader::kReplacementCharacter) {
+            continue;
+          }
+          std::string encoded;
+          utf8_encode_code_point(cp.first, encoded, false, true);
+          ASSERT_EQ(encoded.size(), cp.second) << (int)cp.first;
+          if (encoded.size() >= 1) {
+            EXPECT_TRUE(static_cast<unsigned char>(encoded[0]) == i);
+          }
+          if (encoded.size() >= 2) {
+            EXPECT_TRUE(static_cast<unsigned char>(encoded[1]) == j);
+          }
+          if (encoded.size() >= 3) {
+            EXPECT_TRUE(static_cast<unsigned char>(encoded[2]) == k);
+          }
+          if (encoded.size() >= 4) {
+            EXPECT_TRUE(static_cast<unsigned char>(encoded[3]) == l);
+          }
+          total.insert(cp.first);
+        }
+      }
+    }
+  }
+  EXPECT_EQ(total.size(), 0x10FFFF);
+}
+
 }  // namespace
