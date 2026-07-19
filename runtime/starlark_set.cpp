@@ -169,8 +169,8 @@ starlark_obj* starlark_set::binary_and(const starlark_obj& other, context& ctx, 
   auto* result = Arena::Create<starlark_set>(&ctx.arena());
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
-    if (s_other.contains(key)) {
-      result->add(key, error_callback);
+    if (auto it = s_other.values.find(key); it != s_other.values.end()) {
+      result->add(*it, error_callback);
     }
   }
   return result;

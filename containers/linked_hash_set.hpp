@@ -54,12 +54,28 @@ class linked_hash_set {
     return order.end();
   }
 
+  iterator find(const Key& key) {
+    auto result = values.find(key);
+    if (result == values.end()) {
+      return order.end();
+    }
+    return result->second;
+  }
+
   const_iterator begin() const {
     return order.begin();
   }
 
   const_iterator end() const {
     return order.end();
+  }
+
+  const_iterator find(const Key& key) const {
+    auto result = values.find(key);
+    if (result == values.end()) {
+      return order.end();
+    }
+    return result->second;
   }
 
   reverse_iterator rbegin() {
