@@ -6,6 +6,7 @@
 
 #include <limits>
 #include <random>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -460,7 +461,7 @@ TEST(UTF8Reader, AllCharacters) {
 TEST(UTF8Reader, AllCombinations) {
   char source[8];
   std::string output;
-  std::set<int> total;
+  int total = 0;
   for (int i = 0; i < 256; ++i) {
     for (int j = 0; j < 256; ++j) {
       for (int k = 0; k < 256; ++k) {
@@ -476,7 +477,7 @@ TEST(UTF8Reader, AllCombinations) {
           }
           std::string encoded;
           utf8_encode_code_point(cp.first, encoded, false, true);
-          ASSERT_EQ(encoded.size(), cp.second) << (int)cp.first;
+          ASSERT_EQ(encoded.size(), cp.second) << static_cast<int>(cp.first);
           if (encoded.size() >= 1) {
             EXPECT_TRUE(static_cast<unsigned char>(encoded[0]) == i);
           }
@@ -489,12 +490,19 @@ TEST(UTF8Reader, AllCombinations) {
           if (encoded.size() >= 4) {
             EXPECT_TRUE(static_cast<unsigned char>(encoded[3]) == l);
           }
-          total.insert(cp.first);
+          if (encoded.size() == 1) {
+            j = k = l = 256;
+          } else if (encoded.size() == 2) {
+            k = l = 256;
+          } else if (encoded.size() == 3) {
+            l = 256;
+          }
+          total++;
         }
       }
     }
   }
-  EXPECT_EQ(total.size(), 0x10FFFF);
+  EXPECT_EQ(total, 0x10FFFF);
 }
 
 }  // namespace
