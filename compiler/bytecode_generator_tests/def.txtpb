@@ -79,7 +79,7 @@ block {
   op_code { pop { } }
   op_code { const_none { } }
   op_code { return { } }
-  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } param { name: "c" pos { frame: 0 pos_in_frame: 2 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 2 fn_name: "foo7" }
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } param { name: "c" pos { frame: 0 pos_in_frame: 2 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 2 fn_name: "foo7" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }

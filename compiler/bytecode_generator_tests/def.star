@@ -10,7 +10,7 @@ def foo5(a, *b):
   return a(*b)
 def foo6(a, **b):
   return a(**b)
-def foo7(a, *, b = 2, c):
+def foo7(a, *, b, c = 2):
   print(a, b, c)
 def foo8(*a, b):
   print(b, *a)

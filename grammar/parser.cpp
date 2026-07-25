@@ -244,6 +244,7 @@ struct frame {
       bool found_star_parameter;
       bool found_star_star_parameter;
       bool previous_parameter_was_bare_star;
+      bool found_parameter_with_default;
     };
     Parameter* parameter;
     struct {
@@ -489,6 +490,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             .found_star_parameter = false,
             .found_star_star_parameter = false,
             .previous_parameter_was_bare_star = false,
+            .found_parameter_with_default = false,
           });
         } else if (is_current(token_type::kIf)) {
           found_non_load = true;
@@ -1974,6 +1976,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           .found_star_parameter = false,
           .found_star_star_parameter = false,
           .previous_parameter_was_bare_star = false,
+          .found_parameter_with_default = false,
         });
         break;
       case parser_state::kParseLambda_0:
@@ -2011,6 +2014,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (top.found_star_star_parameter) {
               add_error("arguments cannot follow var-keyword argument");
             }
+            bool found_parameter_with_default = top.found_parameter_with_default;
+            Parameter* param = top.parameters->Add();
+            *param->mutable_pif()->mutable_start() = lex.current_token().start();
+            set_identifier(*param->mutable_identifier());
+            if (is_current(token_type::kEquals)) {
+              found_parameter_with_default = true;
+            } else if (top.found_parameter_with_default && !top.found_star_parameter) {
+              add_error("SyntaxError: parameter without a default follows parameter with a default");
+            }
             frames.emplace_back(frame{
               .state = parser_state::kParseParameters,
               .parameters = top.parameters,
@@ -2019,10 +2031,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_star_parameter = top.found_star_parameter,
               .found_star_star_parameter = top.found_star_star_parameter,
               .previous_parameter_was_bare_star = false,
+              .found_parameter_with_default = found_parameter_with_default,
             });
-            Parameter* param = top.parameters->Add();
-            *param->mutable_pif()->mutable_start() = lex.current_token().start();
-            set_identifier(*param->mutable_identifier());
             if (capture(token_type::kEquals)) {
               frames.emplace_back(frame{
                 .state = parser_state::kParseResolveTest,
@@ -2066,6 +2076,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_star_parameter = true,
               .found_star_star_parameter = top.found_star_star_parameter,
               .previous_parameter_was_bare_star = !is_current(token_type::kIdentifier),
+              .found_parameter_with_default = false,
             });
             if (is_current(token_type::kIdentifier)) {
               *param->mutable_star()->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -2096,6 +2107,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_star_parameter = top.found_star_parameter,
               .found_star_star_parameter = true,
               .previous_parameter_was_bare_star = false,
+              .found_parameter_with_default = top.found_parameter_with_default,
             });
             if (!set_identifier(*param->mutable_identifier())) {
               add_error("Expected identifier after STAR_STAR when parsing parameters");

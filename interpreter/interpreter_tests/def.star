@@ -78,3 +78,12 @@ def foo(*, a):
 foo()
 """, error_message = "TypeError: foo() missing required keyword-only argument 'a'")
 
+x = []
+def y(p1, p2 = 2, *, p3 = 3, p4):
+  x.append(p1)
+  x.append(p2)
+  x.append(p3)
+  x.append(p4)
+
+y(1, p4 = 4)
+assert_eq(x, [1, 2, 3, 4])
