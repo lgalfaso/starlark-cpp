@@ -41,3 +41,11 @@ assert_fail('''enumerate([], iterable = [])''')
 assert_fail('''enumerate([], 100, start = 100)''')
 assert_fail('''enumerate([], unknown = None)''')
 
+
+# Enumerate creates a new list, so it is ok to remove from `a`
+def foo():
+  a = ['one', 'two', 'three']
+  for x, y in enumerate(a):
+    a.remove(y)
+  assert_eq(a, [])
+foo()

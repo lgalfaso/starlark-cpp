@@ -23,3 +23,13 @@ assert_eq(zip(range(3), range(100, 200), range(1000, 1002)), [(0, 100, 1000), (1
 # Named arguments.
 assert_fail('''zip(iterables = [])''')
 
+
+
+# Zip creates a new list, so it is ok to remove from `a`
+def foo():
+  a = ['one', 'two', 'three']
+  for (y,) in zip(a):
+    a.remove(y)
+  assert_eq(a, [])
+foo()
+

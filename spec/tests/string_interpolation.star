@@ -144,3 +144,7 @@ assert_fail('''"%d" %(1, 2)''')
 assert_fail('''"%d %d" % [1, 2]''')
 assert_fail('''"¢¢¢¢¢%y" % 1''')
 
+# Edge case for a single element with a tuple.
+assert_fail('''"coordinates=%s" % (40, -74)''')
+assert_eq("coordinates=%s" % ((40, -74),), "coordinates=(40, -74)")
+

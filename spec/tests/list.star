@@ -1,7 +1,16 @@
 assert_false(True if [] else False)
 assert_true(True if [0] else False)
+assert_true(not [])
+assert_false(not [0])
+
+
 assert_fail("""
 {[]: None}""")
+
+# List may have a trailing comma.
+a = [1,]
+# but not empty lists.
+assert_fail('''[,]''', allow_static_error = True)
 
 # List is a subtype of Sequence.
 def foo():

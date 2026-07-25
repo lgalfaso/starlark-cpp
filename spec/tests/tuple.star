@@ -2,6 +2,8 @@
 assert_false(True if () else False)
 assert_true(True if (None,) else False)
 assert_true(True if (1,) else False)
+assert_true(not ())
+assert_false(not (1, 2))
 
 # Trailing comma is only allowed in parenthesized tuple expression.
 assert_fail("""

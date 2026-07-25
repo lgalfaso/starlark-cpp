@@ -1,5 +1,8 @@
 assert_false(False)
 assert_true(True)
+assert_true(not False)
+assert_false(not True)
+
 assert_eq(int(False), 0)
 assert_eq(int(True), 1)
 assert_ne(False, 0)

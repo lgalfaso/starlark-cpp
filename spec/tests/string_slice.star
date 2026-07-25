@@ -108,3 +108,4 @@ assert_fail(""""abcdef"[None:True:None]""")
 assert_fail(""""abcdef"[None:None:True]""")
 assert_fail(""""abcdef"[None:None:0]""")
 
+assert_eq('hello'[-1000:1000], 'hello')
