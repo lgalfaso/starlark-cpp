@@ -131,7 +131,7 @@ std::string_view error_expected_after_conversion();
 std::string_view error_non_string_with_base();
 std::string_view error_keyword_must_be_string();
 
-}  // namespace runtime
+}  // namespace error_messages
 }  // namespace starlark
 
 #pragma GCC visibility pop

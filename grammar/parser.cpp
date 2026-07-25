@@ -10,32 +10,61 @@
 #include <utility>
 #include <vector>
 
+#include "errors/parser_error_messages.hpp"
 #include "unicode/normalization.hpp"
 #include "third-party/defer.hpp"
 
-using google::protobuf::Arena;
-using google::protobuf::RepeatedPtrField;
-using starlark::ast::Argument;
-using starlark::ast::AssignStmt;
-using starlark::ast::BinaryExpr;
-using starlark::ast::BinaryExpr;
-using starlark::ast::CompClause;
-using starlark::ast::DefStmt;
-using starlark::ast::Entry;
-using starlark::ast::Expression;
-using starlark::ast::File;
-using starlark::ast::ForStmt;
-using starlark::ast::Identifier;
-using starlark::ast::IfStmt;
-using starlark::ast::LambdaExpr;
-using starlark::ast::Parameter;
-using starlark::ast::PositionInFile;
-using starlark::ast::Statement;
-using starlark::ast::UnaryExpr;
-using starlark::logging::LogLevel;
-using starlark::logging::Position;
-using starlark::logging::logger;
-using starlark::unicode::to_nfkc;
+using ::google::protobuf::Arena;
+using ::google::protobuf::RepeatedPtrField;
+using ::starlark::ast::Argument;
+using ::starlark::ast::AssignStmt;
+using ::starlark::ast::BinaryExpr;
+using ::starlark::ast::BinaryExpr;
+using ::starlark::ast::CompClause;
+using ::starlark::ast::DefStmt;
+using ::starlark::ast::Entry;
+using ::starlark::ast::Expression;
+using ::starlark::ast::File;
+using ::starlark::ast::ForStmt;
+using ::starlark::ast::Identifier;
+using ::starlark::ast::IfStmt;
+using ::starlark::ast::LambdaExpr;
+using ::starlark::ast::Parameter;
+using ::starlark::ast::PositionInFile;
+using ::starlark::ast::Statement;
+using ::starlark::ast::UnaryExpr;
+using ::starlark::error_messages::error_arguments_duplicate_star_args;
+using ::starlark::error_messages::error_arguments_duplicate_star_star_kvargs;
+using ::starlark::error_messages::error_arguments_expected_identifier_for_named_arguments;
+using ::starlark::error_messages::error_arguments_non_variadic_before_variadic;
+using ::starlark::error_messages::error_arguments_positional_before_named_arguments;
+using ::starlark::error_messages::error_arguments_star_star_argument_must_be_last;
+using ::starlark::error_messages::error_arguments_varadic_arguments_not_allowed;
+using ::starlark::error_messages::error_comparison_operators_are_not_associative;
+using ::starlark::error_messages::error_expected_identifier;
+using ::starlark::error_messages::error_expected_string;
+using ::starlark::error_messages::error_expected_target;
+using ::starlark::error_messages::error_for_not_allowed_at_top_level;
+using ::starlark::error_messages::error_function_definition_not_allowed;
+using ::starlark::error_messages::error_if_not_allowed_at_top_level;
+using ::starlark::error_messages::error_illegal_target_for_augmented_assignment;
+using ::starlark::error_messages::error_load_at_least_one_symbol;
+using ::starlark::error_messages::error_load_first;
+using ::starlark::error_messages::error_load_not_at_top_level;
+using ::starlark::error_messages::error_params_expected_identifier_after_star_star_token;
+using ::starlark::error_messages::error_params_named_argument_must_follow_bare_star;
+using ::starlark::error_messages::error_params_non_optional_after_optional;
+using ::starlark::error_messages::error_params_star_parameter_may_appear_only_once;
+using ::starlark::error_messages::error_params_variadic_keyword_argument_must_be_last;
+using ::starlark::error_messages::error_unexpected_break;
+using ::starlark::error_messages::error_unexpected_comma;
+using ::starlark::error_messages::error_unexpected_continue;
+using ::starlark::error_messages::error_unexpected_return;
+using ::starlark::error_messages::error_unexpected_token;
+using ::starlark::logging::LogLevel;
+using ::starlark::logging::Position;
+using ::starlark::logging::logger;
+using ::starlark::unicode::to_nfkc;
 
 namespace starlark {
 namespace grammar {
@@ -448,7 +477,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (is_current(token_type::kDef)) {
           found_non_load = true;
           if (!opts.allow_function_definitions) {
-            add_error("Function definitions not allowed");
+            add_error(error_function_definition_not_allowed());
           }
           Statement* statement = top.statements->Add();
           DefStmt* def_statement = statement->mutable_def_statement();
@@ -456,7 +485,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           *statement->mutable_pif()->mutable_start() = lex.current_token().start();
           lex.next_token();
           if (!set_identifier(*def_statement->mutable_function_name())) {
-            add_error("Expected an identifier");
+            add_error(error_expected_identifier());
             break;
           }
 
@@ -495,7 +524,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (is_current(token_type::kIf)) {
           found_non_load = true;
           if (nested_loops.size() == 1 && !opts.allow_top_level_if) {
-            add_error("`if` statements are not allowed at the top level");
+            add_error(error_if_not_allowed_at_top_level());
           }
           Statement* statement = top.statements->Add();
           IfStmt* if_statement = statement->mutable_if_statement();
@@ -532,7 +561,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (is_current(token_type::kFor)) {
           found_non_load = true;
           if (nested_loops.size() == 1 && !opts.allow_top_level_for) {
-            add_error("`for` statements are not allowed at the top level");
+            add_error(error_for_not_allowed_at_top_level());
           }
           Statement* statement = top.statements->Add();
           ForStmt* for_statement = statement->mutable_for_statement();
@@ -778,7 +807,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kReturn:
             found_non_load = true;
             if (nested_loops.size() == 1) {
-              add_error("Unexpected RETURN");
+              add_error(error_unexpected_return());
             }
             *top.statement->mutable_return_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_return_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -804,10 +833,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kLoad: {
             std::set<std::string, std::less<>> symbols;
             if (found_non_load && opts.require_load_statements_first) {
-              add_error("`load` statements must appear before other statements");
+              add_error(error_load_first());
             }
             if (nested_loops.size() != 1) {
-              add_error("`load` statement not at top level");
+              add_error(error_load_not_at_top_level());
             }
             *top.statement->mutable_load_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
@@ -816,7 +845,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               break;
             }
             if (!is_current(token_type::kString)) {
-              add_error("Expected STRING");
+              add_error(error_expected_string());
               break;
             }
             top.statement->mutable_load_statement()->set_module(lex.current_token().string_value());
@@ -836,7 +865,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 }
               }
               if (!is_current(token_type::kString)) {
-                add_error("Expected STRING");
+                add_error(error_expected_string());
                 break;
               }
               if (!opts.allow_load_private_symbols &&
@@ -864,7 +893,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               lex.next_token();
             }
             if (!loaded_symbol) {
-              add_error("Expect to load at least one symbol");
+              add_error(error_load_at_least_one_symbol());
             }
             *top.statement->mutable_load_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
             *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -874,7 +903,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kBreak:
             found_non_load = true;
             if (nested_loops.back() == 0) {
-              add_error("Unexpected BREAK");
+              add_error(error_unexpected_break());
             }
             *top.statement->mutable_break_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_break_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -885,7 +914,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kContinue:
             found_non_load = true;
             if (nested_loops.back() == 0) {
-              add_error("Unexpected CONTINUE");
+              add_error(error_unexpected_continue());
             }
             *top.statement->mutable_continue_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_continue_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -924,7 +953,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           found_non_load = true;
           if (!is_target(&top.statement->expression_statement())) {
             // Report the error and continue to parse this as an expression
-            add_error("Exprecting TARGET");
+            add_error(error_expected_target());
           }
           if (op->first != token_type::kEquals && (
               top.statement->expression_statement().has_tuple() ||
@@ -932,7 +961,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               top.statement->expression_statement().has_list_comprehension() ||
               top.statement->expression_statement().has_dictionary_expression() ||
               top.statement->expression_statement().has_dictionary_comprehension())) {
-            add_error("target is an illegal expression for augmented assignment");
+            add_error(error_illegal_target_for_augmented_assignment());
           }
           {
             AssignStmt* assign_statement = Arena::Create<AssignStmt>(top.statement->GetArena());
@@ -1019,7 +1048,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               is_current(token_type::kRParen) ||
               is_current(token_type::kSemi)) {
             if (!top.expression_allow_trailing_comma) {
-              add_error("Unexpected COMMA");
+              add_error(error_unexpected_comma());
             }
             break;
           }
@@ -1167,7 +1196,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           }
           if (!top.test_p_0_first) {
-            add_error("Comparison operators are not associative. Use parens.");
+            add_error(error_comparison_operators_are_not_associative());
           }
           auto token_start = lex.current_token().start();
           lex.next_token();
@@ -1207,7 +1236,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               break;
             }
             if (!top.test_p_0_first && top.test_p_precedence == all_operator_precedence.at(token_type::kEqualsEquals).first) {
-              add_error("Comparison operators are not associative. Use parens.");
+              add_error(error_comparison_operators_are_not_associative());
             }
             auto token_start = lex.current_token().start();
             auto token_end = lex.current_token().end();
@@ -1269,7 +1298,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             *top.primary->mutable_pif()->mutable_start() = top.primary->dot_expression().primary_expression().pif().start();
           }
           if (!set_identifier(*top.primary->mutable_dot_expression()->mutable_identifier())) {
-            add_error("Expecting IDENTIFIER");
+            add_error(error_expected_identifier());
             break;
           }
           *top.primary->mutable_dot_expression()->mutable_pif()->mutable_end() = top.primary->dot_expression().identifier().pif().end();
@@ -1344,7 +1373,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
         } else {
           if (top.primary_must_be_target && !is_target(top.primary)) {
-            add_error("Expecting a TARGET");
+            add_error(error_expected_target());
           }
         }
         break;
@@ -1515,7 +1544,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             });
           }
         } else {
-          add_error("Unexpected token");
+          add_error(error_unexpected_token());
         }
         break;
       case parser_state::kParseOperandExpression_0:
@@ -1854,15 +1883,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (is_current(token_type::kStar)) {
           if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
-            add_error("Varadic arguments are not allowed");
+            add_error(error_arguments_varadic_arguments_not_allowed());
           }
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_star_argument()) {
-            add_error("Duplicate *args");
+            add_error(error_arguments_duplicate_star_args());
           }
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_star_star_argument()) {
-            add_error("**kwargs must be the last argument");
+            add_error(error_arguments_star_star_argument_must_be_last());
           }
           frames.emplace_back(frame{
             .state = parser_state::kParseExpressionFinal,
@@ -1877,11 +1906,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (is_current(token_type::kStarStar)) {
           if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
-            add_error("Varadic arguments are not allowed");
+            add_error(error_arguments_varadic_arguments_not_allowed());
           }
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_star_star_argument()) {
-            add_error("Duplicate **kwargs");
+            add_error(error_arguments_duplicate_star_star_kvargs());
           }
           frames.emplace_back(frame{
             .state = parser_state::kParseExpressionFinal,
@@ -1897,7 +1926,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (top.previous_argument != nullptr &&
               (top.previous_argument->has_star_argument() ||
                top.previous_argument->has_star_star_argument())) {
-            add_error("Non-variadic arguments must be before variadic arguments");
+            add_error(error_arguments_non_variadic_before_variadic());
           }
           if (lex.current_token().type() == token_type::kIdentifier) {
             frames.emplace_back(frame{
@@ -1917,7 +1946,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           // The reason this is able to detect that this is not an identifier between brackets is
           // because this rule is only called when the argument value started with an identifier.
           if (!top.argument->value().has_identifier()) {
-            add_error("Expected identifier for named arguments");
+            add_error(error_arguments_expected_identifier_for_named_arguments());
             break;
           }
           {
@@ -1933,7 +1962,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else {
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_named_argument()) {
-            add_error("Positional arguments must come before named arguments");
+            add_error(error_arguments_positional_before_named_arguments());
           }
         }
         break;
@@ -1959,7 +1988,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::kParseLambda:
         if (!opts.allow_function_definitions) {
-          add_error("Function definitions not allowed");
+          add_error(error_function_definition_not_allowed());
         }
         *top.test->mutable_pif()->mutable_start() = lex.current_token().start();
         *top.test->mutable_lambda_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
@@ -2012,7 +2041,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
           if (is_current(token_type::kIdentifier)) {
             if (top.found_star_star_parameter) {
-              add_error("arguments cannot follow var-keyword argument");
+              add_error(error_params_variadic_keyword_argument_must_be_last());
             }
             bool found_parameter_with_default = top.found_parameter_with_default;
             Parameter* param = top.parameters->Add();
@@ -2021,7 +2050,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (is_current(token_type::kEquals)) {
               found_parameter_with_default = true;
             } else if (top.found_parameter_with_default && !top.found_star_parameter) {
-              add_error("SyntaxError: parameter without a default follows parameter with a default");
+              add_error(error_params_non_optional_after_optional());
             }
             frames.emplace_back(frame{
               .state = parser_state::kParseParameters,
@@ -2057,10 +2086,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
           } else if (is_current(token_type::kStar)) {
             if (top.found_star_parameter) {
-              add_error("* argument may appear only once");
+              add_error(error_params_star_parameter_may_appear_only_once());
             }
             if (top.found_star_star_parameter) {
-              add_error("arguments cannot follow var-keyword argument");
+              add_error(error_arguments_star_star_argument_must_be_last());
             }
             Parameter* param = top.parameters->Add();
             *param->mutable_star()->mutable_pif()->mutable_start() = lex.current_token().start();
@@ -2088,10 +2117,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
           } else if (is_current(token_type::kStarStar)) {
             if (top.previous_parameter_was_bare_star) {
-              add_error("named arguments must follow bare *");
+              add_error(error_params_named_argument_must_follow_bare_star());
             }
             if (top.found_star_star_parameter) {
-              add_error("arguments cannot follow var-keyword argument");
+              add_error(error_params_variadic_keyword_argument_must_be_last());
             }
             Parameter* param = top.parameters->Add();
             *param->mutable_star_star()->mutable_pif()->mutable_start() = lex.current_token().start();
@@ -2110,7 +2139,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_parameter_with_default = top.found_parameter_with_default,
             });
             if (!set_identifier(*param->mutable_identifier())) {
-              add_error("Expected identifier after STAR_STAR when parsing parameters");
+              add_error(error_params_expected_identifier_after_star_star_token());
             } else {
               if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
                 add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
@@ -2119,15 +2148,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
           } else {
             if (top.previous_parameter_was_bare_star) {
-              add_error("named arguments must follow bare *");
+              add_error(error_params_named_argument_must_follow_bare_star());
             }
             if (!top.parse_parameters_first && !top.parse_parameters_allow_trailing_comma) {
-              add_error("Unexpected COMMA");
+              add_error(error_unexpected_comma());
             }
           }
         } else {
           if (top.previous_parameter_was_bare_star) {
-            add_error("named arguments must follow bare *");
+            add_error(error_params_named_argument_must_follow_bare_star());
           }
         }
         break;

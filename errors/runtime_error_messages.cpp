@@ -428,6 +428,6 @@ std::string_view error_keyword_must_be_string() {
   return "TypeError: keywords must be strings";
 }
 
-}  // namespace runtime
+}  // namespace error_messages
 }  // namespace starlark
 

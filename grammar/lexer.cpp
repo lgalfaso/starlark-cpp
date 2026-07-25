@@ -11,12 +11,21 @@
 #include <utility>
 #include <vector>
 
+#include "errors/lexer_error_messages.hpp"
 #include "grammar/numeric_parser.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/utf8_reader.hpp"
 
 using ::starlark::bigint::parse_number;
+using ::starlark::error_messages::error_dangling_bracket;
+using ::starlark::error_messages::error_invalid_escape_sequence;
+using ::starlark::error_messages::error_invalid_escape_sequence_N;
+using ::starlark::error_messages::error_invalid_line_continuation;
+using ::starlark::error_messages::error_unable_to_parse_numeric_literal;
+using ::starlark::error_messages::error_unexpected_character;
+using ::starlark::error_messages::error_unterminated_string;
+using ::starlark::error_messages::error_wrong_indentation;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::logger;
@@ -241,7 +250,7 @@ void lexer::tokenize() {
     case ']':
     case ')':
       if (open_brackets == 0) {
-        add_error("Dangling bracket", get_position());
+        add_error(error_dangling_bracket(), get_position());
       } else {
         open_brackets--;
       }
@@ -275,7 +284,7 @@ void lexer::tokenize() {
 
         auto end = get_position();
         current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
-        add_error("Unexpected character", start);
+        add_error(error_unexpected_character(), start);
         return;
       }
       const auto& keywords = all_keywords();
@@ -341,7 +350,7 @@ void lexer::consume_indentation(bool modify_indents) {
     }
 
     if (indent_stack.back() < indentation_length) {
-      add_error("Indentation error", get_position() - 1);
+      add_error(error_wrong_indentation(), get_position() - 1);
     }
   }
 }
@@ -362,7 +371,7 @@ void lexer::read_numeric() {
   auto start = get_position();
   auto optional_value = read_number(source_code, opts.allow_binary_integer_literals);
   if (!optional_value.ok()) {
-    add_error("Unable to parse numeric value", start);
+    add_error(error_unable_to_parse_numeric_literal(), start);
     auto end = get_position();
     current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
     return;
@@ -373,7 +382,7 @@ void lexer::read_numeric() {
     char* end;
     double double_value = std::strtod(value.c_str(), &end);
     if (double_value == HUGE_VAL || end != &value.back() + 1) {
-      add_error("Unable to parse numeric value", start);
+      add_error(error_unable_to_parse_numeric_literal(), start);
       current = token{token_type::kIllegal, start, get_position(), value};
       return;
     }
@@ -383,7 +392,7 @@ void lexer::read_numeric() {
     starlark::bigint::number int_value = parse_number(value, &end, 0);
     // At this stage, we do not care about the size of the bigint. This is a runtime concern.
     if (end != &value.back() + 1) {
-      add_error("Unable to parse numeric value", start);
+      add_error(error_unable_to_parse_numeric_literal(), start);
       current = token{token_type::kIllegal, start, get_position(), value};
       return;
     }
@@ -406,7 +415,7 @@ void lexer::read_string() {
     } else if (source_code.capture("b")) {
       is_bytes = true;
     } else {
-      add_error("Unterminated string", get_position());
+      add_error(error_unterminated_string(), get_position());
       auto end = get_position();
       current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
       return;
@@ -511,7 +520,7 @@ void lexer::read_string() {
             if (source_code.capture("\n")) {
               newline();
             } else {
-              add_error("Invalid line continuation", get_position());
+              add_error(error_invalid_line_continuation(), get_position());
               found_errors = true;
             }
             break;
@@ -524,38 +533,38 @@ void lexer::read_string() {
           case '6':
           case '7':
             if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127, 1, 3, 8)) {
-              add_error("Invalid escape sequence", escape_start);
+              add_error(error_invalid_escape_sequence(), escape_start);
               found_errors = true;
             }
             break;
           case 'x':
             source_code.skip();
             if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127, 2, 2, 16)) {
-              add_error("Invalid escape sequence", escape_start);
+              add_error(error_invalid_escape_sequence(), escape_start);
               found_errors = true;
             }
             break;
           case 'u':
             source_code.skip();
             if (!read_escaped_char(result, true, unicode::utf8_reader::kMaxCodePoint, 4, 4, 16)) {
-              add_error("Invalid escape sequence", escape_start);
+              add_error(error_invalid_escape_sequence(), escape_start);
               found_errors = true;
             }
             break;
           case 'U':
             source_code.skip();
             if (!read_escaped_char(result, true, unicode::utf8_reader::kMaxCodePoint, 8, 8, 16)) {
-              add_error("Invalid escape sequence", escape_start);
+              add_error(error_invalid_escape_sequence(), escape_start);
               found_errors = true;
             }
             break;
           case 'N':
-            add_error("Invalid escape sequence, the escape sequence \\N is not supported.", escape_start);
+            add_error(error_invalid_escape_sequence_N(), escape_start);
             found_errors = true;
             source_code.skip();
             break;
           default:
-            add_error("Invalid escape sequence", escape_start);
+            add_error(error_invalid_escape_sequence(), escape_start);
             found_errors = true;
             break;
         }
@@ -568,7 +577,7 @@ void lexer::read_string() {
           newline();
           break;
         }
-        add_error("Unterminated string", get_position());
+        add_error(error_unterminated_string(), get_position());
         auto end = get_position();
         current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
         return;
@@ -601,7 +610,7 @@ void lexer::read_string() {
     }
   }
 
-  add_error("Unterminated string", get_position());
+  add_error(error_unterminated_string(), get_position());
   auto end = get_position();
   current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
 }

@@ -60,6 +60,7 @@ cc_library(
         ":numeric_parser",
         ":options",
         ":token",
+        "//errors:lexer_error_messages",
         "//logging",
         "//unicode:encode",
         "//unicode:ucd",
@@ -121,6 +122,7 @@ cc_library(
     deps = [
         ":lexer",
         ":options",
+        "//errors:parser_error_messages",
         "//logging",
         "//proto:starlark_ast_cc_proto",
         "//third-party:defer",
