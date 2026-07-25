@@ -9,11 +9,13 @@
 #include <string>
 #include <vector>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::error_messages::error_unpack_too_few;
+using ::starlark::error_messages::error_unpack_too_many;
 
 namespace starlark {
 namespace runtime {

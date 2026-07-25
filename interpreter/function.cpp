@@ -8,19 +8,19 @@
 #include <vector>
 
 #include "interpreter/runner_state.hpp"
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::error_messages::error_arguments_exactly;
+using ::starlark::error_messages::error_missing_keyword_only_argument;
+using ::starlark::error_messages::error_missing_positional_argument;
+using ::starlark::error_messages::error_multiple_values_for_argument;
+using ::starlark::error_messages::error_unexpected_keyword_argument;
 using ::starlark::runtime::context;
-using ::starlark::runtime::error_arguments_exactly;
 using ::starlark::runtime::error_fn;
-using ::starlark::runtime::error_missing_keyword_only_argument;
-using ::starlark::runtime::error_missing_positional_argument;
-using ::starlark::runtime::error_multiple_values_for_argument;
-using ::starlark::runtime::error_unexpected_keyword_argument;
 using ::starlark::runtime::order_comparator;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_obj;

@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_numeric.hpp"
@@ -19,6 +19,15 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::error_messages::error_index_out_of_range;
+using ::starlark::error_messages::error_item_not_in_collection;
+using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_mutate_frozen_value;
+using ::starlark::error_messages::error_no_concat;
+using ::starlark::error_messages::error_no_multiply_sequence;
+using ::starlark::error_messages::error_op_in_loop;
+using ::starlark::error_messages::error_unpack_too_few;
+using ::starlark::error_messages::error_unpack_too_many;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;

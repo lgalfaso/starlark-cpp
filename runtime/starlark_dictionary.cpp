@@ -8,13 +8,21 @@
 #include <utility>
 #include <vector>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::error_messages::error_dictionary_key_not_found;
+using ::starlark::error_messages::error_empty_dictionary;
+using ::starlark::error_messages::error_dictionary_update_sequence;
+using ::starlark::error_messages::error_mutate_frozen_value;
+using ::starlark::error_messages::error_op_in_loop;
+using ::starlark::error_messages::error_unhashable_key;
+using ::starlark::error_messages::error_unpack_too_few;
+using ::starlark::error_messages::error_unpack_too_many;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;

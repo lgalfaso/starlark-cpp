@@ -1,13 +1,13 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 
 #include <format>
 #include <string>
 #include <string_view>
 
 namespace starlark {
-namespace runtime {
+namespace error_messages {
 
 std::string error_not_callable(std::string_view type) {
   return std::format("TypeError: '{}' object is not callable", type);
@@ -99,10 +99,6 @@ std::string error_convert(std::string_view from, std::string_view to) {
 
 std::string error_convert_string(std::string_view to, std::string_view string_value) {
   return std::format("ValueError: could not convert string to {}: '{}'", to, string_value);
-}
-
-std::string error_convert_non_string_with_base(std::string_view fn_name) {
-  return std::format("TypeError: {}() can't convert non-string with explicit base", fn_name);
 }
 
 std::string_view error_convert_float_infinity_to_integer() {
@@ -426,6 +422,10 @@ std::string_view error_expected_after_conversion() {
 
 std::string_view error_non_string_with_base() {
   return "TypeError: int() can't convert non-string with explicit base";
+}
+
+std::string_view error_keyword_must_be_string() {
+  return "TypeError: keywords must be strings";
 }
 
 }  // namespace runtime

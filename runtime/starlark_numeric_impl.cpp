@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "google/protobuf/arena.h"
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_float.hpp"
 #include "runtime/starlark_integer.hpp"
@@ -12,6 +12,8 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::error_messages::error_convert_float_infinity_to_integer;
+using ::starlark::error_messages::error_convert_float_nan_to_integer;
 
 namespace starlark {
 namespace runtime {

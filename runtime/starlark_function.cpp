@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/siphash.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
@@ -26,6 +26,34 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::parse_number;
+using ::starlark::error_messages::error_argument_bad_operand_type;
+using ::starlark::error_messages::error_argument_interpreted_as_integer;
+using ::starlark::error_messages::error_argument_interpreted_as_string;
+using ::starlark::error_messages::error_argument_non_zero;
+using ::starlark::error_messages::error_argument_string_int_bool_or_real;
+using ::starlark::error_messages::error_argument_string_or_real;
+using ::starlark::error_messages::error_arguments_exactly_one;
+using ::starlark::error_messages::error_arguments_one_or_two;
+using ::starlark::error_messages::error_arguments_too_many;
+using ::starlark::error_messages::error_attribute_string;
+using ::starlark::error_messages::error_bytes_in_range;
+using ::starlark::error_messages::error_convert;
+using ::starlark::error_messages::error_convert_string;
+using ::starlark::error_messages::error_empty_iterator;
+using ::starlark::error_messages::error_expect_character;
+using ::starlark::error_messages::error_expect_one_character_or_one_byte;
+using ::starlark::error_messages::error_int_base;
+using ::starlark::error_messages::error_interpreted_as_integer;
+using ::starlark::error_messages::error_invalid_literal_with_base;
+using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_missing_argument;
+using ::starlark::error_messages::error_missing_typed_argument;
+using ::starlark::error_messages::error_multiple_values_for_argument;
+using ::starlark::error_messages::error_named_argument_must_be_type;
+using ::starlark::error_messages::error_non_string_with_base;
+using ::starlark::error_messages::error_overflow;
+using ::starlark::error_messages::error_overflow_float_too_large;
+using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;

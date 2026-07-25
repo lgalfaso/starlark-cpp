@@ -6,13 +6,18 @@
 
 #include <string>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/hash.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::starlark::bigint::number;
+using ::starlark::error_messages::error_bad_operand_binary;
+using ::starlark::error_messages::error_division_by_zero;
+using ::starlark::error_messages::error_negative_shift;
+using ::starlark::error_messages::error_overflow;
+using ::starlark::error_messages::error_overflow_too_many_digits;
 
 namespace starlark {
 namespace runtime {

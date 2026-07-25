@@ -7,17 +7,17 @@
 #include <vector>
 #include <utility>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
+using ::starlark::error_messages::error_empty_iterator;
+using ::starlark::error_messages::error_named_argument_must_be_type;
+using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::runtime::context;
-using ::starlark::runtime::error_empty_iterator;
 using ::starlark::runtime::error_fn;
-using ::starlark::runtime::error_named_argument_must_be_type;
-using ::starlark::runtime::error_unknown_argument;
 using ::starlark::runtime::starlark_built_in_functions;
 using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_obj;

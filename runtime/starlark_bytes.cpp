@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/hex_encoder.hpp"
 #include "runtime/options.hpp"
 #include "runtime/siphash.hpp"
@@ -25,6 +25,18 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::error_messages::error_byte_in_range;
+using ::starlark::error_messages::error_bytes_or_tuple_of_bytes;
+using ::starlark::error_messages::error_can_only_join_on_iterable;
+using ::starlark::error_messages::error_empty_separator;
+using ::starlark::error_messages::error_integer_or_type;
+using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_multiple_values_for_argument;
+using ::starlark::error_messages::error_no_concat;
+using ::starlark::error_messages::error_no_multiply_sequence;
+using ::starlark::error_messages::error_substring_not_found;
+using ::starlark::error_messages::error_type_required;
+using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::ucd::is_space;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;

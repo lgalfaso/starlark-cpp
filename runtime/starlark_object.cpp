@@ -14,11 +14,35 @@
 #include <utility>
 #include <vector>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/levenshtein.hpp"
 #include "runtime/starlark_types.hpp"
 
 using ::starlark::bigint::number;
+using ::starlark::error_messages::error_argument_uniterable;
+using ::starlark::error_messages::error_arguments_exactly;
+using ::starlark::error_messages::error_arguments_exactly_one;
+using ::starlark::error_messages::error_arguments_too_few;
+using ::starlark::error_messages::error_arguments_too_many;
+using ::starlark::error_messages::error_bad_operand_binary;
+using ::starlark::error_messages::error_bad_operand_unary;
+using ::starlark::error_messages::error_incomparable;
+using ::starlark::error_messages::error_index_integer_on_a_slice;
+using ::starlark::error_messages::error_index_integer_or_slice;
+using ::starlark::error_messages::error_index_out_of_range;
+using ::starlark::error_messages::error_interpreted_as_integer;
+using ::starlark::error_messages::error_no_attribute;
+using ::starlark::error_messages::error_no_item_assignment;
+using ::starlark::error_messages::error_no_keyword;
+using ::starlark::error_messages::error_no_method;
+using ::starlark::error_messages::error_no_pos_args;
+using ::starlark::error_messages::error_not_callable;
+using ::starlark::error_messages::error_overflow_too_many_digits;
+using ::starlark::error_messages::error_read_only_attribute;
+using ::starlark::error_messages::error_step_non_zero;
+using ::starlark::error_messages::error_uniterable;
+using ::starlark::error_messages::error_unpackable;
+using ::starlark::error_messages::error_unsubscriptable;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;

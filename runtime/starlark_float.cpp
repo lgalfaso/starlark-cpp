@@ -8,10 +8,14 @@
 #include <limits>
 #include <string>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/hash.hpp"
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
+
+using ::starlark::error_messages::error_bad_operand_binary;
+using ::starlark::error_messages::error_division_by_zero;
+using ::starlark::error_messages::error_overflow;
 
 namespace starlark {
 namespace runtime {

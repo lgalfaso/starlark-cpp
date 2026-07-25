@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef RUNTIME_ERROR_MESSAGES_HPP_
-#define RUNTIME_ERROR_MESSAGES_HPP_
+#ifndef ERRORS_RUNTIME_ERROR_MESSAGES_HPP_
+#define ERRORS_RUNTIME_ERROR_MESSAGES_HPP_
 
 #include <string>
 #include <string_view>
@@ -9,7 +9,7 @@
 #pragma GCC visibility push(default)
 
 namespace starlark {
-namespace runtime {
+namespace error_messages {
 
 std::string error_not_callable(std::string_view type);
 std::string error_unpackable(std::string_view type);
@@ -36,7 +36,6 @@ std::string error_read_only_attribute(std::string_view type, std::string_view at
 
 std::string error_convert(std::string_view from, std::string_view to);
 std::string error_convert_string(std::string_view to, std::string_view string_value);
-std::string error_convert_non_string_with_base(std::string_view fn_name);
 std::string_view error_convert_float_infinity_to_integer();
 std::string_view error_convert_float_nan_to_integer();
 std::string error_interpreted_as_integer(std::string_view type);
@@ -130,11 +129,12 @@ std::string_view error_end_of_string_while_looking_for_conversion_specifier();
 std::string error_unknown_conversion(std::string_view conversion);
 std::string_view error_expected_after_conversion();
 std::string_view error_non_string_with_base();
+std::string_view error_keyword_must_be_string();
 
 }  // namespace runtime
 }  // namespace starlark
 
 #pragma GCC visibility pop
 
-#endif  // RUNTIME_ERROR_MESSAGES_HPP_
+#endif  // ERRORS_RUNTIME_ERROR_MESSAGES_HPP_
 

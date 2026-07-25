@@ -15,12 +15,12 @@
 
 #include "bigint/number.hpp"
 #include "compiler/compiler.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "interpreter/built_in_functions.hpp"
 #include "interpreter/frame.hpp"
 #include "interpreter/function.hpp"
 #include "interpreter/runner_state.hpp"
 #include "runtime/error_fn.hpp"
-#include "runtime/error_messages.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
@@ -42,6 +42,8 @@ using ::starlark::bytecode::BlockType;
 using ::starlark::bytecode::OpCode;
 using ::starlark::bytecode::Program;
 using ::starlark::compiler::compiler;
+using ::starlark::error_messages::error_keyword_must_be_string;
+using ::starlark::error_messages::error_max_sequence_length;
 using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::predeclared_symbols;
 using ::starlark::logging::logger;
@@ -50,7 +52,6 @@ using ::starlark::result::status_or;
 using ::starlark::runtime::context;
 using ::starlark::runtime::create_function;
 using ::starlark::runtime::error_fn;
-using ::starlark::runtime::error_max_sequence_length;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -483,7 +484,7 @@ frame* run_program(
           while (it->has_next()) {
             auto* key = it->next();
             if (key->type() != starlark_types::string_t) {
-              error_callback.add_error("TypeError: keywords must be strings");
+              error_callback.add_error(error_keyword_must_be_string());
               return nullptr;
             }
             auto* value = iterable->index(*key, ctx, error_callback);

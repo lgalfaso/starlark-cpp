@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "runtime/error_messages.hpp"
+#include "errors/runtime_error_messages.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_integer.hpp"
@@ -17,6 +17,11 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
+using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_no_concat;
+using ::starlark::error_messages::error_no_multiply_sequence;
+using ::starlark::error_messages::error_unpack_too_few;
+using ::starlark::error_messages::error_unpack_too_many;
 
 namespace starlark {
 namespace runtime {
