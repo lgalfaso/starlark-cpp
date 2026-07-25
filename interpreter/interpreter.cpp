@@ -42,8 +42,17 @@ using ::starlark::bytecode::BlockType;
 using ::starlark::bytecode::OpCode;
 using ::starlark::bytecode::Program;
 using ::starlark::compiler::compiler;
+using ::starlark::error_messages::error_dictionary_duplicate_key;
+using ::starlark::error_messages::error_expect_mapping_after_star_star;
 using ::starlark::error_messages::error_keyword_must_be_string;
 using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_module_does_not_define_symbol;
+using ::starlark::error_messages::error_module_not_ready;
+using ::starlark::error_messages::error_multiple_values_for_keyword;
+using ::starlark::error_messages::error_symbol_not_available;
+using ::starlark::error_messages::error_unable_to_load_module;
+using ::starlark::error_messages::error_unbound_variable;
+using ::starlark::error_messages::error_unknown_op;
 using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::predeclared_symbols;
 using ::starlark::logging::logger;
@@ -233,7 +242,7 @@ frame* run_program(
               op_code.add_to_dictionary().number_of_elements() > 1) {
             // This makes use of the fact that dictionary comprehensions always add elements one at a time and
             // that dictionary literals add all the elements in one go.
-            error_callback.add_error(std::format("Error: dictionary expression has duplicate key: {}", key->repr()));
+            error_callback.add_error(error_dictionary_duplicate_key(key->repr()));
             return nullptr;
           }
         }
@@ -264,7 +273,7 @@ frame* run_program(
         auto* value = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.load().frame()]->elements[op_code.load().pos_in_frame()];
         if (value == nullptr) {
           const auto& name = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.load().frame()]->names->Get(op_code.load().pos_in_frame());
-          error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));
+          error_callback.add_error(error_unbound_variable(name));
           break;
         }
         stack.push_back(value);
@@ -305,7 +314,7 @@ frame* run_program(
             for (const auto& symbol : op_code.create_frame().symbol()) {
               auto pos = global_context.find(symbol);
               if (pos == global_context.end()) {
-                error_callback.add_error(std::format("Error: Required symbol {} not avaible in the global context", symbol));
+                error_callback.add_error(error_symbol_not_available(symbol));
                 return nullptr;
               } else {
                 global_frame->elements[count] = pos->second;
@@ -473,7 +482,7 @@ frame* run_program(
           auto* iterable = stack.back();
           // TODO(lmirelmann): This should be generalized if we want to support other types that are mappings.
           if (iterable->type() != starlark_types::dict_t) {
-            error_callback.add_error(std::format("TypeError: argument after ** must be a mapping, not {}", iterable->type()));
+            error_callback.add_error(error_expect_mapping_after_star_star(iterable->type()));
             return nullptr;
           }
           auto* it = iterable->get_iterator(true, ctx, error_callback);
@@ -493,7 +502,7 @@ frame* run_program(
               return nullptr;
             }
             if (!named_args.insert(key->as_string(), value).second) {
-              error_callback.add_error(std::format("TypeError: got multiple values for keyword argument '{}'", key->as_string()));
+              error_callback.add_error(error_multiple_values_for_keyword(key->as_string()));
               return nullptr;
             }
           }
@@ -569,7 +578,7 @@ frame* run_program(
         auto* value = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()];             \
         if (value == nullptr) {                                                                                                                                                \
           const auto& name = state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.op_method().frame()]->names->Get(op_code.op_method().pos_in_frame());    \
-          error_callback.add_error(std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name));                         \
+          error_callback.add_error(error_unbound_variable(name));                                                                                                              \
           break;                                                                                                                                                               \
         }                                                                                                                                                                      \
         auto* element = stack.back();                                                                                                                                          \
@@ -750,12 +759,12 @@ frame* run_program(
       case OpCode::kLoadModule: {
         auto mod_info = loader.load_module(op_code.load_module().module(), starlark_program.second);
         if (!mod_info.ok()) {
-          error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", op_code.load_module().module()));
+          error_callback.add_error(error_unable_to_load_module(op_code.load_module().module()));
           // It is quite hard to make this happen, but still possible.
           return nullptr;
         }
         if (!(*mod_info)->ready()) {
-          error_callback.add_error(std::format("LoadError: Module '{}' is not ready to be used", op_code.load_module().module()));
+          error_callback.add_error(error_module_not_ready(op_code.load_module().module()));
           // It is quite hard to make this happen, but still possible.
           return nullptr;
         }
@@ -773,7 +782,7 @@ frame* run_program(
             }
           }
           if (!found) {
-            error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", op_code.load_module().module(), value.remote_symbol()));
+            error_callback.add_error(error_module_does_not_define_symbol(op_code.load_module().module(), value.remote_symbol()));
             return nullptr;
           }
         }
@@ -785,7 +794,7 @@ frame* run_program(
       case OpCode::kFail:
         return nullptr;
       case OpCode::OP_CODE_NOT_SET:
-        error_callback.add_error(std::format("Unknown op-code: {}", std::to_underlying(op_code.op_code_case())));
+        error_callback.add_error(error_unknown_op(std::to_underlying(op_code.op_code_case())));
         return nullptr;
     }
   }

@@ -17,7 +17,10 @@ using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_arguments_exactly;
 using ::starlark::error_messages::error_missing_keyword_only_argument;
 using ::starlark::error_messages::error_missing_positional_argument;
+using ::starlark::error_messages::error_module_does_not_define_symbol;
 using ::starlark::error_messages::error_multiple_values_for_argument;
+using ::starlark::error_messages::error_recursive_call;
+using ::starlark::error_messages::error_unable_to_load_module;
 using ::starlark::error_messages::error_unexpected_keyword_argument;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
@@ -87,7 +90,7 @@ starlark_obj* interpreter_function::call(
   runner_state* state = static_cast<runner_state*>(ctx.runner_context());
   if (!ctx.options().allow_recursion) {
     if (state->fns_in_stack.contains(this)) {
-      error_callback.add_error(std::format("Error: function '{}' called recursively", fn_name));
+      error_callback.add_error(error_recursive_call(fn_name));
       return nullptr;
     }
   }
@@ -248,7 +251,7 @@ starlark_obj* starlark_fn_trampoline(std::string_view fn_name, const starlark_ob
   auto mod_info = state->loader->load_module(builtin_star_module, "");
   if (!mod_info.ok() || !(*mod_info)->ready()) {
     // This should never happen.
-    error_callback.add_error(std::format("ModuleNotFoundError: Unable to load module named '{}'", builtin_star_module));
+    error_callback.add_error(error_unable_to_load_module(builtin_star_module));
     return nullptr;
   }
   for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
@@ -257,7 +260,7 @@ starlark_obj* starlark_fn_trampoline(std::string_view fn_name, const starlark_ob
     }
   }
   // This should never happen.
-  error_callback.add_error(std::format("LoadError: Module '{}' does not contain the symbol {}", builtin_star_module, fn_name));
+  error_callback.add_error(error_module_does_not_define_symbol(builtin_star_module, fn_name));
   return nullptr;
 }
 

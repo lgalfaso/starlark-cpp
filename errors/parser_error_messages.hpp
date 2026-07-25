@@ -34,11 +34,22 @@ std::string_view error_arguments_positional_before_named_arguments();
 std::string_view error_expected_identifier();
 std::string_view error_expected_string();
 std::string_view error_expected_target();
+std::string error_expected_symbol(std::string_view symbol);
 std::string_view error_unexpected_return();
 std::string_view error_unexpected_break();
 std::string_view error_unexpected_continue();
 std::string_view error_unexpected_comma();
 std::string_view error_unexpected_token();
+
+std::string error_duplicate_binding_previous_load(std::string_view symbol);
+std::string error_cannot_load_private_symbol(std::string_view symbol);
+std::string error_duplicate_load_binding(std::string_view symbol);
+std::string error_duplicate_binding_by_load(std::string_view symbol);
+std::string error_duplicate_load_binding_by_load(std::string_view symbol);
+std::string error_params_duplicate_params(std::string_view name);
+std::string error_duplicate_binding_from_load(std::string_view symbol);
+std::string error_duplicate_binding(std::string_view symbol);
+std::string error_undefined_name(std::string_view name);
 
 }  // namespace error_messages
 }  // namespace starlark

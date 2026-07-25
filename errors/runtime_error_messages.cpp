@@ -428,6 +428,46 @@ std::string_view error_keyword_must_be_string() {
   return "TypeError: keywords must be strings";
 }
 
+std::string error_dictionary_duplicate_key(std::string_view key) {
+  return std::format("Error: dictionary expression has duplicate key: {}", key);
+}
+
+std::string error_unbound_variable(std::string_view name) {
+  return std::format("UnboundLocalError: cannot access local variable '{}' where it is not associated with a value", name);
+}
+
+std::string error_symbol_not_available(std::string_view symbol) {
+  return std::format("Error: Required symbol {} not avaible in the global context", symbol);
+}
+
+std::string error_expect_mapping_after_star_star(std::string_view type) {
+  return std::format("TypeError: argument after ** must be a mapping, not {}", type);
+}
+
+std::string error_multiple_values_for_keyword(std::string_view name) {
+  return std::format("TypeError: got multiple values for keyword argument '{}'", name);
+}
+
+std::string error_unable_to_load_module(std::string_view module_name) {
+  return std::format("ModuleNotFoundError: Unable to load module named '{}'", module_name);
+}
+
+std::string error_module_not_ready(std::string_view module_name) {
+  return std::format("LoadError: Module '{}' is not ready to be used", module_name);
+}
+
+std::string error_module_does_not_define_symbol(std::string_view  module_name, std::string_view symbol) {
+  return std::format("LoadError: Module '{}' does not contain the symbol {}", module_name, symbol);
+}
+
+std::string error_unknown_op(int op_code) {
+  return std::format("Unknown op-code: {}", op_code);
+}
+
+std::string error_recursive_call(std::string_view fn_name) {
+  return std::format("Error: function '{}' called recursively", fn_name);
+}
+
 }  // namespace error_messages
 }  // namespace starlark
 

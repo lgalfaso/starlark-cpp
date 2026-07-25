@@ -40,9 +40,17 @@ using ::starlark::error_messages::error_arguments_non_variadic_before_variadic;
 using ::starlark::error_messages::error_arguments_positional_before_named_arguments;
 using ::starlark::error_messages::error_arguments_star_star_argument_must_be_last;
 using ::starlark::error_messages::error_arguments_varadic_arguments_not_allowed;
+using ::starlark::error_messages::error_cannot_load_private_symbol;
 using ::starlark::error_messages::error_comparison_operators_are_not_associative;
+using ::starlark::error_messages::error_duplicate_binding;
+using ::starlark::error_messages::error_duplicate_binding_by_load;
+using ::starlark::error_messages::error_duplicate_binding_from_load;
+using ::starlark::error_messages::error_duplicate_binding_previous_load;
+using ::starlark::error_messages::error_duplicate_load_binding;
+using ::starlark::error_messages::error_duplicate_load_binding_by_load;
 using ::starlark::error_messages::error_expected_identifier;
 using ::starlark::error_messages::error_expected_string;
+using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
 using ::starlark::error_messages::error_for_not_allowed_at_top_level;
 using ::starlark::error_messages::error_function_definition_not_allowed;
@@ -51,11 +59,13 @@ using ::starlark::error_messages::error_illegal_target_for_augmented_assignment;
 using ::starlark::error_messages::error_load_at_least_one_symbol;
 using ::starlark::error_messages::error_load_first;
 using ::starlark::error_messages::error_load_not_at_top_level;
+using ::starlark::error_messages::error_params_duplicate_params;
 using ::starlark::error_messages::error_params_expected_identifier_after_star_star_token;
 using ::starlark::error_messages::error_params_named_argument_must_follow_bare_star;
 using ::starlark::error_messages::error_params_non_optional_after_optional;
 using ::starlark::error_messages::error_params_star_parameter_may_appear_only_once;
 using ::starlark::error_messages::error_params_variadic_keyword_argument_must_be_last;
+using ::starlark::error_messages::error_undefined_name;
 using ::starlark::error_messages::error_unexpected_break;
 using ::starlark::error_messages::error_unexpected_comma;
 using ::starlark::error_messages::error_unexpected_continue;
@@ -444,7 +454,7 @@ bool parser::expect(token_type expected_token) {
   if (capture(expected_token)) {
     return true;
   }
-  add_error(std::format("Expected {}", token_name.at(expected_token)));
+  add_error(error_expected_symbol(token_name.at(expected_token)));
   return false;
 }
 
@@ -493,7 +503,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           // with a previous `load` statement.
           if (is_top_level_block()) {
             if (parser_blocks.back().identifiers.contains(def_statement->function_name().nfkc_name())) {
-              add_error(std::format("`def` statement redefines previously defined `load` symbol '{}'", def_statement->function_name().name()));
+              add_error(error_duplicate_binding_previous_load(def_statement->function_name().name()));
             }
           }
           bind(def_statement->function_name());
@@ -870,7 +880,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               if (!opts.allow_load_private_symbols &&
                   lex.current_token().string_value().starts_with("_")) {
-                add_error(std::string {"Cannot import private symbol '"} + lex.current_token().string_value() + "'");
+                add_error(error_cannot_load_private_symbol(lex.current_token().string_value()));
               }
               load_param->set_remote_name(lex.current_token().string_value());
               *load_param->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -880,15 +890,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               resolve(load_param->mutable_local_name(), 0);
               if (!symbols.emplace(load_param->local_name().nfkc_name()).second) {
-                add_error(std::format("`load` statement defines '{}' more than once", load_param->local_name().name()));
+                add_error(error_duplicate_load_binding(load_param->local_name().name()));
               }
               if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name()) && !opts.allow_top_level_rebinding) {
-                add_error(std::format("`load` statement redefines previously defined value '{}'", load_param->local_name().name()));
+                add_error(error_duplicate_binding_by_load(load_param->local_name().name()));
               }
               // The spec does not specify whether it is an error to bind to the file block multiple times.
               // We are taking the possition that if `allow_top_level_rebinding` is `false`, then this is not allowed.
               if (!parser_blocks.back().identifiers.emplace(load_param->local_name().nfkc_name()).second && !opts.allow_top_level_rebinding) {
-                add_error(std::format("Multiple bindings for the top-level load symbol '{}'", load_param->local_name().name()));
+                add_error(error_duplicate_load_binding_by_load(load_param->local_name().name()));
               }
               lex.next_token();
             }
@@ -2079,7 +2089,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               *param->mutable_pif()->mutable_end() = param->identifier().pif().end();
             }
             if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
-              add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
+              add_error(error_params_duplicate_params(param->identifier().name()));
             }
             // The parameters need to be resolved. The issue is that the block does not yet exists so there
             // is a need to store the Identifiers and resolve them later.
@@ -2111,7 +2121,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               *param->mutable_star()->mutable_pif()->mutable_end() = lex.current_token().end();
               set_identifier(*param->mutable_identifier());
               if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
-                add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
+                add_error(error_params_duplicate_params(param->identifier().name()));
               }
               parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
@@ -2142,7 +2152,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               add_error(error_params_expected_identifier_after_star_star_token());
             } else {
               if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
-                add_error(std::format("duplicate argument '{}' in function definition", param->identifier().name()));
+                add_error(error_params_duplicate_params(param->identifier().name()));
               }
               parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
@@ -2187,7 +2197,7 @@ void parser::bind_and_resolve(Expression* base) {
         case Expression::kIdentifier:
           if (is_top_level_block() &&
               parser_blocks.back().identifiers.contains(top->identifier().nfkc_name())) {
-            add_error(std::format("Variable '{}' redefines symbol previously defined by a load statement", top->identifier().name()));
+            add_error(error_duplicate_binding_from_load(top->identifier().name()));
           }
           bind(top->identifier());
           break;
@@ -2228,7 +2238,7 @@ void parser::bind(const Identifier& identifier) {
   // be consistent, follow the same rules, and be handled equally.
   if (is_top_level_block()) {
     if (!parser_blocks[parser_blocks.size() - 2].identifiers.emplace(identifier.nfkc_name()).second && !opts.allow_top_level_rebinding) {
-      add_error(std::format("Multiple bindings for the top-level symbol '{}'", identifier.name()));
+      add_error(error_duplicate_binding(identifier.name()));
     }
   } else {
     parser_blocks.back().identifiers.emplace(identifier.nfkc_name());
@@ -2265,7 +2275,7 @@ void parser::drop_block() {
     auto pos = parser_blocks.back().identifiers.find(entry_id->nfkc_name());
     if (pos == parser_blocks.back().identifiers.end()) {
       if (parser_blocks.size() == 1) {
-        add_error(std::format("name '{}' is not defined", entry_id->name()), entry_id->pif().start());
+        add_error(error_undefined_name(entry_id->name()), entry_id->pif().start());
         entry_id->set_frame(-1);
         entry_id->set_pos_in_frame(-1);
       } else {

@@ -108,6 +108,10 @@ std::string_view error_expected_target() {
   return "Expecting TARGET";
 }
 
+std::string error_expected_symbol(std::string_view symbol) {
+  return std::format("Expecting {}", symbol);
+}
+
 std::string_view error_unexpected_return() {
   return "Unexpected RETURN";
 }
@@ -128,6 +132,42 @@ std::string_view error_unexpected_token() {
   return "Unexpected token";
 }
 
+
+std::string error_duplicate_binding_previous_load(std::string_view symbol) {
+  return std::format("`def` statement redefines previously defined `load` symbol '{}'", symbol);
+}
+
+std::string error_cannot_load_private_symbol(std::string_view symbol) {
+  return std::format("Cannot import private symbol '{}'", symbol);
+}
+
+std::string error_duplicate_load_binding(std::string_view symbol) {
+  return std::format("`load` statement defines '{}' more than once", symbol);
+}
+
+std::string error_duplicate_binding_by_load(std::string_view symbol) {
+  return std::format("`load` statement redefines previously defined value '{}'", symbol);
+}
+
+std::string error_duplicate_load_binding_by_load(std::string_view symbol) {
+  return std::format("Multiple bindings for the top-level load symbol '{}'", symbol);
+}
+
+std::string error_params_duplicate_params(std::string_view name) {
+  return std::format("Duplicate argument '{}' in function definition", name);
+}
+
+std::string error_duplicate_binding_from_load(std::string_view symbol) {
+  return std::format("Variable '{}' redefines symbol previously defined by a load statement", symbol);
+}
+
+std::string error_duplicate_binding(std::string_view symbol) {
+  return std::format("Multiple bindings for the top-level symbol '{}'", symbol);
+}
+
+std::string error_undefined_name(std::string_view name) {
+  return std::format("name '{}' is not defined", name);
+}
 
 }  // namespace error_messages
 }  // namespace starlark
