@@ -201,7 +201,7 @@ starlark_obj* assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_arg
   kv_module_loader loader{modules};
   auto result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
   if (result.ok()) {
-    error_callback.add_error("Program executed without errors, it was expected that it would fail.");
+    error_callback.add_error(std::format("Program executed without errors, it was expected that it would fail.\n{}", source_code->str()));
     return nullptr;
   }
   if (!allow_static_error && result.error() != status_code::kRuntimeError) {
@@ -257,6 +257,9 @@ starlark_obj* assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_
   auto result = runner.run(loader, "main", grammar_options{}, *r_options, logging);
   if (!result.ok()) {
     error_callback.add_error("Program executed with errors, it was expected that it would succeed.");
+    for (const auto& entry : logging) {
+      std::cerr << entry.message() << "\n";
+    }
     return nullptr;
   }
   if (print != nullptr) {
