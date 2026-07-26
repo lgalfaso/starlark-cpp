@@ -1,0 +1,6 @@
+LoadError: Recursion found during module lookup
+    main
++-> //:test1.bzl
+|   //:test2.bzl
+|   //:test3.bzl
++-> //:test1.bzl

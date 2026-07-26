@@ -284,6 +284,7 @@ cc_library(
     testonly = True,
     srcs = ["parsing_options.cpp"],
     hdrs = ["parsing_options.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":options",
     ],

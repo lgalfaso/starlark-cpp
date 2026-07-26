@@ -20,6 +20,7 @@ cc_library(
         "module_loader.hpp",
         "builtin.star",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":built_in_functions",
         ":frame",
@@ -70,6 +71,7 @@ cc_library(
     name = "interpreter",
     srcs = ["interpreter.cpp"],
     hdrs = ["interpreter.hpp"],
+    visibility = ["//visibility:public"],
     deps = [
         ":frame",
         ":function",

@@ -35,6 +35,18 @@ cc_test(
 cc_library(
     name = "options",
     hdrs = ["options.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "parsing_options",
+    testonly = True,
+    srcs = ["parsing_options.cpp"],
+    hdrs = ["parsing_options.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":options",
+    ],
 )
 
 cc_library(
