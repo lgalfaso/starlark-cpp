@@ -8,163 +8,163 @@ block {
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 2 column: 7 pos: 14 } end { row: 2 column: 10 pos: 17 } } } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "b" } }
-  op_code { const_string { value: "c" } }
+  op_code { const_string { value: "b" pif { start { row: 3 column: 7 pos: 25 } end { row: 3 column: 10 pos: 28 } } } }
+  op_code { const_string { value: "c" pif { start { row: 3 column: 12 pos: 30 } end { row: 3 column: 15 pos: 33 } } } }
   op_code { call { positional_arguments_count: 2 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "d" } }
-  op_code { const_string { value: "e" } }
-  op_code { const_string { value: "f" } }
+  op_code { const_string { value: "d" pif { start { row: 4 column: 7 pos: 41 } end { row: 4 column: 10 pos: 44 } } } }
+  op_code { const_string { value: "e" pif { start { row: 4 column: 12 pos: 46 } end { row: 4 column: 15 pos: 49 } } } }
+  op_code { const_string { value: "f" pif { start { row: 4 column: 17 pos: 51 } end { row: 4 column: 20 pos: 54 } } } }
   op_code { call { positional_arguments_count: 3 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 5 column: 13 pos: 68 } end { row: 5 column: 16 pos: 71 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 6 column: 13 pos: 85 } end { row: 6 column: 16 pos: 88 } } } }
   op_code { const_string_view { value: "end" } }
-  op_code { const_string { value: "\n" } }
+  op_code { const_string { value: "\n" pif { start { row: 6 column: 24 pos: 96 } end { row: 6 column: 28 pos: 100 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 2 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "g" } }
+  op_code { const_string { value: "g" pif { start { row: 7 column: 7 pos: 108 } end { row: 7 column: 10 pos: 111 } } } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 7 column: 18 pos: 119 } end { row: 7 column: 21 pos: 122 } } } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "h" } }
+  op_code { const_string { value: "h" pif { start { row: 8 column: 7 pos: 130 } end { row: 8 column: 10 pos: 133 } } } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 8 column: 18 pos: 141 } end { row: 8 column: 21 pos: 144 } } } }
   op_code { const_string_view { value: "end" } }
-  op_code { const_string { value: "\n" } }
+  op_code { const_string { value: "\n" pif { start { row: 8 column: 29 pos: 152 } end { row: 8 column: 33 pos: 156 } } } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 2 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "i" } }
+  op_code { const_string { value: "i" pif { start { row: 9 column: 7 pos: 164 } end { row: 9 column: 10 pos: 167 } } } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 9 column: 14 pos: 171 } end { row: 9 column: 17 pos: 174 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "j" } }
+  op_code { const_string { value: "j" pif { start { row: 10 column: 7 pos: 183 } end { row: 10 column: 10 pos: 186 } } } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 10 column: 25 pos: 201 } end { row: 10 column: 28 pos: 204 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 11 column: 13 pos: 219 } end { row: 11 column: 16 pos: 222 } } } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 11 column: 20 pos: 226 } end { row: 11 column: 23 pos: 229 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string_view { value: "end" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 12 column: 13 pos: 244 } end { row: 12 column: 16 pos: 247 } } } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 12 column: 31 pos: 262 } end { row: 12 column: 34 pos: 265 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 13 column: 9 pos: 276 } end { row: 13 column: 12 pos: 279 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 13 column: 28 pos: 295 } end { row: 13 column: 31 pos: 298 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { const_string_view { value: "end" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 15 column: 13 pos: 314 } end { row: 15 column: 16 pos: 317 } } } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 15 column: 20 pos: 321 } end { row: 15 column: 23 pos: 324 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 15 column: 39 pos: 340 } end { row: 15 column: 42 pos: 343 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "k" } }
+  op_code { const_string { value: "k" pif { start { row: 16 column: 7 pos: 352 } end { row: 16 column: 10 pos: 355 } } } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 16 column: 14 pos: 359 } end { row: 16 column: 17 pos: 362 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 16 column: 33 pos: 378 } end { row: 16 column: 36 pos: 381 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "l" } }
+  op_code { const_string { value: "l" pif: { start { row: 17 column: 7 pos: 390 } end { row: 17 column: 10 pos: 393 } } } }
   op_code { const_string_view { value: "end" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 17 column: 18 pos: 401 } end { row: 17 column: 21 pos: 404 } } } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 17 column: 36 pos: 419 } end { row: 17 column: 39 pos: 422 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "m" } }
+  op_code { const_string { value: "m" pif { start { row: 18 column: 7 pos: 431 } end { row: 18 column: 10 pos: 434 } } } }
   op_code { const_string_view { value: "end" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 18 column: 18 pos: 442 } end { row: 18 column: 21 pos: 445 } } } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 18 column: 25 pos: 449 } end { row: 18 column: 28 pos: 452 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: false } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { const_string { value: "n" } }
+  op_code { const_string { value: "n" pif { start { row: 20 column: 7 pos: 462 } end { row: 20 column: 10 pos: 465 } } } }
   op_code { const_string_view { value: "end" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 20 column: 18 pos: 473 } end { row: 20 column: 21 pos: 476 } } } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 20 column: 25 pos: 480 } end { row: 20 column: 28 pos: 483 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 20 column: 44 pos: 499 } end { row: 20 column: 47 pos: 502 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: true } }
   op_code { pop { } }
 
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { make_list { reserve_size: 1 } }
-  op_code { const_string { value: "a" } }
+  op_code { const_string { value: "a" pif { start { row: 21 column: 9 pos: 513 } end { row: 21 column: 12 pos: 516 } } } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } }
   op_code { pop { } }
@@ -172,7 +172,7 @@ block {
   op_code { load { frame: 2 pos_in_frame: 1 } }
   op_code { load { frame: 2 pos_in_frame: 0 } }
   op_code { const_string_view { value: "sep" } }
-  op_code { const_string { value: " " } }
+  op_code { const_string { value: " " pif { start { row: 22 column: 20 pos: 538 } end { row: 22 column: 23 pos: 541 } } } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } }
   op_code { pop { } }

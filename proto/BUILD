@@ -21,6 +21,7 @@ proto_library(
     name = "starlark_bytecode_proto",
     srcs = ["starlark_bytecode.proto"],
     visibility = ["//visibility:public"],
+    deps = [":starlark_logging_proto"],
 )
 
 cc_proto_library(

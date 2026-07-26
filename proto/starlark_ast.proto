@@ -9,7 +9,7 @@ message File {
   repeated string module_binding = 2;
   repeated string file_binding = 3;
   repeated string global_binding = 4;
-  PositionInFile pif = 5;
+  starlark.logging.PositionInFile pif = 5;
 }
 
 message Statement {
@@ -25,7 +25,7 @@ message Statement {
     Expression expression_statement = 9;
     LoadStmt load_statement = 10;
   }
-  PositionInFile pif = 11;
+  starlark.logging.PositionInFile pif = 11;
 }
 
 message DefStmt {
@@ -33,7 +33,7 @@ message DefStmt {
   repeated Parameter parameter = 2;
   repeated Statement statement = 3;
   repeated string function_binding = 4;
-  PositionInFile pif = 5;
+  starlark.logging.PositionInFile pif = 5;
 }
 
 message Parameter {
@@ -43,15 +43,15 @@ message Parameter {
     Star star = 3;
     StarStar star_star = 4;
   }
-  PositionInFile pif = 5;
+  starlark.logging.PositionInFile pif = 5;
 }
 
 message Star {
-  PositionInFile pif = 1;
+  starlark.logging.PositionInFile pif = 1;
 }
 
 message StarStar {
-  PositionInFile pif = 1;
+  starlark.logging.PositionInFile pif = 1;
 }
 
 message IfStmt {
@@ -59,37 +59,37 @@ message IfStmt {
   repeated Statement statement = 2;
   repeated ElseIf elif = 3;
   repeated Statement else_statement = 4;
-  PositionInFile pif = 5;
+  starlark.logging.PositionInFile pif = 5;
 }
 
 message ElseIf {
   Expression test = 1;
   repeated Statement statement = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message ForStmt {
   Expression loop_variables = 1;
   Expression expression = 2;
   repeated Statement statement = 3;
-  PositionInFile pif = 4;
+  starlark.logging.PositionInFile pif = 4;
 }
 
 message ReturnStmt {
   Expression expression = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message BreakStmt {
-  PositionInFile pif = 1;
+  starlark.logging.PositionInFile pif = 1;
 }
 
 message ContinueStmt {
-  PositionInFile pif = 1;
+  starlark.logging.PositionInFile pif = 1;
 }
 
 message PassStmt {
-  PositionInFile pif = 1;
+  starlark.logging.PositionInFile pif = 1;
 }
 
 message AssignStmt {
@@ -112,27 +112,27 @@ message AssignStmt {
     LESS_LESS_EQUALS = 11;
     GREATER_GREATER_EQUALS = 12;
   }
-  PositionInFile pif = 4;
-  PositionInFile op_pif = 5;
+  starlark.logging.PositionInFile pif = 4;
+  starlark.logging.PositionInFile op_pif = 5;
 }
 
 message LoadStmt {
   string module = 1;
   repeated LoadParams load_param = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message LoadParams {
   Identifier local_name = 1;
   string remote_name = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message IfExpr {
   Expression if_value = 1;
   Expression if_test = 2;
   Expression else_value = 3;
-  PositionInFile pif = 4;
+  starlark.logging.PositionInFile pif = 4;
 }
 
 message UnaryExpr {
@@ -146,8 +146,8 @@ message UnaryExpr {
     TILDE = 3;
     NOT = 4;
   }
-  PositionInFile pif = 3;
-  PositionInFile op_pif = 4;
+  starlark.logging.PositionInFile pif = 3;
+  starlark.logging.PositionInFile op_pif = 4;
 }
 
 message BinaryExpr {
@@ -179,15 +179,15 @@ message BinaryExpr {
     SLASH = 20;
     SLASH_SLASH = 21;
   }
-  PositionInFile pif = 4;
-  PositionInFile op_pif = 5;
+  starlark.logging.PositionInFile pif = 4;
+  starlark.logging.PositionInFile op_pif = 5;
 }
 
 message LambdaExpr {
   repeated Parameter parameter = 1;
   Expression test = 2;
   repeated string function_binding = 3;
-  PositionInFile pif = 4;
+  starlark.logging.PositionInFile pif = 4;
 }
 
 message Expression {
@@ -212,46 +212,46 @@ message Expression {
     LambdaExpr lambda_expression  = 16;
     Tuple tuple = 17;
   }
-  PositionInFile pif = 19;
+  starlark.logging.PositionInFile pif = 19;
 }
 
 message StringValue {
   string value = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message IntValue {
   int64 value = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message FloatValue {
   double value = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message ListExpr {
   repeated Expression element = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message ListComp {
   Expression test = 1;
   repeated CompClause clause = 2;
   repeated string comprehension_binding = 3;
-  PositionInFile pif = 4;
+  starlark.logging.PositionInFile pif = 4;
 }
 
 message DictExpr {
   repeated Entry entry = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message DictComp {
   Entry entry = 1;
   repeated CompClause clause = 2;
   repeated string comprehension_binding = 3;
-  PositionInFile pif = 4;
+  starlark.logging.PositionInFile pif = 4;
 }
 
 message CompClause {
@@ -259,36 +259,36 @@ message CompClause {
     ForClause for_clause = 1;
     IfClause if_clause = 2;
   }
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message ForClause {
   Expression loop_variables = 1;
   Expression in = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message IfClause {
   Expression test = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message Entry {
   Expression key = 1;
   Expression value = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message DotExpr {
   Expression primary_expression = 1;
   Identifier identifier = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message CallExpr {
   Expression primary_expression = 1;
   repeated Argument argument = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message Argument {
@@ -298,13 +298,13 @@ message Argument {
     Expression star_argument = 3;
     Expression star_star_argument = 4;
   }
-  PositionInFile pif = 5;
+  starlark.logging.PositionInFile pif = 5;
 }
 
 message NamedArgument {
   Identifier identifier = 1;
   Expression value = 2;
-  PositionInFile pif = 3;
+  starlark.logging.PositionInFile pif = 3;
 }
 
 message SliceExpr {
@@ -313,7 +313,7 @@ message SliceExpr {
     Expression index = 2;
     Slice slice = 3;
   }
-  PositionInFile pif = 4;
+  starlark.logging.PositionInFile pif = 4;
 }
 
 // The spec states that it is possible to have a slice that `start` is
@@ -323,12 +323,12 @@ message Slice {
   Expression start = 1;
   Expression end = 2;
   Expression step = 3;
-  PositionInFile pif = 4;
+  starlark.logging.PositionInFile pif = 4;
 }
 
 message Tuple {
   repeated Expression value = 1;
-  PositionInFile pif = 2;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message Identifier {
@@ -336,10 +336,6 @@ message Identifier {
   string nfkc_name = 2;
   int64 frame = 3;
   int64 pos_in_frame = 4;
-  PositionInFile pif = 5;
+  starlark.logging.PositionInFile pif = 5;
 }
 
-message PositionInFile {
-  starlark.logging.Position start = 1;
-  starlark.logging.Position end = 2;
-}

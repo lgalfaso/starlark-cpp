@@ -30,7 +30,6 @@ using ::starlark::ast::Identifier;
 using ::starlark::ast::IfStmt;
 using ::starlark::ast::LambdaExpr;
 using ::starlark::ast::Parameter;
-using ::starlark::ast::PositionInFile;
 using ::starlark::ast::Statement;
 using ::starlark::ast::UnaryExpr;
 using ::starlark::error_messages::error_arguments_duplicate_star_args;
@@ -73,6 +72,7 @@ using ::starlark::error_messages::error_unexpected_return;
 using ::starlark::error_messages::error_unexpected_token;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
+using ::starlark::logging::PositionInFile;
 using ::starlark::logging::logger;
 using ::starlark::unicode::to_nfkc;
 

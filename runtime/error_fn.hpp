@@ -5,6 +5,8 @@
 
 #include <string_view>
 
+#include "proto/starlark_logging.pb.h"
+
 #pragma GCC visibility push(default)
 
 namespace starlark {
@@ -13,6 +15,7 @@ namespace runtime {
 class error_fn {
  public:
   virtual void add_error(std::string_view error_msg) = 0;
+  virtual void add_error(std::string_view error_msg, const starlark::logging::Position& pos) = 0;
 };
 
 }  // namespace runtime

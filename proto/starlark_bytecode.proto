@@ -2,6 +2,8 @@ edition = "2024";
 
 package starlark.bytecode;
 
+import "proto/starlark_logging.proto";
+
 message Program {
   repeated Block block = 1;
 }
@@ -154,10 +156,12 @@ message ConstFloat {
 
 message ConstString {
   string value = 1;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message ConstBytes {
   string value = 1;
+  starlark.logging.PositionInFile pif = 2;
 }
 
 message Pop {}

@@ -9,12 +9,14 @@
 
 #include "runtime/error_fn.hpp"
 #include "runtime/starlark_function.hpp"
+#include "proto/starlark_logging.pb.h"
 
 namespace starlark {
 namespace testing {
 
 struct error_handler : public starlark::runtime::error_fn {
   void add_error(std::string_view error_msg) override;
+  void add_error(std::string_view error_msg, const starlark::logging::Position& pos) override;
 
   std::vector<std::string> messages;
 };

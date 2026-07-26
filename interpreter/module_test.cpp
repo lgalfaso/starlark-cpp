@@ -215,7 +215,7 @@ def shell():
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :foo.star\n|   :bar.star\n+-> :foo.star\n");
+  EXPECT_EQ(logging.begin()->message(), "recursion found during module lookup\n    main\n+-> :foo.star\n|   :bar.star\n+-> :foo.star\n");
 }
 
 TEST(Interpreter, ModuleLoadingWithRecursion_2) {
@@ -242,7 +242,7 @@ abc = foo
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :foo.star\n+-> :foo.star\n");
+  EXPECT_EQ(logging.begin()->message(), "recursion found during module lookup\n    main\n+-> :foo.star\n+-> :foo.star\n");
 }
 
 TEST(Interpreter, ModuleLoadingWithRecursion_3) {
@@ -280,7 +280,7 @@ c = "Hi"
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "LoadError: Recursion found during module lookup\n    main\n+-> :a.star\n|   :b.star\n+-> :a.star\n");
+  EXPECT_EQ(logging.begin()->message(), "recursion found during module lookup\n    main\n+-> :a.star\n|   :b.star\n+-> :a.star\n");
 }
 
 class bad_module_loader : public kv_module_loader {

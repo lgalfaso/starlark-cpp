@@ -69,6 +69,9 @@ cc_library(
     name = "error_fn",
     hdrs = ["error_fn.hpp"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//proto:starlark_logging_cc_proto",
+    ],
 )
 
 cc_library(

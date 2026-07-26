@@ -1,4 +1,4 @@
-// Copyright 2024-2025 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
 #ifndef LOGGING_LOGGING_HPP_
 #define LOGGING_LOGGING_HPP_
@@ -48,6 +48,8 @@ class logger_wrap : public logger {
   logger& inner_logger;
   log_report state;
 };
+
+std::string pretty_log(const starlark::logging::LogEntry& entry);
 
 }  // namespace logging
 }  // namespace starlark

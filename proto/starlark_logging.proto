@@ -18,6 +18,11 @@ message Position {
   uint64 pos = 3;
 }
 
+message PositionInFile {
+  Position start = 1;
+  Position end = 2;
+}
+
 message LogEntry {
   LogLevel level = 1;
   string module = 2;

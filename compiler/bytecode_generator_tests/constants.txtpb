@@ -6,9 +6,9 @@ block {
   op_code { pop {} }
   op_code { const_float { value: 1.1 } }
   op_code { pop {} }
-  op_code { const_string { value: "abc" } }
+  op_code { const_string { value: "abc" pif { start { row: 3 column: 1 pos: 6 } end { row: 3 column: 6 pos: 11 } } } }
   op_code { pop {} }
-  op_code { const_bytes { value: "def" } }
+  op_code { const_bytes { value: "def" pif { start { row: 4 column: 1 pos: 12 } end { row: 4 column: 7 pos: 18 } } } }
   op_code { pop {} }
   op_code { pop_frame {} }
   op_code { pop_frame {} }

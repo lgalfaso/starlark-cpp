@@ -1,74 +1,74 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                      #  0
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "b" } }   #  1
-  op_code { create_frame { block_type: FILE_BLOCK } }                             #  2
-  op_code { make_list { reserve_size: 3 } }                                       #  3
-  op_code { const_int { value: 0 } }                                              #  4
-  op_code { const_int { value: 1 } }                                              #  5
-  op_code { const_int { value: 2 } }                                              #  6
-  op_code { add_to_list { number_of_elements: 3 } }                               #  7
-  op_code { get_iterator {} }                                                     #  8
-  op_code { for_iterator { address_delta: 5 } }                                   #  9
-  op_code { store { frame: 1 pos_in_frame: 0 } }                                  # 10
-  op_code { const_string { value: "abc" } }                                       # 11
-  op_code { pop {} }                                                              # 12
-  op_code { goto { address_delta: -4 } }                                          # 13
-  op_code { end_iterator {} }                                                     # 14
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                  #  0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "b" } }                                               #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                         #  2
+  op_code { make_list { reserve_size: 3 } }                                                                                   #  3
+  op_code { const_int { value: 0 } }                                                                                          #  4
+  op_code { const_int { value: 1 } }                                                                                          #  5
+  op_code { const_int { value: 2 } }                                                                                          #  6
+  op_code { add_to_list { number_of_elements: 3 } }                                                                           #  7
+  op_code { get_iterator {} }                                                                                                 #  8
+  op_code { for_iterator { address_delta: 5 } }                                                                               #  9
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                                                              # 10
+  op_code { const_string { value: "abc" pif { start { row: 2 column: 5 pos: 24 } end { row: 2 column: 10 pos: 29 } } } }      # 11
+  op_code { pop {} }                                                                                                          # 12
+  op_code { goto { address_delta: -4 } }                                                                                      # 13
+  op_code { end_iterator {} }                                                                                                 # 14
 
 
-  op_code { make_list { reserve_size: 2 } }                                       # 15
-  op_code { const_int { value: 0 } }                                              # 16
-  op_code { const_int { value: 1 } }                                              # 17
-  op_code { make_tuple { number_of_elements: 2 } }                                # 18
-  op_code { const_int { value: 2 } }                                              # 19
-  op_code { const_int { value: 3 } }                                              # 20
-  op_code { make_tuple { number_of_elements: 2 } }                                # 21
-  op_code { add_to_list { number_of_elements: 2 } }                               # 22
-  op_code { get_iterator {} }                                                     # 23
-  op_code { for_iterator { address_delta: 7 } }                                   # 24
-  op_code { unpack { number_of_elements: 2 } }                                    # 25
-  op_code { store { frame: 1 pos_in_frame: 0 } }                                  # 26
-  op_code { store { frame: 1 pos_in_frame: 1 } }                                  # 27
-  op_code { const_string { value: "def" } }                                       # 28
-  op_code { pop {} }                                                              # 29
-  op_code { goto { address_delta: -6 } }                                          # 30
-  op_code { end_iterator {} }                                                     # 31
+  op_code { make_list { reserve_size: 2 } }                                                                                   # 15
+  op_code { const_int { value: 0 } }                                                                                          # 16
+  op_code { const_int { value: 1 } }                                                                                          # 17
+  op_code { make_tuple { number_of_elements: 2 } }                                                                            # 18
+  op_code { const_int { value: 2 } }                                                                                          # 19
+  op_code { const_int { value: 3 } }                                                                                          # 20
+  op_code { make_tuple { number_of_elements: 2 } }                                                                            # 21
+  op_code { add_to_list { number_of_elements: 2 } }                                                                           # 22
+  op_code { get_iterator {} }                                                                                                 # 23
+  op_code { for_iterator { address_delta: 7 } }                                                                               # 24
+  op_code { unpack { number_of_elements: 2 } }                                                                                # 25
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                                                              # 26
+  op_code { store { frame: 1 pos_in_frame: 1 } }                                                                              # 27
+  op_code { const_string { value: "def" pif { start { row: 5 column: 5 pos: 65 } end { row: 5 column: 10 pos: 70 } } } }      # 28
+  op_code { pop {} }                                                                                                          # 29
+  op_code { goto { address_delta: -6 } }                                                                                      # 30
+  op_code { end_iterator {} }                                                                                                 # 31
 
 
-  op_code { make_list { reserve_size: 3 } }                                       # 32
-  op_code { const_int { value: 0 } }                                              # 33
-  op_code { const_int { value: 1 } }                                              # 34
-  op_code { const_int { value: 2 } }                                              # 35
-  op_code { add_to_list { number_of_elements: 3 } }                               # 36
-  op_code { get_iterator {} }                                                     # 37
-  op_code { for_iterator { address_delta: 6 } }                                   # 38
-  op_code { load { frame: 1 pos_in_frame: 0 } }                                   # 39
-  op_code { assign_dot_member { member: 'b' } }                                   # 40
-  op_code { const_string { value: "ghi" } }                                       # 41
-  op_code { pop {} }                                                              # 42
-  op_code { goto { address_delta: -5 } }                                          # 43
-  op_code { end_iterator {} }                                                     # 44
+  op_code { make_list { reserve_size: 3 } }                                                                                   # 32
+  op_code { const_int { value: 0 } }                                                                                          # 33
+  op_code { const_int { value: 1 } }                                                                                          # 34
+  op_code { const_int { value: 2 } }                                                                                          # 35
+  op_code { add_to_list { number_of_elements: 3 } }                                                                           # 36
+  op_code { get_iterator {} }                                                                                                 # 37
+  op_code { for_iterator { address_delta: 6 } }                                                                               # 38
+  op_code { load { frame: 1 pos_in_frame: 0 } }                                                                               # 39
+  op_code { assign_dot_member { member: 'b' } }                                                                               # 40
+  op_code { const_string { value: "ghi" pif { start { row: 8 column: 5 pos: 98 } end { row: 8 column: 10 pos: 103 } } } }     # 41
+  op_code { pop {} }                                                                                                          # 42
+  op_code { goto { address_delta: -5 } }                                                                                      # 43
+  op_code { end_iterator {} }                                                                                                 # 44
 
-  op_code { make_list { reserve_size: 2 } }                                       # 45
-  op_code { const_int: { value: 0 } }                                             # 46
-  op_code { const_int: { value: 1 } }                                             # 47
-  op_code { make_tuple { number_of_elements: 2 } }                                # 48
-  op_code { const_int { value: 2 } }                                              # 49
-  op_code { const_int { value: 3 } }                                              # 50
-  op_code { make_tuple { number_of_elements: 2 } }                                # 51
-  op_code { add_to_list { number_of_elements: 2 } }                               # 52
-  op_code { get_iterator { } }                                                    # 53
-  op_code { for_iterator { address_delta: 7 } }                                   # 54
-  op_code { unpack { number_of_elements: 2 } }                                    # 55
-  op_code { store { frame: 1 pos_in_frame: 0 } }                                  # 56
-  op_code { store { frame: 1 pos_in_frame: 1 } }                                  # 57
-  op_code { const_string { value: "jkl" } }                                       # 58
-  op_code { pop { } }                                                             # 59
-  op_code { goto { address_delta: -6 } }                                          # 60
-  op_code { end_iterator { } }                                                    # 61
+  op_code { make_list { reserve_size: 2 } }                                                                                   # 45
+  op_code { const_int: { value: 0 } }                                                                                         # 46
+  op_code { const_int: { value: 1 } }                                                                                         # 47
+  op_code { make_tuple { number_of_elements: 2 } }                                                                            # 48
+  op_code { const_int { value: 2 } }                                                                                          # 49
+  op_code { const_int { value: 3 } }                                                                                          # 50
+  op_code { make_tuple { number_of_elements: 2 } }                                                                            # 51
+  op_code { add_to_list { number_of_elements: 2 } }                                                                           # 52
+  op_code { get_iterator { } }                                                                                                # 53
+  op_code { for_iterator { address_delta: 7 } }                                                                               # 54
+  op_code { unpack { number_of_elements: 2 } }                                                                                # 55
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                                                              # 56
+  op_code { store { frame: 1 pos_in_frame: 1 } }                                                                              # 57
+  op_code { const_string { value: "jkl" pif { start { row: 11 column: 5 pos: 141 } end { row: 11 column: 10 pos: 146 } } } }  # 58
+  op_code { pop { } }                                                                                                         # 59
+  op_code { goto { address_delta: -6 } }                                                                                      # 60
+  op_code { end_iterator { } }                                                                                                # 61
 
-  op_code { pop_frame { } }                                                       # 62
-  op_code { pop_frame { } }                                                       # 63
-  op_code { pop_frame { } }                                                       # 64
-  op_code { end {} }                                                              # 65
+  op_code { pop_frame { } }                                                                                                   # 62
+  op_code { pop_frame { } }                                                                                                   # 63
+  op_code { pop_frame { } }                                                                                                   # 64
+  op_code { end {} }                                                                                                          # 65
 }

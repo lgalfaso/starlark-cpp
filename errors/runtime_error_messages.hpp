@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include "proto/starlark_logging.pb.h"
+
 #pragma GCC visibility push(default)
 
 namespace starlark {
@@ -144,6 +146,7 @@ std::string error_module_does_not_define_symbol(std::string_view  module_name, s
 std::string error_unknown_op(int op_code);
 std::string error_recursive_call(std::string_view fn_name);
 
+std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const starlark::logging::PositionInFile& pos);
 }  // namespace error_messages
 }  // namespace starlark
 

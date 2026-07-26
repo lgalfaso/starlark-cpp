@@ -81,5 +81,43 @@ logger_wrap::log_report logger_wrap::report() {
   return state;
 }
 
+std::string pretty_log(const starlark::logging::LogEntry& entry) {
+  std::string result;
+  if (entry.module().empty()) {
+    result += "<Unknown module>";
+  } else {
+    result += entry.module();
+  }
+  result += ":";
+  if (entry.pos().has_row()) {
+    result += std::to_string(entry.pos().row());
+    result += ":";
+    result += std::to_string(entry.pos().column());
+    result += ":";
+  }
+  switch (entry.level()) {
+    case LogLevel::LOG_LEVEL_DEBUG:
+      result += " debug:";
+      break;
+    case LogLevel::LOG_LEVEL_INFO:
+      result += " info:";
+      break;
+    case LogLevel::LOG_LEVEL_WARNING:
+      result += " warning:";
+      break;
+    case LogLevel::LOG_LEVEL_ERROR:
+      result += " error:";
+      break;
+    case LogLevel::LOG_LEVEL_FATAL:
+      result += " fatal:";
+      break;
+    default:
+      break;
+  }
+  result += " ";
+  result += entry.message();
+  return result;
+}
+
 }  // namespace logging
 }  // namespace starlark

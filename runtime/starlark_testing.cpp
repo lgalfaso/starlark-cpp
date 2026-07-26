@@ -17,6 +17,10 @@ void error_handler::add_error(std::string_view error_msg) {
   messages.push_back(std::string(error_msg));
 }
 
+void error_handler::add_error(std::string_view error_msg, const starlark::logging::Position& pos) {
+  messages.push_back(std::string(error_msg));
+}
+
 starlark_testing_function::starlark_testing_function() : starlark_testing_function("test_fn") {}
 
 starlark_testing_function::starlark_testing_function(std::string_view fn_name) : starlark_testing_function(fn_name, "//:test_module.star") {}

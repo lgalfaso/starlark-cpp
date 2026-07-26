@@ -211,11 +211,15 @@ void bytecode_generator::enter_float_value(const FloatValue* float_value) {
 }
 
 void bytecode_generator::enter_string_value(const StringValue* string_value) {
-  mutable_block()->add_op_code()->mutable_const_string()->set_value(string_value->value());
+  auto* const_string_op = mutable_block()->add_op_code()->mutable_const_string();
+  const_string_op->set_value(string_value->value());
+  *const_string_op->mutable_pif() = string_value->pif();
 }
 
 void bytecode_generator::enter_bytes_value(const StringValue* bytes_value) {
-  mutable_block()->add_op_code()->mutable_const_bytes()->set_value(bytes_value->value());
+  auto* const_bytes_op = mutable_block()->add_op_code()->mutable_const_bytes();
+  const_bytes_op->set_value(bytes_value->value());
+  *const_bytes_op->mutable_pif() = bytes_value->pif();
 }
 
 void bytecode_generator::enter_identifier(const Identifier* identifier) {

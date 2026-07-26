@@ -55,6 +55,7 @@ using ::starlark::error_messages::error_symbol_not_available;
 using ::starlark::error_messages::error_unable_to_load_module;
 using ::starlark::error_messages::error_unbound_variable;
 using ::starlark::error_messages::error_unknown_op;
+using ::starlark::error_messages::error_v2_max_string_length;
 using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::predeclared_symbols;
 using ::starlark::logging::logger;
@@ -119,6 +120,11 @@ class error_handler : public error_fn {
   error_handler(runner_state& state, logger& log) : state(state), log(log) {}
 
   void add_error(std::string_view error_msg) override {
+    // TODO(lmirelmann): Do not have the position.
+    add_error(error_msg, starlark::logging::Position::default_instance());
+  }
+
+  void add_error(std::string_view error_msg, const starlark::logging::Position& pos) override {
     static Program fail_program = std::invoke([] -> Program {
       Program result;
       result.mutable_block()->Add()->add_op_code()->mutable_fail();
@@ -126,13 +132,11 @@ class error_handler : public error_fn {
     });
     static std::pair<Program*, std::string> base_program{&fail_program, "@@//:fail.star"};
 
-    // TODO(lmirelmann): Do not have the position.
-    log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program->second, starlark::logging::Position::default_instance());
+    log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program->second, pos);
     state.block_ptr = 0;
     state.instruction_ptr = 0;
     state.current_program = &base_program;
   }
-
  private:
   runner_state& state;
   logger& log;
@@ -141,6 +145,7 @@ class error_handler : public error_fn {
 frame* run_program(
     module_loader& loader,
     std::pair<Program*, std::string>& starlark_program,
+    std::string_view source_code,
     std::map<std::string, starlark_obj*, std::less<>>& global_context,
     context& ctx,
     logger& log) {
@@ -164,7 +169,7 @@ frame* run_program(
           // we are not pointing to the actual ip and block. The right approach would be to be
           // able to produce the errors using the op code information.
           if (op.const_string().value().length() > ctx.options().max_string_length) {
-            error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
+            error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length, source_code, op.const_string().pif()), op.const_string().pif().start());
             return nullptr;
           }
           break;
@@ -874,7 +879,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
     if (module_processing_it != module_processing.end() &&
         (!module_reduction || module_processing_it->second + 1 != module_lookup.size())) {
       logging.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR,
-                  std::format("LoadError: Recursion found during module lookup\n{}", report_recursion_in_modules(module_lookup, module_processing[std::string{c_name}])),
+                  std::format("recursion found during module lookup\n{}", report_recursion_in_modules(module_lookup, module_processing[std::string{c_name}])),
                   entry.caller_module_name,
                   starlark::logging::Position::default_instance());
       return status_or<frame*>(status_code::kStaticError);
@@ -919,7 +924,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
       global_context.insert(kv);
     }
     auto current_program = std::make_pair(entry.program, std::string{(*mod_info)->cannonical_name()});
-    last_frame = run_program(loader, current_program, global_context, ctx, logging);
+    last_frame = run_program(loader, current_program, (*mod_info)->source_code(), global_context, ctx, logging);
     if (last_frame == nullptr) {
       return status_or<frame*>(status_code::kRuntimeError);
     }

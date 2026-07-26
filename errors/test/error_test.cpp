@@ -24,6 +24,7 @@ using ::starlark::interpreter::interpreter;
 using ::starlark::interpreter::kv_module_loader;
 using ::starlark::interpreter_runner::split_test_case;
 using ::starlark::logging::logger;
+using ::starlark::logging::pretty_log;
 using ::starlark::runtime::get_runtime_options;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_obj;
@@ -74,7 +75,7 @@ TEST(Parser, TestCase) {
   auto result = runner.run(loader, "main", g_options, r_options, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_FALSE(logging.empty());
-  EXPECT_EQ(logging.begin()->message(), expeted_error_message);
+  EXPECT_EQ(pretty_log(*logging.begin()), expeted_error_message);
 }
 
 }  // namespace

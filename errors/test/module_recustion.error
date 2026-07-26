@@ -1,4 +1,4 @@
-LoadError: Recursion found during module lookup
+//:test3.bzl: error: recursion found during module lookup
     main
 +-> //:test1.bzl
 |   //:test2.bzl

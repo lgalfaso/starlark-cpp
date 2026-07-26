@@ -1,4 +1,7 @@
-assert_fail("""'0123456789'""", max_string_length = 9, error_message = "TypeError: string must be at most 9 elements")
+assert_fail("""'0123456789'""", max_string_length = 9, error_message = """string must be at most 9 elements
+    1 | '0123456789'
+      | ^~~~~~~~~~~~
+""")
 assert_succeed("""'0123456789'""", max_string_length = 10)
 assert_fail("""b'0123456789'""", max_string_length = 9, error_message = "TypeError: bytes must be at most 9 elements")
 assert_succeed("""b'0123456789'""", max_string_length = 10)

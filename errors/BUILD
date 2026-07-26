@@ -21,5 +21,8 @@ cc_library(
     srcs = ["runtime_error_messages.cpp"],
     hdrs = ["runtime_error_messages.hpp"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//proto:starlark_logging_cc_proto",
+    ],
 )
 

@@ -2,7 +2,7 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { const_string { value: "abc" } }
+  op_code { const_string { value: "abc" pif { start { row: 1 column: 1 pos: 0 } end { row: 1 column: 6 pos: 5 } } } }
   op_code { dot_member { member: "capitalize" } }
   op_code { pop { } }
   op_code { pop_frame { } }
