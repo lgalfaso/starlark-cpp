@@ -45,7 +45,9 @@ using ::starlark::compiler::compiler;
 using ::starlark::error_messages::error_dictionary_duplicate_key;
 using ::starlark::error_messages::error_expect_mapping_after_star_star;
 using ::starlark::error_messages::error_keyword_must_be_string;
+using ::starlark::error_messages::error_max_bytes_length;
 using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_max_string_length;
 using ::starlark::error_messages::error_module_does_not_define_symbol;
 using ::starlark::error_messages::error_module_not_ready;
 using ::starlark::error_messages::error_multiple_values_for_keyword;
@@ -162,13 +164,13 @@ frame* run_program(
           // we are not pointing to the actual ip and block. The right approach would be to be
           // able to produce the errors using the op code information.
           if (op.const_string().value().length() > ctx.options().max_string_length) {
-            error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+            error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
             return nullptr;
           }
           break;
         case OpCode::kConstBytes:
           if (op.const_bytes().value().length() > ctx.options().max_string_length) {
-            error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+            error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
             return nullptr;
           }
           break;

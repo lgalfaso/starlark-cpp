@@ -262,6 +262,14 @@ std::string error_max_sequence_length(int64_t max_length) {
   return std::format("TypeError: sequences must be at most {} elements", max_length);
 }
 
+std::string error_max_string_length(int64_t max_length) {
+  return std::format("TypeError: string must be at most {} elements", max_length);
+}
+
+std::string error_max_bytes_length(int64_t max_length) {
+  return std::format("TypeError: bytes must be at most {} elements", max_length);
+}
+
 std::string error_unpack_too_few(int64_t actual, int64_t expected) {
   return std::format("ValueError: not enough values to unpack (expected {}, got {})", expected, actual);
 }

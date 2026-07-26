@@ -83,6 +83,8 @@ std::string error_no_concat(std::string_view this_type, std::string_view other_t
 std::string error_no_multiply_sequence(std::string_view other_type);
 
 std::string error_max_sequence_length(int64_t max_length);
+std::string error_max_string_length(int64_t max_length);
+std::string error_max_bytes_length(int64_t max_length);
 std::string error_unpack_too_few(int64_t expected, int64_t actual);
 std::string error_unpack_too_many(int64_t expected, int64_t actual);
 std::string error_in_element(std::string_view type, std::string_view actual, std::string_view expected);

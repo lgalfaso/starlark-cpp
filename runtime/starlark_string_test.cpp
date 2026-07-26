@@ -336,7 +336,7 @@ TEST(StarlarkString, PlusEqualsAssignOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 200 elements");
 }
 
 TEST(StarlarkString, PlusEqualsAssignOverflowNoOverflow) {
@@ -438,7 +438,7 @@ TEST(StarlarkString, BinaryStarTooBig) {
   auto* result = str.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 2147483647 elements");
 }
 
 TEST(StarlarkString, StarEqualsAssign) {
@@ -515,7 +515,7 @@ TEST(StarlarkString, StarEqualsAssignOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 200 elements");
 }
 
 TEST(StarlarkString, StarEqualsAssignOverflowNoOverflow) {
@@ -542,7 +542,7 @@ TEST(StarlarkString, StarEqualsAssignOverflowBigint) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 200 elements");
 }
 
 TEST(StarlarkString, StarEqualsAssignOverflowNoOverflowBigint) {

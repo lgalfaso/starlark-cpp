@@ -45,7 +45,7 @@ using ::starlark::error_messages::error_expect_one_character_or_one_byte;
 using ::starlark::error_messages::error_int_base;
 using ::starlark::error_messages::error_interpreted_as_integer;
 using ::starlark::error_messages::error_invalid_literal_with_base;
-using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_max_bytes_length;
 using ::starlark::error_messages::error_missing_argument;
 using ::starlark::error_messages::error_missing_typed_argument;
 using ::starlark::error_messages::error_multiple_values_for_argument;
@@ -295,7 +295,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
       utf8_encode_code_point(reader.read_code_point(), result, false, true);
     }
     if (result.length() > ctx.options().max_string_length) {
-      error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+      error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
       return nullptr;
     }
     return Arena::Create<starlark_bytes>(&ctx.arena(), result);

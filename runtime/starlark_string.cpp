@@ -45,7 +45,7 @@ using ::starlark::error_messages::error_in_type_requires_type;
 using ::starlark::error_messages::error_incomplete_format;
 using ::starlark::error_messages::error_integer_or_unicode_character;
 using ::starlark::error_messages::error_integer_or_unicode_character_type_and_length;
-using ::starlark::error_messages::error_max_sequence_length;
+using ::starlark::error_messages::error_max_string_length;
 using ::starlark::error_messages::error_multiple_values_for_argument;
 using ::starlark::error_messages::error_no_concat;
 using ::starlark::error_messages::error_no_concat;
@@ -291,7 +291,7 @@ starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other
   std::size_t expected_size;
   if (ckd_add(&expected_size, this_obj.as_string().size(), other.as_string().size()) ||
       expected_size > ctx.options().max_string_length) {
-    error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+    error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
     return nullptr;
   }
   std::string result{this_obj.as_string()};
@@ -311,7 +311,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
         std::size_t expected_size;
         if (ckd_mul(&expected_size, this_obj.as_string().size(), multiplier) ||
             expected_size > ctx.options().max_string_length) {
-          error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+          error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
           return nullptr;
         }
         for (int64_t i = 0; i < multiplier; ++i) {
@@ -329,14 +329,14 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
         return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+        error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);
       std::size_t expected_size;
       if (ckd_mul(&expected_size, this_obj.as_string().size(), int_value) ||
           expected_size > ctx.options().max_string_length) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_string_length));
+        error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
         return nullptr;
       }
       std::string result;
