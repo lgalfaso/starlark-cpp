@@ -1,0 +1,3 @@
+main:3:5: error: multiple bindings for the top-level symbol 'foo'
+    3 | foo = 1
+      | ^~~

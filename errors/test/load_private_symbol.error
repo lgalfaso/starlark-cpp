@@ -1,0 +1,3 @@
+main:2:19: error: cannot import private symbol '_private_symbol'
+    2 | load("test.star", "_private_symbol")
+      |                   ^~~~~~~~~~~~~~~~~

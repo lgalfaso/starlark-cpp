@@ -51,37 +51,6 @@ std::string_view error_unexpected_token() {
 }
 
 
-std::string error_duplicate_binding_previous_load(std::string_view symbol) {
-  return std::format("`def` statement redefines previously defined `load` symbol '{}'", symbol);
-}
-
-std::string error_cannot_load_private_symbol(std::string_view symbol) {
-  return std::format("Cannot import private symbol '{}'", symbol);
-}
-
-std::string error_duplicate_load_binding(std::string_view symbol) {
-  return std::format("`load` statement defines '{}' more than once", symbol);
-}
-
-std::string error_duplicate_binding_by_load(std::string_view symbol) {
-  return std::format("`load` statement redefines previously defined value '{}'", symbol);
-}
-
-std::string error_duplicate_load_binding_by_load(std::string_view symbol) {
-  return std::format("Multiple bindings for the top-level load symbol '{}'", symbol);
-}
-
-std::string error_duplicate_binding_from_load(std::string_view symbol) {
-  return std::format("Variable '{}' redefines symbol previously defined by a load statement", symbol);
-}
-
-std::string error_duplicate_binding(std::string_view symbol) {
-  return std::format("Multiple bindings for the top-level symbol '{}'", symbol);
-}
-
-std::string error_undefined_name(std::string_view name) {
-  return std::format("name '{}' is not defined", name);
-}
 
 
 
@@ -180,6 +149,39 @@ std::string error_v2_arguments_expected_identifier_for_named_arguments(std::stri
 
 std::string error_v2_arguments_positional_before_named_arguments(std::string_view program, const Position& start, const Position& end) {
   return std::format("positional arguments must come before named arguments\n{}", get_line_and_underline(program, start, end));
+}
+
+
+std::string error_v2_duplicate_binding_previous_load(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
+  return std::format("`def` statement redefines previously defined `load` symbol '{}'\n{}", symbol, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_cannot_load_private_symbol(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
+  return std::format("cannot import private symbol '{}'\n{}", symbol, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_duplicate_load_binding(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
+  return std::format("`load` statement defines '{}' more than once\n{}", symbol, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_duplicate_binding_by_load(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
+  return std::format("`load` statement redefines previously defined value '{}'\n{}", symbol, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_duplicate_load_binding_by_load(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
+  return std::format("multiple bindings for the top-level load symbol '{}'\n{}", symbol, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_duplicate_binding_from_load(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
+  return std::format("variable '{}' redefines symbol previously defined by a load statement\n{}", symbol, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_duplicate_binding(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
+  return std::format("multiple bindings for the top-level symbol '{}'\n{}", symbol, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_undefined_name(std::string_view name, std::string_view program, const Position& start, const Position& end) {
+  return std::format("name '{}' is not defined\n{}", name, get_line_and_underline(program, start, end));
 }
 
 }  // namespace error_messages

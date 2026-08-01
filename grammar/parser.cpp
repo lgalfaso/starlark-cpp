@@ -32,6 +32,16 @@ using ::starlark::ast::LambdaExpr;
 using ::starlark::ast::Parameter;
 using ::starlark::ast::Statement;
 using ::starlark::ast::UnaryExpr;
+using ::starlark::error_messages::error_expected_identifier;
+using ::starlark::error_messages::error_expected_string;
+using ::starlark::error_messages::error_expected_symbol;
+using ::starlark::error_messages::error_expected_target;
+using ::starlark::error_messages::error_v2_undefined_name;
+using ::starlark::error_messages::error_unexpected_break;
+using ::starlark::error_messages::error_unexpected_comma;
+using ::starlark::error_messages::error_unexpected_continue;
+using ::starlark::error_messages::error_unexpected_return;
+using ::starlark::error_messages::error_unexpected_token;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_args;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_star_kvargs;
 using ::starlark::error_messages::error_v2_arguments_expected_identifier_for_named_arguments;
@@ -39,24 +49,14 @@ using ::starlark::error_messages::error_v2_arguments_non_variadic_before_variadi
 using ::starlark::error_messages::error_v2_arguments_positional_before_named_arguments;
 using ::starlark::error_messages::error_v2_arguments_star_star_argument_must_be_last;
 using ::starlark::error_messages::error_v2_arguments_varadic_arguments_not_allowed;
-using ::starlark::error_messages::error_cannot_load_private_symbol;
-using ::starlark::error_messages::error_duplicate_binding;
-using ::starlark::error_messages::error_duplicate_binding_by_load;
-using ::starlark::error_messages::error_duplicate_binding_from_load;
-using ::starlark::error_messages::error_duplicate_binding_previous_load;
-using ::starlark::error_messages::error_duplicate_load_binding;
-using ::starlark::error_messages::error_duplicate_load_binding_by_load;
-using ::starlark::error_messages::error_expected_identifier;
-using ::starlark::error_messages::error_expected_string;
-using ::starlark::error_messages::error_expected_symbol;
-using ::starlark::error_messages::error_expected_target;
-using ::starlark::error_messages::error_undefined_name;
-using ::starlark::error_messages::error_unexpected_break;
-using ::starlark::error_messages::error_unexpected_comma;
-using ::starlark::error_messages::error_unexpected_continue;
-using ::starlark::error_messages::error_unexpected_return;
-using ::starlark::error_messages::error_unexpected_token;
+using ::starlark::error_messages::error_v2_cannot_load_private_symbol;
 using ::starlark::error_messages::error_v2_comparison_operators_are_not_associative;
+using ::starlark::error_messages::error_v2_duplicate_binding;
+using ::starlark::error_messages::error_v2_duplicate_binding_by_load;
+using ::starlark::error_messages::error_v2_duplicate_binding_from_load;
+using ::starlark::error_messages::error_v2_duplicate_binding_previous_load;
+using ::starlark::error_messages::error_v2_duplicate_load_binding;
+using ::starlark::error_messages::error_v2_duplicate_load_binding_by_load;
 using ::starlark::error_messages::error_v2_for_not_allowed_at_top_level;
 using ::starlark::error_messages::error_v2_function_definition_not_allowed;
 using ::starlark::error_messages::error_v2_if_not_allowed_at_top_level;
@@ -495,6 +495,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           *def_statement->mutable_pif()->mutable_start() = lex.current_token().start();
           *statement->mutable_pif()->mutable_start() = lex.current_token().start();
           lex.next_token();
+          auto identifier_start = lex.current_token().start();
+          auto identifier_end = lex.current_token().end();
           if (!set_identifier(*def_statement->mutable_function_name())) {
             add_error(error_expected_identifier());
             break;
@@ -504,7 +506,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           // with a previous `load` statement.
           if (is_top_level_block()) {
             if (parser_blocks.back().identifiers.contains(def_statement->function_name().nfkc_name())) {
-              add_error(error_duplicate_binding_previous_load(def_statement->function_name().name()));
+              add_error(error_v2_duplicate_binding_previous_load(def_statement->function_name().name(), input, identifier_start, identifier_end));
             }
           }
           bind(def_statement->function_name());
@@ -882,7 +884,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               if (!opts.allow_load_private_symbols &&
                   lex.current_token().string_value().starts_with("_")) {
-                add_error(error_cannot_load_private_symbol(lex.current_token().string_value()));
+                add_error(error_v2_cannot_load_private_symbol(lex.current_token().string_value(), input, lex.current_token().start(), lex.current_token().end()));
               }
               load_param->set_remote_name(lex.current_token().string_value());
               *load_param->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -892,15 +894,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               resolve(load_param->mutable_local_name(), 0);
               if (!symbols.emplace(load_param->local_name().nfkc_name()).second) {
-                add_error(error_duplicate_load_binding(load_param->local_name().name()));
+                add_error(error_v2_duplicate_load_binding(load_param->local_name().name(), input, lex.current_token().start(), lex.current_token().end()));
               }
-              if (parser_blocks.back().identifiers.contains(load_param->local_name().nfkc_name()) && !opts.allow_top_level_rebinding) {
-                add_error(error_duplicate_binding_by_load(load_param->local_name().name()));
+              if (parser_blocks[parser_blocks.size() - 2].identifiers.contains(load_param->local_name().nfkc_name()) && !opts.allow_top_level_rebinding) {
+                add_error(error_v2_duplicate_binding_by_load(load_param->local_name().name(), input, lex.current_token().start(), lex.current_token().end()));
               }
               // The spec does not specify whether it is an error to bind to the file block multiple times.
               // We are taking the possition that if `allow_top_level_rebinding` is `false`, then this is not allowed.
               if (!parser_blocks.back().identifiers.emplace(load_param->local_name().nfkc_name()).second && !opts.allow_top_level_rebinding) {
-                add_error(error_duplicate_load_binding_by_load(load_param->local_name().name()));
+                add_error(error_v2_duplicate_load_binding_by_load(load_param->local_name().name(), input, lex.current_token().start(), lex.current_token().end()));
               }
               lex.next_token();
             }
@@ -2212,7 +2214,7 @@ void parser::bind_and_resolve(Expression* base) {
         case Expression::kIdentifier:
           if (is_top_level_block() &&
               parser_blocks.back().identifiers.contains(top->identifier().nfkc_name())) {
-            add_error(error_duplicate_binding_from_load(top->identifier().name()));
+            add_error(error_v2_duplicate_binding_from_load(top->identifier().name(), input, base->pif().start(), base->pif().end()));
           }
           bind(top->identifier());
           break;
@@ -2253,7 +2255,7 @@ void parser::bind(const Identifier& identifier) {
   // be consistent, follow the same rules, and be handled equally.
   if (is_top_level_block()) {
     if (!parser_blocks[parser_blocks.size() - 2].identifiers.emplace(identifier.nfkc_name()).second && !opts.allow_top_level_rebinding) {
-      add_error(error_duplicate_binding(identifier.name()));
+      add_error(error_v2_duplicate_binding(identifier.name(), input, identifier.pif().start(), identifier.pif().end()));
     }
   } else {
     parser_blocks.back().identifiers.emplace(identifier.nfkc_name());
@@ -2290,7 +2292,8 @@ void parser::drop_block() {
     auto pos = parser_blocks.back().identifiers.find(entry_id->nfkc_name());
     if (pos == parser_blocks.back().identifiers.end()) {
       if (parser_blocks.size() == 1) {
-        add_error(error_undefined_name(entry_id->name()), entry_id->pif().start());
+        // TODO(lmirelmann): We should improve the error by looking into the possible candidates and check which one has the closest Levenshtein distance.
+        add_error(error_v2_undefined_name(entry_id->name(), input, entry_id->pif().start(), entry_id->pif().end()), entry_id->pif().start());
         entry_id->set_frame(-1);
         entry_id->set_pos_in_frame(-1);
       } else {

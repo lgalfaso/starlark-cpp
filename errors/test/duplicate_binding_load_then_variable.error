@@ -1,0 +1,3 @@
+main:3:5: error: variable 'foo' redefines symbol previously defined by a load statement
+    3 | foo = 1
+      | ^~~

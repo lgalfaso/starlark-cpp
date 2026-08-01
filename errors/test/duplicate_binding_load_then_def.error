@@ -1,0 +1,3 @@
+main:3:8: error: `def` statement redefines previously defined `load` symbol 'foo'
+    3 | def foo(): pass
+      |     ^~~

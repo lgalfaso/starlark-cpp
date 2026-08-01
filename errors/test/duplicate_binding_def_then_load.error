@@ -1,0 +1,3 @@
+main:4:19: error: `load` statement redefines previously defined value 'foo'
+    4 | load("test.star", "foo")
+      |                   ^~~~~

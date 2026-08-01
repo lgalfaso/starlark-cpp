@@ -23,15 +23,6 @@ std::string_view error_unexpected_continue();
 std::string_view error_unexpected_comma();
 std::string_view error_unexpected_token();
 
-std::string error_duplicate_binding_previous_load(std::string_view symbol);
-std::string error_cannot_load_private_symbol(std::string_view symbol);
-std::string error_duplicate_load_binding(std::string_view symbol);
-std::string error_duplicate_binding_by_load(std::string_view symbol);
-std::string error_duplicate_load_binding_by_load(std::string_view symbol);
-std::string error_duplicate_binding_from_load(std::string_view symbol);
-std::string error_duplicate_binding(std::string_view symbol);
-std::string error_undefined_name(std::string_view name);
-
 std::string error_v2_function_definition_not_allowed(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_if_not_allowed_at_top_level(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_for_not_allowed_at_top_level(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
@@ -59,6 +50,15 @@ std::string error_v2_arguments_star_star_argument_must_be_last(std::string_view 
 std::string error_v2_arguments_non_variadic_before_variadic(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_arguments_expected_identifier_for_named_arguments(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_arguments_positional_before_named_arguments(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+
+std::string error_v2_duplicate_binding_previous_load(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_cannot_load_private_symbol(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_duplicate_load_binding(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_duplicate_binding_by_load(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_duplicate_load_binding_by_load(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_duplicate_binding_from_load(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_duplicate_binding(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_undefined_name(std::string_view name, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 }  // namespace error_messages
 }  // namespace starlark
