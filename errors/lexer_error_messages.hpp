@@ -4,6 +4,7 @@
 #define ERRORS_LEXER_ERROR_MESSAGES_HPP_
 
 #include <string>
+#include <string_view>
 
 #include "proto/starlark_logging.pb.h"
 

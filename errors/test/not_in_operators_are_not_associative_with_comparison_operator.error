@@ -1,0 +1,3 @@
+main:2:11: error: comparison operators are not associative. Use parens
+    2 | a = 1 < 2 not in []
+      |           ^~~

@@ -13,8 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_illegal_target_for_augmented_assignment();
-std::string_view error_comparison_operators_are_not_associative();
 std::string_view error_arguments_duplicate_star_args();
 std::string_view error_arguments_duplicate_star_star_kvargs();
 std::string_view error_arguments_varadic_arguments_not_allowed();
@@ -56,6 +54,10 @@ std::string error_v2_params_duplicate_keyword_variadic_paramter(std::string_view
 std::string error_v2_params_named_param_must_follow_bare_star(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_expected_identifier_after_star_star_token(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_duplicate_params(std::string_view name, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+
+std::string error_v2_illegal_target_for_augmented_assignment(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+
+std::string error_v2_comparison_operators_are_not_associative(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 }  // namespace error_messages
 }  // namespace starlark

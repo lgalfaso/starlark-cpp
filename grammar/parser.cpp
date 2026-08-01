@@ -40,7 +40,6 @@ using ::starlark::error_messages::error_arguments_positional_before_named_argume
 using ::starlark::error_messages::error_arguments_star_star_argument_must_be_last;
 using ::starlark::error_messages::error_arguments_varadic_arguments_not_allowed;
 using ::starlark::error_messages::error_cannot_load_private_symbol;
-using ::starlark::error_messages::error_comparison_operators_are_not_associative;
 using ::starlark::error_messages::error_duplicate_binding;
 using ::starlark::error_messages::error_duplicate_binding_by_load;
 using ::starlark::error_messages::error_duplicate_binding_from_load;
@@ -51,16 +50,17 @@ using ::starlark::error_messages::error_expected_identifier;
 using ::starlark::error_messages::error_expected_string;
 using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
-using ::starlark::error_messages::error_illegal_target_for_augmented_assignment;
 using ::starlark::error_messages::error_undefined_name;
 using ::starlark::error_messages::error_unexpected_break;
 using ::starlark::error_messages::error_unexpected_comma;
 using ::starlark::error_messages::error_unexpected_continue;
 using ::starlark::error_messages::error_unexpected_return;
 using ::starlark::error_messages::error_unexpected_token;
+using ::starlark::error_messages::error_v2_comparison_operators_are_not_associative;
 using ::starlark::error_messages::error_v2_for_not_allowed_at_top_level;
 using ::starlark::error_messages::error_v2_function_definition_not_allowed;
 using ::starlark::error_messages::error_v2_if_not_allowed_at_top_level;
+using ::starlark::error_messages::error_v2_illegal_target_for_augmented_assignment;
 using ::starlark::error_messages::error_v2_load_at_least_one_symbol;
 using ::starlark::error_messages::error_v2_load_first;
 using ::starlark::error_messages::error_v2_load_not_at_top_level;
@@ -976,7 +976,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               top.statement->expression_statement().has_list_comprehension() ||
               top.statement->expression_statement().has_dictionary_expression() ||
               top.statement->expression_statement().has_dictionary_comprehension())) {
-            add_error(error_illegal_target_for_augmented_assignment());
+            add_error(error_v2_illegal_target_for_augmented_assignment(input, lex.current_token().start(), lex.current_token().end()));
           }
           {
             AssignStmt* assign_statement = Arena::Create<AssignStmt>(top.statement->GetArena());
@@ -1211,7 +1211,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             break;
           }
           if (!top.test_p_0_first) {
-            add_error(error_comparison_operators_are_not_associative());
+            add_error(error_v2_comparison_operators_are_not_associative(input, lex.current_token().start(), lex.current_token().end()));
           }
           auto token_start = lex.current_token().start();
           lex.next_token();
@@ -1251,7 +1251,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               break;
             }
             if (!top.test_p_0_first && top.test_p_precedence == all_operator_precedence.at(token_type::kEqualsEquals).first) {
-              add_error(error_comparison_operators_are_not_associative());
+              add_error(error_v2_comparison_operators_are_not_associative(input, lex.current_token().start(), lex.current_token().end()));
             }
             auto token_start = lex.current_token().start();
             auto token_end = lex.current_token().end();

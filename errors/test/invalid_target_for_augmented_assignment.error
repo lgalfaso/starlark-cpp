@@ -1,0 +1,3 @@
+main:3:10: error: target is an illegal expression for augmented assignment
+    3 |   [a, b] += [3, 4]
+      |          ^~

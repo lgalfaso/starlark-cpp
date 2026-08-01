@@ -14,15 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_illegal_target_for_augmented_assignment() {
-  return "target is an illegal expression for augmented assignment";
-}
-
-std::string_view error_comparison_operators_are_not_associative() {
-  return "Comparison operators are not associative. Use parens.";
-}
-
-
 std::string_view error_arguments_duplicate_star_args() {
   return "Duplicate *args";
 }
@@ -180,6 +171,16 @@ std::string error_v2_params_expected_identifier_after_star_star_token(std::strin
 
 std::string error_v2_params_duplicate_params(std::string_view name, std::string_view program, const Position& start, const Position& end) {
   return std::format("duplicate parameter '{}' in function definition\n{}", name, get_line_and_underline(program, start, end));
+}
+
+
+std::string error_v2_illegal_target_for_augmented_assignment(std::string_view program, const Position& start, const Position& end) {
+  return std::format("target is an illegal expression for augmented assignment\n{}", get_line_and_underline(program, start, end));
+}
+
+
+std::string error_v2_comparison_operators_are_not_associative(std::string_view program, const Position& start, const Position& end) {
+  return std::format("comparison operators are not associative. Use parens\n{}", get_line_and_underline(program, start, end));
 }
 
 

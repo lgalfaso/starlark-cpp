@@ -4,6 +4,7 @@
 
 #include <format>
 #include <string>
+#include <string_view>
 
 #include "errors/source_highlight.hpp"
 #include "proto/starlark_logging.pb.h"
