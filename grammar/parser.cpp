@@ -32,13 +32,13 @@ using ::starlark::ast::LambdaExpr;
 using ::starlark::ast::Parameter;
 using ::starlark::ast::Statement;
 using ::starlark::ast::UnaryExpr;
-using ::starlark::error_messages::error_arguments_duplicate_star_args;
-using ::starlark::error_messages::error_arguments_duplicate_star_star_kvargs;
-using ::starlark::error_messages::error_arguments_expected_identifier_for_named_arguments;
-using ::starlark::error_messages::error_arguments_non_variadic_before_variadic;
-using ::starlark::error_messages::error_arguments_positional_before_named_arguments;
-using ::starlark::error_messages::error_arguments_star_star_argument_must_be_last;
-using ::starlark::error_messages::error_arguments_varadic_arguments_not_allowed;
+using ::starlark::error_messages::error_v2_arguments_duplicate_star_args;
+using ::starlark::error_messages::error_v2_arguments_duplicate_star_star_kvargs;
+using ::starlark::error_messages::error_v2_arguments_expected_identifier_for_named_arguments;
+using ::starlark::error_messages::error_v2_arguments_non_variadic_before_variadic;
+using ::starlark::error_messages::error_v2_arguments_positional_before_named_arguments;
+using ::starlark::error_messages::error_v2_arguments_star_star_argument_must_be_last;
+using ::starlark::error_messages::error_v2_arguments_varadic_arguments_not_allowed;
 using ::starlark::error_messages::error_cannot_load_private_symbol;
 using ::starlark::error_messages::error_duplicate_binding;
 using ::starlark::error_messages::error_duplicate_binding_by_load;
@@ -1898,15 +1898,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (is_current(token_type::kStar)) {
           if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
-            add_error(error_arguments_varadic_arguments_not_allowed());
+            add_error(error_v2_arguments_varadic_arguments_not_allowed(input, lex.current_token().start(), lex.current_token().end()));
           }
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_star_argument()) {
-            add_error(error_arguments_duplicate_star_args());
+            add_error(error_v2_arguments_duplicate_star_args(input, lex.current_token().start(), lex.current_token().end()));
           }
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_star_star_argument()) {
-            add_error(error_arguments_star_star_argument_must_be_last());
+            add_error(error_v2_arguments_star_star_argument_must_be_last(input, lex.current_token().start(), lex.current_token().end()));
           }
           frames.emplace_back(frame{
             .state = parser_state::kParseExpressionFinal,
@@ -1921,11 +1921,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (is_current(token_type::kStarStar)) {
           if (!opts.allow_variadic_arguments) {
             // Report the error, but keep on parsing.
-            add_error(error_arguments_varadic_arguments_not_allowed());
+            add_error(error_v2_arguments_varadic_arguments_not_allowed(input, lex.current_token().start(), lex.current_token().end()));
           }
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_star_star_argument()) {
-            add_error(error_arguments_duplicate_star_star_kvargs());
+            add_error(error_v2_arguments_duplicate_star_star_kvargs(input, lex.current_token().start(), lex.current_token().end()));
           }
           frames.emplace_back(frame{
             .state = parser_state::kParseExpressionFinal,
@@ -1941,7 +1941,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           if (top.previous_argument != nullptr &&
               (top.previous_argument->has_star_argument() ||
                top.previous_argument->has_star_star_argument())) {
-            add_error(error_arguments_non_variadic_before_variadic());
+            add_error(error_v2_arguments_non_variadic_before_variadic(input, lex.current_token().start(), lex.current_token().end()));
           }
           if (lex.current_token().type() == token_type::kIdentifier) {
             frames.emplace_back(frame{
@@ -1949,6 +1949,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .argument = top.argument,
               .previous_argument = top.previous_argument,
             });
+          } else if (top.previous_argument != nullptr && top.previous_argument->has_named_argument()) {
+            add_error(error_v2_arguments_positional_before_named_arguments(input, lex.current_token().start(), lex.current_token().end()));
           }
           frames.emplace_back(frame{
             .state = parser_state::kParseTest,
@@ -1961,7 +1963,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           // The reason this is able to detect that this is not an identifier between brackets is
           // because this rule is only called when the argument value started with an identifier.
           if (!top.argument->value().has_identifier()) {
-            add_error(error_arguments_expected_identifier_for_named_arguments());
+            add_error(error_v2_arguments_expected_identifier_for_named_arguments(input, top.argument->value().pif().start(), top.argument->value().pif().end()));
             break;
           }
           {
@@ -1977,7 +1979,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else {
           if (top.previous_argument != nullptr &&
               top.previous_argument->has_named_argument()) {
-            add_error(error_arguments_positional_before_named_arguments());
+            add_error(error_v2_arguments_positional_before_named_arguments(input, top.argument->value().pif().start(), top.argument->value().pif().end()));
           }
         }
         break;

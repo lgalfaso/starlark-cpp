@@ -1,0 +1,3 @@
+main:2:7: error: varadic arguments are not allowed
+    2 | print(*[1, 2])
+      |       ^

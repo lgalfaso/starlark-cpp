@@ -1,0 +1,3 @@
+main:2:13: error: keyword-variadic argument `**kwargs` must be the last argument
+    2 | print(**{}, *[])
+      |             ^

@@ -13,13 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_arguments_duplicate_star_args();
-std::string_view error_arguments_duplicate_star_star_kvargs();
-std::string_view error_arguments_varadic_arguments_not_allowed();
-std::string_view error_arguments_star_star_argument_must_be_last();
-std::string_view error_arguments_non_variadic_before_variadic();
-std::string_view error_arguments_expected_identifier_for_named_arguments();
-std::string_view error_arguments_positional_before_named_arguments();
 std::string_view error_expected_identifier();
 std::string_view error_expected_string();
 std::string_view error_expected_target();
@@ -58,6 +51,14 @@ std::string error_v2_params_duplicate_params(std::string_view name, std::string_
 std::string error_v2_illegal_target_for_augmented_assignment(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 std::string error_v2_comparison_operators_are_not_associative(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+
+std::string error_v2_arguments_duplicate_star_args(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_arguments_duplicate_star_star_kvargs(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_arguments_varadic_arguments_not_allowed(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_arguments_star_star_argument_must_be_last(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_arguments_non_variadic_before_variadic(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_arguments_expected_identifier_for_named_arguments(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_arguments_positional_before_named_arguments(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 }  // namespace error_messages
 }  // namespace starlark

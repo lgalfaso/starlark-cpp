@@ -1,0 +1,3 @@
+main:2:12: error: non-variadic arguments must be before variadic arguments
+    2 | print(*[], 1)
+      |            ^

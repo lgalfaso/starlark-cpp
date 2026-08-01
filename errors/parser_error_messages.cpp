@@ -14,36 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_arguments_duplicate_star_args() {
-  return "Duplicate *args";
-}
-
-std::string_view error_arguments_duplicate_star_star_kvargs() {
-  return "Duplicate **kwargs";
-}
-
-std::string_view error_arguments_varadic_arguments_not_allowed() {
-  return "Varadic arguments are not allowed";
-}
-
-std::string_view error_arguments_star_star_argument_must_be_last() {
-  return "**kwargs must be the last argument";
-}
-
-std::string_view error_arguments_non_variadic_before_variadic() {
-  return "Non-variadic arguments must be before variadic arguments";
-}
-
-std::string_view error_arguments_expected_identifier_for_named_arguments() {
-  return "Expected identifier for named arguments";
-}
-
-std::string_view error_arguments_positional_before_named_arguments() {
-  return "Positional arguments must come before named arguments";
-}
-
-
-
 std::string_view error_expected_identifier() {
   return "Expecting IDENTIFIER";
 }
@@ -183,6 +153,34 @@ std::string error_v2_comparison_operators_are_not_associative(std::string_view p
   return std::format("comparison operators are not associative. Use parens\n{}", get_line_and_underline(program, start, end));
 }
 
+
+std::string error_v2_arguments_duplicate_star_args(std::string_view program, const Position& start, const Position& end) {
+  return std::format("multiple variadic arguments\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_arguments_duplicate_star_star_kvargs(std::string_view program, const Position& start, const Position& end) {
+  return std::format("multiple keyword-variadic arguments\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_arguments_varadic_arguments_not_allowed(std::string_view program, const Position& start, const Position& end) {
+  return std::format("varadic arguments are not allowed\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_arguments_star_star_argument_must_be_last(std::string_view program, const Position& start, const Position& end) {
+  return std::format("keyword-variadic argument `**kwargs` must be the last argument\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_arguments_non_variadic_before_variadic(std::string_view program, const Position& start, const Position& end) {
+  return std::format("non-variadic arguments must be before variadic arguments\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_arguments_expected_identifier_for_named_arguments(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expected identifier for named arguments\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_arguments_positional_before_named_arguments(std::string_view program, const Position& start, const Position& end) {
+  return std::format("positional arguments must come before named arguments\n{}", get_line_and_underline(program, start, end));
+}
 
 }  // namespace error_messages
 }  // namespace starlark
