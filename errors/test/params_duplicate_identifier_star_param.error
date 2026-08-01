@@ -1,0 +1,3 @@
+main:2:17: error: duplicate parameter 'b' in function definition
+    2 | def foo(a, b, *b): pass
+      |                ^

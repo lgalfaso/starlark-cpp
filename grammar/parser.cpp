@@ -52,7 +52,6 @@ using ::starlark::error_messages::error_expected_string;
 using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
 using ::starlark::error_messages::error_illegal_target_for_augmented_assignment;
-using ::starlark::error_messages::error_params_duplicate_params;
 using ::starlark::error_messages::error_undefined_name;
 using ::starlark::error_messages::error_unexpected_break;
 using ::starlark::error_messages::error_unexpected_comma;
@@ -66,11 +65,12 @@ using ::starlark::error_messages::error_v2_load_at_least_one_symbol;
 using ::starlark::error_messages::error_v2_load_first;
 using ::starlark::error_messages::error_v2_load_not_at_top_level;
 using ::starlark::error_messages::error_v2_params_duplicate_keyword_variadic_paramter;
+using ::starlark::error_messages::error_v2_params_duplicate_params;
 using ::starlark::error_messages::error_v2_params_expected_identifier_after_star_star_token;
+using ::starlark::error_messages::error_v2_params_keyword_variadic_param_must_be_last;
 using ::starlark::error_messages::error_v2_params_named_param_must_follow_bare_star;
 using ::starlark::error_messages::error_v2_params_non_optional_after_optional;
 using ::starlark::error_messages::error_v2_params_star_parameter_may_appear_only_once;
-using ::starlark::error_messages::error_v2_params_keyword_variadic_param_must_be_last;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::PositionInFile;
@@ -2098,7 +2098,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               *param->mutable_pif()->mutable_end() = param->identifier().pif().end();
             }
             if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
-              add_error(error_params_duplicate_params(param->identifier().name()));
+              add_error(error_v2_params_duplicate_params(param->identifier().name(), input, identifier_start, identifier_end));
             }
             // The parameters need to be resolved. The issue is that the block does not yet exists so there
             // is a need to store the Identifiers and resolve them later.
@@ -2127,10 +2127,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_parameter_with_default = false,
             });
             if (is_current(token_type::kIdentifier)) {
-              *param->mutable_star()->mutable_pif()->mutable_end() = lex.current_token().end();
+              auto identifier_start = lex.current_token().start();
+              auto identifier_end = lex.current_token().end();
+              *param->mutable_star()->mutable_pif()->mutable_end() = identifier_end;
               set_identifier(*param->mutable_identifier());
               if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
-                add_error(error_params_duplicate_params(param->identifier().name()));
+                add_error(error_v2_params_duplicate_params(param->identifier().name(), input, identifier_start, identifier_end));
               }
               parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }
@@ -2157,11 +2159,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .previous_parameter_was_bare_star = false,
               .found_parameter_with_default = top.found_parameter_with_default,
             });
+            auto identifier_start = lex.current_token().start();
+            auto identifier_end = lex.current_token().end();
             if (!set_identifier(*param->mutable_identifier())) {
               add_error(error_v2_params_expected_identifier_after_star_star_token(input, lex.current_token().start(), lex.current_token().end()));
             } else {
               if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
-                add_error(error_params_duplicate_params(param->identifier().name()));
+                add_error(error_v2_params_duplicate_params(param->identifier().name(), input, identifier_start, identifier_end));
               }
               parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
             }

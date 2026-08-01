@@ -110,10 +110,6 @@ std::string error_duplicate_load_binding_by_load(std::string_view symbol) {
   return std::format("Multiple bindings for the top-level load symbol '{}'", symbol);
 }
 
-std::string error_params_duplicate_params(std::string_view name) {
-  return std::format("Duplicate argument '{}' in function definition", name);
-}
-
 std::string error_duplicate_binding_from_load(std::string_view symbol) {
   return std::format("Variable '{}' redefines symbol previously defined by a load statement", symbol);
 }
@@ -180,6 +176,10 @@ std::string error_v2_params_named_param_must_follow_bare_star(std::string_view p
 
 std::string error_v2_params_expected_identifier_after_star_star_token(std::string_view program, const Position& start, const Position& end) {
   return std::format("expected identifier after `**` in a variadic-keyword parameter\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_params_duplicate_params(std::string_view name, std::string_view program, const Position& start, const Position& end) {
+  return std::format("duplicate parameter '{}' in function definition\n{}", name, get_line_and_underline(program, start, end));
 }
 
 

@@ -37,7 +37,6 @@ std::string error_cannot_load_private_symbol(std::string_view symbol);
 std::string error_duplicate_load_binding(std::string_view symbol);
 std::string error_duplicate_binding_by_load(std::string_view symbol);
 std::string error_duplicate_load_binding_by_load(std::string_view symbol);
-std::string error_params_duplicate_params(std::string_view name);
 std::string error_duplicate_binding_from_load(std::string_view symbol);
 std::string error_duplicate_binding(std::string_view symbol);
 std::string error_undefined_name(std::string_view name);
@@ -56,6 +55,7 @@ std::string error_v2_params_keyword_variadic_param_must_be_last(std::string_view
 std::string error_v2_params_duplicate_keyword_variadic_paramter(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_named_param_must_follow_bare_star(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_expected_identifier_after_star_star_token(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_params_duplicate_params(std::string_view name, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 }  // namespace error_messages
 }  // namespace starlark
