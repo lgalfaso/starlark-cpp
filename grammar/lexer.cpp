@@ -681,14 +681,13 @@ bool lexer::read_escaped_char(std::string& result, bool utf8_encode, int max_val
 }
 
 std::string lexer::read_identifier_or_keyword() {
-  std::string result;
   bool first = true;
+  auto start = source_code.pos();
 
   while (!source_code.empty()) {
     auto ch = source_code.peek_code_point();
     if ((first && (ch.first == '_' || ucd::is_XID_Start(ch.first))) ||
         (!first && ucd::is_XID_Continue(ch.first))) {
-      utf8_encode_code_point(ch.first, result, false, false);
       source_code.skip(ch.second);
     } else {
       break;
@@ -698,7 +697,7 @@ std::string lexer::read_identifier_or_keyword() {
     // it is showing as another character, then will count it.
     first = false;
   }
-  return result;
+  return std::string{input.substr(start, source_code.pos() - start)};
 }
 
 void lexer::add_error(std::string_view message, Position pos) {
