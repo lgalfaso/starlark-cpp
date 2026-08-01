@@ -6,17 +6,13 @@
 #include <string>
 #include <string_view>
 
+#include "proto/starlark_logging.pb.h"
+
 #pragma GCC visibility push(default)
 
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_function_definition_not_allowed();
-std::string_view error_if_not_allowed_at_top_level();
-std::string_view error_for_not_allowed_at_top_level();
-std::string_view error_load_first();
-std::string_view error_load_not_at_top_level();
-std::string_view error_load_at_least_one_symbol();
 std::string_view error_params_star_parameter_may_appear_only_once();
 std::string_view error_params_non_optional_after_optional();
 std::string_view error_params_variadic_keyword_argument_must_be_last();
@@ -50,6 +46,13 @@ std::string error_params_duplicate_params(std::string_view name);
 std::string error_duplicate_binding_from_load(std::string_view symbol);
 std::string error_duplicate_binding(std::string_view symbol);
 std::string error_undefined_name(std::string_view name);
+
+std::string error_v2_function_definition_not_allowed(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_if_not_allowed_at_top_level(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_for_not_allowed_at_top_level(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_load_first(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_load_not_at_top_level(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_load_at_least_one_symbol(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 }  // namespace error_messages
 }  // namespace starlark

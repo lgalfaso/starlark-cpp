@@ -20,13 +20,11 @@ namespace grammar {
 
 class lexer {
  public:
-  lexer(std::string_view input, starlark::logging::logger& logging);
-  lexer(std::string_view input, const grammar_options& options, starlark::logging::logger& logging);
+  lexer(std::string_view program_name, std::string_view input, starlark::logging::logger& logging);
+  lexer(std::string_view program_name, std::string_view input, const grammar_options& options, starlark::logging::logger& logging);
   const token& current_token() const;
   void next_token();
   const std::vector<std::pair<starlark::logging::Position, starlark::logging::Position>>& comments() const;
-
-  static constexpr std::string module = "Lexer";
 
  private:
   void tokenize();
@@ -46,6 +44,7 @@ class lexer {
   std::size_t current_line = 0;
   std::size_t last_begin_of_line = 0;
   std::size_t indent_ignore = 0;
+  std::string_view program_name;
   std::string_view input;
   unicode::utf8_reader source_code;
   token current;

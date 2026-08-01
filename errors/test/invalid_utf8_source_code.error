@@ -1,0 +1,3 @@
+main:2:18: error: unexpected character
+    2 | abcΠεριπτώσειςdefghi = 1
+      |                  ^

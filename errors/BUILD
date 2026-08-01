@@ -17,6 +17,10 @@ cc_library(
     srcs = ["lexer_error_messages.cpp"],
     hdrs = ["lexer_error_messages.hpp"],
     visibility = ["//visibility:public"],
+    deps = [
+        ":source_highlight",
+        "//proto:starlark_logging_cc_proto",
+    ],
 )
 
 cc_library(
@@ -24,6 +28,10 @@ cc_library(
     srcs = ["parser_error_messages.cpp"],
     hdrs = ["parser_error_messages.hpp"],
     visibility = ["//visibility:public"],
+    deps = [
+        ":source_highlight",
+        "//proto:starlark_logging_cc_proto",
+    ],
 )
 
 cc_library(

@@ -1,0 +1,3 @@
+main:2:1: error: `if` statements are not allowed at the top level
+    2 | if True: print("Hello world")
+      | ^~

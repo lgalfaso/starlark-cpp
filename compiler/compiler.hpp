@@ -21,6 +21,7 @@ class compiler {
  public:
   explicit compiler(std::set<std::string, std::less<>> &binding);
   starlark::bytecode::Program* compile(
+      std::string_view program_name,
       std::string_view starlark_program,
       starlark::grammar::grammar_options options,
       starlark::logging::logger& logging,

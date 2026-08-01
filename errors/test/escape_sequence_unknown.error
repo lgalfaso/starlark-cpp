@@ -1,0 +1,3 @@
+main:2:6: error: invalid escape sequence. The escape sequence is unknown
+    2 | a = "\q"
+      |      ^

@@ -12,7 +12,7 @@ namespace {
 
 void LexerFuzzing(const char* data, size_t size) {
   logger logging;
-  lexer l(std::string_view(data, size), logging);
+  lexer l("main", std::string_view(data, size), logging);
   do {
     l.next_token();
   } while (l.current_token().type() != token_type::kEof);

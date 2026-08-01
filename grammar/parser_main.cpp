@@ -162,7 +162,8 @@ int main(int argc, char* argv[]) {
     if (arg.ends_with(".bzl")) {
       extra_symbols = bzl_symbols;
     }
-    parser star_parser(starlark_program,
+    parser star_parser(argv[i],
+                       starlark_program,
                        grammar_options{
                            .escaped_octal_and_hex_char_are_ascii = false,
                            .require_load_statements_first = !is_build_or_workspace,

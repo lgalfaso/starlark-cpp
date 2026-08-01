@@ -1,0 +1,3 @@
+main:2:11: error: invalid line continuation
+    2 | a = 'abc\
+      |         ^~

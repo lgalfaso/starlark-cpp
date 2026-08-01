@@ -14,7 +14,7 @@ namespace {
 
 void ParserFuzzing(const char* data, size_t size) {
   logger logging;
-  parser star_parser(std::string_view(data, size), logging);
+  parser star_parser("main", std::string_view(data, size), logging);
   Arena arena;
   star_parser.parse_file(arena);
 }

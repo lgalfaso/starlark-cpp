@@ -14,6 +14,8 @@ namespace starlark {
 namespace error_messages {
 
 std::string get_line_and_underline(std::string_view program, const starlark::logging::PositionInFile& pos);
+std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end, bool reverse);
 
 }  // namespace error_messages
 }  // namespace starlark

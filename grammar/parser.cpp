@@ -51,13 +51,7 @@ using ::starlark::error_messages::error_expected_identifier;
 using ::starlark::error_messages::error_expected_string;
 using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
-using ::starlark::error_messages::error_for_not_allowed_at_top_level;
-using ::starlark::error_messages::error_function_definition_not_allowed;
-using ::starlark::error_messages::error_if_not_allowed_at_top_level;
 using ::starlark::error_messages::error_illegal_target_for_augmented_assignment;
-using ::starlark::error_messages::error_load_at_least_one_symbol;
-using ::starlark::error_messages::error_load_first;
-using ::starlark::error_messages::error_load_not_at_top_level;
 using ::starlark::error_messages::error_params_duplicate_params;
 using ::starlark::error_messages::error_params_expected_identifier_after_star_star_token;
 using ::starlark::error_messages::error_params_named_argument_must_follow_bare_star;
@@ -70,6 +64,12 @@ using ::starlark::error_messages::error_unexpected_comma;
 using ::starlark::error_messages::error_unexpected_continue;
 using ::starlark::error_messages::error_unexpected_return;
 using ::starlark::error_messages::error_unexpected_token;
+using ::starlark::error_messages::error_v2_for_not_allowed_at_top_level;
+using ::starlark::error_messages::error_v2_function_definition_not_allowed;
+using ::starlark::error_messages::error_v2_if_not_allowed_at_top_level;
+using ::starlark::error_messages::error_v2_load_at_least_one_symbol;
+using ::starlark::error_messages::error_v2_load_first;
+using ::starlark::error_messages::error_v2_load_not_at_top_level;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::PositionInFile;
@@ -306,11 +306,11 @@ struct frame {
 
 }  // namespace
 
-parser::parser(std::string_view input, logger& logging) : parser(input, grammar_options{}, {}, logging) {
+parser::parser(std::string_view program_name, std::string_view input, logger& logging) : parser(program_name, input, grammar_options{}, {}, logging) {
 }
 
-parser::parser(std::string_view input, const grammar_options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging)
-    : opts(opts), lex(input, opts, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
+parser::parser(std::string_view program_name, std::string_view input, const grammar_options& opts, const std::set<std::string, std::less<>>& bindings, logger& logging)
+    : opts(opts), program_name(program_name), input(input), lex(program_name, input, opts, logging), logging(logging), base_bindings(bindings), nested_loops(1) {
   const auto& symbols = predeclared_symbols();
   base_bindings.insert(symbols.begin(), symbols.end());
   lex.next_token();
@@ -463,12 +463,12 @@ void parser::add_error(std::string_view message) {
 }
 
 void parser::add_error(std::string_view message, const Position& pos) {
-  logging.log(LogLevel::LOG_LEVEL_ERROR, message, module, pos);
+  logging.log(LogLevel::LOG_LEVEL_ERROR, message, program_name, pos);
   recover = true;
 }
 
 void parser::add_warning(std::string_view message) {
-  logging.log(LogLevel::LOG_LEVEL_WARNING, message, module, lex.current_token().start());
+  logging.log(LogLevel::LOG_LEVEL_WARNING, message, program_name, lex.current_token().start());
   recover = true;
 }
 
@@ -487,7 +487,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         if (is_current(token_type::kDef)) {
           found_non_load = true;
           if (!opts.allow_function_definitions) {
-            add_error(error_function_definition_not_allowed());
+            add_error(error_v2_function_definition_not_allowed(input, lex.current_token().start(), lex.current_token().end()));
           }
           Statement* statement = top.statements->Add();
           DefStmt* def_statement = statement->mutable_def_statement();
@@ -534,7 +534,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (is_current(token_type::kIf)) {
           found_non_load = true;
           if (nested_loops.size() == 1 && !opts.allow_top_level_if) {
-            add_error(error_if_not_allowed_at_top_level());
+            add_error(error_v2_if_not_allowed_at_top_level(input, lex.current_token().start(), lex.current_token().end()));
           }
           Statement* statement = top.statements->Add();
           IfStmt* if_statement = statement->mutable_if_statement();
@@ -571,7 +571,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else if (is_current(token_type::kFor)) {
           found_non_load = true;
           if (nested_loops.size() == 1 && !opts.allow_top_level_for) {
-            add_error(error_for_not_allowed_at_top_level());
+            add_error(error_v2_for_not_allowed_at_top_level(input, lex.current_token().start(), lex.current_token().end()));
           }
           Statement* statement = top.statements->Add();
           ForStmt* for_statement = statement->mutable_for_statement();
@@ -843,13 +843,14 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kLoad: {
             std::set<std::string, std::less<>> symbols;
             if (found_non_load && opts.require_load_statements_first) {
-              add_error(error_load_first());
+              add_error(error_v2_load_first(input, lex.current_token().start(), lex.current_token().end()));
             }
             if (nested_loops.size() != 1) {
-              add_error(error_load_not_at_top_level());
+              add_error(error_v2_load_not_at_top_level(input, lex.current_token().start(), lex.current_token().end()));
             }
             *top.statement->mutable_load_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
+            auto start = lex.current_token().start();
             lex.next_token();
             if (!expect(token_type::kLParen)) {
               break;
@@ -902,12 +903,15 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               }
               lex.next_token();
             }
-            if (!loaded_symbol) {
-              add_error(error_load_at_least_one_symbol());
-            }
             *top.statement->mutable_load_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
             *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
-            expect(token_type::kRParen);
+            auto end = lex.current_token().end();
+            if (!expect(token_type::kRParen)) {
+              break;
+            }
+            if (!loaded_symbol) {
+              add_error(error_v2_load_at_least_one_symbol(input, start, end));
+            }
             break;
           }
           case token_type::kBreak:
@@ -1998,11 +2002,13 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::kParseLambda:
         if (!opts.allow_function_definitions) {
-          add_error(error_function_definition_not_allowed());
+          add_error(error_v2_function_definition_not_allowed(input, lex.current_token().start(), lex.current_token().end()));
         }
         *top.test->mutable_pif()->mutable_start() = lex.current_token().start();
         *top.test->mutable_lambda_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
-        expect(token_type::kLambda);
+        if (!expect(token_type::kLambda)) {
+          break;
+        }
         frames.emplace_back(frame{
           .state = parser_state::kParseLambda_0,
           .test = top.test,

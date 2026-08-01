@@ -28,14 +28,12 @@ struct parsing_block {
 
 class parser {
  public:
-  parser(std::string_view input, starlark::logging::logger& logging);
-  parser(std::string_view input, const grammar_options& opts, const std::set<std::string, std::less<>>& bindings, starlark::logging::logger& logging);
+  parser(std::string_view program_name, std::string_view input, starlark::logging::logger& logging);
+  parser(std::string_view program_name, std::string_view input, const grammar_options& opts, const std::set<std::string, std::less<>>& bindings, starlark::logging::logger& logging);
   parser() = delete;
   parser(const parser&) = delete;
   parser(parser&&) = delete;
   starlark::ast::File* parse_file(google::protobuf::Arena& arena);
-
-  static constexpr std::string module = "Parser";
 
  private:
   void parse_statement(google::protobuf::RepeatedPtrField<starlark::ast::Statement>& statements);
@@ -57,6 +55,8 @@ class parser {
   bool is_top_level_block() const;
 
   grammar_options opts;
+  std::string_view program_name;
+  std::string_view input;
   lexer lex;
   starlark::logging::logger& logging;
   std::set<std::string, std::less<>> base_bindings;

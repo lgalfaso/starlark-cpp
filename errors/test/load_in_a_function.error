@@ -1,0 +1,3 @@
+main:4:3: error: `load` statements must appear before other statements
+    4 |   load("//:test.start", "bar")
+      |   ^~~~

@@ -896,7 +896,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
         binding.insert(key);
       }
       class compiler star_compiler(binding);
-      Program* starlark_program = star_compiler.compile((*mod_info)->source_code(), g_options, logging, (*mod_info)->arena());
+      Program* starlark_program = star_compiler.compile((*mod_info)->cannonical_name(), (*mod_info)->source_code(), g_options, logging, (*mod_info)->arena());
       if (starlark_program == nullptr) {
         return status_or<frame*>(status_code::kStaticError);
       }

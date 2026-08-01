@@ -1,0 +1,3 @@
+main:2:1: error: `for` statements are not allowed at the top level
+    2 | for a in range(10): pass
+      | ^~~

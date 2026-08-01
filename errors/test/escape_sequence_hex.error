@@ -1,0 +1,3 @@
+main:2:6: error: invalid hexadecimal escape sequence. Hexadecimal escape sequences must be exactly 2 hexadecimal digits and in the range 0-127
+    2 | a = "\xff"
+      |      ^~~~

@@ -6,35 +6,13 @@
 #include <string>
 #include <string_view>
 
+#include "errors/source_highlight.hpp"
+#include "proto/starlark_logging.pb.h"
+
+using ::starlark::logging::Position;
+
 namespace starlark {
 namespace error_messages {
-
-std::string_view error_function_definition_not_allowed() {
-  return "Function definitions not allowed";
-}
-
-std::string_view error_if_not_allowed_at_top_level() {
-  return "`if` statements are not allowed at the top level";
-}
-
-std::string_view error_for_not_allowed_at_top_level() {
-  return "`for` statements are not allowed at the top level";
-}
-
-
-
-std::string_view error_load_first() {
-  return "`load` statements must appear before other statements";
-}
-
-std::string_view error_load_not_at_top_level() {
-  return "`load` statement not at top level";
-}
-
-std::string_view error_load_at_least_one_symbol() {
-  return "Expect to load at least one symbol";
-}
-
 
 std::string_view error_params_star_parameter_may_appear_only_once() {
   return "* parameter may appear only once";
@@ -167,6 +145,34 @@ std::string error_duplicate_binding(std::string_view symbol) {
 
 std::string error_undefined_name(std::string_view name) {
   return std::format("name '{}' is not defined", name);
+}
+
+
+
+
+
+std::string error_v2_function_definition_not_allowed(std::string_view program, const Position& start, const Position& end) {
+  return std::format("function definitions not allowed\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_if_not_allowed_at_top_level(std::string_view program, const Position& start, const Position& end) {
+  return std::format("`if` statements are not allowed at the top level\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_for_not_allowed_at_top_level(std::string_view program, const Position& start, const Position& end) {
+  return std::format("`for` statements are not allowed at the top level\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_load_first(std::string_view program, const Position& start, const Position& end) {
+  return std::format("`load` statements must appear before other statements\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_load_not_at_top_level(std::string_view program, const Position& start, const Position& end) {
+  return std::format("`load` statement not at top level\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_load_at_least_one_symbol(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expect to load at least one symbol\n{}", get_line_and_underline(program, start, end, true));
 }
 
 }  // namespace error_messages

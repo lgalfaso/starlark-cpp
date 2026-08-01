@@ -522,7 +522,7 @@ TEST(Parser, TestCase) {
   logger logging;
   logging.set_level(LogLevel::LOG_LEVEL_ERROR);
   starlark::grammar::grammar_options opts = starlark::grammar::get_parsing_options(starlark_program);
-  parser star_parser(starlark_program, opts, {}, logging);
+  parser star_parser(argv[1], starlark_program, opts, {}, logging);
   Arena arena;
   File* starlark_file = star_parser.parse_file(arena);
   EXPECT_THAT(logging, IsEmpty()) << show_errors(logging);

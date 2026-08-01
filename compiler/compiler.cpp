@@ -1001,9 +1001,10 @@ const Block& bytecode_generator::block() const {
 
 compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(binding) {}
 
-Program* compiler::compile(std::string_view starlark_program, grammar_options opt, logger& logging, Arena& arena) {
+Program* compiler::compile(std::string_view program_name, std::string_view starlark_program, grammar_options opt, logger& logging, Arena& arena) {
   logger_wrap logging_wrap(logging);
-  parser star_parser(starlark_program,
+  parser star_parser(program_name,
+                     starlark_program,
                      opt,
                      binding,
                      logging_wrap);

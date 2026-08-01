@@ -69,7 +69,7 @@ TEST(CompilerBytecode, TestCase) {
   };
   logger logging;
   Arena arena;
-  Program* actual_starlark_program = star_compiler.compile(starlark_code, opt, logging, arena);
+  Program* actual_starlark_program = star_compiler.compile(argv[1], starlark_code, opt, logging, arena);
 
   ASSERT_NE(actual_starlark_program, nullptr) << get_errors(logging);
   EXPECT_THAT(*actual_starlark_program, EqualsProto(expected_starlark_program));

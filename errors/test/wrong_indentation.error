@@ -1,0 +1,3 @@
+main:3:2: error: indentation error
+    3 |   return a
+      | ~^

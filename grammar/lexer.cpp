@@ -18,19 +18,23 @@
 #include "unicode/utf8_reader.hpp"
 
 using ::starlark::bigint::parse_number;
-using ::starlark::error_messages::error_dangling_bracket;
-using ::starlark::error_messages::error_invalid_escape_sequence;
-using ::starlark::error_messages::error_invalid_escape_sequence_N;
-using ::starlark::error_messages::error_invalid_line_continuation;
-using ::starlark::error_messages::error_unable_to_parse_numeric_literal;
-using ::starlark::error_messages::error_unexpected_character;
-using ::starlark::error_messages::error_unterminated_string;
-using ::starlark::error_messages::error_wrong_indentation;
+using ::starlark::error_messages::error_v2_dangling_bracket;
+using ::starlark::error_messages::error_v2_invalid_escape_sequence_N;
+using ::starlark::error_messages::error_v2_invalid_escape_sequence_hex;
+using ::starlark::error_messages::error_v2_invalid_escape_sequence_octal;
+using ::starlark::error_messages::error_v2_invalid_escape_sequence_unicode;
+using ::starlark::error_messages::error_v2_invalid_escape_sequence_unicode_long;
+using ::starlark::error_messages::error_v2_invalid_escape_sequence_unknown;
+using ::starlark::error_messages::error_v2_invalid_line_continuation;
+using ::starlark::error_messages::error_v2_unable_to_parse_numeric_literal;
+using ::starlark::error_messages::error_v2_unexpected_character;
+using ::starlark::error_messages::error_v2_unterminated_string;
+using ::starlark::error_messages::error_v2_wrong_indentation;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::logger;
-using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::replacement_character_utf8;
+using ::starlark::unicode::utf8_encode_code_point;
 
 namespace starlark {
 namespace grammar {
@@ -151,10 +155,10 @@ int isoctal(int c) {
 
 }  // namespace
 
-lexer::lexer(std::string_view input, logger& logging) : lexer(input, grammar_options{}, logging) {}
+lexer::lexer(std::string_view program_name, std::string_view input, logger& logging) : lexer(program_name, input, grammar_options{}, logging) {}
 
-lexer::lexer(std::string_view input, const grammar_options& opts, logger& logging) :
-    opts(opts), input(input), source_code(input, false, true), current(token_type::kBof, get_position(), get_position()), indent_stack(1), logging(logging) {}
+lexer::lexer(std::string_view program_name, std::string_view input, const grammar_options& opts, logger& logging) :
+    opts(opts), program_name(program_name), input(input), source_code(input, false, true), current(token_type::kBof, get_position(), get_position()), indent_stack(1), logging(logging) {}
 
 const token& lexer::current_token() const {
   return current;
@@ -250,11 +254,13 @@ void lexer::tokenize() {
     case ']':
     case ')':
       if (open_brackets == 0) {
-        add_error(error_dangling_bracket(), get_position());
+        auto pos = get_position();
+        read_operator(next_char);
+        add_error(error_v2_dangling_bracket(input, current.start(), current.end()), pos);
       } else {
         open_brackets--;
+        read_operator(next_char);
       }
-      read_operator(next_char);
       return;
     case '\n': {
       auto start = get_position();
@@ -284,7 +290,7 @@ void lexer::tokenize() {
 
         auto end = get_position();
         current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
-        add_error(error_unexpected_character(), start);
+        add_error(error_v2_unexpected_character(input, start, end), start);
         return;
       }
       const auto& keywords = all_keywords();
@@ -350,7 +356,9 @@ void lexer::consume_indentation(bool modify_indents) {
     }
 
     if (indent_stack.back() < indentation_length) {
-      add_error(error_wrong_indentation(), get_position() - 1);
+      auto end = get_position();
+      auto start = end - (end.column() - 1);
+      add_error(error_v2_wrong_indentation(input, start, end), end - 1);
     }
   }
 }
@@ -371,8 +379,8 @@ void lexer::read_numeric() {
   auto start = get_position();
   auto optional_value = read_number(source_code, opts.allow_binary_integer_literals);
   if (!optional_value.ok()) {
-    add_error(error_unable_to_parse_numeric_literal(), start);
     auto end = get_position();
+    add_error(error_v2_unable_to_parse_numeric_literal(input, start, end), start);
     current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
     return;
   }
@@ -382,8 +390,9 @@ void lexer::read_numeric() {
     char* end;
     double double_value = std::strtod(value.c_str(), &end);
     if (double_value == HUGE_VAL || end != &value.back() + 1) {
-      add_error(error_unable_to_parse_numeric_literal(), start);
-      current = token{token_type::kIllegal, start, get_position(), value};
+      auto current_end = get_position();
+      add_error(error_v2_unable_to_parse_numeric_literal(input, start, current_end), start);
+      current = token{token_type::kIllegal, start, current_end, value};
       return;
     }
     current = token{token_type::kFloat, start, get_position(), double_value};
@@ -392,8 +401,9 @@ void lexer::read_numeric() {
     starlark::bigint::number int_value = parse_number(value, &end, 0);
     // At this stage, we do not care about the size of the bigint. This is a runtime concern.
     if (end != &value.back() + 1) {
-      add_error(error_unable_to_parse_numeric_literal(), start);
-      current = token{token_type::kIllegal, start, get_position(), value};
+      auto current_end = get_position();
+      add_error(error_v2_unable_to_parse_numeric_literal(input, start, current_end), start);
+      current = token{token_type::kIllegal, start, current_end, value};
       return;
     }
     if (int_value.bit_size() < 64) {
@@ -415,8 +425,9 @@ void lexer::read_string() {
     } else if (source_code.capture("b")) {
       is_bytes = true;
     } else {
-      add_error(error_unterminated_string(), get_position());
+      // Currently, we have the checks outside the function and this code will never trigger.
       auto end = get_position();
+      add_error(error_v2_unterminated_string(input, start, end), end);
       current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
       return;
     }
@@ -520,7 +531,7 @@ void lexer::read_string() {
             if (source_code.capture("\n")) {
               newline();
             } else {
-              add_error(error_invalid_line_continuation(), get_position());
+              add_error(error_v2_invalid_line_continuation(input, escape_start, get_position()), get_position());
               found_errors = true;
             }
             break;
@@ -531,40 +542,44 @@ void lexer::read_string() {
           case '4':
           case '5':
           case '6':
-          case '7':
-            if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127, 1, 3, 8)) {
-              add_error(error_invalid_escape_sequence(), escape_start);
+          case '7': {
+            int max_octal =  is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127;
+            if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, max_octal, 1, 3, 8)) {
+              add_error(error_v2_invalid_escape_sequence_octal(max_octal, input, escape_start, get_position()), escape_start);
               found_errors = true;
             }
             break;
-          case 'x':
+          }
+          case 'x': {
             source_code.skip();
-            if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127, 2, 2, 16)) {
-              add_error(error_invalid_escape_sequence(), escape_start);
+            int max_hex = is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127;
+            if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, max_hex, 2, 2, 16)) {
+              add_error(error_v2_invalid_escape_sequence_hex(max_hex, input, escape_start, get_position()), escape_start);
               found_errors = true;
             }
             break;
+          }
           case 'u':
             source_code.skip();
             if (!read_escaped_char(result, true, unicode::utf8_reader::kMaxCodePoint, 4, 4, 16)) {
-              add_error(error_invalid_escape_sequence(), escape_start);
+              add_error(error_v2_invalid_escape_sequence_unicode(input, escape_start, get_position()), escape_start);
               found_errors = true;
             }
             break;
           case 'U':
             source_code.skip();
             if (!read_escaped_char(result, true, unicode::utf8_reader::kMaxCodePoint, 8, 8, 16)) {
-              add_error(error_invalid_escape_sequence(), escape_start);
+              add_error(error_v2_invalid_escape_sequence_unicode_long(input, escape_start, get_position()), escape_start);
               found_errors = true;
             }
             break;
           case 'N':
-            add_error(error_invalid_escape_sequence_N(), escape_start);
+            add_error(error_v2_invalid_escape_sequence_N(input, escape_start, get_position()), escape_start);
             found_errors = true;
             source_code.skip();
             break;
           default:
-            add_error(error_invalid_escape_sequence(), escape_start);
+            add_error(error_v2_invalid_escape_sequence_unknown(input, escape_start, get_position()), escape_start);
             found_errors = true;
             break;
         }
@@ -577,8 +592,8 @@ void lexer::read_string() {
           newline();
           break;
         }
-        add_error(error_unterminated_string(), get_position());
         auto end = get_position();
+        add_error(error_v2_unterminated_string(input, start, end), end);
         current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
         return;
       }
@@ -610,8 +625,8 @@ void lexer::read_string() {
     }
   }
 
-  add_error(error_unterminated_string(), get_position());
   auto end = get_position();
+  add_error(error_v2_unterminated_string(input, start, end), end);
   current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
 }
 
@@ -701,11 +716,11 @@ std::string lexer::read_identifier_or_keyword() {
 }
 
 void lexer::add_error(std::string_view message, Position pos) {
-  logging.log(LogLevel::LOG_LEVEL_ERROR, message, module, pos);
+  logging.log(LogLevel::LOG_LEVEL_ERROR, message, program_name, pos);
 }
 
 void lexer::add_warning(std::string_view message, Position pos) {
-  logging.log(LogLevel::LOG_LEVEL_WARNING, message, module, pos);
+  logging.log(LogLevel::LOG_LEVEL_WARNING, message, program_name, pos);
 }
 
 void lexer::add_comment(Position start, Position end) {

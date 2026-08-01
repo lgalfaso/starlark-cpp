@@ -27,7 +27,7 @@ namespace {
 void checkInvalid(std::string_view program, const grammar_options& opts) {
   logger logging;
   logging.set_level(LogLevel::LOG_LEVEL_ERROR);
-  parser star_parser(program, opts, {}, logging);
+  parser star_parser("main", program, opts, {}, logging);
   Arena arena;
   star_parser.parse_file(arena);
   EXPECT_THAT(logging, Not(IsEmpty()));
