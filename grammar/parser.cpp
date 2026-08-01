@@ -53,11 +53,6 @@ using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
 using ::starlark::error_messages::error_illegal_target_for_augmented_assignment;
 using ::starlark::error_messages::error_params_duplicate_params;
-using ::starlark::error_messages::error_params_expected_identifier_after_star_star_token;
-using ::starlark::error_messages::error_params_named_argument_must_follow_bare_star;
-using ::starlark::error_messages::error_params_non_optional_after_optional;
-using ::starlark::error_messages::error_params_star_parameter_may_appear_only_once;
-using ::starlark::error_messages::error_params_variadic_keyword_argument_must_be_last;
 using ::starlark::error_messages::error_undefined_name;
 using ::starlark::error_messages::error_unexpected_break;
 using ::starlark::error_messages::error_unexpected_comma;
@@ -70,6 +65,12 @@ using ::starlark::error_messages::error_v2_if_not_allowed_at_top_level;
 using ::starlark::error_messages::error_v2_load_at_least_one_symbol;
 using ::starlark::error_messages::error_v2_load_first;
 using ::starlark::error_messages::error_v2_load_not_at_top_level;
+using ::starlark::error_messages::error_v2_params_duplicate_keyword_variadic_paramter;
+using ::starlark::error_messages::error_v2_params_expected_identifier_after_star_star_token;
+using ::starlark::error_messages::error_v2_params_named_param_must_follow_bare_star;
+using ::starlark::error_messages::error_v2_params_non_optional_after_optional;
+using ::starlark::error_messages::error_v2_params_star_parameter_may_appear_only_once;
+using ::starlark::error_messages::error_v2_params_keyword_variadic_param_must_be_last;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::PositionInFile;
@@ -2056,8 +2057,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             parse_parameter_identifiers.emplace_back(std::set<std::string, std::less<>>{}, std::set<Identifier*>{});
           }
           if (is_current(token_type::kIdentifier)) {
+            auto identifier_start = lex.current_token().start();
+            auto identifier_end = lex.current_token().end();
             if (top.found_star_star_parameter) {
-              add_error(error_params_variadic_keyword_argument_must_be_last());
+              add_error(error_v2_params_keyword_variadic_param_must_be_last(input, identifier_start, identifier_end));
             }
             bool found_parameter_with_default = top.found_parameter_with_default;
             Parameter* param = top.parameters->Add();
@@ -2066,7 +2069,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             if (is_current(token_type::kEquals)) {
               found_parameter_with_default = true;
             } else if (top.found_parameter_with_default && !top.found_star_parameter) {
-              add_error(error_params_non_optional_after_optional());
+              add_error(error_v2_params_non_optional_after_optional(input, identifier_start, identifier_end));
             }
             frames.emplace_back(frame{
               .state = parser_state::kParseParameters,
@@ -2102,10 +2105,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             parse_parameter_identifiers.back().second.insert(param->mutable_identifier());
           } else if (is_current(token_type::kStar)) {
             if (top.found_star_parameter) {
-              add_error(error_params_star_parameter_may_appear_only_once());
+              add_error(error_v2_params_star_parameter_may_appear_only_once(input, lex.current_token().start(), lex.current_token().end()));
             }
             if (top.found_star_star_parameter) {
-              add_error(error_arguments_star_star_argument_must_be_last());
+              add_error(error_v2_params_keyword_variadic_param_must_be_last(input, lex.current_token().start(), lex.current_token().end()));
             }
             Parameter* param = top.parameters->Add();
             *param->mutable_star()->mutable_pif()->mutable_start() = lex.current_token().start();
@@ -2133,10 +2136,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
           } else if (is_current(token_type::kStarStar)) {
             if (top.previous_parameter_was_bare_star) {
-              add_error(error_params_named_argument_must_follow_bare_star());
+              add_error(error_v2_params_named_param_must_follow_bare_star(input, lex.current_token().start(), lex.current_token().end()));
             }
             if (top.found_star_star_parameter) {
-              add_error(error_params_variadic_keyword_argument_must_be_last());
+              add_error(error_v2_params_duplicate_keyword_variadic_paramter(input, lex.current_token().start(), lex.current_token().end()));
             }
             Parameter* param = top.parameters->Add();
             *param->mutable_star_star()->mutable_pif()->mutable_start() = lex.current_token().start();
@@ -2155,7 +2158,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               .found_parameter_with_default = top.found_parameter_with_default,
             });
             if (!set_identifier(*param->mutable_identifier())) {
-              add_error(error_params_expected_identifier_after_star_star_token());
+              add_error(error_v2_params_expected_identifier_after_star_star_token(input, lex.current_token().start(), lex.current_token().end()));
             } else {
               if (!parse_parameter_identifiers.back().first.emplace(param->identifier().nfkc_name()).second) {
                 add_error(error_params_duplicate_params(param->identifier().name()));
@@ -2164,7 +2167,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             }
           } else {
             if (top.previous_parameter_was_bare_star) {
-              add_error(error_params_named_argument_must_follow_bare_star());
+              add_error(error_v2_params_named_param_must_follow_bare_star(input, lex.current_token().start(), lex.current_token().end()));
             }
             if (!top.parse_parameters_first && !top.parse_parameters_allow_trailing_comma) {
               add_error(error_unexpected_comma());
@@ -2172,7 +2175,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
         } else {
           if (top.previous_parameter_was_bare_star) {
-            add_error(error_params_named_argument_must_follow_bare_star());
+            add_error(error_v2_params_named_param_must_follow_bare_star(input, lex.current_token().start(), lex.current_token().end()));
           }
         }
         break;

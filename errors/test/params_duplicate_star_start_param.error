@@ -1,0 +1,3 @@
+main:2:19: error: duplicate keyword-variadic parameter
+    2 | def foo(**kwargs, **more_kwargs): pass
+      |                   ^~

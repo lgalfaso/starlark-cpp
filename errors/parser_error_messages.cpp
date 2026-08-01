@@ -14,27 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_params_star_parameter_may_appear_only_once() {
-  return "* parameter may appear only once";
-}
-
-std::string_view error_params_non_optional_after_optional() {
-  return "SyntaxError: parameter without a default follows parameter with a default";
-}
-
-std::string_view error_params_variadic_keyword_argument_must_be_last() {
-  return "Parameters cannot follow variadic-keyword parameter";
-}
-
-std::string_view error_params_named_argument_must_follow_bare_star() {
-  return "named arguments must follow bare *";
-}
-
-std::string_view error_params_expected_identifier_after_star_star_token() {
-  return "Expected identifier after STAR_STAR when parsing parameters";
-}
-
-
 std::string_view error_illegal_target_for_augmented_assignment() {
   return "target is an illegal expression for augmented assignment";
 }
@@ -163,6 +142,8 @@ std::string error_v2_for_not_allowed_at_top_level(std::string_view program, cons
   return std::format("`for` statements are not allowed at the top level\n{}", get_line_and_underline(program, start, end));
 }
 
+
+
 std::string error_v2_load_first(std::string_view program, const Position& start, const Position& end) {
   return std::format("`load` statements must appear before other statements\n{}", get_line_and_underline(program, start, end));
 }
@@ -174,6 +155,33 @@ std::string error_v2_load_not_at_top_level(std::string_view program, const Posit
 std::string error_v2_load_at_least_one_symbol(std::string_view program, const Position& start, const Position& end) {
   return std::format("expect to load at least one symbol\n{}", get_line_and_underline(program, start, end, true));
 }
+
+
+
+std::string error_v2_params_star_parameter_may_appear_only_once(std::string_view program, const Position& start, const Position& end) {
+  return std::format("variadic parameter may appear only once\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_params_non_optional_after_optional(std::string_view program, const Position& start, const Position& end) {
+  return std::format("parameter without a default follows parameter with a default\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_params_keyword_variadic_param_must_be_last(std::string_view program, const Position& start, const Position& end) {
+  return std::format("parameters cannot follow the keyword-variadic parameter\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_params_duplicate_keyword_variadic_paramter(std::string_view program, const Position& start, const Position& end) {
+  return std::format("duplicate keyword-variadic parameter\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_params_named_param_must_follow_bare_star(std::string_view program, const Position& start, const Position& end) {
+  return std::format("named parameter must follow bare * parameter\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_params_expected_identifier_after_star_star_token(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expected identifier after `**` in a variadic-keyword parameter\n{}", get_line_and_underline(program, start, end));
+}
+
 
 }  // namespace error_messages
 }  // namespace starlark

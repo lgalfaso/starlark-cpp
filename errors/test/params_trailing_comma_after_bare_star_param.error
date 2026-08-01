@@ -1,0 +1,3 @@
+main:2:11: error: named parameter must follow bare * parameter
+    2 | def foo(*,): pass
+      |           ^
