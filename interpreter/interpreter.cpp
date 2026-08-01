@@ -55,6 +55,8 @@ using ::starlark::error_messages::error_symbol_not_available;
 using ::starlark::error_messages::error_unable_to_load_module;
 using ::starlark::error_messages::error_unbound_variable;
 using ::starlark::error_messages::error_unknown_op;
+using ::starlark::error_messages::error_v2_max_bytes_length;
+using ::starlark::error_messages::error_v2_max_sequence_length;
 using ::starlark::error_messages::error_v2_max_string_length;
 using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::predeclared_symbols;
@@ -165,23 +167,20 @@ frame* run_program(
     for (const auto& op : block.op_code()) {
       switch (op.op_code_case()) {
         case OpCode::kConstString:
-          // TODO(lmirelmann): This error will not show up the specific string that has the issue as
-          // we are not pointing to the actual ip and block. The right approach would be to be
-          // able to produce the errors using the op code information.
           if (op.const_string().value().length() > ctx.options().max_string_length) {
-            error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length, source_code, op.const_string().pif()), op.const_string().pif().start());
+            error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length, source_code, op.pif()), op.pif().start());
             return nullptr;
           }
           break;
         case OpCode::kConstBytes:
           if (op.const_bytes().value().length() > ctx.options().max_string_length) {
-            error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
+            error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length, source_code, op.pif()), op.pif().start());
             return nullptr;
           }
           break;
         case OpCode::kMakeTuple:
           if (op.make_tuple().number_of_elements() > ctx.options().max_sequence_size) {
-            error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+            error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size, source_code, op.pif()), op.pif().start());
             return nullptr;
           }
           break;

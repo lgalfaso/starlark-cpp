@@ -1,11 +1,13 @@
 // Copyright 2026 Lucas Mirelmann
 
 #include "errors/runtime_error_messages.hpp"
-#include "proto/starlark_logging.pb.h"
 
 #include <format>
 #include <string>
 #include <string_view>
+
+#include "errors/source_highlight.hpp"
+#include "proto/starlark_logging.pb.h"
 
 using ::starlark::logging::PositionInFile;
 
@@ -481,41 +483,17 @@ std::string error_recursive_call(std::string_view fn_name) {
 
 
 
-namespace {
-
-std::string get_line_and_underline(std::string_view program, const PositionInFile& pos) {
-  std::string result;
-  // TODO(lmirelmann): This can be improved as this information can be part of the program while being parsed.
-  // We cannot use the information from `column` directly as this would not be taking into consideration Unicode characters
-  // that their UTF8 representation is 2 or more characters.
-  auto start = pos.start().pos();
-  while (start > 0 && program[start] != '\n' && program[start] != '\r') {
-    --start;
-  }
-  if (program[start] == '\n' || program[start] == '\r') {
-    ++start;
-  }
-  auto end = program.find_first_of("\n\r", pos.start().pos());
-  std::string_view line;
-  if (end == std::string_view::npos) {
-    line = program.substr(start);
-  } else {
-    line = program.substr(start, end - start);
-  }
-  result += std::format("{:5} | {}\n", pos.start().row(), line);
-  if (pos.start().row() == pos.end().row()) {
-    result += std::format("      |{:{}}{:~<{}}\n", ' ', pos.start().column(), '^', pos.end().column() - pos.start().column());
-  } else {
-    // TODO(lmirelmann): This case can be improved.
-    result += std::format("      |{:{}}^", ' ', pos.start().column());
-  }
-  return result;
-}
-
-}
 
 std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const PositionInFile& pos) {
   return std::format("string must be at most {} elements\n{}", max_length, get_line_and_underline(program, pos));
+}
+
+std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const PositionInFile& pos) {
+  return std::format("bytes must be at most {} elements\n{}", max_length, get_line_and_underline(program, pos));
+}
+
+std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const PositionInFile& pos) {
+  return std::format("sequences must be at most {} elements\n{}", max_length, get_line_and_underline(program, pos));
 }
 
 }  // namespace error_messages

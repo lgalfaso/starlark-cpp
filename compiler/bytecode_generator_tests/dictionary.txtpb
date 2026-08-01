@@ -5,23 +5,23 @@ block {
   op_code { make_dictionary { reserve_size: 0 } }
   op_code { pop {} }
   op_code { make_dictionary { reserve_size: 1} }
-  op_code { const_string { value: "a" pif { start { row: 2 column: 2 pos: 4 } end { row: 2 column: 5 pos: 7 } } } }
+  op_code { const_string { value: "a" } pif { start { row: 2 column: 2 pos: 4 } end { row: 2 column: 5 pos: 7 } } }
   op_code { const_int { value: 1 } }
   op_code { add_to_dictionary { number_of_elements: 1 } }
   op_code { pop {} }
   op_code { make_dictionary { reserve_size: 2} }
-  op_code { const_string { value: "a" pif { start { row: 3 column: 2 pos: 13 } end { row: 3 column: 5 pos: 16 } } } }
+  op_code { const_string { value: "a" } pif { start { row: 3 column: 2 pos: 13 } end { row: 3 column: 5 pos: 16 } } }
   op_code { const_int { value: 1 } }
-  op_code { const_string { value: "b" pif { start { row: 3 column: 10 pos: 21 } end { row: 3 column: 13 pos: 24 } } } }
+  op_code { const_string { value: "b" } pif { start { row: 3 column: 10 pos: 21 } end { row: 3 column: 13 pos: 24 } } }
   op_code { const_int { value: 2 } }
   op_code { add_to_dictionary { number_of_elements: 2 } }
   op_code { pop {} }
   op_code { make_dictionary { reserve_size: 3} }
-  op_code { const_string { value: "a" pif { start { row: 4 column: 2 pos: 30 } end { row: 4 column: 5 pos: 33 } } } }
+  op_code { const_string { value: "a" } pif { start { row: 4 column: 2 pos: 30 } end { row: 4 column: 5 pos: 33 } } }
   op_code { const_int { value: 1 } }
-  op_code { const_string { value: "b" pif { start { row: 4 column: 10 pos: 38 } end { row: 4 column: 13 pos: 41 } } } }
+  op_code { const_string { value: "b" } pif { start { row: 4 column: 10 pos: 38 } end { row: 4 column: 13 pos: 41 } } }
   op_code { const_int { value: 2 } }
-  op_code { const_string { value: "c" pif { start { row: 4 column: 18 pos: 46 } end { row: 4 column: 21 pos: 49 } } } }
+  op_code { const_string { value: "c" } pif { start { row: 4 column: 18 pos: 46 } end { row: 4 column: 21 pos: 49 } } }
   op_code { const_int { value: 3 } }
   op_code { add_to_dictionary { number_of_elements: 3 } }
   op_code { pop {} }

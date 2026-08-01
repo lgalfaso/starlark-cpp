@@ -3,6 +3,16 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
+    name = "source_highlight",
+    srcs = ["source_highlight.cpp"],
+    hdrs = ["source_highlight.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:starlark_logging_cc_proto",
+    ],
+)
+
+cc_library(
     name = "lexer_error_messages",
     srcs = ["lexer_error_messages.cpp"],
     hdrs = ["lexer_error_messages.hpp"],
@@ -22,6 +32,7 @@ cc_library(
     hdrs = ["runtime_error_messages.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        ":source_highlight",
         "//proto:starlark_logging_cc_proto",
     ],
 )

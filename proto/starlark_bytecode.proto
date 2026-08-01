@@ -14,7 +14,7 @@ message Block {
 }
 
 message OpCode {
-  // next_id: 107
+  // next_id: 108
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -138,6 +138,7 @@ message OpCode {
     End end = 58;
     Fail fail = 71;
   }
+  starlark.logging.PositionInFile pif = 107;
 }
 
 message ConstNone {}
@@ -156,12 +157,10 @@ message ConstFloat {
 
 message ConstString {
   string value = 1;
-  starlark.logging.PositionInFile pif = 2;
 }
 
 message ConstBytes {
   string value = 1;
-  starlark.logging.PositionInFile pif = 2;
 }
 
 message Pop {}

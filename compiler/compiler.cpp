@@ -211,14 +211,14 @@ void bytecode_generator::enter_float_value(const FloatValue* float_value) {
 }
 
 void bytecode_generator::enter_string_value(const StringValue* string_value) {
-  auto* const_string_op = mutable_block()->add_op_code()->mutable_const_string();
-  const_string_op->set_value(string_value->value());
+  auto* const_string_op = mutable_block()->add_op_code();
+  const_string_op->mutable_const_string()->set_value(string_value->value());
   *const_string_op->mutable_pif() = string_value->pif();
 }
 
 void bytecode_generator::enter_bytes_value(const StringValue* bytes_value) {
-  auto* const_bytes_op = mutable_block()->add_op_code()->mutable_const_bytes();
-  const_bytes_op->set_value(bytes_value->value());
+  auto* const_bytes_op = mutable_block()->add_op_code();
+  const_bytes_op->mutable_const_bytes()->set_value(bytes_value->value());
   *const_bytes_op->mutable_pif() = bytes_value->pif();
 }
 
@@ -657,7 +657,9 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
 }
 
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
-  mutable_block()->add_op_code()->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
+  auto* tuple_op = mutable_block()->add_op_code();
+  tuple_op->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
+  *tuple_op->mutable_pif() = tuple->pif();
 }
 
 void bytecode_generator::enter_tuple_for_assignment(const Tuple* tuple) {

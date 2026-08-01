@@ -1,0 +1,3 @@
+main:3:10: error: sequences must be at most 10 elements
+    3 |   return 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

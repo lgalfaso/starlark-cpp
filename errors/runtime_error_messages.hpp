@@ -147,6 +147,9 @@ std::string error_unknown_op(int op_code);
 std::string error_recursive_call(std::string_view fn_name);
 
 std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const starlark::logging::PositionInFile& pos);
+std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const starlark::logging::PositionInFile& pos);
+std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const starlark::logging::PositionInFile& pos);
+
 }  // namespace error_messages
 }  // namespace starlark
 

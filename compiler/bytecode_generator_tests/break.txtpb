@@ -10,10 +10,10 @@ block {
   op_code { get_iterator { } }                                                                                                    #  8
   op_code { for_iterator { address_delta: 8 } }                                                                                   #  9
   op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                  # 10
-  op_code { const_string { value: "abc" pif { start { row: 2 column: 5 pos: 24 } end { row: 2 column: 10 pos: 29 } } } }          # 11
+  op_code { const_string { value: "abc" } pif { start { row: 2 column: 5 pos: 24 } end { row: 2 column: 10 pos: 29 } } }          # 11
   op_code { pop { } }                                                                                                             # 12
   op_code { goto { address_delta: 4 } }                                                                                           # 13
-  op_code { const_string { value: "def" pif { start { row: 4 column: 5 pos: 44 } end { row: 4 column: 10 pos: 49 } } } }          # 14
+  op_code { const_string { value: "def" } pif { start { row: 4 column: 5 pos: 44 } end { row: 4 column: 10 pos: 49 } } }          # 14
   op_code { pop { } }                                                                                                             # 15
   op_code { goto { address_delta: -7 } }                                                                                          # 16
   op_code { end_iterator { } }                                                                                                    # 17
@@ -26,7 +26,7 @@ block {
   op_code { get_iterator { } }                                                                                                    # 23
   op_code { for_iterator { address_delta: 26 } }                                                                                  # 24
   op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                  # 25
-  op_code { const_string { value: "abc" pif { start { row: 7 column: 5 pos: 75 } end { row: 7 column: 10 pos: 80 } } } }          # 26
+  op_code { const_string { value: "abc" } pif { start { row: 7 column: 5 pos: 75 } end { row: 7 column: 10 pos: 80 } } }          # 26
   op_code { pop { } }                                                                                                             # 27
   op_code { goto { address_delta: 22 } }                                                                                          # 28
   op_code { make_list { reserve_size: 3 } }                                                                                       # 29
@@ -37,17 +37,17 @@ block {
   op_code { get_iterator { } }                                                                                                    # 34
   op_code { for_iterator { address_delta: 8 } }                                                                                   # 35
   op_code { store { frame: 1 pos_in_frame: 1 } }                                                                                  # 36
-  op_code { const_string { value: "def" pif { start { row: 10 column: 9 pos: 123 } end { row: 10 column: 14 pos: 128 } } } }      # 37
+  op_code { const_string { value: "def" } pif { start { row: 10 column: 9 pos: 123 } end { row: 10 column: 14 pos: 128 } } }      # 37
   op_code { pop { } }                                                                                                             # 38
   op_code { goto { address_delta: 4 } }                                                                                           # 39
-  op_code { const_string { value: "ghi" pif { start { row: 12 column: 9 pos: 151 } end { row: 12 column: 14 pos: 156 } } } }      # 40
+  op_code { const_string { value: "ghi" } pif { start { row: 12 column: 9 pos: 151 } end { row: 12 column: 14 pos: 156 } } }      # 40
   op_code { pop { } }                                                                                                             # 41
   op_code { goto { address_delta: -7 } }                                                                                          # 42
   op_code { end_iterator { } }                                                                                                    # 43
-  op_code { const_string { value: "jkl" pif { start { row: 13 column: 5 pos: 161 } end { row: 13 column: 10 pos: 166 } } } }      # 44
+  op_code { const_string { value: "jkl" } pif { start { row: 13 column: 5 pos: 161 } end { row: 13 column: 10 pos: 166 } } }      # 44
   op_code { pop { } }                                                                                                             # 45
   op_code { goto { address_delta: 4 } }                                                                                           # 46
-  op_code { const_string { value: "mno" pif { start { row: 15 column: 5 pos: 181 } end { row: 15 column: 10 pos: 186 } } } }      # 47
+  op_code { const_string { value: "mno" } pif { start { row: 15 column: 5 pos: 181 } end { row: 15 column: 10 pos: 186 } } }      # 47
   op_code { pop { } }                                                                                                             # 48
   op_code { goto { address_delta: -25 } }                                                                                         # 49
   op_code { end_iterator { } }                                                                                                    # 50

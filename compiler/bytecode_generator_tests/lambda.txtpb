@@ -16,7 +16,7 @@ block {
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK } }                                                              #  0
-  op_code { const_string { value: "1" pif { start { row: 1 column: 9 pos: 8 } end { row: 1 column: 12 pos: 11 } } } }  #  1
+  op_code { const_string { value: "1" } pif { start { row: 1 column: 9 pos: 8 } end { row: 1 column: 12 pos: 11 } } }  #  1
   op_code { return { } }                                                                                               #  2
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
