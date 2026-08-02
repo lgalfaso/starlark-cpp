@@ -12,7 +12,6 @@
 
 #include "errors/parser_error_messages.hpp"
 #include "string/levenshtein.hpp"
-#include "third-party/defer.hpp"
 #include "unicode/normalization.hpp"
 
 using ::google::protobuf::Arena;

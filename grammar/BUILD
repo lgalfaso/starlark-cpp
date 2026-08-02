@@ -126,7 +126,6 @@ cc_library(
         "//logging",
         "//proto:starlark_ast_cc_proto",
         "//string:levenshtein",
-        "//third-party:defer",
         "//unicode:normalization",
     ],
 )

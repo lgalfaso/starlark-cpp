@@ -19,7 +19,6 @@
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_types.hpp"
-#include "third-party/defer.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::grammar::grammar_options;

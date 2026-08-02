@@ -26,6 +26,7 @@ cc_library(
     deps = [
         ":compiler",
         "//proto:starlark_bytecode_cc_proto",
+        "//third-party:defer",
         "@googletest//:gtest",
         "@protobuf",
         "@protobuf-matchers//protobuf-matchers",
