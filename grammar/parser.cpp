@@ -33,8 +33,6 @@ using ::starlark::ast::Parameter;
 using ::starlark::ast::Statement;
 using ::starlark::ast::UnaryExpr;
 using ::starlark::error_messages::error_expected_symbol;
-using ::starlark::error_messages::error_expected_target;
-using ::starlark::error_messages::error_unexpected_token;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_args;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_star_kvargs;
 using ::starlark::error_messages::error_v2_arguments_expected_identifier_for_named_arguments;
@@ -52,6 +50,7 @@ using ::starlark::error_messages::error_v2_duplicate_load_binding;
 using ::starlark::error_messages::error_v2_duplicate_load_binding_by_load;
 using ::starlark::error_messages::error_v2_expected_identifier;
 using ::starlark::error_messages::error_v2_expected_string;
+using ::starlark::error_messages::error_v2_expected_target;
 using ::starlark::error_messages::error_v2_for_not_allowed_at_top_level;
 using ::starlark::error_messages::error_v2_function_definition_not_allowed;
 using ::starlark::error_messages::error_v2_if_not_allowed_at_top_level;
@@ -71,6 +70,7 @@ using ::starlark::error_messages::error_v2_unexpected_break;
 using ::starlark::error_messages::error_v2_unexpected_comma;
 using ::starlark::error_messages::error_v2_unexpected_continue;
 using ::starlark::error_messages::error_v2_unexpected_return;
+using ::starlark::error_messages::error_v2_unexpected_token;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::PositionInFile;
@@ -971,7 +971,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           found_non_load = true;
           if (!is_target(&top.statement->expression_statement())) {
             // Report the error and continue to parse this as an expression
-            add_error(error_expected_target());
+            add_error(error_v2_expected_target(input, top.statement->expression_statement().pif().start(), top.statement->expression_statement().pif().end()));
           }
           if (op->first != token_type::kEquals && (
               top.statement->expression_statement().has_tuple() ||
@@ -1394,7 +1394,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
         } else {
           if (top.primary_must_be_target && !is_target(top.primary)) {
-            add_error(error_expected_target());
+            add_error(error_v2_expected_target(input, top.primary->pif().start(), top.primary->pif().end()));
           }
         }
         break;
@@ -1565,7 +1565,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             });
           }
         } else {
-          add_error(error_unexpected_token());
+          add_error(error_v2_unexpected_token(input, lex.current_token().start(), lex.current_token().end()));
         }
         break;
       case parser_state::kParseOperandExpression_0:

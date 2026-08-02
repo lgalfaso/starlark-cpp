@@ -1,0 +1,3 @@
+main:4:11: error: expression is not a valid target
+    4 |   for a() in []: pass
+      |       ^~~

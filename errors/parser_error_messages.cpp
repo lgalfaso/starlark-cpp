@@ -14,16 +14,8 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_expected_target() {
-  return "Expecting TARGET";
-}
-
 std::string error_expected_symbol(std::string_view symbol) {
   return std::format("Expecting {}", symbol);
-}
-
-std::string_view error_unexpected_token() {
-  return "Unexpected token";
 }
 
 
@@ -188,6 +180,14 @@ std::string error_v2_unexpected_continue(std::string_view program, const Positio
 
 std::string error_v2_unexpected_comma(std::string_view program, const Position& start, const Position& end) {
   return std::format("unexpected COMMA(`,`)\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_unexpected_token(std::string_view program, const Position& start, const Position& end) {
+  return std::format("unexpected token\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_target(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expression is not a valid target\n{}", get_line_and_underline(program, start, end));
 }
 
 }  // namespace error_messages
