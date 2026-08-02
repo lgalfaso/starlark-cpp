@@ -1,0 +1,3 @@
+main:2:15: error: expecting close parentheses ')'
+    2 | b = a.count(1 2
+      |               ^

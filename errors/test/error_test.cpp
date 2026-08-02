@@ -79,6 +79,7 @@ TEST(Parser, TestCase) {
   auto result = runner.run(loader, "main", g_options, r_options, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_FALSE(logging.empty());
+  // TODO(lmirelmann): We should check all the errors.
   EXPECT_EQ(pretty_log(*logging.begin()), expeted_error_message);
 }
 

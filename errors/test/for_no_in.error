@@ -1,0 +1,3 @@
+main:4:9: error: expecting IN(`in`) ':'
+    4 |   for a {}:
+      |         ^

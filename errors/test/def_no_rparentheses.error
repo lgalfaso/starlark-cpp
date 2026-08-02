@@ -1,0 +1,3 @@
+main:2:9: error: expecting close parentheses ')'
+    2 | def foo(: pass
+      |         ^

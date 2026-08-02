@@ -1,0 +1,3 @@
+main:4:15: error: expecting colon ':'
+    4 |   for a in [] return 0
+      |               ^~~~~~

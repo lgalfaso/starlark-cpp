@@ -1,0 +1,3 @@
+main:2:14: error: expecting IN(`in`) ':'
+    2 | a = [x for x {}]
+      |              ^

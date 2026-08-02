@@ -14,16 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_expected_symbol(std::string_view symbol) {
-  return std::format("Expecting {}", symbol);
-}
-
-
-
-
-
-
-
 std::string error_v2_function_definition_not_allowed(std::string_view program, const Position& start, const Position& end) {
   return std::format("function definitions not allowed\n{}", get_line_and_underline(program, start, end));
 }
@@ -163,6 +153,62 @@ std::string error_v2_expected_identifier(std::string_view program, const Positio
 
 std::string error_v2_expected_string(std::string_view program, const Position& start, const Position& end) {
   return std::format("expecting a string literal\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_lparentheses(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting open parentheses '('\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_rparentheses(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting close parentheses ')'\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_lbracket(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting open bracket '['\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_rbracket(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting close bracket ']'\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_lbrace(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting open brace '{{'\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_rbrace(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting close brace '}}'\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_colon(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting colon ':'\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_in(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting IN(`in`) ':'\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_indent(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting an indent\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_outdent(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting an outdent\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_newline(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting a NEWLINE(`\\n`)\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_equals(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting a EQUALS(`=`)\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_else(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting a `else`\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_lambda(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting a `lambda`\n{}", get_line_and_underline(program, start, end));
 }
 
 

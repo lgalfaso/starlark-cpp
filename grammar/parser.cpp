@@ -32,7 +32,6 @@ using ::starlark::ast::LambdaExpr;
 using ::starlark::ast::Parameter;
 using ::starlark::ast::Statement;
 using ::starlark::ast::UnaryExpr;
-using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_args;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_star_kvargs;
 using ::starlark::error_messages::error_v2_arguments_expected_identifier_for_named_arguments;
@@ -48,7 +47,21 @@ using ::starlark::error_messages::error_v2_duplicate_binding_from_load;
 using ::starlark::error_messages::error_v2_duplicate_binding_previous_load;
 using ::starlark::error_messages::error_v2_duplicate_load_binding;
 using ::starlark::error_messages::error_v2_duplicate_load_binding_by_load;
+using ::starlark::error_messages::error_v2_expected_colon;
+using ::starlark::error_messages::error_v2_expected_else;
+using ::starlark::error_messages::error_v2_expected_equals;
 using ::starlark::error_messages::error_v2_expected_identifier;
+using ::starlark::error_messages::error_v2_expected_in;
+using ::starlark::error_messages::error_v2_expected_indent;
+using ::starlark::error_messages::error_v2_expected_lambda;
+using ::starlark::error_messages::error_v2_expected_lbrace;
+using ::starlark::error_messages::error_v2_expected_lbracket;
+using ::starlark::error_messages::error_v2_expected_lparentheses;
+using ::starlark::error_messages::error_v2_expected_newline;
+using ::starlark::error_messages::error_v2_expected_outdent;
+using ::starlark::error_messages::error_v2_expected_rbrace;
+using ::starlark::error_messages::error_v2_expected_rbracket;
+using ::starlark::error_messages::error_v2_expected_rparentheses;
 using ::starlark::error_messages::error_v2_expected_string;
 using ::starlark::error_messages::error_v2_expected_target;
 using ::starlark::error_messages::error_v2_for_not_allowed_at_top_level;
@@ -364,102 +377,6 @@ bool parser::is_current(token_type expected_token) const {
   return lex.current_token().type() == expected_token;
 }
 
-bool parser::expect(token_type expected_token) {
-  static const std::map<token_type, std::string> token_name = {
-    {token_type::kAmpersand,            "AMPERSAND"},
-    {token_type::kAmpersandEquals,      "AMPERSAND_EQUALS"},
-    {token_type::kAnd,                  "AND"},
-    {token_type::kAs,                   "AS"},
-    {token_type::kAssert,               "ASSERT"},
-    {token_type::kAsync,                "ASYNC"},
-    {token_type::kAwait,                "AWAIT"},
-    {token_type::kBigInt,               "BIG_INT"},
-    {token_type::kBof,                  "BOF"},
-    {token_type::kBreak,                "BREAK"},
-    {token_type::kBytes,                "BYTES"},
-    {token_type::kCaret,                "CARET"},
-    {token_type::kCaretEquals,          "CARET_EQUALS"},
-    {token_type::kClass,                "CLASS"},
-    {token_type::kColon,                "COLON"},
-    {token_type::kComma,                "COMMA"},
-    {token_type::kContinue,             "CONTINUE"},
-    {token_type::kDef,                  "DEF"},
-    {token_type::kDel,                  "DEL"},
-    {token_type::kDot,                  "DOT"},
-    {token_type::kElif,                 "ELIF"},
-    {token_type::kElse,                 "ELSE"},
-    {token_type::kEof,                  "EOF"},
-    {token_type::kEquals,               "EQUALS"},
-    {token_type::kEqualsEquals,         "EQUALS_EQUALS"},
-    {token_type::kExcept,               "EXCEPT"},
-    {token_type::kFinally,              "FINALLY"},
-    {token_type::kFloat,                "FLOAT"},
-    {token_type::kFor,                  "FOR"},
-    {token_type::kFrom,                 "FROM"},
-    {token_type::kGlobal,               "GLOBAL"},
-    {token_type::kGreater,              "GREATER"},
-    {token_type::kGreaterEquals,        "GREATER_EQUALS"},
-    {token_type::kGreaterGreater,       "GREATER_GREATER"},
-    {token_type::kGreaterGreaterEquals, "GREATER_GREATER_EQUALS"},
-    {token_type::kIdentifier,           "IDENTIFIER"},
-    {token_type::kIf,                   "IF"},
-    {token_type::kIllegal,              "ILLEGAL"},
-    {token_type::kImport,               "IMPORT"},
-    {token_type::kIn,                   "IN"},
-    {token_type::kIndent,               "INDENT"},
-    {token_type::kInt,                  "INT"},
-    {token_type::kIs,                   "IS"},
-    {token_type::kLBrace,               "LBRACE"},
-    {token_type::kLBracket,             "LBRACKET"},
-    {token_type::kLambda,               "LAMBDA"},
-    {token_type::kLess,                 "LESS"},
-    {token_type::kLessEquals,           "LESS_EQUALS"},
-    {token_type::kLessLess,             "LESS_LESS"},
-    {token_type::kLessLessEquals,       "LESS_LESS_EQUALS"},
-    {token_type::kLoad,                 "LOAD"},
-    {token_type::kLParen,               "LPAREN"},
-    {token_type::kMinus,                "MINUS"},
-    {token_type::kMinusEquals,          "MINUS_EQUALS"},
-    {token_type::kNewline,              "NEWLINE"},
-    {token_type::kNonlocal,             "NONLOCAL"},
-    {token_type::kNot,                  "NOT"},
-    {token_type::kNotEquals,            "NOT_EQUALS"},
-    {token_type::kOr,                   "OR"},
-    {token_type::kOutdent,              "OUTDENT"},
-    {token_type::kPass,                 "PASS"},
-    {token_type::kPercent,              "PERCENT"},
-    {token_type::kPercentEquals,        "PERCENT_EQUALS"},
-    {token_type::kPipe,                 "PIPE"},
-    {token_type::kPipeEquals,           "PIPE_EQUALS"},
-    {token_type::kPlus,                 "PLUS"},
-    {token_type::kPlusEquals,           "PLUS_EQUALS"},
-    {token_type::kRaise,                "RAISE"},
-    {token_type::kRBrace,               "RBRACE"},
-    {token_type::kRBracket,             "RBRACKET"},
-    {token_type::kReturn,               "RETURN"},
-    {token_type::kRParen,               "RPAREN"},
-    {token_type::kSemi,                 "SEMI"},
-    {token_type::kSlash,                "SLASH"},
-    {token_type::kSlashEquals,          "SLASH_EQUALS"},
-    {token_type::kSlashSlash,           "SLASH_SLASH"},
-    {token_type::kSlashSlashEquals,     "SLASH_SLASH_EQUALS"},
-    {token_type::kStar,                 "STAR"},
-    {token_type::kStarEquals,           "STAR_EQUALS"},
-    {token_type::kStarStar,             "STAR_STAR"},
-    {token_type::kString,               "STRING"},
-    {token_type::kTilde,                "TILDE"},
-    {token_type::kTry,                  "TRY"},
-    {token_type::kWhile,                "WHILE"},
-    {token_type::kWith,                 "WITH"},
-    {token_type::kYield,                "YIELD"},
-  };
-  if (capture(expected_token)) {
-    return true;
-  }
-  add_error(error_expected_symbol(token_name.at(expected_token)));
-  return false;
-}
-
 void parser::add_error(std::string_view message) {
   add_error(message, lex.current_token().start());
 }
@@ -513,7 +430,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           bind(def_statement->function_name());
           resolve(def_statement->mutable_function_name(), 0);
 
-          if (!expect(token_type::kLParen)) {
+          if (!capture(token_type::kLParen)) {
+            add_error(error_v2_expected_lparentheses(input, lex.current_token().start(), lex.current_token().end()));
             break;
           }
           nested_loops.push_back(0);
@@ -616,10 +534,12 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::kParseStatementDef_0:
         create_block(parse_parameter_identifiers.back().first, parse_parameter_identifiers.back().second, top.def_statement->mutable_function_binding());
         parse_parameter_identifiers.pop_back();
-        if (!expect(token_type::kRParen)) {
+        if (!capture(token_type::kRParen)) {
+          add_error(error_v2_expected_rparentheses(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
-        if (!expect(token_type::kColon)) {
+        if (!capture(token_type::kColon)) {
+          add_error(error_v2_expected_colon(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{
@@ -636,7 +556,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         nested_loops.pop_back();
         break;
       case parser_state::kParseStatementIf_0:
-        if (!expect(token_type::kColon)) {
+        if (!capture(token_type::kColon)) {
+          add_error(error_v2_expected_colon(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{
@@ -720,7 +641,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::kParseStatementFor_1:
-        if (!expect(token_type::kIn)) {
+        if (!capture(token_type::kIn)) {
+          add_error(error_v2_expected_in(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{
@@ -734,7 +656,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::kParseStatementFor_2:
-        if (!expect(token_type::kColon)) {
+        if (!capture(token_type::kColon)) {
+          add_error(error_v2_expected_colon(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{
@@ -755,7 +678,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         break;
       case parser_state::kParseSuite:
         if (capture(token_type::kNewline)) {
-          if (!expect(token_type::kIndent)) {
+          if (!capture(token_type::kIndent)) {
+            add_error(error_v2_expected_indent(input, lex.current_token().start(), lex.current_token().end()));
             break;
           }
           frames.emplace_back(frame{
@@ -778,7 +702,11 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
           break;
         }
-        expect(token_type::kOutdent);
+        if (!capture(token_type::kOutdent)) {
+          // Should only happen as part of another error.
+          add_error(error_v2_expected_outdent(input, lex.current_token().start(), lex.current_token().end()));
+          break;
+        }
         break;
       case parser_state::kParseSimpleStatement:
         frames.emplace_back(frame{
@@ -811,7 +739,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             lex.next_token();
           }
         }
-        if (!expect(token_type::kNewline)) {
+        if (!capture(token_type::kNewline)) {
+          add_error(error_v2_expected_newline(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         recover = false;
@@ -856,7 +785,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             *top.statement->mutable_pif()->mutable_start() = lex.current_token().start();
             auto start = lex.current_token().start();
             lex.next_token();
-            if (!expect(token_type::kLParen)) {
+            if (!capture(token_type::kLParen)) {
+              add_error(error_v2_expected_lparentheses(input, lex.current_token().start(), lex.current_token().end()));
               break;
             }
             if (!is_current(token_type::kString)) {
@@ -875,7 +805,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               *load_param->mutable_pif()->mutable_start() = lex.current_token().start();
               if (is_current(token_type::kIdentifier)) {
                 set_identifier(*load_param->mutable_local_name());
-                if (!expect(token_type::kEquals)) {
+                if (!capture(token_type::kEquals)) {
+                  add_error(error_v2_expected_equals(input, lex.current_token().start(), lex.current_token().end()));
                   break;
                 }
               }
@@ -910,7 +841,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             *top.statement->mutable_load_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
             *top.statement->mutable_pif()->mutable_end() = lex.current_token().end();
             auto end = lex.current_token().end();
-            if (!expect(token_type::kRParen)) {
+            if (!capture(token_type::kRParen)) {
+              add_error(error_v2_expected_rparentheses(input, lex.current_token().start(), lex.current_token().end()));
               break;
             }
             if (!loaded_symbol) {
@@ -1131,7 +1063,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::kParseIfExpression_1:
-        if (!expect(token_type::kElse)) {
+        if (!capture(token_type::kElse)) {
+          add_error(error_v2_expected_else(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{
@@ -1222,7 +1155,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           auto token_start = lex.current_token().start();
           lex.next_token();
           auto token_end = lex.current_token().end();
-          if (!expect(token_type::kIn)) {
+          if (!capture(token_type::kIn)) {
+            add_error(error_v2_expected_in(input, lex.current_token().start(), lex.current_token().end()));
             break;
           }
           {
@@ -1421,7 +1355,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         } else {
           *top.primary->mutable_call_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
           *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
-          expect(token_type::kRParen);
+          if (!capture(token_type::kRParen)) {
+            add_error(error_v2_expected_rparentheses(input, lex.current_token().start(), lex.current_token().end()));
+            break;
+          }
         }
         break;
       case parser_state::kParsePrimaryIndex_0:
@@ -1484,7 +1421,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
       case parser_state::kParsePrimaryIndexFinal:
         *top.primary->mutable_slice_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
         *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
-        expect(token_type::kRBracket);
+        if (!capture(token_type::kRBracket)) {
+          add_error(error_v2_expected_rbracket(input, lex.current_token().start(), lex.current_token().end()));
+          break;
+        }
         break;
       case parser_state::kParseSliceFinal_1:
         *top.primary->mutable_slice_expression()->mutable_slice()->mutable_pif()->mutable_end() = top.primary->slice_expression().slice().end().pif().end();
@@ -1575,14 +1515,17 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         *top.expression->mutable_pif()->mutable_start() = top.start;
         *top.expression->mutable_pif()->mutable_end() = lex.current_token().end();
-        if (!expect(token_type::kRParen)) {
+        if (!capture(token_type::kRParen)) {
+          add_error(error_v2_expected_rparentheses(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         break;
       case parser_state::kParseList:
         *top.primary->mutable_list_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
         *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
-        if (!expect(token_type::kLBracket)) {
+        if (!capture(token_type::kLBracket)) {
+          // Should never happen.
+          add_error(error_v2_expected_lbracket(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         if (is_current(token_type::kRBracket)) {
@@ -1663,12 +1606,17 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           *top.primary->mutable_list_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
         }
         *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
-        expect(token_type::kRBracket);
+        if (!capture(token_type::kRBracket)) {
+          add_error(error_v2_expected_rbracket(input, lex.current_token().start(), lex.current_token().end()));
+          break;
+        }
         break;
       case parser_state::kParseDict:
         *top.primary->mutable_dictionary_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
         *top.primary->mutable_pif()->mutable_start() = lex.current_token().start();
-        if (!expect(token_type::kLBrace)) {
+        if (!capture(token_type::kLBrace)) {
+          // Should never happen.
+          add_error(error_v2_expected_lbrace(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         if (is_current(token_type::kRBrace)) {
@@ -1750,7 +1698,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           *top.primary->mutable_dictionary_expression()->mutable_pif()->mutable_end() = lex.current_token().end();
         }
         *top.primary->mutable_pif()->mutable_end() = lex.current_token().end();
-        expect(token_type::kRBrace);
+        if (!capture(token_type::kRBrace)) {
+          add_error(error_v2_expected_rbrace(input, lex.current_token().start(), lex.current_token().end()));
+          break;
+        }
         break;
       case parser_state::kParseEntry:
         *top.entry->mutable_pif()->mutable_start() = lex.current_token().start();
@@ -1768,7 +1719,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         });
         break;
       case parser_state::kParseEntry_0:
-        if (!expect(token_type::kColon)) {
+        if (!capture(token_type::kColon)) {
+          add_error(error_v2_expected_colon(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{
@@ -1860,7 +1812,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           });
         } else {
           bind_and_resolve(top.comp_clause_primary);
-          if (!expect(token_type::kIn)) {
+          if (!capture(token_type::kIn)) {
+            add_error(error_v2_expected_in(input, lex.current_token().start(), lex.current_token().end()));
             break;
           }
           // The first `for in` test should be reslved one frame up.
@@ -2015,7 +1968,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         *top.test->mutable_pif()->mutable_start() = lex.current_token().start();
         *top.test->mutable_lambda_expression()->mutable_pif()->mutable_start() = lex.current_token().start();
-        if (!expect(token_type::kLambda)) {
+        if (!capture(token_type::kLambda)) {
+          // Should never happen.
+          add_error(error_v2_expected_lambda(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{
@@ -2042,7 +1997,8 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           .state = parser_state::kParseLambdaFinal,
           .test = top.test,
         });
-        if (!expect(token_type::kColon)) {
+        if (!capture(token_type::kColon)) {
+          add_error(error_v2_expected_colon(input, lex.current_token().start(), lex.current_token().end()));
           break;
         }
         frames.emplace_back(frame{

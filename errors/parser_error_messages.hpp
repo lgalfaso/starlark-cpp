@@ -13,8 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_expected_symbol(std::string_view symbol);
-
 std::string error_v2_function_definition_not_allowed(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_if_not_allowed_at_top_level(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_for_not_allowed_at_top_level(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
@@ -54,6 +52,20 @@ std::string error_v2_undefined_name(std::string_view name, std::string_view best
 
 std::string error_v2_expected_identifier(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_expected_string(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_lparentheses(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_rparentheses(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_lbracket(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_rbracket(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_lbrace(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_rbrace(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_colon(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_in(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_indent(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_outdent(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_newline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_equals(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_else(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_expected_lambda(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 std::string error_v2_unexpected_return(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_unexpected_break(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);

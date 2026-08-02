@@ -1,0 +1,3 @@
+main:2:8: error: expecting colon ':'
+    2 | a = {x for x in []}
+      |        ^~~

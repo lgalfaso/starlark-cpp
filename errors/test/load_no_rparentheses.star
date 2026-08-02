@@ -1,0 +1,2 @@
+load("test.star", "foo"
+

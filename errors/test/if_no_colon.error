@@ -1,0 +1,3 @@
+main:3:11: error: expecting colon ':'
+    3 |   if True return 0
+      |           ^~~~~~

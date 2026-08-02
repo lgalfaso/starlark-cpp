@@ -42,7 +42,6 @@ class parser {
   bool set_identifier(starlark::ast::Identifier& id);
   bool capture(token_type expected_token);
   bool is_current(token_type expected_token) const;
-  bool expect(token_type expected_token);
   void add_error(std::string_view error_message);
   void add_error(std::string_view error_message, const starlark::logging::Position&);
   void add_warning(std::string_view error_message);
