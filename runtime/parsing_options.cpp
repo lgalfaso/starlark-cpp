@@ -3,6 +3,7 @@
 #include "runtime/parsing_options.hpp"
 
 #include <charconv>
+#include <iostream>
 #include <string>
 
 namespace starlark {

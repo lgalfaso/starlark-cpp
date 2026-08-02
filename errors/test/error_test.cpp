@@ -6,7 +6,11 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
+#include <functional>
+#include <iostream>
+#include <map>
 #include <string>
+#include <utility>
 
 #include "grammar/parsing_options.hpp"
 #include "interpreter/interpreter.hpp"

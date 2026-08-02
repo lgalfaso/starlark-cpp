@@ -139,6 +139,7 @@ class error_handler : public error_fn {
     state.instruction_ptr = 0;
     state.current_program = &base_program;
   }
+
  private:
   runner_state& state;
   logger& log;
