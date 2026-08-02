@@ -1,0 +1,3 @@
+main:3:12: error: unexpected `break`
+    3 |   if True: break
+      |            ^~~~~

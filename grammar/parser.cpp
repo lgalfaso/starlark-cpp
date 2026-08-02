@@ -34,10 +34,6 @@ using ::starlark::ast::Statement;
 using ::starlark::ast::UnaryExpr;
 using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
-using ::starlark::error_messages::error_unexpected_break;
-using ::starlark::error_messages::error_unexpected_comma;
-using ::starlark::error_messages::error_unexpected_continue;
-using ::starlark::error_messages::error_unexpected_return;
 using ::starlark::error_messages::error_unexpected_token;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_args;
 using ::starlark::error_messages::error_v2_arguments_duplicate_star_star_kvargs;
@@ -71,6 +67,10 @@ using ::starlark::error_messages::error_v2_params_named_param_must_follow_bare_s
 using ::starlark::error_messages::error_v2_params_non_optional_after_optional;
 using ::starlark::error_messages::error_v2_params_star_parameter_may_appear_only_once;
 using ::starlark::error_messages::error_v2_undefined_name;
+using ::starlark::error_messages::error_v2_unexpected_break;
+using ::starlark::error_messages::error_v2_unexpected_comma;
+using ::starlark::error_messages::error_v2_unexpected_continue;
+using ::starlark::error_messages::error_v2_unexpected_return;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::PositionInFile;
@@ -821,7 +821,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kReturn:
             found_non_load = true;
             if (nested_loops.size() == 1) {
-              add_error(error_unexpected_return());
+              add_error(error_v2_unexpected_return(input, lex.current_token().start(), lex.current_token().end()));
             }
             *top.statement->mutable_return_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_return_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -921,7 +921,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kBreak:
             found_non_load = true;
             if (nested_loops.back() == 0) {
-              add_error(error_unexpected_break());
+              add_error(error_v2_unexpected_break(input, lex.current_token().start(), lex.current_token().end()));
             }
             *top.statement->mutable_break_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_break_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -932,7 +932,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           case token_type::kContinue:
             found_non_load = true;
             if (nested_loops.back() == 0) {
-              add_error(error_unexpected_continue());
+              add_error(error_v2_unexpected_continue(input, lex.current_token().start(), lex.current_token().end()));
             }
             *top.statement->mutable_continue_statement()->mutable_pif()->mutable_start() = lex.current_token().start();
             *top.statement->mutable_continue_statement()->mutable_pif()->mutable_end() = lex.current_token().end();
@@ -1058,7 +1058,10 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         }
         break;
       case parser_state::kParseExpression_1:
-        if (capture(token_type::kComma)) {
+        if (is_current(token_type::kComma)) {
+          auto comma_start = lex.current_token().start();
+          auto comma_end = lex.current_token().end();
+          lex.next_token();
           if (is_current(token_type::kNewline) ||
               is_current(token_type::kEquals) ||
               is_current(token_type::kRBrace) ||
@@ -1066,7 +1069,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               is_current(token_type::kRParen) ||
               is_current(token_type::kSemi)) {
             if (!top.expression_allow_trailing_comma) {
-              add_error(error_unexpected_comma());
+              add_error(error_v2_unexpected_comma(input, comma_start, comma_end));
             }
             break;
           }
@@ -2056,7 +2059,9 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
         *top.test->mutable_pif()->mutable_end() = top.test->lambda_expression().test().pif().end();
         drop_block();
         break;
-      case parser_state::kParseParameters:
+      case parser_state::kParseParameters: {
+        auto initial_token_start = lex.current_token().start();
+        auto initial_token_end = lex.current_token().end();
         if (top.parse_parameters_first || capture(token_type::kComma)) {
           if (top.parse_parameters_first) {
             parse_parameter_identifiers.emplace_back(std::set<std::string, std::less<>>{}, std::set<Identifier*>{});
@@ -2179,7 +2184,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               add_error(error_v2_params_named_param_must_follow_bare_star(input, lex.current_token().start(), lex.current_token().end()));
             }
             if (!top.parse_parameters_first && !top.parse_parameters_allow_trailing_comma) {
-              add_error(error_unexpected_comma());
+              add_error(error_v2_unexpected_comma(input, initial_token_start, initial_token_end));
             }
           }
         } else {
@@ -2188,6 +2193,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           }
         }
         break;
+      }
       case parser_state::kParseParameterFinal:
         *top.parameter->mutable_pif()->mutable_end() = top.parameter->initialization().pif().end();
         break;

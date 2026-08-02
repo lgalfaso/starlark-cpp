@@ -22,22 +22,6 @@ std::string error_expected_symbol(std::string_view symbol) {
   return std::format("Expecting {}", symbol);
 }
 
-std::string_view error_unexpected_return() {
-  return "Unexpected RETURN";
-}
-
-std::string_view error_unexpected_break() {
-  return "Unexpected BREAK";
-}
-
-std::string_view error_unexpected_continue() {
-  return "Unexpected CONTINUE";
-}
-
-std::string_view error_unexpected_comma() {
-  return "Unexpected COMMA";
-}
-
 std::string_view error_unexpected_token() {
   return "Unexpected token";
 }
@@ -187,6 +171,23 @@ std::string error_v2_expected_identifier(std::string_view program, const Positio
 
 std::string error_v2_expected_string(std::string_view program, const Position& start, const Position& end) {
   return std::format("expecting a string literal\n{}", get_line_and_underline(program, start, end));
+}
+
+
+std::string error_v2_unexpected_return(std::string_view program, const Position& start, const Position& end) {
+  return std::format("unexpected `return`\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_unexpected_break(std::string_view program, const Position& start, const Position& end) {
+  return std::format("unexpected `break`\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_unexpected_continue(std::string_view program, const Position& start, const Position& end) {
+  return std::format("unexpected `continue`\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_unexpected_comma(std::string_view program, const Position& start, const Position& end) {
+  return std::format("unexpected COMMA(`,`)\n{}", get_line_and_underline(program, start, end));
 }
 
 }  // namespace error_messages

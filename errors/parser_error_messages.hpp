@@ -15,10 +15,6 @@ namespace error_messages {
 
 std::string_view error_expected_target();
 std::string error_expected_symbol(std::string_view symbol);
-std::string_view error_unexpected_return();
-std::string_view error_unexpected_break();
-std::string_view error_unexpected_continue();
-std::string_view error_unexpected_comma();
 std::string_view error_unexpected_token();
 
 std::string error_v2_function_definition_not_allowed(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
@@ -60,6 +56,11 @@ std::string error_v2_undefined_name(std::string_view name, std::string_view best
 
 std::string error_v2_expected_identifier(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_expected_string(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+
+std::string error_v2_unexpected_return(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_unexpected_break(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_unexpected_continue(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_unexpected_comma(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 }  // namespace error_messages
 }  // namespace starlark

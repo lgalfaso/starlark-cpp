@@ -1,0 +1,3 @@
+main:2:14: error: unexpected COMMA(`,`)
+    2 | a = lambda a,: True
+      |             ^
