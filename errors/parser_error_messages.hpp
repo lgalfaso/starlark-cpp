@@ -58,7 +58,7 @@ std::string error_v2_duplicate_binding_by_load(std::string_view symbol, std::str
 std::string error_v2_duplicate_load_binding_by_load(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_duplicate_binding_from_load(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_duplicate_binding(std::string_view symbol, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
-std::string error_v2_undefined_name(std::string_view name, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_undefined_name(std::string_view name, std::string_view best_candidate, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 
 }  // namespace error_messages
 }  // namespace starlark

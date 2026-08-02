@@ -23,6 +23,10 @@ std::string get_line_and_underline(std::string_view program, const Position& sta
 }
 
 std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end, bool reverse) {
+  return get_line_and_underline(program, start, end, reverse, "");
+}
+
+std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end, bool reverse, std::string_view hint) {
   std::string result;
   // TODO(lmirelmann): This can be improved as this information can be part of the program while being parsed.
   // We cannot use the information from `column` directly as this would not be taking into consideration Unicode characters
@@ -59,6 +63,9 @@ std::string get_line_and_underline(std::string_view program, const Position& sta
     } else {
       result += std::format("      |{:{}}{:~<{}}\n", ' ', start.column(), '^', line.size() - start.column() + 1);
     }
+  }
+  if (!hint.empty()) {
+    result += std::format("      |{:{}}{}\n", ' ', start.column(), hint);
   }
   return result;
 }

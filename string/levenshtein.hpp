@@ -1,21 +1,21 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef RUNTIME_LEVENSHTEIN_HPP_
-#define RUNTIME_LEVENSHTEIN_HPP_
+#ifndef STRING_LEVENSHTEIN_HPP_
+#define STRING_LEVENSHTEIN_HPP_
 
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace starlark {
-namespace runtime {
+namespace string {
 
 int levenshtein(std::string_view value, const std::vector<std::string>& candidates);
 
-}  // namespace runtime
+}  // namespace string
 }  // namespace starlark
 
 
 
-#endif  // RUNTIME_LEVENSHTEIN_HPP_
+#endif  // STRING_LEVENSHTEIN_HPP_
 

@@ -17,22 +17,6 @@ cc_library(
 )
 
 cc_library(
-    name = "levenshtein",
-    srcs = ["levenshtein.cpp"],
-    hdrs = ["levenshtein.hpp"],
-)
-
-cc_test(
-    name = "levenshtein_test",
-    size = "small",
-    srcs = ["levenshtein_test.cpp"],
-    deps = [
-        ":levenshtein",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "options",
     hdrs = ["options.hpp"],
     visibility = ["//visibility:public"],
@@ -100,13 +84,13 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
-        ":levenshtein",
         ":options",
         ":starlark_types",
         "//bigint:number",
         "//containers:linked_hash_map",
         "//errors:runtime_error_messages",
         "//status_or:status",
+        "//string:levenshtein",
         "@protobuf",
     ],
 )

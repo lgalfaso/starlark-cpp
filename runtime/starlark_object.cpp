@@ -15,8 +15,8 @@
 #include <vector>
 
 #include "errors/runtime_error_messages.hpp"
-#include "runtime/levenshtein.hpp"
 #include "runtime/starlark_types.hpp"
+#include "string/levenshtein.hpp"
 
 using ::starlark::bigint::number;
 using ::starlark::error_messages::error_argument_uniterable;
@@ -48,6 +48,7 @@ using ::starlark::result::ok_status;
 using ::starlark::result::status;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
+using ::starlark::string::levenshtein;
 
 namespace starlark {
 namespace runtime {

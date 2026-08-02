@@ -11,8 +11,9 @@
 #include <vector>
 
 #include "errors/parser_error_messages.hpp"
-#include "unicode/normalization.hpp"
+#include "string/levenshtein.hpp"
 #include "third-party/defer.hpp"
+#include "unicode/normalization.hpp"
 
 using ::google::protobuf::Arena;
 using ::google::protobuf::RepeatedPtrField;
@@ -36,7 +37,6 @@ using ::starlark::error_messages::error_expected_identifier;
 using ::starlark::error_messages::error_expected_string;
 using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
-using ::starlark::error_messages::error_v2_undefined_name;
 using ::starlark::error_messages::error_unexpected_break;
 using ::starlark::error_messages::error_unexpected_comma;
 using ::starlark::error_messages::error_unexpected_continue;
@@ -71,10 +71,12 @@ using ::starlark::error_messages::error_v2_params_keyword_variadic_param_must_be
 using ::starlark::error_messages::error_v2_params_named_param_must_follow_bare_star;
 using ::starlark::error_messages::error_v2_params_non_optional_after_optional;
 using ::starlark::error_messages::error_v2_params_star_parameter_may_appear_only_once;
+using ::starlark::error_messages::error_v2_undefined_name;
 using ::starlark::logging::LogLevel;
 using ::starlark::logging::Position;
 using ::starlark::logging::PositionInFile;
 using ::starlark::logging::logger;
+using ::starlark::string::levenshtein;
 using ::starlark::unicode::to_nfkc;
 
 namespace starlark {
@@ -2288,23 +2290,34 @@ void parser::drop_block() {
   std::set<std::string, std::less<>> used_bindings;
 
   assert(!parser_blocks.empty());
-  for (auto& [entry_id, entry_dis] : parser_blocks.back().to_resolve) {
+  for (auto& [entry_id, entry_dis, best_candidate] : parser_blocks.back().to_resolve) {
     auto pos = parser_blocks.back().identifiers.find(entry_id->nfkc_name());
     if (pos == parser_blocks.back().identifiers.end()) {
+      std::vector<std::string> candidates;
+      if (!best_candidate.empty()) {
+        candidates.emplace_back(best_candidate);
+      }
+      for (const auto& candidate : parser_blocks.back().identifiers) {
+        candidates.emplace_back(candidate);
+      }
+      std::string new_best_candidate;
+      auto candidate = levenshtein(entry_id->nfkc_name(), candidates);
+      if (candidate >= 0) {
+        new_best_candidate = candidates[candidate];
+      }
       if (parser_blocks.size() == 1) {
-        // TODO(lmirelmann): We should improve the error by looking into the possible candidates and check which one has the closest Levenshtein distance.
-        add_error(error_v2_undefined_name(entry_id->name(), input, entry_id->pif().start(), entry_id->pif().end()), entry_id->pif().start());
+        add_error(error_v2_undefined_name(entry_id->name(), new_best_candidate, input, entry_id->pif().start(), entry_id->pif().end()), entry_id->pif().start());
         entry_id->set_frame(-1);
         entry_id->set_pos_in_frame(-1);
       } else {
         auto new_pos = entry_dis + (parser_blocks.back().id_store == nullptr ? 0 : 1);
-        parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry_id, new_pos);
+        parser_blocks[parser_blocks.size() - 2].to_resolve.emplace_back(entry_id, new_pos, new_best_candidate);
       }
     } else {
       used_bindings.insert(*pos);
     }
   }
-  for (auto& [entry_id, entry_dis] : parser_blocks.back().to_resolve) {
+  for (auto& [entry_id, entry_dis, best_candidate] : parser_blocks.back().to_resolve) {
     auto pos = used_bindings.find(entry_id->nfkc_name());
     if (pos != used_bindings.end()) {
       entry_id->set_frame(entry_dis);
@@ -2320,7 +2333,7 @@ void parser::drop_block() {
 }
 
 void parser::resolve(Identifier* identifier, int base_frame) {
-  parser_blocks.back().to_resolve.emplace_back(identifier, base_frame);
+  parser_blocks.back().to_resolve.emplace_back(identifier, base_frame, "");
 }
 
 void parser::resolve(Expression* base, int base_frame) {

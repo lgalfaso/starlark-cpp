@@ -23,7 +23,7 @@ namespace grammar {
 struct parsing_block {
   std::set<std::string, std::less<>> identifiers;
   google::protobuf::RepeatedPtrField<std::string>* id_store;
-  std::vector<std::pair<starlark::ast::Identifier*, int>> to_resolve;
+  std::vector<std::tuple<starlark::ast::Identifier*, int, std::string>> to_resolve;
 };
 
 class parser {

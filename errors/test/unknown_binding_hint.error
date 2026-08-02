@@ -1,0 +1,4 @@
+main:3:17: error: name 'canddiate' is not defined; did you mean 'candidate'?
+    3 | current_value = canddiate
+      |                 ^~~~~~~~~
+      |                 candidate

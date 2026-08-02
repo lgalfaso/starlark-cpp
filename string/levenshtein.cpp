@@ -1,6 +1,6 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include "runtime/levenshtein.hpp"
+#include "string/levenshtein.hpp"
 
 #include <algorithm>
 #include <limits>
@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace starlark {
-namespace runtime {
+namespace string {
 
 int levenshtein(std::string_view value, const std::vector<std::string>& candidates) {
   int result  = -1;
@@ -43,5 +43,5 @@ int levenshtein(std::string_view value, const std::vector<std::string>& candidat
 }
 
 
-}  // namespace runtime
+}  // namespace string
 }  // namespace starlark

@@ -4,9 +4,9 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
-#include "runtime/levenshtein.hpp"
+#include "string/levenshtein.hpp"
 
-using ::starlark::runtime::levenshtein;
+using ::starlark::string::levenshtein;
 
 namespace {
 
