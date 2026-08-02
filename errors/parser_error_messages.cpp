@@ -14,14 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_expected_identifier() {
-  return "Expecting IDENTIFIER";
-}
-
-std::string_view error_expected_string() {
-  return "Expecting STRING";
-}
-
 std::string_view error_expected_target() {
   return "Expecting TARGET";
 }
@@ -186,6 +178,15 @@ std::string error_v2_undefined_name(std::string_view name, std::string_view best
   } else {
     return std::format("name '{}' is not defined; did you mean '{}'?\n{}", name, best_candidate, get_line_and_underline(program, start, end, false, best_candidate));
   }
+}
+
+
+std::string error_v2_expected_identifier(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting an identifier\n{}", get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_expected_string(std::string_view program, const Position& start, const Position& end) {
+  return std::format("expecting a string literal\n{}", get_line_and_underline(program, start, end));
 }
 
 }  // namespace error_messages

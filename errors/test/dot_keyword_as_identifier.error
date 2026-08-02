@@ -1,0 +1,3 @@
+main:3:7: error: expecting an identifier
+    3 | b = a.finally
+      |       ^~~~~~~

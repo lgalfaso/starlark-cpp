@@ -32,8 +32,6 @@ using ::starlark::ast::LambdaExpr;
 using ::starlark::ast::Parameter;
 using ::starlark::ast::Statement;
 using ::starlark::ast::UnaryExpr;
-using ::starlark::error_messages::error_expected_identifier;
-using ::starlark::error_messages::error_expected_string;
 using ::starlark::error_messages::error_expected_symbol;
 using ::starlark::error_messages::error_expected_target;
 using ::starlark::error_messages::error_unexpected_break;
@@ -56,6 +54,8 @@ using ::starlark::error_messages::error_v2_duplicate_binding_from_load;
 using ::starlark::error_messages::error_v2_duplicate_binding_previous_load;
 using ::starlark::error_messages::error_v2_duplicate_load_binding;
 using ::starlark::error_messages::error_v2_duplicate_load_binding_by_load;
+using ::starlark::error_messages::error_v2_expected_identifier;
+using ::starlark::error_messages::error_v2_expected_string;
 using ::starlark::error_messages::error_v2_for_not_allowed_at_top_level;
 using ::starlark::error_messages::error_v2_function_definition_not_allowed;
 using ::starlark::error_messages::error_v2_if_not_allowed_at_top_level;
@@ -499,7 +499,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
           auto identifier_start = lex.current_token().start();
           auto identifier_end = lex.current_token().end();
           if (!set_identifier(*def_statement->mutable_function_name())) {
-            add_error(error_expected_identifier());
+            add_error(error_v2_expected_identifier(input, identifier_start, identifier_end));
             break;
           }
 
@@ -860,7 +860,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               break;
             }
             if (!is_current(token_type::kString)) {
-              add_error(error_expected_string());
+              add_error(error_v2_expected_string(input, lex.current_token().start(), lex.current_token().end()));
               break;
             }
             top.statement->mutable_load_statement()->set_module(lex.current_token().string_value());
@@ -880,7 +880,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
                 }
               }
               if (!is_current(token_type::kString)) {
-                add_error(error_expected_string());
+                add_error(error_v2_expected_string(input, lex.current_token().start(), lex.current_token().end()));
                 break;
               }
               if (!opts.allow_load_private_symbols &&
@@ -1316,7 +1316,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
             *top.primary->mutable_pif()->mutable_start() = top.primary->dot_expression().primary_expression().pif().start();
           }
           if (!set_identifier(*top.primary->mutable_dot_expression()->mutable_identifier())) {
-            add_error(error_expected_identifier());
+            add_error(error_v2_expected_identifier(input, lex.current_token().start(), lex.current_token().end()));
             break;
           }
           *top.primary->mutable_dot_expression()->mutable_pif()->mutable_end() = top.primary->dot_expression().identifier().pif().end();

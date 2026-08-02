@@ -1,0 +1,3 @@
+main:2:6: error: expecting a string literal
+    2 | load(123, "foo")
+      |      ^~~

@@ -1,0 +1,3 @@
+main:2:25: error: expecting a string literal
+    2 | load("test.star", foo = 123)
+      |                         ^~~
