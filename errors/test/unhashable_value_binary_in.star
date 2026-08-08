@@ -1,0 +1,3 @@
+# Unhashable value.
+[] in set()
+

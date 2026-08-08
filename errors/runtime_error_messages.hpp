@@ -13,7 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_unhashable_value(std::string_view type, std::string_view value_type);
 std::string error_empty_dictionary(std::string_view fn_name);
 std::string error_empty_set(std::string_view fn_name);
 std::string error_uniterable(std::string_view type);
@@ -152,6 +151,7 @@ std::string error_v2_unpack_too_few(int64_t expected, int64_t actual);
 std::string error_v2_unpack_too_many(int64_t expected, int64_t actual);
 
 std::string error_v2_unhashable_key(std::string_view type, std::string_view key_type);
+std::string error_v2_unhashable_value(std::string_view type, std::string_view value_type);
 
 }  // namespace error_messages
 }  // namespace starlark

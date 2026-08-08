@@ -14,10 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_unhashable_value(std::string_view type, std::string_view value_type) {
-  return std::format("TypeError: cannot use '{}' as a {} element (unhashable type: '{}')", value_type, type, value_type);
-}
-
 std::string error_empty_dictionary(std::string_view fn_name) {
   return std::format("KeyError: '{}(): dictionary is empty'", fn_name);
 }
@@ -500,6 +496,10 @@ std::string error_v2_unpack_too_many(int64_t actual, int64_t expected) {
 
 std::string error_v2_unhashable_key(std::string_view type, std::string_view key_type) {
   return std::format("cannot use '{}' as a {} key (unhashable type: '{}')", key_type, type, key_type);
+}
+
+std::string error_v2_unhashable_value(std::string_view type, std::string_view value_type) {
+  return std::format("cannot use '{}' as a {} element (unhashable type: '{}')", value_type, type, value_type);
 }
 
 }  // namespace error_messages

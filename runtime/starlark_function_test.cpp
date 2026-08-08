@@ -4227,7 +4227,7 @@ TEST(StarlarkSet, ElementNotHashable) {
 
   EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: cannot use 'list' as a set element (unhashable type: 'list')", error_callback.messages[0]);
+  EXPECT_EQ("cannot use 'list' as a set element (unhashable type: 'list')", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, String) {

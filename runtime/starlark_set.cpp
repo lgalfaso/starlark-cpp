@@ -17,7 +17,7 @@ using ::starlark::error_messages::error_dictionary_key_not_found;
 using ::starlark::error_messages::error_empty_set;
 using ::starlark::error_messages::error_mutate_frozen_value;
 using ::starlark::error_messages::error_op_in_loop;
-using ::starlark::error_messages::error_unhashable_value;
+using ::starlark::error_messages::error_v2_unhashable_value;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
 using ::starlark::result::error_status;
@@ -162,7 +162,7 @@ bool starlark_set::contains(starlark_obj* obj) const {
 
 bool starlark_set::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   if (other.hash() == -1) {
-    error_callback.add_error(error_unhashable_value(type(), other.type()));
+    error_callback.add_error(error_v2_unhashable_value(type(), other.type()));
     return false;
   }
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`
@@ -302,7 +302,7 @@ status_or<bool> starlark_set::add(starlark_obj* element, error_fn& error_callbac
     return status_or<bool>(status_code::kRuntimeError);
   }
   if (element->hash() == -1) {
-    error_callback.add_error(error_unhashable_value(type(), element->type()));
+    error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
     return status_or<bool>(status_code::kRuntimeError);
   }
   return status_or<bool>(values.insert(element).second);
@@ -366,7 +366,7 @@ status starlark_set::discard(starlark_obj* element, error_fn& error_callback) {
     return error_status();
   }
   if (element->hash() == -1) {
-    error_callback.add_error(error_unhashable_value(type(), element->type()));
+    error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
     return error_status();
   }
   values.erase(element);
@@ -391,7 +391,7 @@ starlark_obj* starlark_set::intersection(const std::vector<starlark_obj*>& other
       auto* element = it->next();
       if (element->hash() == -1) {
         it->end_iterator();
-        error_callback.add_error(error_unhashable_value(type(), element->type()));
+        error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
         return nullptr;
       }
       if (result->values.contains(element)) {
@@ -430,7 +430,7 @@ status starlark_set::intersection_update(const std::vector<starlark_obj*>& other
       auto* element = it->next();
       if (element->hash() == -1) {
         it->end_iterator();
-        error_callback.add_error(error_unhashable_value(type(), element->type()));
+        error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
         return error_status();
       }
       if (values.contains(element)) {
@@ -464,7 +464,7 @@ status_or<bool> starlark_set::isdisjoint(starlark_obj* other, context& ctx, erro
     auto* element = it->next();
     if (element->hash() == -1) {
       it->end_iterator();
-      error_callback.add_error(error_unhashable_value(type(), element->type()));
+      error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
       return status_or<bool>(status_code::kRuntimeError);
     }
     if (values.contains(element)) {
@@ -486,7 +486,7 @@ status_or<bool> starlark_set::issubset(starlark_obj* other, context& ctx, error_
     auto* element = it->next();
     if (element->hash() == -1) {
       it->end_iterator();
-      error_callback.add_error(error_unhashable_value(type(), element->type()));
+      error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
       return status_or<bool>(status_code::kRuntimeError);
     }
     if (values.contains(element)) {
@@ -507,7 +507,7 @@ status_or<bool> starlark_set::issuperset(starlark_obj* other, context& ctx, erro
     auto* element = it->next();
     if (element->hash() == -1) {
       it->end_iterator();
-      error_callback.add_error(error_unhashable_value(type(), element->type()));
+      error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
       return status_or<bool>(status_code::kRuntimeError);
     }
     if (!values.contains(element)) {
@@ -537,7 +537,7 @@ status starlark_set::remove(starlark_obj* element, error_fn& error_callback) {
     return error_status();
   }
   if (element->hash() == -1) {
-    error_callback.add_error(error_unhashable_value(type(), element->type()));
+    error_callback.add_error(error_v2_unhashable_value(type(), element->type()));
     return error_status();
   }
   if (values.erase(element) == 0) {

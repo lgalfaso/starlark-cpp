@@ -1,0 +1,3 @@
+main:2:8: error: cannot use 'list' as a set element (unhashable type: 'list')
+    2 | a = set([1, [], 2])
+      |     ~~~^^^^^^^^^^^^

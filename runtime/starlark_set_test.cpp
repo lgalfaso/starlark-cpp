@@ -229,7 +229,7 @@ TEST(StarlarkSet, MembershipNotHashable) {
 
   EXPECT_FALSE(set.binary_in(list, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_THAT(error_callback.messages[0], "TypeError: cannot use 'list' as a set element (unhashable type: 'list')");
+  EXPECT_THAT(error_callback.messages[0], "cannot use 'list' as a set element (unhashable type: 'list')");
 }
 
 TEST(StarlarkSet, Freeze) {
@@ -255,7 +255,7 @@ TEST(StarlarkSet, AddUnhashable) {
 
   set_1.add(&set_2, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
 }
 
 TEST(StarlarkSet, BinaryPipe) {
@@ -1112,7 +1112,7 @@ TEST(StarlarkSet, DifferenceNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -1342,7 +1342,7 @@ TEST(StarlarkSet, DifferenceUpdateNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -1504,7 +1504,7 @@ TEST(StarlarkSet, DiscardUnhashable) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -1717,7 +1717,7 @@ TEST(StarlarkSet, IntersectionNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -1950,7 +1950,7 @@ TEST(StarlarkSet, IntersectionUpdateNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -2289,7 +2289,7 @@ TEST(StarlarkSet, IsdisjointNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -2630,7 +2630,7 @@ TEST(StarlarkSet, IssubsetNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -2971,7 +2971,7 @@ TEST(StarlarkSet, IssupersetNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -3245,7 +3245,7 @@ TEST(StarlarkSet, RemoveUnhashable) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -3449,7 +3449,7 @@ TEST(StarlarkSet, SymmetricDifferenceNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -3676,7 +3676,7 @@ TEST(StarlarkSet, SymmetricDifferenceUpdateNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -3905,7 +3905,7 @@ TEST(StarlarkSet, UnionNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -4130,7 +4130,7 @@ TEST(StarlarkSet, UpdateNonHashableElement) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'set' as a set element (unhashable type: 'set')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'set' as a set element (unhashable type: 'set')");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 

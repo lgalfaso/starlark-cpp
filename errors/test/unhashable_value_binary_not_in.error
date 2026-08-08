@@ -1,0 +1,3 @@
+main:2:4: error: cannot use 'list' as a set element (unhashable type: 'list')
+    2 | [] not in set()
+      |    ^^^^^^
