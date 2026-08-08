@@ -192,7 +192,7 @@ TEST(StarlarkDictionary, UnpackError) {
     set.unpack(3, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
+    EXPECT_EQ(error_callback.messages[0], "not enough values to unpack (expected 3, got 2)");
   }
   {
     std::vector<starlark_obj*> consumer;
@@ -201,7 +201,7 @@ TEST(StarlarkDictionary, UnpackError) {
     set.unpack(1, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
+    EXPECT_EQ(error_callback.messages[0], "too many values to unpack (expected 1, got 2)");
   }
 }
 

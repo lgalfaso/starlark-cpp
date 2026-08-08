@@ -7,14 +7,14 @@ block {
   op_code { const_int { value: 2 } }
   op_code { const_int { value: 3 } }
   op_code { const_int { value: 4 } }
-  op_code { add_to_dictionary { number_of_elements: 2 } }
+  op_code { add_to_dictionary { number_of_elements: 2 } highlight_start: { row: 1 column: 5 pos: 4 } highlight_mid: { row: 1 column: 5 pos: 4 } highlight_end: { row: 1 column: 17 pos: 16 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { load { frame: 1 pos_in_frame: 0 } }
-  op_code { unpack { number_of_elements: 2 } }
+  op_code { unpack { number_of_elements: 2 } highlight_start: { row: 2 column: 1 pos: 17 } highlight_mid: { row: 2 column: 11 pos: 27 } highlight_end: { row: 2 column: 12 pos: 28 } }
   op_code { store { frame: 1 pos_in_frame: 1 } }
   op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 0 } }
-  op_code { assign_index_member { } }
+  op_code { assign_index_member { } highlight_start: { row: 2 column: 4 pos: 20 } highlight_mid: { row: 2 column: 5 pos: 21 } highlight_end: { row: 2 column: 8 pos: 24 } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

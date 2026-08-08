@@ -33,6 +33,7 @@ using ::starlark::error_messages::error_index_out_of_range;
 using ::starlark::error_messages::error_interpreted_as_integer;
 using ::starlark::error_messages::error_no_attribute;
 using ::starlark::error_messages::error_no_item_assignment;
+using ::starlark::error_messages::error_no_slice_assignment;
 using ::starlark::error_messages::error_no_keyword;
 using ::starlark::error_messages::error_no_method;
 using ::starlark::error_messages::error_no_pos_args;
@@ -40,9 +41,9 @@ using ::starlark::error_messages::error_overflow_too_many_digits;
 using ::starlark::error_messages::error_read_only_attribute;
 using ::starlark::error_messages::error_step_non_zero;
 using ::starlark::error_messages::error_uniterable;
-using ::starlark::error_messages::error_unpackable;
 using ::starlark::error_messages::error_unsubscriptable;
 using ::starlark::error_messages::error_v2_not_callable;
+using ::starlark::error_messages::error_v2_unpackable;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -298,7 +299,7 @@ starlark_obj* starlark_obj::call(const starlark_obj::pos_args_t& pos_args, const
 }
 
 void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_unpackable(type()));
+  error_callback.add_error(error_v2_unpackable(type()));
 }
 
 starlark_obj* starlark_obj::unary_plus(context& ctx, error_fn& error_callback) const {
@@ -480,51 +481,51 @@ starlark_obj* starlark_obj::slice_range(const starlark_obj& start, const starlar
 }
 
 void starlark_obj::slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_star_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_slash_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_percent_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_ampersand_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_pipe_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_hat_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_no_slice_assignment(type()));
 }
 
 int64_t starlark_obj::as_int64() const {

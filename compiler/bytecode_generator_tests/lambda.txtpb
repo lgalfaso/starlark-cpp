@@ -24,7 +24,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }                                                                                                        #  0
   op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                              #  1
   op_code { const_int { value: 1 } }                                                                                                                                         #  2
-  op_code { binary_plus { } }                                                                                                                                                #  3
+  op_code { binary_plus { } highlight_start: { row: 2 column: 13 pos: 24 } highlight_mid: { row: 2 column: 13 pos: 24 } highlight_end: { row: 2 column: 14 pos: 25 } }       #  3
   op_code { return { } }                                                                                                                                                     #  4
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
@@ -32,7 +32,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }                                                                                            #  0
   op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                              #  1
   op_code { load { frame: 0 pos_in_frame: 1 } }                                                                                                                              #  2
-  op_code { binary_plus { } }                                                                                                                                                #  3
+  op_code { binary_plus { } highlight_start: { row: 3 column: 20 pos: 47 } highlight_mid: { row: 3 column: 20 pos: 47 } highlight_end: { row: 3 column: 21 pos: 48 } }       #  3
   op_code { return { } }                                                                                                                                                     #  4
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }

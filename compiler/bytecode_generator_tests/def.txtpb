@@ -41,7 +41,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_plus { } }
+  op_code { binary_plus { } highlight_start: { row: 6 column: 12 pos: 66 } highlight_mid: { row: 6 column: 12 pos: 66 } highlight_end: { row: 6 column: 13 pos: 67 } }
   op_code { return { } }
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo3" }
 }

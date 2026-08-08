@@ -488,7 +488,7 @@ TEST(StarlarkInteger, Unpack) {
 
   zero.unpack(0, consumer, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot unpack non-iterable int object");
+  EXPECT_EQ(error_callback.messages[0], "cannot unpack non-iterable int object");
 }
 
 TEST(StarlarkInteger, BinaryAnd) {

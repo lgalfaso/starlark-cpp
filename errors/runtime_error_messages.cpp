@@ -14,14 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_unpackable(std::string_view type) {
-  return std::format("TypeError: cannot unpack non-iterable {} object", type);
-}
-
-std::string error_unhashable_key(std::string_view type, std::string_view key_type) {
-  return std::format("TypeError: cannot use '{}' as a {} key (unhashable type: '{}')", key_type, type, key_type);
-}
-
 std::string error_unhashable_value(std::string_view type, std::string_view value_type) {
   return std::format("TypeError: cannot use '{}' as a {} element (unhashable type: '{}')", value_type, type, value_type);
 }
@@ -48,6 +40,10 @@ std::string error_unsubscriptable(std::string_view type) {
 
 std::string error_no_item_assignment(std::string_view type) {
   return std::format("TypeError: '{}' object does not support item assignment", type);
+}
+
+std::string error_no_slice_assignment(std::string_view type) {
+  return std::format("TypeError: '{}' object does not support slice assignment", type);
 }
 
 std::string error_incomparable(std::string_view op, std::string_view type1, std::string_view type2) {
@@ -271,14 +267,6 @@ std::string error_max_bytes_length(int64_t max_length) {
   return std::format("TypeError: bytes must be at most {} elements", max_length);
 }
 
-std::string error_unpack_too_few(int64_t actual, int64_t expected) {
-  return std::format("ValueError: not enough values to unpack (expected {}, got {})", expected, actual);
-}
-
-std::string error_unpack_too_many(int64_t actual, int64_t expected) {
-  return std::format("ValueError: too many values to unpack (expected {}, got {})", expected, actual);
-}
-
 std::string error_in_element(std::string_view type, std::string_view actual, std::string_view expected) {
   return std::format("TypeError: 'in <{}>' requires {} as left operand, not {}", type, expected, actual);
 }
@@ -494,6 +482,24 @@ std::string error_v2_max_sequence_length(int64_t max_length, std::string_view pr
 
 std::string error_v2_not_callable(std::string_view type) {
   return std::format("'{}' object is not callable", type);
+}
+
+
+std::string error_v2_unpackable(std::string_view type) {
+  return std::format("cannot unpack non-iterable {} object", type);
+}
+
+std::string error_v2_unpack_too_few(int64_t actual, int64_t expected) {
+  return std::format("not enough values to unpack (expected {}, got {})", expected, actual);
+}
+
+std::string error_v2_unpack_too_many(int64_t actual, int64_t expected) {
+  return std::format("too many values to unpack (expected {}, got {})", expected, actual);
+}
+
+
+std::string error_v2_unhashable_key(std::string_view type, std::string_view key_type) {
+  return std::format("cannot use '{}' as a {} key (unhashable type: '{}')", key_type, type, key_type);
 }
 
 }  // namespace error_messages

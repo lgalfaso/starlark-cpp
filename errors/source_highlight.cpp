@@ -61,7 +61,10 @@ std::string get_line_and_underline(std::string_view program, const Position& sta
   result += std::format("{:5} | {}\n", start.row(), line);
   auto padding_size = start.column();
   auto underline_size = start.row() == mid.row() ? mid.column() - start.column() : line.size() - start.column() + 1;
-  result += std::format("      |{:{}}{:~>{}}", ' ', padding_size, '~', underline_size);
+  result += std::format("      |{:{}}", ' ', padding_size);
+  if (underline_size > 0) {
+    result += std::format("{:~>{}}", '~', underline_size);
+  }
   if (start.row() == end.row() && mid.column() != end.column()) {
     result += std::format("{:^>{}}", '^', end.column() - mid.column());
   }

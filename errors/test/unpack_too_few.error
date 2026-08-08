@@ -1,0 +1,3 @@
+main:2:10: error: not enough values to unpack (expected 2, got 1)
+    2 | (a, b) = [1]
+      | ~~~~~~~~~^^^

@@ -14,8 +14,8 @@
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::error_messages::error_unpack_too_few;
-using ::starlark::error_messages::error_unpack_too_many;
+using ::starlark::error_messages::error_v2_unpack_too_few;
+using ::starlark::error_messages::error_v2_unpack_too_many;
 
 namespace starlark {
 namespace runtime {
@@ -29,9 +29,9 @@ std::string_view starlark_range::type() const {
 void starlark_range::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   if (number_of_elements != state.len) {
     if (state.len < number_of_elements) {
-      error_callback.add_error(error_unpack_too_few(state.len, number_of_elements));
+      error_callback.add_error(error_v2_unpack_too_few(state.len, number_of_elements));
     } else {
-      error_callback.add_error(error_unpack_too_many(state.len, number_of_elements));
+      error_callback.add_error(error_v2_unpack_too_many(state.len, number_of_elements));
     }
     return;
   }

@@ -48,83 +48,83 @@ def exec():
   a = list(range(3))
   a[:] = range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment\n    3 |   a[:] = range(3, 6)\n      |   ~^^^\n")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] += range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] -= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] *= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] /= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] //= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] %= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] &= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] |= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] ^= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] <<= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
   assert_fail("""
 def exec():
   a = list(range(3))
   a[:] >>= range(3, 6)
 exec()
-  """, error_message = "TypeError: 'list' object does not support item assignment")
+  """, error_message = "TypeError: 'list' object does not support slice assignment")
 
 run()

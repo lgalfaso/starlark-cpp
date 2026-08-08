@@ -139,7 +139,7 @@ class error_handler : public error_fn {
     std::pair<starlark::bytecode::Program*, std::string>* program_stack = nullptr;
     int block_ptr = 0;
     int instruction_ptr = 0;
-    std::string_view source_code;
+     std::string_view source_code;
     if (state.instruction_ptr != 0) {
       auto current_module = loader.load_module(state.current_program.second);
       if (!current_module.ok()) {
@@ -159,8 +159,9 @@ class error_handler : public error_fn {
       }
       if (!(*current_module)->inner()) {
         program_stack = &state.current_program_stack[i];
-        block_ptr = state.call_stack[i].first;
-        instruction_ptr = state.call_stack[i].second;
+        block_ptr = state.call_stack[i].block_ptr;
+        instruction_ptr = state.call_stack[i].instruction_ptr;
+        assert(!state.call_stack[i].inner);
         source_code = (*current_module)->source_code();
       }
     }
@@ -179,9 +180,14 @@ class error_handler : public error_fn {
         log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, program_stack->second, pos);
       }
     }
-    // TODO(lmirelmann): Push the current to the stack.
+
+    // Push the current stack and trigger a fail.
+    state.frame_stacks.push_back({});
+    state.call_stack.push_back(call_stack_entry{.block_ptr = state.block_ptr, .instruction_ptr = state.instruction_ptr, .inner = state.inner});
     state.block_ptr = 0;
     state.instruction_ptr = 0;
+    state.inner = true;
+    state.current_program_stack.push_back(state.current_program);
     state.current_program = base_program;
   }
 
@@ -194,6 +200,7 @@ class error_handler : public error_fn {
 frame* run_program(
     module_loader& loader,
     std::pair<Program*, std::string>& starlark_program,
+    bool inner,
     std::map<std::string, starlark_obj*, std::less<>>& global_context,
     context& ctx,
     logger& log) {
@@ -203,6 +210,7 @@ frame* run_program(
 
   state.current_program = starlark_program;
   state.loader = &loader;
+  state.inner = inner;
   ctx.runner_context(&state);
 
   error_handler error_callback(state, log, loader);
@@ -245,6 +253,7 @@ frame* run_program(
             return nullptr;
           }
           break;
+        // TODO(lmirelmann): We should check that all ConstInt follow `log2_max_bigint`.
         default:
           break;
       }
@@ -651,6 +660,9 @@ frame* run_program(
         auto* element = stack.back();                                                                                                                                          \
         stack.pop_back();                                                                                                                                                      \
         auto* result = value->method(*element, ctx, error_callback);                                                                                                           \
+        if (result == nullptr) {                                                                                                                                               \
+          break;                                                                                                                                                               \
+        }                                                                                                                                                                      \
         state.frame_stacks.back()[state.frame_stacks.back().size() - 1 - op_code.op_method().frame()]->elements[op_code.op_method().pos_in_frame()] = result;                  \
         break;                                                                                                                                                                 \
       }
@@ -798,6 +810,7 @@ frame* run_program(
             &state.current_program.first->block(op_code.make_function().entrypoint()).function_signature(),
             state.current_program.first,
             state.current_program.second,
+            state.inner,
             &state.current_program.first->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
             state.frame_stacks.back()));
         break;
@@ -809,8 +822,9 @@ frame* run_program(
         assert(stack.size() >= 2);
         state.frame_stacks.back().pop_back();
         state.frame_stacks.pop_back();
-        state.block_ptr = state.call_stack.back().first;
-        state.instruction_ptr = state.call_stack.back().second;
+        state.block_ptr = state.call_stack.back().block_ptr;
+        state.instruction_ptr = state.call_stack.back().instruction_ptr;
+        state.inner = state.call_stack.back().inner;
         state.call_stack.pop_back();
         auto* result = stack.back();
         stack.pop_back();
@@ -984,7 +998,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
       global_context.insert(kv);
     }
     auto current_program = std::make_pair(entry.program, std::string{(*mod_info)->cannonical_name()});
-    last_frame = run_program(loader, current_program, global_context, ctx, logging);
+    last_frame = run_program(loader, current_program, (*mod_info)->inner(), global_context, ctx, logging);
     if (last_frame == nullptr) {
       return status_or<frame*>(status_code::kRuntimeError);
     }

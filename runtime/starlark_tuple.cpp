@@ -20,8 +20,8 @@ using ::starlark::bigint::number;
 using ::starlark::error_messages::error_max_sequence_length;
 using ::starlark::error_messages::error_no_concat;
 using ::starlark::error_messages::error_no_multiply_sequence;
-using ::starlark::error_messages::error_unpack_too_few;
-using ::starlark::error_messages::error_unpack_too_many;
+using ::starlark::error_messages::error_v2_unpack_too_few;
+using ::starlark::error_messages::error_v2_unpack_too_many;
 
 namespace starlark {
 namespace runtime {
@@ -222,9 +222,9 @@ bool starlark_tuple::truthy() const {
 void starlark_tuple::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   if (number_of_elements != values.size()) {
     if (values.size() < number_of_elements) {
-      error_callback.add_error(error_unpack_too_few(values.size(), number_of_elements));
+      error_callback.add_error(error_v2_unpack_too_few(values.size(), number_of_elements));
     } else {
-      error_callback.add_error(error_unpack_too_many(values.size(), number_of_elements));
+      error_callback.add_error(error_v2_unpack_too_many(values.size(), number_of_elements));
     }
     return;
   }

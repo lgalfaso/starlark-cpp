@@ -16,13 +16,13 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_dictionary_key_not_found;
-using ::starlark::error_messages::error_empty_dictionary;
 using ::starlark::error_messages::error_dictionary_update_sequence;
+using ::starlark::error_messages::error_empty_dictionary;
 using ::starlark::error_messages::error_mutate_frozen_value;
 using ::starlark::error_messages::error_op_in_loop;
-using ::starlark::error_messages::error_unhashable_key;
-using ::starlark::error_messages::error_unpack_too_few;
-using ::starlark::error_messages::error_unpack_too_many;
+using ::starlark::error_messages::error_v2_unhashable_key;
+using ::starlark::error_messages::error_v2_unpack_too_few;
+using ::starlark::error_messages::error_v2_unpack_too_many;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -88,9 +88,9 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_dictionary
 void starlark_dictionary::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   if (number_of_elements != values_.size()) {
     if (values_.size() < number_of_elements) {
-      error_callback.add_error(error_unpack_too_few(values_.size(), number_of_elements));
+      error_callback.add_error(error_v2_unpack_too_few(values_.size(), number_of_elements));
     } else {
-      error_callback.add_error(error_unpack_too_many(values_.size(), number_of_elements));
+      error_callback.add_error(error_v2_unpack_too_many(values_.size(), number_of_elements));
     }
     return;
   }
@@ -155,7 +155,7 @@ bool starlark_dictionary::truthy() const {
 
 bool starlark_dictionary::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   if (other.hash() == -1) {
-    error_callback.add_error(error_unhashable_key(type(), other.type()));
+    error_callback.add_error(error_v2_unhashable_key(type(), other.type()));
     return false;
   }
   // The const_cast is needed as there is no conversion from `const starlark_obj *const` to `starlark_obj *const`.
@@ -196,6 +196,10 @@ starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, context
 }
 
 starlark_obj* starlark_dictionary::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
+  if (other.hash() == -1) {
+    error_callback.add_error(error_v2_unhashable_key(type(), other.type()));
+    return nullptr;
+  }
   auto result = values_.find(&const_cast<starlark_obj&>(other));
   if (result == values_.end()) {
     error_callback.add_error(error_dictionary_key_not_found(other.repr()));
@@ -209,7 +213,7 @@ void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& el
     return;
   }
   if (idx.hash() == -1) {
-    error_callback.add_error(error_unhashable_key(type(), idx.type()));
+    error_callback.add_error(error_v2_unhashable_key(type(), idx.type()));
     return;
   }
   values_.insert(&const_cast<starlark_obj&>(idx), &element);
@@ -225,7 +229,7 @@ status starlark_dictionary::clear(error_fn& error_callback) {
 
 starlark_obj* starlark_dictionary::get(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) const {
   if (key->hash() == -1) {
-    error_callback.add_error(error_unhashable_key(type(), key->type()));
+    error_callback.add_error(error_v2_unhashable_key(type(), key->type()));
     return nullptr;
   }
   auto it = values_.find(key);
@@ -259,7 +263,7 @@ starlark_obj* starlark_dictionary::pop(starlark_obj* key, starlark_obj* default_
     return nullptr;
   }
   if (key->hash() == -1) {
-    error_callback.add_error(error_unhashable_key(type(), key->type()));
+    error_callback.add_error(error_v2_unhashable_key(type(), key->type()));
     return nullptr;
   }
   auto it = values_.find(key);
@@ -295,7 +299,7 @@ starlark_obj* starlark_dictionary::setdefault(starlark_obj* key, starlark_obj* d
     return nullptr;
   }
   if (key->hash() == -1) {
-    error_callback.add_error(error_unhashable_key(type(), key->type()));
+    error_callback.add_error(error_v2_unhashable_key(type(), key->type()));
     return nullptr;
   }
   auto it = values_.find(key);
@@ -414,7 +418,7 @@ std::pair<bool, bool> starlark_dictionary::insert(starlark_obj* key, starlark_ob
     return std::make_pair(false, true);
   }
   if (key->hash() == -1) {
-    error_callback.add_error(error_unhashable_key(type(), key->type()));
+    error_callback.add_error(error_v2_unhashable_key(type(), key->type()));
     return std::make_pair(false, true);
   }
   auto [it, result] = values_.insert(key, value);

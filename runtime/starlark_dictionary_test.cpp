@@ -218,7 +218,7 @@ TEST(StarlarkDictionary, UnpackError) {
     dict.unpack(3, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: not enough values to unpack (expected 3, got 2)");
+    EXPECT_EQ(error_callback.messages[0], "not enough values to unpack (expected 3, got 2)");
   }
   {
     std::vector<starlark_obj*> consumer;
@@ -227,7 +227,7 @@ TEST(StarlarkDictionary, UnpackError) {
     dict.unpack(1, consumer, ctx, error_callback);
     ASSERT_THAT(consumer, IsEmpty());
     EXPECT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: too many values to unpack (expected 1, got 2)");
+    EXPECT_EQ(error_callback.messages[0], "too many values to unpack (expected 1, got 2)");
   }
 }
 
@@ -239,7 +239,7 @@ TEST(StarlarkDictionary, InsertingUsingUnhashableKey) {
 
   EXPECT_THAT(dict.insert(&list, &none, error_callback), Pair(false, true));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+  EXPECT_EQ("cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, InsertReturnValue) {
@@ -300,7 +300,7 @@ TEST(StarlarkDictionary, MembershipNotHashable) {
 
   EXPECT_FALSE(dict.binary_in(list, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_THAT(error_callback.messages[0], "TypeError: cannot use 'list' as a dict key (unhashable type: 'list')");
+  EXPECT_THAT(error_callback.messages[0], "cannot use 'list' as a dict key (unhashable type: 'list')");
 }
 
 TEST(StarlarkDictionary, BinaryPipe) {
@@ -528,6 +528,20 @@ TEST(StarlarkDictionary, Index) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
+TEST(StarlarkDictionary, IndexUnhashable) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_dictionary dictionary;
+  starlark_integer zero(0);
+  starlark_integer one(1);
+  starlark_list list(0);
+
+  EXPECT_EQ(nullptr, dictionary.index(list, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ("cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+}
+
 TEST(StarlarkDictionary, KeyError) {
   error_handler error_callback;
   Arena arena;
@@ -609,7 +623,7 @@ TEST(StarlarkDictionary, IndexAssignUsingUnhashableKey) {
 
   dict.index_assign(list, none, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+  EXPECT_EQ("cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Clear) {
@@ -834,7 +848,7 @@ TEST(StarlarkDictionary, GetUnhashableKey) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+  EXPECT_EQ("cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, GetNoArgs) {
@@ -1183,7 +1197,7 @@ TEST(StarlarkDictionary, PopUnhashableKey) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+  EXPECT_EQ("cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1562,7 +1576,7 @@ TEST(StarlarkDictionary, SetdefaultUnhashableKey) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
+  EXPECT_EQ("cannot use 'list' as a dict key (unhashable type: 'list')", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, SetdefaultNoArgs) {
@@ -1869,7 +1883,7 @@ TEST(StarlarkDictionary, UpdateFromNonHashable) {
 
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'list' as a dict key (unhashable type: 'list')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'list' as a dict key (unhashable type: 'list')");
 }
 
 TEST(StarlarkDictionary, UpdateMultiplePositionalArguments) {

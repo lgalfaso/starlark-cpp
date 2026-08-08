@@ -51,6 +51,7 @@ using ::starlark::ast::Tuple;
 using ::starlark::ast::UnaryExpr;
 using ::starlark::bytecode::Block;
 using ::starlark::bytecode::BlockType;
+using ::starlark::bytecode::OpCode;
 using ::starlark::bytecode::Program;
 using ::starlark::grammar::ast_listener;
 using ::starlark::grammar::ast_listener_base;
@@ -133,6 +134,7 @@ class bytecode_generator : public ast_listener_base {
   std::map<const BinaryExpr*, uint64_t> binary_op_mid_pos;
   std::map<const IfExpr*, uint64_t> if_expression_op_mid_pos;
   std::map<const RepeatedPtrField<Statement>*, uint64_t> if_statement_then;
+  std::vector<OpCode*> for_unpack;
   std::vector<std::vector<uint64_t>> if_statement_to_fix_to_the_end;
   std::vector<int> blocks;
 
@@ -295,76 +297,123 @@ void bytecode_generator::mid_binary_expression(const BinaryExpr* binary_expressi
 }
 
 void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_expression) {
+  OpCode* op_code = nullptr;
   switch (binary_expression->operator_()) {
     case BinaryExpr::OR: {
       auto op_pos = binary_op_mid_pos[binary_expression];
-      mutable_block()->mutable_op_code(op_pos)->mutable_jump_if_true_or_pop()->set_address_delta(block().op_code_size() - op_pos);
+      op_code = mutable_block()->mutable_op_code(op_pos);
+      op_code->mutable_jump_if_true_or_pop()->set_address_delta(block().op_code_size() - op_pos);
       break;
     }
     case BinaryExpr::AND: {
       auto op_pos = binary_op_mid_pos[binary_expression];
-      mutable_block()->mutable_op_code(op_pos)->mutable_jump_if_false_or_pop()->set_address_delta(block().op_code_size() - op_pos);
+      op_code = mutable_block()->mutable_op_code(op_pos);
+      op_code->mutable_jump_if_false_or_pop()->set_address_delta(block().op_code_size() - op_pos);
       break;
     }
-    case BinaryExpr::EQUALS_EQUALS:
-      mutable_block()->add_op_code()->mutable_binary_equals_equals();
+    case BinaryExpr::EQUALS_EQUALS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_equals_equals();
       break;
-    case BinaryExpr::BANG_EQUALS:
-      mutable_block()->add_op_code()->mutable_binary_bang_equals();
+    }
+    case BinaryExpr::BANG_EQUALS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_bang_equals();
       break;
-    case BinaryExpr::LESS_THAN:
-      mutable_block()->add_op_code()->mutable_binary_less_than();
+    }
+    case BinaryExpr::LESS_THAN: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_less_than();
       break;
-    case BinaryExpr::GREATER_THAN:
-      mutable_block()->add_op_code()->mutable_binary_greater_than();
+    }
+    case BinaryExpr::GREATER_THAN: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_greater_than();
       break;
-    case BinaryExpr::LESS_THAN_EQUALS:
-      mutable_block()->add_op_code()->mutable_binary_less_than_equals();
+    }
+    case BinaryExpr::LESS_THAN_EQUALS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_less_than_equals();
       break;
-    case BinaryExpr::GREATER_THAN_EQUALS:
-      mutable_block()->add_op_code()->mutable_binary_greater_than_equals();
+    }
+    case BinaryExpr::GREATER_THAN_EQUALS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_greater_than_equals();
       break;
-    case BinaryExpr::IN:
-      mutable_block()->add_op_code()->mutable_binary_in();
+    }
+    case BinaryExpr::IN: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_in();
       break;
-    case BinaryExpr::NOT_IN:
-      mutable_block()->add_op_code()->mutable_binary_not_in();
+    }
+    case BinaryExpr::NOT_IN: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_not_in();
       break;
-    case BinaryExpr::PIPE:
-      mutable_block()->add_op_code()->mutable_binary_pipe();
+    }
+    case BinaryExpr::PIPE: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_pipe();
       break;
-    case BinaryExpr::HAT:
-      mutable_block()->add_op_code()->mutable_binary_hat();
+    }
+    case BinaryExpr::HAT: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_hat();
       break;
-    case BinaryExpr::AMPERSAND:
-      mutable_block()->add_op_code()->mutable_binary_ampersand();
+    }
+    case BinaryExpr::AMPERSAND: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_ampersand();
       break;
-    case BinaryExpr::LESS_THAN_LESS_THAN:
-      mutable_block()->add_op_code()->mutable_binary_less_than_less_than();
+    }
+    case BinaryExpr::LESS_THAN_LESS_THAN: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_less_than_less_than();
       break;
-    case BinaryExpr::GREATER_THAN_GREATER_THAN:
-      mutable_block()->add_op_code()->mutable_binary_greater_than_greater_than();
+    }
+    case BinaryExpr::GREATER_THAN_GREATER_THAN: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_greater_than_greater_than();
       break;
-    case BinaryExpr::MINUS:
-      mutable_block()->add_op_code()->mutable_binary_minus();
+    }
+    case BinaryExpr::MINUS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_minus();
       break;
-    case BinaryExpr::PLUS:
-      mutable_block()->add_op_code()->mutable_binary_plus();
+    }
+    case BinaryExpr::PLUS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_plus();
       break;
-    case BinaryExpr::STAR:
-      mutable_block()->add_op_code()->mutable_binary_star();
+    }
+    case BinaryExpr::STAR: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_star();
       break;
-    case BinaryExpr::PERCENT:
-      mutable_block()->add_op_code()->mutable_binary_percent();
+    }
+    case BinaryExpr::PERCENT: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_percent();
       break;
-    case BinaryExpr::SLASH:
-      mutable_block()->add_op_code()->mutable_binary_slash();
+    }
+    case BinaryExpr::SLASH: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_slash();
       break;
-    case BinaryExpr::SLASH_SLASH:
-      mutable_block()->add_op_code()->mutable_binary_slash_slash();
+    }
+    case BinaryExpr::SLASH_SLASH: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_binary_slash_slash();
       break;
+    }
     default:
       assert(false);
+  }
+  // TODO(lmirelmann): It should be possible to improve the highlight if there were 4 points instead of 3.
+  if (op_code != nullptr) {
+    *op_code->mutable_highlight_start() = binary_expression->op_pif().start();
+    *op_code->mutable_highlight_mid() = binary_expression->op_pif().start();
+    *op_code->mutable_highlight_end() = binary_expression->op_pif().end();
   }
   binary_op_mid_pos.erase(binary_expression);
 }
@@ -383,12 +432,22 @@ void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_e
 
 void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression) {
   switch (slice_expression->slice_type_case()) {
-    case SliceExpr::kIndex:
-      mutable_block()->add_op_code()->mutable_index_member();
+    case SliceExpr::kIndex: {
+      auto op_code = mutable_block()->add_op_code();
+      op_code->mutable_index_member();
+      *op_code->mutable_highlight_start() = slice_expression->pif().start();
+      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_highlight_end() = slice_expression->pif().end();
       break;
-    case SliceExpr::kSlice:
-      mutable_block()->add_op_code()->mutable_slice_range();
+    }
+    case SliceExpr::kSlice: {
+      auto op_code = mutable_block()->add_op_code();
+      op_code->mutable_slice_range();
+      *op_code->mutable_highlight_start() = slice_expression->pif().start();
+      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_highlight_end() = slice_expression->pif().end();
       break;
+    }
     default:
       assert(false);
   }
@@ -399,12 +458,22 @@ void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* s
     return;
   }
   switch (slice_expression->slice_type_case()) {
-    case SliceExpr::kIndex:
-      mutable_block()->add_op_code()->mutable_assign_index_member();
+    case SliceExpr::kIndex: {
+      auto op_code = mutable_block()->add_op_code();
+      op_code->mutable_assign_index_member();
+      *op_code->mutable_highlight_start() = slice_expression->pif().start();
+      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_highlight_end() = slice_expression->pif().end();
       break;
-    case SliceExpr::kSlice:
-      mutable_block()->add_op_code()->mutable_assign_slice_range();
+    }
+    case SliceExpr::kSlice: {
+      auto op_code = mutable_block()->add_op_code();
+      op_code->mutable_assign_slice_range();
+      *op_code->mutable_highlight_start() = slice_expression->pif().start();
+      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_highlight_end() = slice_expression->pif().end();
       break;
+    }
     default:
       assert(false);
   }
@@ -416,7 +485,6 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
     case Expression::kIdentifier: {
       const auto& identifier = expression.identifier();
       switch (assign_statement->op()) {
-        case AssignStmt::EQUALS:
           break;
         case AssignStmt::PLUS_EQUALS: {
           auto* id_op = mutable_block()->add_op_code()->mutable_assign_plus_equals();
@@ -658,6 +726,14 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
     default:
       break;
   }
+
+  // Set the uppack highlight points.
+  for (auto* op_code : for_unpack) {
+    *op_code->mutable_highlight_start() = assign_statement->pif().start();
+    *op_code->mutable_highlight_mid() = assign_statement->rhs().pif().start();
+    *op_code->mutable_highlight_end() = assign_statement->pif().end();
+  }
+  for_unpack.clear();
 }
 
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
@@ -669,7 +745,9 @@ void bytecode_generator::exit_tuple(const Tuple* tuple) {
 }
 
 void bytecode_generator::enter_tuple_for_assignment(const Tuple* tuple) {
-  mutable_block()->add_op_code()->mutable_unpack()->set_number_of_elements(tuple->value_size());
+  auto* op_code = mutable_block()->add_op_code();
+  op_code->mutable_unpack()->set_number_of_elements(tuple->value_size());
+  for_unpack.push_back(op_code);
 }
 
 void bytecode_generator::enter_list_expression(const ListExpr* list_expression) {
@@ -684,7 +762,9 @@ void bytecode_generator::exit_list_expression(const ListExpr* list_expression) {
 }
 
 void bytecode_generator::enter_list_expression_for_assignment(const ListExpr* list_expression) {
-  mutable_block()->add_op_code()->mutable_unpack()->set_number_of_elements(list_expression->element_size());
+  auto* op_code = mutable_block()->add_op_code();
+  op_code->mutable_unpack()->set_number_of_elements(list_expression->element_size());
+  for_unpack.push_back(op_code);
 }
 
 void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_expression) {
@@ -693,7 +773,11 @@ void bytecode_generator::enter_dictionary_expression(const DictExpr* dictionary_
 
 void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_expression) {
   if (dictionary_expression->entry_size() != 0) {
-    auto* add_to_dict = mutable_block()->add_op_code()->mutable_add_to_dictionary();
+    auto* op_code = mutable_block()->add_op_code();
+    auto* add_to_dict = op_code->mutable_add_to_dictionary();
+    *op_code->mutable_highlight_start() = dictionary_expression->pif().start();
+    *op_code->mutable_highlight_mid() = dictionary_expression->pif().start();
+    *op_code->mutable_highlight_end() = dictionary_expression->pif().end();
     add_to_dict->set_number_of_elements(dictionary_expression->entry_size());
   }
 }

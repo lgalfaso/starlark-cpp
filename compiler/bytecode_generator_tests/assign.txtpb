@@ -32,7 +32,7 @@ block {
   op_code { const_int: { value: 2 } }
   op_code { load: { frame: 1 pos_in_frame: 0 } }
   op_code { const_int: { value: 0 } }
-  op_code { assign_index_member: { } }
+  op_code { assign_index_member: { } highlight_start: { row: 14 column: 1 pos: 92 } highlight_mid: { row: 14 column: 2 pos: 93 } highlight_end: { row: 14 column: 5 pos: 96 } }
 
   op_code { load: { frame: 1 pos_in_frame: 0 } }
   op_code { const_int: { value: 0 } }

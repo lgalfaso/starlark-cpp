@@ -67,6 +67,7 @@ interpreter_function::interpreter_function(
     const starlark::bytecode::FunctionSignature* function_signature,
     starlark::bytecode::Program* program,
     std::string_view module_name,
+    bool inner_fn,
     const google::protobuf::RepeatedPtrField<std::string>* frame_names,
     const std::vector<frame*>& frame_stack) :
       starlark::runtime::starlark_function(function_signature->fn_name(), module_name),
@@ -75,7 +76,8 @@ interpreter_function::interpreter_function(
       function_signature(function_signature),
       frame_names(frame_names),
       frame_stack(frame_stack),
-      current_program(program, module_name) {
+      current_program(program, module_name),
+      inner_(inner_fn) {
   default_parameters = nullptr;
   for (std::size_t i = 0; i < function_signature->param().size(); ++i) {
     named_argument_index[function_signature->param(i).name()] = i;
@@ -88,7 +90,9 @@ starlark_obj* interpreter_function::call(
       context& ctx,
       error_fn& error_callback) {
   runner_state* state = static_cast<runner_state*>(ctx.runner_context());
-  if (!ctx.options().allow_recursion) {
+  // Inner functions can be called recursivelly.
+  // Context: https://github.com/bazelbuild/bazel/issues/29920
+  if (!inner_ && !ctx.options().allow_recursion) {
     if (state->fns_in_stack.contains(this)) {
       error_callback.add_error(error_recursive_call(fn_name));
       return nullptr;
@@ -207,9 +211,10 @@ starlark_obj* interpreter_function::call(
 
   state->frame_stacks.push_back(frame_stack);
   state->frame_stacks.back().push_back(new_frame);
-  state->call_stack.push_back(std::make_pair(state->block_ptr, state->instruction_ptr));
+  state->call_stack.push_back(call_stack_entry{.block_ptr = state->block_ptr, .instruction_ptr = state->instruction_ptr, .inner = state->inner});
   state->block_ptr = entrypoint;
   state->instruction_ptr = 0;
+  state->inner = inner_;
   state->current_program_stack.push_back(state->current_program);
   state->current_program = current_program;
   return ctx.none_value();

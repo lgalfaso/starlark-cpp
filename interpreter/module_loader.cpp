@@ -57,10 +57,10 @@ std::vector<std::string_view> get_dependencies(const starlark::bytecode::Program
   return result;
 }
 
-module_info::module_info(std::string_view c_name, std::string_view source, bool inner_, const bindings_t& bindings) :
+module_info::module_info(std::string_view c_name, std::string_view source, bool inner_module, const bindings_t& bindings) :
     cannonical_name_(c_name),
     source_code_(source),
-    inner_(inner_),
+    inner_(inner_module),
     custom_binding_(bindings),
     frame_and_program(nullptr, nullptr) {}
 
@@ -134,7 +134,6 @@ starlark::result::status_or<module_info*> module_loader::load_module(std::string
   }
   auto result = modules.try_emplace(std::string{cannonical_module_name}, cannonical_module_name, source_and_bindings->first, false, source_and_bindings->second);
   return starlark::result::status_or<module_info*>(&result.first->second);
-
 }
 
 std::string module_loader::cannonical_name(std::string_view module_name, std::string_view caller_module_name) {

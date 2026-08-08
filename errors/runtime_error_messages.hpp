@@ -13,8 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_unpackable(std::string_view type);
-std::string error_unhashable_key(std::string_view type, std::string_view key_type);
 std::string error_unhashable_value(std::string_view type, std::string_view value_type);
 std::string error_empty_dictionary(std::string_view fn_name);
 std::string error_empty_set(std::string_view fn_name);
@@ -22,6 +20,7 @@ std::string error_uniterable(std::string_view type);
 std::string error_argument_uniterable(std::string_view type);
 std::string error_unsubscriptable(std::string_view type);
 std::string error_no_item_assignment(std::string_view type);
+std::string error_no_slice_assignment(std::string_view type);
 std::string error_incomparable(std::string_view op, std::string_view type1, std::string_view type2);
 std::string error_index_out_of_range(std::string_view type);
 std::string error_index_integer_or_slice(std::string_view type, std::string_view actual);
@@ -86,8 +85,6 @@ std::string error_no_multiply_sequence(std::string_view other_type);
 std::string error_max_sequence_length(int64_t max_length);
 std::string error_max_string_length(int64_t max_length);
 std::string error_max_bytes_length(int64_t max_length);
-std::string error_unpack_too_few(int64_t expected, int64_t actual);
-std::string error_unpack_too_many(int64_t expected, int64_t actual);
 std::string error_in_element(std::string_view type, std::string_view actual, std::string_view expected);
 
 std::string_view error_incomplete_format();
@@ -149,6 +146,12 @@ std::string error_v2_max_string_length(int64_t max_length, std::string_view prog
 std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_not_callable(std::string_view type);
+
+std::string error_v2_unpackable(std::string_view type);
+std::string error_v2_unpack_too_few(int64_t expected, int64_t actual);
+std::string error_v2_unpack_too_many(int64_t expected, int64_t actual);
+
+std::string error_v2_unhashable_key(std::string_view type, std::string_view key_type);
 
 }  // namespace error_messages
 }  // namespace starlark

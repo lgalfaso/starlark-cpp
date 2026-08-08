@@ -9,7 +9,7 @@ block {
   op_code { const_none { } }
   op_code { const_int { value: 0 } }
   op_code { const_none { } }
-  op_code { assign_slice_range { } }
+  op_code { assign_slice_range { } highlight_start: { row: 2 column: 1 pos: 7 } highlight_mid: { row: 2 column: 2 pos: 8 } highlight_end: { row: 2 column: 6 pos: 12 } }
   op_code { load { frame: 1 pos_in_frame: 0 } }
   op_code { const_none { } }
   op_code { const_int { value: 1 } }

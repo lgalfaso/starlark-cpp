@@ -1,0 +1,3 @@
+# Unhashable key.
+{}.setdefault([])
+

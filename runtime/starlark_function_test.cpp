@@ -1065,7 +1065,7 @@ TEST(StarlarkDict, FromNonHashable) {
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: cannot use 'list' as a dict key (unhashable type: 'list')");
+  EXPECT_EQ(error_callback.messages[0], "cannot use 'list' as a dict key (unhashable type: 'list')");
 }
 
 TEST(StarlarkDict, MultiplePositionalArguments) {

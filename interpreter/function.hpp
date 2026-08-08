@@ -29,6 +29,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
       const starlark::bytecode::FunctionSignature* function_signature,
       starlark::bytecode::Program* program,
       std::string_view module_name,
+      bool inner_,
       const google::protobuf::RepeatedPtrField<std::string>* frame_names,
       const std::vector<frame*>& frame_stack);
   starlark::runtime::starlark_obj* call(
@@ -51,6 +52,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
   std::vector<frame*> frame_stack;
   starlark::runtime::starlark_obj* default_parameters;
   std::pair<starlark::bytecode::Program*, std::string> current_program;
+  const bool inner_;
 
   friend std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs, bool compare_stack);
 };
