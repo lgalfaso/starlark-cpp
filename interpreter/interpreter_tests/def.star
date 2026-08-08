@@ -48,35 +48,50 @@ def foo():
   pass
 
 foo(1)
-""", error_message = "TypeError: foo expected 0 arguments, got 1")
+""", error_message = """TypeError: foo expected 0 arguments, got 1
+    4 | foo(1)
+      | ~~~^^^
+""")
 
 assert_fail("""
 def foo(a):
   pass
 
 foo(1, a = 2)
-""", error_message = "TypeError: foo() got multiple values for argument 'a'")
+""", error_message = """TypeError: foo() got multiple values for argument 'a'
+    4 | foo(1, a = 2)
+      | ~~~^^^^^^^^^^
+""")
 
 assert_fail("""
 def foo(a):
   pass
 
 foo(b = 2)
-""", error_message = "TypeError: foo() got an unexpected keyword argument 'b'")
+""", error_message = """TypeError: foo() got an unexpected keyword argument 'b'
+    4 | foo(b = 2)
+      | ~~~^^^^^^^
+""")
 
 assert_fail("""
 def foo(a):
   pass
 
 foo()
-""", error_message = "TypeError: foo() missing required positional argument 'a'")
+""", error_message = """TypeError: foo() missing required positional argument 'a'
+    4 | foo()
+      | ~~~^^
+""")
 
 assert_fail("""
 def foo(*, a):
   pass
 
 foo()
-""", error_message = "TypeError: foo() missing required keyword-only argument 'a'")
+""", error_message = """TypeError: foo() missing required keyword-only argument 'a'
+    4 | foo()
+      | ~~~^^
+""")
 
 x = []
 def y(p1, p2 = 2, *, p3 = 3, p4):

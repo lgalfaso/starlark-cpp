@@ -24,18 +24,20 @@ class module_info {
  public:
   typedef std::map<std::string, starlark::runtime::starlark_obj*, std::less<>> bindings_t;
 
-  module_info(std::string_view c_name, std::string_view source, const bindings_t& bindings);
+  module_info(std::string_view c_name, std::string_view source, bool inner_, const bindings_t& bindings);
   bool ready() const;
   const bindings_t& custom_binding() const;
   google::protobuf::Arena& arena();
   std::string_view cannonical_name() const;
   std::string_view source_code() const;
+  bool inner() const;
   void loaded(frame* base_frame, const starlark::bytecode::Program* program);
   std::pair<frame*, const starlark::bytecode::Program*>& get();
 
  private:
   std::string cannonical_name_;
   std::string source_code_;
+  const bool inner_;
   const bindings_t custom_binding_;
   google::protobuf::Arena arena_;
   std::pair<frame*, const starlark::bytecode::Program*> frame_and_program;
@@ -44,14 +46,15 @@ class module_info {
 class module_loader {
  public:
   module_loader();
-  starlark::result::status_or<module_info*> load_module(std::string_view module_name, std::string_view caller_module_name);
+  starlark::result::status_or<module_info*> load_module(std::string_view module_name, std::string_view caller_cannonical_name);
+  starlark::result::status_or<module_info*> load_module(std::string_view cannonical_module_name);
 
  protected:
   virtual std::string cannonical_name(std::string_view module_name, std::string_view caller_module_name);
   virtual starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> inner_load(std::string_view cannonical_name_) = 0;
 
  private:
-  std::map<std::string, module_info> modules;
+  std::map<std::string, module_info, std::less<>> modules;
   module_info::bindings_t custom_binding;
   google::protobuf::Arena arena;
 };

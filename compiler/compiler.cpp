@@ -213,13 +213,17 @@ void bytecode_generator::enter_float_value(const FloatValue* float_value) {
 void bytecode_generator::enter_string_value(const StringValue* string_value) {
   auto* const_string_op = mutable_block()->add_op_code();
   const_string_op->mutable_const_string()->set_value(string_value->value());
-  *const_string_op->mutable_pif() = string_value->pif();
+  *const_string_op->mutable_highlight_start() = string_value->pif().start();
+  *const_string_op->mutable_highlight_mid() = string_value->pif().start();
+  *const_string_op->mutable_highlight_end() = string_value->pif().end();
 }
 
 void bytecode_generator::enter_bytes_value(const StringValue* bytes_value) {
   auto* const_bytes_op = mutable_block()->add_op_code();
   const_bytes_op->mutable_const_bytes()->set_value(bytes_value->value());
-  *const_bytes_op->mutable_pif() = bytes_value->pif();
+  *const_bytes_op->mutable_highlight_start() = bytes_value->pif().start();
+  *const_bytes_op->mutable_highlight_mid() = bytes_value->pif().start();
+  *const_bytes_op->mutable_highlight_end() = bytes_value->pif().end();
 }
 
 void bytecode_generator::enter_identifier(const Identifier* identifier) {
@@ -659,7 +663,9 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
   auto* tuple_op = mutable_block()->add_op_code();
   tuple_op->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
-  *tuple_op->mutable_pif() = tuple->pif();
+  *tuple_op->mutable_highlight_start() = tuple->pif().start();
+  *tuple_op->mutable_highlight_mid() = tuple->pif().start();
+  *tuple_op->mutable_highlight_end() = tuple->pif().end();
 }
 
 void bytecode_generator::enter_tuple_for_assignment(const Tuple* tuple) {
@@ -857,11 +863,15 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
         assert(false);
     }
   }
-  auto* call = mutable_block()->add_op_code()->mutable_call();
+  auto* new_op = mutable_block()->add_op_code();
+  auto* call = new_op->mutable_call();
   call->set_positional_arguments_count(pos_arguments);
   call->set_named_arguments_count(named_arguments);
   call->set_has_variadic_positional_argument(variadic_pos_arg);
   call->set_has_variadic_named_argument(variadic_named_arg);
+  *new_op->mutable_highlight_start() = call_expression->pif().start();
+  *new_op->mutable_highlight_mid() = call_expression->primary_expression().pif().end();
+  *new_op->mutable_highlight_end() = call_expression->pif().end();
 }
 
 void bytecode_generator::enter_argument(const Argument* argument) {

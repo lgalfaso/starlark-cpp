@@ -28,10 +28,10 @@ struct runner_state {
   // this is kept as is. If at a future point in time this were to change, and recursion were never be allowed, then this can be revisited.
   std::vector<std::vector<frame*>> frame_stacks;
   std::vector<std::pair<int, int>> call_stack;
-  std::vector<std::pair<starlark::bytecode::Program*, std::string>*> current_program_stack;
+  std::vector<std::pair<starlark::bytecode::Program*, std::string>> current_program_stack;
   int instruction_ptr = 0;
   int block_ptr = 0;
-  std::pair<starlark::bytecode::Program*, std::string>* current_program = nullptr;
+  std::pair<starlark::bytecode::Program*, std::string> current_program;
   module_loader* loader = nullptr;
   std::vector<interpreter_function*> call_fns;
   std::map<interpreter_function*, int, less_fn> fns_in_stack;

@@ -5,7 +5,10 @@ def fibonacci(n):
   return fibonacci(n - 1) + fibonacci(n - 2)
 
 print(fibonacci(6))
-""", error_message = "Error: function 'fibonacci' called recursively")
+""", error_message = """Error: function 'fibonacci' called recursively
+    4 |   return fibonacci(n - 1) + fibonacci(n - 2)
+      |          ~~~~~~~~~^^^^^^^
+""")
 
 assert_succeed("""
 def fibonacci(n):

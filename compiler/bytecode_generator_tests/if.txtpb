@@ -1,107 +1,107 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "False" symbol: "True" } }                                #  0
-  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                    #  1
-  op_code { create_frame { block_type: FILE_BLOCK } }                                                                      #  2
-  op_code { load { frame: 2 pos_in_frame: 1 } }                                                                            #  3
-  op_code { jump_if_false { address_delta: 4 } }                                                                           #  4
-  op_code { load { frame: 2 pos_in_frame: 0 } }                                                                            #  5
-  op_code { pop {} }                                                                                                       #  6
-  op_code { goto { address_delta: 1 } }                                                                                    #  7
+  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "False" symbol: "True" } }                                                                                         #  0
+  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                             #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                               #  2
+  op_code { load { frame: 2 pos_in_frame: 1 } }                                                                                                                                     #  3
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    #  4
+  op_code { load { frame: 2 pos_in_frame: 0 } }                                                                                                                                     #  5
+  op_code { pop {} }                                                                                                                                                                #  6
+  op_code { goto { address_delta: 1 } }                                                                                                                                             #  7
 
 
-  op_code { load { frame: 2 pos_in_frame: 0 } }                                                                            #  8
-  op_code { jump_if_false { address_delta: 4 } }                                                                           #  9
-  op_code { const_int { value: 0 } }                                                                                       # 10
-  op_code { pop { } }                                                                                                      # 11
-  op_code { goto { address_delta: 3 } }                                                                                    # 12
-  op_code { load { frame: 2 pos_in_frame: 1 } }                                                                            # 13
-  op_code { pop { } }                                                                                                      # 14
+  op_code { load { frame: 2 pos_in_frame: 0 } }                                                                                                                                     #  8
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    #  9
+  op_code { const_int { value: 0 } }                                                                                                                                                # 10
+  op_code { pop { } }                                                                                                                                                               # 11
+  op_code { goto { address_delta: 3 } }                                                                                                                                             # 12
+  op_code { load { frame: 2 pos_in_frame: 1 } }                                                                                                                                     # 13
+  op_code { pop { } }                                                                                                                                                               # 14
 
-  op_code { const_string: { value: "a" } pif { start { row: 6 column: 4 pos: 43 } end { row: 6 column: 7 pos: 46 } } }     # 15
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 16
-  op_code { const_int { value: 1 } }                                                                                       # 17
-  op_code { pop { } }                                                                                                      # 18
-  op_code { goto { address_delta: 6 } }                                                                                    # 19
-  op_code { const_string: { value: "b" } pif { start { row: 7 column: 6 pos: 55 } end { row: 7 column: 9 pos: 58 } } }     # 20
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 21
-  op_code { const_int { value: 2 } }                                                                                       # 22
-  op_code { pop { } }                                                                                                      # 23
-  op_code { goto { address_delta: 1 } }                                                                                    # 24
+  op_code { const_string: { value: "a" } highlight_start { row: 6 column: 4 pos: 43 } highlight_mid { row: 6 column: 4 pos: 43 } highlight_end { row: 6 column: 7 pos: 46 } }       # 15
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 16
+  op_code { const_int { value: 1 } }                                                                                                                                                # 17
+  op_code { pop { } }                                                                                                                                                               # 18
+  op_code { goto { address_delta: 6 } }                                                                                                                                             # 19
+  op_code { const_string: { value: "b" } highlight_start { row: 7 column: 6 pos: 55 } highlight_mid { row: 7 column: 6 pos: 55 } highlight_end { row: 7 column: 9 pos: 58 } }       # 20
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 21
+  op_code { const_int { value: 2 } }                                                                                                                                                # 22
+  op_code { pop { } }                                                                                                                                                               # 23
+  op_code { goto { address_delta: 1 } }                                                                                                                                             # 24
 
 
-  op_code { const_string: { value: "a" } pif { start { row: 9 column: 4 pos: 66 } end { row: 9 column: 7 pos: 69 } } }     # 25
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 26
-  op_code { const_int { value: 1 } }                                                                                       # 27
-  op_code { pop { } }                                                                                                      # 28
-  op_code { goto { address_delta: 8 } }                                                                                    # 29
-  op_code { const_string: { value: "b" } pif { start { row: 10 column: 6 pos: 78 } end { row: 10 column: 9 pos: 81 } } }   # 30
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 31
-  op_code { const_int { value: 2 } }                                                                                       # 32
-  op_code { pop { } }                                                                                                      # 33
-  op_code { goto { address_delta: 3 } }                                                                                    # 34
-  op_code { const_int { value: 3 } }                                                                                       # 35
-  op_code { pop { } }                                                                                                      # 36
+  op_code { const_string: { value: "a" } highlight_start { row: 9 column: 4 pos: 66 } highlight_mid { row: 9 column: 4 pos: 66 } highlight_end { row: 9 column: 7 pos: 69 } }       # 25
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 26
+  op_code { const_int { value: 1 } }                                                                                                                                                # 27
+  op_code { pop { } }                                                                                                                                                               # 28
+  op_code { goto { address_delta: 8 } }                                                                                                                                             # 29
+  op_code { const_string: { value: "b" } highlight_start { row: 10 column: 6 pos: 78 } highlight_mid { row: 10 column: 6 pos: 78 } highlight_end { row: 10 column: 9 pos: 81 } }    # 30
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 31
+  op_code { const_int { value: 2 } }                                                                                                                                                # 32
+  op_code { pop { } }                                                                                                                                                               # 33
+  op_code { goto { address_delta: 3 } }                                                                                                                                             # 34
+  op_code { const_int { value: 3 } }                                                                                                                                                # 35
+  op_code { pop { } }                                                                                                                                                               # 36
 
-  op_code { const_string { value: "a" } pif { start { row: 13 column: 4 pos: 97 } end { row: 13 column: 7 pos: 100 } } }   # 37
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 38
-  op_code { const_int { value: 1 } }                                                                                       # 39
-  op_code { pop { } }                                                                                                      # 40
-  op_code { goto { address_delta: 11 } }                                                                                   # 41
-  op_code { const_string { value: "b" } pif { start { row: 14 column: 6 pos: 109 } end { row: 14 column: 9 pos: 112 } } }  # 42
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 43
-  op_code { const_int { value: 2 } }                                                                                       # 44
-  op_code { pop { } }                                                                                                      # 45
-  op_code { goto { address_delta: 6 } }                                                                                    # 46
-  op_code { const_string { value: "c" } pif { start { row: 15 column: 6 pos: 121 } end { row: 15 column: 9 pos: 124 } } }  # 47
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 48
-  op_code { const_int { value: 3 } }                                                                                       # 49
-  op_code { pop { } }                                                                                                      # 50
-  op_code { goto { address_delta: 1 } }                                                                                    # 51
+  op_code { const_string { value: "a" } highlight_start { row: 13 column: 4 pos: 97 } highlight_mid { row: 13 column: 4 pos: 97 } highlight_end { row: 13 column: 7 pos: 100 } }    # 37
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 38
+  op_code { const_int { value: 1 } }                                                                                                                                                # 39
+  op_code { pop { } }                                                                                                                                                               # 40
+  op_code { goto { address_delta: 11 } }                                                                                                                                            # 41
+  op_code { const_string { value: "b" } highlight_start { row: 14 column: 6 pos: 109 } highlight_mid { row: 14 column: 6 pos: 109 } highlight_end { row: 14 column: 9 pos: 112 } }  # 42
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 43
+  op_code { const_int { value: 2 } }                                                                                                                                                # 44
+  op_code { pop { } }                                                                                                                                                               # 45
+  op_code { goto { address_delta: 6 } }                                                                                                                                             # 46
+  op_code { const_string { value: "c" } highlight_start { row: 15 column: 6 pos: 121 } highlight_mid { row: 15 column: 6 pos: 121 } highlight_end { row: 15 column: 9 pos: 124 } }  # 47
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 48
+  op_code { const_int { value: 3 } }                                                                                                                                                # 49
+  op_code { pop { } }                                                                                                                                                               # 50
+  op_code { goto { address_delta: 1 } }                                                                                                                                             # 51
 
-  op_code { const_string { value: "a" } pif { start { row: 17 column: 4 pos: 132 } end { row: 17 column: 7 pos: 135 } } }  # 52
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 53
-  op_code { const_int { value: 1 } }                                                                                       # 54
-  op_code { pop { } }                                                                                                      # 55
-  op_code { goto { address_delta: 13 } }                                                                                   # 56
-  op_code { const_string { value: "b" } pif { start { row: 18 column: 6 pos: 144 } end { row: 18 column: 9 pos: 147 } } }  # 57
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 58
-  op_code { const_int { value: 2 } }                                                                                       # 59
-  op_code { pop { } }                                                                                                      # 60
-  op_code { goto { address_delta: 8 } }                                                                                    # 61
-  op_code { const_string { value: "c" } pif { start { row: 19 column: 6 pos: 156 } end { row: 19 column: 9 pos: 159 } } }  # 62
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 63
-  op_code { const_int { value: 3 } }                                                                                       # 64
-  op_code { pop { } }                                                                                                      # 65
-  op_code { goto { address_delta: 3 } }                                                                                    # 66
-  op_code { const_int { value: 4 } }                                                                                       # 67
-  op_code { pop { } }                                                                                                      # 68
+  op_code { const_string { value: "a" } highlight_start { row: 17 column: 4 pos: 132 } highlight_mid { row: 17 column: 4 pos: 132 } highlight_end { row: 17 column: 7 pos: 135 } }  # 52
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 53
+  op_code { const_int { value: 1 } }                                                                                                                                                # 54
+  op_code { pop { } }                                                                                                                                                               # 55
+  op_code { goto { address_delta: 13 } }                                                                                                                                            # 56
+  op_code { const_string { value: "b" } highlight_start { row: 18 column: 6 pos: 144 } highlight_mid { row: 18 column: 6 pos: 144 } highlight_end { row: 18 column: 9 pos: 147 } }  # 57
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 58
+  op_code { const_int { value: 2 } }                                                                                                                                                # 59
+  op_code { pop { } }                                                                                                                                                               # 60
+  op_code { goto { address_delta: 8 } }                                                                                                                                             # 61
+  op_code { const_string { value: "c" } highlight_start { row: 19 column: 6 pos: 156 } highlight_mid { row: 19 column: 6 pos: 156 } highlight_end { row: 19 column: 9 pos: 159 } }  # 62
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 63
+  op_code { const_int { value: 3 } }                                                                                                                                                # 64
+  op_code { pop { } }                                                                                                                                                               # 65
+  op_code { goto { address_delta: 3 } }                                                                                                                                             # 66
+  op_code { const_int { value: 4 } }                                                                                                                                                # 67
+  op_code { pop { } }                                                                                                                                                               # 68
 
-  op_code { const_string { value: "a" } pif { start { row: 22 column: 4 pos: 175 } end { row: 22 column: 7 pos: 178 } } }  # 69
-  op_code { jump_if_false { address_delta: 19 } }                                                                          # 70
-  op_code { const_string { value: "b" } pif { start { row: 23 column: 6 pos: 185 } end { row: 23 column: 9 pos: 188 } } }  # 71
-  op_code { jump_if_false { address_delta: 9 } }                                                                           # 72
-  op_code { const_string { value: "c" } pif { start { row: 24 column: 8 pos: 197 } end { row: 24 column: 11 pos: 200 } } } # 73
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 74
-  op_code { const_int { value: 5 } }                                                                                       # 75
-  op_code { pop { } }                                                                                                      # 76
-  op_code { goto { address_delta: 3 } }                                                                                    # 77
-  op_code { const_int { value: 6 } }                                                                                       # 78
-  op_code { pop { } }                                                                                                      # 79
-  op_code { goto { address_delta: 8 } }                                                                                    # 80
-  op_code { const_string { value: "d" } pif { start { row: 26 column: 8 pos: 223 } end { row: 26 column: 11 pos: 226 } } } # 81
-  op_code { jump_if_false { address_delta: 4 } }                                                                           # 82
-  op_code { const_int { value: 7 } }                                                                                       # 83
-  op_code { pop { } }                                                                                                      # 84
-  op_code { goto { address_delta: 3 } }                                                                                    # 85
-  op_code { const_int { value: 8 } }                                                                                       # 86
-  op_code { pop { } }                                                                                                      # 87
-  op_code { goto { address_delta: 3 } }                                                                                    # 88
-  op_code { const_int { value: 9 } }                                                                                       # 89
-  op_code { pop { } }                                                                                                      # 90
+  op_code { const_string { value: "a" } highlight_start { row: 22 column: 4 pos: 175 } highlight_mid { row: 22 column: 4 pos: 175 } highlight_end { row: 22 column: 7 pos: 178 } }  # 69
+  op_code { jump_if_false { address_delta: 19 } }                                                                                                                                   # 70
+  op_code { const_string { value: "b" } highlight_start { row: 23 column: 6 pos: 185 } highlight_mid { row: 23 column: 6 pos: 185 } highlight_end { row: 23 column: 9 pos: 188 } }  # 71
+  op_code { jump_if_false { address_delta: 9 } }                                                                                                                                    # 72
+  op_code { const_string { value: "c" } highlight_start { row: 24 column: 8 pos: 197 } highlight_mid { row: 24 column: 8 pos: 197 } highlight_end { row: 24 column: 11 pos: 200 } } # 73
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 74
+  op_code { const_int { value: 5 } }                                                                                                                                                # 75
+  op_code { pop { } }                                                                                                                                                               # 76
+  op_code { goto { address_delta: 3 } }                                                                                                                                             # 77
+  op_code { const_int { value: 6 } }                                                                                                                                                # 78
+  op_code { pop { } }                                                                                                                                                               # 79
+  op_code { goto { address_delta: 8 } }                                                                                                                                             # 80
+  op_code { const_string { value: "d" } highlight_start { row: 26 column: 8 pos: 223 } highlight_mid { row: 26 column: 8 pos: 223 } highlight_end { row: 26 column: 11 pos: 226 } } # 81
+  op_code { jump_if_false { address_delta: 4 } }                                                                                                                                    # 82
+  op_code { const_int { value: 7 } }                                                                                                                                                # 83
+  op_code { pop { } }                                                                                                                                                               # 84
+  op_code { goto { address_delta: 3 } }                                                                                                                                             # 85
+  op_code { const_int { value: 8 } }                                                                                                                                                # 86
+  op_code { pop { } }                                                                                                                                                               # 87
+  op_code { goto { address_delta: 3 } }                                                                                                                                             # 88
+  op_code { const_int { value: 9 } }                                                                                                                                                # 89
+  op_code { pop { } }                                                                                                                                                               # 90
 
-  op_code { pop_frame { } }                                                                                                # 91
-  op_code { pop_frame { } }                                                                                                # 92
-  op_code { pop_frame { } }                                                                                                # 93
+  op_code { pop_frame { } }                                                                                                                                                         # 91
+  op_code { pop_frame { } }                                                                                                                                                         # 92
+  op_code { pop_frame { } }                                                                                                                                                         # 93
 
-  op_code { end { } }                                                                                                      # 94
+  op_code { end { } }                                                                                                                                                               # 94
 }

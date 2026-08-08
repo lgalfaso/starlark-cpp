@@ -13,7 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_not_callable(std::string_view type);
 std::string error_unpackable(std::string_view type);
 std::string error_unhashable_key(std::string_view type, std::string_view key_type);
 std::string error_unhashable_value(std::string_view type, std::string_view value_type);
@@ -146,9 +145,10 @@ std::string error_module_does_not_define_symbol(std::string_view  module_name, s
 std::string error_unknown_op(int op_code);
 std::string error_recursive_call(std::string_view fn_name);
 
-std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const starlark::logging::PositionInFile& pos);
-std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const starlark::logging::PositionInFile& pos);
-std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const starlark::logging::PositionInFile& pos);
+std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_not_callable(std::string_view type);
 
 }  // namespace error_messages
 }  // namespace starlark

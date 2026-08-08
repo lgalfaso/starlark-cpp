@@ -399,7 +399,7 @@ TEST(StarlarkList, Call) {
   list.call({}, {}, ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object is not callable");
+  EXPECT_EQ(error_callback.messages[0], "'list' object is not callable");
 }
 
 TEST(StarlarkList, UnaryPlus) {

@@ -14,8 +14,14 @@ assert_eq(dir(1), [])
 assert_eq(dir({}), ["clear", "get", "items", "keys", "pop", "popitem", "setdefault", "update", "values"])
 assert_eq(enumerate(['a', 'b', 'c']), [(0, 'a'), (1, 'b'), (2, 'c')])
 assert_eq(enumerate(['a', 'b', 'c'], start = 100), [(100, 'a'), (101, 'b'), (102, 'c')])
-assert_fail("fail('Some message')", error_message = "Error: Some message")
-assert_fail("float('2e308')", error_message = "OverflowError: floating-point number too large")
+assert_fail("fail('Some message')", error_message = """Error: Some message
+    1 | fail('Some message')
+      | ~~~~^^^^^^^^^^^^^^^^
+""")
+assert_fail("float('2e308')", error_message = """OverflowError: floating-point number too large
+    1 | float('2e308')
+      | ~~~~~^^^^^^^^^
+""")
 assert_eq(float(0.0), 0.0)
 assert_eq(float(1), 1.0)
 assert_eq(float("Inf"), 1e308*10)
@@ -26,7 +32,10 @@ assert_eq(hasattr(b'', "elems"), True)
 assert_eq(hash("abc"), 6041520446639342335)
 assert_eq(int("0123", 10), 123)
 assert_eq(int("0123"), 123)
-assert_fail('int("0123", 0)', error_message = "ValueError: invalid literal for int() with base 0: '0123'")
+assert_fail('int("0123", 0)', error_message = """ValueError: invalid literal for int() with base 0: '0123'
+    1 | int("0123", 0)
+      | ~~~^^^^^^^^^^^
+""")
 assert_eq(len([]), 0)
 assert_eq(list((1, 2)), [1, 2])
 assert_eq(max(1, 2, 3), 3)

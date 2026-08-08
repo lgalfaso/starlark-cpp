@@ -20,7 +20,7 @@ block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "x" } }
   op_code { load { frame: 0 pos_in_frame: 0 } }
   op_code { load { frame: 0 pos_in_frame: 1 } }
-  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } }
+  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 1 column: 32 pos: 31 } highlight_mid { row: 1 column: 33 pos: 32 } highlight_end { row: 1 column: 36 pos: 35 } }
   op_code { return { } }
   function_signature { param { name: "x" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }

@@ -9,14 +9,9 @@
 #include "proto/starlark_logging.pb.h"
 
 using ::starlark::logging::Position;
-using ::starlark::logging::PositionInFile;
 
 namespace starlark {
 namespace error_messages {
-
-std::string get_line_and_underline(std::string_view program, const PositionInFile& pos) {
-  return get_line_and_underline(program, pos.start(), pos.end());
-}
 
 std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end) {
   return get_line_and_underline(program, start, end, false);
@@ -37,36 +32,40 @@ std::string get_line_and_underline(std::string_view program, const Position& sta
   //   in cases line unterminated triple-quoted strings as we have to make sure that we do not pick a line that has zero length.
   //   This needs a lot more thought.
   auto start_pos = start.pos();
-  while (start_pos > 0 && program[start_pos] != '\n' && program[start_pos] != '\r') {
+  while (start_pos > 0 && program[start_pos - 1] != '\n' && program[start_pos - 1] != '\r') {
     --start_pos;
   }
-  if (program[start_pos] == '\n' || program[start_pos] == '\r') {
-    ++start_pos;
-  }
-  auto end_pos = program.find_first_of("\n\r", start.pos());
-  std::string_view line;
-  if (end_pos == std::string_view::npos) {
-    line = program.substr(start_pos);
-  } else {
-    line = program.substr(start_pos, end_pos - start_pos);
-  }
+  std::string_view line = program.substr(start_pos, program.find_first_of("\n\r", start.pos()) - start_pos);
   result += std::format("{:5} | {}\n", start.row(), line);
-  if (start.row() == end.row()) {
-    if (reverse) {
-      result += std::format("      |{:{}}{:~>{}}\n", ' ', start.column(), '^', end.column() - start.column());
-    } else {
-      result += std::format("      |{:{}}{:~<{}}\n", ' ', start.column(), '^', end.column() - start.column());
-    }
+  auto padding_size = start.column();
+  auto underline_size = start.row() == end.row() ? end.column() - start.column() : line.size() - start.column() + 1;
+  if (reverse) {
+    result += std::format("      |{:{}}{:~>{}}\n", ' ', padding_size, '^', underline_size);
   } else {
-    if (reverse) {
-      result += std::format("      |{:{}}{:~>{}}\n", ' ', start.column(), '^', line.size() - start.column() + 1);
-    } else {
-      result += std::format("      |{:{}}{:~<{}}\n", ' ', start.column(), '^', line.size() - start.column() + 1);
-    }
+    result += std::format("      |{:{}}{:~<{}}\n", ' ', padding_size, '^', underline_size);
   }
   if (!hint.empty()) {
-    result += std::format("      |{:{}}{}\n", ' ', start.column(), hint);
+    result += std::format("      |{:{}}{}\n", ' ', padding_size, hint);
   }
+  return result;
+}
+
+std::string get_line_and_underline(std::string_view program, const Position& start, const Position& mid, const Position& end) {
+  std::string result;
+  // TODO(lmirelmann): Merge into a single implementation.
+  auto start_pos = start.pos();
+  while (start_pos > 0 && program[start_pos - 1] != '\n' && program[start_pos - 1] != '\r') {
+    --start_pos;
+  }
+  std::string_view line = program.substr(start_pos, program.find_first_of("\n\r", start.pos()) - start_pos);
+  result += std::format("{:5} | {}\n", start.row(), line);
+  auto padding_size = start.column();
+  auto underline_size = start.row() == mid.row() ? mid.column() - start.column() : line.size() - start.column() + 1;
+  result += std::format("      |{:{}}{:~>{}}", ' ', padding_size, '~', underline_size);
+  if (start.row() == end.row() && mid.column() != end.column()) {
+    result += std::format("{:^>{}}", '^', end.column() - mid.column());
+  }
+  result += "\n";
   return result;
 }
 

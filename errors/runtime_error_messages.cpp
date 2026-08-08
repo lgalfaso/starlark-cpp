@@ -9,14 +9,10 @@
 #include "errors/source_highlight.hpp"
 #include "proto/starlark_logging.pb.h"
 
-using ::starlark::logging::PositionInFile;
+using ::starlark::logging::Position;
 
 namespace starlark {
 namespace error_messages {
-
-std::string error_not_callable(std::string_view type) {
-  return std::format("TypeError: '{}' object is not callable", type);
-}
 
 std::string error_unpackable(std::string_view type) {
   return std::format("TypeError: cannot unpack non-iterable {} object", type);
@@ -484,16 +480,20 @@ std::string error_recursive_call(std::string_view fn_name) {
 
 
 
-std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const PositionInFile& pos) {
-  return std::format("string must be at most {} elements\n{}", max_length, get_line_and_underline(program, pos));
+std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const Position& start, const Position& end) {
+  return std::format("string must be at most {} elements\n{}", max_length, get_line_and_underline(program, start, end));
 }
 
-std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const PositionInFile& pos) {
-  return std::format("bytes must be at most {} elements\n{}", max_length, get_line_and_underline(program, pos));
+std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const Position& start, const Position& end) {
+  return std::format("bytes must be at most {} elements\n{}", max_length, get_line_and_underline(program, start, end));
 }
 
-std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const PositionInFile& pos) {
-  return std::format("sequences must be at most {} elements\n{}", max_length, get_line_and_underline(program, pos));
+std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const Position& start, const Position& end) {
+  return std::format("sequences must be at most {} elements\n{}", max_length, get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_not_callable(std::string_view type) {
+  return std::format("'{}' object is not callable", type);
 }
 
 }  // namespace error_messages

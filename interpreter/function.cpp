@@ -211,7 +211,7 @@ starlark_obj* interpreter_function::call(
   state->block_ptr = entrypoint;
   state->instruction_ptr = 0;
   state->current_program_stack.push_back(state->current_program);
-  state->current_program = &current_program;
+  state->current_program = current_program;
   return ctx.none_value();
 }
 
@@ -248,7 +248,7 @@ namespace {
 
 starlark_obj* starlark_fn_trampoline(std::string_view fn_name, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   runner_state* state = static_cast<runner_state*>(ctx.runner_context());
-  auto mod_info = state->loader->load_module(builtin_star_module, "");
+  auto mod_info = state->loader->load_module(builtin_star_module);
   if (!mod_info.ok() || !(*mod_info)->ready()) {
     // This should never happen.
     error_callback.add_error(error_unable_to_load_module(builtin_star_module));

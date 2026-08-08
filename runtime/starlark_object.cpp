@@ -36,13 +36,13 @@ using ::starlark::error_messages::error_no_item_assignment;
 using ::starlark::error_messages::error_no_keyword;
 using ::starlark::error_messages::error_no_method;
 using ::starlark::error_messages::error_no_pos_args;
-using ::starlark::error_messages::error_not_callable;
 using ::starlark::error_messages::error_overflow_too_many_digits;
 using ::starlark::error_messages::error_read_only_attribute;
 using ::starlark::error_messages::error_step_non_zero;
 using ::starlark::error_messages::error_uniterable;
 using ::starlark::error_messages::error_unpackable;
 using ::starlark::error_messages::error_unsubscriptable;
+using ::starlark::error_messages::error_v2_not_callable;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -293,7 +293,7 @@ void starlark_obj::freeze() {
 }
 
 starlark_obj* starlark_obj::call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_not_callable(type()));
+  error_callback.add_error(error_v2_not_callable(type()));
   return nullptr;
 }
 
