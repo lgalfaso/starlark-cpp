@@ -19,31 +19,31 @@
 #include "string/levenshtein.hpp"
 
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_argument_uniterable;
 using ::starlark::error_messages::error_arguments_exactly;
 using ::starlark::error_messages::error_arguments_exactly_one;
 using ::starlark::error_messages::error_arguments_too_few;
 using ::starlark::error_messages::error_arguments_too_many;
 using ::starlark::error_messages::error_bad_operand_binary;
 using ::starlark::error_messages::error_bad_operand_unary;
-using ::starlark::error_messages::error_incomparable;
-using ::starlark::error_messages::error_index_integer_on_a_slice;
-using ::starlark::error_messages::error_index_integer_or_slice;
-using ::starlark::error_messages::error_index_out_of_range;
-using ::starlark::error_messages::error_interpreted_as_integer;
 using ::starlark::error_messages::error_no_attribute;
-using ::starlark::error_messages::error_no_item_assignment;
-using ::starlark::error_messages::error_no_slice_assignment;
 using ::starlark::error_messages::error_no_keyword;
 using ::starlark::error_messages::error_no_method;
 using ::starlark::error_messages::error_no_pos_args;
 using ::starlark::error_messages::error_overflow_too_many_digits;
 using ::starlark::error_messages::error_read_only_attribute;
 using ::starlark::error_messages::error_step_non_zero;
-using ::starlark::error_messages::error_uniterable;
-using ::starlark::error_messages::error_unsubscriptable;
+using ::starlark::error_messages::error_v2_argument_uniterable;
+using ::starlark::error_messages::error_v2_incomparable;
+using ::starlark::error_messages::error_v2_index_integer_on_a_slice;
+using ::starlark::error_messages::error_v2_index_integer_or_slice;
+using ::starlark::error_messages::error_v2_index_out_of_range;
+using ::starlark::error_messages::error_v2_interpreted_as_integer;
+using ::starlark::error_messages::error_v2_no_item_assignment;
+using ::starlark::error_messages::error_v2_no_slice_assignment;
 using ::starlark::error_messages::error_v2_not_callable;
+using ::starlark::error_messages::error_v2_uniterable;
 using ::starlark::error_messages::error_v2_unpackable;
+using ::starlark::error_messages::error_v2_unsubscriptable;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -318,7 +318,7 @@ starlark_obj* starlark_obj::unary_tilde(context& ctx, error_fn& error_callback) 
 }
 
 bool starlark_obj::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  error_callback.add_error(error_argument_uniterable(type()));
+  error_callback.add_error(error_v2_argument_uniterable(type()));
   return false;
 }
 
@@ -441,18 +441,18 @@ int64_t starlark_obj::len(bool produce_error, error_fn& error_callback) const {
 
 starlark_iterator* starlark_obj::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
   if (produce_error) {
-    error_callback.add_error(error_uniterable(type()));
+    error_callback.add_error(error_v2_uniterable(type()));
   }
   return nullptr;
 }
 
 starlark_obj* starlark_obj::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
-  error_callback.add_error(error_unsubscriptable(type()));
+  error_callback.add_error(error_v2_unsubscriptable(type()));
   return nullptr;
 }
 
 void starlark_obj::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
-  error_callback.add_error(error_no_item_assignment(type()));
+  error_callback.add_error(error_v2_no_item_assignment(type()));
 }
 
 starlark_obj* starlark_obj::dot(std::string_view field_name, context& ctx, error_fn& error_callback) {
@@ -476,56 +476,56 @@ void starlark_obj::dot_assign(std::string_view field_name, starlark_obj& element
 }
 
 starlark_obj* starlark_obj::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
-  error_callback.add_error(error_unsubscriptable(type()));
+  error_callback.add_error(error_v2_unsubscriptable(type()));
   return nullptr;
 }
 
 void starlark_obj::slice_range_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_plus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_minus_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_star_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_slash_slash_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_percent_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_ampersand_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_pipe_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_hat_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 void starlark_obj::slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback) {
-  error_callback.add_error(error_no_slice_assignment(type()));
+  error_callback.add_error(error_v2_no_slice_assignment(type()));
 }
 
 int64_t starlark_obj::as_int64() const {
@@ -567,7 +567,7 @@ starlark_numeric_type starlark_obj::numeric_type() const {
 }
 
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  error_callback.add_error(error_incomparable(op, type(), other->type()));
+  error_callback.add_error(error_v2_incomparable(op, type(), other->type()));
   comp.add_task(order_comparator::pending_task_type::kFail);
 }
 
@@ -583,7 +583,7 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
         idx += obj_len;
       }
       if (idx < 0 || obj_len <= idx) {
-        error_callback.add_error(error_index_out_of_range(type()));
+        error_callback.add_error(error_v2_index_out_of_range(type()));
         return status_or<int64_t>(status_code::kRuntimeError);
       }
       return status_or<int64_t>(idx);
@@ -591,7 +591,7 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
     case starlark_numeric_type::kBigInt: {
       const auto& idx = other.as_bigint();
       if (!idx.fits_in_int64()) {
-        error_callback.add_error(error_index_out_of_range(type()));
+        error_callback.add_error(error_v2_index_out_of_range(type()));
         return status_or<int64_t>(status_code::kRuntimeError);
       }
       auto iidx = idx.as_int64();
@@ -599,13 +599,13 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
         iidx += obj_len;
       }
       if (iidx < 0 || obj_len <= iidx) {
-        error_callback.add_error(error_index_out_of_range(type()));
+        error_callback.add_error(error_v2_index_out_of_range(type()));
         return status_or<int64_t>(status_code::kRuntimeError);
       }
       return status_or<int64_t>(iidx);
     }
     default:
-      error_callback.add_error(error_index_integer_or_slice(type(), other.type()));
+      error_callback.add_error(error_v2_index_integer_or_slice(type(), other.type()));
       return status_or<int64_t>(status_code::kRuntimeError);
   }
 }
@@ -794,7 +794,7 @@ status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& er
       }
       break;
     default:
-      error_callback.add_error(error_interpreted_as_integer(iidx.type()));
+      error_callback.add_error(error_v2_interpreted_as_integer(iidx.type()));
       return status_or<int64_t>(status_code::kRuntimeError);
   }
 }
@@ -816,7 +816,7 @@ status_or<int64_t> to_int64_with_clamping_for_index(const starlark_obj& iidx, er
       }
       break;
     default:
-      error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
+      error_callback.add_error(error_v2_interpreted_as_integer(iidx.type()));
       return status_or<int64_t>(status_code::kRuntimeError);
   }
   return status_or<int64_t>(status_code::kRuntimeError);
@@ -842,7 +842,7 @@ status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int
       if (iidx.type() == starlark_types::none_t) {
         return ok_status();
       }
-      error_callback.add_error(error_index_integer_on_a_slice(iidx.type()));
+      error_callback.add_error(error_v2_index_integer_on_a_slice(iidx.type()));
       return error_status();
   }
   return ok_status();

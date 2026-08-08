@@ -1,8 +1,8 @@
-assert_fail("sorted((set(), set()))", error_message = """TypeError: '<' not supported between instances of 'set' and 'set'
+assert_fail("sorted((set(), set()))", error_message = """'<' not supported between instances of 'set' and 'set'
     1 | sorted((set(), set()))
       | ~~~~~~^^^^^^^^^^^^^^^^
 """)
-assert_fail("sorted((set(), set(), set()))", error_message = """TypeError: '<' not supported between instances of 'set' and 'set'
+assert_fail("sorted((set(), set(), set()))", error_message = """'<' not supported between instances of 'set' and 'set'
     1 | sorted((set(), set(), set()))
       | ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
 """)

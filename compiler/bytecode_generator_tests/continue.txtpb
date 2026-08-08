@@ -7,7 +7,7 @@ block {
   op_code { const_int { value: 2 } }                                                                                                                                                         #  5
   op_code { const_int { value: 3 } }                                                                                                                                                         #  6
   op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                          #  7
-  op_code { get_iterator { } }                                                                                                                                                               #  8
+  op_code { get_iterator { } highlight_start: { row: 1 column: 1 pos: 0 } highlight_mid: { row: 1 column: 10 pos: 9 } highlight_end: { row: 1 column: 19 pos: 18 } }                         #  8
   op_code { for_iterator { address_delta: 8 } }                                                                                                                                              #  9
   op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                                                                             # 10
   op_code { const_string { value: "abc" } highlight_start { row: 2 column: 5 pos: 24 } highlight_mid { row: 2 column: 5 pos: 24 } highlight_end { row: 2 column: 10 pos: 29 } }              # 11
@@ -23,7 +23,7 @@ block {
   op_code { const_int { value: 2 } }                                                                                                                                                         # 20
   op_code { const_int { value: 3 } }                                                                                                                                                         # 21
   op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                          # 22
-  op_code { get_iterator { } }                                                                                                                                                               # 23
+  op_code { get_iterator { } highlight_start: { row: 6 column: 1 pos: 54 } highlight_mid: { row: 6 column: 10 pos: 63 } highlight_end: { row: 6 column: 19 pos: 72 } }                       # 23
   op_code { for_iterator { address_delta: 26 } }                                                                                                                                             # 24
   op_code { store { frame: 1 pos_in_frame: 0} }                                                                                                                                              # 25
   op_code { const_string { value: "abc" } highlight_start { row: 7 column: 5 pos: 78 } highlight_mid { row: 7 column: 5 pos: 78 } highlight_end { row: 7 column: 10 pos: 83 } }              # 26
@@ -34,7 +34,7 @@ block {
   op_code { const_int { value: 5 } }                                                                                                                                                         # 31
   op_code { const_int { value: 6 } }                                                                                                                                                         # 32
   op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                          # 33
-  op_code { get_iterator { } }                                                                                                                                                               # 34
+  op_code { get_iterator { } highlight_start: { row: 9 column: 5 pos: 101 } highlight_mid: { row: 9 column: 14 pos: 110 } highlight_end: { row: 9 column: 23 pos: 119 } }                    # 34
   op_code { for_iterator { address_delta: 8 } }                                                                                                                                              # 35
   op_code { store { frame: 1 pos_in_frame: 1 } }                                                                                                                                             # 36
   op_code { const_string { value: "def" } highlight_start { row: 10 column: 9 pos: 129 } highlight_mid { row: 10 column: 9 pos: 129 } highlight_end { row: 10 column: 14 pos: 134 } }        # 37

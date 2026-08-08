@@ -14,9 +14,9 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_dictionary_key_not_found;
-using ::starlark::error_messages::error_empty_set;
 using ::starlark::error_messages::error_mutate_frozen_value;
 using ::starlark::error_messages::error_op_in_loop;
+using ::starlark::error_messages::error_v2_empty_set;
 using ::starlark::error_messages::error_v2_unhashable_value;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
@@ -524,7 +524,7 @@ starlark_obj* starlark_set::pop(error_fn& error_callback) {
     return nullptr;
   }
   if (values.empty()) {
-    error_callback.add_error(error_empty_set("pop"));
+    error_callback.add_error(error_v2_empty_set("pop"));
     return nullptr;
   }
   auto* result = *values.begin();

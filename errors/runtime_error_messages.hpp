@@ -13,19 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_empty_dictionary(std::string_view fn_name);
-std::string error_empty_set(std::string_view fn_name);
-std::string error_uniterable(std::string_view type);
-std::string error_argument_uniterable(std::string_view type);
-std::string error_unsubscriptable(std::string_view type);
-std::string error_no_item_assignment(std::string_view type);
-std::string error_no_slice_assignment(std::string_view type);
-std::string error_incomparable(std::string_view op, std::string_view type1, std::string_view type2);
-std::string error_index_out_of_range(std::string_view type);
-std::string error_index_integer_or_slice(std::string_view type, std::string_view actual);
-std::string error_index_integer_on_a_slice(std::string_view actual);
-std::string error_item_not_in_collection(std::string_view type, std::string_view fn_name);
-
 std::string error_bad_operand_unary(std::string_view op, std::string_view type);
 std::string error_bad_operand_binary(std::string_view op, std::string_view type1, std::string_view type2);
 std::string error_no_method(std::string_view type, std::string_view method);
@@ -37,7 +24,6 @@ std::string error_convert(std::string_view from, std::string_view to);
 std::string error_convert_string(std::string_view to, std::string_view string_value);
 std::string_view error_convert_float_infinity_to_integer();
 std::string_view error_convert_float_nan_to_integer();
-std::string error_interpreted_as_integer(std::string_view type);
 std::string error_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type);
 std::string error_argument_interpreted_as_string(std::string_view argument_name, std::string_view type);
 
@@ -152,6 +138,20 @@ std::string error_v2_unpack_too_many(int64_t expected, int64_t actual);
 
 std::string error_v2_unhashable_key(std::string_view type, std::string_view key_type);
 std::string error_v2_unhashable_value(std::string_view type, std::string_view value_type);
+
+std::string error_v2_empty_dictionary(std::string_view fn_name);
+std::string error_v2_empty_set(std::string_view fn_name);
+std::string error_v2_uniterable(std::string_view type);
+std::string error_v2_argument_uniterable(std::string_view type);
+std::string error_v2_unsubscriptable(std::string_view type);
+std::string error_v2_no_item_assignment(std::string_view type);
+std::string error_v2_no_slice_assignment(std::string_view type);
+std::string error_v2_incomparable(std::string_view op, std::string_view type1, std::string_view type2);
+std::string error_v2_index_out_of_range(std::string_view type);
+std::string error_v2_index_integer_or_slice(std::string_view type, std::string_view actual);
+std::string error_v2_index_integer_on_a_slice(std::string_view actual);
+std::string error_v2_item_not_in_collection(std::string_view type, std::string_view fn_name);
+std::string error_v2_interpreted_as_integer(std::string_view type);
 
 }  // namespace error_messages
 }  // namespace starlark

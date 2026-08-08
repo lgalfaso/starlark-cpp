@@ -192,7 +192,7 @@ TEST(StarlarkInteger, OrderVsBool) {
   auto cmp = starlark_integer(1).cmp(obj_true, "<", error_callback);
   ASSERT_FALSE(cmp.ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'int' and 'bool'");
 }
 
 TEST(StarlarkBigint, OrderVsFloat) {
@@ -476,7 +476,7 @@ TEST(StarlarkInteger, Membership) {
 
   EXPECT_FALSE(zero.binary_in(zero, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument of type 'int' is not a container or iterable");
+  EXPECT_EQ(error_callback.messages[0], "argument of type 'int' is not a container or iterable");
 }
 
 TEST(StarlarkInteger, Unpack) {
@@ -2341,7 +2341,7 @@ TEST(StarlarkInteger, GetIterator) {
 
   EXPECT_EQ(nullptr, starlark_integer(0).get_iterator(true, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
 }
 
 TEST(StarlarkInteger, Index) {
@@ -2352,7 +2352,7 @@ TEST(StarlarkInteger, Index) {
 
   EXPECT_EQ(nullptr, zero.index(zero, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'int' object is not subscriptable", error_callback.messages[0]);
+  EXPECT_EQ("'int' object is not subscriptable", error_callback.messages[0]);
 }
 
 }  // namespace

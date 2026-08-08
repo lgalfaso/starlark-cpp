@@ -1343,7 +1343,7 @@ TEST(StarlarkDictionary, PopitemWhileEmpty) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("KeyError: 'popitem(): dictionary is empty'", error_callback.messages[0]);
+  EXPECT_EQ("popitem(): dictionary is empty", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{}");
 }
 
@@ -1827,7 +1827,7 @@ TEST(StarlarkDictionary, UpdateFromInteger) {
 
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
 }
 
 TEST(StarlarkDictionary, UpdateFromNonIterable) {
@@ -1853,7 +1853,7 @@ TEST(StarlarkDictionary, UpdateFromNonIterable) {
 
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
 }
 
 TEST(StarlarkDictionary, UpdateFromNonHashable) {

@@ -124,7 +124,7 @@ TEST(StarlarkBool, Cmp) {
   auto cmp = starlark_bool(true).cmp(starlark_none(), "cmp", error_callback);
   ASSERT_FALSE(cmp.ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'cmp' not supported between instances of 'bool' and 'NoneType'");
+  EXPECT_EQ(error_callback.messages[0], "'cmp' not supported between instances of 'bool' and 'NoneType'");
 }
 
 TEST(StarlarkBool, Hash) {

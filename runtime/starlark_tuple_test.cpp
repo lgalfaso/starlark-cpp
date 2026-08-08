@@ -277,7 +277,7 @@ TEST(StarlarkTuple, OrderError) {
   auto cmp = tuple.cmp(one, "<", error_callback);
   ASSERT_FALSE(cmp.ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'tuple' and 'int'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'tuple' and 'int'");
 }
 
 TEST(StarlarkTuple, Membership) {
@@ -734,7 +734,7 @@ TEST(StarlarkTuple, IndexOutOfRange1) {
 
   EXPECT_EQ(nullptr, tuple.index(starlark_integer(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: tuple index out of range", error_callback.messages[0]);
+  EXPECT_EQ("tuple index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, IndexOutOfRange2) {
@@ -751,7 +751,7 @@ TEST(StarlarkTuple, IndexOutOfRange2) {
 
   EXPECT_EQ(nullptr, tuple.index(starlark_integer(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: tuple index out of range", error_callback.messages[0]);
+  EXPECT_EQ("tuple index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, SliceRange) {
@@ -888,7 +888,7 @@ TEST(StarlarkTuple, SliceRangeBoolStart) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("(0, 1, 2, 3, 4)", tuple.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkTuple, SliceRangeBoolEnd) {
@@ -909,7 +909,7 @@ TEST(StarlarkTuple, SliceRangeBoolEnd) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("(0, 1, 2, 3, 4)", tuple.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkTuple, SliceRangeBoolStride) {
@@ -930,7 +930,7 @@ TEST(StarlarkTuple, SliceRangeBoolStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("(0, 1, 2, 3, 4)", tuple.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkTuple, SliceRangeZeroStride) {

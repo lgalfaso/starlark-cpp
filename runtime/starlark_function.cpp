@@ -43,7 +43,6 @@ using ::starlark::error_messages::error_empty_iterator;
 using ::starlark::error_messages::error_expect_character;
 using ::starlark::error_messages::error_expect_one_character_or_one_byte;
 using ::starlark::error_messages::error_int_base;
-using ::starlark::error_messages::error_interpreted_as_integer;
 using ::starlark::error_messages::error_invalid_literal_with_base;
 using ::starlark::error_messages::error_max_bytes_length;
 using ::starlark::error_messages::error_missing_argument;
@@ -54,6 +53,7 @@ using ::starlark::error_messages::error_non_string_with_base;
 using ::starlark::error_messages::error_overflow;
 using ::starlark::error_messages::error_overflow_float_too_large;
 using ::starlark::error_messages::error_unknown_argument;
+using ::starlark::error_messages::error_v2_interpreted_as_integer;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -328,7 +328,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
         break;
       }
       default:
-        error_callback.add_error(error_interpreted_as_integer(value->type()));
+        error_callback.add_error(error_v2_interpreted_as_integer(value->type()));
         return nullptr;
     }
   }
@@ -354,7 +354,7 @@ starlark_obj* starlark_fn_chr(starlark_obj* this_obj, const starlark_obj::pos_ar
       }
       break;
     default:
-      error_callback.add_error(error_interpreted_as_integer(value->type()));
+      error_callback.add_error(error_v2_interpreted_as_integer(value->type()));
       return nullptr;
   }
   return Arena::Create<starlark_string>(&ctx.arena(), result);
@@ -644,7 +644,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
           break;
         }
         default:
-          error_callback.add_error(error_interpreted_as_integer(base_param->type()));
+          error_callback.add_error(error_v2_interpreted_as_integer(base_param->type()));
           return nullptr;
       }
     }
@@ -968,7 +968,7 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
       return ok_status();
     }
     default:
-      error_callback.add_error(error_interpreted_as_integer(value->type()));
+      error_callback.add_error(error_v2_interpreted_as_integer(value->type()));
       return error_status();
     }
   };

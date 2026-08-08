@@ -1,0 +1,3 @@
+main:2:10: error: pop from an empty set
+    2 | set().pop()
+      | ~~~~~~~~~^^

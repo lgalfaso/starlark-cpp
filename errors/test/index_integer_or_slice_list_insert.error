@@ -1,0 +1,3 @@
+main:3:9: error: 'NoneType' object cannot be interpreted as an integer
+    3 | a.insert(None, 2)
+      | ~~~~~~~~^^^^^^^^^

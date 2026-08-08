@@ -1,0 +1,3 @@
+main:2:14: error: 'bool' object cannot be interpreted as an integer
+    2 | 'abc'.replace('a', 'x', True)
+      | ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^

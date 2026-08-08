@@ -144,7 +144,7 @@ TEST(StarlarkStringElems, SliceRangeWithBoolean) {
 
   EXPECT_EQ(nullptr, starlark_string("abc"sv).elems(ctx)->slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkStringElemOrds, SliceRangeWithBoolean) {
@@ -154,7 +154,7 @@ TEST(StarlarkStringElemOrds, SliceRangeWithBoolean) {
 
   EXPECT_EQ(nullptr, starlark_string("abc"sv).elem_ords(ctx)->slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkStringCodepoints, SliceRangeWithBoolean) {
@@ -164,7 +164,7 @@ TEST(StarlarkStringCodepoints, SliceRangeWithBoolean) {
 
   EXPECT_EQ(nullptr, starlark_string("abc"sv).codepoints(ctx)->slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkStringCodepointOrds, SliceRangeWithBoolean) {
@@ -174,7 +174,7 @@ TEST(StarlarkStringCodepointOrds, SliceRangeWithBoolean) {
 
   EXPECT_EQ(nullptr, starlark_string("abc"sv).codepoint_ords(ctx)->slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkStringElems, Index) {
@@ -267,7 +267,7 @@ TEST(StarlarkStringElems, IndexWithBool) {
 
   ASSERT_EQ(nullptr, elems->index(*ctx.true_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.elems indices must be integers or slices, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "string.elems indices must be integers or slices, not 'bool'");
 }
 
 TEST(StarlarkStringElemOrds, IndexWithBool) {
@@ -279,7 +279,7 @@ TEST(StarlarkStringElemOrds, IndexWithBool) {
 
   ASSERT_EQ(nullptr, elems->index(*ctx.true_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.elem_ords indices must be integers or slices, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "string.elem_ords indices must be integers or slices, not 'bool'");
 }
 
 TEST(StarlarkStringCodepoints, IndexWithBool) {
@@ -291,7 +291,7 @@ TEST(StarlarkStringCodepoints, IndexWithBool) {
 
   ASSERT_EQ(nullptr, elems->index(*ctx.true_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.codepoints indices must be integers or slices, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "string.codepoints indices must be integers or slices, not 'bool'");
 }
 
 TEST(StarlarkStringCodepointOrds, IndexWithBool) {
@@ -303,7 +303,7 @@ TEST(StarlarkStringCodepointOrds, IndexWithBool) {
 
   ASSERT_EQ(nullptr, elems->index(*ctx.true_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.codepoint_ords indices must be integers or slices, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "string.codepoint_ords indices must be integers or slices, not 'bool'");
 }
 
 TEST(StarlarkStringElems, Equals) {

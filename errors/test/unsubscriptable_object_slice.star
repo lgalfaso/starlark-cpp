@@ -1,0 +1,3 @@
+# Unsubscriptable
+a = 1[:]
+

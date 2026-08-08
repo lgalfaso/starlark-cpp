@@ -1,0 +1,3 @@
+main:2:7: error: argument of type 'int' is not a container or iterable
+    2 | a = 1 in 2
+      |       ^^

@@ -93,7 +93,7 @@ TEST(StarlarkBytesElems, SliceRangeWithBoolean) {
 
   EXPECT_EQ(nullptr, starlark_bytes("abc"sv).elems(ctx)->slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkBytesElemOrds, SliceRangeWithBoolean) {
@@ -103,7 +103,7 @@ TEST(StarlarkBytesElemOrds, SliceRangeWithBoolean) {
 
   EXPECT_EQ(nullptr, starlark_bytes("abc"sv).elem_ords(ctx)->slice_range(*ctx.true_value(), *ctx.none_value(), *ctx.none_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkBytesElems, Index) {
@@ -140,7 +140,7 @@ TEST(StarlarkBytesElems, IndexWithBool) {
 
   ASSERT_EQ(nullptr, elems->index(*ctx.true_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.elems indices must be integers or slices, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "bytes.elems indices must be integers or slices, not 'bool'");
 }
 
 TEST(StarlarkBytesElemOrds, IndexWithBool) {
@@ -152,7 +152,7 @@ TEST(StarlarkBytesElemOrds, IndexWithBool) {
 
   ASSERT_EQ(nullptr, elems->index(*ctx.true_value(), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes.elem_ords indices must be integers or slices, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "bytes.elem_ords indices must be integers or slices, not 'bool'");
 }
 
 TEST(StarlarkBytesElems, Equals) {

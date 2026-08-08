@@ -328,7 +328,7 @@ TEST(StarlarkAll, Integer) {
 
   EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'int' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkAll, NoPosArgs) {
@@ -429,7 +429,7 @@ TEST(StarlarkAny, Integer) {
 
   EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'int' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkAny, NoPosArgs) {
@@ -722,7 +722,7 @@ TEST(StarlarkBytes, ListWithNone) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'NoneType' object cannot be interpreted as an integer", error_callback.messages[0]);
+  EXPECT_EQ("'NoneType' object cannot be interpreted as an integer", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, None) {
@@ -853,7 +853,7 @@ TEST(StarlarkChr, FromFloat) {
 
   EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'float' object cannot be interpreted as an integer", error_callback.messages[0]);
+  EXPECT_EQ("'float' object cannot be interpreted as an integer", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, OutOfRange1) {
@@ -1025,7 +1025,7 @@ TEST(StarlarkDict, FromInteger) {
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
 }
 
 TEST(StarlarkDict, FromNonIterable) {
@@ -1043,7 +1043,7 @@ TEST(StarlarkDict, FromNonIterable) {
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
 }
 
 TEST(StarlarkDict, FromNonHashable) {
@@ -1524,7 +1524,7 @@ TEST(StarlarkEnumerate, NotIterable) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'string' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'string' object is not iterable");
 }
 
 TEST(StarlarkFail, Message) {
@@ -2466,7 +2466,7 @@ TEST(StarlarkInt, FromStringBaseNotIntAsPositionalArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'list' object cannot be interpreted as an integer", error_callback.messages[0]);
+  EXPECT_EQ("'list' object cannot be interpreted as an integer", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromStringBaseNotIntAsNamedArgument) {
@@ -2736,7 +2736,7 @@ TEST(StarlarkList, Integer) {
 
   EXPECT_EQ(nullptr, starlark_fn_list(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'int' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, NoPosArgs) {
@@ -2867,7 +2867,7 @@ TEST(StarlarkMax, OnePosArgsNotComparable) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'string'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'int' and 'string'");
 }
 
 TEST(StarlarkMax, OnePosArgsNotIterable) {
@@ -2882,7 +2882,7 @@ TEST(StarlarkMax, OnePosArgsNotIterable) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
 }
 
 TEST(StarlarkMax, OnePosArgsWithKey) {
@@ -2999,7 +2999,7 @@ TEST(StarlarkMax, OnePosArgsResultOfKeyAreNotComparable) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'set' and 'set'");
 }
 
 TEST(StarlarkMax, TwoPosArgs) {
@@ -3032,7 +3032,7 @@ TEST(StarlarkMax, TwoPosArgsNotComparable) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'int' and 'bool'");
 }
 
 TEST(StarlarkMax, ManyPosArgsWithKey) {
@@ -3139,7 +3139,7 @@ TEST(StarlarkMax, TwoPosArgsResultOfKeyAreNotComparable) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'set' and 'set'");
 }
 
 TEST(StarlarkMax, UnknownNamedArguments) {
@@ -3244,7 +3244,7 @@ TEST(StarlarkMin, OnePosArgsNotComparable) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'string'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'int' and 'string'");
 }
 
 TEST(StarlarkMin, OnePosArgsNotIterable) {
@@ -3259,7 +3259,7 @@ TEST(StarlarkMin, OnePosArgsNotIterable) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
 }
 
 TEST(StarlarkMin, OnePosArgsWithKey) {
@@ -3378,7 +3378,7 @@ TEST(StarlarkMin, OnePosArgsResultOfKeyAreNotComparable) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'set' and 'set'");
 }
 
 TEST(StarlarkMin, TwoPosArgs) {
@@ -3412,7 +3412,7 @@ TEST(StarlarkMin, TwoPosArgsNotComparable) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'int' and 'bool'");
 }
 
 TEST(StarlarkMin, ManyPosArgsWithKey) {
@@ -3521,7 +3521,7 @@ TEST(StarlarkMin, TwoPosArgsResultOfKeyAreNotComparable) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'set' and 'set'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'set' and 'set'");
 }
 
 TEST(StarlarkMin, UnknownNamedArguments) {
@@ -3866,7 +3866,7 @@ TEST(StarlarkRange, OneInvalidArgument) {
   auto* result = starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'list' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkRange, TwoArguments) {
@@ -3902,7 +3902,7 @@ TEST(StarlarkRange, TwoInvalidArguments) {
   auto* result = starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'list' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkRange, TwoArgumentsOverflow) {
@@ -3959,7 +3959,7 @@ TEST(StarlarkRange, ThreeInvalidArguments) {
   auto* result = starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'list' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'list' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkRange, ZeroStep) {
@@ -4127,7 +4127,7 @@ TEST(StarlarkReversed, Integer) {
 
   EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'int' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkReversed, NoPosArgs) {
@@ -4242,7 +4242,7 @@ TEST(StarlarkSet, String) {
 
   EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'string' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, TooManyPosArguments) {
@@ -4467,7 +4467,7 @@ TEST(StarlarkSorted, OneArgumentsNotIterable) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'int' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'int' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, OneArgumentsNotComparable) {
@@ -4484,7 +4484,7 @@ TEST(StarlarkSorted, OneArgumentsNotComparable) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: '<' not supported between instances of 'bool' and 'int'", error_callback.messages[0]);
+  EXPECT_EQ("'<' not supported between instances of 'bool' and 'int'", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, OneArgumentsManyElementsNotComparable) {
@@ -4503,7 +4503,7 @@ TEST(StarlarkSorted, OneArgumentsManyElementsNotComparable) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: '<' not supported between instances of 'bool' and 'int'", error_callback.messages[0]);
+  EXPECT_EQ("'<' not supported between instances of 'bool' and 'int'", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, TwoArguments) {
@@ -4665,7 +4665,7 @@ TEST(StarlarkTuple, String) {
 
   EXPECT_EQ(nullptr, starlark_fn_tuple(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'string' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, TooManyPosArguments) {
@@ -4838,7 +4838,7 @@ TEST(StarlarkZip, NonIterable) {
 
   EXPECT_EQ(nullptr, starlark_fn_zip(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: 'string' object is not iterable", error_callback.messages[0]);
+  EXPECT_EQ("'string' object is not iterable", error_callback.messages[0]);
 }
 
 TEST(StarlarkZip, NamedArguments) {

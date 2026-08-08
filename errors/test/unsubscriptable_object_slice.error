@@ -1,0 +1,3 @@
+main:2:6: error: 'int' object is not subscriptable
+    2 | a = 1[:]
+      |     ~^^^

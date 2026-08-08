@@ -485,6 +485,7 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
     case Expression::kIdentifier: {
       const auto& identifier = expression.identifier();
       switch (assign_statement->op()) {
+        case AssignStmt::EQUALS:
           break;
         case AssignStmt::PLUS_EQUALS: {
           auto* id_op = mutable_block()->add_op_code()->mutable_assign_plus_equals();
@@ -559,113 +560,143 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
     }
     case Expression::kSliceExpression: {
       const auto& slice_expression = expression.slice_expression();
+      OpCode* op_code = nullptr;
       switch (slice_expression.slice_type_case()) {
-        case SliceExpr::kIndex:
+        case SliceExpr::kIndex: {
           switch (assign_statement->op()) {
             case AssignStmt::EQUALS:
               break;
             case AssignStmt::PLUS_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_plus_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_plus_equals();
               break;
             }
             case AssignStmt::MINUS_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_minus_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_minus_equals();
               break;
             }
             case AssignStmt::STAR_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_star_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_star_equals();
               break;
             }
             case AssignStmt::SLASH_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_slash_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_slash_equals();
               break;
             }
             case AssignStmt::SLASH_SLASH_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_slash_slash_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_slash_slash_equals();
               break;
             }
             case AssignStmt::PERCENT_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_percent_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_percent_equals();
               break;
             }
             case AssignStmt::AMPERSAND_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_ampersand_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_ampersand_equals();
               break;
             }
             case AssignStmt::PIPE_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_pipe_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_pipe_equals();
               break;
             }
             case AssignStmt::HAT_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_hat_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_hat_equals();
               break;
             }
             case AssignStmt::LESS_LESS_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_less_less_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_less_less_equals();
               break;
             }
             case AssignStmt::GREATER_GREATER_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_index_member_greater_greater_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_index_member_greater_greater_equals();
               break;
             }
             default:
               assert(false);
           }
           break;
-        case SliceExpr::kSlice:
+        }
+        case SliceExpr::kSlice: {
           switch (assign_statement->op()) {
             case AssignStmt::EQUALS:
               break;
             case AssignStmt::PLUS_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_plus_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_plus_equals();
               break;
             }
             case AssignStmt::MINUS_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_minus_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_minus_equals();
               break;
             }
             case AssignStmt::STAR_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_star_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_star_equals();
               break;
             }
             case AssignStmt::SLASH_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_slash_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_slash_equals();
               break;
             }
             case AssignStmt::SLASH_SLASH_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_slash_slash_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_slash_slash_equals();
               break;
             }
             case AssignStmt::PERCENT_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_percent_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_percent_equals();
               break;
             }
             case AssignStmt::AMPERSAND_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_ampersand_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_ampersand_equals();
               break;
             }
             case AssignStmt::PIPE_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_pipe_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_pipe_equals();
               break;
             }
             case AssignStmt::HAT_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_hat_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_hat_equals();
               break;
             }
             case AssignStmt::LESS_LESS_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_less_less_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_less_less_equals();
               break;
             }
             case AssignStmt::GREATER_GREATER_EQUALS: {
-              mutable_block()->add_op_code()->mutable_assign_slice_range_greater_greater_equals();
+              op_code = mutable_block()->add_op_code();
+              op_code->mutable_assign_slice_range_greater_greater_equals();
               break;
             }
             default:
               assert(false);
           }
           break;
+        }
         default:
           assert(false);
+      }
+      if (op_code != nullptr) {
+        *op_code->mutable_highlight_start() = slice_expression.pif().start();
+        *op_code->mutable_highlight_mid() = slice_expression.primary_expression().pif().end();
+        *op_code->mutable_highlight_end() = slice_expression.pif().end();
       }
       break;
     }
@@ -819,7 +850,11 @@ void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionar
 }
 
 void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
-  mutable_block()->add_op_code()->mutable_get_iterator();
+  auto* get_it_op_code = mutable_block()->add_op_code();
+  get_it_op_code->mutable_get_iterator();
+  *get_it_op_code->mutable_highlight_start() = for_clause->pif().start();
+  *get_it_op_code->mutable_highlight_mid() = for_clause->in().pif().start();
+  *get_it_op_code->mutable_highlight_end() = for_clause->in().pif().end();
   comprehension_comp_clause.back().push_back(block().op_code_size());
   mutable_block()->add_op_code()->mutable_for_iterator();
 }
@@ -860,7 +895,11 @@ void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
   if (!for_statement_op_mid_pos.contains(for_statement)) {
     // This is the first time this is called for this `for statement`.
     for_statement_op_mid_pos[for_statement] = op_code_size;
-    mutable_block()->add_op_code()->mutable_get_iterator();
+    auto* get_it_op_code = mutable_block()->add_op_code();
+    get_it_op_code->mutable_get_iterator();
+    *get_it_op_code->mutable_highlight_start() = for_statement->pif().start();
+    *get_it_op_code->mutable_highlight_mid() = for_statement->expression().pif().start();
+    *get_it_op_code->mutable_highlight_end() = for_statement->expression().pif().end();
     mutable_block()->add_op_code()->mutable_for_iterator();
   }
 }

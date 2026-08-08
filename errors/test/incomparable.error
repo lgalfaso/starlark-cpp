@@ -1,0 +1,3 @@
+main:2:10: error: '<' not supported between instances of 'bool' and 'int'
+    2 | a = True < 1
+      |          ^

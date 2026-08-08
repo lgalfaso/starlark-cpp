@@ -239,7 +239,7 @@ TEST(StarlarkRange, IndexOutOfRange) {
   auto* result = range.index(index, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "IndexError: range index out of range");
+  EXPECT_EQ(error_callback.messages[0], "range index out of range");
 }
 
 TEST(StarlarkRange, BinaryIn) {
@@ -400,7 +400,7 @@ TEST(StarlarkRange, SliceRangeBoolStart) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("range(100)", range.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkRange, SliceRangeBoolEnd) {
@@ -413,7 +413,7 @@ TEST(StarlarkRange, SliceRangeBoolEnd) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("range(100)", range.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkRange, SliceRangeBoolStride) {
@@ -426,7 +426,7 @@ TEST(StarlarkRange, SliceRangeBoolStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("range(100)", range.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkRange, SliceRangeZeroStride) {

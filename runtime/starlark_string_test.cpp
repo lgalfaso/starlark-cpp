@@ -209,7 +209,7 @@ TEST(StarlarkString, OrderErrors) {
   error_handler error_callback;
   EXPECT_FALSE(starlark_string(""sv).cmp(starlark_bytes(""sv), "<", error_callback).ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'string' and 'bytes'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'string' and 'bytes'");
 }
 
 TEST(StarlarkString, BinaryIn) {
@@ -723,7 +723,7 @@ TEST(StarlarkString, IndexOutOfRange1) {
 
   EXPECT_EQ(nullptr, str.index(starlark_integer(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: string index out of range", error_callback.messages[0]);
+  EXPECT_EQ("string index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkString, IndexOutOfRange2) {
@@ -734,7 +734,7 @@ TEST(StarlarkString, IndexOutOfRange2) {
 
   EXPECT_EQ(nullptr, str.index(starlark_integer(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: string index out of range", error_callback.messages[0]);
+  EXPECT_EQ("string index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkString, Dir) {
@@ -919,7 +919,7 @@ TEST(StarlarkString, SliceRangeBoolStart) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("abcdef", str.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkString, SliceRangeBoolEnd) {
@@ -932,7 +932,7 @@ TEST(StarlarkString, SliceRangeBoolEnd) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("abcdef", str.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkString, SliceRangeBoolStride) {
@@ -945,7 +945,7 @@ TEST(StarlarkString, SliceRangeBoolStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("abcdef", str.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkString, SliceRangeZeroStride) {
@@ -1637,7 +1637,7 @@ TEST(StarlarkString, CountTwoArgumentsStartBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1737,7 +1737,7 @@ TEST(StarlarkString, CountThreeArgumentsEndBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -2238,7 +2238,7 @@ TEST(StarlarkString, EndswithStartNotInteger) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2481,7 +2481,7 @@ TEST(StarlarkString, EndswithEndNotInteger) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2791,7 +2791,7 @@ TEST(StarlarkString, StartswithStartNotInteger) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2896,7 +2896,7 @@ TEST(StarlarkString, StartswithEndNotInteger) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3058,7 +3058,7 @@ TEST(StarlarkString, FindStartAsBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -3518,7 +3518,7 @@ TEST(StarlarkString, IndexStartAsBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -3879,7 +3879,7 @@ TEST(StarlarkString, RfindStartAsBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -4234,7 +4234,7 @@ TEST(StarlarkString, RindexStartAsBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -5192,7 +5192,7 @@ TEST(StarlarkString, ReplaceWithThreeArgumentsCountAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'bool' object cannot be interpreted as an integer");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6622,7 +6622,7 @@ TEST(StarlarkString, SplitTwoArgumentsBoolMaxsplit) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'bool' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkString, SplitTwoArgumentsNoneSeparatorArguments) {
@@ -6681,7 +6681,7 @@ TEST(StarlarkString, SplitTwoArgumentsNoneSeparatorBoolMaxsplit) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'bool' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkString, SplitWithThreeArguments) {
@@ -7049,7 +7049,7 @@ TEST(StarlarkString, RsplitTwoArgumentsBoolMaxsplit) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'bool' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkString, RsplitTwoArgumentsNoneSeparatorArguments) {
@@ -7108,7 +7108,7 @@ TEST(StarlarkString, RsplitTwoArgumentsNoneSeparatorBoolMaxsplit) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'bool' object cannot be interpreted as an integer");
+  EXPECT_EQ(error_callback.messages[0], "'bool' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkString, RsplitWithThreeArguments) {

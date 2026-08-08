@@ -19,13 +19,13 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_index_out_of_range;
-using ::starlark::error_messages::error_item_not_in_collection;
 using ::starlark::error_messages::error_max_sequence_length;
 using ::starlark::error_messages::error_mutate_frozen_value;
 using ::starlark::error_messages::error_no_concat;
 using ::starlark::error_messages::error_no_multiply_sequence;
 using ::starlark::error_messages::error_op_in_loop;
+using ::starlark::error_messages::error_v2_index_out_of_range;
+using ::starlark::error_messages::error_v2_item_not_in_collection;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
 using ::starlark::result::error_status;
@@ -425,7 +425,7 @@ starlark_obj* starlark_list::index(starlark_obj* element, int64_t start, int64_t
       return create_integer(i, ctx);
     }
   }
-  error_callback.add_error(error_item_not_in_collection(type(), "index"));
+  error_callback.add_error(error_v2_item_not_in_collection(type(), "index"));
   return nullptr;
 }
 
@@ -450,7 +450,7 @@ starlark_obj* starlark_list::pop(int64_t idx, error_fn& error_callback) {
     idx += values.size();
   }
   if (idx < 0 || idx >= values.size()) {
-    error_callback.add_error(error_index_out_of_range("pop"));
+    error_callback.add_error(error_v2_index_out_of_range("pop"));
     return nullptr;
   }
   auto* result = values[idx];
@@ -468,7 +468,7 @@ status starlark_list::remove(starlark_obj* element, error_fn& error_callback) {
       return ok_status();
     }
   }
-  error_callback.add_error(error_item_not_in_collection(type(), "remove"));
+  error_callback.add_error(error_v2_item_not_in_collection(type(), "remove"));
   return error_status();
 }
 

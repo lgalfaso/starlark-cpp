@@ -14,54 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_empty_dictionary(std::string_view fn_name) {
-  return std::format("KeyError: '{}(): dictionary is empty'", fn_name);
-}
-
-std::string error_empty_set(std::string_view fn_name) {
-  return std::format("KeyError: '{} from an empty set'", fn_name);
-}
-
-std::string error_uniterable(std::string_view type) {
-  return std::format("TypeError: '{}' object is not iterable", type);
-}
-
-std::string error_argument_uniterable(std::string_view type) {
-  return std::format("TypeError: argument of type '{}' is not a container or iterable", type);
-}
-
-std::string error_unsubscriptable(std::string_view type) {
-  return std::format("TypeError: '{}' object is not subscriptable", type);
-}
-
-std::string error_no_item_assignment(std::string_view type) {
-  return std::format("TypeError: '{}' object does not support item assignment", type);
-}
-
-std::string error_no_slice_assignment(std::string_view type) {
-  return std::format("TypeError: '{}' object does not support slice assignment", type);
-}
-
-std::string error_incomparable(std::string_view op, std::string_view type1, std::string_view type2) {
-  return std::format("TypeError: '{}' not supported between instances of '{}' and '{}'", op, type1, type2);
-}
-
-std::string error_index_out_of_range(std::string_view type) {
-  return std::format("IndexError: {} index out of range", type);
-}
-
-std::string error_index_integer_or_slice(std::string_view type, std::string_view actual) {
-  return std::format("TypeError: {} indices must be integers or slices, not '{}'", type, actual);
-}
-
-std::string error_index_integer_on_a_slice(std::string_view actual) {
-  return std::format("TypeError: slice indices must be integers, not '{}'", actual);
-}
-
-std::string error_item_not_in_collection(std::string_view type, std::string_view fn_name) {
-  return std::format("ValueError: {}.{}(x): x not in {}", type, fn_name, type);
-}
-
 std::string error_bad_operand_unary(std::string_view op, std::string_view type) {
   return std::format("TypeError: bad operand type for unary {}: '{}'", op, type);
 }
@@ -100,10 +52,6 @@ std::string_view error_convert_float_infinity_to_integer() {
 
 std::string_view error_convert_float_nan_to_integer() {
   return "ValueError: cannot convert float NaN to integer";
-}
-
-std::string error_interpreted_as_integer(std::string_view type) {
-  return std::format("TypeError: '{}' object cannot be interpreted as an integer", type);
 }
 
 std::string error_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type) {
@@ -500,6 +448,59 @@ std::string error_v2_unhashable_key(std::string_view type, std::string_view key_
 
 std::string error_v2_unhashable_value(std::string_view type, std::string_view value_type) {
   return std::format("cannot use '{}' as a {} element (unhashable type: '{}')", value_type, type, value_type);
+}
+
+
+std::string error_v2_empty_dictionary(std::string_view fn_name) {
+  return std::format("{}(): dictionary is empty", fn_name);
+}
+
+std::string error_v2_empty_set(std::string_view fn_name) {
+  return std::format("{} from an empty set", fn_name);
+}
+
+std::string error_v2_uniterable(std::string_view type) {
+  return std::format("'{}' object is not iterable", type);
+}
+
+std::string error_v2_argument_uniterable(std::string_view type) {
+  return std::format("argument of type '{}' is not a container or iterable", type);
+}
+
+std::string error_v2_unsubscriptable(std::string_view type) {
+  return std::format("'{}' object is not subscriptable", type);
+}
+
+std::string error_v2_no_item_assignment(std::string_view type) {
+  return std::format("'{}' object does not support item assignment", type);
+}
+
+std::string error_v2_no_slice_assignment(std::string_view type) {
+  return std::format("'{}' object does not support slice assignment", type);
+}
+
+std::string error_v2_incomparable(std::string_view op, std::string_view type1, std::string_view type2) {
+  return std::format("'{}' not supported between instances of '{}' and '{}'", op, type1, type2);
+}
+
+std::string error_v2_index_out_of_range(std::string_view type) {
+  return std::format("{} index out of range", type);
+}
+
+std::string error_v2_index_integer_or_slice(std::string_view type, std::string_view actual) {
+  return std::format("{} indices must be integers or slices, not '{}'", type, actual);
+}
+
+std::string error_v2_index_integer_on_a_slice(std::string_view actual) {
+  return std::format("slice indices must be integers, not '{}'", actual);
+}
+
+std::string error_v2_item_not_in_collection(std::string_view type, std::string_view fn_name) {
+  return std::format("{}.{}(x): x not in {}", type, fn_name, type);
+}
+
+std::string error_v2_interpreted_as_integer(std::string_view type) {
+  return std::format("'{}' object cannot be interpreted as an integer", type);
 }
 
 }  // namespace error_messages

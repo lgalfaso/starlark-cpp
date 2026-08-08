@@ -1135,7 +1135,7 @@ TEST(StarlarkSet, DifferenceNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -1365,7 +1365,7 @@ TEST(StarlarkSet, DifferenceUpdateNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -1740,7 +1740,7 @@ TEST(StarlarkSet, IntersectionNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -1973,7 +1973,7 @@ TEST(StarlarkSet, IntersectionUpdateNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -2312,7 +2312,7 @@ TEST(StarlarkSet, IsdisjointNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -2653,7 +2653,7 @@ TEST(StarlarkSet, IssubsetNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -2994,7 +2994,7 @@ TEST(StarlarkSet, IssupersetNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -3085,7 +3085,7 @@ TEST(StarlarkSet, PopWithEmpty) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "KeyError: 'pop from an empty set'");
+  EXPECT_EQ(error_callback.messages[0], "pop from an empty set");
   EXPECT_EQ(set.str(), "set()");
 }
 
@@ -3472,7 +3472,7 @@ TEST(StarlarkSet, SymmetricDifferenceNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -3699,7 +3699,7 @@ TEST(StarlarkSet, SymmetricDifferenceUpdateNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -3928,7 +3928,7 @@ TEST(StarlarkSet, UnionNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 
@@ -4153,7 +4153,7 @@ TEST(StarlarkSet, UpdateNonIterable) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(set1.str(), "set([0, -1])");
 }
 

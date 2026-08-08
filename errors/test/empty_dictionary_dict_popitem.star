@@ -1,0 +1,3 @@
+# Empty dictionary
+{}.popitem()
+

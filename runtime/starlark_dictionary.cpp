@@ -17,9 +17,9 @@
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_dictionary_key_not_found;
 using ::starlark::error_messages::error_dictionary_update_sequence;
-using ::starlark::error_messages::error_empty_dictionary;
 using ::starlark::error_messages::error_mutate_frozen_value;
 using ::starlark::error_messages::error_op_in_loop;
+using ::starlark::error_messages::error_v2_empty_dictionary;
 using ::starlark::error_messages::error_v2_unhashable_key;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
@@ -283,7 +283,7 @@ starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callbac
     return nullptr;
   }
   if (values_.empty()) {
-    error_callback.add_error(error_empty_dictionary("popitem"));
+    error_callback.add_error(error_v2_empty_dictionary("popitem"));
     return nullptr;
   }
   starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), 2);

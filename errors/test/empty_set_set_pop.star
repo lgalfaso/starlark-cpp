@@ -1,0 +1,3 @@
+# Empty set
+set().pop()
+

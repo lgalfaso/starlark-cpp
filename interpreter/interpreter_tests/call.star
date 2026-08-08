@@ -5,7 +5,7 @@ assert_eq(list(range(*[2, 10, 3])), [2, 5, 8])
 assert_eq(dict(**{'a': 1, 'b': 2}), {'a': 1, 'b': 2})
 assert_fail("""
 len(*1)
-""", error_message = """TypeError: 'int' object is not iterable
+""", error_message = """'int' object is not iterable
     1 | len(*1)
       | ~~~^^^^
 """)

@@ -6,7 +6,7 @@ assert_fail("min([])", error_message = """ValueError: min() iterable argument is
     1 | min([])
       | ~~~^^^^
 """)
-assert_fail("min([], [], key = set)", error_message = """TypeError: '<' not supported between instances of 'set' and 'set'
+assert_fail("min([], [], key = set)", error_message = """'<' not supported between instances of 'set' and 'set'
     1 | min([], [], key = set)
       | ~~~^^^^^^^^^^^^^^^^^^^
 """)

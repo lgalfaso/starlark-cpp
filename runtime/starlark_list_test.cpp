@@ -341,7 +341,7 @@ TEST(StarlarkList, OrderError) {
 
   EXPECT_FALSE(list.cmp(one, "<", error_callback).ok());
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: '<' not supported between instances of 'list' and 'int'");
+  EXPECT_EQ(error_callback.messages[0], "'<' not supported between instances of 'list' and 'int'");
 }
 
 TEST(StarlarkList, AddWithFreeze) {
@@ -1134,7 +1134,7 @@ TEST(StarlarkList, SubscriptOutOfRange1) {
 
   EXPECT_EQ(nullptr, list.index(starlark_integer(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+  EXPECT_EQ("list index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, SubscriptOutOfRange2) {
@@ -1151,7 +1151,7 @@ TEST(StarlarkList, SubscriptOutOfRange2) {
 
   EXPECT_EQ(nullptr, list.index(starlark_integer(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+  EXPECT_EQ("list index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, SubscriptOutOfRange3) {
@@ -1168,7 +1168,7 @@ TEST(StarlarkList, SubscriptOutOfRange3) {
 
   EXPECT_EQ(nullptr, list.index(starlark_bigint(-4), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+  EXPECT_EQ("list index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, SubscriptOutOfRange4) {
@@ -1185,7 +1185,7 @@ TEST(StarlarkList, SubscriptOutOfRange4) {
 
   EXPECT_EQ(nullptr, list.index(starlark_bigint(3), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+  EXPECT_EQ("list index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, SubscriptOutOfRange5) {
@@ -1202,7 +1202,7 @@ TEST(StarlarkList, SubscriptOutOfRange5) {
 
   EXPECT_EQ(nullptr, list.index(starlark_bigint(number::one() << 64), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+  EXPECT_EQ("list index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, SubscriptNotInt) {
@@ -1219,7 +1219,7 @@ TEST(StarlarkList, SubscriptNotInt) {
 
   EXPECT_EQ(nullptr, list.index(starlark_float(1), ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: list indices must be integers or slices, not 'float'", error_callback.messages[0]);
+  EXPECT_EQ("list indices must be integers or slices, not 'float'", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, IndexAssign) {
@@ -1257,7 +1257,7 @@ TEST(StarlarkList, IndexAssignOutOfRange1) {
 
   list.index_assign(starlark_integer(-4), three, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+  EXPECT_EQ("list index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, IndexAssignOutOfRange2) {
@@ -1275,7 +1275,7 @@ TEST(StarlarkList, IndexAssignOutOfRange2) {
 
   list.index_assign(starlark_integer(4), three, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("IndexError: list index out of range", error_callback.messages[0]);
+  EXPECT_EQ("list index out of range", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, IndexAssignWhileIterating) {
@@ -1444,7 +1444,7 @@ TEST(StarlarkList, SliceRangeBoolStart) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkList, SliceRangeBoolEnd) {
@@ -1465,7 +1465,7 @@ TEST(StarlarkList, SliceRangeBoolEnd) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkList, SliceRangeBoolStride) {
@@ -1486,7 +1486,7 @@ TEST(StarlarkList, SliceRangeBoolStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
 }
 
 TEST(StarlarkList, SliceRangeZeroStride) {
@@ -1914,7 +1914,7 @@ TEST(StarlarkList, ExtendWithNotIterable) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'int' object is not iterable");
+  EXPECT_EQ(error_callback.messages[0], "'int' object is not iterable");
   EXPECT_EQ(list1.str(), "[0]");
 }
 
@@ -1994,7 +1994,7 @@ TEST(StarlarkList, IndexNotFound) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: list.index(x): x not in list");
+  EXPECT_EQ(error_callback.messages[0], "list.index(x): x not in list");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -2137,7 +2137,7 @@ TEST(StarlarkList, IndexWithStartAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -2287,7 +2287,7 @@ TEST(StarlarkList, IndexWithStartAndEndAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "slice indices must be integers, not 'bool'");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -2317,7 +2317,7 @@ TEST(StarlarkList, IndexWithStartAndEndResutlAtEndAndNegativeEnd) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: list.index(x): x not in list");
+  EXPECT_EQ(error_callback.messages[0], "list.index(x): x not in list");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1, -1]");
 }
 
@@ -2772,7 +2772,7 @@ TEST(StarlarkList, InsertBoolIndex) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "'bool' object cannot be interpreted as an integer");
 }
 
 TEST(StarlarkList, Pop) {
@@ -2883,7 +2883,7 @@ TEST(StarlarkList, PopTooSmallIndex) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "IndexError: pop index out of range");
+  EXPECT_EQ(error_callback.messages[0], "pop index out of range");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -2911,7 +2911,7 @@ TEST(StarlarkList, PopTooBigIndex) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "IndexError: pop index out of range");
+  EXPECT_EQ(error_callback.messages[0], "pop index out of range");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -2958,7 +2958,7 @@ TEST(StarlarkList, PopEmpty) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "IndexError: pop index out of range");
+  EXPECT_EQ(error_callback.messages[0], "pop index out of range");
   EXPECT_EQ(list1.str(), "[]");
 }
 
@@ -3015,7 +3015,7 @@ TEST(StarlarkList, PopBigIntTooSmall) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "IndexError: pop index out of range");
+  EXPECT_EQ(error_callback.messages[0], "pop index out of range");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -3043,7 +3043,7 @@ TEST(StarlarkList, PopBigIntTooBig) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "IndexError: pop index out of range");
+  EXPECT_EQ(error_callback.messages[0], "pop index out of range");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -3070,7 +3070,7 @@ TEST(StarlarkList, PopBoolIndex) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: slice indices must be integers, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "'bool' object cannot be interpreted as an integer");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -3153,7 +3153,7 @@ TEST(StarlarkList, RemoveNoMatch) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: list.remove(x): x not in list");
+  EXPECT_EQ(error_callback.messages[0], "list.remove(x): x not in list");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
