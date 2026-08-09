@@ -244,21 +244,35 @@ void bytecode_generator::exit_identifier_for_assignment(const Identifier* identi
 }
 
 void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression) {
+  OpCode* op_code = nullptr;
   switch (unary_expression->operator_()) {
-    case UnaryExpr::PLUS:
-      mutable_block()->add_op_code()->mutable_unary_plus();
+    case UnaryExpr::PLUS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_unary_plus();
       break;
-    case UnaryExpr::MINUS:
-      mutable_block()->add_op_code()->mutable_unary_minus();
+    }
+    case UnaryExpr::MINUS: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_unary_minus();
       break;
-    case UnaryExpr::TILDE:
-      mutable_block()->add_op_code()->mutable_unary_tilde();
+    }
+    case UnaryExpr::TILDE: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_unary_tilde();
       break;
-    case UnaryExpr::NOT:
-      mutable_block()->add_op_code()->mutable_unary_not();
+    }
+    case UnaryExpr::NOT: {
+      op_code = mutable_block()->add_op_code();
+      op_code->mutable_unary_not();
       break;
+    }
     default:
       assert(false);
+  }
+  if (op_code != nullptr) {
+    *op_code->mutable_highlight_start() = unary_expression->op_pif().start();
+    *op_code->mutable_highlight_mid() = unary_expression->op_pif().end();
+    *op_code->mutable_highlight_end() = unary_expression->pif().end();
   }
 }
 
@@ -419,14 +433,22 @@ void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_express
 }
 
 void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
-  mutable_block()->add_op_code()->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+  auto op_code = mutable_block()->add_op_code();
+  op_code->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+  *op_code->mutable_highlight_start() = dot_expression->pif().start();
+  *op_code->mutable_highlight_mid() = dot_expression->primary_expression().pif().end();
+  *op_code->mutable_highlight_end() = dot_expression->pif().end();
 }
 
 void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) {
   if (op != AssignStmt::EQUALS) {
     return;
   }
-  mutable_block()->add_op_code()->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+  auto op_code = mutable_block()->add_op_code();
+  op_code->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
+  *op_code->mutable_highlight_start() = dot_expression->pif().start();
+  *op_code->mutable_highlight_mid() = dot_expression->primary_expression().pif().end();
+  *op_code->mutable_highlight_end() = dot_expression->pif().end();
 }
 
 
@@ -484,77 +506,94 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
   switch (expression.expression_type_case()) {
     case Expression::kIdentifier: {
       const auto& identifier = expression.identifier();
+      OpCode* op_code = nullptr;
       switch (assign_statement->op()) {
         case AssignStmt::EQUALS:
           break;
         case AssignStmt::PLUS_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_plus_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_plus_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::MINUS_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_minus_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_minus_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::STAR_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_star_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_star_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::SLASH_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_slash_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::SLASH_SLASH_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_slash_slash_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_slash_slash_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::PERCENT_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_percent_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_percent_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::AMPERSAND_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_ampersand_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_ampersand_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::PIPE_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_pipe_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_pipe_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::HAT_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_hat_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_hat_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::LESS_LESS_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_less_less_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_less_less_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         case AssignStmt::GREATER_GREATER_EQUALS: {
-          auto* id_op = mutable_block()->add_op_code()->mutable_assign_greater_greater_equals();
+          op_code = mutable_block()->add_op_code();
+          auto* id_op = op_code->mutable_assign_greater_greater_equals();
           id_op->set_frame(identifier.frame());
           id_op->set_pos_in_frame(identifier.pos_in_frame());
           break;
         }
         default:
           assert(false);
+      }
+      if (op_code != nullptr) {
+        *op_code->mutable_highlight_start() = assign_statement->pif().start();
+        *op_code->mutable_highlight_mid() = assign_statement->op_pif().start();
+        *op_code->mutable_highlight_end() = assign_statement->op_pif().end();
       }
       break;
     }
@@ -702,55 +741,72 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
     }
     case Expression::kDotExpression: {
       const auto& dot_expression = expression.dot_expression();
+      OpCode* op_code = nullptr;
       switch (assign_statement->op()) {
         case AssignStmt::EQUALS:
           break;
         case AssignStmt::PLUS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_plus_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_plus_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::MINUS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_minus_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_minus_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::STAR_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_star_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_star_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::SLASH_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_slash_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_slash_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::SLASH_SLASH_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_slash_slash_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_slash_slash_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::PERCENT_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_percent_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_percent_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::AMPERSAND_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_ampersand_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_ampersand_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::PIPE_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_pipe_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_pipe_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::HAT_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_hat_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_hat_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::LESS_LESS_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_less_less_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_less_less_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         case AssignStmt::GREATER_GREATER_EQUALS: {
-          mutable_block()->add_op_code()->mutable_assign_dot_member_greater_greater_equals()->set_member(dot_expression.identifier().nfkc_name());
+          op_code = mutable_block()->add_op_code();
+          op_code->mutable_assign_dot_member_greater_greater_equals()->set_member(dot_expression.identifier().nfkc_name());
           break;
         }
         default:
           assert(false);
+      }
+      if (op_code != nullptr) {
+        *op_code->mutable_highlight_start() = assign_statement->pif().start();
+        *op_code->mutable_highlight_mid() = assign_statement->op_pif().start();
+        *op_code->mutable_highlight_end() = assign_statement->op_pif().end();
       }
       break;
     }

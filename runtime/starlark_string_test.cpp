@@ -580,7 +580,7 @@ TEST(StarlarkString, LshiftInt) {
   auto* result = str.binary_lshift(*ctx.one(), ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<: 'string' and 'int'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for <<: 'string' and 'int'");
 }
 
 TEST(StarlarkString, RshiftInt) {
@@ -592,7 +592,7 @@ TEST(StarlarkString, RshiftInt) {
   auto* result = str.binary_rshift(*ctx.one(), ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>: 'string' and 'int'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for >>: 'string' and 'int'");
 }
 
 TEST(StarlarkString, SlashInt) {
@@ -604,7 +604,7 @@ TEST(StarlarkString, SlashInt) {
   auto* result = str.binary_slash(*ctx.one(), ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /: 'string' and 'int'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for /: 'string' and 'int'");
 }
 
 TEST(StarlarkString, SlashSlashInt) {
@@ -616,7 +616,7 @@ TEST(StarlarkString, SlashSlashInt) {
   auto* result = str.binary_slash_slash(*ctx.one(), ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'string' and 'int'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for //: 'string' and 'int'");
 }
 
 TEST(StarlarkString, Len) {

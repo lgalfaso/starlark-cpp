@@ -13,13 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_bad_operand_unary(std::string_view op, std::string_view type);
-std::string error_bad_operand_binary(std::string_view op, std::string_view type1, std::string_view type2);
-std::string error_no_method(std::string_view type, std::string_view method);
-std::string error_no_attribute(std::string_view type, std::string_view attribute);
-std::string error_no_attribute(std::string_view type, std::string_view attribute, std::string_view suggestion);
-std::string error_read_only_attribute(std::string_view type, std::string_view attribute);
-
 std::string error_convert(std::string_view from, std::string_view to);
 std::string error_convert_string(std::string_view to, std::string_view string_value);
 std::string_view error_convert_float_infinity_to_integer();
@@ -152,6 +145,13 @@ std::string error_v2_index_integer_or_slice(std::string_view type, std::string_v
 std::string error_v2_index_integer_on_a_slice(std::string_view actual);
 std::string error_v2_item_not_in_collection(std::string_view type, std::string_view fn_name);
 std::string error_v2_interpreted_as_integer(std::string_view type);
+
+std::string error_v2_bad_operand_unary(std::string_view op, std::string_view type);
+std::string error_v2_bad_operand_binary(std::string_view op, std::string_view type1, std::string_view type2);
+std::string error_v2_no_method(std::string_view type, std::string_view method);
+std::string error_v2_no_attribute(std::string_view type, std::string_view attribute);
+std::string error_v2_no_attribute(std::string_view type, std::string_view attribute, std::string_view suggestion);
+std::string error_v2_read_only_attribute(std::string_view type, std::string_view attribute);
 
 }  // namespace error_messages
 }  // namespace starlark

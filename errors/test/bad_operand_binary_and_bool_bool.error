@@ -1,0 +1,3 @@
+main:2:10: error: unsupported operand type(s) for &: 'bool' and 'bool'
+    2 | a = True & True
+      |          ^

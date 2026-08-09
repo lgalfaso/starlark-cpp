@@ -658,7 +658,7 @@ TEST(StarlarkFloat, PlusEqualsAssignError) {
 
   f1.plus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +=: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for +=: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinaryPlus) {
@@ -691,7 +691,7 @@ TEST(StarlarkFloat, BinaryPlusError) {
 
   f1.binary_plus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for +: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinaryPlusOverflowError) {
@@ -736,7 +736,7 @@ TEST(StarlarkFloat, MinusEqualsAssignError) {
 
   f1.minus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -=: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for -=: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinaryMinus) {
@@ -769,7 +769,7 @@ TEST(StarlarkFloat, BinaryMinusError) {
 
   f1.binary_minus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for -: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinaryMinusOverflowError) {
@@ -814,7 +814,7 @@ TEST(StarlarkFloat, StarEqualsAssignError) {
 
   f1.star_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *=: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for *=: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinaryStar) {
@@ -847,7 +847,7 @@ TEST(StarlarkFloat, BinaryStarError) {
 
   f1.binary_star(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for *: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinaryStarOverflowError) {
@@ -902,7 +902,7 @@ TEST(StarlarkFloat, SlashEqualsAssignError) {
 
   f1.slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /=: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for /=: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinarySlash) {
@@ -945,7 +945,7 @@ TEST(StarlarkFloat, BinarySlashError) {
 
   f1.binary_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for /: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinarySlashOverflowError) {
@@ -1036,7 +1036,7 @@ TEST(StarlarkFloat, SlashSlashEqualsAssignError) {
 
   f1.slash_slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //=: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for //=: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinarySlashSlash) {
@@ -1079,7 +1079,7 @@ TEST(StarlarkFloat, BinarySlashSlashError) {
 
   f1.binary_slash_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for //: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinarySlashSlashOverflowError) {
@@ -1615,7 +1615,7 @@ TEST(StarlarkFloat, BinaryPercentError) {
 
   f1.binary_percent(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for %: 'float' and 'bool'");
 }
 
 TEST(StarlarkFloat, BinaryPercentOverflowError) {
@@ -1675,7 +1675,7 @@ TEST(StarlarkFloat, PercentEqualsAssignError) {
 
   f1.percent_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %=: 'float' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for %=: 'float' and 'bool'");
 }
 
 }  // namespace

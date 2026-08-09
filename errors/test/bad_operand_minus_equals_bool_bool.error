@@ -1,0 +1,3 @@
+main:4:5: error: unsupported operand type(s) for -=: 'bool' and 'bool'
+    4 |   a -= True
+      |   ~~^^

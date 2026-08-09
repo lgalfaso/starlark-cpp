@@ -13,7 +13,7 @@
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
-using ::starlark::error_messages::error_bad_operand_binary;
+using ::starlark::error_messages::error_v2_bad_operand_binary;
 using ::starlark::error_messages::error_division_by_zero;
 using ::starlark::error_messages::error_overflow;
 
@@ -102,7 +102,7 @@ starlark_obj* plus_op(double value, const starlark_float& this_obj, const starla
       return create_float(value + fother, ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -122,7 +122,7 @@ starlark_obj* minus_op(double value, const starlark_float& this_obj, const starl
       return create_float(value - fother, ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -142,7 +142,7 @@ starlark_obj* star_op(double value, const starlark_float& this_obj, const starla
       return create_float(value * fother, ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -178,7 +178,7 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
       return create_float(value / fother, ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -214,7 +214,7 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
       return create_float(std::floor(value / fother), ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -250,7 +250,7 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
       return create_float(starlark_fmod(value, fother), ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }

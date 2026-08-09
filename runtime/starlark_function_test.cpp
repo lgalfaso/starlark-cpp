@@ -1848,7 +1848,7 @@ TEST(StarlarkGetattr, AttributeDoesNotExist) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ(list.str(), "[]");
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?", error_callback.messages[0]);
+  EXPECT_EQ("'list' object has no attribute 'appen'. Did you mean: 'append'?", error_callback.messages[0]);
 }
 
 TEST(StarlarkGetattr, AttributeDoesNotExistWithDefault) {
@@ -2650,7 +2650,7 @@ TEST(StarlarkLen, Integer) {
 
   EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: object of type 'int' has no len()", error_callback.messages[0]);
+  EXPECT_EQ("object of type 'int' has no len()", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, NoPosArgs) {
@@ -2955,7 +2955,7 @@ TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_1) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_2) {
@@ -2978,7 +2978,7 @@ TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_2) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMax, OnePosArgsResultOfKeyAreNotComparable) {
@@ -3099,7 +3099,7 @@ TEST(StarlarkMax, TwoPosArgsWithKeyErrorInKeyCall_1) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMax, TwoPosArgsWithKeyErrorInKeyCall_2) {
@@ -3120,7 +3120,7 @@ TEST(StarlarkMax, TwoPosArgsWithKeyErrorInKeyCall_2) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMax, TwoPosArgsResultOfKeyAreNotComparable) {
@@ -3334,7 +3334,7 @@ TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_1) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_2) {
@@ -3357,7 +3357,7 @@ TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_2) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMin, OnePosArgsResultOfKeyAreNotComparable) {
@@ -3481,7 +3481,7 @@ TEST(StarlarkMin, TwoPosArgsWithKeyErrorInKeyCall_1) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMin, TwoPosArgsWithKeyErrorInKeyCall_2) {
@@ -3502,7 +3502,7 @@ TEST(StarlarkMin, TwoPosArgsWithKeyErrorInKeyCall_2) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkMin, TwoPosArgsResultOfKeyAreNotComparable) {

@@ -3,19 +3,19 @@ block {
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
   op_code { const_int { value: 1 } }
-  op_code { unary_plus {} }
-  op_code { pop {} }
+  op_code { unary_plus { } highlight_start: { row: 1 column: 1 pos: 0 } highlight_mid: { row: 1 column: 2 pos: 1 } highlight_end: { row: 1 column: 3 pos: 2 } }
+  op_code { pop { } }
   op_code { const_int { value: 1 } }
-  op_code { unary_minus {} }
-  op_code { pop {} }
+  op_code { unary_minus { } highlight_start: { row: 2 column: 1 pos: 3 } highlight_mid: { row: 2 column: 2 pos: 4 } highlight_end: { row: 2 column: 3 pos: 5 } }
+  op_code { pop { } }
   op_code { const_int { value: 1 } }
-  op_code { unary_tilde {} }
-  op_code { pop {} }
+  op_code { unary_tilde { } highlight_start: { row: 3 column: 1 pos: 6 } highlight_mid: { row: 3 column: 2 pos: 7 } highlight_end: { row: 3 column: 3 pos: 8 } }
+  op_code { pop { } }
   op_code { const_int { value: 1 } }
-  op_code { unary_not {} }
-  op_code { pop {} }
-  op_code { pop_frame {} }
-  op_code { pop_frame {} }
-  op_code { pop_frame {} }
-  op_code { end {} }
+  op_code { unary_not { } highlight_start: { row: 4 column: 1 pos: 9 } highlight_mid: { row: 4 column: 4 pos: 12 } highlight_end: { row: 4 column: 6 pos: 14 } }
+  op_code { pop { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { end { } }
 }

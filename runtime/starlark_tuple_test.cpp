@@ -962,7 +962,7 @@ TEST(StarlarkTuple, DotError) {
 
   EXPECT_EQ(nullptr, tuple.dot("count", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'tuple' object has no attribute 'count'");
+  EXPECT_EQ(error_callback.messages[0], "'tuple' object has no attribute 'count'");
 }
 
 }  // namespace

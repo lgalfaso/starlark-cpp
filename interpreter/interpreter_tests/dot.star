@@ -5,37 +5,37 @@ assert_eq(c(""), 4)
 
 assert_fail("""
 "abc".count = 3
-""", error_message = "AttributeError: 'string' object attribute 'count' is read-only")
+""", error_message = "'string' object attribute 'count' is read-only\n    1 | \"abc\".count = 3\n      | ~~~~~^^^^^^\n")
 assert_fail("""
 "abc".count += 3
-""", error_message = "TypeError: unsupported operand type(s) for +=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for +=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count += 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count -= 3
-""", error_message = "TypeError: unsupported operand type(s) for -=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for -=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count -= 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count *= 3
-""", error_message = "TypeError: unsupported operand type(s) for *=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for *=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count *= 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count /= 3
-""", error_message = "TypeError: unsupported operand type(s) for /=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for /=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count /= 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count //= 3
-""", error_message = "TypeError: unsupported operand type(s) for //=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for //=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count //= 3\n      | ~~~~~~~~~~~~^^^\n")
 assert_fail("""
 "abc".count %= 3
-""", error_message = "TypeError: unsupported operand type(s) for %=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for %=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count %= 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count &= 3
-""", error_message = "TypeError: unsupported operand type(s) for &=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for &=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count &= 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count |= 3
-""", error_message = "TypeError: unsupported operand type(s) for |=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for |=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count |= 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count ^= 3
-""", error_message = "TypeError: unsupported operand type(s) for ^=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for ^=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count ^= 3\n      | ~~~~~~~~~~~~^^\n")
 assert_fail("""
 "abc".count <<= 3
-""", error_message = "TypeError: unsupported operand type(s) for <<=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for <<=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count <<= 3\n      | ~~~~~~~~~~~~^^^\n")
 assert_fail("""
 "abc".count >>= 3
-""", error_message = "TypeError: unsupported operand type(s) for >>=: 'builtin_function_or_method' and 'int'")
+""", error_message = "unsupported operand type(s) for >>=: 'builtin_function_or_method' and 'int'\n    1 | \"abc\".count >>= 3\n      | ~~~~~~~~~~~~^^^\n")

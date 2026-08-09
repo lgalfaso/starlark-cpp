@@ -14,30 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_bad_operand_unary(std::string_view op, std::string_view type) {
-  return std::format("TypeError: bad operand type for unary {}: '{}'", op, type);
-}
-
-std::string error_bad_operand_binary(std::string_view op, std::string_view type1, std::string_view type2) {
-  return std::format("TypeError: unsupported operand type(s) for {}: '{}' and '{}'", op, type1, type2);
-}
-
-std::string error_no_method(std::string_view type, std::string_view method) {
-  return std::format("TypeError: object of type '{}' has no {}()", type, method);
-}
-
-std::string error_no_attribute(std::string_view type, std::string_view attribute) {
-  return std::format("AttributeError: '{}' object has no attribute '{}'", type, attribute);
-}
-
-std::string error_no_attribute(std::string_view type, std::string_view attribute, std::string_view suggestion) {
-  return std::format("AttributeError: '{}' object has no attribute '{}'. Did you mean: '{}'?", type, attribute, suggestion);
-}
-
-std::string error_read_only_attribute(std::string_view type, std::string_view attribute) {
-  return std::format("AttributeError: '{}' object attribute '{}' is read-only", type, attribute);
-}
-
 std::string error_convert(std::string_view from, std::string_view to) {
   return std::format("TypeError: cannot convert '{}' object to {}", from, to);
 }
@@ -501,6 +477,31 @@ std::string error_v2_item_not_in_collection(std::string_view type, std::string_v
 
 std::string error_v2_interpreted_as_integer(std::string_view type) {
   return std::format("'{}' object cannot be interpreted as an integer", type);
+}
+
+
+std::string error_v2_bad_operand_unary(std::string_view op, std::string_view type) {
+  return std::format("bad operand type for unary {}: '{}'", op, type);
+}
+
+std::string error_v2_bad_operand_binary(std::string_view op, std::string_view type1, std::string_view type2) {
+  return std::format("unsupported operand type(s) for {}: '{}' and '{}'", op, type1, type2);
+}
+
+std::string error_v2_no_method(std::string_view type, std::string_view method) {
+  return std::format("object of type '{}' has no {}()", type, method);
+}
+
+std::string error_v2_no_attribute(std::string_view type, std::string_view attribute) {
+  return std::format("'{}' object has no attribute '{}'", type, attribute);
+}
+
+std::string error_v2_no_attribute(std::string_view type, std::string_view attribute, std::string_view suggestion) {
+  return std::format("'{}' object has no attribute '{}'. Did you mean: '{}'?", type, attribute, suggestion);
+}
+
+std::string error_v2_read_only_attribute(std::string_view type, std::string_view attribute) {
+  return std::format("'{}' object attribute '{}' is read-only", type, attribute);
 }
 
 }  // namespace error_messages

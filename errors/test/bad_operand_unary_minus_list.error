@@ -1,0 +1,3 @@
+main:2:6: error: bad operand type for unary -: 'list'
+    2 | a = -[]
+      |     ~^^

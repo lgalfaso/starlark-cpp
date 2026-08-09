@@ -1,0 +1,2 @@
+# Bad unary operand
+a = +[]

@@ -7,27 +7,27 @@ block {
   op_code { add_to_list: { number_of_elements: 1 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 2 } }
-  op_code { assign_plus_equals { frame: 1 pos_in_frame: 1 } }
+  op_code { assign_plus_equals { frame: 1 pos_in_frame: 1 } highlight_start: { row: 2 column: 1 pos: 8 } highlight_mid: { row: 2 column: 3 pos: 10 } highlight_end: { row: 2 column: 5 pos: 12 } }
   op_code { const_int { value: 3 } }
-  op_code { assign_minus_equals { frame: 1 pos_in_frame: 2 } }
+  op_code { assign_minus_equals { frame: 1 pos_in_frame: 2 } highlight_start: { row: 3 column: 1 pos: 15 } highlight_mid: { row: 3 column: 3 pos: 17 } highlight_end: { row: 3 column: 5 pos: 19 } }
   op_code { const_int { value: 4 } }
-  op_code { assign_slash_equals { frame: 1 pos_in_frame: 3 } }
+  op_code { assign_slash_equals { frame: 1 pos_in_frame: 3 } highlight_start: { row: 4 column: 1 pos: 22 } highlight_mid: { row: 4 column: 3 pos: 24 } highlight_end: { row: 4 column: 5 pos: 26 } }
   op_code { const_int { value: 5 } }
-  op_code { assign_slash_slash_equals { frame: 1 pos_in_frame: 4 } }
+  op_code { assign_slash_slash_equals { frame: 1 pos_in_frame: 4 } highlight_start: { row: 5 column: 1 pos: 29 } highlight_mid: { row: 5 column: 3 pos: 31 } highlight_end: { row: 5 column: 6 pos: 34 } }
   op_code { const_int { value: 6 } }
-  op_code { assign_percent_equals { frame: 1 pos_in_frame: 5 } }
+  op_code { assign_percent_equals { frame: 1 pos_in_frame: 5 } highlight_start: { row: 6 column: 1 pos: 37 } highlight_mid: { row: 6 column: 3 pos: 39 } highlight_end: { row: 6 column: 5 pos: 41 } }
   op_code { const_int { value: 7 } }
-  op_code { assign_ampersand_equals { frame: 1 pos_in_frame: 6 } }
+  op_code { assign_ampersand_equals { frame: 1 pos_in_frame: 6 } highlight_start: { row: 7 column: 1 pos: 44 } highlight_mid: { row: 7 column: 3 pos: 46 } highlight_end: { row: 7 column: 5 pos: 48 } }
   op_code { const_int { value: 8 } }
-  op_code { assign_pipe_equals { frame: 1 pos_in_frame: 7 } }
+  op_code { assign_pipe_equals { frame: 1 pos_in_frame: 7 } highlight_start: { row: 8 column: 1 pos: 51 } highlight_mid: { row: 8 column: 3 pos: 53 } highlight_end: { row: 8 column: 5 pos: 55 } }
   op_code { const_int { value: 9 } }
-  op_code { assign_hat_equals { frame: 1 pos_in_frame: 8 } }
+  op_code { assign_hat_equals { frame: 1 pos_in_frame: 8 } highlight_start: { row: 9 column: 1 pos: 58 } highlight_mid: { row: 9 column: 3 pos: 60 } highlight_end: { row: 9 column: 5 pos: 62 } }
   op_code { const_int { value: 10 } }
-  op_code { assign_greater_greater_equals { frame: 1 pos_in_frame: 9 } }
+  op_code { assign_greater_greater_equals { frame: 1 pos_in_frame: 9 } highlight_start: { row: 10 column: 1 pos: 65 } highlight_mid: { row: 10 column: 3 pos: 67 } highlight_end: { row: 10 column: 6 pos: 70 } }
   op_code { const_int { value: 11 } }
-  op_code { assign_less_less_equals { frame: 1 pos_in_frame: 10 } }
+  op_code { assign_less_less_equals { frame: 1 pos_in_frame: 10 } highlight_start: { row: 11 column: 1 pos: 74 } highlight_mid: { row: 11 column: 3 pos: 76 } highlight_end: { row: 11 column: 6 pos: 79 } }
   op_code { const_int { value: 12 } }
-  op_code { assign_star_equals { frame: 1 pos_in_frame: 11 } }
+  op_code { assign_star_equals { frame: 1 pos_in_frame: 11 } highlight_start: { row: 12 column: 1 pos: 83 } highlight_mid: { row: 12 column: 3 pos: 85 } highlight_end: { row: 12 column: 5 pos: 87 } }
 
   op_code { const_int: { value: 2 } }
   op_code { load: { frame: 1 pos_in_frame: 0 } }

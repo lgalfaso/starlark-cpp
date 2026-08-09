@@ -394,25 +394,25 @@ TEST(StarlarkInteger, ShiftInvalidInput) {
   auto* result = starlark_integer(100).binary_rshift(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for >>: 'int' and 'float'");
   error_callback.messages.clear();
 
   result = starlark_integer(100).greater_greater_equals_assign(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for >>=: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for >>=: 'int' and 'float'");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_lshift(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for <<: 'int' and 'float'");
   error_callback.messages.clear();
 
   result = starlark_integer(100).less_less_equals_assign(starlark_float(3.0), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for <<=: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for <<=: 'int' and 'float'");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_lshift(starlark_integer(-1), ctx, error_callback);
@@ -533,7 +533,7 @@ TEST(StarlarkInteger, BinaryAndError) {
 
   zero.binary_and(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for &: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, AndEqualsAssignError) {
@@ -545,7 +545,7 @@ TEST(StarlarkInteger, AndEqualsAssignError) {
 
   zero.ampersand_equals_assign(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &=: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for &=: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, BinaryOr) {
@@ -590,7 +590,7 @@ TEST(StarlarkInteger, BinaryOrError) {
 
   zero.binary_pipe(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for |: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, OrEqualsAssignError) {
@@ -602,7 +602,7 @@ TEST(StarlarkInteger, OrEqualsAssignError) {
 
   zero.pipe_equals_assign(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for |=: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, BinaryXor) {
@@ -647,7 +647,7 @@ TEST(StarlarkInteger, BinaryXorError) {
 
   zero.binary_hat(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for ^: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, XorEqualsAssignError) {
@@ -659,7 +659,7 @@ TEST(StarlarkInteger, XorEqualsAssignError) {
 
   zero.hat_equals_assign(float_zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^=: 'int' and 'float'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for ^=: 'int' and 'float'");
 }
 
 TEST(StarlarkInteger, BinaryPlus) {
@@ -859,7 +859,7 @@ TEST(StarlarkInteger, BinaryPlusError) {
 
   zero.binary_plus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for +: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, PlusEqualsAssignError) {
@@ -871,7 +871,7 @@ TEST(StarlarkInteger, PlusEqualsAssignError) {
 
   zero.plus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for +=: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for +=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinaryMinus) {
@@ -1063,7 +1063,7 @@ TEST(StarlarkInteger, BinaryMinusError) {
 
   zero.binary_minus(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for -: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, MinusEqualsAssignError) {
@@ -1075,7 +1075,7 @@ TEST(StarlarkInteger, MinusEqualsAssignError) {
 
   zero.minus_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -=: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for -=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, StarEqualsAssign) {
@@ -1108,7 +1108,7 @@ TEST(StarlarkInteger, StarEqualsAssignError) {
 
   zero.star_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *=: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for *=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinaryStar) {
@@ -1141,7 +1141,7 @@ TEST(StarlarkInteger, BinaryStarError) {
 
   zero.binary_star(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for *: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for *: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, SlashEqualsAssign) {
@@ -1174,7 +1174,7 @@ TEST(StarlarkInteger, SlashEqualsAssignError) {
 
   zero.slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /=: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for /=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinarySlash) {
@@ -1207,7 +1207,7 @@ TEST(StarlarkInteger, BinarySlashError) {
 
   zero.binary_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for /: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for /: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinarySlashOverflowiDenominatorError) {
@@ -1729,7 +1729,7 @@ TEST(StarlarkInteger, BinarySlashSlashError) {
 
   zero.binary_slash_slash(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for //: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, SlashSlashEqualsAssignError) {
@@ -1741,7 +1741,7 @@ TEST(StarlarkInteger, SlashSlashEqualsAssignError) {
 
   zero.slash_slash_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for //=: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for //=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinarySlashSlashZeroFloatError) {
@@ -2263,7 +2263,7 @@ TEST(StarlarkInteger, BinaryPercentError) {
 
   zero.binary_percent(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for %: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, PercentEqualsAssignError) {
@@ -2275,7 +2275,7 @@ TEST(StarlarkInteger, PercentEqualsAssignError) {
 
   zero.percent_equals_assign(true_obj, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for %=: 'int' and 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for %=: 'int' and 'bool'");
 }
 
 TEST(StarlarkInteger, BinaryPercentZeroFloatError) {
@@ -2331,7 +2331,7 @@ TEST(StarlarkInteger, Len) {
 
   EXPECT_THAT(starlark_integer(0).len(true, error_callback), Lt(0));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: object of type 'int' has no len()");
+  EXPECT_EQ(error_callback.messages[0], "object of type 'int' has no len()");
 }
 
 TEST(StarlarkInteger, GetIterator) {

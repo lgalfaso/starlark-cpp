@@ -292,7 +292,7 @@ TEST(StarlarkSet, BinaryPipeWithNonSet) {
   auto* result = set.binary_pipe(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for |: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, PipeEqualsAssign) {
@@ -365,7 +365,7 @@ TEST(StarlarkSet, PipeEqualsAssignWithNonSet) {
   auto* result = set.pipe_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for |=: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, BinaryAnd) {
@@ -422,7 +422,7 @@ TEST(StarlarkSet, BinaryAndWithNonSet) {
   auto* result = set.binary_and(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for &: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, AndEqualsAssign) {
@@ -477,7 +477,7 @@ TEST(StarlarkSet, AndEqualsAssignWithNonSet) {
   auto* result = set.ampersand_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for &=: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for &=: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, BinaryHat) {
@@ -515,7 +515,7 @@ TEST(StarlarkSet, BinaryHatWithNonSet) {
   auto* result = set.binary_hat(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for ^: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, HatEqualsAssign) {
@@ -589,7 +589,7 @@ TEST(StarlarkSet, HatEqualsAssignWithNonSet) {
   auto* result = set.hat_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for ^=: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for ^=: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, BinaryMinus) {
@@ -625,7 +625,7 @@ TEST(StarlarkSet, BinaryMinusWithNonSet) {
   auto* result = set.binary_minus(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for -: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, MinusEqualsAssign) {
@@ -693,7 +693,7 @@ TEST(StarlarkSet, MinusEqualsAssignWithNonSet) {
   auto* result = set.minus_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for -=: 'set' and 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for -=: 'set' and 'tuple'");
 }
 
 TEST(StarlarkSet, Len) {

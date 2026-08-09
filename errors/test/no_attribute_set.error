@@ -1,0 +1,3 @@
+main:2:3: error: 'dict' object has no attribute 'unknown'
+    2 | {}.unknown = 1
+      | ~~^^^^^^^^

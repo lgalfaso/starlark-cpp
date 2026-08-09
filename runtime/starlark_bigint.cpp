@@ -13,11 +13,11 @@
 #include "runtime/starlark_types.hpp"
 
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_bad_operand_binary;
 using ::starlark::error_messages::error_division_by_zero;
 using ::starlark::error_messages::error_negative_shift;
 using ::starlark::error_messages::error_overflow;
 using ::starlark::error_messages::error_overflow_too_many_digits;
+using ::starlark::error_messages::error_v2_bad_operand_binary;
 
 namespace starlark {
 namespace runtime {
@@ -119,7 +119,7 @@ starlark_obj* plus_op(const number& value, const starlark_bigint& this_obj, cons
     case starlark_numeric_type::kBigInt:
       return create_integer(value + other.as_bigint(), ctx);
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -139,7 +139,7 @@ starlark_obj* minus_op(const number& value, const starlark_bigint& this_obj, con
     case starlark_numeric_type::kBigInt:
       return create_integer(value - other.as_bigint(), ctx);
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -162,7 +162,7 @@ starlark_obj* star_op(const number& value, const starlark_bigint& this_obj, cons
     case starlark_numeric_type::kBigInt:
       return create_integer(value * other.as_bigint(), ctx);
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -213,7 +213,7 @@ starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, con
       return create_float(fvalue / fother, ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -250,7 +250,7 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
       return create_integer(starlark_div(value, bother), ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -287,7 +287,7 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
       return create_integer(starlark_mod(value, bother), ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -299,7 +299,7 @@ starlark_obj* and_op(const number& value, const starlark_bigint& this_obj, const
     case starlark_numeric_type::kBigInt:
       return create_integer(value & other.as_bigint(), ctx);
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -311,7 +311,7 @@ starlark_obj* pipe_op(const number& value, const starlark_bigint& this_obj, cons
     case starlark_numeric_type::kBigInt:
       return create_integer(value | other.as_bigint(), ctx);
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -323,7 +323,7 @@ starlark_obj* hat_op(const number& value, const starlark_bigint& this_obj, const
     case starlark_numeric_type::kBigInt:
       return create_integer(value ^ other.as_bigint(), ctx);
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -368,7 +368,7 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
       return create_integer(value << int_shift, ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }
@@ -408,7 +408,7 @@ starlark_obj* greater_greater_op(const number& value, const starlark_bigint& thi
       return create_integer(value >> int_shift, ctx);
     }
     default:
-      error_callback.add_error(error_bad_operand_binary(op, this_obj.type(), other.type()));
+      error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
       return nullptr;
   }
 }

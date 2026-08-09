@@ -411,7 +411,7 @@ TEST(StarlarkList, UnaryPlus) {
   list.unary_plus(ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary +: 'list'");
+  EXPECT_EQ(error_callback.messages[0], "bad operand type for unary +: 'list'");
 }
 
 TEST(StarlarkList, UnaryMinus) {
@@ -423,7 +423,7 @@ TEST(StarlarkList, UnaryMinus) {
   list.unary_minus(ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary -: 'list'");
+  EXPECT_EQ(error_callback.messages[0], "bad operand type for unary -: 'list'");
 }
 
 TEST(StarlarkList, UnaryTilde) {
@@ -435,7 +435,7 @@ TEST(StarlarkList, UnaryTilde) {
   list.unary_tilde(ctx, error_callback);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bad operand type for unary ~: 'list'");
+  EXPECT_EQ(error_callback.messages[0], "bad operand type for unary ~: 'list'");
 }
 
 TEST(StarlarkList, BinaryPlus) {
@@ -1518,7 +1518,7 @@ TEST(StarlarkList, GetAttrError) {
 
   EXPECT_EQ(nullptr, list.get_attr(true, "count", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
+  EXPECT_EQ(error_callback.messages[0], "'list' object has no attribute 'count'");
 }
 
 TEST(StarlarkList, GetAttrErrorWithSuggestion) {
@@ -1529,7 +1529,7 @@ TEST(StarlarkList, GetAttrErrorWithSuggestion) {
 
   EXPECT_EQ(nullptr, list.get_attr(true, "appen", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
+  EXPECT_EQ(error_callback.messages[0], "'list' object has no attribute 'appen'. Did you mean: 'append'?");
 }
 
 TEST(StarlarkList, Dot) {
@@ -1551,7 +1551,7 @@ TEST(StarlarkList, DotError) {
 
   EXPECT_EQ(nullptr, list.dot("count", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
+  EXPECT_EQ(error_callback.messages[0], "'list' object has no attribute 'count'");
 }
 
 TEST(StarlarkList, DotErrorWithSuggestion) {
@@ -1562,7 +1562,7 @@ TEST(StarlarkList, DotErrorWithSuggestion) {
 
   EXPECT_EQ(nullptr, list.dot("appen", ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
+  EXPECT_EQ(error_callback.messages[0], "'list' object has no attribute 'appen'. Did you mean: 'append'?");
 }
 
 TEST(StarlarkList, DotAssigneadOnly) {
@@ -1571,7 +1571,7 @@ TEST(StarlarkList, DotAssigneadOnly) {
 
   list.dot_assign("append", list, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object attribute 'append' is read-only");
+  EXPECT_EQ(error_callback.messages[0], "'list' object attribute 'append' is read-only");
 }
 
 TEST(StarlarkList, DotAssignError) {
@@ -1580,7 +1580,7 @@ TEST(StarlarkList, DotAssignError) {
 
   list.dot_assign("count", list, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'count'");
+  EXPECT_EQ(error_callback.messages[0], "'list' object has no attribute 'count'");
 }
 
 TEST(StarlarkList, DotAssignErrorWithSuggestion) {
@@ -1589,7 +1589,7 @@ TEST(StarlarkList, DotAssignErrorWithSuggestion) {
 
   list.dot_assign("appen", list, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "AttributeError: 'list' object has no attribute 'appen'. Did you mean: 'append'?");
+  EXPECT_EQ(error_callback.messages[0], "'list' object has no attribute 'appen'. Did you mean: 'append'?");
 }
 
 TEST(StarlarkList, Append) {

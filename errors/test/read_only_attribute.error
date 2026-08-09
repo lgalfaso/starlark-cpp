@@ -1,0 +1,3 @@
+main:2:3: error: 'list' object attribute 'append' is read-only
+    2 | [].append = 1
+      | ~~^^^^^^^

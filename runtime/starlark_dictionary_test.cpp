@@ -342,7 +342,7 @@ TEST(StarlarkDictionary, BinaryPipeWithNonDict) {
   auto* result = dict.binary_pipe(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |: 'dict' and 'list'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for |: 'dict' and 'list'");
 }
 
 TEST(StarlarkDictionary, PipeEqualsAssign) {
@@ -403,7 +403,7 @@ TEST(StarlarkDictionary, PipeEqualsAssignWithNonDict) {
   auto* result = dict.pipe_equals_assign(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: unsupported operand type(s) for |=: 'dict' and 'list'");
+  EXPECT_EQ(error_callback.messages[0], "unsupported operand type(s) for |=: 'dict' and 'list'");
 }
 
 TEST(StarlarkDictionary, PipeEqualsAssignWhileIterating) {

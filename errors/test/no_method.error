@@ -1,0 +1,3 @@
+main:2:8: error: object of type 'int' has no len()
+    2 | a = len(1)
+      |     ~~~^^^

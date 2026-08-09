@@ -20,5 +20,5 @@ block {
   op_code { pop_frame { } }
   op_code { pop_frame { } }
 
-  op_code { end {} }
+  op_code { end { } }
 }

@@ -1,0 +1,3 @@
+# No attribute
+a = [].appen
+

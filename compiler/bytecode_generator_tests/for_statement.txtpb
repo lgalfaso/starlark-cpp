@@ -11,9 +11,9 @@ block {
   op_code { for_iterator { address_delta: 5 } }                                                                                                                                                 #  9
   op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                                                                                # 10
   op_code { const_string { value: "abc" } highlight_start { row: 2 column: 5 pos: 24 } highlight_mid { row: 2 column: 5 pos: 24 } highlight_end { row: 2 column: 10 pos: 29 } }                 # 11
-  op_code { pop {} }                                                                                                                                                                            # 12
+  op_code { pop { } }                                                                                                                                                                           # 12
   op_code { goto { address_delta: -4 } }                                                                                                                                                        # 13
-  op_code { end_iterator {} }                                                                                                                                                                   # 14
+  op_code { end_iterator { } }                                                                                                                                                                  # 14
 
 
   op_code { make_list { reserve_size: 2 } }                                                                                                                                                     # 15
@@ -30,9 +30,9 @@ block {
   op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                                                                                # 26
   op_code { store { frame: 1 pos_in_frame: 1 } }                                                                                                                                                # 27
   op_code { const_string { value: "def" } highlight_start { row: 5 column: 5 pos: 65 } highlight_mid { row: 5 column: 5 pos: 65 } highlight_end { row: 5 column: 10 pos: 70 } }                 # 28
-  op_code { pop {} }                                                                                                                                                                            # 29
+  op_code { pop { } }                                                                                                                                                                           # 29
   op_code { goto { address_delta: -6 } }                                                                                                                                                        # 30
-  op_code { end_iterator {} }                                                                                                                                                                   # 31
+  op_code { end_iterator { } }                                                                                                                                                                  # 31
 
 
   op_code { make_list { reserve_size: 3 } }                                                                                                                                                     # 32
@@ -43,11 +43,11 @@ block {
   op_code { get_iterator { } highlight_start: { row: 7 column: 1 pos: 72 } highlight_mid: { row: 7 column: 12 pos: 83 } highlight_end: { row: 7 column: 21 pos: 92 } }                          # 37
   op_code { for_iterator { address_delta: 6 } }                                                                                                                                                 # 38
   op_code { load { frame: 1 pos_in_frame: 0 } }                                                                                                                                                 # 39
-  op_code { assign_dot_member { member: 'b' } }                                                                                                                                                 # 40
+  op_code { assign_dot_member { member: 'b' } highlight_start: { row: 7 column: 5 pos: 76 } highlight_mid: { row: 7 column: 6 pos: 77 } highlight_end: { row: 7 column: 8 pos: 79 } }           # 40
   op_code { const_string { value: "ghi" } highlight_start { row: 8 column: 5 pos: 98 } highlight_mid { row: 8 column: 5 pos: 98 } highlight_end { row: 8 column: 10 pos: 103 } }                # 41
-  op_code { pop {} }                                                                                                                                                                            # 42
+  op_code { pop { } }                                                                                                                                                                           # 42
   op_code { goto { address_delta: -5 } }                                                                                                                                                        # 43
-  op_code { end_iterator {} }                                                                                                                                                                   # 44
+  op_code { end_iterator { } }                                                                                                                                                                  # 44
 
   op_code { make_list { reserve_size: 2 } }                                                                                                                                                     # 45
   op_code { const_int: { value: 0 } }                                                                                                                                                           # 46
@@ -70,5 +70,5 @@ block {
   op_code { pop_frame { } }                                                                                                                                                                     # 62
   op_code { pop_frame { } }                                                                                                                                                                     # 63
   op_code { pop_frame { } }                                                                                                                                                                     # 64
-  op_code { end {} }                                                                                                                                                                            # 65
+  op_code { end { } }                                                                                                                                                                           # 65
 }
