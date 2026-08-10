@@ -1,0 +1,3 @@
+main:2:14: error: unknown named argument 'xyz'
+    2 | a = enumerate([], xyz = 1)
+      |     ~~~~~~~~~^^^^^^^^^^^^^

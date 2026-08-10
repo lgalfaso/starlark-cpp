@@ -7,7 +7,7 @@ assert_fail("sorted((set(), set(), set()))", error_message = """'<' not supporte
       | ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
 """)
 
-assert_fail('''sorted([], None)''', error_message = """TypeError: sorted_impl expected 1 arguments, got 2
+assert_fail('''sorted([], None)''', error_message = """sorted expected 1 arguments, got 2
     1 | sorted([], None)
       | ~~~~~~^^^^^^^^^^
 """)

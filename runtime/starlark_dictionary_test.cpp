@@ -699,7 +699,7 @@ TEST(StarlarkDictionary, ClearWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.clear() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ("dict.clear() takes no arguments (1 given)", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -870,7 +870,7 @@ TEST(StarlarkDictionary, GetNoArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: get expected at least 1 argument, got 0", error_callback.messages[0]);
+  EXPECT_EQ("get expected at least 1 argument, got 0", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, GetThreeArgs) {
@@ -895,7 +895,7 @@ TEST(StarlarkDictionary, GetThreeArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: get expected at most 2 argument, got 3", error_callback.messages[0]);
+  EXPECT_EQ("get expected at most 2 argument, got 3", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, GetWithNamedArgs) {
@@ -920,7 +920,7 @@ TEST(StarlarkDictionary, GetWithNamedArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.get() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("dict.get() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Items) {
@@ -995,7 +995,7 @@ TEST(StarlarkDictionary, ItemsWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.items() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ("dict.items() takes no arguments (1 given)", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1071,7 +1071,7 @@ TEST(StarlarkDictionary, KeysWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.keys() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ("dict.keys() takes no arguments (1 given)", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1248,7 +1248,7 @@ TEST(StarlarkDictionary, PopWithNoArgs) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: pop expected at least 1 argument, got 0", error_callback.messages[0]);
+  EXPECT_EQ("pop expected at least 1 argument, got 0", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1277,7 +1277,7 @@ TEST(StarlarkDictionary, PopWithThreeArgs) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: pop expected at most 2 argument, got 3", error_callback.messages[0]);
+  EXPECT_EQ("pop expected at most 2 argument, got 3", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1303,7 +1303,7 @@ TEST(StarlarkDictionary, PopWithNamedArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.pop() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("dict.pop() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Popitem) {
@@ -1394,7 +1394,7 @@ TEST(StarlarkDictionary, PopitemWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.popitem() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ("dict.popitem() takes no arguments (1 given)", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1418,7 +1418,7 @@ TEST(StarlarkDictionary, PopitemWithNamedArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.popitem() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("dict.popitem() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Setdefault) {
@@ -1598,7 +1598,7 @@ TEST(StarlarkDictionary, SetdefaultNoArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: setdefault expected at least 1 argument, got 0", error_callback.messages[0]);
+  EXPECT_EQ("setdefault expected at least 1 argument, got 0", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, SetdefaultThreeArgs) {
@@ -1623,7 +1623,7 @@ TEST(StarlarkDictionary, SetdefaultThreeArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: setdefault expected at most 2 argument, got 3", error_callback.messages[0]);
+  EXPECT_EQ("setdefault expected at most 2 argument, got 3", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, SetdefaultWithNamedArgs) {
@@ -1648,7 +1648,7 @@ TEST(StarlarkDictionary, SetdefaultWithNamedArgs) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.setdefault() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("dict.setdefault() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, UpdateEmpty) {
@@ -1909,7 +1909,7 @@ TEST(StarlarkDictionary, UpdateMultiplePositionalArguments) {
 
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: update expected at most 1 argument, got 2");
+  EXPECT_EQ(error_callback.messages[0], "update expected at most 1 argument, got 2");
 }
 
 TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements1) {
@@ -2107,7 +2107,7 @@ TEST(StarlarkDictionary, ValuesWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: dict.values() takes no arguments (1 given)", error_callback.messages[0]);
+  EXPECT_EQ("dict.values() takes no arguments (1 given)", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 

@@ -1,0 +1,3 @@
+main:2:9: error: in call to hash(), got value of type 'bool', want 'string' or 'bytes'
+    2 | a = hash(True)
+      |     ~~~~^^^^^^

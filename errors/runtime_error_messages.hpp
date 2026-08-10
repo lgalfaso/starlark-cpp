@@ -13,24 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_no_keyword(std::string_view fn_name);
-std::string error_unknown_argument(std::string_view argument_name);
-std::string error_no_pos_args(std::string_view fn_name, int64_t actual);
-std::string error_arguments_too_few(std::string_view fn_name, int64_t actual, int64_t expected);
-std::string error_arguments_too_many(std::string_view fn_name, int64_t actual, int64_t expected);
-std::string error_arguments_exactly_one(std::string_view fn_name, int64_t actual);
-std::string error_arguments_one_or_two(std::string_view fn_name, int64_t actual);
-std::string error_arguments_exactly(std::string_view fn_name, int64_t actual, int64_t expected);
-std::string error_argument_bad_operand_type(std::string_view fn_name, std::string_view type);
-std::string error_argument_bad_operand_type(std::string_view fn_name, std::string_view type, std::string_view expected1, std::string_view expected2);
-std::string error_argument_string_or_real(std::string_view fn_name, std::string_view type);
-std::string error_argument_string_int_bool_or_real(std::string_view fn_name, std::string_view type);
-std::string error_attribute_string(std::string_view type);
-std::string error_expect_character(std::string_view fn_name, std::string_view type, int64_t length);
-std::string error_expect_one_character_or_one_byte(std::string_view fn_name, std::string_view type);
-std::string error_argument_non_zero(std::string_view fn_name, int64_t arg_pos);
-std::string error_step_non_zero();
-
 std::string error_op_in_loop(std::string_view type, std::string_view op);
 std::string error_mutate_frozen_value(std::string_view type);
 
@@ -152,6 +134,23 @@ std::string_view error_v2_overflow_too_many_digits();
 std::string_view error_v2_overflow_float_too_large();
 std::string error_v2_int_base(std::string_view fn_name);
 std::string error_v2_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value);
+
+std::string error_v2_no_keyword(std::string_view fn_name);
+std::string error_v2_unknown_argument(std::string_view argument_name);
+std::string error_v2_no_pos_args(std::string_view fn_name, int64_t actual);
+std::string error_v2_arguments_too_few(std::string_view fn_name, int64_t actual, int64_t expected);
+std::string error_v2_arguments_too_many(std::string_view fn_name, int64_t actual, int64_t expected);
+std::string error_v2_arguments_exactly_one(std::string_view fn_name, int64_t actual);
+std::string error_v2_arguments_one_or_two(std::string_view fn_name, int64_t actual);
+std::string error_v2_arguments_exactly(std::string_view fn_name, int64_t actual, int64_t expected);
+std::string error_v2_argument_bad_operand_type(std::string_view fn_name, std::string_view type, std::string_view expected1, std::string_view expected2);
+std::string error_v2_argument_string_or_real(std::string_view fn_name, std::string_view type);
+std::string error_v2_argument_string_int_bool_or_real(std::string_view fn_name, std::string_view type);
+std::string error_v2_attribute_string(std::string_view type);
+std::string error_v2_expect_character(std::string_view fn_name, std::string_view type, int64_t length);
+std::string error_v2_expect_one_character_or_one_byte(std::string_view fn_name, std::string_view type);
+std::string error_v2_argument_non_zero(std::string_view fn_name, int64_t arg_pos);
+std::string_view error_v2_step_non_zero();
 
 }  // namespace error_messages
 }  // namespace starlark

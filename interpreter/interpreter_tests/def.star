@@ -48,7 +48,7 @@ def foo():
   pass
 
 foo(1)
-""", error_message = """TypeError: foo expected 0 arguments, got 1
+""", error_message = """foo expected 0 arguments, got 1
     4 | foo(1)
       | ~~~^^^
 """)

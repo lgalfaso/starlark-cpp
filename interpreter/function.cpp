@@ -14,7 +14,6 @@
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::error_messages::error_arguments_exactly;
 using ::starlark::error_messages::error_missing_keyword_only_argument;
 using ::starlark::error_messages::error_missing_positional_argument;
 using ::starlark::error_messages::error_module_does_not_define_symbol;
@@ -22,6 +21,7 @@ using ::starlark::error_messages::error_multiple_values_for_argument;
 using ::starlark::error_messages::error_recursive_call;
 using ::starlark::error_messages::error_unable_to_load_module;
 using ::starlark::error_messages::error_unexpected_keyword_argument;
+using ::starlark::error_messages::error_v2_arguments_exactly;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::order_comparator;
@@ -124,7 +124,7 @@ starlark_obj* interpreter_function::call(
     } else if (function_signature->has_star_argument()) {
       args.push_back(param);
     } else {
-      error_callback.add_error(error_arguments_exactly(
+      error_callback.add_error(error_v2_arguments_exactly(
           function_signature->fn_name(),
           pos_args.size(),
           number_positional_params));
@@ -272,15 +272,15 @@ starlark_obj* starlark_fn_trampoline(std::string_view fn_name, const starlark_ob
 }  // namespace
 
 starlark_obj* starlark_fn_max_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  return starlark_fn_trampoline("max_impl", pos_args, named_args, ctx, error_callback);
+  return starlark_fn_trampoline("max", pos_args, named_args, ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_min_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  return starlark_fn_trampoline("min_impl", pos_args, named_args, ctx, error_callback);
+  return starlark_fn_trampoline("min", pos_args, named_args, ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_sorted_impl(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  return starlark_fn_trampoline("sorted_impl", pos_args, named_args, ctx, error_callback);
+  return starlark_fn_trampoline("sorted", pos_args, named_args, ctx, error_callback);
 }
 
 }  // namespace interpreter

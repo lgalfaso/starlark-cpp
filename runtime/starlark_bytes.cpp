@@ -35,8 +35,8 @@ using ::starlark::error_messages::error_no_concat;
 using ::starlark::error_messages::error_no_multiply_sequence;
 using ::starlark::error_messages::error_substring_not_found;
 using ::starlark::error_messages::error_type_required;
-using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::error_messages::error_v2_byte_in_range;
+using ::starlark::error_messages::error_v2_unknown_argument;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
 using ::starlark::ucd::is_space;
@@ -928,7 +928,7 @@ starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_o
       assert(value != nullptr);
       count = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -1033,7 +1033,7 @@ starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_ob
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -1100,7 +1100,7 @@ starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }

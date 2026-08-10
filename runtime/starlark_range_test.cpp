@@ -439,7 +439,7 @@ TEST(StarlarkRange, SliceRangeZeroStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("range(100)", range.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
+  EXPECT_EQ(error_callback.messages[0], "slice step cannot be zero");
 }
 
 TEST(StarlarkRange, SliceRange) {

@@ -15,7 +15,6 @@
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_empty_iterator;
 using ::starlark::error_messages::error_named_argument_must_be_type;
-using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_built_in_functions;

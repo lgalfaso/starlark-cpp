@@ -958,7 +958,7 @@ TEST(StarlarkString, SliceRangeZeroStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("abcdef", str.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
+  EXPECT_EQ(error_callback.messages[0], "slice step cannot be zero");
 }
 
 TEST(StarlarkString, InterpolationNoInterpolation) {
@@ -1299,7 +1299,7 @@ TEST(StarlarkString, CountNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "count expected at least 1 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -1914,7 +1914,7 @@ TEST(StarlarkString, CountFourArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "count expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -1936,7 +1936,7 @@ TEST(StarlarkString, CountWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.count() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.count() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -1956,7 +1956,7 @@ TEST(StarlarkString, EndswithNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "endswith expected at least 1 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2528,7 +2528,7 @@ TEST(StarlarkString, EndswithFourArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "endswith expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2550,7 +2550,7 @@ TEST(StarlarkString, EndswithWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.endswith() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.endswith() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2570,7 +2570,7 @@ TEST(StarlarkString, StartswithNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "startswith expected at least 1 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2943,7 +2943,7 @@ TEST(StarlarkString, StartswithFourArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "startswith expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2965,7 +2965,7 @@ TEST(StarlarkString, StartswithWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.startswith() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.startswith() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2985,7 +2985,7 @@ TEST(StarlarkString, FindNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: find expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "find expected at least 1 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3397,7 +3397,7 @@ TEST(StarlarkString, FindFourArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: find expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "find expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3419,7 +3419,7 @@ TEST(StarlarkString, FindWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.find() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.find() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3439,7 +3439,7 @@ TEST(StarlarkString, IndexNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "index expected at least 1 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3764,7 +3764,7 @@ TEST(StarlarkString, IndexFourArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "index expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3786,7 +3786,7 @@ TEST(StarlarkString, IndexWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.index() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.index() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3806,7 +3806,7 @@ TEST(StarlarkString, RfindNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rfind expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "rfind expected at least 1 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4113,7 +4113,7 @@ TEST(StarlarkString, RfindFourArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rfind expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "rfind expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4135,7 +4135,7 @@ TEST(StarlarkString, RfindWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.rfind() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.rfind() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4155,7 +4155,7 @@ TEST(StarlarkString, RindexNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rindex expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "rindex expected at least 1 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4480,7 +4480,7 @@ TEST(StarlarkString, RindexFourArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rindex expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "rindex expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4502,7 +4502,7 @@ TEST(StarlarkString, RindexWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.rindex() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.rindex() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4522,7 +4522,7 @@ TEST(StarlarkString, JoinNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: join() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "join() takes exactly one argument (0 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4665,7 +4665,7 @@ TEST(StarlarkString, JoinTwoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: join() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "join() takes exactly one argument (2 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4687,7 +4687,7 @@ TEST(StarlarkString, JoinWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: join() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "join() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4707,7 +4707,7 @@ TEST(StarlarkString, PartitionNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "partition() takes exactly one argument (0 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4797,7 +4797,7 @@ TEST(StarlarkString, PartitionWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "partition() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4817,7 +4817,7 @@ TEST(StarlarkString, RpartitionNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "rpartition() takes exactly one argument (0 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4907,7 +4907,7 @@ TEST(StarlarkString, RpartitionWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "rpartition() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4927,7 +4927,7 @@ TEST(StarlarkString, ReplaceWithNoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at least 2 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "replace expected at least 2 argument, got 0");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4948,7 +4948,7 @@ TEST(StarlarkString, ReplaceWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at least 2 argument, got 1");
+  EXPECT_EQ(error_callback.messages[0], "replace expected at least 2 argument, got 1");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5216,7 +5216,7 @@ TEST(StarlarkString, ReplaceWithFourArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: replace expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "replace expected at most 3 argument, got 4");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5238,7 +5238,7 @@ TEST(StarlarkString, ReplaceWithOldNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'old'");
+  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'old'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5559,7 +5559,7 @@ TEST(StarlarkString, IsalnumWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isalnum() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "isalnum() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5580,7 +5580,7 @@ TEST(StarlarkString, IsalphaWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isalpha() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "isalpha() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5601,7 +5601,7 @@ TEST(StarlarkString, IsdigitWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isdigit() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "isdigit() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5622,7 +5622,7 @@ TEST(StarlarkString, IsspaceWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isspace() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "isspace() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5643,7 +5643,7 @@ TEST(StarlarkString, IslowerWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: islower() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "islower() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5664,7 +5664,7 @@ TEST(StarlarkString, IstitleWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: istitle() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "istitle() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5685,7 +5685,7 @@ TEST(StarlarkString, IsupperWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isupper() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "isupper() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5707,7 +5707,7 @@ TEST(StarlarkString, IsalnumWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isalnum() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "isalnum() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5729,7 +5729,7 @@ TEST(StarlarkString, IsalphaWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isalpha() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "isalpha() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5751,7 +5751,7 @@ TEST(StarlarkString, IsdigitWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isdigit() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "isdigit() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5773,7 +5773,7 @@ TEST(StarlarkString, IsspaceWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isspace() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "isspace() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5795,7 +5795,7 @@ TEST(StarlarkString, IslowerWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: islower() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "islower() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5817,7 +5817,7 @@ TEST(StarlarkString, IstitleWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: istitle() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "istitle() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5839,7 +5839,7 @@ TEST(StarlarkString, IsupperWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: isupper() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "isupper() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5859,7 +5859,7 @@ TEST(StarlarkString, RemovesuffixWithNoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removesuffix() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "removesuffix() takes exactly one argument (0 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5934,7 +5934,7 @@ TEST(StarlarkString, RemovesuffixWithTwoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removesuffix() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "removesuffix() takes exactly one argument (2 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5956,7 +5956,7 @@ TEST(StarlarkString, RemovesuffixWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removesuffix() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "removesuffix() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5976,7 +5976,7 @@ TEST(StarlarkString, RemoveprefixWithNoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removeprefix() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "removeprefix() takes exactly one argument (0 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6051,7 +6051,7 @@ TEST(StarlarkString, RemoveprefixWithTwoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removeprefix() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "removeprefix() takes exactly one argument (2 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6073,7 +6073,7 @@ TEST(StarlarkString, RemoveprefixWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removeprefix() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "removeprefix() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6246,7 +6246,7 @@ TEST(StarlarkString, UpperWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: upper() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "upper() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6267,7 +6267,7 @@ TEST(StarlarkString, TitleWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: title() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "title() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6288,7 +6288,7 @@ TEST(StarlarkString, LowerWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: lower() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "lower() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6309,7 +6309,7 @@ TEST(StarlarkString, CapitalizeWithOneArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: capitalize() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "capitalize() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6330,7 +6330,7 @@ TEST(StarlarkString, UpperWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: upper() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "upper() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6351,7 +6351,7 @@ TEST(StarlarkString, TitleWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: title() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "title() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6372,7 +6372,7 @@ TEST(StarlarkString, LowerWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: lower() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "lower() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6393,7 +6393,7 @@ TEST(StarlarkString, CapitalizeWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: capitalize() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "capitalize() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6703,7 +6703,7 @@ TEST(StarlarkString, SplitWithThreeArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: split expected at most 2 argument, got 3");
+  EXPECT_EQ(error_callback.messages[0], "split expected at most 2 argument, got 3");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6821,7 +6821,7 @@ TEST(StarlarkString, SplitWithNamedArgumentsUnknown) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7130,7 +7130,7 @@ TEST(StarlarkString, RsplitWithThreeArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit expected at most 2 argument, got 3");
+  EXPECT_EQ(error_callback.messages[0], "rsplit expected at most 2 argument, got 3");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7225,7 +7225,7 @@ TEST(StarlarkString, RsplitWithNamedArgumentsUnknown) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7440,7 +7440,7 @@ TEST(StarlarkString, StripWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: strip() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "strip() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7462,7 +7462,7 @@ TEST(StarlarkString, RstripWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rstrip() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "rstrip() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7484,7 +7484,7 @@ TEST(StarlarkString, LstripWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: lstrip() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "lstrip() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7591,7 +7591,7 @@ TEST(StarlarkString, SplitlinesWithTwoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines expected at most 1 argument, got 2");
+  EXPECT_EQ(error_callback.messages[0], "splitlines expected at most 1 argument, got 2");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7655,7 +7655,7 @@ TEST(StarlarkString, SplitlinesWithUnknownNamedArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
   EXPECT_EQ(str.str(), "abc\ndef");
 }
 
@@ -7696,7 +7696,7 @@ TEST(StarlarkString, ElemsWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.elems() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "string.elems() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7718,7 +7718,7 @@ TEST(StarlarkString, ElemsWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.elems() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.elems() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7759,7 +7759,7 @@ TEST(StarlarkString, ElemOrdsWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.elem_ords() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "string.elem_ords() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7781,7 +7781,7 @@ TEST(StarlarkString, ElemOrdsWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.elem_ords() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.elem_ords() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7822,7 +7822,7 @@ TEST(StarlarkString, CodepointsWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.codepoints() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "string.codepoints() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7844,7 +7844,7 @@ TEST(StarlarkString, CodepointsWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.codepoints() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.codepoints() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7885,7 +7885,7 @@ TEST(StarlarkString, CodepointOrdsWithArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.codepoint_ords() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "string.codepoint_ords() takes no arguments (1 given)");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7907,7 +7907,7 @@ TEST(StarlarkString, CodepointOrdsWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string.codepoint_ords() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "string.codepoint_ords() takes no keyword arguments");
   EXPECT_EQ(str.str(), "abc");
 }
 

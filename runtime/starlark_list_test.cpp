@@ -1507,7 +1507,7 @@ TEST(StarlarkList, SliceRangeZeroStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("[0, 1, 2, 3, 4]", list.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
+  EXPECT_EQ(error_callback.messages[0], "slice step cannot be zero");
 }
 
 TEST(StarlarkList, GetAttrError) {
@@ -1666,7 +1666,7 @@ TEST(StarlarkList, AppendNoPositionalArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.append() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "list.append() takes exactly one argument (0 given)");
   EXPECT_EQ(list.str(), "[]");
 }
 
@@ -1688,7 +1688,7 @@ TEST(StarlarkList, AppendTwoPositionalArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.append() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "list.append() takes exactly one argument (2 given)");
   EXPECT_EQ(list.str(), "[]");
 }
 
@@ -1710,7 +1710,7 @@ TEST(StarlarkList, AppendWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.append() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "list.append() takes no keyword arguments");
   EXPECT_EQ(list.str(), "[]");
 }
 
@@ -1753,7 +1753,7 @@ TEST(StarlarkList, ClearWithPositionalArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.clear() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "list.clear() takes no arguments (1 given)");
   EXPECT_EQ(list.str(), "[0]");
 }
 
@@ -1775,7 +1775,7 @@ TEST(StarlarkList, ClearWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.clear() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "list.clear() takes no keyword arguments");
   EXPECT_EQ(list.str(), "[0]");
 }
 
@@ -1892,7 +1892,7 @@ TEST(StarlarkList, ExtendWithNoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.extend() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "list.extend() takes exactly one argument (0 given)");
   EXPECT_EQ(list1.str(), "[0]");
 }
 
@@ -2020,7 +2020,7 @@ TEST(StarlarkList, IndexWithNoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at least 1 argument, got 0");
+  EXPECT_EQ(error_callback.messages[0], "index expected at least 1 argument, got 0");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -2347,7 +2347,7 @@ TEST(StarlarkList, IndexWithFourArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: index expected at most 3 argument, got 4");
+  EXPECT_EQ(error_callback.messages[0], "index expected at most 3 argument, got 4");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -2682,7 +2682,7 @@ TEST(StarlarkList, InsertNoArguments) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.insert expected 2 arguments, got 0");
+  EXPECT_EQ(error_callback.messages[0], "list.insert expected 2 arguments, got 0");
 }
 
 TEST(StarlarkList, InsertOneArgument) {
@@ -2711,7 +2711,7 @@ TEST(StarlarkList, InsertOneArgument) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.insert expected 2 arguments, got 1");
+  EXPECT_EQ(error_callback.messages[0], "list.insert expected 2 arguments, got 1");
 }
 
 TEST(StarlarkList, InsertThreeArgument) {
@@ -2742,7 +2742,7 @@ TEST(StarlarkList, InsertThreeArgument) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.insert expected 2 arguments, got 3");
+  EXPECT_EQ(error_callback.messages[0], "list.insert expected 2 arguments, got 3");
 }
 
 TEST(StarlarkList, InsertBoolIndex) {
@@ -3098,7 +3098,7 @@ TEST(StarlarkList, PopTwoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.pop expected at most 1 argument, got 2");
+  EXPECT_EQ(error_callback.messages[0], "list.pop expected at most 1 argument, got 2");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -3207,7 +3207,7 @@ TEST(StarlarkList, RemoveNoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.remove() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "list.remove() takes exactly one argument (0 given)");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -3235,7 +3235,7 @@ TEST(StarlarkList, RemoveTwoArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: list.remove() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "list.remove() takes exactly one argument (2 given)");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 

@@ -951,7 +951,7 @@ TEST(StarlarkTuple, SliceRangeZeroStride) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ("(0, 1, 2, 3, 4)", tuple.str());
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: slice step cannot be zero");
+  EXPECT_EQ(error_callback.messages[0], "slice step cannot be zero");
 }
 
 TEST(StarlarkTuple, DotError) {

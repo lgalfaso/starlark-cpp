@@ -816,7 +816,7 @@ TEST(StarlarkSet, AddNoPositionalArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.add() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.add() takes exactly one argument (0 given)");
   EXPECT_EQ(set.str(), "set()");
 }
 
@@ -838,7 +838,7 @@ TEST(StarlarkSet, AddTwoPositionalArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.add() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.add() takes exactly one argument (2 given)");
   EXPECT_EQ(set.str(), "set()");
 }
 
@@ -860,7 +860,7 @@ TEST(StarlarkSet, AddWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.add() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.add() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set()");
 }
 
@@ -925,7 +925,7 @@ TEST(StarlarkSet, ClearOnePositionalArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.clear() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.clear() takes no arguments (1 given)");
   EXPECT_EQ(set.str(), "set([0])");
 }
 
@@ -947,7 +947,7 @@ TEST(StarlarkSet, ClearWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.clear() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.clear() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0])");
 }
 
@@ -1182,7 +1182,7 @@ TEST(StarlarkSet, DifferenceWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.difference() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.difference() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -1410,7 +1410,7 @@ TEST(StarlarkSet, DifferenceUpdateWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.difference_update() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.difference_update() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -1526,7 +1526,7 @@ TEST(StarlarkSet, DiscardNoPositionalArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.discard() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.discard() takes exactly one argument (0 given)");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -1549,7 +1549,7 @@ TEST(StarlarkSet, DiscardWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.discard() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.discard() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -1787,7 +1787,7 @@ TEST(StarlarkSet, IntersectionWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.intersection() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.intersection() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -2019,7 +2019,7 @@ TEST(StarlarkSet, IntersectionUpdateWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.intersection_update() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.intersection_update() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -2041,7 +2041,7 @@ TEST(StarlarkSet, IsdisjointNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.isdisjoint() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.isdisjoint() takes exactly one argument (0 given)");
   EXPECT_EQ(set1.str(), "set([0, 1])");
 }
 
@@ -2234,7 +2234,7 @@ TEST(StarlarkSet, IsdisjointTwoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.isdisjoint() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.isdisjoint() takes exactly one argument (2 given)");
   EXPECT_EQ(set1.str(), "set([0, 1, -1])");
   EXPECT_EQ(set2.str(), "set([-1])");
   EXPECT_EQ(set3.str(), "set([1, -1])");
@@ -2360,7 +2360,7 @@ TEST(StarlarkSet, IsdisjointWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.isdisjoint() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.isdisjoint() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -2382,7 +2382,7 @@ TEST(StarlarkSet, IssubsetNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.issubset() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.issubset() takes exactly one argument (0 given)");
   EXPECT_EQ(set1.str(), "set([0, 1])");
 }
 
@@ -2575,7 +2575,7 @@ TEST(StarlarkSet, IssubsetTwoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.issubset() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.issubset() takes exactly one argument (2 given)");
   EXPECT_EQ(set1.str(), "set([0, 1, -1])");
   EXPECT_EQ(set2.str(), "set([-1])");
   EXPECT_EQ(set3.str(), "set([1, -1])");
@@ -2701,7 +2701,7 @@ TEST(StarlarkSet, IssubsetWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.issubset() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.issubset() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -2723,7 +2723,7 @@ TEST(StarlarkSet, IssupersetNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.issuperset() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.issuperset() takes exactly one argument (0 given)");
   EXPECT_EQ(set1.str(), "set([0, 1])");
 }
 
@@ -2916,7 +2916,7 @@ TEST(StarlarkSet, IssupersetTwoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.issuperset() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.issuperset() takes exactly one argument (2 given)");
   EXPECT_EQ(set1.str(), "set([0, 1, -1])");
   EXPECT_EQ(set2.str(), "set([-1])");
   EXPECT_EQ(set3.str(), "set([1, -1])");
@@ -3042,7 +3042,7 @@ TEST(StarlarkSet, IssupersetWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.issuperset() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.issuperset() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -3129,7 +3129,7 @@ TEST(StarlarkSet, PopOnePositionalArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.pop() takes no arguments (1 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.pop() takes no arguments (1 given)");
   EXPECT_EQ(set.str(), "set([0])");
 }
 
@@ -3151,7 +3151,7 @@ TEST(StarlarkSet, PopWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.pop() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.pop() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0])");
 }
 
@@ -3267,7 +3267,7 @@ TEST(StarlarkSet, RemoveNoPositionalArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.remove() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.remove() takes exactly one argument (0 given)");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -3290,7 +3290,7 @@ TEST(StarlarkSet, RemoveWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.remove() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.remove() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -3309,7 +3309,7 @@ TEST(StarlarkSet, SymmetricDifferenceNoArguments) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.symmetric_difference() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.symmetric_difference() takes exactly one argument (0 given)");
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -3369,7 +3369,7 @@ TEST(StarlarkSet, SymmetricDifferenceTwoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.symmetric_difference() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.symmetric_difference() takes exactly one argument (2 given)");
   EXPECT_EQ(set1.str(), "set([0, 1, -1])");
   EXPECT_EQ(set2.str(), "set([-1])");
   EXPECT_EQ(set3.str(), "set([1])");
@@ -3520,7 +3520,7 @@ TEST(StarlarkSet, SymmetricDifferenceWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.symmetric_difference() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.symmetric_difference() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -3542,7 +3542,7 @@ TEST(StarlarkSet, SymmetricDifferenceUpdateNoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.symmetric_difference_update() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.symmetric_difference_update() takes exactly one argument (0 given)");
   EXPECT_EQ(set1.str(), "set([0, 1])");
 }
 
@@ -3598,7 +3598,7 @@ TEST(StarlarkSet, SymmetricDifferenceUpdateTwoArguments) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.symmetric_difference_update() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "set.symmetric_difference_update() takes exactly one argument (2 given)");
   EXPECT_EQ(set1.str(), "set([0, 1, -1])");
   EXPECT_EQ(set2.str(), "set([-1])");
   EXPECT_EQ(set3.str(), "set([1])");
@@ -3745,7 +3745,7 @@ TEST(StarlarkSet, SymmetricDifferenceUpdateWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.symmetric_difference_update() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.symmetric_difference_update() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -3975,7 +3975,7 @@ TEST(StarlarkSet, UnionWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.union() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.union() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 
@@ -4199,7 +4199,7 @@ TEST(StarlarkSet, UpdateWithNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: set.update() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "set.update() takes no keyword arguments");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 

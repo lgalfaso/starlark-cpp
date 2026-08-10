@@ -1,0 +1,3 @@
+main:2:10: error: bytes expected at most 1 argument, got 2
+    2 | a = bytes('abc', True)
+      |     ~~~~~^^^^^^^^^^^^^

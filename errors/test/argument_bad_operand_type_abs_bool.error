@@ -1,0 +1,3 @@
+main:2:8: error: in call to abs(), got value of type 'bool', want 'int' or 'float'
+    2 | a = abs(True)
+      |     ~~~^^^^^^

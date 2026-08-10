@@ -1,0 +1,3 @@
+main:3:8: error: set.clear() takes no arguments (1 given)
+    3 | a.clear(True)
+      | ~~~~~~~^^^^^^

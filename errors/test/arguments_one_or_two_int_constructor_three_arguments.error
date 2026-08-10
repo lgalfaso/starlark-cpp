@@ -1,0 +1,3 @@
+main:2:8: error: int() takes one or two argument (3 given)
+    2 | a = int('123', 10, True)
+      |     ~~~^^^^^^^^^^^^^^^^^

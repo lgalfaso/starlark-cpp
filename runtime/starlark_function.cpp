@@ -26,34 +26,34 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::parse_number;
-using ::starlark::error_messages::error_argument_bad_operand_type;
-using ::starlark::error_messages::error_argument_non_zero;
-using ::starlark::error_messages::error_argument_string_int_bool_or_real;
-using ::starlark::error_messages::error_argument_string_or_real;
-using ::starlark::error_messages::error_arguments_exactly_one;
-using ::starlark::error_messages::error_arguments_one_or_two;
-using ::starlark::error_messages::error_arguments_too_many;
-using ::starlark::error_messages::error_attribute_string;
 using ::starlark::error_messages::error_empty_iterator;
-using ::starlark::error_messages::error_expect_character;
-using ::starlark::error_messages::error_expect_one_character_or_one_byte;
 using ::starlark::error_messages::error_max_bytes_length;
 using ::starlark::error_messages::error_missing_argument;
 using ::starlark::error_messages::error_missing_typed_argument;
 using ::starlark::error_messages::error_multiple_values_for_argument;
 using ::starlark::error_messages::error_named_argument_must_be_type;
 using ::starlark::error_messages::error_non_string_with_base;
-using ::starlark::error_messages::error_unknown_argument;
+using ::starlark::error_messages::error_v2_argument_bad_operand_type;
 using ::starlark::error_messages::error_v2_argument_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_argument_interpreted_as_string;
+using ::starlark::error_messages::error_v2_argument_non_zero;
+using ::starlark::error_messages::error_v2_argument_string_int_bool_or_real;
+using ::starlark::error_messages::error_v2_argument_string_or_real;
+using ::starlark::error_messages::error_v2_arguments_exactly_one;
+using ::starlark::error_messages::error_v2_arguments_one_or_two;
+using ::starlark::error_messages::error_v2_arguments_too_many;
+using ::starlark::error_messages::error_v2_attribute_string;
 using ::starlark::error_messages::error_v2_bytes_in_range;
 using ::starlark::error_messages::error_v2_convert;
 using ::starlark::error_messages::error_v2_convert_string;
+using ::starlark::error_messages::error_v2_expect_character;
+using ::starlark::error_messages::error_v2_expect_one_character_or_one_byte;
 using ::starlark::error_messages::error_v2_int_base;
 using ::starlark::error_messages::error_v2_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_invalid_literal_with_base;
 using ::starlark::error_messages::error_v2_overflow;
 using ::starlark::error_messages::error_v2_overflow_float_too_large;
+using ::starlark::error_messages::error_v2_unknown_argument;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -206,7 +206,7 @@ starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark
       return value;
     }
     default:
-      error_callback.add_error(error_argument_bad_operand_type(starlark_built_in_functions::abs_f, value->type()));
+      error_callback.add_error(error_v2_argument_bad_operand_type(starlark_built_in_functions::abs_f, value->type(), starlark_types::int_t, starlark_types::float_t));
       return nullptr;
   }
 }
@@ -263,12 +263,12 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
       assert(value != nullptr);
       source = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
   if (pos_args.size() >= 2) {
-    error_callback.add_error(error_arguments_too_many(starlark_built_in_functions::bytes_f, pos_args.size(), 1));
+    error_callback.add_error(error_v2_arguments_too_many(starlark_built_in_functions::bytes_f, pos_args.size(), 1));
     return nullptr;
   }
   if (pos_args.size() >= 1) {
@@ -400,7 +400,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
       assert(value != nullptr);
       iterable = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -510,7 +510,7 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
           return create_float(0.0, ctx);
         }
       } else {
-        error_callback.add_error(error_argument_string_or_real(starlark_built_in_functions::float_f, value->type()));
+        error_callback.add_error(error_v2_argument_string_or_real(starlark_built_in_functions::float_f, value->type()));
         return nullptr;
       }
   }
@@ -525,7 +525,7 @@ starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::po
   auto* element = pos_args.front();
   auto* name = pos_args[1];
   if (name->type() != starlark_types::string_t) {
-    error_callback.add_error(error_attribute_string(name->type()));
+    error_callback.add_error(error_v2_attribute_string(name->type()));
     return nullptr;
   }
   auto* result = element->get_attr(pos_args.size() == 2, name->as_string(), ctx, error_callback);
@@ -544,7 +544,7 @@ starlark_obj* starlark_fn_hasattr(starlark_obj* this_obj, const starlark_obj::po
   }
   auto* attr = pos_args.back();
   if (attr->type() != starlark_types::string_t) {
-    error_callback.add_error(error_attribute_string(attr->type()));
+    error_callback.add_error(error_v2_attribute_string(attr->type()));
     return nullptr;
   }
   const auto& attributes = pos_args.front()->dir();
@@ -564,7 +564,7 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
   if (value->type() == starlark_types::string_t || value->type() == starlark_types::bytes_t) {
     return create_integer(value->hash(), ctx);
   } else {
-    error_callback.add_error(error_argument_bad_operand_type(starlark_built_in_functions::hash_f, value->type(), starlark_types::string_t, starlark_types::bytes_t));
+    error_callback.add_error(error_v2_argument_bad_operand_type(starlark_built_in_functions::hash_f, value->type(), starlark_types::string_t, starlark_types::bytes_t));
     return nullptr;
   }
 }
@@ -581,12 +581,12 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       }
       base_param = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
   if (pos_args.size() > 2) {
-    error_callback.add_error(error_arguments_one_or_two(starlark_built_in_functions::int_f, pos_args.size()));
+    error_callback.add_error(error_v2_arguments_one_or_two(starlark_built_in_functions::int_f, pos_args.size()));
     return nullptr;
   }
   if (pos_args.size() >= 2) {
@@ -661,7 +661,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
     }
     return create_integer(std::move(result), ctx);
   } else {
-    error_callback.add_error(error_argument_string_int_bool_or_real(starlark_built_in_functions::int_f, value->type()));
+    error_callback.add_error(error_v2_argument_string_int_bool_or_real(starlark_built_in_functions::int_f, value->type()));
     return nullptr;
   }
 }
@@ -708,7 +708,7 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -804,7 +804,7 @@ starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_ar
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -898,23 +898,23 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (value->type() == starlark_types::string_t) {
     utf8_reader reader(value->as_string(), false, false);
     if (!reader.pending()) {
-      error_callback.add_error(error_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
+      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
       return nullptr;
     }
     auto result = reader.read_code_point();
     if (reader.pending()) {
-      error_callback.add_error(error_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
+      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
       return nullptr;
     }
     return create_integer(result, ctx);
   } else if (value->type() == starlark_types::bytes_t) {
     if (value->len(false, error_callback) != 1) {
-      error_callback.add_error(error_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
+      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
       return nullptr;
     }
     return create_integer(static_cast<unsigned char>(value->as_string()[0]), ctx);
   } else {
-    error_callback.add_error(error_expect_one_character_or_one_byte(starlark_built_in_functions::ord_f, value->type()));
+    error_callback.add_error(error_v2_expect_one_character_or_one_byte(starlark_built_in_functions::ord_f, value->type()));
     return nullptr;
   }
 }
@@ -930,7 +930,7 @@ starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_
       }
       sep = value->str();
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -995,7 +995,7 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
         return nullptr;
       }
       if (step == 0) {
-        error_callback.add_error(error_argument_non_zero(starlark_built_in_functions::range_f, 3));
+        error_callback.add_error(error_v2_argument_non_zero(starlark_built_in_functions::range_f, 3));
         return nullptr;
       }
       break;
@@ -1062,7 +1062,7 @@ starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_ar
 
 starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (pos_args.size() != 1) {
-    error_callback.add_error(error_arguments_exactly_one(starlark_built_in_functions::sorted_f, pos_args.size()));
+    error_callback.add_error(error_v2_arguments_exactly_one(starlark_built_in_functions::sorted_f, pos_args.size()));
     return nullptr;
   }
   starlark_obj* key_fn = nullptr;
@@ -1080,7 +1080,7 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
       }
       reverse = value->truthy();
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -1139,12 +1139,12 @@ starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_ar
       assert(value != nullptr);
       object = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
   if (pos_args.size() >= 2) {
-    error_callback.add_error(error_arguments_too_many(starlark_built_in_functions::str_f, pos_args.size(), 1));
+    error_callback.add_error(error_v2_arguments_too_many(starlark_built_in_functions::str_f, pos_args.size(), 1));
     return nullptr;
   }
   if (pos_args.size() >= 1) {

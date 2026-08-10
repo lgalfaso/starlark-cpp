@@ -1,0 +1,3 @@
+main:2:17: error: unknown named argument 'xyz'
+    2 | a = b'abc'.split(xyz = 1)
+      |     ~~~~~~~~~~~~^^^^^^^^^

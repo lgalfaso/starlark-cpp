@@ -1,0 +1,3 @@
+main:2:8: error: TypeError: min() got an unexpected keyword argument 'xyz'
+    2 | a = min(1, 2, xyz = 1)
+      |     ~~~^^^^^^^^^^^^^^^

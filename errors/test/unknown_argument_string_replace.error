@@ -1,0 +1,3 @@
+main:2:18: error: unknown named argument 'xyz'
+    2 | a = 'abc'.replace('a', 'b', xyz = 1)
+      |     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^

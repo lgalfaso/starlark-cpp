@@ -234,7 +234,7 @@ TEST(StarlarkAbs, List) {
 
   EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bad operand type for abs(): 'list'", error_callback.messages[0]);
+  EXPECT_EQ("in call to abs(), got value of type 'list', want 'int' or 'float'", error_callback.messages[0]);
 }
 
 TEST(StarlarkAbs, NoPosArgs) {
@@ -247,7 +247,7 @@ TEST(StarlarkAbs, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: abs() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("abs() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAbs, MultiplePosArgs) {
@@ -264,7 +264,7 @@ TEST(StarlarkAbs, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: abs() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("abs() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAbs, NamedArguments) {
@@ -282,7 +282,7 @@ TEST(StarlarkAbs, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: abs() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("abs() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkAll, List) {
@@ -341,7 +341,7 @@ TEST(StarlarkAll, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: all() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("all() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAll, MultiplePosArgs) {
@@ -358,7 +358,7 @@ TEST(StarlarkAll, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: all() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("all() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAll, NamedArguments) {
@@ -376,7 +376,7 @@ TEST(StarlarkAll, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: all() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("all() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkAny, List) {
@@ -442,7 +442,7 @@ TEST(StarlarkAny, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: any() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("any() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAny, MultiplePosArgs) {
@@ -459,7 +459,7 @@ TEST(StarlarkAny, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: any() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("any() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkAny, NamedArguments) {
@@ -475,9 +475,9 @@ TEST(StarlarkAny, NamedArguments) {
   named_args.insert(s_one, &one);
   pos_args.push_back(&list);
 
-  EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, ctx, error_callback));
+  EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: all() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("any() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkBool, List) {
@@ -531,7 +531,7 @@ TEST(StarlarkBool, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bool expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("bool expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkBool, NamedArguments) {
@@ -549,7 +549,7 @@ TEST(StarlarkBool, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bool() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("bool() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, FromBytesOrString) {
@@ -753,7 +753,7 @@ TEST(StarlarkBytes, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bytes expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("bytes expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, UnknownNamedArguments) {
@@ -773,7 +773,7 @@ TEST(StarlarkBytes, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, SourceAsNamedArgument) {
@@ -931,7 +931,7 @@ TEST(StarlarkChr, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: chr() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("chr() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkDict, Empty) {
@@ -1082,7 +1082,7 @@ TEST(StarlarkDict, MultiplePositionalArguments) {
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: dict expected at most 1 argument, got 2");
+  EXPECT_EQ(error_callback.messages[0], "dict expected at most 1 argument, got 2");
 }
 
 TEST(StarlarkDict, FromIterableWithWrongNumberOfElements1) {
@@ -1188,7 +1188,7 @@ TEST(StarlarkDir, TooFewPosArgs) {
   auto* result = starlark_fn_dir(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: dir() takes exactly one argument (0 given)");
+  EXPECT_EQ(error_callback.messages[0], "dir() takes exactly one argument (0 given)");
 }
 
 TEST(StarlarkDir, TooManyPosArgs) {
@@ -1205,7 +1205,7 @@ TEST(StarlarkDir, TooManyPosArgs) {
   auto* result = starlark_fn_dir(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: dir() takes exactly one argument (2 given)");
+  EXPECT_EQ(error_callback.messages[0], "dir() takes exactly one argument (2 given)");
 }
 
 TEST(StarlarkDir, NamedArguments) {
@@ -1224,7 +1224,7 @@ TEST(StarlarkDir, NamedArguments) {
   auto* result = starlark_fn_dir(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: dir() takes no keyword arguments");
+  EXPECT_EQ(error_callback.messages[0], "dir() takes no keyword arguments");
 }
 
 TEST(StarlarkEnumerate, FromIterable) {
@@ -1447,7 +1447,7 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'end'");
+  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'end'");
 }
 
 TEST(StarlarkEnumerate, TooFewPosArguments) {
@@ -1508,7 +1508,7 @@ TEST(StarlarkEnumerate, ThreePosArguments) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate expected at most 2 argument, got 3");
+  EXPECT_EQ(error_callback.messages[0], "enumerate expected at most 2 argument, got 3");
 }
 
 TEST(StarlarkEnumerate, NotIterable) {
@@ -1560,7 +1560,7 @@ TEST(StarlarkFail, NamedArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_fail(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: fail() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("fail() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkFloat, NoArgs) {
@@ -1724,7 +1724,7 @@ TEST(StarlarkFloat, FromList) {
   auto* result = starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: float() argument must be a string or a real number, not 'list'");
+  EXPECT_EQ(error_callback.messages[0], "float() argument must be a string or a real number, not 'list'");
 }
 
 TEST(StarlarkFloat, BigintOverflow) {
@@ -1788,7 +1788,7 @@ TEST(StarlarkFloat, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: float expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("float expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkFloat, NamedArguments) {
@@ -1805,7 +1805,7 @@ TEST(StarlarkFloat, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: float() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("float() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkGetattr, CheckAttribute) {
@@ -1888,7 +1888,7 @@ TEST(StarlarkGetattr, AttributeNotString) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ(list.str(), "[]");
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: attribute name must be string, not 'bytes'", error_callback.messages[0]);
+  EXPECT_EQ("attribute name must be string, not 'bytes'", error_callback.messages[0]);
 }
 
 TEST(StarlarkGetattr, OneParam) {
@@ -1905,7 +1905,7 @@ TEST(StarlarkGetattr, OneParam) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ(list.str(), "[]");
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: getattr expected at least 2 argument, got 1", error_callback.messages[0]);
+  EXPECT_EQ("getattr expected at least 2 argument, got 1", error_callback.messages[0]);
 }
 
 TEST(StarlarkGetattr, FourParams) {
@@ -1926,7 +1926,7 @@ TEST(StarlarkGetattr, FourParams) {
   ASSERT_EQ(nullptr, result);
   EXPECT_EQ(list.str(), "[]");
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: getattr expected at most 3 argument, got 4", error_callback.messages[0]);
+  EXPECT_EQ("getattr expected at most 3 argument, got 4", error_callback.messages[0]);
 }
 
 TEST(StarlarkGetattr, NamedArguments) {
@@ -1946,7 +1946,7 @@ TEST(StarlarkGetattr, NamedArguments) {
   auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: getattr() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("getattr() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkHasattr, CheckAttribute) {
@@ -1988,7 +1988,7 @@ TEST(StarlarkHasattr, WrongAttributeType) {
 
   EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: attribute name must be string, not 'int'", error_callback.messages[0]);
+  EXPECT_EQ("attribute name must be string, not 'int'", error_callback.messages[0]);
 }
 
 TEST(StarlarkHasattr, TooFewPosArgs) {
@@ -2003,7 +2003,7 @@ TEST(StarlarkHasattr, TooFewPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: hasattr expected 2 arguments, got 1", error_callback.messages[0]);
+  EXPECT_EQ("hasattr expected 2 arguments, got 1", error_callback.messages[0]);
 }
 
 TEST(StarlarkHasattr, TooManyPosArgs) {
@@ -2022,7 +2022,7 @@ TEST(StarlarkHasattr, TooManyPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: hasattr expected 2 arguments, got 3", error_callback.messages[0]);
+  EXPECT_EQ("hasattr expected 2 arguments, got 3", error_callback.messages[0]);
 }
 
 TEST(StarlarkHasattr, NamedArguments) {
@@ -2039,7 +2039,7 @@ TEST(StarlarkHasattr, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: hasattr() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("hasattr() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkHash, String) {
@@ -2092,7 +2092,7 @@ TEST(StarlarkHash, Bool) {
 
   EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: in call to hash(), got value of type 'bool', want 'string' or 'bytes'", error_callback.messages[0]);
+  EXPECT_EQ("in call to hash(), got value of type 'bool', want 'string' or 'bytes'", error_callback.messages[0]);
 }
 
 TEST(StarlarkHash, NoPosArgs) {
@@ -2105,7 +2105,7 @@ TEST(StarlarkHash, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: hash() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("hash() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkHash, MultiplePosArgs) {
@@ -2121,7 +2121,7 @@ TEST(StarlarkHash, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: hash() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("hash() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkHash, NamedArguments) {
@@ -2138,7 +2138,7 @@ TEST(StarlarkHash, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: hash() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("hash() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromInt) {
@@ -2528,7 +2528,7 @@ TEST(StarlarkInt, FromList) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() argument must be a string, int, bool or a real number, not 'list'", error_callback.messages[0]);
+  EXPECT_EQ("int() argument must be a string, int, bool or a real number, not 'list'", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, NoPosArgs) {
@@ -2596,7 +2596,7 @@ TEST(StarlarkInt, ThreePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() takes one or two argument (3 given)", error_callback.messages[0]);
+  EXPECT_EQ("int() takes one or two argument (3 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, NamedArguments) {
@@ -2613,7 +2613,7 @@ TEST(StarlarkInt, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, List) {
@@ -2663,7 +2663,7 @@ TEST(StarlarkLen, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: len() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("len() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, MultiplePosArgs) {
@@ -2679,7 +2679,7 @@ TEST(StarlarkLen, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: len() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("len() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, NamedArguments) {
@@ -2697,7 +2697,7 @@ TEST(StarlarkLen, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: len() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("len() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, Tuple) {
@@ -2764,7 +2764,7 @@ TEST(StarlarkList, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_list(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: list expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("list expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, NamedArguments) {
@@ -2782,7 +2782,7 @@ TEST(StarlarkList, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_list(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: list() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("list() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkMax, NoPosArgs) {
@@ -2795,7 +2795,7 @@ TEST(StarlarkMax, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: max expected at least 1 argument, got 0", error_callback.messages[0]);
+  EXPECT_EQ("max expected at least 1 argument, got 0", error_callback.messages[0]);
 }
 
 TEST(StarlarkMax, OnePosArgsEmpty) {
@@ -3159,7 +3159,7 @@ TEST(StarlarkMax, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
 }
 
 TEST(StarlarkMin, NoPosArgs) {
@@ -3172,7 +3172,7 @@ TEST(StarlarkMin, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: min expected at least 1 argument, got 0", error_callback.messages[0]);
+  EXPECT_EQ("min expected at least 1 argument, got 0", error_callback.messages[0]);
 }
 
 TEST(StarlarkMin, OnePosArgsEmpty) {
@@ -3541,7 +3541,7 @@ TEST(StarlarkMin, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, NoPosArgs) {
@@ -3554,7 +3554,7 @@ TEST(StarlarkOrd, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("ord() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, FromString) {
@@ -3597,7 +3597,7 @@ TEST(StarlarkOrd, ShortString) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() expected a character, but string of length 0 found", error_callback.messages[0]);
+  EXPECT_EQ("ord() expected a character, but string of length 0 found", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, LongString) {
@@ -3612,7 +3612,7 @@ TEST(StarlarkOrd, LongString) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() expected a character, but string of length 2 found", error_callback.messages[0]);
+  EXPECT_EQ("ord() expected a character, but string of length 2 found", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, ShortBytes) {
@@ -3627,7 +3627,7 @@ TEST(StarlarkOrd, ShortBytes) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() expected a character, but bytes of length 0 found", error_callback.messages[0]);
+  EXPECT_EQ("ord() expected a character, but bytes of length 0 found", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, LongBytes) {
@@ -3642,7 +3642,7 @@ TEST(StarlarkOrd, LongBytes) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() expected a character, but bytes of length 2 found", error_callback.messages[0]);
+  EXPECT_EQ("ord() expected a character, but bytes of length 2 found", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, List) {
@@ -3657,7 +3657,7 @@ TEST(StarlarkOrd, List) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() expected bytes of length 1 or string with one character, but 'list' found", error_callback.messages[0]);
+  EXPECT_EQ("ord() expected bytes of length 1 or string with one character, but 'list' found", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, MultiplePosArgs) {
@@ -3673,7 +3673,7 @@ TEST(StarlarkOrd, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("ord() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, NamedArguments) {
@@ -3691,7 +3691,7 @@ TEST(StarlarkOrd, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: ord() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("ord() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkPrint, NoArguments) {
@@ -3802,7 +3802,7 @@ TEST(StarlarkPrint, NamedArgumentsEnd) {
   auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Unknown named argument 'end'");
+  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'end'");
 }
 
 TEST(StarlarkRange, OneArgument) {
@@ -3979,7 +3979,7 @@ TEST(StarlarkRange, ZeroStep) {
   auto* result = starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: range() arg 3 must not be zero");
+  EXPECT_EQ(error_callback.messages[0], "range() arg 3 must not be zero");
 }
 
 TEST(StarlarkRange, TooFewPosArguments) {
@@ -3992,7 +3992,7 @@ TEST(StarlarkRange, TooFewPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: range expected at least 1 argument, got 0", error_callback.messages[0]);
+  EXPECT_EQ("range expected at least 1 argument, got 0", error_callback.messages[0]);
 }
 
 TEST(StarlarkRange, TooManyPosArguments) {
@@ -4010,7 +4010,7 @@ TEST(StarlarkRange, TooManyPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: range expected at most 3 argument, got 4", error_callback.messages[0]);
+  EXPECT_EQ("range expected at most 3 argument, got 4", error_callback.messages[0]);
 }
 
 TEST(StarlarkRange, NamedArguments) {
@@ -4027,7 +4027,7 @@ TEST(StarlarkRange, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: range() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("range() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkRepr, String) {
@@ -4055,7 +4055,7 @@ TEST(StarlarkRepr, TooFewPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_repr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: repr() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("repr() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkRepr, TooManyPosArguments) {
@@ -4071,7 +4071,7 @@ TEST(StarlarkRepr, TooManyPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_repr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: repr() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("repr() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkRepr, NamedArguments) {
@@ -4088,7 +4088,7 @@ TEST(StarlarkRepr, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_repr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: repr() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("repr() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkReversed, Tuple) {
@@ -4140,7 +4140,7 @@ TEST(StarlarkReversed, NoPosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: reversed() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("reversed() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkReversed, MultiplePosArgs) {
@@ -4156,7 +4156,7 @@ TEST(StarlarkReversed, MultiplePosArgs) {
 
   EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: reversed() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("reversed() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkReversed, NamedArguments) {
@@ -4174,7 +4174,7 @@ TEST(StarlarkReversed, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: reversed() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("reversed() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, NoArguments) {
@@ -4258,7 +4258,7 @@ TEST(StarlarkSet, TooManyPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: set expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("set expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkSet, NamedArguments) {
@@ -4275,7 +4275,7 @@ TEST(StarlarkSet, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: set() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("set() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, NoArguments) {
@@ -4288,7 +4288,7 @@ TEST(StarlarkSorted, NoArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: sorted() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("sorted() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, OneArgumentsEmptyTuple) {
@@ -4453,7 +4453,7 @@ TEST(StarlarkSorted, OneArgumentsUnknownNamedArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Unknown named argument 'foo'", error_callback.messages[0]);
+  EXPECT_EQ("unknown named argument 'foo'", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, OneArgumentsNotIterable) {
@@ -4519,7 +4519,7 @@ TEST(StarlarkSorted, TwoArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: sorted() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("sorted() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkStr, String) {
@@ -4565,7 +4565,7 @@ TEST(StarlarkStr, TooManyPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: str expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("str expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkStr, NamedArguments) {
@@ -4617,7 +4617,7 @@ TEST(StarlarkStr, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, NoArguments) {
@@ -4681,7 +4681,7 @@ TEST(StarlarkTuple, TooManyPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_tuple(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: tuple expected at most 1 argument, got 2", error_callback.messages[0]);
+  EXPECT_EQ("tuple expected at most 1 argument, got 2", error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, NamedArguments) {
@@ -4698,7 +4698,7 @@ TEST(StarlarkTuple, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_tuple(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: tuple() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("tuple() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkType, String) {
@@ -4726,7 +4726,7 @@ TEST(StarlarkType, TooFewPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_type(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: type() takes exactly one argument (0 given)", error_callback.messages[0]);
+  EXPECT_EQ("type() takes exactly one argument (0 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkType, TooManyPosArguments) {
@@ -4742,7 +4742,7 @@ TEST(StarlarkType, TooManyPosArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_type(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: type() takes exactly one argument (2 given)", error_callback.messages[0]);
+  EXPECT_EQ("type() takes exactly one argument (2 given)", error_callback.messages[0]);
 }
 
 TEST(StarlarkType, NamedArguments) {
@@ -4759,7 +4759,7 @@ TEST(StarlarkType, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_type(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: type() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("type() takes no keyword arguments", error_callback.messages[0]);
 }
 
 TEST(StarlarkZip, NoArguments) {
@@ -4855,7 +4855,7 @@ TEST(StarlarkZip, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_zip(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: zip() takes no keyword arguments", error_callback.messages[0]);
+  EXPECT_EQ("zip() takes no keyword arguments", error_callback.messages[0]);
 }
 
 }  // namespace

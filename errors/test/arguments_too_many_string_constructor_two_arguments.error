@@ -1,0 +1,3 @@
+main:2:8: error: str expected at most 1 argument, got 2
+    2 | a = str('', True)
+      |     ~~~^^^^^^^^^^

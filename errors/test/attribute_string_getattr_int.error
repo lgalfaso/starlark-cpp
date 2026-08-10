@@ -1,0 +1,3 @@
+main:2:12: error: attribute name must be string, not 'int'
+    2 | a = getattr({}, 1)
+      |     ~~~~~~~^^^^^^^

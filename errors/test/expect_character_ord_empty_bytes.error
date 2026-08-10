@@ -1,0 +1,3 @@
+main:2:8: error: ord() expected a character, but bytes of length 0 found
+    2 | a = ord(b'')
+      |     ~~~^^^^^

@@ -19,14 +19,11 @@
 #include "string/levenshtein.hpp"
 
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_arguments_exactly;
-using ::starlark::error_messages::error_arguments_exactly_one;
-using ::starlark::error_messages::error_arguments_too_few;
-using ::starlark::error_messages::error_arguments_too_many;
-using ::starlark::error_messages::error_no_keyword;
-using ::starlark::error_messages::error_no_pos_args;
-using ::starlark::error_messages::error_step_non_zero;
 using ::starlark::error_messages::error_v2_argument_uniterable;
+using ::starlark::error_messages::error_v2_arguments_exactly;
+using ::starlark::error_messages::error_v2_arguments_exactly_one;
+using ::starlark::error_messages::error_v2_arguments_too_few;
+using ::starlark::error_messages::error_v2_arguments_too_many;
 using ::starlark::error_messages::error_v2_bad_operand_binary;
 using ::starlark::error_messages::error_v2_bad_operand_unary;
 using ::starlark::error_messages::error_v2_incomparable;
@@ -36,11 +33,14 @@ using ::starlark::error_messages::error_v2_index_out_of_range;
 using ::starlark::error_messages::error_v2_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_no_attribute;
 using ::starlark::error_messages::error_v2_no_item_assignment;
+using ::starlark::error_messages::error_v2_no_keyword;
 using ::starlark::error_messages::error_v2_no_method;
+using ::starlark::error_messages::error_v2_no_pos_args;
 using ::starlark::error_messages::error_v2_no_slice_assignment;
 using ::starlark::error_messages::error_v2_not_callable;
 using ::starlark::error_messages::error_v2_overflow_too_many_digits;
 using ::starlark::error_messages::error_v2_read_only_attribute;
+using ::starlark::error_messages::error_v2_step_non_zero;
 using ::starlark::error_messages::error_v2_uniterable;
 using ::starlark::error_messages::error_v2_unpackable;
 using ::starlark::error_messages::error_v2_unsubscriptable;
@@ -622,7 +622,7 @@ status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj::inner_slice_range
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   if (i_stride == 0) {
-    error_callback.add_error(error_step_non_zero());
+    error_callback.add_error(error_v2_step_non_zero());
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t i_start = i_stride > 0 ? 0 : len - 1;
@@ -715,7 +715,7 @@ int64_t starlark_hash(std::span<int64_t> values) {
 
 status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
   if (!named_args.empty()) {
-    error_callback.add_error(error_no_keyword(fn_name));
+    error_callback.add_error(error_v2_no_keyword(fn_name));
     return error_status();
   }
   return ok_status();
@@ -723,7 +723,7 @@ status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& err
 
 status min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min) {
   if (pos_args.size() < expected_min) {
-    error_callback.add_error(error_arguments_too_few(fn_name, pos_args.size(), expected_min));
+    error_callback.add_error(error_v2_arguments_too_few(fn_name, pos_args.size(), expected_min));
     return error_status();
   }
   return ok_status();
@@ -731,7 +731,7 @@ status min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callba
 
 status max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max) {
   if (pos_args.size() > expected_max) {
-    error_callback.add_error(error_arguments_too_many(fn_name, pos_args.size(), expected_max));
+    error_callback.add_error(error_v2_arguments_too_many(fn_name, pos_args.size(), expected_max));
     return error_status();
   }
   return ok_status();
@@ -742,7 +742,7 @@ status no_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj::name
     return error_status();
   }
   if (!pos_args.empty()) {
-    error_callback.add_error(error_no_pos_args(fn_name, pos_args.size()));
+    error_callback.add_error(error_v2_no_pos_args(fn_name, pos_args.size()));
     return error_status();
   }
   return ok_status();
@@ -753,7 +753,7 @@ status one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starlark_obj:
     return error_status();
   }
   if (pos_args.size() != 1) {
-    error_callback.add_error(error_arguments_exactly_one(fn_name, pos_args.size()));
+    error_callback.add_error(error_v2_arguments_exactly_one(fn_name, pos_args.size()));
     return error_status();
   }
   return ok_status();
@@ -764,7 +764,7 @@ status n_pos_args(const starlark_obj::pos_args_t& pos_args, const starlark_obj::
     return error_status();
   }
   if (pos_args.size() != pos_args_count) {
-    error_callback.add_error(error_arguments_exactly(fn_name, pos_args.size(), pos_args_count));
+    error_callback.add_error(error_v2_arguments_exactly(fn_name, pos_args.size(), pos_args_count));
     return error_status();
   }
   return ok_status();

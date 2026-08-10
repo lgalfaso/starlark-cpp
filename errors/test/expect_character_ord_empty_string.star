@@ -1,0 +1,3 @@
+# Expect character
+a = ord('')
+

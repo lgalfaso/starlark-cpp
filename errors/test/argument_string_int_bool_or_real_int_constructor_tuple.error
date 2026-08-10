@@ -1,0 +1,3 @@
+main:2:8: error: int() argument must be a string, int, bool or a real number, not 'tuple'
+    2 | a = int(())
+      |     ~~~^^^^

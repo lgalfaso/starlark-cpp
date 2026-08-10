@@ -1,0 +1,3 @@
+main:2:10: error: unknown named argument 'xyz'
+    2 | a = bytes('', xyz = 1)
+      |     ~~~~~^^^^^^^^^^^^^

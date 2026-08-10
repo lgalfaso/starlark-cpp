@@ -56,11 +56,11 @@ using ::starlark::error_messages::error_substring_not_found;
 using ::starlark::error_messages::error_switch_from_manual_to_automatic_numbering;
 using ::starlark::error_messages::error_tuple_must_contain_type;
 using ::starlark::error_messages::error_unexpected_in_field_name;
-using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::error_messages::error_unknown_conversion;
 using ::starlark::error_messages::error_unsupported_format_character;
 using ::starlark::error_messages::error_v2_dictionary_key_not_found;
 using ::starlark::error_messages::error_v2_unicode_in_range;
+using ::starlark::error_messages::error_v2_unknown_argument;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -2125,7 +2125,7 @@ starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_
       assert(value != nullptr);
       count = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -2255,7 +2255,7 @@ starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_o
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -2321,7 +2321,7 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }
@@ -2369,7 +2369,7 @@ starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starla
       assert(value != nullptr);
       keepends = value;
     } else {
-      error_callback.add_error(error_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key));
       return nullptr;
     }
   }

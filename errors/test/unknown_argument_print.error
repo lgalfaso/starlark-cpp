@@ -1,0 +1,3 @@
+main:2:6: error: unknown named argument 'xyz'
+    2 | print('a', xyz = 1)
+      | ~~~~~^^^^^^^^^^^^^^

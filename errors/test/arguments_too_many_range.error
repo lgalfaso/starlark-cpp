@@ -1,0 +1,3 @@
+main:2:10: error: range expected at most 3 argument, got 4
+    2 | a = range(1, 2, 3, 4)
+      |     ~~~~~^^^^^^^^^^^^

@@ -1,0 +1,3 @@
+main:2:10: error: float() argument must be a string or a real number, not 'tuple'
+    2 | a = float(())
+      |     ~~~~~^^^^

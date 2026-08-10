@@ -14,74 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_no_keyword(std::string_view fn_name) {
-  return std::format("TypeError: {}() takes no keyword arguments", fn_name);
-}
-
-std::string error_unknown_argument(std::string_view argument_name) {
-  return std::format("Unknown named argument '{}'", argument_name);
-}
-
-std::string error_no_pos_args(std::string_view fn_name, int64_t actual) {
-  return std::format("TypeError: {}() takes no arguments ({} given)", fn_name, actual);
-}
-
-std::string error_arguments_too_few(std::string_view fn_name, int64_t actual, int64_t expected) {
-  return std::format("TypeError: {} expected at least {} argument, got {}", fn_name, expected, actual);
-}
-
-std::string error_arguments_too_many(std::string_view fn_name, int64_t actual, int64_t expected) {
-  return std::format("TypeError: {} expected at most {} argument, got {}", fn_name, expected, actual);
-}
-
-std::string error_arguments_exactly_one(std::string_view fn_name, int64_t actual) {
-  return std::format("TypeError: {}() takes exactly one argument ({} given)", fn_name, actual);
-}
-
-std::string error_arguments_one_or_two(std::string_view fn_name, int64_t actual) {
-  return std::format("TypeError: {}() takes one or two argument ({} given)", fn_name, actual);
-}
-
-std::string error_arguments_exactly(std::string_view fn_name, int64_t actual, int64_t expected) {
-  return std::format("TypeError: {} expected {} arguments, got {}", fn_name, expected, actual);
-}
-
-std::string error_argument_bad_operand_type(std::string_view fn_name, std::string_view type) {
-  return std::format("TypeError: bad operand type for {}(): '{}'", fn_name, type);
-}
-
-std::string error_argument_bad_operand_type(std::string_view fn_name, std::string_view type, std::string_view expected1, std::string_view expected2) {
-  return std::format("TypeError: in call to {}(), got value of type '{}', want '{}' or '{}'", fn_name, type, expected1, expected2);
-}
-
-std::string error_argument_string_or_real(std::string_view fn_name, std::string_view type) {
-  return std::format("TypeError: {}() argument must be a string or a real number, not '{}'", fn_name, type);
-}
-
-std::string error_argument_string_int_bool_or_real(std::string_view fn_name, std::string_view type) {
-  return std::format("TypeError: {}() argument must be a string, int, bool or a real number, not '{}'", fn_name, type);
-}
-
-std::string error_attribute_string(std::string_view type) {
-  return std::format("TypeError: attribute name must be string, not '{}'", type);
-}
-
-std::string error_expect_character(std::string_view fn_name, std::string_view type, int64_t length) {
-  return std::format("TypeError: {}() expected a character, but {} of length {} found", fn_name, type, length);
-}
-
-std::string error_expect_one_character_or_one_byte(std::string_view fn_name, std::string_view type) {
-  return std::format("TypeError: {}() expected bytes of length 1 or string with one character, but '{}' found", fn_name, type);
-}
-
-std::string error_argument_non_zero(std::string_view fn_name, int64_t arg_pos) {
-  return std::format("ValueError: {}() arg {} must not be zero", fn_name, arg_pos);
-}
-
-std::string error_step_non_zero() {
-  return "ValueError: slice step cannot be zero";
-}
-
 std::string error_op_in_loop(std::string_view type, std::string_view op) {
   return std::format("Error in {}: {} value is temporarily immutable due to active for-loop iteration", op, type);
 }
@@ -505,6 +437,71 @@ std::string error_v2_int_base(std::string_view fn_name) {
 
 std::string error_v2_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value) {
   return std::format("invalid literal for {}() with base {}: '{}'", fn_name, base, literal_value);
+}
+
+
+std::string error_v2_no_keyword(std::string_view fn_name) {
+  return std::format("{}() takes no keyword arguments", fn_name);
+}
+
+std::string error_v2_unknown_argument(std::string_view argument_name) {
+  return std::format("unknown named argument '{}'", argument_name);
+}
+
+std::string error_v2_no_pos_args(std::string_view fn_name, int64_t actual) {
+  return std::format("{}() takes no arguments ({} given)", fn_name, actual);
+}
+
+std::string error_v2_arguments_too_few(std::string_view fn_name, int64_t actual, int64_t expected) {
+  return std::format("{} expected at least {} argument, got {}", fn_name, expected, actual);
+}
+
+std::string error_v2_arguments_too_many(std::string_view fn_name, int64_t actual, int64_t expected) {
+  return std::format("{} expected at most {} argument, got {}", fn_name, expected, actual);
+}
+
+std::string error_v2_arguments_exactly_one(std::string_view fn_name, int64_t actual) {
+  return std::format("{}() takes exactly one argument ({} given)", fn_name, actual);
+}
+
+std::string error_v2_arguments_one_or_two(std::string_view fn_name, int64_t actual) {
+  return std::format("{}() takes one or two argument ({} given)", fn_name, actual);
+}
+
+std::string error_v2_arguments_exactly(std::string_view fn_name, int64_t actual, int64_t expected) {
+  return std::format("{} expected {} arguments, got {}", fn_name, expected, actual);
+}
+
+std::string error_v2_argument_bad_operand_type(std::string_view fn_name, std::string_view type, std::string_view expected1, std::string_view expected2) {
+  return std::format("in call to {}(), got value of type '{}', want '{}' or '{}'", fn_name, type, expected1, expected2);
+}
+
+std::string error_v2_argument_string_or_real(std::string_view fn_name, std::string_view type) {
+  return std::format("{}() argument must be a string or a real number, not '{}'", fn_name, type);
+}
+
+std::string error_v2_argument_string_int_bool_or_real(std::string_view fn_name, std::string_view type) {
+  return std::format("{}() argument must be a string, int, bool or a real number, not '{}'", fn_name, type);
+}
+
+std::string error_v2_attribute_string(std::string_view type) {
+  return std::format("attribute name must be string, not '{}'", type);
+}
+
+std::string error_v2_expect_character(std::string_view fn_name, std::string_view type, int64_t length) {
+  return std::format("{}() expected a character, but {} of length {} found", fn_name, type, length);
+}
+
+std::string error_v2_expect_one_character_or_one_byte(std::string_view fn_name, std::string_view type) {
+  return std::format("{}() expected bytes of length 1 or string with one character, but '{}' found", fn_name, type);
+}
+
+std::string error_v2_argument_non_zero(std::string_view fn_name, int64_t arg_pos) {
+  return std::format("{}() arg {} must not be zero", fn_name, arg_pos);
+}
+
+std::string_view error_v2_step_non_zero() {
+  return "slice step cannot be zero";
 }
 
 }  // namespace error_messages
