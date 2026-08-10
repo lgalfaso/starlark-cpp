@@ -13,18 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_byte_in_range();
-std::string_view error_bytes_in_range();
-std::string_view error_unicode_in_range();
-
-std::string_view error_negative_shift();
-std::string_view error_division_by_zero();
-std::string error_overflow(std::string_view from, std::string_view to);
-std::string_view error_overflow_too_many_digits();
-std::string_view error_overflow_float_too_large();
-std::string error_int_base(std::string_view fn_name);
-std::string error_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value);
-
 std::string error_no_keyword(std::string_view fn_name);
 std::string error_unknown_argument(std::string_view argument_name);
 std::string error_no_pos_args(std::string_view fn_name, int64_t actual);
@@ -152,6 +140,18 @@ std::string error_v2_argument_interpreted_as_string(std::string_view argument_na
 
 std::string error_v2_dictionary_key_not_found(std::string_view key);
 std::string error_v2_dictionary_update_sequence(int64_t position, int64_t actual, int64_t expected);
+
+std::string_view error_v2_byte_in_range();
+std::string_view error_v2_bytes_in_range();
+std::string_view error_v2_unicode_in_range();
+
+std::string_view error_v2_negative_shift();
+std::string_view error_v2_division_by_zero();
+std::string error_v2_overflow(std::string_view from, std::string_view to);
+std::string_view error_v2_overflow_too_many_digits();
+std::string_view error_v2_overflow_float_too_large();
+std::string error_v2_int_base(std::string_view fn_name);
+std::string error_v2_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value);
 
 }  // namespace error_messages
 }  // namespace starlark

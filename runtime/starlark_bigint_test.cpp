@@ -454,55 +454,55 @@ TEST(StarlarkBigint, ShiftInvalidInput) {
   result = starlark_bigint(100).binary_lshift(starlark_integer(-1), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_bigint(100).binary_rshift(starlark_integer(-1), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_bigint(100).binary_lshift(starlark_bigint(number::minus_one()), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_bigint(100).binary_rshift(starlark_bigint(number::minus_one()), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_bigint(1).binary_lshift(starlark_integer(1 << 30), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_bigint(1).binary_lshift(starlark_integer(0x7fff'ffff'ffff'ffffL), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 100), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 63), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_bigint(100).binary_lshift(starlark_bigint(number::one() << 62), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 }
 
@@ -752,7 +752,7 @@ TEST(StarlarkBigint, BinaryPlusOverflowError) {
 
   big.binary_plus(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkBigint, BinaryMinus) {
@@ -830,7 +830,7 @@ TEST(StarlarkBigint, BinaryMinusOverflowError) {
 
   big.binary_minus(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkBigint, BinaryStar) {
@@ -908,7 +908,7 @@ TEST(StarlarkBigint, BinaryStarOverflowError) {
 
   big.binary_star(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkBigint, BinarySlash) {
@@ -986,7 +986,7 @@ TEST(StarlarkBigint, BinarySlashOverflowError) {
 
     big.binary_slash(starlark_float(1.0), ctx, error_callback);
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+    EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
   }
   {
     Arena arena;
@@ -995,7 +995,7 @@ TEST(StarlarkBigint, BinarySlashOverflowError) {
 
     big.binary_slash(starlark_integer(1), ctx, error_callback);
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+    EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
   }
   {
     Arena arena;
@@ -1004,7 +1004,7 @@ TEST(StarlarkBigint, BinarySlashOverflowError) {
 
     big.binary_slash(starlark_bigint(1), ctx, error_callback);
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+    EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
   }
 }
 
@@ -1017,7 +1017,7 @@ TEST(StarlarkBigint, BinarySlashOverflowDenominatorError) {
 
   small.binary_slash(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkBigint, BinarySlashZeroFloatError) {
@@ -1029,7 +1029,7 @@ TEST(StarlarkBigint, BinarySlashZeroFloatError) {
 
   small.binary_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinarySlashZeroIntError) {
@@ -1041,7 +1041,7 @@ TEST(StarlarkBigint, BinarySlashZeroIntError) {
 
   small.binary_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinarySlashZeroBigintError) {
@@ -1053,7 +1053,7 @@ TEST(StarlarkBigint, BinarySlashZeroBigintError) {
 
   small.binary_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinarySlashSlash) {
@@ -1551,7 +1551,7 @@ TEST(StarlarkBigint, BinarySlashSlashOverflowError) {
 
   big.binary_slash_slash(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkBigint, BinarySlashSlashOverflowiDenominatorError) {
@@ -1574,7 +1574,7 @@ TEST(StarlarkBigint, BinarySlashSlashZeroFloatError) {
 
   small.binary_slash_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinarySlashSlashZeroIntError) {
@@ -1586,7 +1586,7 @@ TEST(StarlarkBigint, BinarySlashSlashZeroIntError) {
 
   small.binary_slash_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinarySlashSlashZeroBigintError) {
@@ -1598,7 +1598,7 @@ TEST(StarlarkBigint, BinarySlashSlashZeroBigintError) {
 
   small.binary_slash_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinaryPercent) {
@@ -2096,7 +2096,7 @@ TEST(StarlarkBigint, BinaryPercentOverflowError) {
 
   big.binary_percent(f1, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkBigint, BinaryPercentOverflowiDenominatorError) {
@@ -2119,7 +2119,7 @@ TEST(StarlarkBigint, BinaryPercentZeroFloatError) {
 
   small.binary_percent(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinaryPercentZeroIntError) {
@@ -2131,7 +2131,7 @@ TEST(StarlarkBigint, BinaryPercentZeroIntError) {
 
   small.binary_percent(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkBigint, BinaryPercentZeroBigintError) {
@@ -2143,7 +2143,7 @@ TEST(StarlarkBigint, BinaryPercentZeroBigintError) {
 
   small.binary_percent(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 }  // namespace

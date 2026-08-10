@@ -34,26 +34,26 @@ using ::starlark::error_messages::error_arguments_exactly_one;
 using ::starlark::error_messages::error_arguments_one_or_two;
 using ::starlark::error_messages::error_arguments_too_many;
 using ::starlark::error_messages::error_attribute_string;
-using ::starlark::error_messages::error_bytes_in_range;
 using ::starlark::error_messages::error_empty_iterator;
 using ::starlark::error_messages::error_expect_character;
 using ::starlark::error_messages::error_expect_one_character_or_one_byte;
-using ::starlark::error_messages::error_int_base;
-using ::starlark::error_messages::error_invalid_literal_with_base;
 using ::starlark::error_messages::error_max_bytes_length;
 using ::starlark::error_messages::error_missing_argument;
 using ::starlark::error_messages::error_missing_typed_argument;
 using ::starlark::error_messages::error_multiple_values_for_argument;
 using ::starlark::error_messages::error_named_argument_must_be_type;
 using ::starlark::error_messages::error_non_string_with_base;
-using ::starlark::error_messages::error_overflow;
-using ::starlark::error_messages::error_overflow_float_too_large;
 using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::error_messages::error_v2_argument_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_argument_interpreted_as_string;
+using ::starlark::error_messages::error_v2_bytes_in_range;
 using ::starlark::error_messages::error_v2_convert;
 using ::starlark::error_messages::error_v2_convert_string;
+using ::starlark::error_messages::error_v2_int_base;
 using ::starlark::error_messages::error_v2_interpreted_as_integer;
+using ::starlark::error_messages::error_v2_invalid_literal_with_base;
+using ::starlark::error_messages::error_v2_overflow;
+using ::starlark::error_messages::error_v2_overflow_float_too_large;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -312,7 +312,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
       case starlark_numeric_type::kInt64: {
         auto ivalue = value->as_int64();
         if (ivalue < 0 || 255 < ivalue) {
-          error_callback.add_error(error_bytes_in_range());
+          error_callback.add_error(error_v2_bytes_in_range());
           return nullptr;
         }
         result += static_cast<char>(ivalue);
@@ -321,7 +321,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
       case starlark_numeric_type::kBigInt: {
         const auto& bvalue = value->as_bigint();
         if (bvalue.sign() || bvalue.bit_size() > 8) {
-          error_callback.add_error(error_bytes_in_range());
+          error_callback.add_error(error_v2_bytes_in_range());
           return nullptr;
         }
         result += static_cast<char>(bvalue.at(0));
@@ -482,7 +482,7 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
     case starlark_numeric_type::kBigInt: {
       auto fvalue = to_double(value->as_bigint());
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(value->type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(value->type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(fvalue, ctx);
@@ -499,7 +499,7 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
           return nullptr;
         }
         if (errno != 0) {
-          error_callback.add_error(error_overflow_float_too_large());
+          error_callback.add_error(error_v2_overflow_float_too_large());
           return nullptr;
         }
         return create_float(double_value, ctx);
@@ -623,7 +623,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
         case starlark_numeric_type::kInt64: {
           auto ibase = base_param->as_int64();
           if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
-            error_callback.add_error(error_int_base(starlark_built_in_functions::int_f));
+            error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
             return nullptr;
           }
           base = ibase;
@@ -632,12 +632,12 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
         case starlark_numeric_type::kBigInt: {
           const auto& bbase = base_param->as_bigint();
           if (bbase.sign() || bbase.length() > 1) {
-            error_callback.add_error(error_int_base(starlark_built_in_functions::int_f));
+            error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
             return nullptr;
           }
           auto ibase = bbase.at(0);
           if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
-            error_callback.add_error(error_int_base(starlark_built_in_functions::int_f));
+            error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
             return nullptr;
           }
           base = ibase;
@@ -650,13 +650,13 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
     }
     auto svalue = value->as_string();
     if (svalue.empty()) {
-      error_callback.add_error(error_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
+      error_callback.add_error(error_v2_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
       return nullptr;
     }
     const char* end;
     auto result = parse_number(svalue, &end, base);
     if (end != (&svalue.back() + 1)) {
-      error_callback.add_error(error_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
+      error_callback.add_error(error_v2_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
       return nullptr;
     }
     return create_integer(std::move(result), ctx);
@@ -961,7 +961,7 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
     case starlark_numeric_type::kBigInt: {
       const auto& bvalue = value->as_bigint();
       if (!bvalue.fits_in_int64()) {
-        error_callback.add_error(error_overflow(value->type(), starlark_types::int64));
+        error_callback.add_error(error_v2_overflow(value->type(), starlark_types::int64));
         return error_status();
       }
       output = bvalue.as_int64();
@@ -1004,7 +1004,7 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
 
   auto* result = Arena::Create<starlark_range>(&ctx.arena(), start, end, step);
   if (result->len(false, error_callback) < 0) {
-    error_callback.add_error(error_overflow(starlark_types::int_t, starlark_types::int64));
+    error_callback.add_error(error_v2_overflow(starlark_types::int_t, starlark_types::int64));
     return nullptr;
   }
   return result;

@@ -1,0 +1,3 @@
+main:2:34: error: Unicode code point must be in range(0, 0x110000)
+    2 | a = "some string %c more string" % 0x10000000000000000
+      |                                  ^

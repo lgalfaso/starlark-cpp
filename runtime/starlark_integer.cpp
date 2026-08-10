@@ -15,11 +15,11 @@
 #include "runtime/starlark_types.hpp"
 
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_division_by_zero;
-using ::starlark::error_messages::error_negative_shift;
-using ::starlark::error_messages::error_overflow;
-using ::starlark::error_messages::error_overflow_too_many_digits;
 using ::starlark::error_messages::error_v2_bad_operand_binary;
+using ::starlark::error_messages::error_v2_division_by_zero;
+using ::starlark::error_messages::error_v2_negative_shift;
+using ::starlark::error_messages::error_v2_overflow;
+using ::starlark::error_messages::error_v2_overflow_too_many_digits;
 
 namespace starlark {
 namespace runtime {
@@ -195,7 +195,7 @@ starlark_obj* slash_op(int64_t value, const starlark_integer& this_obj, const st
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(value / fother, ctx);
@@ -203,7 +203,7 @@ starlark_obj* slash_op(int64_t value, const starlark_integer& this_obj, const st
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(static_cast<double>(value) / iother, ctx);
@@ -211,13 +211,13 @@ starlark_obj* slash_op(int64_t value, const starlark_integer& this_obj, const st
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       // This is a difference between Python and the Starlark implementation in Bazel. Python is
       // happy to return `0` if the integer is too large. Bazel throws an error.
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(value / fother, ctx);
@@ -233,7 +233,7 @@ starlark_obj* slash_slash_op(int64_t value, const starlark_integer& this_obj, co
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(std::floor(value / fother), ctx);
@@ -241,7 +241,7 @@ starlark_obj* slash_slash_op(int64_t value, const starlark_integer& this_obj, co
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       // Handle the overflow.
@@ -253,7 +253,7 @@ starlark_obj* slash_slash_op(int64_t value, const starlark_integer& this_obj, co
     case starlark_numeric_type::kBigInt: {
       auto bother = other.as_bigint();
       if (bother == number::zero()) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_div(from_int64(value), bother), ctx);
@@ -269,7 +269,7 @@ starlark_obj* percent_op(int64_t value, const starlark_integer& this_obj, const 
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(starlark_fmod(value, fother), ctx);
@@ -277,7 +277,7 @@ starlark_obj* percent_op(int64_t value, const starlark_integer& this_obj, const 
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       if (value == std::numeric_limits<int64_t>::min() && iother == -1) {
@@ -288,7 +288,7 @@ starlark_obj* percent_op(int64_t value, const starlark_integer& this_obj, const 
     case starlark_numeric_type::kBigInt: {
       auto bother = other.as_bigint();
       if (bother == number::zero()) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_mod(from_int64(value), bother), ctx);
@@ -343,7 +343,7 @@ starlark_obj* less_less_op(int64_t value, const starlark_integer& this_obj, cons
       }
       auto shift = other.as_int64();
       if (shift < 0) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       // Check whether it will fit in an int64_t.
@@ -353,7 +353,7 @@ starlark_obj* less_less_op(int64_t value, const starlark_integer& this_obj, cons
       } else {
         if (ctx.options().log2_max_bigint < shift ||
             ctx.options().log2_max_bigint < shift + 64 - left_shift_space) {
-          error_callback.add_error(error_overflow_too_many_digits());
+          error_callback.add_error(error_v2_overflow_too_many_digits());
           return nullptr;
         }
         return create_integer(from_int64(value) << shift, ctx);
@@ -365,11 +365,11 @@ starlark_obj* less_less_op(int64_t value, const starlark_integer& this_obj, cons
       }
       const auto& shift = other.as_bigint();
       if (shift.sign()) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       if (shift.length() > 1) {
-        error_callback.add_error(error_overflow_too_many_digits());
+        error_callback.add_error(error_v2_overflow_too_many_digits());
         return nullptr;
       }
       auto int_shift = shift.at(0);
@@ -379,7 +379,7 @@ starlark_obj* less_less_op(int64_t value, const starlark_integer& this_obj, cons
       } else {
         if (ctx.options().log2_max_bigint < int_shift ||
             ctx.options().log2_max_bigint < int_shift + 64 - left_shift_space) {
-          error_callback.add_error(error_overflow_too_many_digits());
+          error_callback.add_error(error_v2_overflow_too_many_digits());
           return nullptr;
         }
         return create_integer(from_int64(value) << int_shift, ctx);
@@ -399,7 +399,7 @@ starlark_obj* greater_greater_op(int64_t value, const starlark_integer& this_obj
       }
       auto shift = other.as_int64();
       if (shift < 0) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       if (shift >= 64) {
@@ -413,7 +413,7 @@ starlark_obj* greater_greater_op(int64_t value, const starlark_integer& this_obj
       }
       const auto& shift = other.as_bigint();
       if (shift.sign()) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       if (shift.length() > 1) {

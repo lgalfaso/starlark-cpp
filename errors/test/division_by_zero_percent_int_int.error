@@ -1,0 +1,3 @@
+main:2:7: error: division by zero
+    2 | a = 1 % 0
+      |       ^

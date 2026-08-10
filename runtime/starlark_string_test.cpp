@@ -1046,10 +1046,10 @@ TEST(StarlarkString, Interpolation) {
 
   test("%c", &small_int, "{");
   test("%c", &small_big_int, "{");
-  test_with_error("%c", &mid_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
-  test_with_error("%c", &mid_big_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
-  test_with_error("%c", &big_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
-  test_with_error("%c", &huge_int, "ValueError: Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", &mid_int, "Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", &mid_big_int, "Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", &big_int, "Unicode code point must be in range(0, 0x110000)");
+  test_with_error("%c", &huge_int, "Unicode code point must be in range(0, 0x110000)");
   test_with_error("%c", & big_float, "TypeError: %c requires an int or a unicode character, not float");
   test_with_error("%c", &plus_inf, "TypeError: %c requires an int or a unicode character, not float");
   test_with_error("%c", &minus_inf, "TypeError: %c requires an int or a unicode character, not float");

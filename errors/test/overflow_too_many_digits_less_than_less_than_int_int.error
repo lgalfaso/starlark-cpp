@@ -1,0 +1,3 @@
+main:2:7: error: too many digits in integer
+    2 | a = 1 << (1 << 64)
+      |       ^^

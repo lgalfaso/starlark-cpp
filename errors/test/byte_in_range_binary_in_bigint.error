@@ -1,0 +1,3 @@
+main:2:15: error: byte must be in range(0, 256)
+    2 | a = (1 << 64) in b''
+      |               ^^

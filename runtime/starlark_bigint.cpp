@@ -13,11 +13,11 @@
 #include "runtime/starlark_types.hpp"
 
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_division_by_zero;
-using ::starlark::error_messages::error_negative_shift;
-using ::starlark::error_messages::error_overflow;
-using ::starlark::error_messages::error_overflow_too_many_digits;
 using ::starlark::error_messages::error_v2_bad_operand_binary;
+using ::starlark::error_messages::error_v2_division_by_zero;
+using ::starlark::error_messages::error_v2_negative_shift;
+using ::starlark::error_messages::error_v2_overflow;
+using ::starlark::error_messages::error_v2_overflow_too_many_digits;
 
 namespace starlark {
 namespace runtime {
@@ -109,7 +109,7 @@ starlark_obj* plus_op(const number& value, const starlark_bigint& this_obj, cons
     case starlark_numeric_type::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(fvalue + other.as_float(), ctx);
@@ -129,7 +129,7 @@ starlark_obj* minus_op(const number& value, const starlark_bigint& this_obj, con
     case starlark_numeric_type::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(fvalue - other.as_float(), ctx);
@@ -152,7 +152,7 @@ starlark_obj* star_op(const number& value, const starlark_bigint& this_obj, cons
     case starlark_numeric_type::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(fvalue * other.as_float(), ctx);
@@ -172,12 +172,12 @@ starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, con
     case starlark_numeric_type::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(fvalue / fother, ctx);
@@ -185,12 +185,12 @@ starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, con
     case starlark_numeric_type::kInt64: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(fvalue / iother, ctx);
@@ -198,16 +198,16 @@ starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, con
     case starlark_numeric_type::kBigInt: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       return create_float(fvalue / fother, ctx);
@@ -223,12 +223,12 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
     case starlark_numeric_type::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(std::floor(fvalue / fother), ctx);
@@ -236,7 +236,7 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_div(value, from_int64(iother)), ctx);
@@ -244,7 +244,7 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
     case starlark_numeric_type::kBigInt: {
       const auto& bother = other.as_bigint();
       if (bother == number::zero()) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_div(value, bother), ctx);
@@ -260,12 +260,12 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
     case starlark_numeric_type::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
-        error_callback.add_error(error_overflow(this_obj.type(), starlark_types::float_t));
+        error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
         return nullptr;
       }
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(starlark_fmod(fvalue, fother), ctx);
@@ -273,7 +273,7 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_mod(value, from_int64(iother)), ctx);
@@ -281,7 +281,7 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
     case starlark_numeric_type::kBigInt: {
       const auto& bother = other.as_bigint();
       if (bother == number::zero()) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_integer(starlark_mod(value, bother), ctx);
@@ -336,12 +336,12 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
       }
       auto shift = other.as_int64();
       if (shift < 0) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       if (ctx.options().log2_max_bigint < shift ||
           ctx.options().log2_max_bigint < shift + value.bit_size()) {
-        error_callback.add_error(error_overflow_too_many_digits());
+        error_callback.add_error(error_v2_overflow_too_many_digits());
         return nullptr;
       }
       return create_integer(value << shift, ctx);
@@ -352,17 +352,17 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
       }
       const auto& shift = other.as_bigint();
       if (shift.sign()) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       if (shift.length() > 1) {
-        error_callback.add_error(error_overflow_too_many_digits());
+        error_callback.add_error(error_v2_overflow_too_many_digits());
         return nullptr;
       }
       auto int_shift = shift.at(0);
       if (ctx.options().log2_max_bigint < int_shift ||
           ctx.options().log2_max_bigint < int_shift + value.bit_size()) {
-        error_callback.add_error(error_overflow_too_many_digits());
+        error_callback.add_error(error_v2_overflow_too_many_digits());
         return nullptr;
       }
       return create_integer(value << int_shift, ctx);
@@ -381,7 +381,7 @@ starlark_obj* greater_greater_op(const number& value, const starlark_bigint& thi
       }
       auto shift = other.as_int64();
       if (shift < 0) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       if (shift >= value.bit_size()) {
@@ -395,7 +395,7 @@ starlark_obj* greater_greater_op(const number& value, const starlark_bigint& thi
       }
       const auto& shift = other.as_bigint();
       if (shift.sign()) {
-        error_callback.add_error(error_negative_shift());
+        error_callback.add_error(error_v2_negative_shift());
         return nullptr;
       }
       if (shift.length() > 1) {

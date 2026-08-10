@@ -1,0 +1,3 @@
+main:2:10: error: floating-point number too large
+    2 | a = float('1e309')
+      |     ~~~~~^^^^^^^^^

@@ -56,11 +56,11 @@ using ::starlark::error_messages::error_substring_not_found;
 using ::starlark::error_messages::error_switch_from_manual_to_automatic_numbering;
 using ::starlark::error_messages::error_tuple_must_contain_type;
 using ::starlark::error_messages::error_unexpected_in_field_name;
-using ::starlark::error_messages::error_unicode_in_range;
 using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::error_messages::error_unknown_conversion;
 using ::starlark::error_messages::error_unsupported_format_character;
 using ::starlark::error_messages::error_v2_dictionary_key_not_found;
+using ::starlark::error_messages::error_v2_unicode_in_range;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -139,7 +139,7 @@ void append_for_repr(std::string& output, std::string_view input) {
 
 status chr_fn(std::string& output, int64_t input, error_fn& error_callback) {
   if (input < 0 || 0x10ffff < input) {
-    error_callback.add_error(error_unicode_in_range());
+    error_callback.add_error(error_v2_unicode_in_range());
     return error_status();
   }
   utf8_encode_code_point(input, output, false, true);
@@ -148,12 +148,12 @@ status chr_fn(std::string& output, int64_t input, error_fn& error_callback) {
 
 status chr_fn(std::string& output, const starlark::bigint::number& input, error_fn& error_callback) {
   if (input.sign() || input.bit_size() > 21) {
-    error_callback.add_error(error_unicode_in_range());
+    error_callback.add_error(error_v2_unicode_in_range());
     return error_status();
   }
   auto ivalue = input.at(0);
   if (0x10ffff < ivalue) {
-    error_callback.add_error(error_unicode_in_range());
+    error_callback.add_error(error_v2_unicode_in_range());
     return error_status();
   }
   utf8_encode_code_point(ivalue, output, false, true);

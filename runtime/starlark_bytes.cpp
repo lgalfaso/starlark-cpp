@@ -25,7 +25,6 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_byte_in_range;
 using ::starlark::error_messages::error_bytes_or_tuple_of_bytes;
 using ::starlark::error_messages::error_can_only_join_on_iterable;
 using ::starlark::error_messages::error_empty_separator;
@@ -37,9 +36,10 @@ using ::starlark::error_messages::error_no_multiply_sequence;
 using ::starlark::error_messages::error_substring_not_found;
 using ::starlark::error_messages::error_type_required;
 using ::starlark::error_messages::error_unknown_argument;
-using ::starlark::ucd::is_space;
+using ::starlark::error_messages::error_v2_byte_in_range;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
+using ::starlark::ucd::is_space;
 
 namespace starlark {
 namespace runtime {
@@ -158,7 +158,7 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
     case starlark_numeric_type::kInt64: {
       auto other_value = other.as_int64();
       if (other_value < 0 || 255 < other_value) {
-        error_callback.add_error(error_byte_in_range());
+        error_callback.add_error(error_v2_byte_in_range());
         return false;
       }
       return value.contains(static_cast<char>(other.as_int64()));
@@ -166,7 +166,7 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
     case starlark_numeric_type::kBigInt: {
       auto& other_value = other.as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
-        error_callback.add_error(error_byte_in_range());
+        error_callback.add_error(error_v2_byte_in_range());
         return false;
       }
       return value.contains(static_cast<char>(other_value.at(0)));
@@ -698,7 +698,7 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
     case starlark_numeric_type::kInt64: {
       auto other_value = element->as_int64();
       if (other_value < 0 || 255 < other_value) {
-        error_callback.add_error(error_byte_in_range());
+        error_callback.add_error(error_v2_byte_in_range());
         return status_or<std::string_view>(status_code::kRuntimeError);
       }
       return status_or<std::string_view>(std::string_view(&all_chars[other_value], 1));
@@ -706,7 +706,7 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
     case starlark_numeric_type::kBigInt: {
       auto& other_value = element->as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
-        error_callback.add_error(error_byte_in_range());
+        error_callback.add_error(error_v2_byte_in_range());
         return status_or<std::string_view>(status_code::kRuntimeError);
       }
       return status_or<std::string_view>(std::string_view(&all_chars[other_value.at(0)], 1));

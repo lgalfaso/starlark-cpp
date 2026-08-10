@@ -14,46 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string_view error_byte_in_range() {
-  return "ValueError: byte must be in range(0, 256)";
-}
-
-std::string_view error_bytes_in_range() {
-  return "ValueError: bytes must be in range(0, 256)";
-}
-
-std::string_view error_unicode_in_range() {
-  return "ValueError: Unicode code point must be in range(0, 0x110000)";
-}
-
-std::string_view error_negative_shift() {
-  return "ValueError: negative shift count";
-}
-
-std::string_view error_division_by_zero() {
-  return "ZeroDivisionError: division by zero";
-}
-
-std::string error_overflow(std::string_view from, std::string_view to) {
-  return std::format("OverflowError: {} too large to convert to {}", from, to);
-}
-
-std::string_view error_overflow_too_many_digits() {
-  return "OverflowError: too many digits in integer";
-}
-
-std::string_view error_overflow_float_too_large() {
-  return "OverflowError: floating-point number too large";
-}
-
-std::string error_int_base(std::string_view fn_name) {
-  return std::format("ValueError: {}() base must be >= 2 and <= 36, or 0", fn_name);
-}
-
-std::string error_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value) {
-  return std::format("ValueError: invalid literal for {}() with base {}: '{}'", fn_name, base, literal_value);
-}
-
 std::string error_no_keyword(std::string_view fn_name) {
   return std::format("TypeError: {}() takes no keyword arguments", fn_name);
 }
@@ -503,6 +463,48 @@ std::string error_v2_dictionary_key_not_found(std::string_view key) {
 
 std::string error_v2_dictionary_update_sequence(int64_t position, int64_t actual, int64_t expected) {
   return std::format("dictionary update sequence element #{} has length {}; {} is required", position, actual, expected);
+}
+
+
+std::string_view error_v2_byte_in_range() {
+  return "byte must be in range(0, 256)";
+}
+
+std::string_view error_v2_bytes_in_range() {
+  return "bytes must be in range(0, 256)";
+}
+
+std::string_view error_v2_unicode_in_range() {
+  return "Unicode code point must be in range(0, 0x110000)";
+}
+
+
+std::string_view error_v2_negative_shift() {
+  return "negative shift count";
+}
+
+std::string_view error_v2_division_by_zero() {
+  return "division by zero";
+}
+
+std::string error_v2_overflow(std::string_view from, std::string_view to) {
+  return std::format("{} too large to convert to {}", from, to);
+}
+
+std::string_view error_v2_overflow_too_many_digits() {
+  return "too many digits in integer";
+}
+
+std::string_view error_v2_overflow_float_too_large() {
+  return "floating-point number too large";
+}
+
+std::string error_v2_int_base(std::string_view fn_name) {
+  return std::format("{}() base must be >= 2 and <= 36, or 0", fn_name);
+}
+
+std::string error_v2_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value) {
+  return std::format("invalid literal for {}() with base {}: '{}'", fn_name, base, literal_value);
 }
 
 }  // namespace error_messages

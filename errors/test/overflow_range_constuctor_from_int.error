@@ -1,0 +1,3 @@
+main:2:10: error: int too large to convert to int64
+    2 | a = range(1 << 64)
+      |     ~~~~~^^^^^^^^^

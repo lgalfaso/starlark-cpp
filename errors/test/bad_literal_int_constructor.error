@@ -1,0 +1,3 @@
+main:2:8: error: invalid literal for int() with base 8: '123abc'
+    2 | a = int('123abc', base = 8)
+      |     ~~~^^^^^^^^^^^^^^^^^^^^

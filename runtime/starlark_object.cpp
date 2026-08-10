@@ -25,7 +25,6 @@ using ::starlark::error_messages::error_arguments_too_few;
 using ::starlark::error_messages::error_arguments_too_many;
 using ::starlark::error_messages::error_no_keyword;
 using ::starlark::error_messages::error_no_pos_args;
-using ::starlark::error_messages::error_overflow_too_many_digits;
 using ::starlark::error_messages::error_step_non_zero;
 using ::starlark::error_messages::error_v2_argument_uniterable;
 using ::starlark::error_messages::error_v2_bad_operand_binary;
@@ -40,6 +39,7 @@ using ::starlark::error_messages::error_v2_no_item_assignment;
 using ::starlark::error_messages::error_v2_no_method;
 using ::starlark::error_messages::error_v2_no_slice_assignment;
 using ::starlark::error_messages::error_v2_not_callable;
+using ::starlark::error_messages::error_v2_overflow_too_many_digits;
 using ::starlark::error_messages::error_v2_read_only_attribute;
 using ::starlark::error_messages::error_v2_uniterable;
 using ::starlark::error_messages::error_v2_unpackable;
@@ -659,26 +659,26 @@ starlark::result::status_or<std::tuple<int64_t, int64_t, int64_t>> starlark_obj:
 
   int64_t r_stride;
   if (ckd_mul(&r_stride, original_stride, i_stride)) {
-    error_callback.add_error(error_overflow_too_many_digits());
+    error_callback.add_error(error_v2_overflow_too_many_digits());
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t tmp;
   if (ckd_mul(&tmp, original_stride, i_start)) {
-    error_callback.add_error(error_overflow_too_many_digits());
+    error_callback.add_error(error_v2_overflow_too_many_digits());
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t r_start;
   if (ckd_add(&r_start, original_start, tmp)) {
-    error_callback.add_error(error_overflow_too_many_digits());
+    error_callback.add_error(error_v2_overflow_too_many_digits());
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   if (ckd_mul(&tmp, original_stride, i_end)) {
-    error_callback.add_error(error_overflow_too_many_digits());
+    error_callback.add_error(error_v2_overflow_too_many_digits());
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   int64_t r_end;
   if (ckd_add(&r_end, original_start, tmp)) {
-    error_callback.add_error(error_overflow_too_many_digits());
+    error_callback.add_error(error_v2_overflow_too_many_digits());
     return status_or<std::tuple<int64_t, int64_t, int64_t>>(status_code::kRuntimeError);
   }
   return status_or<std::tuple<int64_t, int64_t, int64_t>>(std::make_tuple(r_start, r_end, r_stride));

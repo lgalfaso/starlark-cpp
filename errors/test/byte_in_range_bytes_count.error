@@ -1,0 +1,3 @@
+main:2:10: error: byte must be in range(0, 256)
+    2 | b''.count(256)
+      | ~~~~~~~~~^^^^^

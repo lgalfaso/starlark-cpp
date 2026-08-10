@@ -418,55 +418,55 @@ TEST(StarlarkInteger, ShiftInvalidInput) {
   result = starlark_integer(100).binary_lshift(starlark_integer(-1), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_rshift(starlark_integer(-1), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_lshift(starlark_bigint(number::minus_one()), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_rshift(starlark_bigint(number::minus_one()), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: negative shift count");
+  EXPECT_EQ(error_callback.messages[0], "negative shift count");
   error_callback.messages.clear();
 
   result = starlark_integer(1).binary_lshift(starlark_integer(1 << 30), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_integer(1).binary_lshift(starlark_integer(0x7fff'ffff'ffff'ffffL), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_lshift(starlark_bigint(number::one() << 100), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_lshift(starlark_bigint(number::one() << 63), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 
   result = starlark_integer(100).binary_lshift(starlark_bigint(number::one() << 62), ctx, error_callback);
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: too many digits in integer");
+  EXPECT_EQ(error_callback.messages[0], "too many digits in integer");
   error_callback.messages.clear();
 }
 
@@ -1219,7 +1219,7 @@ TEST(StarlarkInteger, BinarySlashOverflowiDenominatorError) {
 
   small.binary_slash(big, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkInteger, BinarySlashZeroFloatError) {
@@ -1231,7 +1231,7 @@ TEST(StarlarkInteger, BinarySlashZeroFloatError) {
 
   small.binary_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinarySlashZeroIntError) {
@@ -1243,7 +1243,7 @@ TEST(StarlarkInteger, BinarySlashZeroIntError) {
 
   small.binary_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinarySlashZeroBigintError) {
@@ -1255,7 +1255,7 @@ TEST(StarlarkInteger, BinarySlashZeroBigintError) {
 
   small.binary_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinarySlashSlash) {
@@ -1753,7 +1753,7 @@ TEST(StarlarkInteger, BinarySlashSlashZeroFloatError) {
 
   small.binary_slash_slash(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinarySlashSlashZeroIntError) {
@@ -1765,7 +1765,7 @@ TEST(StarlarkInteger, BinarySlashSlashZeroIntError) {
 
   small.binary_slash_slash(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinarySlashSlashZeroBigintError) {
@@ -1777,7 +1777,7 @@ TEST(StarlarkInteger, BinarySlashSlashZeroBigintError) {
 
   small.binary_slash_slash(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinarySlashSlashOverflow) {
@@ -2287,7 +2287,7 @@ TEST(StarlarkInteger, BinaryPercentZeroFloatError) {
 
   small.binary_percent(f0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinaryPercentZeroIntError) {
@@ -2299,7 +2299,7 @@ TEST(StarlarkInteger, BinaryPercentZeroIntError) {
 
   small.binary_percent(i0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinaryPercentZeroBigintError) {
@@ -2311,7 +2311,7 @@ TEST(StarlarkInteger, BinaryPercentZeroBigintError) {
 
   small.binary_percent(b0, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ZeroDivisionError: division by zero");
+  EXPECT_EQ(error_callback.messages[0], "division by zero");
 }
 
 TEST(StarlarkInteger, BinaryPercentOverflow) {

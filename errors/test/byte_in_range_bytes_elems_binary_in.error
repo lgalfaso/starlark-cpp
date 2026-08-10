@@ -1,0 +1,3 @@
+main:2:9: error: byte must be in range(0, 256)
+    2 | a = 256 in b''.elems()
+      |         ^^

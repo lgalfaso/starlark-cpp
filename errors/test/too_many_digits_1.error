@@ -1,0 +1,3 @@
+main:6:33: error: too many digits in integer
+    6 | a = range(0, (1<<63) -1, over_a)[over_b:1:1]
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^

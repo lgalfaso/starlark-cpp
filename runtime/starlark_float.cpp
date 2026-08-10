@@ -14,8 +14,8 @@
 #include "runtime/starlark_types.hpp"
 
 using ::starlark::error_messages::error_v2_bad_operand_binary;
-using ::starlark::error_messages::error_division_by_zero;
-using ::starlark::error_messages::error_overflow;
+using ::starlark::error_messages::error_v2_division_by_zero;
+using ::starlark::error_messages::error_v2_overflow;
 
 namespace starlark {
 namespace runtime {
@@ -96,7 +96,7 @@ starlark_obj* plus_op(double value, const starlark_float& this_obj, const starla
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(other.type(), this_obj.type()));
+        error_callback.add_error(error_v2_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
       return create_float(value + fother, ctx);
@@ -116,7 +116,7 @@ starlark_obj* minus_op(double value, const starlark_float& this_obj, const starl
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(other.type(), this_obj.type()));
+        error_callback.add_error(error_v2_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
       return create_float(value - fother, ctx);
@@ -136,7 +136,7 @@ starlark_obj* star_op(double value, const starlark_float& this_obj, const starla
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(other.type(), this_obj.type()));
+        error_callback.add_error(error_v2_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
       return create_float(value * fother, ctx);
@@ -152,7 +152,7 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(value / fother, ctx);
@@ -160,7 +160,7 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(value / iother, ctx);
@@ -168,11 +168,11 @@ starlark_obj* slash_op(double value, const starlark_float& this_obj, const starl
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(other.type(), this_obj.type()));
+        error_callback.add_error(error_v2_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
       return create_float(value / fother, ctx);
@@ -188,7 +188,7 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(std::floor(value / fother), ctx);
@@ -196,7 +196,7 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(std::floor(value / iother), ctx);
@@ -204,11 +204,11 @@ starlark_obj* slash_slash_op(double value, const starlark_float& this_obj, const
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(other.type(), this_obj.type()));
+        error_callback.add_error(error_v2_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
       return create_float(std::floor(value / fother), ctx);
@@ -224,7 +224,7 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
     case starlark_numeric_type::kFloat: {
       auto fother = other.as_float();
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(starlark_fmod(value, fother), ctx);
@@ -232,7 +232,7 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
     case starlark_numeric_type::kInt64: {
       auto iother = other.as_int64();
       if (iother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       return create_float(starlark_fmod(value, iother), ctx);
@@ -240,11 +240,11 @@ starlark_obj* percent_op(double value, const starlark_float& this_obj, const sta
     case starlark_numeric_type::kBigInt: {
       auto fother = to_double(other.as_bigint());
       if (fother == 0) {
-        error_callback.add_error(error_division_by_zero());
+        error_callback.add_error(error_v2_division_by_zero());
         return nullptr;
       }
       if (std::isinf(fother)) {
-        error_callback.add_error(error_overflow(other.type(), this_obj.type()));
+        error_callback.add_error(error_v2_overflow(other.type(), this_obj.type()));
         return nullptr;
       }
       return create_float(starlark_fmod(value, fother), ctx);

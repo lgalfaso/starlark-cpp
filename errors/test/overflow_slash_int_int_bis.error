@@ -1,0 +1,3 @@
+main:2:17: error: int too large to convert to float
+    2 | a = (1 << 1024) / 1
+      |                 ^

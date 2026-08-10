@@ -18,7 +18,7 @@ assert_fail("fail('Some message')", error_message = """Error: Some message
     1 | fail('Some message')
       | ~~~~^^^^^^^^^^^^^^^^
 """)
-assert_fail("float('2e308')", error_message = """OverflowError: floating-point number too large
+assert_fail("float('2e308')", error_message = """floating-point number too large
     1 | float('2e308')
       | ~~~~~^^^^^^^^^
 """)
@@ -32,7 +32,7 @@ assert_eq(hasattr(b'', "elems"), True)
 assert_eq(hash("abc"), 6041520446639342335)
 assert_eq(int("0123", 10), 123)
 assert_eq(int("0123"), 123)
-assert_fail('int("0123", 0)', error_message = """ValueError: invalid literal for int() with base 0: '0123'
+assert_fail('int("0123", 0)', error_message = """invalid literal for int() with base 0: '0123'
     1 | int("0123", 0)
       | ~~~^^^^^^^^^^^
 """)

@@ -220,25 +220,25 @@ TEST(StarlarkBytes, BinaryInErrors) {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_integer(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_integer(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_bigint(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_bigint(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+    EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   }
 }
 
@@ -900,7 +900,7 @@ TEST(StarlarkBytes, CountIntegerNegative) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -922,7 +922,7 @@ TEST(StarlarkBytes, CountIntegerTooBig) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -944,7 +944,7 @@ TEST(StarlarkBytes, CountBigIntNegative) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -966,7 +966,7 @@ TEST(StarlarkBytes, CountBigIntTooBig) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: byte must be in range(0, 256)");
+  EXPECT_EQ(error_callback.messages[0], "byte must be in range(0, 256)");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 

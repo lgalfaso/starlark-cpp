@@ -684,7 +684,7 @@ TEST(StarlarkBytes, OutOfRange) {
 
     EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback)) << value->str();
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ("ValueError: bytes must be in range(0, 256)", error_callback.messages[0]);
+    EXPECT_EQ("bytes must be in range(0, 256)", error_callback.messages[0]);
   };
   test(&iminus_one);
   test(&bminus_one);
@@ -868,7 +868,7 @@ TEST(StarlarkChr, OutOfRange1) {
 
   EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+  EXPECT_EQ("Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, OutOfRange2) {
@@ -883,7 +883,7 @@ TEST(StarlarkChr, OutOfRange2) {
 
   EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+  EXPECT_EQ("Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, OutOfRange3) {
@@ -898,7 +898,7 @@ TEST(StarlarkChr, OutOfRange3) {
 
   EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+  EXPECT_EQ("Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, OutOfRange4) {
@@ -913,7 +913,7 @@ TEST(StarlarkChr, OutOfRange4) {
 
   EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
+  EXPECT_EQ("Unicode code point must be in range(0, 0x110000)", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, NamedArguments) {
@@ -1740,7 +1740,7 @@ TEST(StarlarkFloat, BigintOverflow) {
   auto* result = starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to float");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to float");
 }
 
 TEST(StarlarkFloat, StringOverflow) {
@@ -1756,7 +1756,7 @@ TEST(StarlarkFloat, StringOverflow) {
   auto* result = starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: floating-point number too large");
+  EXPECT_EQ(error_callback.messages[0], "floating-point number too large");
 }
 
 TEST(StarlarkFloat, InvalidString) {
@@ -2430,7 +2430,7 @@ void test_invalid_base(int base, bool positional) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: int() base must be >= 2 and <= 36, or 0", error_callback.messages[0]);
+  EXPECT_EQ("int() base must be >= 2 and <= 36, or 0", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromStringInvalidBase) {
@@ -2499,7 +2499,7 @@ TEST(StarlarkInt, FromStringNotAbleToParseInFull) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: invalid literal for int() with base 10: '123abc'", error_callback.messages[0]);
+  EXPECT_EQ("invalid literal for int() with base 10: '123abc'", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromStringEmpty) {
@@ -2513,7 +2513,7 @@ TEST(StarlarkInt, FromStringEmpty) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: invalid literal for int() with base 10: ''", error_callback.messages[0]);
+  EXPECT_EQ("invalid literal for int() with base 10: ''", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromList) {
@@ -3850,7 +3850,7 @@ TEST(StarlarkRange, OneArgumentBigIntTooBig) {
   auto* result = starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to int64");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to int64");
 }
 
 TEST(StarlarkRange, OneInvalidArgument) {
@@ -3920,7 +3920,7 @@ TEST(StarlarkRange, TwoArgumentsOverflow) {
   auto* result = starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "OverflowError: int too large to convert to int64");
+  EXPECT_EQ(error_callback.messages[0], "int too large to convert to int64");
 }
 
 TEST(StarlarkRange, ThreeArguments) {
