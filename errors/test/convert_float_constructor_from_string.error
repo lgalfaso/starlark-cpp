@@ -1,0 +1,3 @@
+main:2:10: error: could not convert string to float: '12abc'
+    2 | a = float('12abc')
+      |     ~~~~~^^^^^^^^^

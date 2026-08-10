@@ -1,0 +1,3 @@
+main:2:60: error: key not found 'missing_param'
+    2 | a = "some string {missing_param} more of the string".format(not_the_same_param = "foo")
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^

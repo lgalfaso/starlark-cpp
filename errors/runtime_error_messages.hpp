@@ -13,16 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_convert(std::string_view from, std::string_view to);
-std::string error_convert_string(std::string_view to, std::string_view string_value);
-std::string_view error_convert_float_infinity_to_integer();
-std::string_view error_convert_float_nan_to_integer();
-std::string error_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type);
-std::string error_argument_interpreted_as_string(std::string_view argument_name, std::string_view type);
-
-std::string error_dictionary_key_not_found(std::string_view key);
-std::string error_dictionary_update_sequence(int64_t position, int64_t actual, int64_t expected);
-
 std::string_view error_byte_in_range();
 std::string_view error_bytes_in_range();
 std::string_view error_unicode_in_range();
@@ -152,6 +142,16 @@ std::string error_v2_no_method(std::string_view type, std::string_view method);
 std::string error_v2_no_attribute(std::string_view type, std::string_view attribute);
 std::string error_v2_no_attribute(std::string_view type, std::string_view attribute, std::string_view suggestion);
 std::string error_v2_read_only_attribute(std::string_view type, std::string_view attribute);
+
+std::string error_v2_convert(std::string_view from, std::string_view to);
+std::string error_v2_convert_string(std::string_view to, std::string_view string_value);
+std::string_view error_v2_convert_float_infinity_to_integer();
+std::string_view error_v2_convert_float_nan_to_integer();
+std::string error_v2_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type);
+std::string error_v2_argument_interpreted_as_string(std::string_view argument_name, std::string_view type);
+
+std::string error_v2_dictionary_key_not_found(std::string_view key);
+std::string error_v2_dictionary_update_sequence(int64_t position, int64_t actual, int64_t expected);
 
 }  // namespace error_messages
 }  // namespace starlark

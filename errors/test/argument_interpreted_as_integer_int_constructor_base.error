@@ -1,0 +1,3 @@
+main:2:8: error: parameter 'base' cannot be interpreted as an integer (string)
+    2 | a = int('123', base = 'abc')
+      |     ~~~^^^^^^^^^^^^^^^^^^^^^

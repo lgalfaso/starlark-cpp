@@ -32,7 +32,6 @@ using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::error_messages::error_argument_must_be_type;
 using ::starlark::error_messages::error_can_only_join_on_iterable;
-using ::starlark::error_messages::error_dictionary_key_not_found;
 using ::starlark::error_messages::error_empty_separator;
 using ::starlark::error_messages::error_end_of_string_while_looking_for_conversion_specifier;
 using ::starlark::error_messages::error_expected_after_conversion;
@@ -40,14 +39,12 @@ using ::starlark::error_messages::error_expected_format_element_before_end_of_st
 using ::starlark::error_messages::error_format_integer_is_required;
 using ::starlark::error_messages::error_format_real_is_required;
 using ::starlark::error_messages::error_in_element;
-using ::starlark::error_messages::error_in_element;
 using ::starlark::error_messages::error_in_type_requires_type;
 using ::starlark::error_messages::error_incomplete_format;
 using ::starlark::error_messages::error_integer_or_unicode_character;
 using ::starlark::error_messages::error_integer_or_unicode_character_type_and_length;
 using ::starlark::error_messages::error_max_string_length;
 using ::starlark::error_messages::error_multiple_values_for_argument;
-using ::starlark::error_messages::error_no_concat;
 using ::starlark::error_messages::error_no_concat;
 using ::starlark::error_messages::error_no_multiply_sequence;
 using ::starlark::error_messages::error_not_all_arguments_converted_during_string_formatting;
@@ -60,10 +57,10 @@ using ::starlark::error_messages::error_switch_from_manual_to_automatic_numberin
 using ::starlark::error_messages::error_tuple_must_contain_type;
 using ::starlark::error_messages::error_unexpected_in_field_name;
 using ::starlark::error_messages::error_unicode_in_range;
-using ::starlark::error_messages::error_unicode_in_range;
 using ::starlark::error_messages::error_unknown_argument;
 using ::starlark::error_messages::error_unknown_conversion;
 using ::starlark::error_messages::error_unsupported_format_character;
+using ::starlark::error_messages::error_v2_dictionary_key_not_found;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -1555,7 +1552,7 @@ starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, 
     } else {
       auto it = named_args.find(name);
       if (it == named_args.end()) {
-        error_callback.add_error(error_dictionary_key_not_found(name));
+        error_callback.add_error(error_v2_dictionary_key_not_found(name));
         return nullptr;
       }
       append_with_conversion(it->second, conversions[i], result);

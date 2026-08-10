@@ -1,0 +1,3 @@
+main:2:10: error: cannot convert 'bool' object to bytes
+    2 | a = bytes(True)
+      |     ~~~~~^^^^^^

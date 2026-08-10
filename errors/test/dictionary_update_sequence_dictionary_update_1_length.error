@@ -1,0 +1,3 @@
+main:3:9: error: dictionary update sequence element #0 has length 1; 2 is required
+    3 | a.update([(1,)])
+      | ~~~~~~~~^^^^^^^^

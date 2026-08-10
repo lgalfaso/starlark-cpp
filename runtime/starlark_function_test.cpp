@@ -737,7 +737,7 @@ TEST(StarlarkBytes, None) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: cannot convert 'NoneType' object to bytes", error_callback.messages[0]);
+  EXPECT_EQ("cannot convert 'NoneType' object to bytes", error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, MultiplePosArgs) {
@@ -1106,7 +1106,7 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements1) {
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 0; 2 is required");
+  EXPECT_EQ(error_callback.messages[0], "dictionary update sequence element #1 has length 0; 2 is required");
 }
 
 TEST(StarlarkDict, FromIterableWithWrongNumberOfElements2) {
@@ -1131,7 +1131,7 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements2) {
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 1; 2 is required");
+  EXPECT_EQ(error_callback.messages[0], "dictionary update sequence element #1 has length 1; 2 is required");
 }
 
 TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
@@ -1158,7 +1158,7 @@ TEST(StarlarkDict, FromIterableWithWrongNumberOfElements3) {
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
+  EXPECT_EQ(error_callback.messages[0], "dictionary update sequence element #1 has length 3; 2 is required");
 }
 
 TEST(StarlarkDir, ReturnsTheAttributes) {
@@ -1346,7 +1346,7 @@ TEST(StarlarkEnumerate, InvalidStartAsNamedArgument) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string)");
+  EXPECT_EQ(error_callback.messages[0], "parameter 'start' cannot be interpreted as an integer (string)");
 }
 
 TEST(StarlarkEnumerate, InvalidStartAsPositionalArgument) {
@@ -1370,7 +1370,7 @@ TEST(StarlarkEnumerate, InvalidStartAsPositionalArgument) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'start' cannot be interpreted as an integer (string)");
+  EXPECT_EQ(error_callback.messages[0], "parameter 'start' cannot be interpreted as an integer (string)");
 }
 
 TEST(StarlarkEnumerate, IterableAsNamedArgumentAndPositionalArgument) {
@@ -1772,7 +1772,7 @@ TEST(StarlarkFloat, InvalidString) {
   auto* result = starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: could not convert string to float: '1a'");
+  EXPECT_EQ(error_callback.messages[0], "could not convert string to float: '1a'");
 }
 
 TEST(StarlarkFloat, MultiplePosArgs) {
@@ -2216,7 +2216,7 @@ TEST(StarlarkInt, FromFloatInfinity) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("OverflowError: cannot convert float infinity to integer", error_callback.messages[0]);
+  EXPECT_EQ("cannot convert float infinity to integer", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromFloatNaN) {
@@ -2231,7 +2231,7 @@ TEST(StarlarkInt, FromFloatNaN) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("ValueError: cannot convert float NaN to integer", error_callback.messages[0]);
+  EXPECT_EQ("cannot convert float NaN to integer", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromFloatWithBaseWithPositionalArgument) {
@@ -2484,7 +2484,7 @@ TEST(StarlarkInt, FromStringBaseNotIntAsNamedArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: parameter 'base' cannot be interpreted as an integer (list)", error_callback.messages[0]);
+  EXPECT_EQ("parameter 'base' cannot be interpreted as an integer (list)", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromStringNotAbleToParseInFull) {
@@ -3782,7 +3782,7 @@ TEST(StarlarkPrint, NamedArgumentsSepAsNone) {
   auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: parameter 'sep' cannot be interpreted as an string (NoneType)");
+  EXPECT_EQ(error_callback.messages[0], "parameter 'sep' cannot be interpreted as an string (NoneType)");
 }
 
 TEST(StarlarkPrint, NamedArgumentsEnd) {

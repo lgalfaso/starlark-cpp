@@ -3197,7 +3197,7 @@ TEST(StarlarkSet, RemoveElementNotInSet) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "KeyError: -1");
+  EXPECT_EQ(error_callback.messages[0], "key not found '-1'");
   EXPECT_EQ(set.str(), "set([0, 1])");
 }
 

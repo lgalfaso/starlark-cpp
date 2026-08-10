@@ -1,0 +1,3 @@
+main:2:6: error: parameter 'sep' cannot be interpreted as an string (int)
+    2 | print('abc', 'def', sep = 1)
+      | ~~~~~^^^^^^^^^^^^^^^^^^^^^^^

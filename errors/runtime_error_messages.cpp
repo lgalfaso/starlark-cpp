@@ -14,38 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_convert(std::string_view from, std::string_view to) {
-  return std::format("TypeError: cannot convert '{}' object to {}", from, to);
-}
-
-std::string error_convert_string(std::string_view to, std::string_view string_value) {
-  return std::format("ValueError: could not convert string to {}: '{}'", to, string_value);
-}
-
-std::string_view error_convert_float_infinity_to_integer() {
-  return "OverflowError: cannot convert float infinity to integer";
-}
-
-std::string_view error_convert_float_nan_to_integer() {
-  return "ValueError: cannot convert float NaN to integer";
-}
-
-std::string error_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type) {
-  return std::format("TypeError: parameter '{}' cannot be interpreted as an integer ({})", argument_name, type);
-}
-
-std::string error_argument_interpreted_as_string(std::string_view argument_name, std::string_view type) {
-  return std::format("TypeError: parameter '{}' cannot be interpreted as an string ({})", argument_name, type);
-}
-
-std::string error_dictionary_key_not_found(std::string_view key) {
-  return std::format("KeyError: {}", key);
-}
-
-std::string error_dictionary_update_sequence(int64_t position, int64_t actual, int64_t expected) {
-  return std::format("ValueError: dictionary update sequence element #{} has length {}; {} is required", position, actual, expected);
-}
-
 std::string_view error_byte_in_range() {
   return "ValueError: byte must be in range(0, 256)";
 }
@@ -502,6 +470,39 @@ std::string error_v2_no_attribute(std::string_view type, std::string_view attrib
 
 std::string error_v2_read_only_attribute(std::string_view type, std::string_view attribute) {
   return std::format("'{}' object attribute '{}' is read-only", type, attribute);
+}
+
+
+std::string error_v2_convert(std::string_view from, std::string_view to) {
+  return std::format("cannot convert '{}' object to {}", from, to);
+}
+
+std::string error_v2_convert_string(std::string_view to, std::string_view string_value) {
+  return std::format("could not convert string to {}: '{}'", to, string_value);
+}
+
+std::string_view error_v2_convert_float_infinity_to_integer() {
+  return "cannot convert float infinity to integer";
+}
+
+std::string_view error_v2_convert_float_nan_to_integer() {
+  return "cannot convert float NaN to integer";
+}
+
+std::string error_v2_argument_interpreted_as_integer(std::string_view argument_name, std::string_view type) {
+  return std::format("parameter '{}' cannot be interpreted as an integer ({})", argument_name, type);
+}
+
+std::string error_v2_argument_interpreted_as_string(std::string_view argument_name, std::string_view type) {
+  return std::format("parameter '{}' cannot be interpreted as an string ({})", argument_name, type);
+}
+
+std::string error_v2_dictionary_key_not_found(std::string_view key) {
+  return std::format("key not found '{}'", key);
+}
+
+std::string error_v2_dictionary_update_sequence(int64_t position, int64_t actual, int64_t expected) {
+  return std::format("dictionary update sequence element #{} has length {}; {} is required", position, actual, expected);
 }
 
 }  // namespace error_messages

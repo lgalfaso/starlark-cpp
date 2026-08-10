@@ -1,0 +1,3 @@
+main:2:14: error: parameter 'start' cannot be interpreted as an integer (string)
+    2 | a = enumerate(['foo'], start = 'abc')
+      |     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^

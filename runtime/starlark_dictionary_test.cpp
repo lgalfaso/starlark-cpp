@@ -554,7 +554,7 @@ TEST(StarlarkDictionary, KeyError) {
 
   EXPECT_EQ(nullptr, dictionary.index(s_one, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("KeyError: \"key1\"", error_callback.messages[0]);
+  EXPECT_EQ("key not found '\"key1\"'", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, IndexAssign) {
@@ -1120,7 +1120,7 @@ TEST(StarlarkDictionary, PopKeyNotFound) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("KeyError: 0", error_callback.messages[0]);
+  EXPECT_EQ("key not found '0'", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1941,7 +1941,7 @@ TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements1) {
 
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 0; 2 is required");
+  EXPECT_EQ(error_callback.messages[0], "dictionary update sequence element #1 has length 0; 2 is required");
 }
 
 TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements2) {
@@ -1974,7 +1974,7 @@ TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements2) {
 
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 1; 2 is required");
+  EXPECT_EQ(error_callback.messages[0], "dictionary update sequence element #1 has length 1; 2 is required");
 }
 
 TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements3) {
@@ -2009,7 +2009,7 @@ TEST(StarlarkDictionary, UpdateFromIterableWithWrongNumberOfElements3) {
 
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: dictionary update sequence element #1 has length 3; 2 is required");
+  EXPECT_EQ(error_callback.messages[0], "dictionary update sequence element #1 has length 3; 2 is required");
 }
 
 TEST(StarlarkDictionary, UpdateWhileIterating) {

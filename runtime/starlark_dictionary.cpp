@@ -15,10 +15,10 @@
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::error_messages::error_dictionary_key_not_found;
-using ::starlark::error_messages::error_dictionary_update_sequence;
 using ::starlark::error_messages::error_mutate_frozen_value;
 using ::starlark::error_messages::error_op_in_loop;
+using ::starlark::error_messages::error_v2_dictionary_key_not_found;
+using ::starlark::error_messages::error_v2_dictionary_update_sequence;
 using ::starlark::error_messages::error_v2_empty_dictionary;
 using ::starlark::error_messages::error_v2_unhashable_key;
 using ::starlark::error_messages::error_v2_unpack_too_few;
@@ -202,7 +202,7 @@ starlark_obj* starlark_dictionary::index(const starlark_obj& other, context& ctx
   }
   auto result = values_.find(&const_cast<starlark_obj&>(other));
   if (result == values_.end()) {
-    error_callback.add_error(error_dictionary_key_not_found(other.repr()));
+    error_callback.add_error(error_v2_dictionary_key_not_found(other.repr()));
     return nullptr;
   }
   return result->second;
@@ -269,7 +269,7 @@ starlark_obj* starlark_dictionary::pop(starlark_obj* key, starlark_obj* default_
   auto it = values_.find(key);
   if (it == values_.end()) {
     if (default_value == nullptr) {
-      error_callback.add_error(error_dictionary_key_not_found(key->repr()));
+      error_callback.add_error(error_v2_dictionary_key_not_found(key->repr()));
     }
     return default_value;
   }
@@ -335,19 +335,19 @@ status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::n
           return error_status();
         }
         if (!it2->has_next()) {
-          error_callback.add_error(error_dictionary_update_sequence(pos, 0, 2));
+          error_callback.add_error(error_v2_dictionary_update_sequence(pos, 0, 2));
           return error_status();
         }
         auto* key = it2->next();
         assert(key != nullptr);
         if (!it2->has_next()) {
-          error_callback.add_error(error_dictionary_update_sequence(pos, 1, 2));
+          error_callback.add_error(error_v2_dictionary_update_sequence(pos, 1, 2));
           return error_status();
         }
         auto* value = it2->next();
         assert(value != nullptr);
         if (it2->has_next()) {
-          error_callback.add_error(error_dictionary_update_sequence(pos, kv->len(false, error_callback), 2));
+          error_callback.add_error(error_v2_dictionary_update_sequence(pos, kv->len(false, error_callback), 2));
           return error_status();
         }
         if (insert(key, value, error_callback).second) {

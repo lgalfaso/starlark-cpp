@@ -12,8 +12,8 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_convert_float_infinity_to_integer;
-using ::starlark::error_messages::error_convert_float_nan_to_integer;
+using ::starlark::error_messages::error_v2_convert_float_infinity_to_integer;
+using ::starlark::error_messages::error_v2_convert_float_nan_to_integer;
 
 namespace starlark {
 namespace runtime {
@@ -34,9 +34,9 @@ starlark_obj* create_integer(number&& value, context& ctx) {
 starlark_obj* create_integer_from_float(double value, context& ctx, error_fn& error_callback) {
   if (!std::isfinite(value)) {
     if (std::isinf(value)) {
-      error_callback.add_error(error_convert_float_infinity_to_integer());
+      error_callback.add_error(error_v2_convert_float_infinity_to_integer());
     } else {
-      error_callback.add_error(error_convert_float_nan_to_integer());
+      error_callback.add_error(error_v2_convert_float_nan_to_integer());
     }
     return nullptr;
   }

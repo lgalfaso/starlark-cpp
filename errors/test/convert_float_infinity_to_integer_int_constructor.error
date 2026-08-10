@@ -1,0 +1,3 @@
+main:3:8: error: cannot convert float infinity to integer
+    3 | b = int(a)
+      |     ~~~^^^

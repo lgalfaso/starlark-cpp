@@ -27,8 +27,6 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::parse_number;
 using ::starlark::error_messages::error_argument_bad_operand_type;
-using ::starlark::error_messages::error_argument_interpreted_as_integer;
-using ::starlark::error_messages::error_argument_interpreted_as_string;
 using ::starlark::error_messages::error_argument_non_zero;
 using ::starlark::error_messages::error_argument_string_int_bool_or_real;
 using ::starlark::error_messages::error_argument_string_or_real;
@@ -37,8 +35,6 @@ using ::starlark::error_messages::error_arguments_one_or_two;
 using ::starlark::error_messages::error_arguments_too_many;
 using ::starlark::error_messages::error_attribute_string;
 using ::starlark::error_messages::error_bytes_in_range;
-using ::starlark::error_messages::error_convert;
-using ::starlark::error_messages::error_convert_string;
 using ::starlark::error_messages::error_empty_iterator;
 using ::starlark::error_messages::error_expect_character;
 using ::starlark::error_messages::error_expect_one_character_or_one_byte;
@@ -53,6 +49,10 @@ using ::starlark::error_messages::error_non_string_with_base;
 using ::starlark::error_messages::error_overflow;
 using ::starlark::error_messages::error_overflow_float_too_large;
 using ::starlark::error_messages::error_unknown_argument;
+using ::starlark::error_messages::error_v2_argument_interpreted_as_integer;
+using ::starlark::error_messages::error_v2_argument_interpreted_as_string;
+using ::starlark::error_messages::error_v2_convert;
+using ::starlark::error_messages::error_v2_convert_string;
 using ::starlark::error_messages::error_v2_interpreted_as_integer;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
@@ -302,7 +302,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
   }
   auto* it = source->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
-    error_callback.add_error(error_convert(source->type(), starlark_types::bytes_t));
+    error_callback.add_error(error_v2_convert(source->type(), starlark_types::bytes_t));
     return nullptr;
   }
   std::string result;
@@ -430,7 +430,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
     return nullptr;
   }
   if (start != nullptr && start->type() != starlark_types::int_t) {
-    error_callback.add_error(error_argument_interpreted_as_integer("start", start->type()));
+    error_callback.add_error(error_v2_argument_interpreted_as_integer("start", start->type()));
     return nullptr;
   }
   auto* it = iterable->get_iterator(true, ctx, error_callback);
@@ -495,7 +495,7 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
         char* end;
         double double_value = std::strtod(svalue.data(), &end);
         if (end != &svalue.back() + 1) {
-          error_callback.add_error(error_convert_string(starlark_types::float_t, svalue));
+          error_callback.add_error(error_v2_convert_string(starlark_types::float_t, svalue));
           return nullptr;
         }
         if (errno != 0) {
@@ -576,7 +576,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
     if (key == "base") {
       assert(value != nullptr);
       if (value->type() != starlark_types::int_t) {
-        error_callback.add_error(error_argument_interpreted_as_integer("base", value->type()));
+        error_callback.add_error(error_v2_argument_interpreted_as_integer("base", value->type()));
         return nullptr;
       }
       base_param = value;
@@ -925,7 +925,7 @@ starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_
     if (key == "sep") {
       assert(value != nullptr);
       if (value->type() != starlark_types::string_t) {
-        error_callback.add_error(error_argument_interpreted_as_string("sep", value->type()));
+        error_callback.add_error(error_v2_argument_interpreted_as_string("sep", value->type()));
         return nullptr;
       }
       sep = value->str();

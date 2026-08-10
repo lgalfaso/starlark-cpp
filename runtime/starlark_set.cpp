@@ -13,9 +13,9 @@
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::error_messages::error_dictionary_key_not_found;
 using ::starlark::error_messages::error_mutate_frozen_value;
 using ::starlark::error_messages::error_op_in_loop;
+using ::starlark::error_messages::error_v2_dictionary_key_not_found;
 using ::starlark::error_messages::error_v2_empty_set;
 using ::starlark::error_messages::error_v2_unhashable_value;
 using ::starlark::error_messages::error_v2_unpack_too_few;
@@ -541,7 +541,7 @@ status starlark_set::remove(starlark_obj* element, error_fn& error_callback) {
     return error_status();
   }
   if (values.erase(element) == 0) {
-    error_callback.add_error(error_dictionary_key_not_found(element->repr()));
+    error_callback.add_error(error_v2_dictionary_key_not_found(element->repr()));
     return error_status();
   }
   return ok_status();

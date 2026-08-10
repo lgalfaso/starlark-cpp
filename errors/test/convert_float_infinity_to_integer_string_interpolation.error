@@ -1,0 +1,3 @@
+main:3:43: error: cannot convert float infinity to integer
+    3 | print('some string %o more of the string' % a)
+      |                                           ^
