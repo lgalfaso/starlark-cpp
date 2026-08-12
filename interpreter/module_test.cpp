@@ -381,7 +381,7 @@ foo = []
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "TypeError: trying to mutate a frozen list value\n    4 | foo.append(1)\n      | ~~~~~~~~~~^^^\n");
+  EXPECT_EQ(logging.begin()->message(), "trying to mutate a frozen list value\n    4 | foo.append(1)\n      | ~~~~~~~~~~^^^\n");
 }
 
 TEST(Interpreter, ObjectsInModuleAreFrozen_2) {
@@ -408,7 +408,7 @@ def foo(x = []):
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "TypeError: trying to mutate a frozen list value\n    3 |   x.append(1)\n      |   ~~~~~~~~^^^\n");
+  EXPECT_EQ(logging.begin()->message(), "trying to mutate a frozen list value\n    3 |   x.append(1)\n      |   ~~~~~~~~^^^\n");
 }
 
 }  // namespace

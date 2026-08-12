@@ -13,10 +13,10 @@
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::error_messages::error_mutate_frozen_value;
-using ::starlark::error_messages::error_op_in_loop;
 using ::starlark::error_messages::error_v2_dictionary_key_not_found;
 using ::starlark::error_messages::error_v2_empty_set;
+using ::starlark::error_messages::error_v2_mutate_frozen_value;
+using ::starlark::error_messages::error_v2_op_in_loop;
 using ::starlark::error_messages::error_v2_unhashable_value;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
@@ -232,7 +232,7 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, context& ctx
 }
 
 starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("remove", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -246,7 +246,7 @@ starlark_obj* starlark_set::minus_equals_assign(const starlark_obj& other, conte
 }
 
 starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("intersection", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -262,7 +262,7 @@ starlark_obj* starlark_set::ampersand_equals_assign(const starlark_obj& other, c
 }
 
 starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("merge", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -276,7 +276,7 @@ starlark_obj* starlark_set::pipe_equals_assign(const starlark_obj& other, contex
 }
 
 starlark_obj* starlark_set::hat_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  if (!can_modify("update", error_callback)) {
+  if (!can_modify("disjoin", error_callback)) {
     return nullptr;
   }
   if (other.type() != type()) {
@@ -298,7 +298,7 @@ starlark_iterator* starlark_set::get_iterator(bool produce_error, context& ctx, 
 }
 
 status_or<bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("add", error_callback)) {
     return status_or<bool>(status_code::kRuntimeError);
   }
   if (element->hash() == -1) {
@@ -309,7 +309,7 @@ status_or<bool> starlark_set::add(starlark_obj* element, error_fn& error_callbac
 }
 
 status starlark_set::clear(error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("clear", error_callback)) {
     return error_status();
   }
   values.clear();
@@ -338,7 +338,7 @@ starlark_obj* starlark_set::difference(const std::vector<starlark_obj*>& others,
 }
 
 status starlark_set::difference_update(std::vector<starlark_obj*> others, context& ctx, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("difference_update", error_callback)) {
     return error_status();
   }
   for (auto* other : others) {
@@ -362,7 +362,7 @@ status starlark_set::difference_update(std::vector<starlark_obj*> others, contex
 }
 
 status starlark_set::discard(starlark_obj* element, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("discard", error_callback)) {
     return error_status();
   }
   if (element->hash() == -1) {
@@ -414,7 +414,7 @@ starlark_obj* starlark_set::intersection(const std::vector<starlark_obj*>& other
 }
 
 status starlark_set::intersection_update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("intersection_update", error_callback)) {
     return error_status();
   }
   for (auto* other : others) {
@@ -520,7 +520,7 @@ status_or<bool> starlark_set::issuperset(starlark_obj* other, context& ctx, erro
 }
 
 starlark_obj* starlark_set::pop(error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("pop", error_callback)) {
     return nullptr;
   }
   if (values.empty()) {
@@ -533,7 +533,7 @@ starlark_obj* starlark_set::pop(error_fn& error_callback) {
 }
 
 status starlark_set::remove(starlark_obj* element, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("remove", error_callback)) {
     return error_status();
   }
   if (element->hash() == -1) {
@@ -572,7 +572,7 @@ starlark_obj* starlark_set::symmetric_difference(starlark_obj* other, context& c
 }
 
 status starlark_set::symmetric_difference_update(starlark_obj* other, context& ctx, error_fn& error_callback) {
-  if (!can_modify("update", error_callback)) {
+  if (!can_modify("symmetric_difference_update", error_callback)) {
     return error_status();
   }
   if (other == this) {
@@ -621,7 +621,7 @@ starlark_obj* starlark_set::union_(const std::vector<starlark_obj*>& others, con
 }
 
 status starlark_set::update(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("update", error_callback)) {
     return error_status();
   }
   for (auto* other : others) {
@@ -696,11 +696,11 @@ void starlark_set::starlark_set_iterator::end_iterator() {
 
 bool starlark_set::can_modify(std::string_view op, error_fn& error_callback) const {
   if (iterators_count) {
-    error_callback.add_error(error_op_in_loop(type(), op));
+    error_callback.add_error(error_v2_op_in_loop(type(), op));
     return false;
   }
   if (freezed) {
-    error_callback.add_error(error_mutate_frozen_value(type()));
+    error_callback.add_error(error_v2_mutate_frozen_value(type()));
     return false;
   }
   return true;

@@ -273,7 +273,7 @@ TEST(StarlarkDictionary, InsertFreezed) {
 
   EXPECT_THAT(dict.insert(&none, &none, error_callback), Pair(false, true));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_THAT(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
+  EXPECT_THAT(error_callback.messages[0], "trying to mutate a frozen dict value");
 }
 
 TEST(StarlarkDictionary, Membership) {
@@ -422,7 +422,7 @@ TEST(StarlarkDictionary, PipeEqualsAssignWhileIterating) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.pipe_equals_assign(dictionary, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform append, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, PipeEqualsAssigWithFreeze) {
@@ -440,7 +440,7 @@ TEST(StarlarkDictionary, PipeEqualsAssigWithFreeze) {
   dictionary.freeze();
   dictionary.pipe_equals_assign(dictionary, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
+  EXPECT_EQ(error_callback.messages[0], "trying to mutate a frozen dict value");
 }
 
 TEST(StarlarkDictionary, Len) {
@@ -508,7 +508,7 @@ TEST(StarlarkDictionary, MutationWhileIterating1) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.insert(&s_one, &one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform insert, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Index) {
@@ -576,7 +576,7 @@ TEST(StarlarkDictionary, IndexAssign) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
-TEST(StarlarkDictionary, IdexAssignWhileIterating) {
+TEST(StarlarkDictionary, IndexAssignWhileIterating) {
   error_handler error_callback;
   Arena arena;
   context ctx(arena);
@@ -594,7 +594,7 @@ TEST(StarlarkDictionary, IdexAssignWhileIterating) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   dictionary.index_assign(s_two, two, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in update: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform assign, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, IndexAssignWithFreeze) {
@@ -612,7 +612,7 @@ TEST(StarlarkDictionary, IndexAssignWithFreeze) {
   dictionary.freeze();
   dictionary.index_assign(s_two, two, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen dict value");
+  EXPECT_EQ(error_callback.messages[0], "trying to mutate a frozen dict value");
 }
 
 TEST(StarlarkDictionary, IndexAssignUsingUnhashableKey) {
@@ -672,7 +672,7 @@ TEST(StarlarkDictionary, ClearWhileIterating) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in delete: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform clear, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1222,7 +1222,7 @@ TEST(StarlarkDictionary, PopWhileIterating) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in delete: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform pop, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1367,7 +1367,7 @@ TEST(StarlarkDictionary, PopitemWhileIterating) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in delete: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform popitem, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
   EXPECT_EQ(dictionary.str(), "{\"key0\": 0, \"key1\": 1}");
 }
 
@@ -1552,7 +1552,7 @@ TEST(StarlarkDictionary, SetdefaultWhileIterating) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform setdefault, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, SetdefaultUnhashableKey) {
@@ -2032,7 +2032,7 @@ TEST(StarlarkDictionary, UpdateWhileIterating) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform update, dict value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkDictionary, Values) {

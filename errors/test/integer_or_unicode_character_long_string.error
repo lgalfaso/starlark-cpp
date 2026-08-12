@@ -1,0 +1,3 @@
+main:2:10: error: %c requires an int or a unicode character, not string of length 3
+    2 | a = '%c' % 'abc'
+      |          ^

@@ -1,0 +1,3 @@
+main:2:7: error: sequences must be at most 10 elements
+    2 | a = 2 * [0, 1, 2, 3, 4, 5]
+      |       ^

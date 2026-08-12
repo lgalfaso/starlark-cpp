@@ -1,0 +1,3 @@
+main:3:9: error: sequences must be at most 10 elements
+    3 | a.append(11)
+      | ~~~~~~~~^^^^

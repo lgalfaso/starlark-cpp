@@ -1,0 +1,3 @@
+main:2:10: error: bytes must be at most 10 elements
+    2 | a = bytes([65] * 11)
+      |     ~~~~~^^^^^^^^^^^

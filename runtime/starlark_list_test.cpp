@@ -356,7 +356,7 @@ TEST(StarlarkList, AddWithFreeze) {
   list.freeze();
   list.append(&one, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
+  EXPECT_EQ(error_callback.messages[0], "trying to mutate a frozen list value");
 }
 
 TEST(StarlarkList, AddWithMultipleFreeze) {
@@ -372,7 +372,7 @@ TEST(StarlarkList, AddWithMultipleFreeze) {
   list.freeze();
   list.append(&one, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
+  EXPECT_EQ(error_callback.messages[0], "trying to mutate a frozen list value");
 }
 
 TEST(StarlarkList, Membership) {
@@ -499,7 +499,7 @@ TEST(StarlarkList, BinaryPlusOverflowOverflow) {
 
   ASSERT_EQ(result, nullptr);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 19 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 19 elements");
   EXPECT_EQ(list_1.str(), "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]");
   EXPECT_EQ(list_2.str(), "[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]");
 }
@@ -514,7 +514,7 @@ TEST(StarlarkList, BinaryPlusNotList) {
   auto* result = list.binary_plus(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate list (not \"tuple\") to list");
+  EXPECT_EQ(error_callback.messages[0], "can only concatenate list (not 'tuple') to list");
 }
 
 TEST(StarlarkList, PlusEqualsAssign) {
@@ -576,7 +576,7 @@ TEST(StarlarkList, PlusEqualsAssignOverflowOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 19 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 19 elements");
 }
 
 TEST(StarlarkList, PlusEqualsAssignSelf) {
@@ -607,7 +607,7 @@ TEST(StarlarkList, PlusEqualsAssignNotList) {
   auto* result = list.plus_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate list (not \"tuple\") to list");
+  EXPECT_EQ(error_callback.messages[0], "can only concatenate list (not 'tuple') to list");
 }
 
 TEST(StarlarkList, PlusEqualsAssignWhileIterating) {
@@ -624,7 +624,7 @@ TEST(StarlarkList, PlusEqualsAssignWhileIterating) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.plus_equals_assign(list, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform extend, list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, StarEqualsAssign) {
@@ -689,7 +689,7 @@ TEST(StarlarkList, StarEqualsAssignOverflowOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 19 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 19 elements");
 }
 
 TEST(StarlarkList, StarEqualsAssignOverflowNoOverflowBigint) {
@@ -723,7 +723,7 @@ TEST(StarlarkList, StarEqualsAssignOverflowOverflowBigint) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 19 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 19 elements");
 }
 
 TEST(StarlarkList, StarEqualsAssignNegativeAndZero) {
@@ -799,7 +799,7 @@ TEST(StarlarkList, StarEqualsAssignNotInt) {
   auto* result = list.star_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'tuple'");
 }
 
 TEST(StarlarkList, StarEqualsAssignTooBig) {
@@ -813,7 +813,7 @@ TEST(StarlarkList, StarEqualsAssignTooBig) {
   auto* result = list.star_equals_assign(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 2147483647 elements");
 }
 
 TEST(StarlarkList, StarEqualsAssignWhileIterating1) {
@@ -830,7 +830,7 @@ TEST(StarlarkList, StarEqualsAssignWhileIterating1) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.star_equals_assign(zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform append, list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, StarEqualsAssignWhileIterating2) {
@@ -847,7 +847,7 @@ TEST(StarlarkList, StarEqualsAssignWhileIterating2) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.star_equals_assign(zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform append, list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, StarEqualsAssignWhileIterating3) {
@@ -865,7 +865,7 @@ TEST(StarlarkList, StarEqualsAssignWhileIterating3) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.star_equals_assign(tuple, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'tuple'");
 }
 
 TEST(StarlarkList, BinaryStar) {
@@ -938,7 +938,7 @@ TEST(StarlarkList, BinaryStarOverflowOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 20 elements");
 }
 
 TEST(StarlarkList, BinaryStarOverflowNoOverflowBigint) {
@@ -970,7 +970,7 @@ TEST(StarlarkList, BinaryStarOverflowOverflowBigint) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 20 elements");
 }
 
 TEST(StarlarkList, BinaryStarReverse) {
@@ -1017,7 +1017,7 @@ TEST(StarlarkList, BinaryStarNotInt) {
   auto* result = list.binary_star(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'tuple'");
 }
 
 TEST(StarlarkList, BinaryStarTooBig) {
@@ -1031,7 +1031,7 @@ TEST(StarlarkList, BinaryStarTooBig) {
   auto* result = list.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 2147483647 elements");
 }
 
 TEST(StarlarkList, Len) {
@@ -1090,7 +1090,7 @@ TEST(StarlarkList, MutationWhileIterating1) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.append(&zero, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in append: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform append, list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, Subscript) {
@@ -1292,7 +1292,7 @@ TEST(StarlarkList, IndexAssignWhileIterating) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.index_assign(zero, one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("Error in update: list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
+  EXPECT_EQ("cannot perform update, list value is temporarily immutable due to active for-loop iteration", error_callback.messages[0]);
 }
 
 TEST(StarlarkList, IndexAssignWithFreeze) {
@@ -1307,7 +1307,7 @@ TEST(StarlarkList, IndexAssignWithFreeze) {
   list.freeze();
   list.index_assign(*ctx.zero(), one, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
+  EXPECT_EQ(error_callback.messages[0], "trying to mutate a frozen list value");
 }
 
 TEST(StarlarkList, SliceRange) {
@@ -1625,7 +1625,7 @@ TEST(StarlarkList, AppendOverflow) {
   EXPECT_THAT(error_callback.messages, IsEmpty());
   list.append(ctx.zero(), ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 20 elements");
 }
 
 TEST(StarlarkList, AppendWhileIterating) {
@@ -1646,7 +1646,7 @@ TEST(StarlarkList, AppendWhileIterating) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Error in append: list value is temporarily immutable due to active for-loop iteration");
+  EXPECT_EQ(error_callback.messages[0], "cannot perform append, list value is temporarily immutable due to active for-loop iteration");
   EXPECT_EQ(list.str(), "[]");
 }
 
@@ -1798,7 +1798,7 @@ TEST(StarlarkList, ClearWhileIterating) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Error in delete: list value is temporarily immutable due to active for-loop iteration");
+  EXPECT_EQ(error_callback.messages[0], "cannot perform clear, list value is temporarily immutable due to active for-loop iteration");
   EXPECT_EQ(list.str(), "[0]");
 }
 
@@ -1939,7 +1939,7 @@ TEST(StarlarkList, ExtendWhileIterating) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Error in append: list value is temporarily immutable due to active for-loop iteration");
+  EXPECT_EQ(error_callback.messages[0], "cannot perform extend, list value is temporarily immutable due to active for-loop iteration");
   EXPECT_EQ(list1.str(), "[0]");
 }
 
@@ -2655,7 +2655,7 @@ TEST(StarlarkList, InsertWhileIterating) {
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
-  EXPECT_EQ(error_callback.messages[0], "Error in append: list value is temporarily immutable due to active for-loop iteration");
+  EXPECT_EQ(error_callback.messages[0], "cannot perform insert, list value is temporarily immutable due to active for-loop iteration");
 }
 
 TEST(StarlarkList, InsertNoArguments) {
@@ -2938,7 +2938,7 @@ TEST(StarlarkList, PopWhileIterating) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Error in delete: list value is temporarily immutable due to active for-loop iteration");
+  EXPECT_EQ(error_callback.messages[0], "cannot perform pop, list value is temporarily immutable due to active for-loop iteration");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 
@@ -3181,7 +3181,7 @@ TEST(StarlarkList, RemoveWhileIterating) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "Error in delete: list value is temporarily immutable due to active for-loop iteration");
+  EXPECT_EQ(error_callback.messages[0], "cannot perform remove, list value is temporarily immutable due to active for-loop iteration");
   EXPECT_EQ(list1.str(), "[0, 1, 0, 0, 1, 1]");
 }
 

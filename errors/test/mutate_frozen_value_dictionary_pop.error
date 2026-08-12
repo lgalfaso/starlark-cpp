@@ -1,0 +1,3 @@
+main:6:8: error: trying to mutate a frozen dict value
+    6 |   b.pop(1)
+      |   ~~~~~^^^

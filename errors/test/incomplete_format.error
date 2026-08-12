@@ -1,0 +1,3 @@
+main:2:9: error: incomplete format
+    2 | a = '%' % 1
+      |         ^

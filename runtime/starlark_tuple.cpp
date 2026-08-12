@@ -17,9 +17,9 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_max_sequence_length;
-using ::starlark::error_messages::error_no_concat;
-using ::starlark::error_messages::error_no_multiply_sequence;
+using ::starlark::error_messages::error_v2_max_sequence_length;
+using ::starlark::error_messages::error_v2_no_concat;
+using ::starlark::error_messages::error_v2_no_multiply_sequence;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
 
@@ -42,7 +42,7 @@ namespace {
 
 starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   if (other.type() != this_obj.type()) {
-    error_callback.add_error(error_no_concat(this_obj.type(), other.type(), this_obj.type()));
+    error_callback.add_error(error_v2_no_concat(this_obj.type(), other.type(), this_obj.type()));
     return nullptr;
   }
   const starlark_tuple& t_other = static_cast<const starlark_tuple&>(other);
@@ -51,7 +51,7 @@ starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other,
   std::size_t expected_size;
   if (ckd_add(&expected_size, this_values.size(), other_values.size()) ||
       expected_size > ctx.options().max_sequence_size) {
-    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
     return nullptr;
   }
   auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
@@ -78,7 +78,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
       std::size_t expected_size;
       if (ckd_mul(&expected_size, this_values.size(), value) ||
           expected_size > ctx.options().max_sequence_size) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
@@ -98,14 +98,14 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
         return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       int64_t int_value = value.at(0);
       std::size_t expected_size;
       if (ckd_mul(&expected_size, this_values.size(), int_value) ||
           expected_size > ctx.options().max_sequence_size) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
@@ -117,7 +117,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
       return result;
     }
     default:
-      error_callback.add_error(error_no_multiply_sequence(other.type()));
+      error_callback.add_error(error_v2_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }

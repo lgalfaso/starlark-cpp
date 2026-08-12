@@ -1,0 +1,3 @@
+main:2:10: error: %c requires an int or a unicode character, not list
+    2 | a = '%c' % []
+      |          ^

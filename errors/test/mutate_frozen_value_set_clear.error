@@ -1,0 +1,3 @@
+main:6:10: error: trying to mutate a frozen set value
+    6 |   b.clear()
+      |   ~~~~~~~^^

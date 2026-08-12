@@ -265,7 +265,7 @@ TEST(StarlarkBytes, BinaryPlusNotBytes) {
   auto* result = bytes.binary_plus(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to bytes");
+  EXPECT_EQ(error_callback.messages[0], "cannot concat tuple to bytes");
 }
 
 TEST(StarlarkBytes, PlusEqualsAssign) {
@@ -292,7 +292,7 @@ TEST(StarlarkBytes, PlusEqualsAssignOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "bytes must be at most 200 elements");
 }
 
 TEST(StarlarkBytes, PlusEqualsAssignOverflowNoOverflow) {
@@ -318,7 +318,7 @@ TEST(StarlarkBytes, PlusEqualsAssignNotBytes) {
   auto* result = bytes.plus_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to bytes");
+  EXPECT_EQ(error_callback.messages[0], "cannot concat tuple to bytes");
 }
 
 TEST(StarlarkBytes, StarEqualsAssign) {
@@ -395,7 +395,7 @@ TEST(StarlarkBytes, StarEqualsAssignOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "bytes must be at most 200 elements");
 }
 
 TEST(StarlarkBytes, StarEqualsAssignOverflowNoOverflow) {
@@ -422,7 +422,7 @@ TEST(StarlarkBytes, StarEqualsAssignOverflowBigint) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "bytes must be at most 200 elements");
 }
 
 TEST(StarlarkBytes, StarEqualsAssignOverflowNoOverflowBigint) {
@@ -448,7 +448,7 @@ TEST(StarlarkBytes, StarEqualsNotInt) {
   auto* result = bytes.star_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'tuple'");
 }
 
 TEST(StarlarkBytes, BinaryStar) {
@@ -524,7 +524,7 @@ TEST(StarlarkBytes, BinaryStarNotInt) {
   auto* result = bytes.binary_star(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'tuple'");
 }
 
 TEST(StarlarkBytes, BinaryStarTooBig) {
@@ -537,7 +537,7 @@ TEST(StarlarkBytes, BinaryStarTooBig) {
   auto* result = bytes.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes must be at most 2147483647 elements");
+  EXPECT_EQ(error_callback.messages[0], "bytes must be at most 2147483647 elements");
 }
 
 TEST(StarlarkBytes, Len) {

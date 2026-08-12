@@ -1,0 +1,3 @@
+main:2:32: error: not enough arguments for format string
+    2 | a = 'abc %o def %o ghi %o jkl' % (1, 2)
+      |                                ^

@@ -15,11 +15,11 @@
 #include "runtime/starlark_types.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::error_messages::error_mutate_frozen_value;
-using ::starlark::error_messages::error_op_in_loop;
 using ::starlark::error_messages::error_v2_dictionary_key_not_found;
 using ::starlark::error_messages::error_v2_dictionary_update_sequence;
 using ::starlark::error_messages::error_v2_empty_dictionary;
+using ::starlark::error_messages::error_v2_mutate_frozen_value;
+using ::starlark::error_messages::error_v2_op_in_loop;
 using ::starlark::error_messages::error_v2_unhashable_key;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
@@ -209,7 +209,7 @@ starlark_obj* starlark_dictionary::index(const starlark_obj& other, context& ctx
 }
 
 void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) {
-  if (!can_modify("update", error_callback)) {
+  if (!can_modify("assign", error_callback)) {
     return;
   }
   if (idx.hash() == -1) {
@@ -220,7 +220,7 @@ void starlark_dictionary::index_assign(const starlark_obj& idx, starlark_obj& el
 }
 
 status starlark_dictionary::clear(error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("clear", error_callback)) {
     return error_status();
   }
   values_.clear();
@@ -259,7 +259,7 @@ starlark_obj* starlark_dictionary::keys(context& ctx) const {
 }
 
 starlark_obj* starlark_dictionary::pop(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("pop", error_callback)) {
     return nullptr;
   }
   if (key->hash() == -1) {
@@ -279,7 +279,7 @@ starlark_obj* starlark_dictionary::pop(starlark_obj* key, starlark_obj* default_
 }
 
 starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("popitem", error_callback)) {
     return nullptr;
   }
   if (values_.empty()) {
@@ -295,7 +295,7 @@ starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callbac
 }
 
 starlark_obj* starlark_dictionary::setdefault(starlark_obj* key, starlark_obj* default_value, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("setdefault", error_callback)) {
     return nullptr;
   }
   if (key->hash() == -1) {
@@ -311,7 +311,7 @@ starlark_obj* starlark_dictionary::setdefault(starlark_obj* key, starlark_obj* d
 }
 
 status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("update", error_callback)) {
     return error_status();
   }
   if (iterable != nullptr) {
@@ -414,7 +414,8 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_dictionary::inner_has
 }
 
 std::pair<bool, bool> starlark_dictionary::insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  // TODO(lmirelmann): check whether this can be replaced with `insert_unsafe`.
+  if (!can_modify("insert", error_callback)) {
     return std::make_pair(false, true);
   }
   if (key->hash() == -1) {
@@ -443,11 +444,11 @@ void starlark_dictionary::starlark_dictionary_iterator::end_iterator() {
 
 bool starlark_dictionary::can_modify(std::string_view op, error_fn& error_callback) const {
   if (iterators_count) {
-    error_callback.add_error(error_op_in_loop(type(), op));
+    error_callback.add_error(error_v2_op_in_loop(type(), op));
     return false;
   }
   if (freezed) {
-    error_callback.add_error(error_mutate_frozen_value(type()));
+    error_callback.add_error(error_v2_mutate_frozen_value(type()));
     return false;
   }
   return true;

@@ -1,0 +1,3 @@
+main:6:8: error: trying to mutate a frozen set value
+    6 |   b.add(2)
+      |   ~~~~~^^^

@@ -1,0 +1,3 @@
+main:2:13: error: not all arguments converted during string formatting
+    2 | a = '%o %o' % (1, 2, 3)
+      |             ^

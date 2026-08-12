@@ -1,0 +1,3 @@
+main:5:7: error: can only concatenate list (not 'int') to list
+    5 |     a += 3
+      |     ~~^^

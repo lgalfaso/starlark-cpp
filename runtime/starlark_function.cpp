@@ -27,7 +27,6 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::parse_number;
 using ::starlark::error_messages::error_empty_iterator;
-using ::starlark::error_messages::error_max_bytes_length;
 using ::starlark::error_messages::error_missing_argument;
 using ::starlark::error_messages::error_missing_typed_argument;
 using ::starlark::error_messages::error_multiple_values_for_argument;
@@ -51,6 +50,7 @@ using ::starlark::error_messages::error_v2_expect_one_character_or_one_byte;
 using ::starlark::error_messages::error_v2_int_base;
 using ::starlark::error_messages::error_v2_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_invalid_literal_with_base;
+using ::starlark::error_messages::error_v2_max_bytes_length;
 using ::starlark::error_messages::error_v2_overflow;
 using ::starlark::error_messages::error_v2_overflow_float_too_large;
 using ::starlark::error_messages::error_v2_unknown_argument;
@@ -295,7 +295,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
       utf8_encode_code_point(reader.read_code_point(), result, false, true);
     }
     if (result.length() > ctx.options().max_string_length) {
-      error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
+      error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
       return nullptr;
     }
     return Arena::Create<starlark_bytes>(&ctx.arena(), result);
@@ -303,6 +303,10 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
   auto* it = source->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
     error_callback.add_error(error_v2_convert(source->type(), starlark_types::bytes_t));
+    return nullptr;
+  }
+  if (source->len(false, error_callback) > ctx.options().max_string_length) {
+    error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
     return nullptr;
   }
   std::string result;

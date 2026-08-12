@@ -1,0 +1,3 @@
+main:2:10: error: %o format requires an integer, not string
+    2 | a = "%o" % 'abc'
+      |          ^

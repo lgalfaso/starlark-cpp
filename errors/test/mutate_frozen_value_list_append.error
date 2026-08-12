@@ -1,0 +1,3 @@
+main:6:11: error: trying to mutate a frozen list value
+    6 |   b.append(2)
+      |   ~~~~~~~~^^^

@@ -19,13 +19,13 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_max_sequence_length;
-using ::starlark::error_messages::error_mutate_frozen_value;
-using ::starlark::error_messages::error_no_concat;
-using ::starlark::error_messages::error_no_multiply_sequence;
-using ::starlark::error_messages::error_op_in_loop;
 using ::starlark::error_messages::error_v2_index_out_of_range;
 using ::starlark::error_messages::error_v2_item_not_in_collection;
+using ::starlark::error_messages::error_v2_max_sequence_length;
+using ::starlark::error_messages::error_v2_mutate_frozen_value;
+using ::starlark::error_messages::error_v2_no_concat;
+using ::starlark::error_messages::error_v2_no_multiply_sequence;
+using ::starlark::error_messages::error_v2_op_in_loop;
 using ::starlark::error_messages::error_v2_unpack_too_few;
 using ::starlark::error_messages::error_v2_unpack_too_many;
 using ::starlark::result::error_status;
@@ -157,14 +157,14 @@ bool starlark_list::binary_in(const starlark_obj& other, error_fn& error_callbac
 
 starlark_obj* starlark_list::binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
   if (other.type() != type()) {
-    error_callback.add_error(error_no_concat(type(), other.type(), type()));
+    error_callback.add_error(error_v2_no_concat(type(), other.type(), type()));
     return nullptr;
   }
   const starlark_list& l_other = static_cast<const starlark_list&>(other);
   std::size_t expected_size;
   if (ckd_add(&expected_size, values.size(), l_other.values.size()) ||
       expected_size > ctx.options().max_sequence_size) {
-    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
     return nullptr;
   }
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), values.size() + l_other.values.size());
@@ -186,7 +186,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
       std::size_t expected_size;
       if (ckd_mul(&expected_size, values.size(), value) ||
           expected_size > ctx.options().max_sequence_size) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       auto* result = Arena::Create<starlark_list>(&ctx.arena(), expected_size);
@@ -204,14 +204,14 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
         return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       int64_t int_value = value.at(0);
       std::size_t expected_size;
       if (ckd_mul(&expected_size, values.size(), int_value) ||
           expected_size > ctx.options().max_sequence_size) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       auto* result = Arena::Create<starlark_list>(&ctx.arena(), expected_size);
@@ -221,24 +221,24 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
       return result;
     }
     default:
-      error_callback.add_error(error_no_multiply_sequence(other.type()));
+      error_callback.add_error(error_v2_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }
 
 starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
   if (other.type() != type()) {
-    error_callback.add_error(error_no_concat(type(), other.type(), type()));
+    error_callback.add_error(error_v2_no_concat(type(), other.type(), type()));
     return nullptr;
   }
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("extend", error_callback)) {
     return nullptr;
   }
   const starlark_list& l_other = static_cast<const starlark_list&>(other);
   std::size_t expected_size;
   if (ckd_add(&expected_size, values.size(), l_other.values.size()) ||
       expected_size > ctx.options().max_sequence_size) {
-    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
     return nullptr;
   }
   // This needs to be able to handle the case `a += a`
@@ -266,7 +266,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       std::size_t expected_size;
       if (ckd_mul(&expected_size, original_size, value) ||
           expected_size > ctx.options().max_sequence_size) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       for (int64_t i = 1; i < value; ++i) {
@@ -289,7 +289,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
         return this;
       }
       if (value.bit_size() >= 63) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       int64_t int_value = value.at(0);
@@ -297,7 +297,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       std::size_t expected_size;
       if (ckd_mul(&expected_size, original_size, int_value) ||
           expected_size > ctx.options().max_sequence_size) {
-        error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+        error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
       for (int64_t i = 1; i < int_value; ++i) {
@@ -308,7 +308,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       return this;
     }
     default:
-      error_callback.add_error(error_no_multiply_sequence(other.type()));
+      error_callback.add_error(error_v2_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }
@@ -363,7 +363,7 @@ status starlark_list::append(starlark_obj* element, context& ctx, error_fn& erro
     return error_status();
   }
   if (values.size() == ctx.options().max_sequence_size) {
-    error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+    error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
     return error_status();
   }
   values.push_back(element);
@@ -371,7 +371,7 @@ status starlark_list::append(starlark_obj* element, context& ctx, error_fn& erro
 }
 
 status starlark_list::clear(error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("clear", error_callback)) {
     return error_status();
   }
   values.clear();
@@ -379,7 +379,7 @@ status starlark_list::clear(error_fn& error_callback) {
 }
 
 status starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("extend", error_callback)) {
     return error_status();
   }
   auto other_len = other->len(false, error_callback);
@@ -387,7 +387,7 @@ status starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_
     std::size_t expected_size;
     if (ckd_add(&expected_size, values.size(), other_len) ||
         expected_size > ctx.options().max_sequence_size) {
-      error_callback.add_error(error_max_sequence_length(ctx.options().max_sequence_size));
+      error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
       return error_status();
     }
   }
@@ -430,7 +430,7 @@ starlark_obj* starlark_list::index(starlark_obj* element, int64_t start, int64_t
 }
 
 status starlark_list::insert(starlark_obj* element, int64_t pos, error_fn& error_callback) {
-  if (!can_modify("append", error_callback)) {
+  if (!can_modify("insert", error_callback)) {
     return error_status();
   }
   if (pos < 0) {
@@ -443,7 +443,7 @@ status starlark_list::insert(starlark_obj* element, int64_t pos, error_fn& error
 }
 
 starlark_obj* starlark_list::pop(int64_t idx, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("pop", error_callback)) {
     return nullptr;
   }
   if (idx < 0) {
@@ -459,7 +459,7 @@ starlark_obj* starlark_list::pop(int64_t idx, error_fn& error_callback) {
 }
 
 status starlark_list::remove(starlark_obj* element, error_fn& error_callback) {
-  if (!can_modify("delete", error_callback)) {
+  if (!can_modify("remove", error_callback)) {
     return error_status();
   }
   for (auto it = values.begin(); it != values.end(); ++it) {
@@ -540,11 +540,11 @@ void starlark_list::starlark_list_iterator::end_iterator() {
 
 bool starlark_list::can_modify(std::string_view op, error_fn& error_callback) const {
   if (iterators_count) {
-    error_callback.add_error(error_op_in_loop(type(), op));
+    error_callback.add_error(error_v2_op_in_loop(type(), op));
     return false;
   }
   if (freezed) {
-    error_callback.add_error(error_mutate_frozen_value(type()));
+    error_callback.add_error(error_v2_mutate_frozen_value(type()));
     return false;
   }
   return true;

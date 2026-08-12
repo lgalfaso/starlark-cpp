@@ -1,0 +1,3 @@
+main:5:13: error: cannot perform append, list value is temporarily immutable due to active for-loop iteration
+    5 |     a.append(3)
+      |     ~~~~~~~~^^^

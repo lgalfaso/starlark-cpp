@@ -1,0 +1,3 @@
+main:2:15: error: bytes must be at most 10 elements
+    2 | a = b'012345' * 2
+      |               ^

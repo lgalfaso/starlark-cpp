@@ -630,7 +630,27 @@ TEST(StarlarkBytes, FromStringOverflowOverflow) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: bytes must be at most 20 elements");
+  EXPECT_EQ(error_callback.messages[0], "bytes must be at most 20 elements");
+}
+
+TEST(StarlarkBytes, FromIterableOverflow) {
+  Arena arena;
+  context ctx(arena, runtime_options{.max_string_length = 20});
+  error_handler error_callback;
+
+  starlark_list list(21);
+  for (int i = 0; i < 21; ++i) {
+    list.unsafe_append(ctx.one());
+  }
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&list);
+
+  auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback);
+  ASSERT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(error_callback.messages[0], "bytes must be at most 20 elements");
 }
 
 TEST(StarlarkBytes, List) {

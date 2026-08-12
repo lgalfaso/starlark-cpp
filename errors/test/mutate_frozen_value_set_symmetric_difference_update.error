@@ -1,0 +1,3 @@
+main:6:32: error: trying to mutate a frozen set value
+    6 |   b.symmetric_difference_update(set([2]))
+      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^

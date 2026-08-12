@@ -1,0 +1,3 @@
+main:5:34: error: cannot perform symmetric_difference_update, set value is temporarily immutable due to active for-loop iteration
+    5 |     a.symmetric_difference_update(set([x + 1]))
+      |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^

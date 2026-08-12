@@ -13,27 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_op_in_loop(std::string_view type, std::string_view op);
-std::string error_mutate_frozen_value(std::string_view type);
-
-std::string error_no_concat(std::string_view this_type, std::string_view other_type);
-std::string error_no_concat(std::string_view this_type, std::string_view other_type, std::string_view possible_type);
-std::string error_no_multiply_sequence(std::string_view other_type);
-
-std::string error_max_sequence_length(int64_t max_length);
-std::string error_max_string_length(int64_t max_length);
-std::string error_max_bytes_length(int64_t max_length);
-std::string error_in_element(std::string_view type, std::string_view actual, std::string_view expected);
-
-std::string_view error_incomplete_format();
-std::string_view error_not_enough_arguments_for_format_string();
-std::string_view error_not_all_arguments_converted_during_string_formatting();
-std::string error_unsupported_format_character(char c, std::size_t pos);
-std::string error_format_integer_is_required(char format, std::string_view type);
-std::string error_format_real_is_required(char format, std::string_view type);
-std::string error_integer_or_unicode_character(std::string_view type);
-std::string error_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len);
-
 std::string error_integer_or_type(std::string_view type, std::string_view other_type);
 std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type);
 std::string error_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type);
@@ -81,8 +60,11 @@ std::string error_unknown_op(int op_code);
 std::string error_recursive_call(std::string_view fn_name);
 
 std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_max_string_length(int64_t max_length);
 std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_max_bytes_length(int64_t max_length);
 std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_max_sequence_length(int64_t max_length);
 std::string error_v2_not_callable(std::string_view type);
 
 std::string error_v2_unpackable(std::string_view type);
@@ -151,6 +133,24 @@ std::string error_v2_expect_character(std::string_view fn_name, std::string_view
 std::string error_v2_expect_one_character_or_one_byte(std::string_view fn_name, std::string_view type);
 std::string error_v2_argument_non_zero(std::string_view fn_name, int64_t arg_pos);
 std::string_view error_v2_step_non_zero();
+
+std::string error_v2_op_in_loop(std::string_view type, std::string_view op);
+std::string error_v2_mutate_frozen_value(std::string_view type);
+
+std::string error_v2_no_concat(std::string_view this_type, std::string_view other_type);
+std::string error_v2_no_concat(std::string_view this_type, std::string_view other_type, std::string_view possible_type);
+std::string error_v2_no_multiply_sequence(std::string_view other_type);
+
+std::string error_v2_in_element(std::string_view type, std::string_view actual, std::string_view expected);
+
+std::string_view error_v2_incomplete_format();
+std::string_view error_v2_not_enough_arguments_for_format_string();
+std::string_view error_v2_not_all_arguments_converted_during_string_formatting();
+std::string error_v2_unsupported_format_character(char c, std::size_t pos);
+std::string error_v2_format_integer_is_required(char format, std::string_view type);
+std::string error_v2_format_real_is_required(char format, std::string_view type);
+std::string error_v2_integer_or_unicode_character(std::string_view type);
+std::string error_v2_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len);
 
 }  // namespace error_messages
 }  // namespace starlark

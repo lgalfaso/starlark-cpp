@@ -225,49 +225,49 @@ TEST(StarlarkString, BinaryInErrors) {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string("a"sv).binary_in(starlark_integer('b'), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string("a"sv).binary_in(starlark_integer('a'), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string("a"sv).binary_in(starlark_bigint('a'), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_bytes(""sv), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not bytes");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not bytes");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_integer(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_integer(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_bigint(-1), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not int");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_string(""sv).binary_in(starlark_bigint(256), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string>' requires string as left operand, not int");
+    EXPECT_EQ(error_callback.messages[0], "'in <string>' requires string as left operand, not int");
   }
 }
 
@@ -295,7 +295,7 @@ TEST(StarlarkString, BinaryPlusNotString) {
   auto* result = str.binary_plus(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to string");
+  EXPECT_EQ(error_callback.messages[0], "cannot concat tuple to string");
 }
 
 TEST(StarlarkString, PlusEqualsAssign) {
@@ -322,7 +322,7 @@ TEST(StarlarkString, PlusEqualsAssignNotString) {
   auto* result = str.plus_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't concat tuple to string");
+  EXPECT_EQ(error_callback.messages[0], "cannot concat tuple to string");
 }
 
 TEST(StarlarkString, PlusEqualsAssignOverflow) {
@@ -336,7 +336,7 @@ TEST(StarlarkString, PlusEqualsAssignOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "string must be at most 200 elements");
 }
 
 TEST(StarlarkString, PlusEqualsAssignOverflowNoOverflow) {
@@ -425,7 +425,7 @@ TEST(StarlarkString, BinaryStarNotInt) {
   auto* result = str.binary_star(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'tuple'");
 }
 
 TEST(StarlarkString, BinaryStarTooBig) {
@@ -438,7 +438,7 @@ TEST(StarlarkString, BinaryStarTooBig) {
   auto* result = str.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 2147483647 elements");
+  EXPECT_EQ(error_callback.messages[0], "string must be at most 2147483647 elements");
 }
 
 TEST(StarlarkString, StarEqualsAssign) {
@@ -515,7 +515,7 @@ TEST(StarlarkString, StarEqualsAssignOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "string must be at most 200 elements");
 }
 
 TEST(StarlarkString, StarEqualsAssignOverflowNoOverflow) {
@@ -542,7 +542,7 @@ TEST(StarlarkString, StarEqualsAssignOverflowBigint) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: string must be at most 200 elements");
+  EXPECT_EQ(error_callback.messages[0], "string must be at most 200 elements");
 }
 
 TEST(StarlarkString, StarEqualsAssignOverflowNoOverflowBigint) {
@@ -568,7 +568,7 @@ TEST(StarlarkString, StarEqualsAssignNotInt) {
   auto* result = str.star_equals_assign(tuple, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'tuple'");
 }
 
 TEST(StarlarkString, LshiftInt) {
@@ -1050,17 +1050,17 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%c", &mid_big_int, "Unicode code point must be in range(0, 0x110000)");
   test_with_error("%c", &big_int, "Unicode code point must be in range(0, 0x110000)");
   test_with_error("%c", &huge_int, "Unicode code point must be in range(0, 0x110000)");
-  test_with_error("%c", & big_float, "TypeError: %c requires an int or a unicode character, not float");
-  test_with_error("%c", &plus_inf, "TypeError: %c requires an int or a unicode character, not float");
-  test_with_error("%c", &minus_inf, "TypeError: %c requires an int or a unicode character, not float");
-  test_with_error("%c", &plus_nan, "TypeError: %c requires an int or a unicode character, not float");
-  test_with_error("%c", &minus_nan, "TypeError: %c requires an int or a unicode character, not float");
-  test_with_error("%c", ctx.empty_string(), "TypeError: %c requires an int or a unicode character, not string of length 0");
-  test_with_error("%c", ctx.empty_bytes(), "TypeError: %c requires an int or a unicode character, not bytes");
-  test_with_error("%c", ctx.false_value(), "TypeError: %c requires an int or a unicode character, not bool");
+  test_with_error("%c", & big_float, "%c requires an int or a unicode character, not float");
+  test_with_error("%c", &plus_inf, "%c requires an int or a unicode character, not float");
+  test_with_error("%c", &minus_inf, "%c requires an int or a unicode character, not float");
+  test_with_error("%c", &plus_nan, "%c requires an int or a unicode character, not float");
+  test_with_error("%c", &minus_nan, "%c requires an int or a unicode character, not float");
+  test_with_error("%c", ctx.empty_string(), "%c requires an int or a unicode character, not string of length 0");
+  test_with_error("%c", ctx.empty_bytes(), "%c requires an int or a unicode character, not bytes");
+  test_with_error("%c", ctx.false_value(), "%c requires an int or a unicode character, not bool");
   test("%c", &char_string, "a");
   test("%c", &char_unicode_string, "Ω");
-  test_with_error("%c", &small_string, "TypeError: %c requires an int or a unicode character, not string of length 3");
+  test_with_error("%c", &small_string, "%c requires an int or a unicode character, not string of length 3");
 
   test("%d", &small_int, "123");
   test("%d", &big_int, "123456789012345678901234567890");
@@ -1070,7 +1070,7 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%d", &minus_inf, "cannot convert float infinity to integer");
   test_with_error("%d", &plus_nan, "cannot convert float NaN to integer");
   test_with_error("%d", &minus_nan, "cannot convert float NaN to integer");
-  test_with_error("%d", &small_string, "TypeError: %d format: an integer is required, not string");
+  test_with_error("%d", &small_string, "%d format requires an integer, not string");
 
   test("%i", &small_int, "123");
   test("%i", &big_int, "123456789012345678901234567890");
@@ -1080,7 +1080,7 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%i", &minus_inf, "cannot convert float infinity to integer");
   test_with_error("%i", &plus_nan, "cannot convert float NaN to integer");
   test_with_error("%i", &minus_nan, "cannot convert float NaN to integer");
-  test_with_error("%i", &small_string, "TypeError: %i format: an integer is required, not string");
+  test_with_error("%i", &small_string, "%i format requires an integer, not string");
 
   test("%o", &small_int, "173");
   test("%o", &big_int, "143564417755415637016711617605322");
@@ -1090,7 +1090,7 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%o", &minus_inf, "cannot convert float infinity to integer");
   test_with_error("%o", &plus_nan, "cannot convert float NaN to integer");
   test_with_error("%o", &minus_nan, "cannot convert float NaN to integer");
-  test_with_error("%o", &small_string, "TypeError: %o format: an integer is required, not string");
+  test_with_error("%o", &small_string, "%o format requires an integer, not string");
 
   test("%x", &small_int, "7b");
   test("%x", &big_int, "18ee90ff6c373e0ee4e3f0ad2");
@@ -1100,7 +1100,7 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%x", &minus_inf, "cannot convert float infinity to integer");
   test_with_error("%x", &plus_nan, "cannot convert float NaN to integer");
   test_with_error("%x", &minus_nan, "cannot convert float NaN to integer");
-  test_with_error("%x", &small_string, "TypeError: %x format: an integer is required, not string");
+  test_with_error("%x", &small_string, "%x format requires an integer, not string");
 
   test("%X", &small_int, "7B");
   test("%X", &big_int, "18EE90FF6C373E0EE4E3F0AD2");
@@ -1110,7 +1110,7 @@ TEST(StarlarkString, Interpolation) {
   test_with_error("%X", &minus_inf, "cannot convert float infinity to integer");
   test_with_error("%X", &plus_nan, "cannot convert float NaN to integer");
   test_with_error("%X", &minus_nan, "cannot convert float NaN to integer");
-  test_with_error("%X", &small_string, "TypeError: %X format: an integer is required, not string");
+  test_with_error("%X", &small_string, "%X format requires an integer, not string");
 
   test("%e", &small_int, "1.230000e+02");
   test("%e", &big_int, "1.234568e+29");
@@ -1120,7 +1120,7 @@ TEST(StarlarkString, Interpolation) {
   test("%e", &minus_inf, "-inf");
   test("%e", &plus_nan, "nan");
   test("%e", &minus_nan, "nan");
-  test_with_error("%e", &small_string, "TypeError: %e format: a real number is required, not string");
+  test_with_error("%e", &small_string, "%e format requires a real number, not string");
 
   test("%E", &small_int, "1.230000E+02");
   test("%E", &big_int, "1.234568E+29");
@@ -1130,7 +1130,7 @@ TEST(StarlarkString, Interpolation) {
   test("%E", &minus_inf, "-inf");
   test("%E", &plus_nan, "nan");
   test("%E", &minus_nan, "nan");
-  test_with_error("%E", &small_string, "TypeError: %E format: a real number is required, not string");
+  test_with_error("%E", &small_string, "%E format requires a real number, not string");
 
   test("%f", &small_int, "123.000000");
   test("%f", &big_int, "123456789012345677877719597056.000000");
@@ -1140,7 +1140,7 @@ TEST(StarlarkString, Interpolation) {
   test("%f", &minus_inf, "-inf");
   test("%f", &plus_nan, "nan");
   test("%f", &minus_nan, "nan");
-  test_with_error("%f", &small_string, "TypeError: %f format: a real number is required, not string");
+  test_with_error("%f", &small_string, "%f format requires a real number, not string");
 
   test("%F", &small_int, "123.000000");
   test("%F", &big_int, "123456789012345677877719597056.000000");
@@ -1150,7 +1150,7 @@ TEST(StarlarkString, Interpolation) {
   test("%F", &minus_inf, "-inf");
   test("%F", &plus_nan, "nan");
   test("%F", &minus_nan, "nan");
-  test_with_error("%F", &small_string, "TypeError: %F format: a real number is required, not string");
+  test_with_error("%F", &small_string, "%F format requires a real number, not string");
 
   test("%g", &small_int, "123.0");
   test("%g", &big_int, "1.2345678901234568e+29");
@@ -1160,7 +1160,7 @@ TEST(StarlarkString, Interpolation) {
   test("%g", &minus_inf, "-inf");
   test("%g", &plus_nan, "nan");
   test("%g", &minus_nan, "nan");
-  test_with_error("%g", &small_string, "TypeError: %g format: a real number is required, not string");
+  test_with_error("%g", &small_string, "%g format requires a real number, not string");
 
   test("%G", &small_int, "123.0");
   test("%G", &big_int, "1.2345678901234568E+29");
@@ -1170,16 +1170,16 @@ TEST(StarlarkString, Interpolation) {
   test("%G", &minus_inf, "-inf");
   test("%G", &plus_nan, "nan");
   test("%G", &minus_nan, "nan");
-  test_with_error("%G", &small_string, "TypeError: %G format: a real number is required, not string");
+  test_with_error("%G", &small_string, "%G format requires a real number, not string");
 
 
-  test_with_error("%", &one, "ValueError: incomplete format");
-  test_with_error("%w", &one, "ValueError: unsupported format character 'w' (0x77) at index 1");
-  test_with_error("%w %w", &tuple_one_two, "ValueError: unsupported format character 'w' (0x77) at index 1");
-  test_with_error("%d", &tuple, "TypeError: not enough arguments for format string");
-  test_with_error("%d", &tuple_one_two, "TypeError: not all arguments converted during string formatting");
-  test_with_error("%d %d", &list_one_two, "TypeError: not enough arguments for format string");
-  test_with_error("¢¢¢¢¢%y", &one, "ValueError: unsupported format character 'y' (0x79) at index 6");
+  test_with_error("%", &one, "incomplete format");
+  test_with_error("%w", &one, "unsupported format character 'w' (0x77) at index 1");
+  test_with_error("%w %w", &tuple_one_two, "unsupported format character 'w' (0x77) at index 1");
+  test_with_error("%d", &tuple, "not enough arguments for format string");
+  test_with_error("%d", &tuple_one_two, "not all arguments converted during string formatting");
+  test_with_error("%d %d", &list_one_two, "not enough arguments for format string");
+  test_with_error("¢¢¢¢¢%y", &one, "unsupported format character 'y' (0x79) at index 6");
 }
 
 TEST(StarlarkString, FormatNoFormat) {

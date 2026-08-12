@@ -29,13 +29,13 @@ using ::starlark::error_messages::error_bytes_or_tuple_of_bytes;
 using ::starlark::error_messages::error_can_only_join_on_iterable;
 using ::starlark::error_messages::error_empty_separator;
 using ::starlark::error_messages::error_integer_or_type;
-using ::starlark::error_messages::error_max_bytes_length;
 using ::starlark::error_messages::error_multiple_values_for_argument;
-using ::starlark::error_messages::error_no_concat;
-using ::starlark::error_messages::error_no_multiply_sequence;
 using ::starlark::error_messages::error_substring_not_found;
 using ::starlark::error_messages::error_type_required;
 using ::starlark::error_messages::error_v2_byte_in_range;
+using ::starlark::error_messages::error_v2_max_bytes_length;
+using ::starlark::error_messages::error_v2_no_concat;
+using ::starlark::error_messages::error_v2_no_multiply_sequence;
 using ::starlark::error_messages::error_v2_unknown_argument;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
@@ -189,13 +189,13 @@ namespace {
 
 starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   if (other.type() != this_obj.type()) {
-    error_callback.add_error(error_no_concat(this_obj.type(), other.type()));
+    error_callback.add_error(error_v2_no_concat(this_obj.type(), other.type()));
     return nullptr;
   }
   std::size_t expected_length;
   if (ckd_add(&expected_length, this_obj.as_string().length(),  other.as_string().length()) ||
       expected_length > ctx.options().max_string_length) {
-    error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
+    error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
     return nullptr;
   }
   std::string value{this_obj.as_string()};
@@ -215,7 +215,7 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
         std::size_t expected_length;
         if (ckd_mul(&expected_length, this_obj.as_string().length(), multiplier) ||
             expected_length > ctx.options().max_string_length) {
-          error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
+          error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
           return nullptr;
         }
         for (int64_t i = 0; i < multiplier; ++i) {
@@ -233,14 +233,14 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
         return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
-        error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
+        error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);
       std::size_t expected_length;
       if (ckd_mul(&expected_length, this_obj.as_string().length(), int_value) ||
           expected_length > ctx.options().max_string_length) {
-        error_callback.add_error(error_max_bytes_length(ctx.options().max_string_length));
+        error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
         return nullptr;
       }
       std::string result;
@@ -250,7 +250,7 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
       return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
     }
     default:
-      error_callback.add_error(error_no_multiply_sequence(other.type()));
+      error_callback.add_error(error_v2_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }

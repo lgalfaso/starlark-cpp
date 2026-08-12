@@ -36,19 +36,8 @@ using ::starlark::error_messages::error_empty_separator;
 using ::starlark::error_messages::error_end_of_string_while_looking_for_conversion_specifier;
 using ::starlark::error_messages::error_expected_after_conversion;
 using ::starlark::error_messages::error_expected_format_element_before_end_of_string;
-using ::starlark::error_messages::error_format_integer_is_required;
-using ::starlark::error_messages::error_format_real_is_required;
-using ::starlark::error_messages::error_in_element;
 using ::starlark::error_messages::error_in_type_requires_type;
-using ::starlark::error_messages::error_incomplete_format;
-using ::starlark::error_messages::error_integer_or_unicode_character;
-using ::starlark::error_messages::error_integer_or_unicode_character_type_and_length;
-using ::starlark::error_messages::error_max_string_length;
 using ::starlark::error_messages::error_multiple_values_for_argument;
-using ::starlark::error_messages::error_no_concat;
-using ::starlark::error_messages::error_no_multiply_sequence;
-using ::starlark::error_messages::error_not_all_arguments_converted_during_string_formatting;
-using ::starlark::error_messages::error_not_enough_arguments_for_format_string;
 using ::starlark::error_messages::error_positional_argument_out_of_range;
 using ::starlark::error_messages::error_single_format_element_in_string;
 using ::starlark::error_messages::error_string_or_tuple_of_string;
@@ -57,10 +46,21 @@ using ::starlark::error_messages::error_switch_from_manual_to_automatic_numberin
 using ::starlark::error_messages::error_tuple_must_contain_type;
 using ::starlark::error_messages::error_unexpected_in_field_name;
 using ::starlark::error_messages::error_unknown_conversion;
-using ::starlark::error_messages::error_unsupported_format_character;
 using ::starlark::error_messages::error_v2_dictionary_key_not_found;
+using ::starlark::error_messages::error_v2_format_integer_is_required;
+using ::starlark::error_messages::error_v2_format_real_is_required;
+using ::starlark::error_messages::error_v2_in_element;
+using ::starlark::error_messages::error_v2_incomplete_format;
+using ::starlark::error_messages::error_v2_integer_or_unicode_character;
+using ::starlark::error_messages::error_v2_integer_or_unicode_character_type_and_length;
+using ::starlark::error_messages::error_v2_max_string_length;
+using ::starlark::error_messages::error_v2_no_concat;
+using ::starlark::error_messages::error_v2_no_multiply_sequence;
+using ::starlark::error_messages::error_v2_not_all_arguments_converted_during_string_formatting;
+using ::starlark::error_messages::error_v2_not_enough_arguments_for_format_string;
 using ::starlark::error_messages::error_v2_unicode_in_range;
 using ::starlark::error_messages::error_v2_unknown_argument;
+using ::starlark::error_messages::error_v2_unsupported_format_character;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -270,7 +270,7 @@ bool starlark_string::truthy() const {
 
 bool starlark_string::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   if (other.type() != type()) {
-    error_callback.add_error(error_in_element(type(), other.type(), type()));
+    error_callback.add_error(error_v2_in_element(type(), other.type(), type()));
     return false;
   }
 
@@ -282,13 +282,13 @@ namespace {
 
 starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   if (other.type() != this_obj.type()) {
-    error_callback.add_error(error_no_concat(this_obj.type(), other.type()));
+    error_callback.add_error(error_v2_no_concat(this_obj.type(), other.type()));
     return nullptr;
   }
   std::size_t expected_size;
   if (ckd_add(&expected_size, this_obj.as_string().size(), other.as_string().size()) ||
       expected_size > ctx.options().max_string_length) {
-    error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
+    error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
     return nullptr;
   }
   std::string result{this_obj.as_string()};
@@ -308,7 +308,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
         std::size_t expected_size;
         if (ckd_mul(&expected_size, this_obj.as_string().size(), multiplier) ||
             expected_size > ctx.options().max_string_length) {
-          error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
+          error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
           return nullptr;
         }
         for (int64_t i = 0; i < multiplier; ++i) {
@@ -326,14 +326,14 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
         return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
-        error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
+        error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
         return nullptr;
       }
       int64_t int_value = multiplier.at(0);
       std::size_t expected_size;
       if (ckd_mul(&expected_size, this_obj.as_string().size(), int_value) ||
           expected_size > ctx.options().max_string_length) {
-        error_callback.add_error(error_max_string_length(ctx.options().max_string_length));
+        error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
         return nullptr;
       }
       std::string result;
@@ -343,7 +343,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
     }
     default:
-      error_callback.add_error(error_no_multiply_sequence(other.type()));
+      error_callback.add_error(error_v2_no_multiply_sequence(other.type()));
       return nullptr;
   }
 }
@@ -372,7 +372,7 @@ status parse_interpolation(std::string_view format, std::vector<std::string>& pa
     ++pos;
   }
   if (last_is_percent) {
-    error_callback.add_error(error_incomplete_format());
+    error_callback.add_error(error_v2_incomplete_format());
     return error_status();
   }
   return ok_status();
@@ -400,19 +400,19 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
           break;
         case starlark_numeric_type::kNotNumeric: {
           if (element.type() != starlark_types::string_t) {
-            error_callback.add_error(error_integer_or_unicode_character(element.type()));
+            error_callback.add_error(error_v2_integer_or_unicode_character(element.type()));
             return error_status();
           }
           auto len = element.len(false, error_callback);
           if (len != 1) {
-            error_callback.add_error(error_integer_or_unicode_character_type_and_length(element.type(), len));
+            error_callback.add_error(error_v2_integer_or_unicode_character_type_and_length(element.type(), len));
             return error_status();
           }
           result += element.as_string();
           break;
         }
         default:
-          error_callback.add_error(error_integer_or_unicode_character(element.type()));
+          error_callback.add_error(error_v2_integer_or_unicode_character(element.type()));
           return error_status();
       }
       break;
@@ -434,7 +434,7 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
           }
           break;
         default:
-          error_callback.add_error(error_format_integer_is_required(format, element.type()));
+          error_callback.add_error(error_v2_format_integer_is_required(format, element.type()));
           return error_status();
       }
       switch (format) {
@@ -505,7 +505,7 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
           float_value = element.as_float();
           break;
         default:
-          error_callback.add_error(error_format_real_is_required(format, element.type()));
+          error_callback.add_error(error_v2_format_real_is_required(format, element.type()));
           return error_status();
       }
       if (std::isfinite(float_value)) {
@@ -535,7 +535,7 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
       break;
     }
     default:
-      error_callback.add_error(error_unsupported_format_character(format, index));
+      error_callback.add_error(error_v2_unsupported_format_character(format, index));
       return error_status();
   }
   return ok_status();
@@ -694,7 +694,7 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
   std::string result = parts[0];
   if (other.type() != starlark_types::tuple_t) {
     if (parts.size() != 2) {
-      error_callback.add_error(error_not_enough_arguments_for_format_string());
+      error_callback.add_error(error_v2_not_enough_arguments_for_format_string());
       return nullptr;
     }
     if (!interpolation_convertion(result, other, convertions[0].first, convertions[0].second, ctx, error_callback).ok()) {
@@ -707,9 +707,9 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
   const starlark_tuple& t_other = static_cast<const starlark_tuple&>(other);
   if (t_other.size() != convertions.size()) {
     if (t_other.size() < convertions.size()) {
-      error_callback.add_error(error_not_enough_arguments_for_format_string());
+      error_callback.add_error(error_v2_not_enough_arguments_for_format_string());
     } else {
-      error_callback.add_error(error_not_all_arguments_converted_during_string_formatting());
+      error_callback.add_error(error_v2_not_all_arguments_converted_during_string_formatting());
     }
     return nullptr;
   }

@@ -14,75 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_op_in_loop(std::string_view type, std::string_view op) {
-  return std::format("Error in {}: {} value is temporarily immutable due to active for-loop iteration", op, type);
-}
-
-std::string error_mutate_frozen_value(std::string_view type) {
-  // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
-  return std::format("TypeError: trying to mutate a frozen {} value", type);
-}
-
-std::string error_no_concat(std::string_view this_type, std::string_view other_type) {
-  return std::format("TypeError: can't concat {} to {}", other_type, this_type);
-}
-
-std::string error_no_concat(std::string_view this_type, std::string_view other_type, std::string_view possible_type) {
-  return std::format("TypeError: can only concatenate {} (not \"{}\") to {}", possible_type, other_type, this_type);
-}
-
-std::string error_no_multiply_sequence(std::string_view other_type) {
-  return std::format("TypeError: can't multiply sequence by non-int of type '{}'", other_type);
-}
-
-std::string error_max_sequence_length(int64_t max_length) {
-  return std::format("TypeError: sequences must be at most {} elements", max_length);
-}
-
-std::string error_max_string_length(int64_t max_length) {
-  return std::format("TypeError: string must be at most {} elements", max_length);
-}
-
-std::string error_max_bytes_length(int64_t max_length) {
-  return std::format("TypeError: bytes must be at most {} elements", max_length);
-}
-
-std::string error_in_element(std::string_view type, std::string_view actual, std::string_view expected) {
-  return std::format("TypeError: 'in <{}>' requires {} as left operand, not {}", type, expected, actual);
-}
-
-std::string_view error_incomplete_format() {
-  return "ValueError: incomplete format";
-}
-
-std::string_view error_not_enough_arguments_for_format_string() {
-  return "TypeError: not enough arguments for format string";
-}
-
-std::string_view error_not_all_arguments_converted_during_string_formatting() {
-  return "TypeError: not all arguments converted during string formatting";
-}
-
-std::string error_unsupported_format_character(char format, std::size_t pos) {
-  return std::format("ValueError: unsupported format character '{}' (0x{:x}) at index {}", format, static_cast<int>(static_cast<unsigned char>(format)), pos);
-}
-
-std::string error_format_integer_is_required(char format, std::string_view type) {
-  return std::format("TypeError: %{} format: an integer is required, not {}", format, type);
-}
-
-std::string error_format_real_is_required(char format, std::string_view type) {
-  return std::format("TypeError: %{} format: a real number is required, not {}", format, type);
-}
-
-std::string error_integer_or_unicode_character(std::string_view type) {
-  return std::format("TypeError: %c requires an int or a unicode character, not {}", type);
-}
-
-std::string error_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len) {
-  return std::format("TypeError: %c requires an int or a unicode character, not {} of length {}", type, len);
-}
-
 std::string error_integer_or_type(std::string_view type, std::string_view other_type) {
   return std::format("TypeError: argument should be integer or {} object, not '{}'", type, other_type);
 }
@@ -249,15 +180,27 @@ std::string error_recursive_call(std::string_view fn_name) {
 
 
 std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const Position& start, const Position& end) {
-  return std::format("string must be at most {} elements\n{}", max_length, get_line_and_underline(program, start, end));
+  return std::format("{}\n{}", error_v2_max_string_length(max_length), get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_max_string_length(int64_t max_length) {
+  return std::format("string must be at most {} elements", max_length);
 }
 
 std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const Position& start, const Position& end) {
-  return std::format("bytes must be at most {} elements\n{}", max_length, get_line_and_underline(program, start, end));
+  return std::format("{}\n{}", error_v2_max_bytes_length(max_length), get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_max_bytes_length(int64_t max_length) {
+  return std::format("bytes must be at most {} elements", max_length);
 }
 
 std::string error_v2_max_sequence_length(int64_t max_length, std::string_view program, const Position& start, const Position& end) {
-  return std::format("sequences must be at most {} elements\n{}", max_length, get_line_and_underline(program, start, end));
+  return std::format("{}\n{}", error_v2_max_sequence_length(max_length), get_line_and_underline(program, start, end));
+}
+
+std::string error_v2_max_sequence_length(int64_t max_length) {
+  return std::format("sequences must be at most {} elements", max_length);
 }
 
 std::string error_v2_not_callable(std::string_view type) {
@@ -502,6 +445,64 @@ std::string error_v2_argument_non_zero(std::string_view fn_name, int64_t arg_pos
 
 std::string_view error_v2_step_non_zero() {
   return "slice step cannot be zero";
+}
+
+
+std::string error_v2_op_in_loop(std::string_view type, std::string_view op) {
+  return std::format("cannot perform {}, {} value is temporarily immutable due to active for-loop iteration", op, type);
+}
+
+std::string error_v2_mutate_frozen_value(std::string_view type) {
+  // This error does not exists in Python, so using a mix of the Python error type and Bazel message.
+  return std::format("trying to mutate a frozen {} value", type);
+}
+
+std::string error_v2_no_concat(std::string_view this_type, std::string_view other_type) {
+  return std::format("cannot concat {} to {}", other_type, this_type);
+}
+
+std::string error_v2_no_concat(std::string_view this_type, std::string_view other_type, std::string_view possible_type) {
+  return std::format("can only concatenate {} (not '{}') to {}", possible_type, other_type, this_type);
+}
+
+std::string error_v2_no_multiply_sequence(std::string_view other_type) {
+  return std::format("cannot multiply sequence by non-int of type '{}'", other_type);
+}
+
+std::string error_v2_in_element(std::string_view type, std::string_view actual, std::string_view expected) {
+  return std::format("'in <{}>' requires {} as left operand, not {}", type, expected, actual);
+}
+
+std::string_view error_v2_incomplete_format() {
+  return "incomplete format";
+}
+
+std::string_view error_v2_not_enough_arguments_for_format_string() {
+  return "not enough arguments for format string";
+}
+
+std::string_view error_v2_not_all_arguments_converted_during_string_formatting() {
+  return "not all arguments converted during string formatting";
+}
+
+std::string error_v2_unsupported_format_character(char format, std::size_t pos) {
+  return std::format("unsupported format character '{}' (0x{:x}) at index {}", format, static_cast<int>(static_cast<unsigned char>(format)), pos);
+}
+
+std::string error_v2_format_integer_is_required(char format, std::string_view type) {
+  return std::format("%{} format requires an integer, not {}", format, type);
+}
+
+std::string error_v2_format_real_is_required(char format, std::string_view type) {
+  return std::format("%{} format requires a real number, not {}", format, type);
+}
+
+std::string error_v2_integer_or_unicode_character(std::string_view type) {
+  return std::format("%c requires an int or a unicode character, not {}", type);
+}
+
+std::string error_v2_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len) {
+  return std::format("%c requires an int or a unicode character, not {} of length {}", type, len);
 }
 
 }  // namespace error_messages

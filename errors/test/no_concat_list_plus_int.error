@@ -1,0 +1,3 @@
+main:2:18: error: can only concatenate list (not 'int') to list
+    2 | a = [0, 1, 2, 3] + 1
+      |                  ^

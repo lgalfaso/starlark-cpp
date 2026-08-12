@@ -1,0 +1,3 @@
+main:2:10: error: %g format requires a real number, not string
+    2 | a = '%g' % 'abc'
+      |          ^

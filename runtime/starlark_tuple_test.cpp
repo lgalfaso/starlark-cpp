@@ -304,7 +304,7 @@ TEST(StarlarkTuple, Freeze) {
   tuple.freeze();
   list.append(&one, ctx, error_callback);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: trying to mutate a frozen list value");
+  EXPECT_EQ(error_callback.messages[0], "trying to mutate a frozen list value");
 }
 
 TEST(StarlarkTuple, BinaryPlus) {
@@ -361,7 +361,7 @@ TEST(StarlarkTuple, BinaryPlusOverflowOverflow) {
 
   ASSERT_EQ(result, nullptr);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 19 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 19 elements");
   EXPECT_EQ(tuple_1.str(), "(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)");
   EXPECT_EQ(tuple_2.str(), "(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)");
 }
@@ -376,7 +376,7 @@ TEST(StarlarkTuple, BinaryPlusNotList) {
   auto* result = tuple.binary_plus(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate tuple (not \"list\") to tuple");
+  EXPECT_EQ(error_callback.messages[0], "can only concatenate tuple (not 'list') to tuple");
 }
 
 TEST(StarlarkTuple, PlusEqualsAssign) {
@@ -406,7 +406,7 @@ TEST(StarlarkTuple, PlusEqualsAssignNotList) {
   auto* result = tuple.plus_equals_assign(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can only concatenate tuple (not \"list\") to tuple");
+  EXPECT_EQ(error_callback.messages[0], "can only concatenate tuple (not 'list') to tuple");
 }
 
 TEST(StarlarkTuple, BinaryStar) {
@@ -509,7 +509,7 @@ TEST(StarlarkTuple, BinaryStarOverflowOverflow) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 20 elements");
 }
 
 TEST(StarlarkTuple, BinaryStarOverflowNoOverflowBigint) {
@@ -541,7 +541,7 @@ TEST(StarlarkTuple, BinaryStarOverflowOverflowBigint) {
 
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 20 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 20 elements");
 }
 
 TEST(StarlarkTuple, BinaryStarNotInt) {
@@ -554,7 +554,7 @@ TEST(StarlarkTuple, BinaryStarNotInt) {
   auto* result = tuple.binary_star(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'list'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'list'");
 }
 
 TEST(StarlarkTuple, BinaryStarTooBig) {
@@ -568,7 +568,7 @@ TEST(StarlarkTuple, BinaryStarTooBig) {
   auto* result = tuple.binary_star(big, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: sequences must be at most 2147483647 elements");
+  EXPECT_EQ(error_callback.messages[0], "sequences must be at most 2147483647 elements");
 }
 
 TEST(StarlarkTuple, StarEqualsAssign) {
@@ -652,7 +652,7 @@ TEST(StarlarkTuple, StarEqualsAssignNotInt) {
   auto* result = tuple.star_equals_assign(list, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can't multiply sequence by non-int of type 'list'");
+  EXPECT_EQ(error_callback.messages[0], "cannot multiply sequence by non-int of type 'list'");
 }
 
 TEST(StarlarkTuple, Len) {
