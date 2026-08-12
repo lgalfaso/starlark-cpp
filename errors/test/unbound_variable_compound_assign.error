@@ -1,0 +1,3 @@
+main:2:3: error: cannot access local variable 'a' where it is not associated with a value
+    2 | a += 1
+      | ~~^^

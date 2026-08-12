@@ -1,164 +1,164 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                       #   0
-  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                            #   1
-  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                              #   2
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  #   3
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                         #   4
-  op_code { make_list { reserve_size: 1 } }                                                                                                                                        #   5
-  op_code { const_int { value: 0 } }                                                                                                                                               #   6
-  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                #   7
-  op_code { get_iterator { } highlight_start: { row: 1 column: 7 pos: 6 } highlight_mid: { row: 1 column: 16 pos: 15 } highlight_end: { row: 1 column: 19 pos: 18 } }              #   8
-  op_code { for_iterator { address_delta: 6 } }                                                                                                                                    #   9
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   #  10
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  11
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  12
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          #  13
-  op_code { goto { address_delta: -5 } }                                                                                                                                           #  14
-  op_code { end_iterator { } }                                                                                                                                                     #  15
-  op_code { pop_frame { } }                                                                                                                                                        #  16
-  op_code { pop { } }                                                                                                                                                              #  17
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                 #   0
+  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                                      #   1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                        #   2
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            #   3
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                                   #   4
+  op_code { make_list { reserve_size: 1 } }                                                                                                                                                  #   5
+  op_code { const_int { value: 0 } }                                                                                                                                                         #   6
+  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                          #   7
+  op_code { get_iterator { } highlight_start: { row: 1 column: 7 pos: 6 } highlight_mid: { row: 1 column: 16 pos: 15 } highlight_end: { row: 1 column: 19 pos: 18 } }                        #   8
+  op_code { for_iterator { address_delta: 6 } }                                                                                                                                              #   9
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             #  10
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 1 column: 2 pos: 1 } highlight_mid: { row: 1 column: 2 pos: 1 } highlight_end: { row: 1 column: 3 pos: 2 } }           #  11
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 1 column: 5 pos: 4 } highlight_mid: { row: 1 column: 5 pos: 4 } highlight_end: { row: 1 column: 6 pos: 5 } }           #  12
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    #  13
+  op_code { goto { address_delta: -5 } }                                                                                                                                                     #  14
+  op_code { end_iterator { } }                                                                                                                                                               #  15
+  op_code { pop_frame { } }                                                                                                                                                                  #  16
+  op_code { pop { } }                                                                                                                                                                        #  17
 
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  #  18
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" symbol: "x" } }                                                                                             #  19
-  op_code { make_list { reserve_size: 1 } }                                                                                                                                        #  20
-  op_code { const_int { value: 1 } }                                                                                                                                               #  21
-  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                #  22
-  op_code { get_iterator { } highlight_start: { row: 2 column: 7 pos: 26 } highlight_mid: { row: 2 column: 16 pos: 35 } highlight_end: { row: 2 column: 19 pos: 38 } }             #  23
-  op_code { for_iterator { address_delta: 14 } }                                                                                                                                   #  24
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   #  25
-  op_code { make_list { reserve_size: 1 } }                                                                                                                                        #  26
-  op_code { const_int { value: 2 } }                                                                                                                                               #  27
-  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                #  28
-  op_code { get_iterator { } highlight_start: { row: 2 column: 20 pos: 39 } highlight_mid: { row: 2 column: 29 pos: 48 } highlight_end: { row: 2 column: 32 pos: 51 } }            #  29
-  op_code { for_iterator { address_delta: 6 } }                                                                                                                                    #  30
-  op_code { store { frame: 0 pos_in_frame: 1 } }                                                                                                                                   #  31
-  op_code { load { frame: 0 pos_in_frame: 1 } }                                                                                                                                    #  32
-  op_code { load { frame: 0 pos_in_frame: 1 } }                                                                                                                                    #  33
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          #  34
-  op_code { goto { address_delta: -5 } }                                                                                                                                           #  35
-  op_code { end_iterator { } }                                                                                                                                                     #  36
-  op_code { goto { address_delta: -13 } }                                                                                                                                          #  37
-  op_code { end_iterator { } }                                                                                                                                                     #  38
-  op_code { pop_frame { } }                                                                                                                                                        #  39
-  op_code { pop { } }                                                                                                                                                              #  40
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            #  18
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" symbol: "x" } }                                                                                                       #  19
+  op_code { make_list { reserve_size: 1 } }                                                                                                                                                  #  20
+  op_code { const_int { value: 1 } }                                                                                                                                                         #  21
+  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                          #  22
+  op_code { get_iterator { } highlight_start: { row: 2 column: 7 pos: 26 } highlight_mid: { row: 2 column: 16 pos: 35 } highlight_end: { row: 2 column: 19 pos: 38 } }                       #  23
+  op_code { for_iterator { address_delta: 14 } }                                                                                                                                             #  24
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             #  25
+  op_code { make_list { reserve_size: 1 } }                                                                                                                                                  #  26
+  op_code { const_int { value: 2 } }                                                                                                                                                         #  27
+  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                          #  28
+  op_code { get_iterator { } highlight_start: { row: 2 column: 20 pos: 39 } highlight_mid: { row: 2 column: 29 pos: 48 } highlight_end: { row: 2 column: 32 pos: 51 } }                      #  29
+  op_code { for_iterator { address_delta: 6 } }                                                                                                                                              #  30
+  op_code { store { frame: 0 pos_in_frame: 1 } }                                                                                                                                             #  31
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 2 column: 2 pos: 21 } highlight_mid: { row: 2 column: 2 pos: 21 } highlight_end: { row: 2 column: 3 pos: 22 } }        #  32
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 2 column: 5 pos: 24 } highlight_mid: { row: 2 column: 5 pos: 24 } highlight_end: { row: 2 column: 6 pos: 25 } }        #  33
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    #  34
+  op_code { goto { address_delta: -5 } }                                                                                                                                                     #  35
+  op_code { end_iterator { } }                                                                                                                                                               #  36
+  op_code { goto { address_delta: -13 } }                                                                                                                                                    #  37
+  op_code { end_iterator { } }                                                                                                                                                               #  38
+  op_code { pop_frame { } }                                                                                                                                                                  #  39
+  op_code { pop { } }                                                                                                                                                                        #  40
 
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  #  41
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" symbol: "x" } }                                                                                             #  42
-  op_code { make_list { reserve_size: 3 } }                                                                                                                                        #  43
-  op_code { const_int { value: 3 } }                                                                                                                                               #  44
-  op_code { const_int { value: 4 } }                                                                                                                                               #  45
-  op_code { const_int { value: 5 } }                                                                                                                                               #  46
-  op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                #  47
-  op_code { get_iterator { } highlight_start: { row: 3 column: 7 pos: 59 } highlight_mid: { row: 3 column: 16 pos: 68 } highlight_end: { row: 3 column: 25 pos: 77 } }             #  48
-  op_code { for_iterator { address_delta: 22 } }                                                                                                                                   #  49
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   #  50
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  51
-  op_code { const_int { value: 2 } }                                                                                                                                               #  52
-  op_code { binary_percent { } highlight_start: { row: 3 column: 31 pos: 83 } highlight_mid: { row: 3 column: 31 pos: 83 } highlight_end: { row: 3 column: 32 pos: 84 } }          #  53
-  op_code { const_int { value: 0 } }                                                                                                                                               #  54
-  op_code { binary_equals_equals { } highlight_start: { row: 3 column: 35 pos: 87 } highlight_mid: { row: 3 column: 35 pos: 87 } highlight_end: { row: 3 column: 37 pos: 89 } }    #  55
-  op_code { jump_if_false { address_delta: 14 } }                                                                                                                                  #  56
-  op_code { make_list { reserve_size: 3 } }                                                                                                                                        #  57
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  58
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  59
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  60
-  op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                #  61
-  op_code { get_iterator { } highlight_start: { row: 3 column: 40 pos: 92 } highlight_mid: { row: 3 column: 49 pos: 101 } highlight_end: { row: 3 column: 58 pos: 110 } }          #  62
-  op_code { for_iterator { address_delta: 6 } }                                                                                                                                    #  63
-  op_code { store { frame: 0 pos_in_frame: 1 } }                                                                                                                                   #  64
-  op_code { load { frame: 0 pos_in_frame: 1 } }                                                                                                                                    #  65
-  op_code { load { frame: 0 pos_in_frame: 1 } }                                                                                                                                    #  66
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          #  67
-  op_code { goto { address_delta: -5 } }                                                                                                                                           #  68
-  op_code { end_iterator { } }                                                                                                                                                     #  69
-  op_code { goto { address_delta: -21 } }                                                                                                                                          #  70
-  op_code { end_iterator { } }                                                                                                                                                     #  71
-  op_code { pop_frame { } }                                                                                                                                                        #  72
-  op_code { pop { } }                                                                                                                                                              #  73
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            #  41
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" symbol: "x" } }                                                                                                       #  42
+  op_code { make_list { reserve_size: 3 } }                                                                                                                                                  #  43
+  op_code { const_int { value: 3 } }                                                                                                                                                         #  44
+  op_code { const_int { value: 4 } }                                                                                                                                                         #  45
+  op_code { const_int { value: 5 } }                                                                                                                                                         #  46
+  op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                          #  47
+  op_code { get_iterator { } highlight_start: { row: 3 column: 7 pos: 59 } highlight_mid: { row: 3 column: 16 pos: 68 } highlight_end: { row: 3 column: 25 pos: 77 } }                       #  48
+  op_code { for_iterator { address_delta: 22 } }                                                                                                                                             #  49
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             #  50
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 3 column: 29 pos: 81 } highlight_mid: { row: 3 column: 29 pos: 81 } highlight_end: { row: 3 column: 30 pos: 82 } }     #  51
+  op_code { const_int { value: 2 } }                                                                                                                                                         #  52
+  op_code { binary_percent { } highlight_start: { row: 3 column: 31 pos: 83 } highlight_mid: { row: 3 column: 31 pos: 83 } highlight_end: { row: 3 column: 32 pos: 84 } }                    #  53
+  op_code { const_int { value: 0 } }                                                                                                                                                         #  54
+  op_code { binary_equals_equals { } highlight_start: { row: 3 column: 35 pos: 87 } highlight_mid: { row: 3 column: 35 pos: 87 } highlight_end: { row: 3 column: 37 pos: 89 } }              #  55
+  op_code { jump_if_false { address_delta: 14 } }                                                                                                                                            #  56
+  op_code { make_list { reserve_size: 3 } }                                                                                                                                                  #  57
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 3 column: 50 pos: 102 } highlight_mid: { row: 3 column: 50 pos: 102 } highlight_end: { row: 3 column: 51 pos: 103 } }  #  58
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 3 column: 53 pos: 105 } highlight_mid: { row: 3 column: 53 pos: 105 } highlight_end: { row: 3 column: 54 pos: 106 } }  #  59
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 3 column: 56 pos: 108 } highlight_mid: { row: 3 column: 56 pos: 108 } highlight_end: { row: 3 column: 57 pos: 109 } }  #  60
+  op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                          #  61
+  op_code { get_iterator { } highlight_start: { row: 3 column: 40 pos: 92 } highlight_mid: { row: 3 column: 49 pos: 101 } highlight_end: { row: 3 column: 58 pos: 110 } }                    #  62
+  op_code { for_iterator { address_delta: 6 } }                                                                                                                                              #  63
+  op_code { store { frame: 0 pos_in_frame: 1 } }                                                                                                                                             #  64
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 3 column: 2 pos: 54 } highlight_mid: { row: 3 column: 2 pos: 54 } highlight_end: { row: 3 column: 3 pos: 55 } }        #  65
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 3 column: 5 pos: 57 } highlight_mid: { row: 3 column: 5 pos: 57 } highlight_end: { row: 3 column: 6 pos: 58 } }        #  66
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    #  67
+  op_code { goto { address_delta: -5 } }                                                                                                                                                     #  68
+  op_code { end_iterator { } }                                                                                                                                                               #  69
+  op_code { goto { address_delta: -21 } }                                                                                                                                                    #  70
+  op_code { end_iterator { } }                                                                                                                                                               #  71
+  op_code { pop_frame { } }                                                                                                                                                                  #  72
+  op_code { pop { } }                                                                                                                                                                        #  73
 
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  #  74
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                         #  75
-  op_code { make_list { reserve_size: 1 } }                                                                                                                                        #  76
-  op_code { const_int { value: 0 } }                                                                                                                                               #  77
-  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                #  78
-  op_code { get_iterator { } highlight_start: { row: 4 column: 9 pos: 120 } highlight_mid: { row: 4 column: 18 pos: 129 } highlight_end: { row: 4 column: 21 pos: 132 } }          #  79
-  op_code { for_iterator { address_delta: 7 } }                                                                                                                                    #  80
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   #  81
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  82
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    #  83
-  op_code { dot_member { member: "y" } highlight_start: { row: 4 column: 5 pos: 116 } highlight_mid: { row: 4 column: 6 pos: 117 } highlight_end: { row: 4 column: 8 pos: 119 } }  #  84
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          #  85
-  op_code { goto { address_delta: -6 } }                                                                                                                                           #  86
-  op_code { end_iterator { } }                                                                                                                                                     #  87
-  op_code { pop_frame { } }                                                                                                                                                        #  88
-  op_code { pop { } }                                                                                                                                                              #  89
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            #  74
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                                   #  75
+  op_code { make_list { reserve_size: 1 } }                                                                                                                                                  #  76
+  op_code { const_int { value: 0 } }                                                                                                                                                         #  77
+  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                          #  78
+  op_code { get_iterator { } highlight_start: { row: 4 column: 9 pos: 120 } highlight_mid: { row: 4 column: 18 pos: 129 } highlight_end: { row: 4 column: 21 pos: 132 } }                    #  79
+  op_code { for_iterator { address_delta: 7 } }                                                                                                                                              #  80
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             #  81
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 4 column: 2 pos: 113 } highlight_mid: { row: 4 column: 2 pos: 113 } highlight_end: { row: 4 column: 3 pos: 114 } }     #  82
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 4 column: 5 pos: 116 } highlight_mid: { row: 4 column: 5 pos: 116 } highlight_end: { row: 4 column: 6 pos: 117 } }     #  83
+  op_code { dot_member { member: "y" } highlight_start: { row: 4 column: 5 pos: 116 } highlight_mid: { row: 4 column: 6 pos: 117 } highlight_end: { row: 4 column: 8 pos: 119 } }            #  84
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    #  85
+  op_code { goto { address_delta: -6 } }                                                                                                                                                     #  86
+  op_code { end_iterator { } }                                                                                                                                                               #  87
+  op_code { pop_frame { } }                                                                                                                                                                  #  88
+  op_code { pop { } }                                                                                                                                                                        #  89
 
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  #  90
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                         #  91
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  #  92
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" } }                                                                                                         #  93
-  op_code { make_list { reserve_size: 3 } }                                                                                                                                        #  94
-  op_code { const_int { value: 0 } }                                                                                                                                               #  95
-  op_code { const_int { value: 1 } }                                                                                                                                               #  96
-  op_code { const_int { value: 2 } }                                                                                                                                               #  97
-  op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                #  98
-  op_code { get_iterator { } highlight_start: { row: 5 column: 22 pos: 155 } highlight_mid: { row: 5 column: 31 pos: 164 } highlight_end: { row: 5 column: 40 pos: 173 } }         #  99
-  op_code { for_iterator { address_delta: 6 } }                                                                                                                                    # 100
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   # 101
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 102
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 103
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          # 104
-  op_code { goto { address_delta: -5 } }                                                                                                                                           # 105
-  op_code { end_iterator { } }                                                                                                                                                     # 106
-  op_code { pop_frame { } }                                                                                                                                                        # 107
-  op_code { get_iterator { } highlight_start: { row: 5 column: 7 pos: 140 } highlight_mid: { row: 5 column: 16 pos: 149 } highlight_end: { row: 5 column: 41 pos: 174 } }          # 108
-  op_code { for_iterator { address_delta: 6 } }                                                                                                                                    # 109
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   # 110
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 111
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 112
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          # 113
-  op_code { goto { address_delta: -5 } }                                                                                                                                           # 114
-  op_code { end_iterator { } }                                                                                                                                                     # 115
-  op_code { pop_frame { } }                                                                                                                                                        # 116
-  op_code { pop { } }                                                                                                                                                              # 117
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            #  90
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                                   #  91
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            #  92
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" } }                                                                                                                   #  93
+  op_code { make_list { reserve_size: 3 } }                                                                                                                                                  #  94
+  op_code { const_int { value: 0 } }                                                                                                                                                         #  95
+  op_code { const_int { value: 1 } }                                                                                                                                                         #  96
+  op_code { const_int { value: 2 } }                                                                                                                                                         #  97
+  op_code { add_to_list { number_of_elements: 3 } }                                                                                                                                          #  98
+  op_code { get_iterator { } highlight_start: { row: 5 column: 22 pos: 155 } highlight_mid: { row: 5 column: 31 pos: 164 } highlight_end: { row: 5 column: 40 pos: 173 } }                   #  99
+  op_code { for_iterator { address_delta: 6 } }                                                                                                                                              # 100
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             # 101
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 5 column: 17 pos: 150 } highlight_mid: { row: 5 column: 17 pos: 150 } highlight_end: { row: 5 column: 18 pos: 151 } }  # 102
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 5 column: 20 pos: 153 } highlight_mid: { row: 5 column: 20 pos: 153 } highlight_end: { row: 5 column: 21 pos: 154 } }  # 103
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    # 104
+  op_code { goto { address_delta: -5 } }                                                                                                                                                     # 105
+  op_code { end_iterator { } }                                                                                                                                                               # 106
+  op_code { pop_frame { } }                                                                                                                                                                  # 107
+  op_code { get_iterator { } highlight_start: { row: 5 column: 7 pos: 140 } highlight_mid: { row: 5 column: 16 pos: 149 } highlight_end: { row: 5 column: 41 pos: 174 } }                    # 108
+  op_code { for_iterator { address_delta: 6 } }                                                                                                                                              # 109
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             # 110
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 5 column: 2 pos: 135 } highlight_mid: { row: 5 column: 2 pos: 135 } highlight_end: { row: 5 column: 3 pos: 136 } }     # 111
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 5 column: 5 pos: 138 } highlight_mid: { row: 5 column: 5 pos: 138 } highlight_end: { row: 5 column: 6 pos: 139 } }     # 112
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    # 113
+  op_code { goto { address_delta: -5 } }                                                                                                                                                     # 114
+  op_code { end_iterator { } }                                                                                                                                                               # 115
+  op_code { pop_frame { } }                                                                                                                                                                  # 116
+  op_code { pop { } }                                                                                                                                                                        # 117
 
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  # 118
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" symbol: "y" } }                                                                                             # 119
-  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                  # 120
-  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                         # 121
-  op_code { make_list { reserve_size: 1 } }                                                                                                                                        # 122
-  op_code { load { frame: 1 pos_in_frame: 0 } }                                                                                                                                    # 123
-  op_code { add_to_list { number_of_elements: 1} }                                                                                                                                 # 124
-  op_code { get_iterator { } highlight_start: { row: 6 column: 22 pos: 197 } highlight_mid: { row: 6 column: 31 pos: 206 } highlight_end: { row: 6 column: 34 pos: 209 } }         # 125
-  op_code { for_iterator { address_delta: 6 } }                                                                                                                                    # 126
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   # 127
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 128
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 129
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          # 130
-  op_code { goto { address_delta: -5 } }                                                                                                                                           # 131
-  op_code { end_iterator { } }                                                                                                                                                     # 132
-  op_code { pop_frame { } }                                                                                                                                                        # 133
-  op_code { get_iterator { } highlight_start: { row: 6 column: 7 pos: 182 } highlight_mid: { row: 6 column: 16 pos: 191 } highlight_end: { row: 6 column: 35 pos: 210 } }          # 134
-  op_code { for_iterator { address_delta: 14 } }                                                                                                                                   # 135
-  op_code { store { frame: 0 pos_in_frame: 1 } }                                                                                                                                   # 136
-  op_code { make_list { reserve_size: 1 } }                                                                                                                                        # 137
-  op_code { const_int { value: 0 } }                                                                                                                                               # 138
-  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                # 139
-  op_code { get_iterator { } highlight_start: { row: 6 column: 36 pos: 211 } highlight_mid: { row: 6 column: 45 pos: 220 } highlight_end: { row: 6 column: 48 pos: 223 } }         # 140
-  op_code { for_iterator { address_delta: 6 } }                                                                                                                                    # 141
-  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                   # 142
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 143
-  op_code { load { frame: 0 pos_in_frame: 0 } }                                                                                                                                    # 144
-  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                          # 145
-  op_code { goto { address_delta: -5 } }                                                                                                                                           # 146
-  op_code { end_iterator { } }                                                                                                                                                     # 147
-  op_code { goto { address_delta: -13 } }                                                                                                                                          # 148
-  op_code { end_iterator { } }                                                                                                                                                     # 149
-  op_code { pop_frame { } }                                                                                                                                                        # 150
-  op_code { pop { } }                                                                                                                                                              # 151
-  op_code { pop_frame { } }                                                                                                                                                        # 152
-  op_code { pop_frame { } }                                                                                                                                                        # 153
-  op_code { pop_frame { } }                                                                                                                                                        # 154
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            # 118
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "a" symbol: "y" } }                                                                                                       # 119
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                            # 120
+  op_code { create_frame { block_type: COMPREHENSION_BLOCK symbol: "x" } }                                                                                                                   # 121
+  op_code { make_list { reserve_size: 1 } }                                                                                                                                                  # 122
+  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 6 column: 32 pos: 207 } highlight_mid: { row: 6 column: 32 pos: 207 } highlight_end: { row: 6 column: 33 pos: 208 } }  # 123
+  op_code { add_to_list { number_of_elements: 1} }                                                                                                                                           # 124
+  op_code { get_iterator { } highlight_start: { row: 6 column: 22 pos: 197 } highlight_mid: { row: 6 column: 31 pos: 206 } highlight_end: { row: 6 column: 34 pos: 209 } }                   # 125
+  op_code { for_iterator { address_delta: 6 } }                                                                                                                                              # 126
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             # 127
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 6 column: 17 pos: 192 } highlight_mid: { row: 6 column: 17 pos: 192 } highlight_end: { row: 6 column: 18 pos: 193 } }  # 128
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 6 column: 20 pos: 195 } highlight_mid: { row: 6 column: 20 pos: 195 } highlight_end: { row: 6 column: 21 pos: 196 } }  # 129
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    # 130
+  op_code { goto { address_delta: -5 } }                                                                                                                                                     # 131
+  op_code { end_iterator { } }                                                                                                                                                               # 132
+  op_code { pop_frame { } }                                                                                                                                                                  # 133
+  op_code { get_iterator { } highlight_start: { row: 6 column: 7 pos: 182 } highlight_mid: { row: 6 column: 16 pos: 191 } highlight_end: { row: 6 column: 35 pos: 210 } }                    # 134
+  op_code { for_iterator { address_delta: 14 } }                                                                                                                                             # 135
+  op_code { store { frame: 0 pos_in_frame: 1 } }                                                                                                                                             # 136
+  op_code { make_list { reserve_size: 1 } }                                                                                                                                                  # 137
+  op_code { const_int { value: 0 } }                                                                                                                                                         # 138
+  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                          # 139
+  op_code { get_iterator { } highlight_start: { row: 6 column: 36 pos: 211 } highlight_mid: { row: 6 column: 45 pos: 220 } highlight_end: { row: 6 column: 48 pos: 223 } }                   # 140
+  op_code { for_iterator { address_delta: 6 } }                                                                                                                                              # 141
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                             # 142
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 6 column: 2 pos: 177 } highlight_mid: { row: 6 column: 2 pos: 177 } highlight_end: { row: 6 column: 3 pos: 178 } }     # 143
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 6 column: 5 pos: 180 } highlight_mid: { row: 6 column: 5 pos: 180 } highlight_end: { row: 6 column: 6 pos: 181 } }     # 144
+  op_code { add_to_dictionary { number_of_elements: 1 } }                                                                                                                                    # 145
+  op_code { goto { address_delta: -5 } }                                                                                                                                                     # 146
+  op_code { end_iterator { } }                                                                                                                                                               # 147
+  op_code { goto { address_delta: -13 } }                                                                                                                                                    # 148
+  op_code { end_iterator { } }                                                                                                                                                               # 149
+  op_code { pop_frame { } }                                                                                                                                                                  # 150
+  op_code { pop { } }                                                                                                                                                                        # 151
+  op_code { pop_frame { } }                                                                                                                                                                  # 152
+  op_code { pop_frame { } }                                                                                                                                                                  # 153
+  op_code { pop_frame { } }                                                                                                                                                                  # 154
 
-  op_code { end { } }                                                                                                                                                              # 155
+  op_code { end { } }                                                                                                                                                                        # 155
 }

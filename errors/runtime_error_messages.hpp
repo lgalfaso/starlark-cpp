@@ -13,17 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_dictionary_duplicate_key(std::string_view key);
-std::string error_unbound_variable(std::string_view name);
-std::string error_symbol_not_available(std::string_view symbol);
-std::string error_expect_mapping_after_star_star(std::string_view type);
-std::string error_multiple_values_for_keyword(std::string_view name);
-std::string error_unable_to_load_module(std::string_view module_name);
-std::string error_module_not_ready(std::string_view module_name);
-std::string error_module_does_not_define_symbol(std::string_view  module_name, std::string_view symbol);
-std::string error_unknown_op(int op_code);
-std::string error_recursive_call(std::string_view fn_name);
-
 std::string error_v2_max_string_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_max_string_length(int64_t max_length);
 std::string error_v2_max_bytes_length(int64_t max_length, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
@@ -151,6 +140,17 @@ std::string error_v2_unknown_conversion(std::string_view conversion);
 std::string_view error_v2_expected_after_conversion();
 std::string_view error_v2_non_string_with_base();
 std::string_view error_v2_keyword_must_be_string();
+
+std::string error_v2_dictionary_duplicate_key(std::string_view key);
+std::string error_v2_unbound_variable(std::string_view name);
+std::string error_v2_symbol_not_available(std::string_view symbol);
+std::string error_v2_expect_mapping_after_star_star(std::string_view type);
+std::string error_v2_multiple_values_for_keyword(std::string_view name);
+std::string error_v2_unable_to_load_module(std::string_view module_name);
+std::string error_v2_module_not_ready(std::string_view module_name);
+std::string error_v2_module_does_not_define_symbol(std::string_view  module_name, std::string_view symbol);
+std::string error_v2_unknown_op(int op_code);
+std::string error_v2_recursive_call(std::string_view fn_name);
 
 }  // namespace error_messages
 }  // namespace starlark

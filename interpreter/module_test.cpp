@@ -102,7 +102,7 @@ def foo():
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "LoadError: Module ':foo.star' does not contain the symbol bar");
+  EXPECT_EQ(logging.begin()->message(), "module ':foo.star' does not contain the symbol bar\n");
 }
 
 TEST(Interpreter, MultipleModuleLoading_1) {
@@ -327,7 +327,7 @@ def foo():
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "ModuleNotFoundError: Unable to load module named ':foo.star'");
+  EXPECT_EQ(logging.begin()->message(), "unable to load module named ':foo.star'\n");
 }
 
 TEST(Interpreter, FailToTranslateModuleAtExecutionTime) {
@@ -355,7 +355,7 @@ def foo():
   auto result = runner.run(loader, "main", grammar_options{}, runtime_options{}, logging);
   ASSERT_FALSE(result.ok());
   ASSERT_THAT(logging, SizeIs(1));
-  EXPECT_EQ(logging.begin()->message(), "LoadError: Module ':foo.star' is not ready to be used");
+  EXPECT_EQ(logging.begin()->message(), "module ':foo.star' is not ready to be used\n");
 }
 
 TEST(Interpreter, ObjectsInModuleAreFrozen_1) {

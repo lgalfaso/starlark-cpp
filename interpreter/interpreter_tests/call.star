@@ -11,7 +11,7 @@ len(*1)
 """)
 assert_fail("""
 dict(**1)
-""", error_message = """TypeError: argument after ** must be a mapping, not int
+""", error_message = """argument after ** must be a mapping, not int
     1 | dict(**1)
       | ~~~~^^^^^
 """)
@@ -23,19 +23,19 @@ dict(**{1: 1})
 """)
 assert_fail("""
 dict(a = 1, **{'a': 2})
-""", error_message = """TypeError: got multiple values for keyword argument 'a'
+""", error_message = """got multiple values for keyword argument 'a'
     1 | dict(a = 1, **{'a': 2})
       | ~~~~^^^^^^^^^^^^^^^^^^^
 """)
 assert_fail("""
 dict(**['a'])
-""", error_message = """TypeError: argument after ** must be a mapping, not list
+""", error_message = """argument after ** must be a mapping, not list
     1 | dict(**['a'])
       | ~~~~^^^^^^^^^
 """)
 assert_fail("""
 dict(**[])
-""", error_message = """TypeError: argument after ** must be a mapping, not list
+""", error_message = """argument after ** must be a mapping, not list
     1 | dict(**[])
       | ~~~~^^^^^^
 """)

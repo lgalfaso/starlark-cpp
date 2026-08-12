@@ -7,93 +7,93 @@ block {
   op_code { make_list { reserve_size: 0 } }
   op_code { store { frame: 1 pos_in_frame: 1 } }
   op_code { const_int { value: 2 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 3 column: 1 pos: 14 } highlight_mid: { row: 3 column: 1 pos: 14 } highlight_end: { row: 3 column: 2 pos: 15 } }
   op_code { const_int { value: 1 } }
   op_code { assign_index_member { } highlight_start: { row: 3 column: 1 pos: 14 } highlight_mid: { row: 3 column: 2 pos: 15 } highlight_end: { row: 3 column: 5 pos: 18 } }
   op_code { const_int { value: 3 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 4 column: 1 pos: 23 } highlight_mid: { row: 4 column: 1 pos: 23 } highlight_end: { row: 4 column: 2 pos: 24 } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 4 column: 1 pos: 23 } highlight_mid: { row: 4 column: 2 pos: 24 } highlight_end: { row: 4 column: 5 pos: 27 } }
   op_code { const_int { value: 5 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 5 column: 1 pos: 32 } highlight_mid: { row: 5 column: 1 pos: 32 } highlight_end: { row: 5 column: 2 pos: 33 } }
   op_code { const_int { value: 4 } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 5 column: 1 pos: 32 } highlight_mid: { row: 5 column: 2 pos: 33 } highlight_end: { row: 5 column: 6 pos: 37 } }
   op_code { const_int { value: 7 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 6 column: 1 pos: 42 } highlight_mid: { row: 6 column: 1 pos: 42 } highlight_end: { row: 6 column: 2 pos: 43 } }
   op_code { const_none { } }
   op_code { const_int { value: 6 } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 6 column: 1 pos: 42 } highlight_mid: { row: 6 column: 2 pos: 43 } highlight_end: { row: 6 column: 6 pos: 47 } }
   op_code { const_int { value: 10 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 7 column: 1 pos: 52 } highlight_mid: { row: 7 column: 1 pos: 52 } highlight_end: { row: 7 column: 2 pos: 53 } }
   op_code { const_int { value: 8 } }
   op_code { const_int { value: 9 } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 7 column: 1 pos: 52 } highlight_mid: { row: 7 column: 2 pos: 53 } highlight_end: { row: 7 column: 7 pos: 58 } }
   op_code { const_int { value: 11 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 8 column: 1 pos: 64 } highlight_mid: { row: 8 column: 1 pos: 64 } highlight_end: { row: 8 column: 2 pos: 65 } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 8 column: 1 pos: 64 } highlight_mid: { row: 8 column: 2 pos: 65 } highlight_end: { row: 8 column: 6 pos: 69 } }
   op_code { const_int { value: 13 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 9 column: 1 pos: 75 } highlight_mid: { row: 9 column: 1 pos: 75 } highlight_end: { row: 9 column: 2 pos: 76 } }
   op_code { const_int { value: 12 } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 9 column: 1 pos: 75 } highlight_mid: { row: 9 column: 2 pos: 76 } highlight_end: { row: 9 column: 8 pos: 82 } }
   op_code { const_int { value: 15 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 10 column: 1 pos: 88 } highlight_mid: { row: 10 column: 1 pos: 88 } highlight_end: { row: 10 column: 2 pos: 89 } }
   op_code { const_none { } }
   op_code { const_int { value: 14 } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 10 column: 1 pos: 88 } highlight_mid: { row: 10 column: 2 pos: 89 } highlight_end: { row: 10 column: 8 pos: 95 } }
   op_code { const_int { value: 18 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 11 column: 1 pos: 101 } highlight_mid: { row: 11 column: 1 pos: 101 } highlight_end: { row: 11 column: 2 pos: 102 } }
   op_code { const_int { value: 16 } }
   op_code { const_int { value: 17 } }
   op_code { const_none { } }
   op_code { assign_slice_range { } highlight_start: { row: 11 column: 1 pos: 101 } highlight_mid: { row: 11 column: 2 pos: 102 } highlight_end: { row: 11 column: 10 pos: 110 } }
   op_code { const_int { value: 20 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 12 column: 1 pos: 116 } highlight_mid: { row: 12 column: 1 pos: 116 } highlight_end: { row: 12 column: 2 pos: 117 } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { const_int { value: 19 } }
   op_code { assign_slice_range { } highlight_start: { row: 12 column: 1 pos: 116 } highlight_mid: { row: 12 column: 2 pos: 117 } highlight_end: { row: 12 column: 8 pos: 123 } }
   op_code { const_int { value: 23 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 13 column: 1 pos: 129 } highlight_mid: { row: 13 column: 1 pos: 129 } highlight_end: { row: 13 column: 2 pos: 130 } }
   op_code { const_int { value: 21 } }
   op_code { const_none { } }
   op_code { const_int { value: 22 } }
   op_code { assign_slice_range { } highlight_start: { row: 13 column: 1 pos: 129 } highlight_mid: { row: 13 column: 2 pos: 130 } highlight_end: { row: 13 column: 10 pos: 138 } }
   op_code { const_int { value: 26 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 14 column: 1 pos: 144 } highlight_mid: { row: 14 column: 1 pos: 144 } highlight_end: { row: 14 column: 2 pos: 145 } }
   op_code { const_none { } }
   op_code { const_int { value: 24 } }
   op_code { const_int { value: 25 } }
   op_code { assign_slice_range { } highlight_start: { row: 14 column: 1 pos: 144 } highlight_mid: { row: 14 column: 2 pos: 145 } highlight_end: { row: 14 column: 10 pos: 153 } }
   op_code { const_int { value: 30 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 15 column: 1 pos: 159 } highlight_mid: { row: 15 column: 1 pos: 159 } highlight_end: { row: 15 column: 2 pos: 160 } }
   op_code { const_int { value: 27 } }
   op_code { const_int { value: 28 } }
   op_code { const_int { value: 29 } }
   op_code { assign_slice_range { } highlight_start: { row: 15 column: 1 pos: 159 } highlight_mid: { row: 15 column: 2 pos: 160 } highlight_end: { row: 15 column: 12 pos: 170 } }
   op_code { const_int { value: 33 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } }
+  op_code { load { frame: 1 pos_in_frame: 1 } highlight_start: { row: 16 column: 1 pos: 176 } highlight_mid: { row: 16 column: 1 pos: 176 } highlight_end: { row: 16 column: 2 pos: 177 } }
   op_code { const_int { value: 31 } }
   op_code { index_member { } highlight_start: { row: 16 column: 1 pos: 176 } highlight_mid: { row: 16 column: 2 pos: 177 } highlight_end: { row: 16 column: 6 pos: 181 } }
   op_code { const_int { value: 32 } }
   op_code { assign_index_member { } highlight_start: { row: 16 column: 1 pos: 176 } highlight_mid: { row: 16 column: 6 pos: 181 } highlight_end: { row: 16 column: 10 pos: 185 } }
-  op_code { load: { frame: 1 pos_in_frame: 1 } }
+  op_code { load: { frame: 1 pos_in_frame: 1 } highlight_start: { row: 17 column: 8 pos: 198 } highlight_mid: { row: 17 column: 8 pos: 198 } highlight_end: { row: 17 column: 9 pos: 199 } }
   op_code { const_none: { } }
   op_code { const_none: { } }
   op_code { const_none { } }
   op_code { slice_range { } highlight_start: { row: 17 column: 8 pos: 198 } highlight_mid: { row: 17 column: 9 pos: 199 } highlight_end: { row: 17 column: 12 pos: 202 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 17 column: 1 pos: 191 } highlight_mid: { row: 17 column: 1 pos: 191 } highlight_end: { row: 17 column: 2 pos: 192 } }
   op_code { const_none { } }
   op_code { const_none { } }
   op_code { const_none { } }

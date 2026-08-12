@@ -1,0 +1,3 @@
+main:3:4: error: argument after ** must be a mapping, not list
+    3 | foo(**[])
+      | ~~~^^^^^^

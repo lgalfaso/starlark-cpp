@@ -3,35 +3,35 @@ block {
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 1 column: 1 pos: 0 } highlight_mid: { row: 1 column: 1 pos: 0 } highlight_end: { row: 1 column: 6 pos: 5 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 1 column: 1 pos: 0 } highlight_mid { row: 1 column: 6 pos: 5 } highlight_end { row: 1 column: 8 pos: 7 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 2 column: 1 pos: 8 } highlight_mid: { row: 2 column: 1 pos: 8 } highlight_end: { row: 2 column: 6 pos: 13 } }
   op_code { const_string { value: "a" } highlight_start { row: 2 column: 7 pos: 14 } highlight_mid { row: 2 column: 7 pos: 14 } highlight_end { row: 2 column: 10 pos: 17 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 2 column: 1 pos: 8 } highlight_mid { row: 2 column: 6 pos: 13 } highlight_end { row: 2 column: 11 pos: 18 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 3 column: 1 pos: 19 } highlight_mid: { row: 3 column: 1 pos: 19 } highlight_end: { row: 3 column: 6 pos: 24 } }
   op_code { const_string { value: "b" } highlight_start { row: 3 column: 7 pos: 25 } highlight_mid { row: 3 column: 7 pos: 25 } highlight_end { row: 3 column: 10 pos: 28 } }
   op_code { const_string { value: "c" } highlight_start { row: 3 column: 12 pos: 30 } highlight_mid { row: 3 column: 12 pos: 30 } highlight_end { row: 3 column: 15 pos: 33 } }
   op_code { call { positional_arguments_count: 2 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 3 column: 1 pos: 19 } highlight_mid { row: 3 column: 6 pos: 24 } highlight_end { row: 3 column: 16 pos: 34 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 4 column: 1 pos: 35 } highlight_mid: { row: 4 column: 1 pos: 35 } highlight_end: { row: 4 column: 6 pos: 40 } }
   op_code { const_string { value: "d" } highlight_start { row: 4 column: 7 pos: 41 } highlight_mid { row: 4 column: 7 pos: 41 } highlight_end { row: 4 column: 10 pos: 44 } }
   op_code { const_string { value: "e" } highlight_start { row: 4 column: 12 pos: 46 } highlight_mid { row: 4 column: 12 pos: 46 } highlight_end { row: 4 column: 15 pos: 49 } }
   op_code { const_string { value: "f" } highlight_start { row: 4 column: 17 pos: 51 } highlight_mid { row: 4 column: 17 pos: 51 } highlight_end { row: 4 column: 20 pos: 54 } }
   op_code { call { positional_arguments_count: 3 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 4 column: 1 pos: 35 } highlight_mid { row: 4 column: 6 pos: 40 } highlight_end { row: 4 column: 21 pos: 55 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 5 column: 1 pos: 56 } highlight_mid: { row: 5 column: 1 pos: 56 } highlight_end: { row: 5 column: 6 pos: 61 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 5 column: 13 pos: 68 } highlight_mid { row: 5 column: 13 pos: 68 } highlight_end { row: 5 column: 16 pos: 71 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 5 column: 1 pos: 56 } highlight_mid { row: 5 column: 6 pos: 61 } highlight_end { row: 5 column: 17 pos: 72 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 6 column: 1 pos: 73 } highlight_mid: { row: 6 column: 1 pos: 73 } highlight_end: { row: 6 column: 6 pos: 78 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 6 column: 13 pos: 85 } highlight_mid { row: 6 column: 13 pos: 85 } highlight_end { row: 6 column: 16 pos: 88 } }
   op_code { const_string_view { value: "end" } }
@@ -39,14 +39,14 @@ block {
   op_code { call { positional_arguments_count: 0 named_arguments_count: 2 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 6 column: 1 pos: 73 } highlight_mid { row: 6 column: 6 pos: 78 } highlight_end { row: 6 column: 29 pos: 101 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 7 column: 1 pos: 102 } highlight_mid: { row: 7 column: 1 pos: 102 } highlight_end: { row: 7 column: 6 pos: 107 } }
   op_code { const_string { value: "g" } highlight_start { row: 7 column: 7 pos: 108 } highlight_mid { row: 7 column: 7 pos: 108 } highlight_end { row: 7 column: 10 pos: 111 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 7 column: 18 pos: 119 } highlight_mid { row: 7 column: 18 pos: 119 } highlight_end { row: 7 column: 21 pos: 122 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 7 column: 1 pos: 102 } highlight_mid { row: 7 column: 6 pos: 107 } highlight_end { row: 7 column: 22 pos: 123 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 8 column: 1 pos: 124 } highlight_mid: { row: 8 column: 1 pos: 124 } highlight_end: { row: 8 column: 6 pos: 129 } }
   op_code { const_string { value: "h" } highlight_start { row: 8 column: 7 pos: 130 } highlight_mid { row: 8 column: 7 pos: 130 } highlight_end { row: 8 column: 10 pos: 133 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 8 column: 18 pos: 141 } highlight_mid { row: 8 column: 18 pos: 141 } highlight_end { row: 8 column: 21 pos: 144 } }
@@ -55,7 +55,7 @@ block {
   op_code { call { positional_arguments_count: 1 named_arguments_count: 2 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 8 column: 1 pos: 124 } highlight_mid { row: 8 column: 6 pos: 129 } highlight_end { row: 8 column: 34 pos: 157 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 9 column: 1 pos: 158 } highlight_mid: { row: 9 column: 1 pos: 158 } highlight_end: { row: 9 column: 6 pos: 163 } }
   op_code { const_string { value: "i" } highlight_start { row: 9 column: 7 pos: 164 } highlight_mid { row: 9 column: 7 pos: 164 } highlight_end { row: 9 column: 10 pos: 167 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } highlight_start { row: 9 column: 14 pos: 171 } highlight_mid { row: 9 column: 14 pos: 171 } highlight_end { row: 9 column: 17 pos: 174 } }
@@ -63,16 +63,16 @@ block {
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } highlight_start { row: 9 column: 1 pos: 158 } highlight_mid { row: 9 column: 6 pos: 163 } highlight_end { row: 9 column: 19 pos: 176 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 10 column: 1 pos: 177 } highlight_mid: { row: 10 column: 1 pos: 177 } highlight_end: { row: 10 column: 6 pos: 182 } }
   op_code { const_string { value: "j" } highlight_start { row: 10 column: 7 pos: 183 } highlight_mid { row: 10 column: 7 pos: 183 } highlight_end { row: 10 column: 10 pos: 186 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 10 column: 14 pos: 190 } highlight_mid: { row: 10 column: 14 pos: 190 } highlight_end: { row: 10 column: 18 pos: 194 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 10 column: 25 pos: 201 } highlight_mid { row: 10 column: 25 pos: 201 } highlight_end { row: 10 column: 28 pos: 204 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 10 column: 14 pos: 190 } highlight_mid { row: 10 column: 18 pos: 194 } highlight_end { row: 10 column: 29 pos: 205 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } highlight_start { row: 10 column: 1 pos: 177 } highlight_mid { row: 10 column: 6 pos: 182 } highlight_end { row: 10 column: 30 pos: 206 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 11 column: 1 pos: 207 } highlight_mid: { row: 11 column: 1 pos: 207 } highlight_end: { row: 11 column: 6 pos: 212 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 11 column: 13 pos: 219 } highlight_mid { row: 11 column: 13 pos: 219 } highlight_end { row: 11 column: 16 pos: 222 } }
   op_code { make_list { reserve_size: 1 } }
@@ -81,64 +81,64 @@ block {
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: false } highlight_start { row: 11 column: 1 pos: 207 } highlight_mid { row: 11 column: 6 pos: 212 } highlight_end { row: 11 column: 25 pos: 231 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 12 column: 1 pos: 232 } highlight_mid: { row: 12 column: 1 pos: 232 } highlight_end: { row: 12 column: 6 pos: 237 } }
   op_code { const_string_view { value: "end" } }
   op_code { const_string { value: " " } highlight_start { row: 12 column: 13 pos: 244 } highlight_mid { row: 12 column: 13 pos: 244 } highlight_end { row: 12 column: 16 pos: 247 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 12 column: 20 pos: 251 } highlight_mid: { row: 12 column: 20 pos: 251 } highlight_end: { row: 12 column: 24 pos: 255 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 12 column: 31 pos: 262 } highlight_mid { row: 12 column: 31 pos: 262 } highlight_end { row: 12 column: 34 pos: 265 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 12 column: 20 pos: 251 } highlight_mid { row: 12 column: 24 pos: 255 } highlight_end { row: 12 column: 35 pos: 266 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: true } highlight_start { row: 12 column: 1 pos: 232 } highlight_mid { row: 12 column: 6 pos: 237 } highlight_end { row: 12 column: 36 pos: 267 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 13 column: 1 pos: 268 } highlight_mid: { row: 13 column: 1 pos: 268 } highlight_end: { row: 13 column: 6 pos: 273 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } highlight_start { row: 13 column: 9 pos: 276 } highlight_mid { row: 13 column: 9 pos: 276 } highlight_end { row: 13 column: 12 pos: 279 } }
   op_code { add_to_list { number_of_elements: 1 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 13 column: 17 pos: 284 } highlight_mid: { row: 13 column: 17 pos: 284 } highlight_end: { row: 13 column: 21 pos: 288 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 13 column: 28 pos: 295 } highlight_mid { row: 13 column: 28 pos: 295 } highlight_end { row: 13 column: 31 pos: 298 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 13 column: 17 pos: 284 } highlight_mid { row: 13 column: 21 pos: 288 } highlight_end { row: 13 column: 32 pos: 299 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: true } highlight_start { row: 13 column: 1 pos: 268 } highlight_mid { row: 13 column: 6 pos: 273 } highlight_end { row: 13 column: 33 pos: 300 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 15 column: 1 pos: 302 } highlight_mid: { row: 15 column: 1 pos: 302 } highlight_end: { row: 15 column: 6 pos: 307 } }
   op_code { const_string_view { value: "end" } }
   op_code { const_string { value: " " } highlight_start { row: 15 column: 13 pos: 314 } highlight_mid { row: 15 column: 13 pos: 314 } highlight_end { row: 15 column: 16 pos: 317 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } highlight_start { row: 15 column: 20 pos: 321 } highlight_mid { row: 15 column: 20 pos: 321 } highlight_end { row: 15 column: 23 pos: 324 } }
   op_code { add_to_list { number_of_elements: 1 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 15 column: 28 pos: 329 } highlight_mid: { row: 15 column: 28 pos: 329 } highlight_end: { row: 15 column: 32 pos: 333 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 15 column: 39 pos: 340 } highlight_mid { row: 15 column: 39 pos: 340 } highlight_end { row: 15 column: 42 pos: 343 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 15 column: 28 pos: 329 } highlight_mid { row: 15 column: 32 pos: 333 } highlight_end { row: 15 column: 43 pos: 344 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: true } highlight_start { row: 15 column: 1 pos: 302 } highlight_mid { row: 15 column: 6 pos: 307 } highlight_end { row: 15 column: 44 pos: 345 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 16 column: 1 pos: 346 } highlight_mid: { row: 16 column: 1 pos: 346 } highlight_end: { row: 16 column: 6 pos: 351 } }
   op_code { const_string { value: "k" } highlight_start { row: 16 column: 7 pos: 352 } highlight_mid { row: 16 column: 7 pos: 352 } highlight_end { row: 16 column: 10 pos: 355 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } highlight_start { row: 16 column: 14 pos: 359 } highlight_mid { row: 16 column: 14 pos: 359 } highlight_end { row: 16 column: 17 pos: 362 } }
   op_code { add_to_list { number_of_elements: 1 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 16 column: 22 pos: 367 } highlight_mid: { row: 16 column: 22 pos: 367 } highlight_end: { row: 16 column: 26 pos: 371 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 16 column: 33 pos: 378 } highlight_mid { row: 16 column: 33 pos: 378 } highlight_end { row: 16 column: 36 pos: 381 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 16 column: 22 pos: 367 } highlight_mid { row: 16 column: 26 pos: 371 } highlight_end { row: 16 column: 37 pos: 382 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: true } highlight_start { row: 16 column: 1 pos: 346 } highlight_mid { row: 16 column: 6 pos: 351 } highlight_end { row: 16 column: 38 pos: 383 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 17 column: 1 pos: 384 } highlight_mid: { row: 17 column: 1 pos: 384 } highlight_end: { row: 17 column: 6 pos: 389 } }
   op_code { const_string { value: "l" } highlight_start { row: 17 column: 7 pos: 390 } highlight_mid { row: 17 column: 7 pos: 390 } highlight_end { row: 17 column: 10 pos: 393 } }
   op_code { const_string_view { value: "end" } }
   op_code { const_string { value: " " } highlight_start { row: 17 column: 18 pos: 401 } highlight_mid { row: 17 column: 18 pos: 401 } highlight_end { row: 17 column: 21 pos: 404 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 17 column: 25 pos: 408 } highlight_mid: { row: 17 column: 25 pos: 408 } highlight_end: { row: 17 column: 29 pos: 412 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 17 column: 36 pos: 419 } highlight_mid { row: 17 column: 36 pos: 419 } highlight_end { row: 17 column: 39 pos: 422 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 17 column: 25 pos: 408 } highlight_mid { row: 17 column: 29 pos: 412 } highlight_end { row: 17 column: 40 pos: 423 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: true } highlight_start { row: 17 column: 1 pos: 384 } highlight_mid { row: 17 column: 6 pos: 389 } highlight_end { row: 17 column: 41 pos: 424 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 18 column: 1 pos: 425 } highlight_mid: { row: 18 column: 1 pos: 425 } highlight_end: { row: 18 column: 6 pos: 430 } }
   op_code { const_string { value: "m" } highlight_start { row: 18 column: 7 pos: 431 } highlight_mid { row: 18 column: 7 pos: 431 } highlight_end { row: 18 column: 10 pos: 434 } }
   op_code { const_string_view { value: "end" } }
   op_code { const_string { value: " " } highlight_start { row: 18 column: 18 pos: 442 } highlight_mid { row: 18 column: 18 pos: 442 } highlight_end { row: 18 column: 21 pos: 445 } }
@@ -148,29 +148,29 @@ block {
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: false } highlight_start { row: 18 column: 1 pos: 425 } highlight_mid { row: 18 column: 6 pos: 430 } highlight_end { row: 18 column: 30 pos: 454 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 20 column: 1 pos: 456 } highlight_mid: { row: 20 column: 1 pos: 456 } highlight_end: { row: 20 column: 6 pos: 461 } }
   op_code { const_string { value: "n" } highlight_start { row: 20 column: 7 pos: 462 } highlight_mid { row: 20 column: 7 pos: 462 } highlight_end { row: 20 column: 10 pos: 465 } }
   op_code { const_string_view { value: "end" } }
   op_code { const_string { value: " " } highlight_start { row: 20 column: 18 pos: 473 } highlight_mid { row: 20 column: 18 pos: 473 } highlight_end { row: 20 column: 21 pos: 476 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } highlight_start { row: 20 column: 25 pos: 480 } highlight_mid { row: 20 column: 25 pos: 480 } highlight_end { row: 20 column: 28 pos: 483 } }
   op_code { add_to_list { number_of_elements: 1 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 20 column: 33 pos: 488 } highlight_mid: { row: 20 column: 33 pos: 488 } highlight_end: { row: 20 column: 37 pos: 492 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 20 column: 44 pos: 499 } highlight_mid { row: 20 column: 44 pos: 499 } highlight_end { row: 20 column: 47 pos: 502 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 20 column: 33 pos: 488 } highlight_mid { row: 20 column: 37 pos: 492 } highlight_end { row: 20 column: 48 pos: 503 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 1 has_variadic_positional_argument: true has_variadic_named_argument: true } highlight_start { row: 20 column: 1 pos: 456 } highlight_mid { row: 20 column: 6 pos: 461 } highlight_end { row: 20 column: 49 pos: 504 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 21 column: 1 pos: 505 } highlight_mid: { row: 21 column: 1 pos: 505 } highlight_end: { row: 21 column: 6 pos: 510 } }
   op_code { make_list { reserve_size: 1 } }
   op_code { const_string { value: "a" } highlight_start { row: 21 column: 9 pos: 513 } highlight_mid { row: 21 column: 9 pos: 513 } highlight_end { row: 21 column: 12 pos: 516 } }
   op_code { add_to_list { number_of_elements: 1 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } highlight_start { row: 21 column: 1 pos: 505 } highlight_mid { row: 21 column: 6 pos: 510 } highlight_end { row: 21 column: 14 pos: 518 } }
   op_code { pop { } }
 
-  op_code { load { frame: 2 pos_in_frame: 1 } }
-  op_code { load { frame: 2 pos_in_frame: 0 } }
+  op_code { load { frame: 2 pos_in_frame: 1 } highlight_start: { row: 22 column: 1 pos: 519 } highlight_mid: { row: 22 column: 1 pos: 519 } highlight_end: { row: 22 column: 6 pos: 524 } }
+  op_code { load { frame: 2 pos_in_frame: 0 } highlight_start: { row: 22 column: 9 pos: 527 } highlight_mid: { row: 22 column: 9 pos: 527 } highlight_end: { row: 22 column: 13 pos: 531 } }
   op_code { const_string_view { value: "sep" } }
   op_code { const_string { value: " " } highlight_start { row: 22 column: 20 pos: 538 } highlight_mid { row: 22 column: 20 pos: 538 } highlight_end { row: 22 column: 23 pos: 541 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 1 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 22 column: 9 pos: 527 } highlight_mid { row: 22 column: 13 pos: 531 } highlight_end { row: 22 column: 24 pos: 542 } }

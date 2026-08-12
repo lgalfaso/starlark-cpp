@@ -39,7 +39,7 @@ block {
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 6 column: 10 pos: 64 } highlight_mid: { row: 6 column: 10 pos: 64 } highlight_end: { row: 6 column: 11 pos: 65 } }
   op_code { const_int { value: 1 } }
   op_code { binary_plus { } highlight_start: { row: 6 column: 12 pos: 66 } highlight_mid: { row: 6 column: 12 pos: 66 } highlight_end: { row: 6 column: 13 pos: 67 } }
   op_code { return { } }
@@ -47,34 +47,34 @@ block {
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } }
-  op_code { load { frame: 0 pos_in_frame: 1 } }
+  op_code { load { frame: 0 pos_in_frame: 0 }  highlight_start: { row: 8 column: 10 pos: 99 } highlight_mid: { row: 8 column: 10 pos: 99 } highlight_end: { row: 8 column: 11 pos: 100 } }
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 8 column: 12 pos: 101 } highlight_mid: { row: 8 column: 12 pos: 101 } highlight_end: { row: 8 column: 13 pos: 102 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 8 column: 10 pos: 99 } highlight_mid { row: 8 column: 11 pos: 100 } highlight_end { row: 8 column: 14 pos: 103 } }
   op_code { return { } }
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo4" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } }
-  op_code { load { frame: 0 pos_in_frame: 1 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 10 column: 10 pos: 130 } highlight_mid: { row: 10 column: 10 pos: 130 } highlight_end: { row: 10 column: 11 pos: 131 } }
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 10 column: 13 pos: 133 } highlight_mid: { row: 10 column: 13 pos: 133 } highlight_end: { row: 10 column: 14 pos: 134 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } highlight_start { row: 10 column: 10 pos: 130 } highlight_mid { row: 10 column: 11 pos: 131 } highlight_end { row: 10 column: 15 pos: 135 } }
   op_code { return { } }
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo5" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } }
-  op_code { load { frame: 0 pos_in_frame: 1 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 12 column: 10 pos: 163 } highlight_mid: { row: 12 column: 10 pos: 163 } highlight_end: { row: 12 column: 11 pos: 164 } }
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 12 column: 14 pos: 167 } highlight_mid: { row: 12 column: 14 pos: 167 } highlight_end: { row: 12 column: 15 pos: 168 } }
   op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } highlight_start { row: 12 column: 10 pos: 163 } highlight_mid { row: 12 column: 11 pos: 164 } highlight_end { row: 12 column: 16 pos: 169 } }
   op_code { return { } }
   function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: false has_star_star_argument: true keyword_only_parameter_count: 0 fn_name: "foo6" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" symbol: "c" } }
-  op_code { load { frame: 3 pos_in_frame: 0 } }
-  op_code { load { frame: 0 pos_in_frame: 0 } }
-  op_code { load { frame: 0 pos_in_frame: 1 } }
-  op_code { load { frame: 0 pos_in_frame: 2 } }
+  op_code { load { frame: 3 pos_in_frame: 0 } highlight_start: { row: 14 column: 3 pos: 198 } highlight_mid: { row: 14 column: 3 pos: 198 } highlight_end: { row: 14 column: 8 pos: 203 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 14 column: 9 pos: 204 } highlight_mid: { row: 14 column: 9 pos: 204 } highlight_end: { row: 14 column: 10 pos: 205 } }
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 14 column: 12 pos: 207 } highlight_mid: { row: 14 column: 12 pos: 207 } highlight_end: { row: 14 column: 13 pos: 208 } }
+  op_code { load { frame: 0 pos_in_frame: 2 } highlight_start: { row: 14 column: 15 pos: 210 } highlight_mid: { row: 14 column: 15 pos: 210 } highlight_end: { row: 14 column: 16 pos: 211 } }
   op_code { call { positional_arguments_count: 3 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 14 column: 3 pos: 198 } highlight_mid { row: 14 column: 8 pos: 203 } highlight_end { row: 14 column: 17 pos: 212 } }
   op_code { pop { } }
   op_code { const_none { } }
@@ -83,9 +83,9 @@ block {
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 3 pos_in_frame: 0 } }
-  op_code { load { frame: 0 pos_in_frame: 1 } }
-  op_code { load { frame: 0 pos_in_frame: 0 } }
+  op_code { load { frame: 3 pos_in_frame: 0 } highlight_start: { row: 16 column: 3 pos: 232 } highlight_mid: { row: 16 column: 3 pos: 232 } highlight_end: { row: 16 column: 8 pos: 237 } }
+  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 16 column: 9 pos: 238 } highlight_mid: { row: 16 column: 9 pos: 238 } highlight_end: { row: 16 column: 10 pos: 239 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 16 column: 13 pos: 242 } highlight_mid: { row: 16 column: 13 pos: 242 } highlight_end: { row: 16 column: 14 pos: 243 } }
   op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: true has_variadic_named_argument: false } highlight_start { row: 16 column: 3 pos: 232 } highlight_mid { row: 16 column: 8 pos: 237 } highlight_end { row: 16 column: 15 pos: 244 } }
   op_code { pop { } }
   op_code { const_none { } }

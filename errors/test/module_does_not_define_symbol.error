@@ -1,0 +1,1 @@
+main: error: module '//:test1.bzl' does not contain the symbol b

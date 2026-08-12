@@ -229,9 +229,13 @@ void bytecode_generator::enter_bytes_value(const StringValue* bytes_value) {
 }
 
 void bytecode_generator::enter_identifier(const Identifier* identifier) {
-  auto* id_op = mutable_block()->add_op_code()->mutable_load();
+  auto* op_code = mutable_block()->add_op_code();
+  auto* id_op = op_code->mutable_load();
   id_op->set_frame(identifier->frame());
   id_op->set_pos_in_frame(identifier->pos_in_frame());
+  *op_code->mutable_highlight_start() = identifier->pif().start();
+  *op_code->mutable_highlight_mid() = identifier->pif().start();
+  *op_code->mutable_highlight_end() = identifier->pif().end();
 }
 
 void bytecode_generator::exit_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {
