@@ -2,7 +2,7 @@ assert_fail("min()", error_message = """Error: TypeError: min expected at least 
     1 | min()
       | ~~~^^
 """)
-assert_fail("min([])", error_message = """ValueError: min() iterable argument is empty
+assert_fail("min([])", error_message = """min() iterable argument is empty
     1 | min([])
       | ~~~^^^^
 """)

@@ -1,0 +1,3 @@
+main:2:21: error: splitlines() got multiple values for argument 'keepends'
+    2 | a = 'abc'.splitlines(True, keepends = False)
+      |     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^

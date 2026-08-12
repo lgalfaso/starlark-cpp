@@ -1,0 +1,3 @@
+main:2:9: error: argument should be integer or bytes object, not 'float'
+    2 | a = 1.0 in b'def'
+      |         ^^

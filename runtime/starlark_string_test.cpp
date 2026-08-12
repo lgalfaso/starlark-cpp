@@ -1390,7 +1390,7 @@ TEST(StarlarkString, CountInteger) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not int");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not int");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1412,7 +1412,7 @@ TEST(StarlarkString, CountBigInt) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not int");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not int");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1433,7 +1433,7 @@ TEST(StarlarkString, CountIntegerNegative) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not int");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not int");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1455,7 +1455,7 @@ TEST(StarlarkString, CountIntegerTooBig) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not int");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not int");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1477,7 +1477,7 @@ TEST(StarlarkString, CountBigIntNegative) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not int");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not int");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1499,7 +1499,7 @@ TEST(StarlarkString, CountBigIntTooBig) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not int");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not int");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1520,7 +1520,7 @@ TEST(StarlarkString, CountNone) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not NoneType");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not NoneType");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -1542,7 +1542,7 @@ TEST(StarlarkString, CountFloat) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: count() argument 1 must be string, not float");
+  EXPECT_EQ(error_callback.messages[0], "count() argument 1 must be string, not float");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -2124,7 +2124,7 @@ TEST(StarlarkString, EndswithList) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith first arg must be str or a tuple of str, not list");
+  EXPECT_EQ(error_callback.messages[0], "endswith first arg must be string or a tuple of strings, not list");
 }
 
 TEST(StarlarkString, EndswithBytes) {
@@ -2145,7 +2145,7 @@ TEST(StarlarkString, EndswithBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith first arg must be str or a tuple of str, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "endswith first arg must be string or a tuple of strings, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2169,7 +2169,7 @@ TEST(StarlarkString, EndswithTupleWithBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: tuple for endswith must only contain string, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "tuple for endswith must only contain string, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2675,7 +2675,7 @@ TEST(StarlarkString, StartswithList) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith first arg must be str or a tuple of str, not list");
+  EXPECT_EQ(error_callback.messages[0], "startswith first arg must be string or a tuple of strings, not list");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2697,7 +2697,7 @@ TEST(StarlarkString, StartswithBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith first arg must be str or a tuple of str, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "startswith first arg must be string or a tuple of strings, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -2721,7 +2721,7 @@ TEST(StarlarkString, StartswithTupleWithBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: tuple for startswith must only contain string, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "tuple for startswith must only contain string, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -3007,7 +3007,7 @@ TEST(StarlarkString, FindTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: find() argument 1 must be string, not tuple");
+  EXPECT_EQ(error_callback.messages[0], "find() argument 1 must be string, not tuple");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -3461,7 +3461,7 @@ TEST(StarlarkString, IndexTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: index() argument 1 must be string, not tuple");
+  EXPECT_EQ(error_callback.messages[0], "index() argument 1 must be string, not tuple");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -3484,7 +3484,7 @@ TEST(StarlarkString, IndexOneArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -3543,7 +3543,7 @@ TEST(StarlarkString, IndexTwoArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -3592,7 +3592,7 @@ TEST(StarlarkString, IndexThreeArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -3828,7 +3828,7 @@ TEST(StarlarkString, RfindTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rfind() argument 1 must be string, not tuple");
+  EXPECT_EQ(error_callback.messages[0], "rfind() argument 1 must be string, not tuple");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -4177,7 +4177,7 @@ TEST(StarlarkString, RindexTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rindex() argument 1 must be string, not tuple");
+  EXPECT_EQ(error_callback.messages[0], "rindex() argument 1 must be string, not tuple");
   EXPECT_EQ(str.str(), "banana");
 }
 
@@ -4200,7 +4200,7 @@ TEST(StarlarkString, RindexOneArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -4259,7 +4259,7 @@ TEST(StarlarkString, RindexTwoArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -4308,7 +4308,7 @@ TEST(StarlarkString, RindexThreeArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -4544,7 +4544,7 @@ TEST(StarlarkString, JoinString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can only join an iterable");
+  EXPECT_EQ(error_callback.messages[0], "can only join an iterable");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4615,7 +4615,7 @@ TEST(StarlarkString, JoinTupleWithOneBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: join() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "join() argument 1 must be string, not bool");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -4756,7 +4756,7 @@ TEST(StarlarkString, PartitionBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: partition() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "partition() argument 1 must be string, not bool");
 }
 
 TEST(StarlarkString, PartitionEmptySeparator) {
@@ -4776,7 +4776,7 @@ TEST(StarlarkString, PartitionEmptySeparator) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkString, PartitionWithNamedArguments) {
@@ -4866,7 +4866,7 @@ TEST(StarlarkString, RpartitionBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rpartition() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "rpartition() argument 1 must be string, not bool");
 }
 
 TEST(StarlarkString, RpartitionEmptySeparator) {
@@ -4886,7 +4886,7 @@ TEST(StarlarkString, RpartitionEmptySeparator) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkString, RpartitionWithNamedArguments) {
@@ -5009,7 +5009,7 @@ TEST(StarlarkString, ReplaceWithTwoArgumentsOldAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "replace() argument 1 must be string, not bool");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5031,7 +5031,7 @@ TEST(StarlarkString, ReplaceWithTwoArgumentsNewAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() argument 2 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "replace() argument 2 must be string, not bool");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5289,7 +5289,7 @@ TEST(StarlarkString, ReplaceWithCountPositionalAndNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() got multiple values for argument 'count'");
+  EXPECT_EQ(error_callback.messages[0], "replace() got multiple values for argument 'count'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -5912,7 +5912,7 @@ TEST(StarlarkString, RemovesuffixWithOneArgumentBytes) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removesuffix() argument 1 must be string, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "removesuffix() argument 1 must be string, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6029,7 +6029,7 @@ TEST(StarlarkString, RemoveprefixWithOneArgumentBytes) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: removeprefix() argument 1 must be string, not bytes");
+  EXPECT_EQ(error_callback.messages[0], "removeprefix() argument 1 must be string, not bytes");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6467,7 +6467,7 @@ TEST(StarlarkString, SplitBoolSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: split() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "split() argument 1 must be string, not bool");
 }
 
 TEST(StarlarkString, SplitEmptySeparatorArguments) {
@@ -6486,7 +6486,7 @@ TEST(StarlarkString, SplitEmptySeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkString, SplitOneArguments) {
@@ -6582,7 +6582,7 @@ TEST(StarlarkString, SplitEmptySeparatorTwoArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkString, SplitTwoArgumentsBoolSeparator) {
@@ -6602,7 +6602,7 @@ TEST(StarlarkString, SplitTwoArgumentsBoolSeparator) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: split() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "split() argument 1 must be string, not bool");
 }
 
 TEST(StarlarkString, SplitTwoArgumentsBoolMaxsplit) {
@@ -6773,7 +6773,7 @@ TEST(StarlarkString, SplitWithNamedArgumentsSepDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'sep'");
+  EXPECT_EQ(error_callback.messages[0], "split() got multiple values for argument 'sep'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6797,7 +6797,7 @@ TEST(StarlarkString, SplitWithNamedArgumentsMaxsplitDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(error_callback.messages[0], "split() got multiple values for argument 'maxsplit'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -6894,7 +6894,7 @@ TEST(StarlarkString, RsplitBoolSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() argument 1 must be string, not bool");
 }
 
 TEST(StarlarkString, RsplitEmptySeparatorArguments) {
@@ -6913,7 +6913,7 @@ TEST(StarlarkString, RsplitEmptySeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkString, RsplitOneArguments) {
@@ -7009,7 +7009,7 @@ TEST(StarlarkString, RsplitEmptySeparatorTwoArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkString, RsplitTwoArgumentsBoolSeparator) {
@@ -7029,7 +7029,7 @@ TEST(StarlarkString, RsplitTwoArgumentsBoolSeparator) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() argument 1 must be string, not bool");
 }
 
 TEST(StarlarkString, RsplitTwoArgumentsBoolMaxsplit) {
@@ -7177,7 +7177,7 @@ TEST(StarlarkString, RsplitWithNamedArgumentsSepDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'sep'");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() got multiple values for argument 'sep'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7201,7 +7201,7 @@ TEST(StarlarkString, RsplitWithNamedArgumentsMaxsplitDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() got multiple values for argument 'maxsplit'");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7376,7 +7376,7 @@ TEST(StarlarkString, StripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: strip() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "strip() argument 1 must be string, not bool");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7397,7 +7397,7 @@ TEST(StarlarkString, RstripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rstrip() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "rstrip() argument 1 must be string, not bool");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7418,7 +7418,7 @@ TEST(StarlarkString, LstripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: lstrip() argument 1 must be string, not bool");
+  EXPECT_EQ(error_callback.messages[0], "lstrip() argument 1 must be string, not bool");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7569,7 +7569,7 @@ TEST(StarlarkString, SplitlinesWithKeependsAsNumber) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines() argument 1 must be bool, not int");
+  EXPECT_EQ(error_callback.messages[0], "splitlines() argument 1 must be bool, not int");
   EXPECT_EQ(str.str(), "abc");
 }
 
@@ -7634,7 +7634,7 @@ TEST(StarlarkString, SplitlinesWithKeependsPositionalAndNamedArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: splitlines() got multiple values for argument 'keepends'");
+  EXPECT_EQ(error_callback.messages[0], "splitlines() got multiple values for argument 'keepends'");
   EXPECT_EQ(str.str(), "abc\ndef");
 }
 

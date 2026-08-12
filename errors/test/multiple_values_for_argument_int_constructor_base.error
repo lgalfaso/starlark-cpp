@@ -1,0 +1,3 @@
+main:2:8: error: int() got multiple values for argument 'base'
+    2 | a = int('1', 10, base = 8)
+      |     ~~~^^^^^^^^^^^^^^^^^^^

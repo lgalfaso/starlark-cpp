@@ -58,7 +58,7 @@ def foo(a):
   pass
 
 foo(1, a = 2)
-""", error_message = """TypeError: foo() got multiple values for argument 'a'
+""", error_message = """foo() got multiple values for argument 'a'
     4 | foo(1, a = 2)
       | ~~~^^^^^^^^^^
 """)
@@ -68,7 +68,7 @@ def foo(a):
   pass
 
 foo(b = 2)
-""", error_message = """TypeError: foo() got an unexpected keyword argument 'b'
+""", error_message = """foo() got an unexpected keyword argument 'b'
     4 | foo(b = 2)
       | ~~~^^^^^^^
 """)
@@ -78,7 +78,7 @@ def foo(a):
   pass
 
 foo()
-""", error_message = """TypeError: foo() missing required positional argument 'a'
+""", error_message = """foo() missing required positional argument 'a'
     4 | foo()
       | ~~~^^
 """)
@@ -88,7 +88,7 @@ def foo(*, a):
   pass
 
 foo()
-""", error_message = """TypeError: foo() missing required keyword-only argument 'a'
+""", error_message = """foo() missing required keyword-only argument 'a'
     4 | foo()
       | ~~~^^
 """)

@@ -209,7 +209,7 @@ TEST(StarlarkBytesElems, BinaryInWithBoolean) {
 
   EXPECT_FALSE(starlark_bytes(""sv).elems(ctx)->binary_in(*ctx.true_value(), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'bool'");
 }
 
 TEST(StarlarkBytesElemOrds, BinaryInWithBoolean) {
@@ -219,7 +219,7 @@ TEST(StarlarkBytesElemOrds, BinaryInWithBoolean) {
 
   EXPECT_FALSE(starlark_bytes(""sv).elem_ords(ctx)->binary_in(*ctx.true_value(), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'bool'");
 }
 
 TEST(StarlarkBytesElems, GetIterator) {

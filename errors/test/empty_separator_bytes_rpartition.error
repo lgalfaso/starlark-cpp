@@ -1,0 +1,3 @@
+main:2:22: error: empty separator
+    2 | a = b'abc'.rpartition(b'')
+      |     ~~~~~~~~~~~~~~~~~^^^^^

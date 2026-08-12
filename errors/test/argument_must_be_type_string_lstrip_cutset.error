@@ -1,0 +1,3 @@
+main:2:17: error: lstrip() argument 1 must be string, not list
+    2 | a = "abc".lstrip([])
+      |     ~~~~~~~~~~~~^^^^

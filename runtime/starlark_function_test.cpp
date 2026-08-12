@@ -828,7 +828,7 @@ TEST(StarlarkBytes, SourceAsNamedAndPositionalArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: bytes() got multiple values for argument 'source'", error_callback.messages[0]);
+  EXPECT_EQ("bytes() got multiple values for argument 'source'", error_callback.messages[0]);
 }
 
 TEST(StarlarkChr, FromInt) {
@@ -1416,7 +1416,7 @@ TEST(StarlarkEnumerate, IterableAsNamedArgumentAndPositionalArgument) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() got multiple values for argument 'iterable'");
+  EXPECT_EQ(error_callback.messages[0], "enumerate() got multiple values for argument 'iterable'");
 }
 
 TEST(StarlarkEnumerate, StartAsNamedArgumentAndPositionalArgument) {
@@ -1442,7 +1442,7 @@ TEST(StarlarkEnumerate, StartAsNamedArgumentAndPositionalArgument) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() got multiple values for argument 'start'");
+  EXPECT_EQ(error_callback.messages[0], "enumerate() got multiple values for argument 'start'");
 }
 
 TEST(StarlarkEnumerate, InvalidNamedArgument) {
@@ -1481,7 +1481,7 @@ TEST(StarlarkEnumerate, TooFewPosArguments) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: enumerate() missing required argument 'iterable'");
+  EXPECT_EQ(error_callback.messages[0], "enumerate() missing required argument 'iterable'");
 }
 
 TEST(StarlarkEnumerate, TwoPosArguments) {
@@ -2580,7 +2580,7 @@ TEST(StarlarkInt, NoPosArgsAndBase) {
   auto* result = starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() missing string argument", error_callback.messages[0]);
+  EXPECT_EQ("int() missing string argument", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, BaseAsNamedAndPositionalArgument) {
@@ -2599,7 +2599,7 @@ TEST(StarlarkInt, BaseAsNamedAndPositionalArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() got multiple values for argument 'base'", error_callback.messages[0]);
+  EXPECT_EQ("int() got multiple values for argument 'base'", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, ThreePosArgs) {
@@ -2831,7 +2831,7 @@ TEST(StarlarkMax, OnePosArgsEmpty) {
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: max() iterable argument is empty");
+  EXPECT_EQ(error_callback.messages[0], "max() iterable argument is empty");
 }
 
 TEST(StarlarkMax, OnePosArgOneElement) {
@@ -3208,7 +3208,7 @@ TEST(StarlarkMin, OnePosArgsEmpty) {
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: min() iterable argument is empty");
+  EXPECT_EQ(error_callback.messages[0], "min() iterable argument is empty");
 }
 
 TEST(StarlarkMin, OnePosArgOneElement) {
@@ -4456,7 +4456,7 @@ TEST(StarlarkSorted, OneArgumentsReverseNone) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: sorted() argument reverse must be bool, not NoneType", error_callback.messages[0]);
+  EXPECT_EQ("sorted() argument reverse must be bool, not NoneType", error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, OneArgumentsUnknownNamedArgument) {
@@ -4620,7 +4620,7 @@ TEST(StarlarkStr, ObjectAsNamedAndPositionalArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: str() got multiple values for argument 'object'", error_callback.messages[0]);
+  EXPECT_EQ("str() got multiple values for argument 'object'", error_callback.messages[0]);
 }
 
 TEST(StarlarkStr, UnknownNamedArguments) {

@@ -1,0 +1,3 @@
+main:2:17: error: rindex() argument 1 must be string, not list
+    2 | a = "abc".rindex([])
+      |     ~~~~~~~~~~~~^^^^

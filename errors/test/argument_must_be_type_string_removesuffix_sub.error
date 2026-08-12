@@ -1,0 +1,3 @@
+main:2:23: error: removesuffix() argument 1 must be string, not list
+    2 | a = "abc".removesuffix([])
+      |     ~~~~~~~~~~~~~~~~~~^^^^

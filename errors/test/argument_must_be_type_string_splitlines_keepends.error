@@ -1,0 +1,3 @@
+main:2:21: error: splitlines() argument 1 must be bool, not list
+    2 | a = "abc".splitlines(keepends = [])
+      |     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^

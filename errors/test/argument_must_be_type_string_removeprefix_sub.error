@@ -1,0 +1,3 @@
+main:2:23: error: removeprefix() argument 1 must be string, not list
+    2 | a = "abc".removeprefix([])
+      |     ~~~~~~~~~~~~~~~~~~^^^^

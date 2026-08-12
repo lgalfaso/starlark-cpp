@@ -1,0 +1,3 @@
+main:2:20: error: endswith first arg must be bytes or a tuple of bytes, not string
+    2 | a = b'abc'.endswith('abc')
+      |     ~~~~~~~~~~~~~~~^^^^^^^

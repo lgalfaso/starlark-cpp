@@ -1,0 +1,3 @@
+main:2:12: error: can only join an iterable
+    2 | b'abc'.join(b'def')
+      | ~~~~~~~~~~~^^^^^^^^

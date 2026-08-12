@@ -399,7 +399,7 @@ TEST(StarlarkStringElems, BinaryInWithBoolean) {
 
   EXPECT_FALSE(starlark_string(""sv).elems(ctx)->binary_in(*ctx.true_value(), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.elems>' requires string as left operand, not bool");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.elems>' requires string as left operand, not bool");
 }
 
 TEST(StarlarkStringElems, BinaryInWithInt) {
@@ -409,7 +409,7 @@ TEST(StarlarkStringElems, BinaryInWithInt) {
 
   EXPECT_FALSE(starlark_string("a"sv).elems(ctx)->binary_in(starlark_integer(97), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.elems>' requires string as left operand, not int");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.elems>' requires string as left operand, not int");
 }
 
 TEST(StarlarkStringElemOrds, BinaryInWithBoolean) {
@@ -419,7 +419,7 @@ TEST(StarlarkStringElemOrds, BinaryInWithBoolean) {
 
   EXPECT_FALSE(starlark_string(""sv).elem_ords(ctx)->binary_in(*ctx.true_value(), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.elem_ords>' requires int as left operand, not bool");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.elem_ords>' requires int as left operand, not bool");
 }
 
 TEST(StarlarkStringElemOrds, BinaryInWithString) {
@@ -429,7 +429,7 @@ TEST(StarlarkStringElemOrds, BinaryInWithString) {
 
   EXPECT_FALSE(starlark_string("a"sv).elem_ords(ctx)->binary_in(starlark_string("a"sv), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.elem_ords>' requires int as left operand, not string");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.elem_ords>' requires int as left operand, not string");
 }
 
 TEST(StarlarkStringCodepoints, BinaryInWithBoolean) {
@@ -439,7 +439,7 @@ TEST(StarlarkStringCodepoints, BinaryInWithBoolean) {
 
   EXPECT_FALSE(starlark_string(""sv).codepoints(ctx)->binary_in(*ctx.true_value(), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.codepoints>' requires string as left operand, not bool");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.codepoints>' requires string as left operand, not bool");
 }
 
 TEST(StarlarkStringCodepoints, BinaryInWithInt) {
@@ -449,7 +449,7 @@ TEST(StarlarkStringCodepoints, BinaryInWithInt) {
 
   EXPECT_FALSE(starlark_string("a"sv).codepoints(ctx)->binary_in(starlark_integer(97), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.codepoints>' requires string as left operand, not int");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.codepoints>' requires string as left operand, not int");
 }
 
 TEST(StarlarkStringCodepointOrds, BinaryInWithBoolean) {
@@ -459,7 +459,7 @@ TEST(StarlarkStringCodepointOrds, BinaryInWithBoolean) {
 
   EXPECT_FALSE(starlark_string(""sv).codepoint_ords(ctx)->binary_in(*ctx.true_value(), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.codepoint_ords>' requires int as left operand, not bool");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.codepoint_ords>' requires int as left operand, not bool");
 }
 
 TEST(StarlarkStringCodepointOrds, BinaryInWithString) {
@@ -469,7 +469,7 @@ TEST(StarlarkStringCodepointOrds, BinaryInWithString) {
 
   EXPECT_FALSE(starlark_string("a"sv).codepoint_ords(ctx)->binary_in(starlark_string("a"sv), error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: 'in <string.codepoint_ords>' requires int as left operand, not string");
+  EXPECT_EQ(error_callback.messages[0], "'in <string.codepoint_ords>' requires int as left operand, not string");
 }
 
 TEST(StarlarkStringElems, GetIterator) {

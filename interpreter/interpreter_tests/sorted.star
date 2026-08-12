@@ -11,7 +11,7 @@ assert_fail('''sorted([], None)''', error_message = """sorted expected 1 argumen
     1 | sorted([], None)
       | ~~~~~~^^^^^^^^^^
 """)
-assert_fail('''sorted([], reverse = None)''', error_message = """TypeError: sorted() argument reverse must be bool, not NoneType
+assert_fail('''sorted([], reverse = None)''', error_message = """sorted() argument reverse must be bool, not NoneType
     1 | sorted([], reverse = None)
       | ~~~~~~^^^^^^^^^^^^^^^^^^^^
 """)

@@ -208,13 +208,13 @@ TEST(StarlarkBytes, BinaryInErrors) {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_string(""sv), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'string'");
+    EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'string'");
   }
   {
     error_handler error_callback;
     EXPECT_FALSE(starlark_bytes(""sv).binary_in(starlark_float(0), error_callback));
     ASSERT_THAT(error_callback.messages, SizeIs(1));
-    EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'float'");
+    EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'float'");
   }
   {
     error_handler error_callback;
@@ -987,7 +987,7 @@ TEST(StarlarkBytes, CountNone) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'NoneType'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'NoneType'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -1009,7 +1009,7 @@ TEST(StarlarkBytes, CountFloat) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'float'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'float'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -1031,7 +1031,7 @@ TEST(StarlarkBytes, CountTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -1550,7 +1550,7 @@ TEST(StarlarkBytes, EndswithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: endswith first arg must be bytes or a tuple of bytes, not string");
+  EXPECT_EQ(error_callback.messages[0], "endswith first arg must be bytes or a tuple of bytes, not string");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -1574,7 +1574,7 @@ TEST(StarlarkBytes, EndswithTupleWithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'string'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'string'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -1597,7 +1597,7 @@ TEST(StarlarkBytes, EndswithTupleWithInt) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -1961,7 +1961,7 @@ TEST(StarlarkBytes, StartswithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: startswith first arg must be bytes or a tuple of bytes, not string");
+  EXPECT_EQ(error_callback.messages[0], "startswith first arg must be bytes or a tuple of bytes, not string");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -1985,7 +1985,7 @@ TEST(StarlarkBytes, StartswithTupleWithString) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'string'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'string'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -2008,7 +2008,7 @@ TEST(StarlarkBytes, StartswithTupleWithInt) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -2294,7 +2294,7 @@ TEST(StarlarkBytes, FindTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -2664,7 +2664,7 @@ TEST(StarlarkBytes, IndexTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -2708,7 +2708,7 @@ TEST(StarlarkBytes, IndexOneArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -2767,7 +2767,7 @@ TEST(StarlarkBytes, IndexTwoArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -2816,7 +2816,7 @@ TEST(StarlarkBytes, IndexThreeArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -3052,7 +3052,7 @@ TEST(StarlarkBytes, RfindTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -3422,7 +3422,7 @@ TEST(StarlarkBytes, RindexTuple) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: argument should be integer or bytes object, not 'tuple'");
+  EXPECT_EQ(error_callback.messages[0], "argument should be integer or bytes object, not 'tuple'");
   EXPECT_EQ(bytes.str(), "b\"banana\"");
 }
 
@@ -3466,7 +3466,7 @@ TEST(StarlarkBytes, RindexOneArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -3525,7 +3525,7 @@ TEST(StarlarkBytes, RindexTwoArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -3574,7 +3574,7 @@ TEST(StarlarkBytes, RindexThreeArgument) {
     if (expected < 0) {
       EXPECT_EQ(nullptr, result);
       ASSERT_THAT(error_callback.messages, SizeIs(1));
-      EXPECT_EQ(error_callback.messages[0], "ValueError: substring not found");
+      EXPECT_EQ(error_callback.messages[0], "substring not found");
     } else {
       ASSERT_NE(nullptr, result);
       EXPECT_EQ(result->type(), starlark_types::int_t);
@@ -3810,7 +3810,7 @@ TEST(StarlarkBytes, JoinBytes) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: can only join an iterable");
+  EXPECT_EQ(error_callback.messages[0], "can only join an iterable");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -3881,7 +3881,7 @@ TEST(StarlarkBytes, JoinTupleWithOneElementAsInt) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -3904,7 +3904,7 @@ TEST(StarlarkBytes, JoinTupleWithOneBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -3955,7 +3955,7 @@ TEST(StarlarkBytes, JoinTupleWithInts) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4105,7 +4105,7 @@ TEST(StarlarkBytes, StripWithCutsetAsInteger) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4126,7 +4126,7 @@ TEST(StarlarkBytes, RstripWithCutsetAsInteger) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4147,7 +4147,7 @@ TEST(StarlarkBytes, LstripWithCutsetAsInteger) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4168,7 +4168,7 @@ TEST(StarlarkBytes, StripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4189,7 +4189,7 @@ TEST(StarlarkBytes, RstripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4210,7 +4210,7 @@ TEST(StarlarkBytes, LstripWithCutsetAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4345,7 +4345,7 @@ TEST(StarlarkBytes, PartitionInt) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
 }
 
 TEST(StarlarkBytes, PartitionBool) {
@@ -4365,7 +4365,7 @@ TEST(StarlarkBytes, PartitionBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, PartitionEmptySeparator) {
@@ -4385,7 +4385,7 @@ TEST(StarlarkBytes, PartitionEmptySeparator) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkBytes, PartitionWithNamedArguments) {
@@ -4475,7 +4475,7 @@ TEST(StarlarkBytes, RpartitionBool) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, RpartitionInteger) {
@@ -4495,7 +4495,7 @@ TEST(StarlarkBytes, RpartitionInteger) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
 }
 
 TEST(StarlarkBytes, RpartitionEmptySeparator) {
@@ -4515,7 +4515,7 @@ TEST(StarlarkBytes, RpartitionEmptySeparator) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkBytes, RpartitionWithNamedArguments) {
@@ -4638,7 +4638,7 @@ TEST(StarlarkBytes, SplitBoolSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, SplitIntegerSeparatorArguments) {
@@ -4657,7 +4657,7 @@ TEST(StarlarkBytes, SplitIntegerSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
 }
 
 TEST(StarlarkBytes, SplitEmptySeparatorArguments) {
@@ -4676,7 +4676,7 @@ TEST(StarlarkBytes, SplitEmptySeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkBytes, SplitOneArguments) {
@@ -4772,7 +4772,7 @@ TEST(StarlarkBytes, SplitEmptySeparatorTwoArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkBytes, SplitTwoArgumentsBoolSeparator) {
@@ -4792,7 +4792,7 @@ TEST(StarlarkBytes, SplitTwoArgumentsBoolSeparator) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, SplitTwoArgumentsBoolMaxsplit) {
@@ -4963,7 +4963,7 @@ TEST(StarlarkBytes, SplitWithNamedArgumentsSepDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'sep'");
+  EXPECT_EQ(error_callback.messages[0], "split() got multiple values for argument 'sep'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -4987,7 +4987,7 @@ TEST(StarlarkBytes, SplitWithNamedArgumentsMaxsplitDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: split() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(error_callback.messages[0], "split() got multiple values for argument 'maxsplit'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5084,7 +5084,7 @@ TEST(StarlarkBytes, RsplitBoolSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, RsplitIntegerSeparatorArguments) {
@@ -5103,7 +5103,7 @@ TEST(StarlarkBytes, RsplitIntegerSeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
 }
 
 TEST(StarlarkBytes, RsplitEmptySeparatorArguments) {
@@ -5122,7 +5122,7 @@ TEST(StarlarkBytes, RsplitEmptySeparatorArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkBytes, RsplitOneArguments) {
@@ -5218,7 +5218,7 @@ TEST(StarlarkBytes, RsplitEmptySeparatorTwoArguments) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "ValueError: empty separator");
+  EXPECT_EQ(error_callback.messages[0], "empty separator");
 }
 
 TEST(StarlarkBytes, RsplitTwoArgumentsBoolSeparator) {
@@ -5238,7 +5238,7 @@ TEST(StarlarkBytes, RsplitTwoArgumentsBoolSeparator) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
 }
 
 TEST(StarlarkBytes, RsplitTwoArgumentsBoolMaxsplit) {
@@ -5363,7 +5363,7 @@ TEST(StarlarkBytes, RsplitWithNamedArgumentsSepDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'sep'");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() got multiple values for argument 'sep'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5387,7 +5387,7 @@ TEST(StarlarkBytes, RsplitWithNamedArgumentsMaxsplitDuplicate) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: rsplit() got multiple values for argument 'maxsplit'");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() got multiple values for argument 'maxsplit'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5536,7 +5536,7 @@ TEST(StarlarkBytes, ReplaceWithTwoArgumentsOldAsInteger) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5558,7 +5558,7 @@ TEST(StarlarkBytes, ReplaceWithTwoArgumentsNewAsInteger) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'int'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'int'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5580,7 +5580,7 @@ TEST(StarlarkBytes, ReplaceWithTwoArgumentsOldAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5602,7 +5602,7 @@ TEST(StarlarkBytes, ReplaceWithTwoArgumentsNewAsBool) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: a bytes object is required, not 'bool'");
+  EXPECT_EQ(error_callback.messages[0], "a bytes object is required, not 'bool'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 
@@ -5787,7 +5787,7 @@ TEST(StarlarkBytes, ReplaceWithCountPositionalAndNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   EXPECT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "TypeError: replace() got multiple values for argument 'count'");
+  EXPECT_EQ(error_callback.messages[0], "replace() got multiple values for argument 'count'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
 }
 

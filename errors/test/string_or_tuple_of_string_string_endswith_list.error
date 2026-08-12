@@ -1,0 +1,3 @@
+main:2:19: error: endswith first arg must be string or a tuple of strings, not list
+    2 | a = 'abc'.endswith([])
+      |     ~~~~~~~~~~~~~~^^^^

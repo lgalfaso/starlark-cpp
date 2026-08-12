@@ -1,0 +1,3 @@
+main:2:18: error: rsplit() got multiple values for argument 'sep'
+    2 | a = b'abc'.rsplit(b'a', sep = b'b')
+      |     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^

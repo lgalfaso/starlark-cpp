@@ -1,0 +1,3 @@
+main:2:18: error: a bytes object is required, not 'string'
+    2 | a = b'abc'.rsplit('x')
+      |     ~~~~~~~~~~~~~^^^^^

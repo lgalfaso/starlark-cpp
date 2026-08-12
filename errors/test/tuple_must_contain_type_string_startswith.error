@@ -1,0 +1,3 @@
+main:2:21: error: tuple for startswith must only contain string, not int
+    2 | a = 'abc'.startswith(('a', 1))
+      |     ~~~~~~~~~~~~~~~~^^^^^^^^^^

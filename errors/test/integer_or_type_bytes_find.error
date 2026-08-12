@@ -1,0 +1,3 @@
+main:2:16: error: argument should be integer or bytes object, not 'string'
+    2 | a = b'abc'.find('x')
+      |     ~~~~~~~~~~~^^^^^

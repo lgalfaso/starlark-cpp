@@ -26,11 +26,6 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::parse_number;
-using ::starlark::error_messages::error_empty_iterator;
-using ::starlark::error_messages::error_missing_argument;
-using ::starlark::error_messages::error_missing_typed_argument;
-using ::starlark::error_messages::error_multiple_values_for_argument;
-using ::starlark::error_messages::error_named_argument_must_be_type;
 using ::starlark::error_messages::error_non_string_with_base;
 using ::starlark::error_messages::error_v2_argument_bad_operand_type;
 using ::starlark::error_messages::error_v2_argument_interpreted_as_integer;
@@ -45,12 +40,17 @@ using ::starlark::error_messages::error_v2_attribute_string;
 using ::starlark::error_messages::error_v2_bytes_in_range;
 using ::starlark::error_messages::error_v2_convert;
 using ::starlark::error_messages::error_v2_convert_string;
+using ::starlark::error_messages::error_v2_empty_iterator;
 using ::starlark::error_messages::error_v2_expect_character;
 using ::starlark::error_messages::error_v2_expect_one_character_or_one_byte;
 using ::starlark::error_messages::error_v2_int_base;
 using ::starlark::error_messages::error_v2_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_invalid_literal_with_base;
 using ::starlark::error_messages::error_v2_max_bytes_length;
+using ::starlark::error_messages::error_v2_missing_argument;
+using ::starlark::error_messages::error_v2_missing_typed_argument;
+using ::starlark::error_messages::error_v2_multiple_values_for_argument;
+using ::starlark::error_messages::error_v2_named_argument_must_be_type;
 using ::starlark::error_messages::error_v2_overflow;
 using ::starlark::error_messages::error_v2_overflow_float_too_large;
 using ::starlark::error_messages::error_v2_unknown_argument;
@@ -273,7 +273,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
   }
   if (pos_args.size() >= 1) {
     if (source != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument(
+      error_callback.add_error(error_v2_multiple_values_for_argument(
           starlark_built_in_functions::bytes_f,
           "source"));
       return nullptr;
@@ -413,7 +413,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
   }
   if (!pos_args.empty()) {
     if (iterable != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument(
+      error_callback.add_error(error_v2_multiple_values_for_argument(
           starlark_built_in_functions::enumerate_f,
           "iterable"));
       return nullptr;
@@ -422,7 +422,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
   }
   if (pos_args.size() >= 2) {
     if (start != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument(
+      error_callback.add_error(error_v2_multiple_values_for_argument(
           starlark_built_in_functions::enumerate_f,
           "start"));
       return nullptr;
@@ -430,7 +430,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
     start = pos_args[1];
   }
   if (iterable == nullptr) {
-    error_callback.add_error(error_missing_argument(starlark_built_in_functions::enumerate_f, "iterable"));
+    error_callback.add_error(error_v2_missing_argument(starlark_built_in_functions::enumerate_f, "iterable"));
     return nullptr;
   }
   if (start != nullptr && start->type() != starlark_types::int_t) {
@@ -595,7 +595,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   if (pos_args.size() >= 2) {
     if (base_param != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument(
+      error_callback.add_error(error_v2_multiple_values_for_argument(
           starlark_built_in_functions::int_f,
           "base"));
       return nullptr;
@@ -604,7 +604,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   if (pos_args.empty()) {
     if (base_param != nullptr) {
-      error_callback.add_error(error_missing_typed_argument(starlark_built_in_functions::int_f, starlark_types::string_t));
+      error_callback.add_error(error_v2_missing_typed_argument(starlark_built_in_functions::int_f, starlark_types::string_t));
       return nullptr;
     }
     return ctx.zero();
@@ -756,7 +756,7 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   if (!it->has_next()) {
     it->end_iterator();
-    error_callback.add_error(error_empty_iterator(starlark_built_in_functions::max_f));
+    error_callback.add_error(error_v2_empty_iterator(starlark_built_in_functions::max_f));
     return nullptr;
   }
   starlark_obj* candidate = it->next();
@@ -854,7 +854,7 @@ starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   if (!it->has_next()) {
     it->end_iterator();
-    error_callback.add_error(error_empty_iterator(starlark_built_in_functions::min_f));
+    error_callback.add_error(error_v2_empty_iterator(starlark_built_in_functions::min_f));
     return nullptr;
   }
   starlark_obj* candidate = it->next();
@@ -1079,7 +1079,7 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
       }
     } else if (key == "reverse") {
       if (value->type() != starlark_types::bool_t) {
-        error_callback.add_error(error_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reverse", starlark_types::bool_t, value->type()));
+        error_callback.add_error(error_v2_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reverse", starlark_types::bool_t, value->type()));
         return nullptr;
       }
       reverse = value->truthy();
@@ -1153,7 +1153,7 @@ starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   if (pos_args.size() >= 1) {
     if (object != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument(
+      error_callback.add_error(error_v2_multiple_values_for_argument(
           starlark_built_in_functions::str_f,
           "object"));
       return nullptr;

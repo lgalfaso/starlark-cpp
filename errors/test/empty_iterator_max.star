@@ -1,0 +1,3 @@
+# Empty iterator
+a = max([])
+

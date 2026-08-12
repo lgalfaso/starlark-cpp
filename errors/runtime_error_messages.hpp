@@ -13,29 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_integer_or_type(std::string_view type, std::string_view other_type);
-std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type);
-std::string error_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type);
-std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type);
-std::string error_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type);
-std::string error_bytes_or_tuple_of_bytes(std::string_view fn_name, std::string_view actual_type);
-std::string error_type_required(std::string_view expected_type, std::string_view actual_type);
-
-std::string_view error_substring_not_found();
-std::string error_non_iterable(std::string_view fn_name);
-
-std::string_view error_empty_separator();
-std::string_view error_can_only_join_on_iterable();
-std::string error_in_type_requires_type(std::string_view base, std::string_view required, std::string_view actual);
-std::string error_multiple_values_for_argument(std::string_view fn_name, std::string_view argument_name);
-std::string error_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name);
-std::string error_missing_positional_argument(std::string_view fn_name, std::string_view argument_name);
-std::string error_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name);
-std::string error_missing_argument(std::string_view fn_name, std::string_view argument_name);
-std::string error_missing_typed_argument(std::string_view fn_name, std::string_view type_name);
-
-std::string error_empty_iterator(std::string_view fn_name);
-
 std::string error_unexpected_in_field_name(std::string_view unexpected);
 std::string_view error_switch_from_manual_to_automatic_numbering();
 std::string error_single_format_element_in_string(std::string_view format_element);
@@ -151,6 +128,29 @@ std::string error_v2_format_integer_is_required(char format, std::string_view ty
 std::string error_v2_format_real_is_required(char format, std::string_view type);
 std::string error_v2_integer_or_unicode_character(std::string_view type);
 std::string error_v2_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len);
+
+std::string error_v2_integer_or_type(std::string_view type, std::string_view other_type);
+std::string error_v2_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type);
+std::string error_v2_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type);
+std::string error_v2_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type);
+std::string error_v2_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type);
+std::string error_v2_bytes_or_tuple_of_bytes(std::string_view fn_name, std::string_view actual_type);
+std::string error_v2_type_required(std::string_view expected_type, std::string_view actual_type);
+
+std::string_view error_v2_substring_not_found();
+std::string error_v2_non_iterable(std::string_view fn_name);
+
+std::string_view error_v2_empty_separator();
+std::string_view error_v2_can_only_join_on_iterable();
+std::string error_v2_in_type_requires_type(std::string_view base, std::string_view required, std::string_view actual);
+std::string error_v2_multiple_values_for_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_v2_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_v2_missing_positional_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_v2_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_v2_missing_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_v2_missing_typed_argument(std::string_view fn_name, std::string_view type_name);
+
+std::string error_v2_empty_iterator(std::string_view fn_name);
 
 }  // namespace error_messages
 }  // namespace starlark

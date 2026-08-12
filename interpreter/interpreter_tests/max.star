@@ -2,7 +2,7 @@ assert_fail("max()", error_message = """Error: TypeError: max expected at least 
     1 | max()
       | ~~~^^
 """)
-assert_fail("max([])", error_message = """ValueError: max() iterable argument is empty
+assert_fail("max([])", error_message = """max() iterable argument is empty
     1 | max([])
       | ~~~^^^^
 """)

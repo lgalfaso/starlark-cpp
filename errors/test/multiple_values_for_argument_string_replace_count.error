@@ -1,0 +1,3 @@
+main:2:18: error: replace() got multiple values for argument 'count'
+    2 | a = 'abc'.replace('a', 'b', 3, count = 4)
+      |     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^

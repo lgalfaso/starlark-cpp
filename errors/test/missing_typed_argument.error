@@ -1,0 +1,3 @@
+main:2:8: error: int() missing string argument
+    2 | a = int(base = 10)
+      |     ~~~^^^^^^^^^^^

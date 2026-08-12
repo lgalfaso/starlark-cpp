@@ -1,0 +1,3 @@
+main:2:21: error: startswith first arg must be string or a tuple of strings, not list
+    2 | a = 'abc'.startswith([])
+      |     ~~~~~~~~~~~~~~~~^^^^

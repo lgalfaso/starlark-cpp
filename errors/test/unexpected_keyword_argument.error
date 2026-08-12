@@ -1,0 +1,3 @@
+main:3:4: error: foo() got an unexpected keyword argument 'bar'
+    3 | foo(bar = 1)
+      | ~~~^^^^^^^^^

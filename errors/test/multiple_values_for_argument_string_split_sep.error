@@ -1,0 +1,3 @@
+main:2:16: error: split() got multiple values for argument 'sep'
+    2 | a = 'abc'.split('a', sep = 'b')
+      |     ~~~~~~~~~~~^^^^^^^^^^^^^^^^

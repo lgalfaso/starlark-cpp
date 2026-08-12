@@ -1,0 +1,3 @@
+main:2:19: error: tuple for endswith must only contain string, not int
+    2 | a = 'abc'.endswith(('a', 1))
+      |     ~~~~~~~~~~~~~~^^^^^^^^^^

@@ -14,82 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_integer_or_type(std::string_view type, std::string_view other_type) {
-  return std::format("TypeError: argument should be integer or {} object, not '{}'", type, other_type);
-}
-
-std::string error_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type) {
-  return std::format("TypeError: {}() argument {} must be {}, not {}", fn_name, arg_num, expected_type, actual_type);
-}
-
-std::string error_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type) {
-  return std::format("TypeError: {}() argument {} must be {}, not {}", fn_name, arg_name, expected_type, actual_type);
-}
-
-std::string error_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type) {
-  return std::format("TypeError: tuple for {} must only contain {}, not {}", fn_name, expected_type, actual_type);
-}
-
-std::string error_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type) {
-  return std::format("TypeError: {} first arg must be str or a tuple of str, not {}", fn_name, actual_type);
-}
-
-std::string error_bytes_or_tuple_of_bytes(std::string_view fn_name, std::string_view actual_type) {
-  return std::format("TypeError: {} first arg must be bytes or a tuple of bytes, not {}", fn_name, actual_type);
-}
-
-std::string error_type_required(std::string_view expected_type, std::string_view actual_type) {
-  return std::format("TypeError: a {} object is required, not '{}'", expected_type, actual_type);
-}
-
-std::string_view error_substring_not_found() {
-  return "ValueError: substring not found";
-}
-
-std::string error_non_iterable(std::string_view fn_name) {
-  return std::format("TypeError: can only {} an iterable", fn_name);
-}
-
-std::string_view error_empty_separator() {
-  return "ValueError: empty separator";
-}
-
-std::string_view error_can_only_join_on_iterable() {
-  return "TypeError: can only join an iterable";
-}
-
-std::string error_in_type_requires_type(std::string_view base, std::string_view required, std::string_view actual) {
-  return std::format("TypeError: 'in <{}>' requires {} as left operand, not {}", base, required, actual);
-}
-
-std::string error_multiple_values_for_argument(std::string_view fn_name, std::string_view argument_name) {
-  return std::format("TypeError: {}() got multiple values for argument '{}'", fn_name, argument_name);
-}
-
-std::string error_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name) {
-  return std::format("TypeError: {}() got an unexpected keyword argument '{}'", fn_name, argument_name);
-}
-
-std::string error_missing_positional_argument(std::string_view fn_name, std::string_view argument_name) {
-  return std::format("TypeError: {}() missing required positional argument '{}'", fn_name, argument_name);
-}
-
-std::string error_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name) {
-  return std::format("TypeError: {}() missing required keyword-only argument '{}'", fn_name, argument_name);
-}
-
-std::string error_missing_argument(std::string_view fn_name, std::string_view argument_name) {
-  return std::format("TypeError: {}() missing required argument '{}'", fn_name, argument_name);
-}
-
-std::string error_missing_typed_argument(std::string_view fn_name, std::string_view type_name) {
-  return std::format("TypeError: {}() missing {} argument", fn_name, type_name);
-}
-
-std::string error_empty_iterator(std::string_view fn_name) {
-  return std::format("ValueError: {}() iterable argument is empty", fn_name);
-}
-
 std::string error_unexpected_in_field_name(std::string_view unexpected) {
   return std::format("ValueError: unexpected '{}' in field name", unexpected);
 }
@@ -503,6 +427,83 @@ std::string error_v2_integer_or_unicode_character(std::string_view type) {
 
 std::string error_v2_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len) {
   return std::format("%c requires an int or a unicode character, not {} of length {}", type, len);
+}
+
+
+std::string error_v2_integer_or_type(std::string_view type, std::string_view other_type) {
+  return std::format("argument should be integer or {} object, not '{}'", type, other_type);
+}
+
+std::string error_v2_argument_must_be_type(std::string_view fn_name, int arg_num, std::string_view expected_type, std::string_view actual_type) {
+  return std::format("{}() argument {} must be {}, not {}", fn_name, arg_num, expected_type, actual_type);
+}
+
+std::string error_v2_named_argument_must_be_type(std::string_view fn_name, std::string_view arg_name, std::string_view expected_type, std::string_view actual_type) {
+  return std::format("{}() argument {} must be {}, not {}", fn_name, arg_name, expected_type, actual_type);
+}
+
+std::string error_v2_tuple_must_contain_type(std::string_view fn_name, std::string_view expected_type, std::string_view actual_type) {
+  return std::format("tuple for {} must only contain {}, not {}", fn_name, expected_type, actual_type);
+}
+
+std::string error_v2_string_or_tuple_of_string(std::string_view fn_name, std::string_view actual_type) {
+  return std::format("{} first arg must be string or a tuple of strings, not {}", fn_name, actual_type);
+}
+
+std::string error_v2_bytes_or_tuple_of_bytes(std::string_view fn_name, std::string_view actual_type) {
+  return std::format("{} first arg must be bytes or a tuple of bytes, not {}", fn_name, actual_type);
+}
+
+std::string error_v2_type_required(std::string_view expected_type, std::string_view actual_type) {
+  return std::format("a {} object is required, not '{}'", expected_type, actual_type);
+}
+
+std::string_view error_v2_substring_not_found() {
+  return "substring not found";
+}
+
+std::string error_v2_non_iterable(std::string_view fn_name) {
+  return std::format("can only {} an iterable", fn_name);
+}
+
+std::string_view error_v2_empty_separator() {
+  return "empty separator";
+}
+
+std::string_view error_v2_can_only_join_on_iterable() {
+  return "can only join an iterable";
+}
+
+std::string error_v2_in_type_requires_type(std::string_view base, std::string_view required, std::string_view actual) {
+  return std::format("'in <{}>' requires {} as left operand, not {}", base, required, actual);
+}
+
+std::string error_v2_multiple_values_for_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("{}() got multiple values for argument '{}'", fn_name, argument_name);
+}
+
+std::string error_v2_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("{}() got an unexpected keyword argument '{}'", fn_name, argument_name);
+}
+
+std::string error_v2_missing_positional_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("{}() missing required positional argument '{}'", fn_name, argument_name);
+}
+
+std::string error_v2_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("{}() missing required keyword-only argument '{}'", fn_name, argument_name);
+}
+
+std::string error_v2_missing_argument(std::string_view fn_name, std::string_view argument_name) {
+  return std::format("{}() missing required argument '{}'", fn_name, argument_name);
+}
+
+std::string error_v2_missing_typed_argument(std::string_view fn_name, std::string_view type_name) {
+  return std::format("{}() missing {} argument", fn_name, type_name);
+}
+
+std::string error_v2_empty_iterator(std::string_view fn_name) {
+  return std::format("{}() iterable argument is empty", fn_name);
 }
 
 }  // namespace error_messages

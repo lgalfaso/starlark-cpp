@@ -1,0 +1,3 @@
+main:2:8: error: str() got multiple values for argument 'object'
+    2 | a = str({}, object = [])
+      |     ~~~^^^^^^^^^^^^^^^^^

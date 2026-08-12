@@ -1,0 +1,3 @@
+main:2:14: error: enumerate() got multiple values for argument 'start'
+    2 | a = enumerate([], 10, start = 20)
+      |     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^

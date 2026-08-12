@@ -1,0 +1,3 @@
+main:2:15: error: find() argument 1 must be string, not list
+    2 | a = "abc".find([])
+      |     ~~~~~~~~~~^^^^

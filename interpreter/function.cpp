@@ -14,14 +14,14 @@
 #include "runtime/starlark_tuple.hpp"
 
 using ::google::protobuf::Arena;
-using ::starlark::error_messages::error_missing_keyword_only_argument;
-using ::starlark::error_messages::error_missing_positional_argument;
 using ::starlark::error_messages::error_module_does_not_define_symbol;
-using ::starlark::error_messages::error_multiple_values_for_argument;
 using ::starlark::error_messages::error_recursive_call;
 using ::starlark::error_messages::error_unable_to_load_module;
-using ::starlark::error_messages::error_unexpected_keyword_argument;
 using ::starlark::error_messages::error_v2_arguments_exactly;
+using ::starlark::error_messages::error_v2_missing_keyword_only_argument;
+using ::starlark::error_messages::error_v2_missing_positional_argument;
+using ::starlark::error_messages::error_v2_multiple_values_for_argument;
+using ::starlark::error_messages::error_v2_unexpected_keyword_argument;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::order_comparator;
@@ -138,7 +138,7 @@ starlark_obj* interpreter_function::call(
       if (function_signature->has_star_star_argument()) {
         kwargs.insert(kwparam.first, kwparam.second);
       } else {
-        error_callback.add_error(error_unexpected_keyword_argument(
+        error_callback.add_error(error_v2_unexpected_keyword_argument(
             function_signature->fn_name(),
             kwparam.first));
         return nullptr;
@@ -147,7 +147,7 @@ starlark_obj* interpreter_function::call(
     }
     auto pos = it->second;
     if (filled_elements[pos]) {
-      error_callback.add_error(error_multiple_values_for_argument(
+      error_callback.add_error(error_v2_multiple_values_for_argument(
           function_signature->fn_name(),
           kwparam.first));
       return nullptr;
@@ -162,7 +162,7 @@ starlark_obj* interpreter_function::call(
       if (function_signature->param(i).default_initialization()) {
         new_frame->elements[function_signature->param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
       } else {
-        error_callback.add_error(error_missing_positional_argument(
+        error_callback.add_error(error_v2_missing_positional_argument(
             function_signature->fn_name(),
             function_signature->param(i).name()));
         return nullptr;
@@ -182,7 +182,7 @@ starlark_obj* interpreter_function::call(
       if (function_signature->param(i).default_initialization()) {
         new_frame->elements[function_signature->param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
       } else {
-        error_callback.add_error(error_missing_keyword_only_argument(
+        error_callback.add_error(error_v2_missing_keyword_only_argument(
             function_signature->fn_name(),
             function_signature->param(i).name()));
         return nullptr;

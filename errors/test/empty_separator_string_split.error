@@ -1,0 +1,3 @@
+main:2:16: error: empty separator
+    2 | a = 'abc'.split('')
+      |     ~~~~~~~~~~~^^^^

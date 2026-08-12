@@ -30,34 +30,34 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_argument_must_be_type;
-using ::starlark::error_messages::error_can_only_join_on_iterable;
-using ::starlark::error_messages::error_empty_separator;
 using ::starlark::error_messages::error_end_of_string_while_looking_for_conversion_specifier;
 using ::starlark::error_messages::error_expected_after_conversion;
 using ::starlark::error_messages::error_expected_format_element_before_end_of_string;
-using ::starlark::error_messages::error_in_type_requires_type;
-using ::starlark::error_messages::error_multiple_values_for_argument;
 using ::starlark::error_messages::error_positional_argument_out_of_range;
 using ::starlark::error_messages::error_single_format_element_in_string;
-using ::starlark::error_messages::error_string_or_tuple_of_string;
-using ::starlark::error_messages::error_substring_not_found;
 using ::starlark::error_messages::error_switch_from_manual_to_automatic_numbering;
-using ::starlark::error_messages::error_tuple_must_contain_type;
 using ::starlark::error_messages::error_unexpected_in_field_name;
 using ::starlark::error_messages::error_unknown_conversion;
+using ::starlark::error_messages::error_v2_argument_must_be_type;
+using ::starlark::error_messages::error_v2_can_only_join_on_iterable;
 using ::starlark::error_messages::error_v2_dictionary_key_not_found;
+using ::starlark::error_messages::error_v2_empty_separator;
 using ::starlark::error_messages::error_v2_format_integer_is_required;
 using ::starlark::error_messages::error_v2_format_real_is_required;
 using ::starlark::error_messages::error_v2_in_element;
+using ::starlark::error_messages::error_v2_in_type_requires_type;
 using ::starlark::error_messages::error_v2_incomplete_format;
 using ::starlark::error_messages::error_v2_integer_or_unicode_character;
 using ::starlark::error_messages::error_v2_integer_or_unicode_character_type_and_length;
 using ::starlark::error_messages::error_v2_max_string_length;
+using ::starlark::error_messages::error_v2_multiple_values_for_argument;
 using ::starlark::error_messages::error_v2_no_concat;
 using ::starlark::error_messages::error_v2_no_multiply_sequence;
 using ::starlark::error_messages::error_v2_not_all_arguments_converted_during_string_formatting;
 using ::starlark::error_messages::error_v2_not_enough_arguments_for_format_string;
+using ::starlark::error_messages::error_v2_string_or_tuple_of_string;
+using ::starlark::error_messages::error_v2_substring_not_found;
+using ::starlark::error_messages::error_v2_tuple_must_contain_type;
 using ::starlark::error_messages::error_v2_unicode_in_range;
 using ::starlark::error_messages::error_v2_unknown_argument;
 using ::starlark::error_messages::error_v2_unsupported_format_character;
@@ -874,7 +874,7 @@ std::string_view strip_impl(std::string_view value, std::string_view cutset, str
 
 status_or<std::string_view> string_as_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
   if (element->type() != starlark_types::string_t) {
-    error_callback.add_error(error_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
+    error_callback.add_error(error_v2_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
     return status_or<std::string_view>(status_code::kRuntimeError);
   }
   return status_or<std::string_view>(element->as_string());
@@ -1070,7 +1070,7 @@ starlark_obj* starlark_string::join(const std::vector<std::string_view>& element
 
 starlark_obj* starlark_string::partition(std::string_view sub, context& ctx, error_fn& error_callback) {
   if (sub.empty()) {
-    error_callback.add_error(error_empty_separator());
+    error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
   auto pos = value.find(sub);
@@ -1089,7 +1089,7 @@ starlark_obj* starlark_string::partition(std::string_view sub, context& ctx, err
 
 starlark_obj* starlark_string::rpartition(std::string_view sub, context& ctx, error_fn& error_callback) {
   if (sub.empty()) {
-    error_callback.add_error(error_empty_separator());
+    error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
   auto pos = value.rfind(sub);
@@ -1167,7 +1167,7 @@ starlark_obj* starlark_string::rsplit(int64_t maxsplit, context& ctx) const {
 
 starlark_obj* starlark_string::rsplit(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const {
   if (sep.empty()) {
-    error_callback.add_error(error_empty_separator());
+    error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
@@ -1217,7 +1217,7 @@ starlark_obj* starlark_string::split(int64_t maxsplit, context& ctx) const {
 
 starlark_obj* starlark_string::split(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const {
   if (sep.empty()) {
-    error_callback.add_error(error_empty_separator());
+    error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
   auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
@@ -1630,7 +1630,7 @@ bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_f
         break;
       }
       default:
-        error_callback.add_error(error_in_type_requires_type(type(), starlark_types::int_t, other.type()));
+        error_callback.add_error(error_v2_in_type_requires_type(type(), starlark_types::int_t, other.type()));
         return false;
     }
     for (std::string::size_type i = 0; i < state.len; ++i) {
@@ -1640,7 +1640,7 @@ bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_f
     }
   } else {
     if (other.type() != starlark_types::string_t) {
-      error_callback.add_error(error_in_type_requires_type(type(), starlark_types::string_t, other.type()));
+      error_callback.add_error(error_v2_in_type_requires_type(type(), starlark_types::string_t, other.type()));
       return false;
     }
     for (std::string::size_type i = 0; i < state.len; ++i) {
@@ -1826,14 +1826,14 @@ status_or<std::vector<std::string_view>> string_or_tuple_as_vector_of_string(con
     for (int i = 0; i < tuple->size(); ++i) {
       auto* entry = tuple->at(i);
       if (entry->type() != starlark_types::string_t) {
-        error_callback.add_error(error_tuple_must_contain_type(fn_name, starlark_types::string_t, entry->type()));
+        error_callback.add_error(error_v2_tuple_must_contain_type(fn_name, starlark_types::string_t, entry->type()));
         return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
       }
       result.emplace_back(entry->as_string());
     }
   } else {
     if (element->type() != starlark_types::string_t) {
-      error_callback.add_error(error_string_or_tuple_of_string(fn_name, element->type()));
+      error_callback.add_error(error_v2_string_or_tuple_of_string(fn_name, element->type()));
       return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
     }
     result.emplace_back(element->as_string());
@@ -1985,7 +1985,7 @@ starlark_obj* starlark_string_fn_index(starlark_obj* this_obj, const starlark_ob
   }
   auto result = static_cast<starlark_string*>(this_obj)->find(*sub, start_end->first, start_end->second);
   if (result < 0) {
-    error_callback.add_error(error_substring_not_found());
+    error_callback.add_error(error_v2_substring_not_found());
     return nullptr;
   }
   return create_integer(result, ctx);
@@ -2063,7 +2063,7 @@ starlark_obj* starlark_string_fn_join(starlark_obj* this_obj, const starlark_obj
 
   auto it = pos_args.front()->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
-    error_callback.add_error(error_can_only_join_on_iterable());
+    error_callback.add_error(error_v2_can_only_join_on_iterable());
     return nullptr;
   }
   std::vector<std::string_view> elements;
@@ -2131,7 +2131,7 @@ starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_
   }
   if (pos_args.size() >= 3) {
     if (count != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument("replace", "count"));
+      error_callback.add_error(error_v2_multiple_values_for_argument("replace", "count"));
       return nullptr;
     }
     count = pos_args[2];
@@ -2224,7 +2224,7 @@ starlark_obj* starlark_string_fn_rindex(starlark_obj* this_obj, const starlark_o
   }
   auto result = static_cast<starlark_string*>(this_obj)->rfind(*sub, start_end->first, start_end->second);
   if (result < 0) {
-    error_callback.add_error(error_substring_not_found());
+    error_callback.add_error(error_v2_substring_not_found());
     return nullptr;
   }
   return create_integer(result, ctx);
@@ -2264,14 +2264,14 @@ starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_o
   }
   if (pos_args.size() >= 1) {
     if (sep != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument("rsplit", "sep"));
+      error_callback.add_error(error_v2_multiple_values_for_argument("rsplit", "sep"));
       return nullptr;
     }
     sep = pos_args.front();
   }
   if (pos_args.size() >= 2) {
     if (maxsplit != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument("rsplit", "maxsplit"));
+      error_callback.add_error(error_v2_multiple_values_for_argument("rsplit", "maxsplit"));
       return nullptr;
     }
     maxsplit = pos_args[1];
@@ -2330,14 +2330,14 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
   }
   if (pos_args.size() >= 1) {
     if (sep != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument("split", "sep"));
+      error_callback.add_error(error_v2_multiple_values_for_argument("split", "sep"));
       return nullptr;
     }
     sep = pos_args.front();
   }
   if (pos_args.size() >= 2) {
     if (maxsplit != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument("split", "maxsplit"));
+      error_callback.add_error(error_v2_multiple_values_for_argument("split", "maxsplit"));
       return nullptr;
     }
     maxsplit = pos_args[1];
@@ -2378,7 +2378,7 @@ starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starla
   }
   if (pos_args.size() >= 1) {
     if (keepends != nullptr) {
-      error_callback.add_error(error_multiple_values_for_argument("splitlines", "keepends"));
+      error_callback.add_error(error_v2_multiple_values_for_argument("splitlines", "keepends"));
       return nullptr;
     }
     keepends = pos_args.front();
@@ -2387,7 +2387,7 @@ starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starla
   if (keepends != nullptr) {
     // Python does not have the restriction that this need to be a bool.
     if (keepends->type() != starlark_types::bool_t) {
-      error_callback.add_error(error_argument_must_be_type("splitlines", 1, starlark_types::bool_t, keepends->type()));
+      error_callback.add_error(error_v2_argument_must_be_type("splitlines", 1, starlark_types::bool_t, keepends->type()));
       return nullptr;
     }
     keepends_value = keepends->truthy();
