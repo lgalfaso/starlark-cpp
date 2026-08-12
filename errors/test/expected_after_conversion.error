@@ -1,0 +1,3 @@
+main:2:17: error: single '{' encountered in format string
+    2 | a = '{!r'.format(1)
+      |     ~~~~~~~~~~~~^^^

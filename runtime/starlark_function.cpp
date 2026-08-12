@@ -26,7 +26,6 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::parse_number;
-using ::starlark::error_messages::error_non_string_with_base;
 using ::starlark::error_messages::error_v2_argument_bad_operand_type;
 using ::starlark::error_messages::error_v2_argument_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_argument_interpreted_as_string;
@@ -51,6 +50,7 @@ using ::starlark::error_messages::error_v2_missing_argument;
 using ::starlark::error_messages::error_v2_missing_typed_argument;
 using ::starlark::error_messages::error_v2_multiple_values_for_argument;
 using ::starlark::error_messages::error_v2_named_argument_must_be_type;
+using ::starlark::error_messages::error_v2_non_string_with_base;
 using ::starlark::error_messages::error_v2_overflow;
 using ::starlark::error_messages::error_v2_overflow_float_too_large;
 using ::starlark::error_messages::error_v2_unknown_argument;
@@ -611,7 +611,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   auto* value = pos_args.front();
   if (value->type() != starlark_types::string_t && base_param != nullptr) {
-    error_callback.add_error(error_non_string_with_base());
+    error_callback.add_error(error_v2_non_string_with_base());
     return nullptr;
   }
   if (value->type() == starlark_types::int_t) {

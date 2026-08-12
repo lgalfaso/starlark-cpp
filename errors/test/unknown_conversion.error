@@ -1,0 +1,3 @@
+main:2:18: error: unknown conversion specifier x
+    2 | a = '{!x}'.format(1)
+      |     ~~~~~~~~~~~~~^^^

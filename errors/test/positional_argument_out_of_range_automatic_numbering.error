@@ -1,0 +1,3 @@
+main:2:24: error: replacement index 2 out of range for positional args
+    2 | a = '{}, {}, {}'.format(1, 2)
+      |     ~~~~~~~~~~~~~~~~~~~^^^^^^

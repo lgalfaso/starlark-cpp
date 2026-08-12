@@ -1,0 +1,3 @@
+main:2:21: error: unexpected ':' in field name
+    2 | a = 'abc{a:}'.format(**{'a:': 1})
+      |     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^

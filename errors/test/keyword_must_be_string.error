@@ -1,0 +1,3 @@
+main:3:4: error: keywords must be strings
+    3 | foo(**{1: 2})
+      | ~~~^^^^^^^^^^

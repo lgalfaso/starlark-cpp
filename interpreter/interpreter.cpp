@@ -45,7 +45,6 @@ using ::starlark::bytecode::Program;
 using ::starlark::compiler::compiler;
 using ::starlark::error_messages::error_dictionary_duplicate_key;
 using ::starlark::error_messages::error_expect_mapping_after_star_star;
-using ::starlark::error_messages::error_keyword_must_be_string;
 using ::starlark::error_messages::error_module_does_not_define_symbol;
 using ::starlark::error_messages::error_module_not_ready;
 using ::starlark::error_messages::error_multiple_values_for_keyword;
@@ -53,6 +52,7 @@ using ::starlark::error_messages::error_symbol_not_available;
 using ::starlark::error_messages::error_unable_to_load_module;
 using ::starlark::error_messages::error_unbound_variable;
 using ::starlark::error_messages::error_unknown_op;
+using ::starlark::error_messages::error_v2_keyword_must_be_string;
 using ::starlark::error_messages::error_v2_max_bytes_length;
 using ::starlark::error_messages::error_v2_max_sequence_length;
 using ::starlark::error_messages::error_v2_max_string_length;
@@ -566,7 +566,7 @@ frame* run_program(
           while (it->has_next()) {
             auto* key = it->next();
             if (key->type() != starlark_types::string_t) {
-              error_callback.add_error(error_keyword_must_be_string());
+              error_callback.add_error(error_v2_keyword_must_be_string());
               return nullptr;
             }
             auto* value = iterable->index(*key, ctx, error_callback);

@@ -30,18 +30,13 @@
 
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
-using ::starlark::error_messages::error_end_of_string_while_looking_for_conversion_specifier;
-using ::starlark::error_messages::error_expected_after_conversion;
-using ::starlark::error_messages::error_expected_format_element_before_end_of_string;
-using ::starlark::error_messages::error_positional_argument_out_of_range;
-using ::starlark::error_messages::error_single_format_element_in_string;
-using ::starlark::error_messages::error_switch_from_manual_to_automatic_numbering;
-using ::starlark::error_messages::error_unexpected_in_field_name;
-using ::starlark::error_messages::error_unknown_conversion;
 using ::starlark::error_messages::error_v2_argument_must_be_type;
 using ::starlark::error_messages::error_v2_can_only_join_on_iterable;
 using ::starlark::error_messages::error_v2_dictionary_key_not_found;
 using ::starlark::error_messages::error_v2_empty_separator;
+using ::starlark::error_messages::error_v2_end_of_string_while_looking_for_conversion_specifier;
+using ::starlark::error_messages::error_v2_expected_after_conversion;
+using ::starlark::error_messages::error_v2_expected_format_element_before_end_of_string;
 using ::starlark::error_messages::error_v2_format_integer_is_required;
 using ::starlark::error_messages::error_v2_format_real_is_required;
 using ::starlark::error_messages::error_v2_in_element;
@@ -55,11 +50,16 @@ using ::starlark::error_messages::error_v2_no_concat;
 using ::starlark::error_messages::error_v2_no_multiply_sequence;
 using ::starlark::error_messages::error_v2_not_all_arguments_converted_during_string_formatting;
 using ::starlark::error_messages::error_v2_not_enough_arguments_for_format_string;
+using ::starlark::error_messages::error_v2_positional_argument_out_of_range;
+using ::starlark::error_messages::error_v2_single_format_element_in_string;
 using ::starlark::error_messages::error_v2_string_or_tuple_of_string;
 using ::starlark::error_messages::error_v2_substring_not_found;
+using ::starlark::error_messages::error_v2_switch_from_manual_to_automatic_numbering;
 using ::starlark::error_messages::error_v2_tuple_must_contain_type;
+using ::starlark::error_messages::error_v2_unexpected_in_field_name;
 using ::starlark::error_messages::error_v2_unicode_in_range;
 using ::starlark::error_messages::error_v2_unknown_argument;
+using ::starlark::error_messages::error_v2_unknown_conversion;
 using ::starlark::error_messages::error_v2_unsupported_format_character;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
@@ -593,7 +593,7 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
           conversions.emplace_back('s');
           state = state_t::kLastElementWasExclamationMark;
         } else if (cp == '.' || cp == ':' || cp == '[') {  // https://github.com/python/cpython/issues/150626
-          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          error_callback.add_error(error_v2_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
           return error_status();
         } else {
           names.emplace_back();
@@ -607,7 +607,7 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
           parts.back() += format.substr(start, reader.pos() - start);
           state = state_t::kText;
         } else {
-          error_callback.add_error(error_single_format_element_in_string("}"));
+          error_callback.add_error(error_v2_single_format_element_in_string("}"));
           return error_status();
         }
         break;
@@ -618,7 +618,7 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
         } else if (cp == '!') {
           state = state_t::kLastElementWasExclamationMark;
         } else if (cp == '.' || cp == ':' || cp == '[' || cp == '{') {  // https://github.com/python/cpython/issues/150626
-          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          error_callback.add_error(error_v2_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
           return error_status();
         } else {
           names.back() += cp;
@@ -633,7 +633,7 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
         } else if (cp == '!') {
           state = state_t::kLastElementWasExclamationMark;
         } else {
-          error_callback.add_error(error_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
+          error_callback.add_error(error_v2_unexpected_in_field_name(format.substr(start, reader.pos() - start)));
           return error_status();
         }
         break;
@@ -644,7 +644,7 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
           conversions.back() = 's';
         } else {
           // We do not support the `a` conversion.
-          error_callback.add_error(error_unknown_conversion(format.substr(start, reader.pos() - start)));
+          error_callback.add_error(error_v2_unknown_conversion(format.substr(start, reader.pos() - start)));
           return error_status();
         }
         state = state_t::kLastElementWasConversion;
@@ -654,14 +654,14 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
           parts.emplace_back();
           state = state_t::kText;
         } else {
-          error_callback.add_error(error_expected_after_conversion());
+          error_callback.add_error(error_v2_expected_after_conversion());
           return error_status();
         }
         break;
     }
   }
   if (has_blanks && has_numbers) {
-    error_callback.add_error(error_switch_from_manual_to_automatic_numbering());
+    error_callback.add_error(error_v2_switch_from_manual_to_automatic_numbering());
     return error_status();
   }
   switch (state) {
@@ -670,17 +670,17 @@ status parse_format(std::string_view format, std::vector<std::string>& parts, st
       return ok_status();
     case state_t::kLastElementWasOpenCurlyBraces:
     case state_t::kLastElementWasConversion:
-      error_callback.add_error(error_single_format_element_in_string("{"));
+      error_callback.add_error(error_v2_single_format_element_in_string("{"));
       return error_status();
     case state_t::kLastElementWasCloseCurlyBraces:
-      error_callback.add_error(error_single_format_element_in_string("}"));
+      error_callback.add_error(error_v2_single_format_element_in_string("}"));
       return error_status();
     case state_t::kName:
     case state_t::kNumber:
-      error_callback.add_error(error_expected_format_element_before_end_of_string("}"));
+      error_callback.add_error(error_v2_expected_format_element_before_end_of_string("}"));
       return error_status();
     case state_t::kLastElementWasExclamationMark:
-      error_callback.add_error(error_end_of_string_while_looking_for_conversion_specifier());
+      error_callback.add_error(error_v2_end_of_string_while_looking_for_conversion_specifier());
       return error_status();
   }
 }
@@ -1530,7 +1530,7 @@ starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, 
     const auto& name = names[i];
     if (name.empty()) {
       if (pos_args.size() <= automatic_numbering) {
-        error_callback.add_error(error_positional_argument_out_of_range(automatic_numbering));
+        error_callback.add_error(error_v2_positional_argument_out_of_range(automatic_numbering));
         return nullptr;
       }
       append_with_conversion(pos_args[automatic_numbering], conversions[i], result);
@@ -1541,11 +1541,11 @@ starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, 
       char* end;
       std::int64_t int_value = std::strtol(name.c_str(), &end, 10);
       if (errno == ERANGE || end != &*name.end()) {
-        error_callback.add_error(error_positional_argument_out_of_range(name));
+        error_callback.add_error(error_v2_positional_argument_out_of_range(name));
         return nullptr;
       }
       if (int_value < 0 || int_value >= pos_args.size()) {
-        error_callback.add_error(error_positional_argument_out_of_range(name));
+        error_callback.add_error(error_v2_positional_argument_out_of_range(name));
         return nullptr;
       }
       append_with_conversion(pos_args[int_value], conversions[i], result);

@@ -1,0 +1,3 @@
+main:2:8: error: int() cannot convert non-string with explicit base
+    2 | a = int(1, base = 10)
+      |     ~~~^^^^^^^^^^^^^^

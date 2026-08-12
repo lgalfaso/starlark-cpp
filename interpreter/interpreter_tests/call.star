@@ -17,7 +17,7 @@ dict(**1)
 """)
 assert_fail("""
 dict(**{1: 1})
-""", error_message = """TypeError: keywords must be strings
+""", error_message = """keywords must be strings
     1 | dict(**{1: 1})
       | ~~~~^^^^^^^^^^
 """)

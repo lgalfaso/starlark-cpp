@@ -2189,7 +2189,7 @@ TEST(StarlarkInt, FromIntWithBaseAsPositionalArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+  EXPECT_EQ("int() cannot convert non-string with explicit base", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromIntWithBaseAsNamedArgument) {
@@ -2207,7 +2207,7 @@ TEST(StarlarkInt, FromIntWithBaseAsNamedArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+  EXPECT_EQ("int() cannot convert non-string with explicit base", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromFloat) {
@@ -2268,7 +2268,7 @@ TEST(StarlarkInt, FromFloatWithBaseWithPositionalArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+  EXPECT_EQ("int() cannot convert non-string with explicit base", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromFloatWithBaseWithNamedArgument) {
@@ -2286,7 +2286,7 @@ TEST(StarlarkInt, FromFloatWithBaseWithNamedArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+  EXPECT_EQ("int() cannot convert non-string with explicit base", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromBool) {
@@ -2322,7 +2322,7 @@ TEST(StarlarkInt, FromBoolWithBaseAsPositionalArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+  EXPECT_EQ("int() cannot convert non-string with explicit base", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromBoolWithBaseAsNamedArgument) {
@@ -2340,7 +2340,7 @@ TEST(StarlarkInt, FromBoolWithBaseAsNamedArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("TypeError: int() can't convert non-string with explicit base", error_callback.messages[0]);
+  EXPECT_EQ("int() cannot convert non-string with explicit base", error_callback.messages[0]);
 }
 
 TEST(StarlarkInt, FromString) {

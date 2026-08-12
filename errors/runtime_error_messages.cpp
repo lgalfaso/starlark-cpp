@@ -14,52 +14,6 @@ using ::starlark::logging::Position;
 namespace starlark {
 namespace error_messages {
 
-std::string error_unexpected_in_field_name(std::string_view unexpected) {
-  return std::format("ValueError: unexpected '{}' in field name", unexpected);
-}
-
-std::string_view error_switch_from_manual_to_automatic_numbering() {
-  return "ValueError: cannot switch from manual field specification to automatic field numbering";
-}
-
-std::string error_single_format_element_in_string(std::string_view format_element) {
-  return std::format("ValueError: Single '{}' encountered in format string", format_element);
-}
-
-std::string error_expected_format_element_before_end_of_string(std::string_view format_element) {
-  return std::format("ValueError: expected '{}' before end of string", format_element);
-}
-
-std::string error_positional_argument_out_of_range(std::string_view pos_argument) {
-  return std::format("IndexError: Replacement index {} out of range for positional args tuple", pos_argument);
-}
-
-std::string error_positional_argument_out_of_range(std::size_t pos_argument) {
-  return std::format("IndexError: Replacement index {} out of range for positional args tuple", pos_argument);
-}
-
-std::string_view error_end_of_string_while_looking_for_conversion_specifier() {
-  return "ValueError: end of string while looking for conversion specifier";
-}
-
-std::string error_unknown_conversion(std::string_view conversion) {
-  return std::format("ValueError: Unknown conversion specifier {}", conversion);
-}
-
-std::string_view error_expected_after_conversion() {
-  // This is not the same error as in Python, but given that we do not support all
-  // the formats from Python, this is the best we can do.
-  return "ValueError: expected '}' after conversion specifier";
-}
-
-std::string_view error_non_string_with_base() {
-  return "TypeError: int() can't convert non-string with explicit base";
-}
-
-std::string_view error_keyword_must_be_string() {
-  return "TypeError: keywords must be strings";
-}
-
 std::string error_dictionary_duplicate_key(std::string_view key) {
   return std::format("Error: dictionary expression has duplicate key: {}", key);
 }
@@ -504,6 +458,51 @@ std::string error_v2_missing_typed_argument(std::string_view fn_name, std::strin
 
 std::string error_v2_empty_iterator(std::string_view fn_name) {
   return std::format("{}() iterable argument is empty", fn_name);
+}
+
+
+std::string error_v2_unexpected_in_field_name(std::string_view unexpected) {
+  return std::format("unexpected '{}' in field name", unexpected);
+}
+
+std::string_view error_v2_switch_from_manual_to_automatic_numbering() {
+  return "cannot switch from manual field specification to automatic field numbering";
+}
+
+std::string error_v2_single_format_element_in_string(std::string_view format_element) {
+  return std::format("single '{}' encountered in format string", format_element);
+}
+
+std::string error_v2_expected_format_element_before_end_of_string(std::string_view format_element) {
+  return std::format("expected '{}' before end of string", format_element);
+}
+
+std::string error_v2_positional_argument_out_of_range(std::string_view pos_argument) {
+  return std::format("replacement index {} out of range for positional args", pos_argument);
+}
+
+std::string error_v2_positional_argument_out_of_range(std::size_t pos_argument) {
+  return std::format("replacement index {} out of range for positional args", pos_argument);
+}
+
+std::string_view error_v2_end_of_string_while_looking_for_conversion_specifier() {
+  return "end of string while looking for conversion specifier";
+}
+
+std::string error_v2_unknown_conversion(std::string_view conversion) {
+  return std::format("unknown conversion specifier {}", conversion);
+}
+
+std::string_view error_v2_expected_after_conversion() {
+  return "expected '}' after conversion specifier";
+}
+
+std::string_view error_v2_non_string_with_base() {
+  return "int() cannot convert non-string with explicit base";
+}
+
+std::string_view error_v2_keyword_must_be_string() {
+  return "keywords must be strings";
 }
 
 }  // namespace error_messages

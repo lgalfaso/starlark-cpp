@@ -13,18 +13,6 @@
 namespace starlark {
 namespace error_messages {
 
-std::string error_unexpected_in_field_name(std::string_view unexpected);
-std::string_view error_switch_from_manual_to_automatic_numbering();
-std::string error_single_format_element_in_string(std::string_view format_element);
-std::string error_expected_format_element_before_end_of_string(std::string_view format_element);
-std::string error_positional_argument_out_of_range(std::string_view pos_argument);
-std::string error_positional_argument_out_of_range(std::size_t pos_argument);
-std::string_view error_end_of_string_while_looking_for_conversion_specifier();
-std::string error_unknown_conversion(std::string_view conversion);
-std::string_view error_expected_after_conversion();
-std::string_view error_non_string_with_base();
-std::string_view error_keyword_must_be_string();
-
 std::string error_dictionary_duplicate_key(std::string_view key);
 std::string error_unbound_variable(std::string_view name);
 std::string error_symbol_not_available(std::string_view symbol);
@@ -151,6 +139,18 @@ std::string error_v2_missing_argument(std::string_view fn_name, std::string_view
 std::string error_v2_missing_typed_argument(std::string_view fn_name, std::string_view type_name);
 
 std::string error_v2_empty_iterator(std::string_view fn_name);
+
+std::string error_v2_unexpected_in_field_name(std::string_view unexpected);
+std::string_view error_v2_switch_from_manual_to_automatic_numbering();
+std::string error_v2_single_format_element_in_string(std::string_view format_element);
+std::string error_v2_expected_format_element_before_end_of_string(std::string_view format_element);
+std::string error_v2_positional_argument_out_of_range(std::string_view pos_argument);
+std::string error_v2_positional_argument_out_of_range(std::size_t pos_argument);
+std::string_view error_v2_end_of_string_while_looking_for_conversion_specifier();
+std::string error_v2_unknown_conversion(std::string_view conversion);
+std::string_view error_v2_expected_after_conversion();
+std::string_view error_v2_non_string_with_base();
+std::string_view error_v2_keyword_must_be_string();
 
 }  // namespace error_messages
 }  // namespace starlark

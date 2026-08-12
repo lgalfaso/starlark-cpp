@@ -1258,13 +1258,13 @@ TEST(StarlarkString, Format) {
   test("abc{١}def{٠}ghi", with_zero_one, with_abc, "abc1def0ghi");
   test("xyz{abc}qwe", with_zero_one, with_abc, "xyzdefqwe");
   test("abc{0000}def{1}ghi", with_zero_one, empty_names, "abc0def1ghi");
-  test_with_error("{", empty_pos, empty_names, "ValueError: Single '{' encountered in format string");
-  test_with_error("}", empty_pos, empty_names, "ValueError: Single '}' encountered in format string");
-  test_with_error("}abc", empty_pos, empty_names, "ValueError: Single '}' encountered in format string");
-  test_with_error("{0", empty_pos, empty_names, "ValueError: expected '}' before end of string");
-  test_with_error("{0a}", empty_pos, empty_names, "ValueError: unexpected 'a' in field name");
-  test_with_error("{0}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
-  test_with_error("{18446744073709551616}", empty_pos, empty_names, "IndexError: Replacement index 18446744073709551616 out of range for positional args tuple");
+  test_with_error("{", empty_pos, empty_names, "single '{' encountered in format string");
+  test_with_error("}", empty_pos, empty_names, "single '}' encountered in format string");
+  test_with_error("}abc", empty_pos, empty_names, "single '}' encountered in format string");
+  test_with_error("{0", empty_pos, empty_names, "expected '}' before end of string");
+  test_with_error("{0a}", empty_pos, empty_names, "unexpected 'a' in field name");
+  test_with_error("{0}", empty_pos, empty_names, "replacement index 0 out of range for positional args");
+  test_with_error("{18446744073709551616}", empty_pos, empty_names, "replacement index 18446744073709551616 out of range for positional args");
   test_with_error("{abc}", empty_pos, empty_names, "key not found 'abc'");
   test("{$}", empty_pos, with_dollar, "def");
   test("{$!s}", empty_pos, with_dollar, "def");
@@ -1273,14 +1273,14 @@ TEST(StarlarkString, Format) {
   test("{!r}", pos_with_def, empty_names, "\"def\"");
   test("{0!s}", pos_with_def, empty_names, "def");
   test("{0!r}", pos_with_def, empty_names, "\"def\"");
-  test_with_error("{:}", empty_pos, empty_names, "ValueError: unexpected ':' in field name");
-  test_with_error("{a!}", empty_pos, empty_names, "ValueError: Unknown conversion specifier }");
-  test_with_error("{a!a}", empty_pos, empty_names, "ValueError: Unknown conversion specifier a");
-  test_with_error("{a!", empty_pos, empty_names, "ValueError: end of string while looking for conversion specifier");
-  test_with_error("{a!r", empty_pos, empty_names, "ValueError: Single '{' encountered in format string");
-  test_with_error("{a!ru", empty_pos, empty_names, "ValueError: expected '}' after conversion specifier");
-  test_with_error("{}", empty_pos, empty_names, "IndexError: Replacement index 0 out of range for positional args tuple");
-  test_with_error("{}{0}", empty_pos, empty_names, "ValueError: cannot switch from manual field specification to automatic field numbering");
+  test_with_error("{:}", empty_pos, empty_names, "unexpected ':' in field name");
+  test_with_error("{a!}", empty_pos, empty_names, "unknown conversion specifier }");
+  test_with_error("{a!a}", empty_pos, empty_names, "unknown conversion specifier a");
+  test_with_error("{a!", empty_pos, empty_names, "end of string while looking for conversion specifier");
+  test_with_error("{a!r", empty_pos, empty_names, "single '{' encountered in format string");
+  test_with_error("{a!ru", empty_pos, empty_names, "expected '}' after conversion specifier");
+  test_with_error("{}", empty_pos, empty_names, "replacement index 0 out of range for positional args");
+  test_with_error("{}{0}", empty_pos, empty_names, "cannot switch from manual field specification to automatic field numbering");
 }
 
 TEST(StarlarkString, CountNoArguments) {

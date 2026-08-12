@@ -1,0 +1,3 @@
+main:2:21: error: cannot switch from manual field specification to automatic field numbering
+    2 | a = '{}, {2}'.format(1, 2, 3, 4)
+      |     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^
