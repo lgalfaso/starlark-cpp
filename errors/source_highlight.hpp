@@ -17,6 +17,8 @@ std::string get_line_and_underline(std::string_view program, const starlark::log
 std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end, bool reverse);
 std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end, bool reverse, std::string_view hint);
 std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& mid, const starlark::logging::Position& end);
+std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& start_underline,
+                                   const starlark::logging::Position& end_underline, const starlark::logging::Position& end, std::string_view hint);
 
 }  // namespace error_messages
 }  // namespace starlark

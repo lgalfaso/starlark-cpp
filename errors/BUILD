@@ -9,6 +9,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//proto:starlark_logging_cc_proto",
+        "//unicode:utf8_reader",
     ],
 )
 

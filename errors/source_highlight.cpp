@@ -7,11 +7,29 @@
 #include <string_view>
 
 #include "proto/starlark_logging.pb.h"
+#include "unicode/utf8_reader.hpp"
 
 using ::starlark::logging::Position;
+using ::starlark::unicode::is_utf8_continue;
 
 namespace starlark {
 namespace error_messages {
+
+namespace {
+
+int count_chars(std::string_view input) {
+  int result = 0;
+  for (auto c : input) {
+    // We do not count Unicode continuation characters as we are interested in the Unicode length.
+    // TODO(lmirelmann): This is not taking into consideration if the character is a combining mark. Doing this would be a lot of work.
+    if (!is_utf8_continue(c)) {
+      ++result;
+    }
+  }
+  return result;
+}
+
+}  // namespace
 
 std::string get_line_and_underline(std::string_view program, const Position& start, const Position& start_underline, const Position& end_underline, const Position& end, std::string_view hint) {
   std::string result;
@@ -31,9 +49,9 @@ std::string get_line_and_underline(std::string_view program, const Position& sta
   if (first_curly_size > 0) {
     result += std::format("{:~>{}}", '~', first_curly_size);
   }
-  result += std::format("{:^>{}}", '^', start_underline.row() == end_underline.row() ? end_underline.column() - start_underline.column() : line.size() - start_underline.column());
+  result += std::format("{:^>{}}", '^', start_underline.row() == end_underline.row() ? end_underline.column() - start_underline.column() : count_chars(line) - start_underline.column());
   if (start_underline.row() == end_underline.row()) {
-    auto second_curly_size = end_underline.row() == end.row() ? end.column() - end_underline.column() : line.size() - end_underline.column() + 1;
+    auto second_curly_size = end_underline.row() == end.row() ? end.column() - end_underline.column() : count_chars(line) - end_underline.column() + 1;
     if (second_curly_size > 0) {
       result += std::format("{:~>{}}", '~', second_curly_size);
     }
@@ -68,7 +86,7 @@ std::string get_line_and_underline(std::string_view program, const Position& sta
       while (previous_line_length < end.pos() && program[end.pos() - previous_line_length - 1] != '\n') {
         previous_line_length++;
       }
-      underline_start.set_column(previous_line_length - 1);
+      underline_start.set_column(count_chars(program.substr(end.pos() - previous_line_length, previous_line_length)) - 1);
       underline_start.set_pos(end.pos() - 1);
       underline_start.set_row(end.row() - 1);
     }

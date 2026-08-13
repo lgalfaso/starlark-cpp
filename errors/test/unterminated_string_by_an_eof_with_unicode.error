@@ -1,0 +1,3 @@
+main:4:1: error: unterminated string
+    3 | πøµ The line continues œåΩ∑ß≈
+      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
