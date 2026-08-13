@@ -112,7 +112,7 @@ void starlark_set::unpack(int32_t number_of_elements, std::vector<starlark_obj*>
   }
 }
 
-int64_t starlark_set::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_set::unsafe_len() const {
   return values.size();
 }
 

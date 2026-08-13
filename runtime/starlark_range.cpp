@@ -40,7 +40,7 @@ void starlark_range::unpack(int32_t number_of_elements, std::vector<starlark_obj
   }
 }
 
-int64_t starlark_range::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_range::unsafe_len() const {
   return state.len;
 }
 
@@ -159,6 +159,10 @@ starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starl
     return nullptr;
   }
   return Arena::Create<starlark_range>(&ctx.arena(), std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result));
+}
+
+bool starlark_range::valid() const {
+  return unsafe_len() >= 0;
 }
 
 starlark_range::starlark_range_iterator::starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, context& ctx)

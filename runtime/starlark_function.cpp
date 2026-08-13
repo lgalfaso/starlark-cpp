@@ -305,7 +305,7 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     error_callback.add_error(error_v2_convert(source->type(), starlark_types::bytes_t));
     return nullptr;
   }
-  if (source->len(false, error_callback) > ctx.options().max_string_length) {
+  if (source->unsafe_len() > ctx.options().max_string_length) {
     error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
     return nullptr;
   }
@@ -441,7 +441,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, iterable->len(false, error_callback)));
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, iterable->unsafe_len()));
   if (start == nullptr) {
     start = ctx.zero();
   }
@@ -674,7 +674,7 @@ starlark_obj* starlark_fn_len(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::len_f).ok()) {
     return nullptr;
   }
-  auto result = pos_args.front()->len(true, error_callback);
+  auto result = pos_args.front()->len(error_callback);
   if (result < 0) {
     return nullptr;
   }
@@ -692,7 +692,7 @@ starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_a
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
+  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->unsafe_len()));
   while (it->has_next()) {
     result->unsafe_append(it->next());
   }
@@ -902,18 +902,18 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (value->type() == starlark_types::string_t) {
     utf8_reader reader(value->as_string(), false, false);
     if (!reader.pending()) {
-      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
+      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->unsafe_len()));
       return nullptr;
     }
     auto result = reader.read_code_point();
     if (reader.pending()) {
-      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
+      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->unsafe_len()));
       return nullptr;
     }
     return create_integer(result, ctx);
   } else if (value->type() == starlark_types::bytes_t) {
-    if (value->len(false, error_callback) != 1) {
-      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->len(false, error_callback)));
+    if (auto value_len = value->unsafe_len(); value_len != 1) {
+      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value_len));
       return nullptr;
     }
     return create_integer(static_cast<unsigned char>(value->as_string()[0]), ctx);
@@ -1007,7 +1007,7 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
 
 
   auto* result = Arena::Create<starlark_range>(&ctx.arena(), start, end, step);
-  if (result->len(false, error_callback) < 0) {
+  if (!result->valid()) {
     error_callback.add_error(error_v2_overflow(starlark_types::int_t, starlark_types::int64));
     return nullptr;
   }
@@ -1178,7 +1178,7 @@ starlark_obj* starlark_fn_tuple(starlark_obj* this_obj, const starlark_obj::pos_
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->len(false, error_callback)));
+  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->unsafe_len()));
   while (it->has_next()) {
     result->add(it->next());
   }
@@ -1215,10 +1215,13 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
   for (auto* element : pos_args) {
     auto* it = element->get_iterator(true, ctx, error_callback);
     if (it == nullptr) {
+      for (auto& iit : its) {
+        iit->end_iterator();
+      }
       return nullptr;
     }
     its.push_back(it);
-    len = std::min<int64_t>(len, element->len(false, error_callback));
+    len = std::min<int64_t>(len, element->unsafe_len());
   }
   starlark_list* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, len));
   while (all_available(its)) {

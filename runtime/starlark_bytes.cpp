@@ -134,7 +134,7 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_bytes::met
   return method_refs();
 }
 
-int64_t starlark_bytes::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_bytes::unsafe_len() const {
   return value.size();
 }
 
@@ -1214,7 +1214,7 @@ bool starlark_bytes::bytes_elems::binary_in(const starlark_obj& other, error_fn&
   return false;
 }
 
-int64_t starlark_bytes::bytes_elems::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_bytes::bytes_elems::unsafe_len() const {
   return state.len;
 }
 

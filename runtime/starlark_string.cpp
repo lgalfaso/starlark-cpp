@@ -247,7 +247,7 @@ std::string starlark_string::str() const {
   return value;
 }
 
-int64_t starlark_string::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_string::unsafe_len() const {
   return size;
 }
 
@@ -403,7 +403,7 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
             error_callback.add_error(error_v2_integer_or_unicode_character(element.type()));
             return error_status();
           }
-          auto len = element.len(false, error_callback);
+          auto len = element.unsafe_len();
           if (len != 1) {
             error_callback.add_error(error_v2_integer_or_unicode_character_type_and_length(element.type(), len));
             return error_status();
@@ -1652,7 +1652,7 @@ bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_f
   return false;
 }
 
-int64_t starlark_string::string_elems::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_string::string_elems::unsafe_len() const {
   return state.len;
 }
 

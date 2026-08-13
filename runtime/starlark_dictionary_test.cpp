@@ -461,8 +461,8 @@ TEST(StarlarkDictionary, Len) {
   dict_2.insert(&two, &s_two, error_callback);
   dict_2.insert(&three, &s_three, error_callback);
 
-  EXPECT_EQ(0, dict_1.len(true, error_callback));
-  EXPECT_EQ(4, dict_2.len(true, error_callback));
+  EXPECT_EQ(0, dict_1.len(error_callback));
+  EXPECT_EQ(4, dict_2.len(error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

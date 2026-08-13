@@ -1046,8 +1046,8 @@ TEST(StarlarkList, Len) {
   list1.append(&zero, ctx, error_callback);
   list1.append(&one, ctx, error_callback);
 
-  EXPECT_EQ(0, list0.len(true, error_callback));
-  EXPECT_EQ(2, list1.len(true, error_callback));
+  EXPECT_EQ(0, list0.len(error_callback));
+  EXPECT_EQ(2, list1.len(error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

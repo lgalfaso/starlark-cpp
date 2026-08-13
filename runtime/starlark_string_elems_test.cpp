@@ -53,25 +53,25 @@ TEST(StarlarkStringElems, Len) {
   context ctx(arena);
   error_handler error_callback;
 
-  EXPECT_EQ(starlark_string(""sv).elems(ctx)->len(true, error_callback), 0);
-  EXPECT_EQ(starlark_string("a"sv).elems(ctx)->len(true, error_callback), 1);
-  EXPECT_EQ(starlark_string("ab"sv).elems(ctx)->len(true, error_callback), 2);
-  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).elems(ctx)->len(true, error_callback), 11);
+  EXPECT_EQ(starlark_string(""sv).elems(ctx)->len(error_callback), 0);
+  EXPECT_EQ(starlark_string("a"sv).elems(ctx)->len(error_callback), 1);
+  EXPECT_EQ(starlark_string("ab"sv).elems(ctx)->len(error_callback), 2);
+  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).elems(ctx)->len(error_callback), 11);
 
-  EXPECT_EQ(starlark_string(""sv).elem_ords(ctx)->len(true, error_callback), 0);
-  EXPECT_EQ(starlark_string("a"sv).elem_ords(ctx)->len(true, error_callback), 1);
-  EXPECT_EQ(starlark_string("ab"sv).elem_ords(ctx)->len(true, error_callback), 2);
-  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).elem_ords(ctx)->len(true, error_callback), 11);
+  EXPECT_EQ(starlark_string(""sv).elem_ords(ctx)->len(error_callback), 0);
+  EXPECT_EQ(starlark_string("a"sv).elem_ords(ctx)->len(error_callback), 1);
+  EXPECT_EQ(starlark_string("ab"sv).elem_ords(ctx)->len(error_callback), 2);
+  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).elem_ords(ctx)->len(error_callback), 11);
 
-  EXPECT_EQ(starlark_string(""sv).codepoints(ctx)->len(true, error_callback), 0);
-  EXPECT_EQ(starlark_string("a"sv).codepoints(ctx)->len(true, error_callback), 1);
-  EXPECT_EQ(starlark_string("ab"sv).codepoints(ctx)->len(true, error_callback), 2);
-  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).codepoints(ctx)->len(true, error_callback), 11);
+  EXPECT_EQ(starlark_string(""sv).codepoints(ctx)->len(error_callback), 0);
+  EXPECT_EQ(starlark_string("a"sv).codepoints(ctx)->len(error_callback), 1);
+  EXPECT_EQ(starlark_string("ab"sv).codepoints(ctx)->len(error_callback), 2);
+  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).codepoints(ctx)->len(error_callback), 11);
 
-  EXPECT_EQ(starlark_string(""sv).codepoint_ords(ctx)->len(true, error_callback), 0);
-  EXPECT_EQ(starlark_string("a"sv).codepoint_ords(ctx)->len(true, error_callback), 1);
-  EXPECT_EQ(starlark_string("ab"sv).codepoint_ords(ctx)->len(true, error_callback), 2);
-  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).codepoint_ords(ctx)->len(true, error_callback), 11);
+  EXPECT_EQ(starlark_string(""sv).codepoint_ords(ctx)->len(error_callback), 0);
+  EXPECT_EQ(starlark_string("a"sv).codepoint_ords(ctx)->len(error_callback), 1);
+  EXPECT_EQ(starlark_string("ab"sv).codepoint_ords(ctx)->len(error_callback), 2);
+  EXPECT_EQ(starlark_string("Περιπτώσεις"sv).codepoint_ords(ctx)->len(error_callback), 11);
 
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }

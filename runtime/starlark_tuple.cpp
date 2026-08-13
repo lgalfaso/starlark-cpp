@@ -140,7 +140,7 @@ starlark_obj* starlark_tuple::star_equals_assign(const starlark_obj& other, cont
   return star_op(*this, other, "*=", ctx, error_callback);
 }
 
-int64_t starlark_tuple::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_tuple::unsafe_len() const {
   return values.size();
 }
 

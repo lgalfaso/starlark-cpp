@@ -46,12 +46,12 @@ TEST(StarlarkBytesElems, Len) {
   context ctx(arena);
   error_handler error_callback;
 
-  EXPECT_EQ(starlark_bytes(""sv).elems(ctx)->len(true, error_callback), 0);
-  EXPECT_EQ(starlark_bytes("a"sv).elems(ctx)->len(true, error_callback), 1);
-  EXPECT_EQ(starlark_bytes("ab"sv).elems(ctx)->len(true, error_callback), 2);
-  EXPECT_EQ(starlark_bytes(""sv).elem_ords(ctx)->len(true, error_callback), 0);
-  EXPECT_EQ(starlark_bytes("a"sv).elem_ords(ctx)->len(true, error_callback), 1);
-  EXPECT_EQ(starlark_bytes("ab"sv).elem_ords(ctx)->len(true, error_callback), 2);
+  EXPECT_EQ(starlark_bytes(""sv).elems(ctx)->len(error_callback), 0);
+  EXPECT_EQ(starlark_bytes("a"sv).elems(ctx)->len(error_callback), 1);
+  EXPECT_EQ(starlark_bytes("ab"sv).elems(ctx)->len(error_callback), 2);
+  EXPECT_EQ(starlark_bytes(""sv).elem_ords(ctx)->len(error_callback), 0);
+  EXPECT_EQ(starlark_bytes("a"sv).elem_ords(ctx)->len(error_callback), 1);
+  EXPECT_EQ(starlark_bytes("ab"sv).elem_ords(ctx)->len(error_callback), 2);
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

@@ -31,7 +31,7 @@ class starlark_dictionary : public starlark_obj {
   std::pair<bool, bool> insert(starlark_obj* key, starlark_obj* value, error_fn& error_callback);
   starlark_obj* binary_pipe(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   starlark_obj* pipe_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
-  int64_t len(bool produce_error, error_fn& error_callback) const override;
+  int64_t unsafe_len() const override;
   starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
   starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback) override;

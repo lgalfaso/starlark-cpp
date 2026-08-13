@@ -31,7 +31,7 @@ class starlark_bytes : public starlark_obj {
   starlark_obj* binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   starlark_obj* plus_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
   starlark_obj* star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
-  int64_t len(bool produce_error, error_fn& error_callback) const override;
+  int64_t unsafe_len() const override;
   starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
   starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
   std::string_view as_string() const override;
@@ -65,7 +65,7 @@ class starlark_bytes : public starlark_obj {
     bool truthy() const override;
 
     bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;
-    int64_t len(bool produce_error, error_fn& error_callback) const override;
+    int64_t unsafe_len() const override;
     starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback) override;
     starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
     starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;

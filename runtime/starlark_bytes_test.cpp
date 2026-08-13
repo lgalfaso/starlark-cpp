@@ -543,8 +543,8 @@ TEST(StarlarkBytes, BinaryStarTooBig) {
 TEST(StarlarkBytes, Len) {
   error_handler error_callback;
 
-  EXPECT_EQ(0, starlark_bytes(""sv).len(true, error_callback));
-  EXPECT_EQ(3, starlark_bytes("abc"sv).len(true, error_callback));
+  EXPECT_EQ(0, starlark_bytes(""sv).len(error_callback));
+  EXPECT_EQ(3, starlark_bytes("abc"sv).len(error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

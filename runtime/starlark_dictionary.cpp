@@ -99,7 +99,7 @@ void starlark_dictionary::unpack(int32_t number_of_elements, std::vector<starlar
   }
 }
 
-int64_t starlark_dictionary::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_dictionary::unsafe_len() const {
   return values_.size();
 }
 
@@ -347,7 +347,7 @@ status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::n
         auto* value = it2->next();
         assert(value != nullptr);
         if (it2->has_next()) {
-          error_callback.add_error(error_v2_dictionary_update_sequence(pos, kv->len(false, error_callback), 2));
+          error_callback.add_error(error_v2_dictionary_update_sequence(pos, kv->unsafe_len(), 2));
           return error_status();
         }
         if (insert(key, value, error_callback).second) {

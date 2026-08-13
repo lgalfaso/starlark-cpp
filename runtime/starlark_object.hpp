@@ -217,7 +217,8 @@ class starlark_obj {
   virtual starlark_obj* binary_lshift(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
   virtual starlark_obj* binary_rshift(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
 
-  virtual int64_t len(bool produce_error, error_fn& error_callback) const;
+  int64_t len(error_fn& error_callback) const;
+  virtual int64_t unsafe_len() const;
   virtual starlark_iterator* get_iterator(bool produce_error, context& ctx, error_fn& error_callback);
   virtual starlark_obj* index(const starlark_obj& other, context& ctx, error_fn& error_callback) const;
   virtual void index_assign(const starlark_obj& idx, starlark_obj& element, error_fn& error_callback);

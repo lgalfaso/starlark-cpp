@@ -432,10 +432,15 @@ starlark_obj* starlark_obj::binary_percent(const starlark_obj& other, context& c
   return nullptr;
 }
 
-int64_t starlark_obj::len(bool produce_error, error_fn& error_callback) const {
-  if (produce_error) {
+int64_t starlark_obj::len(error_fn& error_callback) const {
+  auto result = unsafe_len();
+  if (result < 0) {
     error_callback.add_error(error_v2_no_method(type(), "len"));
   }
+  return result;
+}
+
+int64_t starlark_obj::unsafe_len() const {
   return -1;
 }
 

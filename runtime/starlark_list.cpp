@@ -88,7 +88,7 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_list::meth
   return method_refs();
 }
 
-int64_t starlark_list::len(bool produce_error, error_fn& error_callback) const {
+int64_t starlark_list::unsafe_len() const {
   return values.size();
 }
 
@@ -382,7 +382,7 @@ status starlark_list::extend(starlark_obj* other, context& ctx, error_fn& error_
   if (!can_modify("extend", error_callback)) {
     return error_status();
   }
-  auto other_len = other->len(false, error_callback);
+  auto other_len = other->unsafe_len();
   if (other_len > 0) {
     std::size_t expected_size;
     if (ckd_add(&expected_size, values.size(), other_len) ||

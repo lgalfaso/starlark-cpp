@@ -622,9 +622,9 @@ TEST(StarlarkString, SlashSlashInt) {
 TEST(StarlarkString, Len) {
   error_handler error_callback;
 
-  EXPECT_EQ(0, starlark_string(""sv).len(true, error_callback));
-  EXPECT_EQ(3, starlark_string("abc"sv).len(true, error_callback));
-  EXPECT_EQ(5, starlark_string("\u2028\u0231abc"sv).len(true, error_callback));
+  EXPECT_EQ(0, starlark_string(""sv).len(error_callback));
+  EXPECT_EQ(3, starlark_string("abc"sv).len(error_callback));
+  EXPECT_EQ(5, starlark_string("\u2028\u0231abc"sv).len(error_callback));
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
@@ -707,7 +707,7 @@ TEST(StarlarkString, IndexLargeStringsUnicode) {
     "Π", "ε", "ρ", "ι", "π", "τ", "ώ", "σ", "ε", "ι", "ς", " ",
   };
 
-  auto len = str.len(true, error_callback);
+  auto len = str.len(error_callback);
   EXPECT_EQ(len, 720);
   for (int i = 0; i < len; ++i) {
     EXPECT_EQ(str.index(starlark_integer(i), ctx, error_callback)->str(), elements[i % 12]);
@@ -869,7 +869,7 @@ TEST(StarlarkString, SliceRangeUnicode) {
                            "Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις Περιπτώσεις ";
   starlark_string str(value);
 
-  auto len = str.len(true, error_callback);
+  auto len = str.len(error_callback);
   EXPECT_EQ(len, 720);
   for (int i = 0; i < len; i += 12) {
     EXPECT_EQ(str.slice_range(starlark_integer(i), starlark_integer(i + 12), *ctx.none_value(), ctx, error_callback)->str(), "Περιπτώσεις ") << i;
