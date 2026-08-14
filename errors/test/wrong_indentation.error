@@ -1,3 +1,3 @@
-main:3:2: error: indentation error
+main:3:2: error: unindent does not match any outer indentation level
     3 |   return a
       | ~^

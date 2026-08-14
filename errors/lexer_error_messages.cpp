@@ -15,15 +15,21 @@ namespace starlark {
 namespace error_messages {
 
 std::string error_v2_dangling_bracket(std::string_view program, const Position& start, const Position& end) {
-  return std::format("dangling bracket\n{}", get_line_and_underline(program, start, end));
+  return std::format("dangling bracket\n{}", get_line_and_underline(program, start, start, end, end, ""));
 }
 
 std::string error_v2_unexpected_character(std::string_view program, const Position& start, const Position& end) {
-  return std::format("unexpected character\n{}", get_line_and_underline(program, start, end));
+  return std::format("unexpected character\n{}", get_line_and_underline(program, start, start, end, end, ""));
 }
 
+
+
+
+
+
+
 std::string error_v2_wrong_indentation(std::string_view program, const Position& start, const Position& end) {
-  return std::format("indentation error\n{}", get_line_and_underline(program, start, end, true));
+  return std::format("unindent does not match any outer indentation level\n{}", get_line_and_underline(program, start, end, true));
 }
 
 std::string error_v2_unable_to_parse_numeric_literal(std::string_view program, const Position& start, const Position& end) {

@@ -211,7 +211,7 @@ def foo():
   pass
 )starlark",
       "DEF:2,1:2,4 IDENTIFIER(\"foo\"):2,5:2,8 LPAREN:2,8:2,9 RPAREN:2,9:2,10 COLON:2,10:2,11 NEWLINE:2,11:2,12 INDENT:3,1:3,5 PASS:3,5:3,9 NEWLINE:3,9:3,10 OUTDENT:4,3:4,3 PASS:4,3:4,7 NEWLINE:4,7:4,8 EOF:5,1:5,1",
-      { "indentation error\n    4 |   pass\n      | ~^\n:4,2" });
+      { "unindent does not match any outer indentation level\n    4 |   pass\n      | ~^\n:4,2" });
 }
 
 TEST(LexerTest, Comments) {
