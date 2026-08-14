@@ -22,19 +22,19 @@ std::string error_v2_unexpected_character(std::string_view program, const Positi
   return std::format("unexpected character\n{}", get_line_and_underline(program, start, start, end, end, ""));
 }
 
-
-
-
-
-
-
 std::string error_v2_wrong_indentation(std::string_view program, const Position& start, const Position& end) {
-  return std::format("unindent does not match any outer indentation level\n{}", get_line_and_underline(program, start, end, true));
+  return std::format("unindent does not match any outer indentation level\n{}", get_line_and_underline(program, start, start, end, end, ""));
 }
 
 std::string error_v2_unable_to_parse_numeric_literal(std::string_view program, const Position& start, const Position& end) {
-  return std::format("unable to parse numeric value\n{}", get_line_and_underline(program, start, end));
+  return std::format("unable to parse numeric value\n{}", get_line_and_underline(program, start, start, end, end, ""));
 }
+
+
+
+
+
+
 
 std::string error_v2_unterminated_string(std::string_view program, const Position& start, const Position& end) {
   return std::format("unterminated string\n{}", get_line_and_underline(program, start, end, true));

@@ -211,7 +211,7 @@ def foo():
   pass
 )starlark",
       "DEF:2,1:2,4 IDENTIFIER(\"foo\"):2,5:2,8 LPAREN:2,8:2,9 RPAREN:2,9:2,10 COLON:2,10:2,11 NEWLINE:2,11:2,12 INDENT:3,1:3,5 PASS:3,5:3,9 NEWLINE:3,9:3,10 OUTDENT:4,3:4,3 PASS:4,3:4,7 NEWLINE:4,7:4,8 EOF:5,1:5,1",
-      { "unindent does not match any outer indentation level\n    4 |   pass\n      | ~^\n:4,2" });
+      { "unindent does not match any outer indentation level\n    4 |   pass\n      | ^^\n:4,2" });
 }
 
 TEST(LexerTest, Comments) {
@@ -228,10 +228,10 @@ man = []  # Another comment.
 TEST(LexerTest, Integer) {
   check("1", "INT(1):1,1:1,2 NEWLINE:1,2:1,2 EOF:1,2:1,2");
   check("1234567890", "INT(1234567890):1,1:1,11 NEWLINE:1,11:1,11 EOF:1,11:1,11");
-  checkErrors("01234567890", "ILLEGAL(\"01234567890\"):1,1:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12", {"unable to parse numeric value\n    1 | 01234567890\n      | ^~~~~~~~~~~\n:1,1"});
+  checkErrors("01234567890", "ILLEGAL(\"01234567890\"):1,1:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12", {"unable to parse numeric value\n    1 | 01234567890\n      | ^^^^^^^^^^^\n:1,1"});
   check("0o1234567", "INT(342391):1,1:1,10 NEWLINE:1,10:1,10 EOF:1,10:1,10");
   check("0O1234567", "INT(342391):1,1:1,10 NEWLINE:1,10:1,10 EOF:1,10:1,10");
-  checkErrors("0o18", "ILLEGAL(\"0o18\"):1,1:1,5 NEWLINE:1,5:1,5 EOF:1,5:1,5", { "unable to parse numeric value\n    1 | 0o18\n      | ^~~~\n:1,1" });
+  checkErrors("0o18", "ILLEGAL(\"0o18\"):1,1:1,5 NEWLINE:1,5:1,5 EOF:1,5:1,5", { "unable to parse numeric value\n    1 | 0o18\n      | ^^^^\n:1,1" });
   check("0x1234567890", "INT(78187493520):1,1:1,13 NEWLINE:1,13:1,13 EOF:1,13:1,13");
   check("0X1234567890", "INT(78187493520):1,1:1,13 NEWLINE:1,13:1,13 EOF:1,13:1,13");
   check("0X7fffffffffffffff", "INT(9223372036854775807):1,1:1,19 NEWLINE:1,19:1,19 EOF:1,19:1,19");
@@ -239,7 +239,7 @@ TEST(LexerTest, Integer) {
   check("0Xffffffffffffffff", "BIG_INT(18446744073709551615):1,1:1,19 NEWLINE:1,19:1,19 EOF:1,19:1,19");
   check("0X1234567890ABCDEFabcdef", "BIG_INT(22007822917795467892608495):1,1:1,25 NEWLINE:1,25:1,25 EOF:1,25:1,25");
   check("12345678901234567890", "BIG_INT(12345678901234567890):1,1:1,21 NEWLINE:1,21:1,21 EOF:1,21:1,21");
-  checkErrors("0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101", "ILLEGAL(\"0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101\"):1,1:1,111 NEWLINE:1,111:1,111 EOF:1,111:1,111", {"unable to parse numeric value\n    1 | 0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101\n      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n:1,1"});
+  checkErrors("0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101", "ILLEGAL(\"0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101\"):1,1:1,111 NEWLINE:1,111:1,111 EOF:1,111:1,111", {"unable to parse numeric value\n    1 | 0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101\n      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n:1,1"});
   check("0b101010101001010100101001010100101001010100101000100101001010010100010010100101001000100101010011010010100101", "BIG_INT(216239213597319401788632766690469):1,1:1,111 NEWLINE:1,111:1,111 EOF:1,111:1,111", grammar_options{.allow_binary_integer_literals = true});
 }
 
@@ -247,8 +247,8 @@ TEST(LexerTest, Float) {
   check("1.0", "FLOAT(1.000000):1,1:1,4 NEWLINE:1,4:1,4 EOF:1,4:1,4");
   check("1234567890.0", "FLOAT(1234567890.000000):1,1:1,13 NEWLINE:1,13:1,13 EOF:1,13:1,13");
   check(".1234", "FLOAT(0.123400):1,1:1,6 NEWLINE:1,6:1,6 EOF:1,6:1,6");
-  checkErrors("2e308", "ILLEGAL(\"2e308\"):1,1:1,6 NEWLINE:1,6:1,6 EOF:1,6:1,6", {"unable to parse numeric value\n    1 | 2e308\n      | ^~~~~\n:1,1"});
-  checkErrors("-2e308", "MINUS:1,1:1,2 ILLEGAL(\"2e308\"):1,2:1,7 NEWLINE:1,7:1,7 EOF:1,7:1,7", {"unable to parse numeric value\n    1 | -2e308\n      |  ^~~~~\n:1,2"});
+  checkErrors("2e308", "ILLEGAL(\"2e308\"):1,1:1,6 NEWLINE:1,6:1,6 EOF:1,6:1,6", {"unable to parse numeric value\n    1 | 2e308\n      | ^^^^^\n:1,1"});
+  checkErrors("-2e308", "MINUS:1,1:1,2 ILLEGAL(\"2e308\"):1,2:1,7 NEWLINE:1,7:1,7 EOF:1,7:1,7", {"unable to parse numeric value\n    1 | -2e308\n      |  ^^^^^\n:1,2"});
 }
 
 TEST(LexerTest, Identifier) {
