@@ -121,10 +121,18 @@ class error_handler : public error_fn {
   error_handler(runner_state& state, logger& log, module_loader& loader) : state(state), log(log), loader(loader) {}
 
   void add_error(std::string_view error_msg) override {
-    add_error(error_msg, starlark::logging::Position::default_instance());
+    add_error(error_msg, starlark::logging::Position::default_instance(), "");
+  }
+
+  void add_error(std::string_view error_msg, std::string_view hint) override {
+    add_error(error_msg, starlark::logging::Position::default_instance(), hint);
   }
 
   void add_error(std::string_view error_msg, const starlark::logging::Position& pos) override {
+    add_error(error_msg, pos, "");
+  }
+
+  void add_error(std::string_view error_msg, const starlark::logging::Position& pos, std::string_view hint) override {
     static Program fail_program = std::invoke([] -> Program {
       Program result;
       result.mutable_block()->Add()->add_op_code()->mutable_fail();
@@ -170,7 +178,7 @@ class error_handler : public error_fn {
       const auto& op_code = program_stack->first->block(block_ptr).op_code(instruction_ptr - 1);
       // If we have the position, then use it.
       if (op_code.has_highlight_start()) {
-        auto msg = std::format("{}\n{}", error_msg, get_line_and_underline(source_code, op_code.highlight_start(), op_code.highlight_mid(), op_code.highlight_end()));
+        auto msg = std::format("{}\n{}", error_msg, get_line_and_underline(source_code, op_code.highlight_start(), op_code.highlight_mid(), op_code.highlight_end(), op_code.highlight_end(), hint));
         log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, msg, program_stack->second, op_code.highlight_mid());
       } else {
         // There are a few operations that do not have code assigned to them.

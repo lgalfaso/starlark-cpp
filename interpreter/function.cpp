@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "interpreter/runner_state.hpp"
+#include "string/levenshtein.hpp"
 #include "errors/runtime_error_messages.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
@@ -22,6 +23,7 @@ using ::starlark::error_messages::error_v2_multiple_values_for_argument;
 using ::starlark::error_messages::error_v2_recursive_call;
 using ::starlark::error_messages::error_v2_unable_to_load_module;
 using ::starlark::error_messages::error_v2_unexpected_keyword_argument;
+using ::starlark::error_messages::error_v2_unexpected_keyword_argument_with_hint;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::order_comparator;
@@ -138,9 +140,21 @@ starlark_obj* interpreter_function::call(
       if (function_signature->has_star_star_argument()) {
         kwargs.insert(kwparam.first, kwparam.second);
       } else {
-        error_callback.add_error(error_v2_unexpected_keyword_argument(
-            function_signature->fn_name(),
-            kwparam.first));
+        std::vector<std::string> all_candidates;
+        for (const auto& param : function_signature->param()) {
+          all_candidates.emplace_back(param.name());
+        }
+        auto candidate = starlark::string::levenshtein(kwparam.first, all_candidates);
+        if (candidate >= 0) {
+          error_callback.add_error(error_v2_unexpected_keyword_argument_with_hint(
+              function_signature->fn_name(),
+              kwparam.first,
+              all_candidates[candidate]), all_candidates[candidate]);
+        } else {
+          error_callback.add_error(error_v2_unexpected_keyword_argument(
+              function_signature->fn_name(),
+              kwparam.first));
+        }
         return nullptr;
       }
       continue;

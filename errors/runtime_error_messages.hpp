@@ -122,6 +122,7 @@ std::string_view error_v2_can_only_join_on_iterable();
 std::string error_v2_in_type_requires_type(std::string_view base, std::string_view required, std::string_view actual);
 std::string error_v2_multiple_values_for_argument(std::string_view fn_name, std::string_view argument_name);
 std::string error_v2_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name);
+std::string error_v2_unexpected_keyword_argument_with_hint(std::string_view fn_name, std::string_view argument_name, std::string_view hint);
 std::string error_v2_missing_positional_argument(std::string_view fn_name, std::string_view argument_name);
 std::string error_v2_missing_keyword_only_argument(std::string_view fn_name, std::string_view argument_name);
 std::string error_v2_missing_argument(std::string_view fn_name, std::string_view argument_name);

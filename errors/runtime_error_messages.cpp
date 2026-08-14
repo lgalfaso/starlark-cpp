@@ -223,6 +223,7 @@ std::string error_v2_no_keyword(std::string_view fn_name) {
 }
 
 std::string error_v2_unknown_argument(std::string_view argument_name) {
+  // TODO(lmirelmann): Replace all references of this with `error_v2_unexpected_keyword_argument` and maybe provide the hint.
   return std::format("unknown named argument '{}'", argument_name);
 }
 
@@ -395,6 +396,10 @@ std::string error_v2_multiple_values_for_argument(std::string_view fn_name, std:
 
 std::string error_v2_unexpected_keyword_argument(std::string_view fn_name, std::string_view argument_name) {
   return std::format("{}() got an unexpected keyword argument '{}'", fn_name, argument_name);
+}
+
+std::string error_v2_unexpected_keyword_argument_with_hint(std::string_view fn_name, std::string_view argument_name, std::string_view hint) {
+  return std::format("{}() got an unexpected keyword argument '{}'. Did you mean: '{}'?", fn_name, argument_name, hint);
 }
 
 std::string error_v2_missing_positional_argument(std::string_view fn_name, std::string_view argument_name) {

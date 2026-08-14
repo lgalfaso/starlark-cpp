@@ -1,0 +1,4 @@
+main:3:4: error: foo() got an unexpected keyword argument 'some_long_nane'. Did you mean: 'some_long_name'?
+    3 | foo(some_long_nane = 1)
+      | ~~~^^^^^^^^^^^^^^^^^^^^
+      |    some_long_name

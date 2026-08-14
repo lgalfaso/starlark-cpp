@@ -17,7 +17,15 @@ void error_handler::add_error(std::string_view error_msg) {
   messages.push_back(std::string(error_msg));
 }
 
+void error_handler::add_error(std::string_view error_msg, std::string_view hint) {
+  messages.push_back(std::string(error_msg));
+}
+
 void error_handler::add_error(std::string_view error_msg, const starlark::logging::Position& pos) {
+  messages.push_back(std::string(error_msg));
+}
+
+void error_handler::add_error(std::string_view error_msg, const starlark::logging::Position& pos, std::string_view hint) {
   messages.push_back(std::string(error_msg));
 }
 
