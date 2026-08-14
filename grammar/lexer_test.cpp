@@ -307,7 +307,7 @@ foo = "şpěćïåł"
   check("foo = \"\364\215\264\"",
         "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 ILLEGAL(\"\\\"\\364\\215\\264\\\"\"):1,7:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12");
   checkErrors("foo = \"\\xa\"",
-        "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 ILLEGAL(\"\\\"\\\\xa\\\"\"):1,7:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12", {"invalid hexadecimal escape sequence. Hexadecimal escape sequences must be exactly 2 hexadecimal digits and in the range 0-127\n    1 | foo = \"\\xa\"\n      |        ^~~\n:1,8"});
+        "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 ILLEGAL(\"\\\"\\\\xa\\\"\"):1,7:1,12 NEWLINE:1,12:1,12 EOF:1,12:1,12", {"invalid hexadecimal escape sequence. Hexadecimal escape sequences must be exactly 2 hexadecimal digits and in the range 0-127\n    1 | foo = \"\\xa\"\n      |        ^^^\n:1,8"});
 }
 
 TEST(LexerTest, StringTripleQuote) {
@@ -359,7 +359,7 @@ foo = "bar\
         "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 STRING(\"bar\"):1,7:2,2 NEWLINE:2,2:2,2 EOF:2,2:2,2");
   checkErrors("foo = \"bar\\\r\"",
       "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 ILLEGAL(\"\\\"bar\\\\\\r\\\"\"):1,7:1,14 NEWLINE:1,14:1,14 EOF:1,14:1,14",
-      { "invalid line continuation\n    1 | foo = \"bar\\\n      |           ^~\n:1,13" });
+      { "invalid line continuation\n    1 | foo = \"bar\\\n      |           ^^\n:1,13" });
   check(R"starlark(
 foo = "bar\0"
 )starlark",
@@ -376,7 +376,7 @@ foo = "bar\177"
 foo = "bar\377"
 )starlark",
       "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\377\\\"\"):2,7:2,16 NEWLINE:2,16:2,17 EOF:3,1:3,1",
-      { "invalid octal escape sequence. Octal escape sequences must be in the range 0-127\n    2 | foo = \"bar\\377\"\n      |           ^~~~\n:2,11" });
+      { "invalid octal escape sequence. Octal escape sequences must be in the range 0-127\n    2 | foo = \"bar\\377\"\n      |           ^^^^\n:2,11" });
   check(R"starlark(
 foo = "bar\1777"
 )starlark",
@@ -389,7 +389,7 @@ foo = "bar\x7f"
 foo = "bar\x80"
 )starlark",
       "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\x80\\\"\"):2,7:2,16 NEWLINE:2,16:2,17 EOF:3,1:3,1",
-      { "invalid hexadecimal escape sequence. Hexadecimal escape sequences must be exactly 2 hexadecimal digits and in the range 0-127\n    2 | foo = \"bar\\x80\"\n      |           ^~~~\n:2,11" });
+      { "invalid hexadecimal escape sequence. Hexadecimal escape sequences must be exactly 2 hexadecimal digits and in the range 0-127\n    2 | foo = \"bar\\x80\"\n      |           ^^^^\n:2,11" });
   check(R"starlark(
 foo = "bar\u1234"
 )starlark",
@@ -406,23 +406,23 @@ foo = "bar
   checkErrors(R"starlark(
 foo = "bar\U00012)starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\U00012\"):2,7:2,18 NEWLINE:2,18:2,18 EOF:2,18:2,18",
-       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\U00012\n      |           ^~~~~~~\n:2,11", "unterminated string\n    2 | foo = \"bar\\U00012\n      |       ~~~~~~~~~~^\n:2,18" });
+       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\U00012\n      |           ^^^^^^^\n:2,11", "unterminated string\n    2 | foo = \"bar\\U00012\n      |       ~~~~~~~~~~^\n:2,18" });
   checkErrors(R"starlark(
 foo = "bar\u12")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\u12\\\"\"):2,7:2,16 NEWLINE:2,16:2,16 EOF:2,16:2,16",
-       { "invalid Unicode escape sequence. The escape sequence must be exactly 4 digits and cannot contain surrogates\n    2 | foo = \"bar\\u12\"\n      |           ^~~~\n:2,11" });
+       { "invalid Unicode escape sequence. The escape sequence must be exactly 4 digits and cannot contain surrogates\n    2 | foo = \"bar\\u12\"\n      |           ^^^^\n:2,11" });
   checkErrors(R"starlark(
 foo = "bar\U00012")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\U00012\\\"\"):2,7:2,19 NEWLINE:2,19:2,19 EOF:2,19:2,19",
-       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\U00012\"\n      |           ^~~~~~~\n:2,11" });
+       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\U00012\"\n      |           ^^^^^^^\n:2,11" });
   checkErrors(R"starlark(
 foo = "bar\U00012 ")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\U00012 \\\"\"):2,7:2,20 NEWLINE:2,20:2,20 EOF:2,20:2,20",
-       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\U00012 \"\n      |           ^~~~~~~\n:2,11" });
+       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\U00012 \"\n      |           ^^^^^^^\n:2,11" });
   checkErrors(R"starlark(
 foo = "bar\UFFFFFFFF")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\UFFFFFFFF\\\"\"):2,7:2,22 NEWLINE:2,22:2,22 EOF:2,22:2,22",
-       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\UFFFFFFFF\"\n      |           ^~~~~~~~~~\n:2,11" });
+       { "invalid Unicode escape sequence. The escape sequence must be exactly 8 digits, cannot contain surrogates and must be in the range 0-0x10FFFF\n    2 | foo = \"bar\\UFFFFFFFF\"\n      |           ^^^^^^^^^^\n:2,11" });
   checkErrors(R"starlark(
 print ("\N{LATIN SMALL LETTER CLOSED OMEGA}")
 )starlark",
@@ -444,7 +444,7 @@ foo = "\200")starlark",
   checkErrors(R"starlark(
 foo = "bar\ud83d")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\ud83d\\\"\"):2,7:2,18 NEWLINE:2,18:2,18 EOF:2,18:2,18",
-       { "invalid Unicode escape sequence. The escape sequence must be exactly 4 digits and cannot contain surrogates\n    2 | foo = \"bar\\ud83d\"\n      |           ^~~~~~\n:2,11" });
+       { "invalid Unicode escape sequence. The escape sequence must be exactly 4 digits and cannot contain surrogates\n    2 | foo = \"bar\\ud83d\"\n      |           ^^^^^^\n:2,11" });
   check(R"starlark(
 foo = '\119')starlark",
       "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\t9\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13");
