@@ -5,41 +5,41 @@ block {
   op_code { make_dictionary { reserve_size: 0 } }
   op_code { store { frame: 1 pos_in_frame: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 2 column: 1 pos: 7 } highlight_mid: { row: 2 column: 1 pos: 7 } highlight_end: { row: 2 column: 2 pos: 8 } }
-  op_code { assign_dot_member { member: "a" } highlight_start: { row: 2 column: 1 pos: 7 } highlight_mid: { row: 2 column: 2 pos: 8 } highlight_end: { row: 2 column: 4 pos: 10 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 3 column: 1 pos: 15 } highlight_mid: { row: 3 column: 1 pos: 15 } highlight_end: { row: 3 column: 2 pos: 16 } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 2 column: 1 pos: 7 } highlight_start: { row: 2 column: 1 pos: 7 } highlight_end: { row: 2 column: 2 pos: 8 } end: { row: 2 column: 2 pos: 8 } } }
+  op_code { assign_dot_member { member: "a" } sh { start: { row: 2 column: 1 pos: 7 } highlight_start: { row: 2 column: 2 pos: 8 } highlight_end: { row: 2 column: 4 pos: 10 } end: { row: 2 column: 4 pos: 10 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 3 column: 1 pos: 15 } highlight_start: { row: 3 column: 1 pos: 15 } highlight_end: { row: 3 column: 2 pos: 16 } end: { row: 3 column: 2 pos: 16 } } }
   op_code { const_int { value: 2 } }
-  op_code { assign_dot_member_plus_equals { member: "b" } highlight_start: { row: 3 column: 1 pos: 15 } highlight_mid: { row: 3 column: 5 pos: 19 } highlight_end: { row: 3 column: 7 pos: 21 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 4 column: 1 pos: 24 } highlight_mid: { row: 4 column: 1 pos: 24 } highlight_end: { row: 4 column: 2 pos: 25 } }
+  op_code { assign_dot_member_plus_equals { member: "b" } sh { start: { row: 3 column: 1 pos: 15 } highlight_start: { row: 3 column: 5 pos: 19 } highlight_end: { row: 3 column: 7 pos: 21 } end: { row: 3 column: 7 pos: 21 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 4 column: 1 pos: 24 } highlight_start: { row: 4 column: 1 pos: 24 } highlight_end: { row: 4 column: 2 pos: 25 } end: { row: 4 column: 2 pos: 25 } } }
   op_code { const_int { value: 3 } }
-  op_code { assign_dot_member_minus_equals { member: "c" } highlight_start: { row: 4 column: 1 pos: 24 } highlight_mid: { row: 4 column: 5 pos: 28 } highlight_end: { row: 4 column: 7 pos: 30 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 5 column: 1 pos: 33 } highlight_mid: { row: 5 column: 1 pos: 33 } highlight_end: { row: 5 column: 2 pos: 34 } }
+  op_code { assign_dot_member_minus_equals { member: "c" } sh { start: { row: 4 column: 1 pos: 24 } highlight_start: { row: 4 column: 5 pos: 28 } highlight_end: { row: 4 column: 7 pos: 30 } end: { row: 4 column: 7 pos: 30 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 5 column: 1 pos: 33 } highlight_start: { row: 5 column: 1 pos: 33 } highlight_end: { row: 5 column: 2 pos: 34 } end: { row: 5 column: 2 pos: 34 } } }
   op_code { const_int { value: 4 } }
-  op_code { assign_dot_member_slash_equals { member: "d" } highlight_start: { row: 5 column: 1 pos: 33 } highlight_mid: { row: 5 column: 5 pos: 37 } highlight_end: { row: 5 column: 7 pos: 39 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 6 column: 1 pos: 42 } highlight_mid: { row: 6 column: 1 pos: 42 } highlight_end: { row: 6 column: 2 pos: 43 } }
+  op_code { assign_dot_member_slash_equals { member: "d" } sh { start: { row: 5 column: 1 pos: 33 } highlight_start: { row: 5 column: 5 pos: 37 } highlight_end: { row: 5 column: 7 pos: 39 } end: { row: 5 column: 7 pos: 39 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 6 column: 1 pos: 42 } highlight_start: { row: 6 column: 1 pos: 42 } highlight_end: { row: 6 column: 2 pos: 43 } end: { row: 6 column: 2 pos: 43 } } }
   op_code { const_int { value: 5 } }
-  op_code { assign_dot_member_slash_slash_equals { member: "e" } highlight_start: { row: 6 column: 1 pos: 42 } highlight_mid: { row: 6 column: 5 pos: 46 } highlight_end: { row: 6 column: 8 pos: 49 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 7 column: 1 pos: 52 } highlight_mid: { row: 7 column: 1 pos: 52 } highlight_end: { row: 7 column: 2 pos: 53 } }
+  op_code { assign_dot_member_slash_slash_equals { member: "e" } sh { start: { row: 6 column: 1 pos: 42 } highlight_start: { row: 6 column: 5 pos: 46 } highlight_end: { row: 6 column: 8 pos: 49 } end: { row: 6 column: 8 pos: 49 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 7 column: 1 pos: 52 } highlight_start: { row: 7 column: 1 pos: 52 } highlight_end: { row: 7 column: 2 pos: 53 } end: { row: 7 column: 2 pos: 53 } } }
   op_code { const_int { value: 6 } }
-  op_code { assign_dot_member_percent_equals { member: "f" } highlight_start: { row: 7 column: 1 pos: 52 } highlight_mid: { row: 7 column: 5 pos: 56 } highlight_end: { row: 7 column: 7 pos: 58 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 8 column: 1 pos: 61 } highlight_mid: { row: 8 column: 1 pos: 61 } highlight_end: { row: 8 column: 2 pos: 62 } }
+  op_code { assign_dot_member_percent_equals { member: "f" } sh { start: { row: 7 column: 1 pos: 52 } highlight_start: { row: 7 column: 5 pos: 56 } highlight_end: { row: 7 column: 7 pos: 58 } end: { row: 7 column: 7 pos: 58 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 8 column: 1 pos: 61 } highlight_start: { row: 8 column: 1 pos: 61 } highlight_end: { row: 8 column: 2 pos: 62 } end: { row: 8 column: 2 pos: 62 } } }
   op_code { const_int { value: 7 } }
-  op_code { assign_dot_member_ampersand_equals { member: "g" } highlight_start: { row: 8 column: 1 pos: 61 } highlight_mid: { row: 8 column: 5 pos: 65 } highlight_end: { row: 8 column: 7 pos: 67 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 9 column: 1 pos: 70 } highlight_mid: { row: 9 column: 1 pos: 70 } highlight_end: { row: 9 column: 2 pos: 71 } }
+  op_code { assign_dot_member_ampersand_equals { member: "g" } sh { start: { row: 8 column: 1 pos: 61 } highlight_start: { row: 8 column: 5 pos: 65 } highlight_end: { row: 8 column: 7 pos: 67 } end: { row: 8 column: 7 pos: 67 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 9 column: 1 pos: 70 } highlight_start: { row: 9 column: 1 pos: 70 } highlight_end: { row: 9 column: 2 pos: 71 } end: { row: 9 column: 2 pos: 71 } } }
   op_code { const_int { value: 8 } }
-  op_code { assign_dot_member_pipe_equals { member: "h" } highlight_start: { row: 9 column: 1 pos: 70 } highlight_mid: { row: 9 column: 5 pos: 74 } highlight_end: { row: 9 column: 7 pos: 76 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 10 column: 1 pos: 79 } highlight_mid: { row: 10 column: 1 pos: 79 } highlight_end: { row: 10 column: 2 pos: 80 } }
+  op_code { assign_dot_member_pipe_equals { member: "h" } sh { start: { row: 9 column: 1 pos: 70 } highlight_start: { row: 9 column: 5 pos: 74 } highlight_end: { row: 9 column: 7 pos: 76 } end: { row: 9 column: 7 pos: 76 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 10 column: 1 pos: 79 } highlight_start: { row: 10 column: 1 pos: 79 } highlight_end: { row: 10 column: 2 pos: 80 } end: { row: 10 column: 2 pos: 80 } } }
   op_code { const_int { value: 9 } }
-  op_code { assign_dot_member_hat_equals { member: "i" } highlight_start: { row: 10 column: 1 pos: 79 } highlight_mid: { row: 10 column: 5 pos: 83 } highlight_end: { row: 10 column: 7 pos: 85 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 11 column: 1 pos: 88 } highlight_mid: { row: 11 column: 1 pos: 88 } highlight_end: { row: 11 column: 2 pos: 89 } }
+  op_code { assign_dot_member_hat_equals { member: "i" } sh { start: { row: 10 column: 1 pos: 79 } highlight_start: { row: 10 column: 5 pos: 83 } highlight_end: { row: 10 column: 7 pos: 85 } end: { row: 10 column: 7 pos: 85 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 11 column: 1 pos: 88 } highlight_start: { row: 11 column: 1 pos: 88 } highlight_end: { row: 11 column: 2 pos: 89 } end: { row: 11 column: 2 pos: 89 } } }
   op_code { const_int { value: 10 } }
-  op_code { assign_dot_member_greater_greater_equals { member: "j" } highlight_start: { row: 11 column: 1 pos: 88 } highlight_mid: { row: 11 column: 5 pos: 92 } highlight_end: { row: 11 column: 8 pos: 95 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 12 column: 1 pos: 99 } highlight_mid: { row: 12 column: 1 pos: 99 } highlight_end: { row: 12 column: 2 pos: 100 } }
+  op_code { assign_dot_member_greater_greater_equals { member: "j" } sh { start: { row: 11 column: 1 pos: 88 } highlight_start: { row: 11 column: 5 pos: 92 } highlight_end: { row: 11 column: 8 pos: 95 } end: { row: 11 column: 8 pos: 95 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 12 column: 1 pos: 99 } highlight_start: { row: 12 column: 1 pos: 99 } highlight_end: { row: 12 column: 2 pos: 100 } end: { row: 12 column: 2 pos: 100 } } }
   op_code { const_int { value: 11 } }
-  op_code { assign_dot_member_less_less_equals { member: "k" } highlight_start: { row: 12 column: 1 pos: 99 } highlight_mid: { row: 12 column: 5 pos: 103 } highlight_end: { row: 12 column: 8 pos: 106 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } highlight_start: { row: 13 column: 1 pos: 110 } highlight_mid: { row: 13 column: 1 pos: 110 } highlight_end: { row: 13 column: 2 pos: 111 } }
+  op_code { assign_dot_member_less_less_equals { member: "k" } sh { start: { row: 12 column: 1 pos: 99 } highlight_start: { row: 12 column: 5 pos: 103 } highlight_end: { row: 12 column: 8 pos: 106 } end: { row: 12 column: 8 pos: 106 } } }
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 13 column: 1 pos: 110 } highlight_start: { row: 13 column: 1 pos: 110 } highlight_end: { row: 13 column: 2 pos: 111 } end: { row: 13 column: 2 pos: 111 } } }
   op_code { const_int { value: 12 } }
-  op_code { assign_dot_member_star_equals { member: "l" } highlight_start: { row: 13 column: 1 pos: 110 } highlight_mid: { row: 13 column: 5 pos: 114 } highlight_end: { row: 13 column: 7 pos: 116 } }
+  op_code { assign_dot_member_star_equals { member: "l" } sh { start: { row: 13 column: 1 pos: 110 } highlight_start: { row: 13 column: 5 pos: 114 } highlight_end: { row: 13 column: 7 pos: 116 } end: { row: 13 column: 7 pos: 116 } } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

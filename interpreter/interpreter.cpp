@@ -177,9 +177,9 @@ class error_handler : public error_fn {
     } else {
       const auto& op_code = program_stack->first->block(block_ptr).op_code(instruction_ptr - 1);
       // If we have the position, then use it.
-      if (op_code.has_highlight_start()) {
-        auto msg = std::format("{}\n{}", error_msg, get_line_and_underline(source_code, op_code.highlight_start(), op_code.highlight_mid(), op_code.highlight_end(), op_code.highlight_end(), hint));
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, msg, program_stack->second, op_code.highlight_mid());
+      if (op_code.has_sh()) {
+        auto msg = std::format("{}\n{}", error_msg, get_line_and_underline(source_code, op_code.sh().start(), op_code.sh().highlight_start(), op_code.sh().highlight_end(), op_code.sh().end(), hint));
+        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, msg, program_stack->second, op_code.sh().highlight_start());
       } else {
         // There are a few operations that do not have code assigned to them.
         log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, std::format("{}\n", error_msg), program_stack->second, pos);
@@ -231,7 +231,7 @@ frame* run_program(
             if (!current_module.ok()) {
               error_callback.add_error("internal error (2)");
             } else {
-              error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length, (*current_module)->source_code(), op.highlight_start(), op.highlight_end()), op.highlight_start());
+              error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length, (*current_module)->source_code(), op.sh().highlight_start(), op.sh().highlight_end()), op.sh().highlight_start());
             }
             return nullptr;
           }
@@ -242,7 +242,7 @@ frame* run_program(
             if (!current_module.ok()) {
               error_callback.add_error("internal error (3)");
             } else {
-              error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length, (*current_module)->source_code(), op.highlight_start(), op.highlight_end()), op.highlight_start());
+              error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length, (*current_module)->source_code(), op.sh().highlight_start(), op.sh().highlight_end()), op.sh().highlight_start());
             }
             return nullptr;
           }
@@ -253,7 +253,7 @@ frame* run_program(
             if (!current_module.ok()) {
               error_callback.add_error("internal error (4)");
             } else {
-              error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size, (*current_module)->source_code(), op.highlight_start(), op.highlight_end()), op.highlight_start());
+              error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size, (*current_module)->source_code(), op.sh().highlight_start(), op.sh().highlight_end()), op.sh().highlight_start());
             }
             return nullptr;
           }

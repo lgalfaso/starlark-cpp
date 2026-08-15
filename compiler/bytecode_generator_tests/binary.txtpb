@@ -2,109 +2,109 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { const_int { value: 0 } }                                                                                                                                                         #  3
-  op_code { jump_if_true_or_pop { address_delta: 2 } highlight_start: { row: 1 column: 3 pos: 2 } highlight_mid: { row: 1 column: 3 pos: 2 } highlight_end: { row: 1 column: 5 pos: 4 } }    #  4
-  op_code { const_int { value: 1 } }                                                                                                                                                         #  5
-  op_code { pop { } }                                                                                                                                                                        #  6
+  op_code { const_int { value: 0 } }                                                                                                                                                                                         #  3
+  op_code { jump_if_true_or_pop { address_delta: 2 } sh { start: { row: 1 column: 3 pos: 2 } highlight_start: { row: 1 column: 3 pos: 2 } highlight_end: { row: 1 column: 5 pos: 4 } end: { row: 1 column: 5 pos: 4 } } }    #  4
+  op_code { const_int { value: 1 } }                                                                                                                                                                                         #  5
+  op_code { pop { } }                                                                                                                                                                                                        #  6
 
-  op_code { const_int { value: 0 } }                                                                                                                                                         #  7
-  op_code { jump_if_false_or_pop { address_delta: 2 } highlight_start: { row: 2 column: 3 pos: 9 } highlight_mid: { row: 2 column: 3 pos: 9 } highlight_end: { row: 2 column: 6 pos: 12 } }  #  8
-  op_code { const_int { value: 1 } }                                                                                                                                                         #  9
-  op_code { pop { } }                                                                                                                                                                        # 10
+  op_code { const_int { value: 0 } }                                                                                                                                                                                         #  7
+  op_code { jump_if_false_or_pop { address_delta: 2 } sh { start: { row: 2 column: 3 pos: 9 } highlight_start: { row: 2 column: 3 pos: 9 } highlight_end: { row: 2 column: 6 pos: 12 } end: { row: 2 column: 6 pos: 12 } } } #  8
+  op_code { const_int { value: 1 } }                                                                                                                                                                                         #  9
+  op_code { pop { } }                                                                                                                                                                                                        # 10
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_equals_equals { } highlight_start: { row: 3 column: 3 pos: 17 } highlight_mid: { row: 3 column: 3 pos: 17 } highlight_end: { row: 3 column: 5 pos: 19 } }
+  op_code { binary_equals_equals { } sh { start: { row: 3 column: 3 pos: 17 } highlight_start: { row: 3 column: 3 pos: 17 } highlight_end: { row: 3 column: 5 pos: 19 } end: { row: 3 column: 5 pos: 19 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_bang_equals { } highlight_start: { row: 4 column: 3 pos: 24 } highlight_mid: { row: 4 column: 3 pos: 24 } highlight_end: { row: 4 column: 5 pos: 26 } }
+  op_code { binary_bang_equals { } sh { start: { row: 4 column: 3 pos: 24 } highlight_start: { row: 4 column: 3 pos: 24 } highlight_end: { row: 4 column: 5 pos: 26 } end: { row: 4 column: 5 pos: 26 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_less_than { } highlight_start: { row: 5 column: 3 pos: 31 } highlight_mid: { row: 5 column: 3 pos: 31 } highlight_end: { row: 5 column: 4 pos: 32 } }
+  op_code { binary_less_than { } sh { start: { row: 5 column: 3 pos: 31 } highlight_start: { row: 5 column: 3 pos: 31 } highlight_end: { row: 5 column: 4 pos: 32 } end: { row: 5 column: 4 pos: 32 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_greater_than { } highlight_start: { row: 6 column: 3 pos: 37 } highlight_mid: { row: 6 column: 3 pos: 37 } highlight_end: { row: 6 column: 4 pos: 38 } }
+  op_code { binary_greater_than { } sh { start: { row: 6 column: 3 pos: 37 } highlight_start: { row: 6 column: 3 pos: 37 } highlight_end: { row: 6 column: 4 pos: 38 } end: { row: 6 column: 4 pos: 38 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_less_than_equals { } highlight_start: { row: 7 column: 3 pos: 43 } highlight_mid: { row: 7 column: 3 pos: 43 } highlight_end: { row: 7 column: 5 pos: 45 } }
+  op_code { binary_less_than_equals { } sh { start: { row: 7 column: 3 pos: 43 } highlight_start: { row: 7 column: 3 pos: 43 } highlight_end: { row: 7 column: 5 pos: 45 } end: { row: 7 column: 5 pos: 45 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_greater_than_equals { } highlight_start: { row: 8 column: 3 pos: 50 } highlight_mid: { row: 8 column: 3 pos: 50 } highlight_end: { row: 8 column: 5 pos: 52 } }
+  op_code { binary_greater_than_equals { } sh { start: { row: 8 column: 3 pos: 50 } highlight_start: { row: 8 column: 3 pos: 50 } highlight_end: { row: 8 column: 5 pos: 52 } end: { row: 8 column: 5 pos: 52 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_in { } highlight_start: { row: 9 column: 3 pos: 57 } highlight_mid: { row: 9 column: 3 pos: 57 } highlight_end: { row: 9 column: 5 pos: 59 } }
+  op_code { binary_in { } sh { start: { row: 9 column: 3 pos: 57 } highlight_start: { row: 9 column: 3 pos: 57 } highlight_end: { row: 9 column: 5 pos: 59 } end: { row: 9 column: 5 pos: 59 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_not_in { } highlight_start: { row: 10 column: 3 pos: 64 } highlight_mid: { row: 10 column: 3 pos: 64 } highlight_end: { row: 10 column: 9 pos: 70 } }
+  op_code { binary_not_in { } sh { start: { row: 10 column: 3 pos: 64 } highlight_start: { row: 10 column: 3 pos: 64 } highlight_end: { row: 10 column: 9 pos: 70 } end: { row: 10 column: 9 pos: 70 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_pipe { } highlight_start: { row: 11 column: 3 pos: 75 } highlight_mid: { row: 11 column: 3 pos: 75 } highlight_end: { row: 11 column: 4 pos: 76 } }
+  op_code { binary_pipe { } sh { start: { row: 11 column: 3 pos: 75 } highlight_start: { row: 11 column: 3 pos: 75 } highlight_end: { row: 11 column: 4 pos: 76 } end: { row: 11 column: 4 pos: 76 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_hat { } highlight_start: { row: 12 column: 3 pos: 81 } highlight_mid: { row: 12 column: 3 pos: 81 } highlight_end: { row: 12 column: 4 pos: 82 } }
+  op_code { binary_hat { } sh { start: { row: 12 column: 3 pos: 81 } highlight_start: { row: 12 column: 3 pos: 81 } highlight_end: { row: 12 column: 4 pos: 82 } end: { row: 12 column: 4 pos: 82 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_ampersand { } highlight_start: { row: 13 column: 3 pos: 87 } highlight_mid: { row: 13 column: 3 pos: 87 } highlight_end: { row: 13 column: 4 pos: 88 } }
+  op_code { binary_ampersand { } sh { start: { row: 13 column: 3 pos: 87 } highlight_start: { row: 13 column: 3 pos: 87 } highlight_end: { row: 13 column: 4 pos: 88 } end: { row: 13 column: 4 pos: 88 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_less_than_less_than { } highlight_start: { row: 14 column: 3 pos: 93 } highlight_mid: { row: 14 column: 3 pos: 93 } highlight_end: { row: 14 column: 5 pos: 95 } }
+  op_code { binary_less_than_less_than { } sh { start: { row: 14 column: 3 pos: 93 } highlight_start: { row: 14 column: 3 pos: 93 } highlight_end: { row: 14 column: 5 pos: 95 } end: { row: 14 column: 5 pos: 95 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_greater_than_greater_than { } highlight_start: { row: 15 column: 3 pos: 100 } highlight_mid: { row: 15 column: 3 pos: 100 } highlight_end: { row: 15 column: 5 pos: 102 } }
+  op_code { binary_greater_than_greater_than { } sh { start: { row: 15 column: 3 pos: 100 } highlight_start: { row: 15 column: 3 pos: 100 } highlight_end: { row: 15 column: 5 pos: 102 } end: { row: 15 column: 5 pos: 102 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_minus { } highlight_start: { row: 16 column: 3 pos: 107 } highlight_mid: { row: 16 column: 3 pos: 107 } highlight_end: { row: 16 column: 4 pos: 108 } }
+  op_code { binary_minus { } sh { start: { row: 16 column: 3 pos: 107 } highlight_start: { row: 16 column: 3 pos: 107 } highlight_end: { row: 16 column: 4 pos: 108 } end: { row: 16 column: 4 pos: 108 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_plus { } highlight_start: { row: 17 column: 3 pos: 113 } highlight_mid: { row: 17 column: 3 pos: 113 } highlight_end: { row: 17 column: 4 pos: 114 } }
+  op_code { binary_plus { } sh { start: { row: 17 column: 3 pos: 113 } highlight_start: { row: 17 column: 3 pos: 113 } highlight_end: { row: 17 column: 4 pos: 114 } end: { row: 17 column: 4 pos: 114 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_star { } highlight_start: { row: 18 column: 3 pos: 119 } highlight_mid: { row: 18 column: 3 pos: 119 } highlight_end: { row: 18 column: 4 pos: 120 } }
+  op_code { binary_star { } sh { start: { row: 18 column: 3 pos: 119 } highlight_start: { row: 18 column: 3 pos: 119 } highlight_end: { row: 18 column: 4 pos: 120 } end: { row: 18 column: 4 pos: 120 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_percent { } highlight_start: { row: 19 column: 3 pos: 125 } highlight_mid: { row: 19 column: 3 pos: 125 } highlight_end: { row: 19 column: 4 pos: 126 } }
+  op_code { binary_percent { } sh { start: { row: 19 column: 3 pos: 125 } highlight_start: { row: 19 column: 3 pos: 125 } highlight_end: { row: 19 column: 4 pos: 126 } end: { row: 19 column: 4 pos: 126 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_slash { } highlight_start: { row: 20 column: 3 pos: 131 } highlight_mid: { row: 20 column: 3 pos: 131 } highlight_end: { row: 20 column: 4 pos: 132 } }
+  op_code { binary_slash { } sh { start: { row: 20 column: 3 pos: 131 } highlight_start: { row: 20 column: 3 pos: 131 } highlight_end: { row: 20 column: 4 pos: 132 } end: { row: 20 column: 4 pos: 132 } } }
   op_code { pop { } }
 
   op_code { const_int { value: 0 } }
   op_code { const_int { value: 1 } }
-  op_code { binary_slash_slash { } highlight_start: { row: 21 column: 3 pos: 137 } highlight_mid: { row: 21 column: 3 pos: 137 } highlight_end: { row: 21 column: 5 pos: 139 } }
+  op_code { binary_slash_slash { } sh { start: { row: 21 column: 3 pos: 137 } highlight_start: { row: 21 column: 3 pos: 137 } highlight_end: { row: 21 column: 5 pos: 139 } end: { row: 21 column: 5 pos: 139 } } }
   op_code { pop { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

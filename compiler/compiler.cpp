@@ -215,17 +215,19 @@ void bytecode_generator::enter_float_value(const FloatValue* float_value) {
 void bytecode_generator::enter_string_value(const StringValue* string_value) {
   auto* const_string_op = mutable_block()->add_op_code();
   const_string_op->mutable_const_string()->set_value(string_value->value());
-  *const_string_op->mutable_highlight_start() = string_value->pif().start();
-  *const_string_op->mutable_highlight_mid() = string_value->pif().start();
-  *const_string_op->mutable_highlight_end() = string_value->pif().end();
+  *const_string_op->mutable_sh()->mutable_start() = string_value->pif().start();
+  *const_string_op->mutable_sh()->mutable_highlight_start() = string_value->pif().start();
+  *const_string_op->mutable_sh()->mutable_highlight_end() = string_value->pif().end();
+  *const_string_op->mutable_sh()->mutable_end() = string_value->pif().end();
 }
 
 void bytecode_generator::enter_bytes_value(const StringValue* bytes_value) {
   auto* const_bytes_op = mutable_block()->add_op_code();
   const_bytes_op->mutable_const_bytes()->set_value(bytes_value->value());
-  *const_bytes_op->mutable_highlight_start() = bytes_value->pif().start();
-  *const_bytes_op->mutable_highlight_mid() = bytes_value->pif().start();
-  *const_bytes_op->mutable_highlight_end() = bytes_value->pif().end();
+  *const_bytes_op->mutable_sh()->mutable_start() = bytes_value->pif().start();
+  *const_bytes_op->mutable_sh()->mutable_highlight_start() = bytes_value->pif().start();
+  *const_bytes_op->mutable_sh()->mutable_highlight_end() = bytes_value->pif().end();
+  *const_bytes_op->mutable_sh()->mutable_end() = bytes_value->pif().end();
 }
 
 void bytecode_generator::enter_identifier(const Identifier* identifier) {
@@ -233,9 +235,10 @@ void bytecode_generator::enter_identifier(const Identifier* identifier) {
   auto* id_op = op_code->mutable_load();
   id_op->set_frame(identifier->frame());
   id_op->set_pos_in_frame(identifier->pos_in_frame());
-  *op_code->mutable_highlight_start() = identifier->pif().start();
-  *op_code->mutable_highlight_mid() = identifier->pif().start();
-  *op_code->mutable_highlight_end() = identifier->pif().end();
+  *op_code->mutable_sh()->mutable_start() = identifier->pif().start();
+  *op_code->mutable_sh()->mutable_highlight_start() = identifier->pif().start();
+  *op_code->mutable_sh()->mutable_highlight_end() = identifier->pif().end();
+  *op_code->mutable_sh()->mutable_end() = identifier->pif().end();
 }
 
 void bytecode_generator::exit_identifier_for_assignment(const Identifier* identifier, AssignStmt::AssignOperator op) {
@@ -274,9 +277,10 @@ void bytecode_generator::exit_unary_expression(const UnaryExpr* unary_expression
       assert(false);
   }
   if (op_code != nullptr) {
-    *op_code->mutable_highlight_start() = unary_expression->op_pif().start();
-    *op_code->mutable_highlight_mid() = unary_expression->op_pif().end();
-    *op_code->mutable_highlight_end() = unary_expression->pif().end();
+    *op_code->mutable_sh()->mutable_start() = unary_expression->op_pif().start();
+    *op_code->mutable_sh()->mutable_highlight_start() = unary_expression->op_pif().end();
+    *op_code->mutable_sh()->mutable_highlight_end() = unary_expression->pif().end();
+    *op_code->mutable_sh()->mutable_end() = unary_expression->pif().end();
   }
 }
 
@@ -429,9 +433,10 @@ void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_express
   }
   // TODO(lmirelmann): It should be possible to improve the highlight if there were 4 points instead of 3.
   if (op_code != nullptr) {
-    *op_code->mutable_highlight_start() = binary_expression->op_pif().start();
-    *op_code->mutable_highlight_mid() = binary_expression->op_pif().start();
-    *op_code->mutable_highlight_end() = binary_expression->op_pif().end();
+    *op_code->mutable_sh()->mutable_start() = binary_expression->op_pif().start();
+    *op_code->mutable_sh()->mutable_highlight_start() = binary_expression->op_pif().start();
+    *op_code->mutable_sh()->mutable_highlight_end() = binary_expression->op_pif().end();
+    *op_code->mutable_sh()->mutable_end() = binary_expression->op_pif().end();
   }
   binary_op_mid_pos.erase(binary_expression);
 }
@@ -439,9 +444,10 @@ void bytecode_generator::exit_binary_expression(const BinaryExpr* binary_express
 void bytecode_generator::exit_dot_expression(const DotExpr* dot_expression) {
   auto op_code = mutable_block()->add_op_code();
   op_code->mutable_dot_member()->set_member(dot_expression->identifier().nfkc_name());
-  *op_code->mutable_highlight_start() = dot_expression->pif().start();
-  *op_code->mutable_highlight_mid() = dot_expression->primary_expression().pif().end();
-  *op_code->mutable_highlight_end() = dot_expression->pif().end();
+  *op_code->mutable_sh()->mutable_start() = dot_expression->pif().start();
+  *op_code->mutable_sh()->mutable_highlight_start() = dot_expression->primary_expression().pif().end();
+  *op_code->mutable_sh()->mutable_highlight_end() = dot_expression->pif().end();
+  *op_code->mutable_sh()->mutable_end() = dot_expression->pif().end();
 }
 
 void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_expression, AssignStmt::AssignOperator op) {
@@ -450,9 +456,10 @@ void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_e
   }
   auto op_code = mutable_block()->add_op_code();
   op_code->mutable_assign_dot_member()->set_member(dot_expression->identifier().nfkc_name());
-  *op_code->mutable_highlight_start() = dot_expression->pif().start();
-  *op_code->mutable_highlight_mid() = dot_expression->primary_expression().pif().end();
-  *op_code->mutable_highlight_end() = dot_expression->pif().end();
+  *op_code->mutable_sh()->mutable_start() = dot_expression->pif().start();
+  *op_code->mutable_sh()->mutable_highlight_start() = dot_expression->primary_expression().pif().end();
+  *op_code->mutable_sh()->mutable_highlight_end() = dot_expression->pif().end();
+  *op_code->mutable_sh()->mutable_end() = dot_expression->pif().end();
 }
 
 
@@ -461,17 +468,19 @@ void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression
     case SliceExpr::kIndex: {
       auto op_code = mutable_block()->add_op_code();
       op_code->mutable_index_member();
-      *op_code->mutable_highlight_start() = slice_expression->pif().start();
-      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
-      *op_code->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_start() = slice_expression->pif().start();
+      *op_code->mutable_sh()->mutable_highlight_start() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_sh()->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_end() = slice_expression->pif().end();
       break;
     }
     case SliceExpr::kSlice: {
       auto op_code = mutable_block()->add_op_code();
       op_code->mutable_slice_range();
-      *op_code->mutable_highlight_start() = slice_expression->pif().start();
-      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
-      *op_code->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_start() = slice_expression->pif().start();
+      *op_code->mutable_sh()->mutable_highlight_start() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_sh()->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_end() = slice_expression->pif().end();
       break;
     }
     default:
@@ -487,17 +496,19 @@ void bytecode_generator::exit_slice_expression_for_assignment(const SliceExpr* s
     case SliceExpr::kIndex: {
       auto op_code = mutable_block()->add_op_code();
       op_code->mutable_assign_index_member();
-      *op_code->mutable_highlight_start() = slice_expression->pif().start();
-      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
-      *op_code->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_start() = slice_expression->pif().start();
+      *op_code->mutable_sh()->mutable_highlight_start() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_sh()->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_end() = slice_expression->pif().end();
       break;
     }
     case SliceExpr::kSlice: {
       auto op_code = mutable_block()->add_op_code();
       op_code->mutable_assign_slice_range();
-      *op_code->mutable_highlight_start() = slice_expression->pif().start();
-      *op_code->mutable_highlight_mid() = slice_expression->primary_expression().pif().end();
-      *op_code->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_start() = slice_expression->pif().start();
+      *op_code->mutable_sh()->mutable_highlight_start() = slice_expression->primary_expression().pif().end();
+      *op_code->mutable_sh()->mutable_highlight_end() = slice_expression->pif().end();
+      *op_code->mutable_sh()->mutable_end() = slice_expression->pif().end();
       break;
     }
     default:
@@ -595,9 +606,10 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
           assert(false);
       }
       if (op_code != nullptr) {
-        *op_code->mutable_highlight_start() = assign_statement->pif().start();
-        *op_code->mutable_highlight_mid() = assign_statement->op_pif().start();
-        *op_code->mutable_highlight_end() = assign_statement->op_pif().end();
+        *op_code->mutable_sh()->mutable_start() = assign_statement->pif().start();
+        *op_code->mutable_sh()->mutable_highlight_start() = assign_statement->op_pif().start();
+        *op_code->mutable_sh()->mutable_highlight_end() = assign_statement->op_pif().end();
+        *op_code->mutable_sh()->mutable_end() = assign_statement->op_pif().end();
       }
       break;
     }
@@ -737,9 +749,10 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
           assert(false);
       }
       if (op_code != nullptr) {
-        *op_code->mutable_highlight_start() = slice_expression.pif().start();
-        *op_code->mutable_highlight_mid() = slice_expression.primary_expression().pif().end();
-        *op_code->mutable_highlight_end() = slice_expression.pif().end();
+        *op_code->mutable_sh()->mutable_start() = slice_expression.pif().start();
+        *op_code->mutable_sh()->mutable_highlight_start() = slice_expression.primary_expression().pif().end();
+        *op_code->mutable_sh()->mutable_highlight_end() = slice_expression.pif().end();
+        *op_code->mutable_sh()->mutable_end() = slice_expression.pif().end();
       }
       break;
     }
@@ -808,9 +821,10 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
           assert(false);
       }
       if (op_code != nullptr) {
-        *op_code->mutable_highlight_start() = assign_statement->pif().start();
-        *op_code->mutable_highlight_mid() = assign_statement->op_pif().start();
-        *op_code->mutable_highlight_end() = assign_statement->op_pif().end();
+        *op_code->mutable_sh()->mutable_start() = assign_statement->pif().start();
+        *op_code->mutable_sh()->mutable_highlight_start() = assign_statement->op_pif().start();
+        *op_code->mutable_sh()->mutable_highlight_end() = assign_statement->op_pif().end();
+        *op_code->mutable_sh()->mutable_end() = assign_statement->op_pif().end();
       }
       break;
     }
@@ -820,9 +834,10 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
 
   // Set the uppack highlight points.
   for (auto* op_code : for_unpack) {
-    *op_code->mutable_highlight_start() = assign_statement->pif().start();
-    *op_code->mutable_highlight_mid() = assign_statement->rhs().pif().start();
-    *op_code->mutable_highlight_end() = assign_statement->pif().end();
+    *op_code->mutable_sh()->mutable_start() = assign_statement->pif().start();
+    *op_code->mutable_sh()->mutable_highlight_start() = assign_statement->rhs().pif().start();
+    *op_code->mutable_sh()->mutable_highlight_end() = assign_statement->pif().end();
+    *op_code->mutable_sh()->mutable_end() = assign_statement->pif().end();
   }
   for_unpack.clear();
 }
@@ -830,9 +845,10 @@ void bytecode_generator::exit_assign_statement(const AssignStmt* assign_statemen
 void bytecode_generator::exit_tuple(const Tuple* tuple) {
   auto* tuple_op = mutable_block()->add_op_code();
   tuple_op->mutable_make_tuple()->set_number_of_elements(tuple->value_size());
-  *tuple_op->mutable_highlight_start() = tuple->pif().start();
-  *tuple_op->mutable_highlight_mid() = tuple->pif().start();
-  *tuple_op->mutable_highlight_end() = tuple->pif().end();
+  *tuple_op->mutable_sh()->mutable_start() = tuple->pif().start();
+  *tuple_op->mutable_sh()->mutable_highlight_start() = tuple->pif().start();
+  *tuple_op->mutable_sh()->mutable_highlight_end() = tuple->pif().end();
+  *tuple_op->mutable_sh()->mutable_end() = tuple->pif().end();
 }
 
 void bytecode_generator::enter_tuple_for_assignment(const Tuple* tuple) {
@@ -866,9 +882,10 @@ void bytecode_generator::exit_dictionary_expression(const DictExpr* dictionary_e
   if (dictionary_expression->entry_size() != 0) {
     auto* op_code = mutable_block()->add_op_code();
     auto* add_to_dict = op_code->mutable_add_to_dictionary();
-    *op_code->mutable_highlight_start() = dictionary_expression->pif().start();
-    *op_code->mutable_highlight_mid() = dictionary_expression->pif().start();
-    *op_code->mutable_highlight_end() = dictionary_expression->pif().end();
+    *op_code->mutable_sh()->mutable_start() = dictionary_expression->pif().start();
+    *op_code->mutable_sh()->mutable_highlight_start() = dictionary_expression->pif().start();
+    *op_code->mutable_sh()->mutable_highlight_end() = dictionary_expression->pif().end();
+    *op_code->mutable_sh()->mutable_end() = dictionary_expression->pif().end();
     add_to_dict->set_number_of_elements(dictionary_expression->entry_size());
   }
 }
@@ -912,9 +929,10 @@ void bytecode_generator::exit_dictionary_comprehension(const DictComp* dictionar
 void bytecode_generator::mid_for_clause(const ForClause* for_clause) {
   auto* get_it_op_code = mutable_block()->add_op_code();
   get_it_op_code->mutable_get_iterator();
-  *get_it_op_code->mutable_highlight_start() = for_clause->pif().start();
-  *get_it_op_code->mutable_highlight_mid() = for_clause->in().pif().start();
-  *get_it_op_code->mutable_highlight_end() = for_clause->in().pif().end();
+  *get_it_op_code->mutable_sh()->mutable_start() = for_clause->pif().start();
+  *get_it_op_code->mutable_sh()->mutable_highlight_start() = for_clause->in().pif().start();
+  *get_it_op_code->mutable_sh()->mutable_highlight_end() = for_clause->in().pif().end();
+  *get_it_op_code->mutable_sh()->mutable_end() = for_clause->in().pif().end();
   comprehension_comp_clause.back().push_back(block().op_code_size());
   mutable_block()->add_op_code()->mutable_for_iterator();
 }
@@ -957,9 +975,10 @@ void bytecode_generator::mid_for_statement(const ForStmt* for_statement) {
     for_statement_op_mid_pos[for_statement] = op_code_size;
     auto* get_it_op_code = mutable_block()->add_op_code();
     get_it_op_code->mutable_get_iterator();
-    *get_it_op_code->mutable_highlight_start() = for_statement->pif().start();
-    *get_it_op_code->mutable_highlight_mid() = for_statement->expression().pif().start();
-    *get_it_op_code->mutable_highlight_end() = for_statement->expression().pif().end();
+    *get_it_op_code->mutable_sh()->mutable_start() = for_statement->pif().start();
+    *get_it_op_code->mutable_sh()->mutable_highlight_start() = for_statement->expression().pif().start();
+    *get_it_op_code->mutable_sh()->mutable_highlight_end() = for_statement->expression().pif().end();
+    *get_it_op_code->mutable_sh()->mutable_end() = for_statement->expression().pif().end();
     mutable_block()->add_op_code()->mutable_for_iterator();
   }
 }
@@ -1052,9 +1071,10 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
   call->set_named_arguments_count(named_arguments);
   call->set_has_variadic_positional_argument(variadic_pos_arg);
   call->set_has_variadic_named_argument(variadic_named_arg);
-  *new_op->mutable_highlight_start() = call_expression->pif().start();
-  *new_op->mutable_highlight_mid() = call_expression->primary_expression().pif().end();
-  *new_op->mutable_highlight_end() = call_expression->pif().end();
+  *new_op->mutable_sh()->mutable_start() = call_expression->pif().start();
+  *new_op->mutable_sh()->mutable_highlight_start() = call_expression->primary_expression().pif().end();
+  *new_op->mutable_sh()->mutable_highlight_end() = call_expression->pif().end();
+  *new_op->mutable_sh()->mutable_end() = call_expression->pif().end();
 }
 
 void bytecode_generator::enter_argument(const Argument* argument) {

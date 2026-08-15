@@ -2,19 +2,19 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_tuple { number_of_elements: 0 } highlight_start { row: 1 column: 1 pos: 0 } highlight_mid { row: 1 column: 1 pos: 0 } highlight_end { row: 1 column: 3 pos: 2 } }
+  op_code { make_tuple { number_of_elements: 0 } sh { start { row: 1 column: 1 pos: 0 } highlight_start { row: 1 column: 1 pos: 0 } highlight_end { row: 1 column: 3 pos: 2 } end { row: 1 column: 3 pos: 2 } } }
   op_code { pop { } }
   op_code { const_int { value: 0 } }
-  op_code { make_tuple { number_of_elements: 1 } highlight_start { row: 2 column: 1 pos: 3 } highlight_mid { row: 2 column: 1 pos: 3 } highlight_end { row: 2 column: 5 pos: 7 } }
+  op_code { make_tuple { number_of_elements: 1 } sh { start { row: 2 column: 1 pos: 3 } highlight_start { row: 2 column: 1 pos: 3 } highlight_end { row: 2 column: 5 pos: 7 } end { row: 2 column: 5 pos: 7 } } }
   op_code { pop { } }
   op_code { const_int { value: 1 } }
   op_code { const_int { value: 2 } }
-  op_code { make_tuple { number_of_elements: 2 } highlight_start { row: 3 column: 1 pos: 8 } highlight_mid { row: 3 column: 1 pos: 8 } highlight_end { row: 3 column: 7 pos: 14 } }
+  op_code { make_tuple { number_of_elements: 2 } sh { start { row: 3 column: 1 pos: 8 } highlight_start { row: 3 column: 1 pos: 8 } highlight_end { row: 3 column: 7 pos: 14 } end { row: 3 column: 7 pos: 14 } } }
   op_code { pop { } }
   op_code { const_int { value: 3 } }
   op_code { const_int { value: 4 } }
   op_code { const_int { value: 5 } }
-  op_code { make_tuple { number_of_elements: 3 } highlight_start { row: 4 column: 1 pos: 15 } highlight_mid { row: 4 column: 1 pos: 15 } highlight_end { row: 4 column: 10 pos: 24 } }
+  op_code { make_tuple { number_of_elements: 3 } sh { start { row: 4 column: 1 pos: 15 } highlight_start { row: 4 column: 1 pos: 15 } highlight_end { row: 4 column: 10 pos: 24 } end { row: 4 column: 10 pos: 24 } } }
   op_code { pop { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

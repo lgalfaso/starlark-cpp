@@ -6,9 +6,9 @@ block {
   op_code { pop { } }
   op_code { const_float { value: 1.1 } }
   op_code { pop { } }
-  op_code { const_string { value: "abc" } highlight_start { row: 3 column: 1 pos: 6 } highlight_mid { row: 3 column: 1 pos: 6 } highlight_end { row: 3 column: 6 pos: 11 } }
+  op_code { const_string { value: "abc" } sh { start { row: 3 column: 1 pos: 6 } highlight_start { row: 3 column: 1 pos: 6 } highlight_end { row: 3 column: 6 pos: 11 } end { row: 3 column: 6 pos: 11 } } }
   op_code { pop { } }
-  op_code { const_bytes { value: "def" } highlight_start { row: 4 column: 1 pos: 12 } highlight_mid { row: 4 column: 1 pos: 12 } highlight_end { row: 4 column: 7 pos: 18 } }
+  op_code { const_bytes { value: "def" } sh { start { row: 4 column: 1 pos: 12 } highlight_start { row: 4 column: 1 pos: 12 } highlight_end { row: 4 column: 7 pos: 18 } end { row: 4 column: 7 pos: 18 } } }
   op_code { pop { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

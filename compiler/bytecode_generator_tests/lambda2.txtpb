@@ -12,15 +12,15 @@ block {
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "x" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 1 column: 29 pos: 28 } highlight_mid: { row: 1 column: 29 pos: 28 } highlight_end: { row: 1 column: 30 pos: 29 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 1 column: 29 pos: 28 } highlight_start: { row: 1 column: 29 pos: 28 } highlight_end: { row: 1 column: 30 pos: 29 } end: { row: 1 column: 30 pos: 29 } } }
   op_code { return { } }
   function_signature { param { name: "x" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "x" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 1 column: 32 pos: 31 } highlight_mid: { row: 1 column: 32 pos: 31 } highlight_end: { row: 1 column: 33 pos: 32 } }
-  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 1 column: 34 pos: 33 } highlight_mid: { row: 1 column: 34 pos: 33 } highlight_end: { row: 1 column: 35 pos: 34 } }
-  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } highlight_start { row: 1 column: 32 pos: 31 } highlight_mid { row: 1 column: 33 pos: 32 } highlight_end { row: 1 column: 36 pos: 35 } }
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 1 column: 32 pos: 31 } highlight_start: { row: 1 column: 32 pos: 31 } highlight_end: { row: 1 column: 33 pos: 32 } end: { row: 1 column: 33 pos: 32 } } }
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 1 column: 34 pos: 33 } highlight_start: { row: 1 column: 34 pos: 33 } highlight_end: { row: 1 column: 35 pos: 34 } end: { row: 1 column: 35 pos: 34 } } }
+  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } sh { start { row: 1 column: 32 pos: 31 } highlight_start { row: 1 column: 33 pos: 32 } highlight_end { row: 1 column: 36 pos: 35 } end { row: 1 column: 36 pos: 35 } } }
   op_code { return { } }
   function_signature { param { name: "x" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }

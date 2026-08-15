@@ -14,7 +14,7 @@ message Block {
 }
 
 message OpCode {
-  // next_id: 110
+  // next_id: 108
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -138,9 +138,7 @@ message OpCode {
     End end = 58;
     Fail fail = 71;
   }
-  starlark.logging.Position highlight_start = 107;
-  starlark.logging.Position highlight_mid = 108;
-  starlark.logging.Position highlight_end = 109;
+  SourceHighlight sh = 107;
 }
 
 message ConstNone {}
@@ -287,5 +285,12 @@ message FunctionSignature {
     PosInFrame pos = 2;
     bool default_initialization = 3;
   }
+}
+
+message SourceHighlight {
+  starlark.logging.Position start = 1;
+  starlark.logging.Position highlight_start = 2;
+  starlark.logging.Position highlight_end = 3;
+  starlark.logging.Position end = 4;
 }
 

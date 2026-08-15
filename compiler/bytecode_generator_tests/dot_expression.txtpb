@@ -2,8 +2,8 @@ block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }
   op_code { create_frame { block_type: MODULE_BLOCK } }
   op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { const_string { value: "abc" } highlight_start { row: 1 column: 1 pos: 0 } highlight_mid { row: 1 column: 1 pos: 0 } highlight_end { row: 1 column: 6 pos: 5 } }
-  op_code { dot_member { member: "capitalize" } highlight_start: { row: 1 column: 1 pos: 0 } highlight_mid: { row: 1 column: 6 pos: 5 } highlight_end: { row: 1 column: 17 pos: 16 } }
+  op_code { const_string { value: "abc" } sh { start { row: 1 column: 1 pos: 0 } highlight_start { row: 1 column: 1 pos: 0 } highlight_end { row: 1 column: 6 pos: 5 } end { row: 1 column: 6 pos: 5 } } }
+  op_code { dot_member { member: "capitalize" } sh { start: { row: 1 column: 1 pos: 0 } highlight_start: { row: 1 column: 6 pos: 5 } highlight_end: { row: 1 column: 17 pos: 16 } end: { row: 1 column: 17 pos: 16 } } }
   op_code { pop { } }
   op_code { pop_frame { } }
   op_code { pop_frame { } }

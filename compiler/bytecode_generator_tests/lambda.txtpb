@@ -1,38 +1,38 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                              #  0
-  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                                   #  1
-  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                     #  2
-  op_code { make_function { entrypoint: 1 default_values_count: 0 } }                                                                                                                     #  3
-  op_code { pop { } }                                                                                                                                                                     #  4
-  op_code { make_function { entrypoint: 2 default_values_count: 0 } }                                                                                                                     #  5
-  op_code { pop { } }                                                                                                                                                                     #  6
-  op_code { const_int { value: 1 } }                                                                                                                                                      #  7
-  op_code { make_function { entrypoint: 3 default_values_count: 1 } }                                                                                                                     #  8
-  op_code { pop { } }                                                                                                                                                                     #  9
-  op_code { pop_frame { } }                                                                                                                                                               # 10
-  op_code { pop_frame { } }                                                                                                                                                               # 11
-  op_code { pop_frame { } }                                                                                                                                                               # 12
-  op_code { end { } }                                                                                                                                                                     # 13
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                                                #  0
+  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                                                                     #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                                                       #  2
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }                                                                                                                                                       #  3
+  op_code { pop { } }                                                                                                                                                                                                       #  4
+  op_code { make_function { entrypoint: 2 default_values_count: 0 } }                                                                                                                                                       #  5
+  op_code { pop { } }                                                                                                                                                                                                       #  6
+  op_code { const_int { value: 1 } }                                                                                                                                                                                        #  7
+  op_code { make_function { entrypoint: 3 default_values_count: 1 } }                                                                                                                                                       #  8
+  op_code { pop { } }                                                                                                                                                                                                       #  9
+  op_code { pop_frame { } }                                                                                                                                                                                                 # 10
+  op_code { pop_frame { } }                                                                                                                                                                                                 # 11
+  op_code { pop_frame { } }                                                                                                                                                                                                 # 12
+  op_code { end { } }                                                                                                                                                                                                       # 13
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK } }                                                                                                                                 #  0
-  op_code { const_string { value: "1" } highlight_start { row: 1 column: 9 pos: 8 } highlight_mid { row: 1 column: 9 pos: 8 } highlight_end { row: 1 column: 12 pos: 11 } }               #  1
-  op_code { return { } }                                                                                                                                                                  #  2
+  op_code { create_frame { block_type: FUNCTION_BLOCK } }                                                                                                                                                                   #  0
+  op_code { const_string { value: "1" } sh { start { row: 1 column: 9 pos: 8 } highlight_start { row: 1 column: 9 pos: 8 } highlight_end { row: 1 column: 12 pos: 11 } end { row: 1 column: 12 pos: 11 } } }                #  1
+  op_code { return { } }                                                                                                                                                                                                    #  2
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }                                                                                                                     #  0
-  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 2 column: 11 pos: 22 } highlight_mid: { row: 2 column: 11 pos: 22 } highlight_end: { row: 2 column: 12 pos: 23 } }  #  1
-  op_code { const_int { value: 1 } }                                                                                                                                                      #  2
-  op_code { binary_plus { } highlight_start: { row: 2 column: 13 pos: 24 } highlight_mid: { row: 2 column: 13 pos: 24 } highlight_end: { row: 2 column: 14 pos: 25 } }                    #  3
-  op_code { return { } }                                                                                                                                                                  #  4
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }                                                                                                                                                       #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 2 column: 11 pos: 22 } highlight_start: { row: 2 column: 11 pos: 22 } highlight_end: { row: 2 column: 12 pos: 23 } end: { row: 2 column: 12 pos: 23 } } }  #  1
+  op_code { const_int { value: 1 } }                                                                                                                                                                                        #  2
+  op_code { binary_plus { } sh { start: { row: 2 column: 13 pos: 24 } highlight_start: { row: 2 column: 13 pos: 24 } highlight_end: { row: 2 column: 14 pos: 25 } end: { row: 2 column: 14 pos: 25 } } }                    #  3
+  op_code { return { } }                                                                                                                                                                                                    #  4
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }                                                                                                         #  0
-  op_code { load { frame: 0 pos_in_frame: 0 } highlight_start: { row: 3 column: 18 pos: 45 } highlight_mid: { row: 3 column: 18 pos: 45 } highlight_end: { row: 3 column: 19 pos: 46 } }  #  1
-  op_code { load { frame: 0 pos_in_frame: 1 } highlight_start: { row: 3 column: 22 pos: 49 } highlight_mid: { row: 3 column: 22 pos: 49 } highlight_end: { row: 3 column: 23 pos: 50 } }  #  2
-  op_code { binary_plus { } highlight_start: { row: 3 column: 20 pos: 47 } highlight_mid: { row: 3 column: 20 pos: 47 } highlight_end: { row: 3 column: 21 pos: 48 } }                    #  3
-  op_code { return { } }                                                                                                                                                                  #  4
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }                                                                                                                                           #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 3 column: 18 pos: 45 } highlight_start: { row: 3 column: 18 pos: 45 } highlight_end: { row: 3 column: 19 pos: 46 } end: { row: 3 column: 19 pos: 46 } } }  #  1
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 3 column: 22 pos: 49 } highlight_start: { row: 3 column: 22 pos: 49 } highlight_end: { row: 3 column: 23 pos: 50 } end: { row: 3 column: 23 pos: 50 } } }  #  2
+  op_code { binary_plus { } sh { start: { row: 3 column: 20 pos: 47 } highlight_start: { row: 3 column: 20 pos: 47 } highlight_end: { row: 3 column: 21 pos: 48 } end: { row: 3 column: 21 pos: 48 } } }                    #  3
+  op_code { return { } }                                                                                                                                                                                                    #  4
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
