@@ -37,7 +37,7 @@ std::string error_v2_load_not_at_top_level(std::string_view program, const Posit
 }
 
 std::string error_v2_load_at_least_one_symbol(std::string_view program, const Position& start, const Position& end) {
-  return std::format("expect to load at least one symbol\n{}", get_line_and_underline(program, start, end, true));
+  return std::format("expect to load at least one symbol\n{}", get_line_and_underline(program, start, previous_position(program, end), end, end, ""));
 }
 
 
@@ -142,7 +142,7 @@ std::string error_v2_undefined_name(std::string_view name, std::string_view best
   if (best_candidate.empty()) {
     return std::format("name '{}' is not defined\n{}", name, get_line_and_underline(program, start, end));
   } else {
-    return std::format("name '{}' is not defined; did you mean '{}'?\n{}", name, best_candidate, get_line_and_underline(program, start, end, false, best_candidate));
+    return std::format("name '{}' is not defined; did you mean '{}'?\n{}", name, best_candidate, get_line_and_underline(program, start, end, best_candidate));
   }
 }
 

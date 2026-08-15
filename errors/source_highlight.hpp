@@ -17,8 +17,7 @@ starlark::logging::Position previous_position(std::string_view program, const st
 starlark::logging::Position next_position(std::string_view program, const starlark::logging::Position& input);
 
 std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
-std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end, bool reverse);
-std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end, bool reverse, std::string_view hint);
+std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end, std::string_view hint);
 std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& mid, const starlark::logging::Position& end);
 std::string get_line_and_underline(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& start_underline,
                                    const starlark::logging::Position& end_underline, const starlark::logging::Position& end, std::string_view hint);

@@ -85,6 +85,23 @@ starlark::logging::Position next_position(std::string_view program, const Positi
   return result;
 }
 
+std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end) {
+  return get_line_and_underline(program, start, end, "");
+}
+
+std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end, std::string_view hint) {
+  Position underline_end = next_position(program, start);
+  if (underline_end.pos() > end.pos()) {
+    return get_line_and_underline(program, start, start, underline_end, underline_end, hint);
+  } else {
+    return get_line_and_underline(program, start, start, underline_end, end, hint);
+  }
+}
+
+std::string get_line_and_underline(std::string_view program, const Position& start, const Position& mid, const Position& end) {
+  return get_line_and_underline(program, start, mid, end, end, "");
+}
+
 std::string get_line_and_underline(std::string_view program, const Position& start, const Position& start_underline, const Position& end_underline, const Position& end, std::string_view hint) {
   assert(start.pos() <= start_underline.pos());
   // Ideally, this should be `start_underline.pos() < end_underline.pos()`, but this is not possible yet as sometimes we produce an error at the last character of a program.
@@ -122,32 +139,6 @@ std::string get_line_and_underline(std::string_view program, const Position& sta
   }
   return result;
 }
-
-std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end) {
-  return get_line_and_underline(program, start, end, false);
-}
-
-std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end, bool reverse) {
-  return get_line_and_underline(program, start, end, reverse, "");
-}
-
-std::string get_line_and_underline(std::string_view program, const Position& start, const Position& end, bool reverse, std::string_view hint) {
-  if (reverse) {
-    return get_line_and_underline(program, start, previous_position(program, end), end, end, hint);
-  } else {
-    Position underline_end = next_position(program, start);
-    if (underline_end.pos() > end.pos()) {
-      return get_line_and_underline(program, start, start, underline_end, underline_end, hint);
-    } else {
-      return get_line_and_underline(program, start, start, underline_end, end, hint);
-    }
-  }
-}
-
-std::string get_line_and_underline(std::string_view program, const Position& start, const Position& mid, const Position& end) {
-  return get_line_and_underline(program, start, mid, end, end, "");
-}
-
 
 }  // namespace error_messages
 }  // namespace starlark
