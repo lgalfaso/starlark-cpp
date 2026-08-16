@@ -382,9 +382,7 @@ def btree_to_dict(tree):
 
 
 
-_BENCH_SIZES = [0, 10, 30, 100, 1000, 5000,
-    # 0x110000  # We are too slow for the moment to be able to handle this one.
-]
+_BENCH_SIZES = [0, 10, 30, 100, 1000, 5000] # + [0x110000]  # We are too slow for the moment to be able to handle this one.
 
 # Knuth multiplicative hash for deterministic pseudo-random byte payloads.
 _HASH_MIX = 2654435761
