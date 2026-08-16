@@ -26,6 +26,9 @@ context::context(Arena& arena, const runtime_options& options) :
     empty_bytes_(Arena::Create<starlark_bytes>(&arena, std::string_view())),
     empty_string_(Arena::Create<starlark_string>(&arena, std::string_view())) {
   runner_context_ = nullptr;
+  for (int i = MIN_SMALL_INT; i <= MAX_SMALL_INT; ++i) {
+    small_integers[i - MIN_SMALL_INT] = Arena::Create<starlark_integer>(&arena, i);
+  }
 }
 
 starlark_obj* context::false_value() const {

@@ -154,6 +154,10 @@ class context {
   void* runner_context();
   void runner_context(void* r_context);
 
+  static constexpr int64_t MIN_SMALL_INT = -50;
+  static constexpr int64_t MAX_SMALL_INT = 256;
+  std::array<starlark_obj*, (MAX_SMALL_INT - MIN_SMALL_INT + 1)> small_integers;
+
  private:
   google::protobuf::Arena& arena_;
   const runtime_options options_;

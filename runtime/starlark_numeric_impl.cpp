@@ -19,7 +19,9 @@ namespace starlark {
 namespace runtime {
 
 starlark_obj* create_integer(std::int64_t value, context& ctx) {
-  // TODO(lmirelmann): Use a cache of small integers.
+  if (context::MIN_SMALL_INT <= value && value <= context::MAX_SMALL_INT) {
+    return ctx.small_integers[value - context::MIN_SMALL_INT];
+  }
   return Arena::Create<starlark_integer>(&ctx.arena(), value);
 }
 
