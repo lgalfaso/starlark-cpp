@@ -170,7 +170,9 @@ cc_fuzz_test(
     name = "interpreter_fuzz_test",
     srcs = ["interpreter_fuzz_test.cpp"],
     corpus = [
+        "//errors/test:corpus_filegroup",
         "//grammar/lexer_fuzz_test_corpus:corpus_filegroup",
+        "//spec/tests:corpus_filegroup",
     ],
     dicts = [
         "//grammar/lexer_fuzz_test_dictionary:lexical_elements.dict",

@@ -17,3 +17,8 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
     ) for f in glob(["*.star"])
 ]
 
+filegroup(
+    name = "corpus_filegroup",
+    srcs = glob(["*.star"], ["int_xor.star", "int_and.star", "int_or.star", "range_slice.star"]),
+    visibility = ["//visibility:public"],
+)

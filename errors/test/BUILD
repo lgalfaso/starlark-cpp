@@ -40,3 +40,8 @@ cc_library(
     for f in glob(["*.star"])
 ]
 
+filegroup(
+    name = "corpus_filegroup",
+    srcs = glob(["*.star"]),
+    visibility = ["//visibility:public"],
+)
