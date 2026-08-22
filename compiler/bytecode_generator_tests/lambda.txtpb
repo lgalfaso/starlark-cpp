@@ -1,3 +1,4 @@
+const_string: "1"
 block {
   op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                                                #  0
   op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                                                                     #  1
@@ -16,7 +17,7 @@ block {
 }
 block {
   op_code { create_frame { block_type: FUNCTION_BLOCK } }                                                                                                                                                                   #  0
-  op_code { const_string { value: "1" } sh { start { row: 1 column: 9 pos: 8 } highlight_start { row: 1 column: 9 pos: 8 } highlight_end { row: 1 column: 12 pos: 11 } end { row: 1 column: 12 pos: 11 } } }                #  1
+  op_code { const_string { const_string_pos: 0 } sh { start { row: 1 column: 9 pos: 8 } highlight_start { row: 1 column: 9 pos: 8 } highlight_end { row: 1 column: 12 pos: 11 } end { row: 1 column: 12 pos: 11 } } }       #  1
   op_code { return { } }                                                                                                                                                                                                    #  2
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }

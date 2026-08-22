@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "interpreter/frame.hpp"
+#include "interpreter/runner_state.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "runtime/starlark_function.hpp"
 
@@ -26,9 +27,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
   interpreter_function(
       int entrypoint,
       std::vector<starlark::runtime::starlark_obj*>&& default_arguments,
-      const starlark::bytecode::FunctionSignature* function_signature,
-      starlark::bytecode::Program* program,
-      std::string_view module_name,
+      const runner_state::program_info& current_program_,
       bool inner_,
       const google::protobuf::RepeatedPtrField<std::string>* frame_names,
       const std::vector<frame*>& frame_stack);
@@ -46,12 +45,11 @@ class interpreter_function : public starlark::runtime::starlark_function {
  private:
   int entrypoint;
   std::vector<starlark::runtime::starlark_obj*> default_arguments;
-  const starlark::bytecode::FunctionSignature* function_signature;
   std::map<std::string_view, std::size_t> named_argument_index;
   const google::protobuf::RepeatedPtrField<std::string>* frame_names;
   std::vector<frame*> frame_stack;
   starlark::runtime::starlark_obj* default_parameters;
-  std::pair<starlark::bytecode::Program*, std::string> current_program;
+  runner_state::program_info current_program;
   const bool inner_;
 
   friend std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs, bool compare_stack);

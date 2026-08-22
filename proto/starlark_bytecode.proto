@@ -6,6 +6,7 @@ import "proto/starlark_logging.proto";
 
 message Program {
   repeated Block block = 1;
+  repeated string const_string = 2;
 }
 
 message Block {
@@ -156,7 +157,7 @@ message ConstFloat {
 }
 
 message ConstString {
-  string value = 1;
+  int64 const_string_pos = 1;
 }
 
 message ConstBytes {

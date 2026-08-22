@@ -138,17 +138,17 @@ class error_handler : public error_fn {
       result.mutable_block()->Add()->add_op_code()->mutable_fail();
       return result;
     });
-    static std::pair<Program*, std::string> base_program{&fail_program, "@@//:fail.star"};
+    static runner_state::program_info base_program{&fail_program, "@@//:fail.star"};
 
     // Get the current operation that is being executed. Skip the operation if this is an internal module.
-    std::pair<starlark::bytecode::Program*, std::string>* program_stack = nullptr;
+    runner_state::program_info* program_stack = nullptr;
     int block_ptr = 0;
     int instruction_ptr = 0;
      std::string_view source_code;
     if (state.instruction_ptr != 0) {
-      auto current_module = loader.load_module(state.current_program.second);
+      auto current_module = loader.load_module(state.current_program.module_name);
       if (!current_module.ok()) {
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, "internal error (0)", state.current_program.second, pos);
+        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, "internal error (0)", state.current_program.module_name, pos);
       } else if (!(*current_module)->inner()) {
         program_stack = &state.current_program;
         block_ptr = state.block_ptr;
@@ -157,9 +157,9 @@ class error_handler : public error_fn {
       }
     }
     for (int i = state.current_program_stack.size() - 1; program_stack == nullptr && i >= 0; --i) {
-      auto current_module = loader.load_module(state.current_program_stack[i].second);
+      auto current_module = loader.load_module(state.current_program_stack[i].module_name);
       if (!current_module.ok()) {
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, "internal error (1)", state.current_program_stack[i].second, pos);
+        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, "internal error (1)", state.current_program_stack[i].module_name, pos);
         break;
       }
       if (!(*current_module)->inner()) {
@@ -173,16 +173,16 @@ class error_handler : public error_fn {
 
     // Log the error message.
     if (program_stack == nullptr) {
-      log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program.second, pos);
+      log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program.module_name, pos);
     } else {
-      const auto& op_code = program_stack->first->block(block_ptr).op_code(instruction_ptr - 1);
+      const auto& op_code = program_stack->bytecode->block(block_ptr).op_code(instruction_ptr - 1);
       // If we have the position, then use it.
       if (op_code.has_sh()) {
         auto msg = std::format("{}\n{}", error_msg, get_line_and_underline(source_code, op_code.sh().start(), op_code.sh().highlight_start(), op_code.sh().highlight_end(), op_code.sh().end(), hint));
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, msg, program_stack->second, op_code.sh().highlight_start());
+        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, msg, program_stack->module_name, op_code.sh().highlight_start());
       } else {
         // There are a few operations that do not have code assigned to them.
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, std::format("{}\n", error_msg), program_stack->second, pos);
+        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, std::format("{}\n", error_msg), program_stack->module_name, pos);
       }
     }
 
@@ -204,7 +204,7 @@ class error_handler : public error_fn {
 
 frame* run_program(
     module_loader& loader,
-    std::pair<Program*, std::string>& starlark_program,
+    runner_state::program_info& starlark_program,
     bool inner,
     std::map<std::string, starlark_obj*, std::less<>>& global_context,
     context& ctx,
@@ -222,12 +222,12 @@ frame* run_program(
   frame* result = nullptr;
 
   // Limit checks.
-  for (const auto& block : starlark_program.first->block()) {
+  for (const auto& block : starlark_program.bytecode->block()) {
     for (const auto& op : block.op_code()) {
       switch (op.op_code_case()) {
         case OpCode::kConstString:
-          if (op.const_string().value().length() > ctx.options().max_string_length) {
-            auto current_module = loader.load_module(starlark_program.second);
+          if (starlark_program.bytecode->const_string(op.const_string().const_string_pos()).length() > ctx.options().max_string_length) {
+            auto current_module = loader.load_module(starlark_program.module_name);
             if (!current_module.ok()) {
               error_callback.add_error("internal error (2)");
             } else {
@@ -238,7 +238,7 @@ frame* run_program(
           break;
         case OpCode::kConstBytes:
           if (op.const_bytes().value().length() > ctx.options().max_string_length) {
-            auto current_module = loader.load_module(starlark_program.second);
+            auto current_module = loader.load_module(starlark_program.module_name);
             if (!current_module.ok()) {
               error_callback.add_error("internal error (3)");
             } else {
@@ -249,7 +249,7 @@ frame* run_program(
           break;
         case OpCode::kMakeTuple:
           if (op.make_tuple().number_of_elements() > ctx.options().max_sequence_size) {
-            auto current_module = loader.load_module(starlark_program.second);
+            auto current_module = loader.load_module(starlark_program.module_name);
             if (!current_module.ok()) {
               error_callback.add_error("internal error (4)");
             } else {
@@ -266,7 +266,7 @@ frame* run_program(
   }
 
   while (true) {
-    const auto& op_code = state.current_program.first->block(state.block_ptr).op_code(state.instruction_ptr);
+    const auto& op_code = state.current_program.bytecode->block(state.block_ptr).op_code(state.instruction_ptr);
     state.instruction_ptr++;
     switch (op_code.op_code_case()) {
       case OpCode::kConstNone:
@@ -283,10 +283,12 @@ frame* run_program(
         stack.push_back(Arena::Create<starlark_float>(&ctx.arena(), op_code.const_float().value()));
         break;
       case OpCode::kConstString:
-        stack.push_back(Arena::Create<starlark_string>(&ctx.arena(), op_code.const_string().value()));
+        assert(op_code.const_string().const_string_pos() < state.current_program.bytecode->const_string().size());
+        stack.push_back((*state.current_program.const_strings)[op_code.const_string().const_string_pos()]);
         break;
       case OpCode::kConstStringView:
-        sv_stack.push_back(op_code.const_string_view().value());
+        assert(op_code.const_string_view().const_string_pos() < state.current_program.bytecode->const_string().size());
+        sv_stack.push_back(state.current_program.bytecode->const_string(op_code.const_string_view().const_string_pos()));
         break;
       case OpCode::kConstBytes:
         stack.push_back(Arena::Create<starlark_bytes>(&ctx.arena(), op_code.const_bytes().value()));
@@ -812,11 +814,9 @@ frame* run_program(
             &ctx.arena(),
             op_code.make_function().entrypoint(),
             std::move(default_values),
-            &state.current_program.first->block(op_code.make_function().entrypoint()).function_signature(),
-            state.current_program.first,
-            state.current_program.second,
+            state.current_program,
             state.inner,
-            &state.current_program.first->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
+            &state.current_program.bytecode->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
             state.frame_stacks.back()));
         break;
       }
@@ -843,7 +843,7 @@ frame* run_program(
         break;
       }
       case OpCode::kLoadModule: {
-        auto mod_info = loader.load_module(op_code.load_module().module(), starlark_program.second);
+        auto mod_info = loader.load_module(op_code.load_module().module(), starlark_program.module_name);
         if (!mod_info.ok()) {
           error_callback.add_error(error_v2_unable_to_load_module(op_code.load_module().module()));
           // It is quite hard to make this happen, but still possible.
@@ -1002,7 +1002,13 @@ status_or<frame*> interpreter::run(module_loader& loader,
     for (const auto& kv : (*mod_info)->custom_binding()) {
       global_context.insert(kv);
     }
-    auto current_program = std::make_pair(entry.program, std::string{(*mod_info)->cannonical_name()});
+    auto current_program = runner_state::program_info{entry.program, std::string{(*mod_info)->cannonical_name()}};
+    if (!current_program.bytecode->const_string().empty()) {
+      current_program.const_strings = Arena::Create<std::vector<starlark_string*>>(&ctx.arena(), current_program.bytecode->const_string().size());
+      for (int i = 0; i < current_program.bytecode->const_string().size(); ++i) {
+        (*current_program.const_strings)[i] = Arena::Create<starlark_string>(&ctx.arena(), current_program.bytecode->const_string(i));
+      }
+    }
     last_frame = run_program(loader, current_program, (*mod_info)->inner(), global_context, ctx, logging);
     if (last_frame == nullptr) {
       return status_or<frame*>(status_code::kRuntimeError);

@@ -148,6 +148,7 @@ class bytecode_generator : public ast_listener_base {
   void exit_def_or_lambda_expression(const RepeatedPtrField<Parameter>* params);
   Block* mutable_block();
   const Block& block() const;
+  std::map<std::string, int64_t> const_string;
 };
 
 bytecode_generator::bytecode_generator(Program& output) : output(output) {}
@@ -214,7 +215,11 @@ void bytecode_generator::enter_float_value(const FloatValue* float_value) {
 
 void bytecode_generator::enter_string_value(const StringValue* string_value) {
   auto* const_string_op = mutable_block()->add_op_code();
-  const_string_op->mutable_const_string()->set_value(string_value->value());
+  auto it = const_string.insert({std::string{string_value->value()}, const_string.size()});
+  const_string_op->mutable_const_string()->set_const_string_pos(it.first->second);
+  if (it.second) {
+    output.add_const_string(string_value->value());
+  }
   *const_string_op->mutable_sh()->mutable_start() = string_value->pif().start();
   *const_string_op->mutable_sh()->mutable_highlight_start() = string_value->pif().start();
   *const_string_op->mutable_sh()->mutable_highlight_end() = string_value->pif().end();
@@ -1079,7 +1084,12 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
 
 void bytecode_generator::enter_argument(const Argument* argument) {
   if (argument->argument_type_case() == Argument::kNamedArgument) {
-    mutable_block()->add_op_code()->mutable_const_string_view()->set_value(argument->named_argument().identifier().nfkc_name());
+    auto* const_string_view = mutable_block()->add_op_code();
+    auto it = const_string.insert({std::string{argument->named_argument().identifier().nfkc_name()}, const_string.size()});
+    const_string_view->mutable_const_string_view()->set_const_string_pos(it.first->second);
+    if (it.second) {
+      output.add_const_string(argument->named_argument().identifier().nfkc_name());
+    }
   }
 }
 
