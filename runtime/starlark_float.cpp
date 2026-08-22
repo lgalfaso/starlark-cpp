@@ -13,8 +13,10 @@
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
+using ::starlark::result::status_or;
 using ::starlark::error_messages::error_v2_bad_operand_binary;
 using ::starlark::error_messages::error_v2_division_by_zero;
+using ::starlark::error_messages::error_v2_incomparable;
 using ::starlark::error_messages::error_v2_overflow;
 
 namespace starlark {
@@ -36,6 +38,45 @@ starlark_obj* starlark_float::unary_plus(context& ctx, error_fn& error_callback)
 
 starlark_obj* starlark_float::unary_minus(context& ctx, error_fn& error_callback) const {
   return create_float(-value, ctx);
+}
+
+status_or<int> starlark_float::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kFloat: {
+      if (std::isnan(as_float())) {
+        if (!std::isnan(other.as_float())) {
+          return status_or<int>(1);
+        }
+        return status_or<int>(0);
+      }
+      if (std::isnan(other.as_float())) {
+        return status_or<int>(-1);
+      }
+      auto r = as_float() <=> other.as_float();
+      if (r == 0) {
+        return status_or<int>(0);
+      }
+      if (r < 0) {
+        return status_or<int>(-1);
+      }
+      return status_or<int>(1);
+    }
+    case starlark_numeric_type::kInt64: {
+      if (std::isnan(as_float())) {
+        return status_or<int>(1);
+      }
+      return status_or<int>(cmp_fi(as_float(), other.as_int64()));
+    }
+    case starlark_numeric_type::kBigInt: {
+      if (std::isnan(as_float())) {
+        return status_or<int>(1);
+      }
+      return status_or<int>(cmp_fb(as_float(), other.as_bigint()));
+    }
+    default:
+      error_callback.add_error(error_v2_incomparable(op, type(), other.type()));
+      return status_or<int>(starlark::result::status_code::kRuntimeError);
+  }
 }
 
 void starlark_float::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {

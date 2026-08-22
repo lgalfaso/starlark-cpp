@@ -18,6 +18,7 @@ class starlark_float : public starlark_obj {
   std::string_view type() const override;
   bool truthy() const override;
   bool primitive() const override;
+  starlark::result::status_or<int> cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const override;
   starlark_obj* unary_plus(context& ctx, error_fn& error_callback) const override;
   starlark_obj* unary_minus(context& ctx, error_fn& error_callback) const override;
   starlark_obj* binary_plus(const starlark_obj& other, context& ctx, error_fn& error_callback) const override;
