@@ -41,6 +41,7 @@ using ::starlark::error_messages::error_v2_format_integer_is_required;
 using ::starlark::error_messages::error_v2_format_real_is_required;
 using ::starlark::error_messages::error_v2_in_element;
 using ::starlark::error_messages::error_v2_in_type_requires_type;
+using ::starlark::error_messages::error_v2_incomparable;
 using ::starlark::error_messages::error_v2_incomplete_format;
 using ::starlark::error_messages::error_v2_integer_or_unicode_character;
 using ::starlark::error_messages::error_v2_integer_or_unicode_character_type_and_length;
@@ -1761,6 +1762,21 @@ void starlark_string::starlark_elems_iterator::end_iterator() {}
 bool starlark_string::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
          value == other->as_string();
+}
+
+status_or<int> starlark_string::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
+  if (other.type() != type()) {
+    error_callback.add_error(error_v2_incomparable(op, type(), other.type()));
+    return status_or<int>(starlark::result::status_code::kRuntimeError);
+  }
+  auto result = value <=> static_cast<const starlark_string&>(other).value;
+  if (result == 0) {
+    return status_or<int>(0);
+  }
+  if (result < 0) {
+    return status_or<int>(-1);
+  }
+  return status_or<int>(1);
 }
 
 void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {

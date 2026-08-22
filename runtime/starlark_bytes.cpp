@@ -29,6 +29,7 @@ using ::starlark::error_messages::error_v2_byte_in_range;
 using ::starlark::error_messages::error_v2_bytes_or_tuple_of_bytes;
 using ::starlark::error_messages::error_v2_can_only_join_on_iterable;
 using ::starlark::error_messages::error_v2_empty_separator;
+using ::starlark::error_messages::error_v2_incomparable;
 using ::starlark::error_messages::error_v2_integer_or_type;
 using ::starlark::error_messages::error_v2_max_bytes_length;
 using ::starlark::error_messages::error_v2_multiple_values_for_argument;
@@ -662,6 +663,21 @@ starlark_obj* starlark_bytes::strip(std::string_view cutset, context& ctx) const
 bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
   return type() == other->type() &&
       value == (static_cast<const starlark_bytes*>(other))->value;
+}
+
+status_or<int> starlark_bytes::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
+  if (other.type() != type()) {
+    error_callback.add_error(error_v2_incomparable(op, type(), other.type()));
+    return status_or<int>(starlark::result::status_code::kRuntimeError);
+  }
+  auto result = value <=> static_cast<const starlark_bytes&>(other).value;
+  if (result == 0) {
+    return status_or<int>(0);
+  }
+  if (result < 0) {
+    return status_or<int>(-1);
+  }
+  return status_or<int>(1);
 }
 
 void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
