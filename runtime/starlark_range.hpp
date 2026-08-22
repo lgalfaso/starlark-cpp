@@ -38,6 +38,7 @@ class starlark_range : public starlark_obj {
     starlark_range_iterator(int64_t current_pos, int64_t step, int64_t remaining, context& ctx);
     bool has_next() const override;
     starlark_obj* next() override;
+    void next_ext() override;
     void end_iterator() override;
 
    private:

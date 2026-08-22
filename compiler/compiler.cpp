@@ -1220,6 +1220,118 @@ const Block& bytecode_generator::block() const {
   return output.block(blocks.back());
 }
 
+
+void remove_extra_store(Program* program) {
+  struct store_info {
+    std::vector<OpCode*> store;
+    bool found_load = false;
+  };
+  struct ip_info {
+    int64_t block;
+    int64_t pos;
+  };
+  std::vector<std::vector<store_info>> frames;
+  std::vector<ip_info> traverse;
+  traverse.emplace_back(ip_info{.block = 0, .pos = 0 });
+  auto pop_frame = [&frames]() {
+    if (frames.empty()) {
+      return;
+    }
+    // The top 3 frames are not candidates for store removal.
+    if (frames.size() <= 3) {
+      frames.pop_back();
+      return;
+    }
+    for (auto& stores : frames.back()) {
+      if (!stores.found_load) {
+        for (auto* store : stores.store) {
+          store->mutable_pop();
+        }
+      }
+    }
+    frames.pop_back();
+  };
+
+  while (!traverse.empty()) {
+    if (program->block(traverse.back().block).op_code().size() == traverse.back().pos) {
+      pop_frame();
+      traverse.pop_back();
+      continue;
+    }
+    const auto& op_code = program->block(traverse.back().block).op_code(traverse.back().pos);
+    traverse.back().pos++;
+    switch(op_code.op_code_case()) {
+      case OpCode::kLoad:
+        frames[frames.size() - 1 - op_code.load().frame()][op_code.load().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignPlusEquals:
+        frames[frames.size() - 1 - op_code.assign_plus_equals().frame()][op_code.assign_plus_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignMinusEquals:
+        frames[frames.size() - 1 - op_code.assign_minus_equals().frame()][op_code.assign_minus_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignStarEquals:
+        frames[frames.size() - 1 - op_code.assign_star_equals().frame()][op_code.assign_star_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignSlashEquals:
+        frames[frames.size() - 1 - op_code.assign_slash_equals().frame()][op_code.assign_slash_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignSlashSlashEquals:
+        frames[frames.size() - 1 - op_code.assign_slash_slash_equals().frame()][op_code.assign_slash_slash_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignPercentEquals:
+        frames[frames.size() - 1 - op_code.assign_percent_equals().frame()][op_code.assign_percent_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignAmpersandEquals:
+        frames[frames.size() - 1 - op_code.assign_ampersand_equals().frame()][op_code.assign_ampersand_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignPipeEquals:
+        frames[frames.size() - 1 - op_code.assign_pipe_equals().frame()][op_code.assign_pipe_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignHatEquals:
+        frames[frames.size() - 1 - op_code.assign_hat_equals().frame()][op_code.assign_hat_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignLessLessEquals:
+        frames[frames.size() - 1 - op_code.assign_less_less_equals().frame()][op_code.assign_less_less_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kAssignGreaterGreaterEquals:
+        frames[frames.size() - 1 - op_code.assign_greater_greater_equals().frame()][op_code.assign_greater_greater_equals().pos_in_frame()].found_load = true;
+        break;
+      case OpCode::kMakeFunction:
+        traverse.emplace_back(ip_info{.block = op_code.make_function().entrypoint(), .pos = 0});
+        break;
+      case OpCode::kCreateFrame:
+        frames.emplace_back(op_code.create_frame().symbol().size());
+        for (int i = 0; i < op_code.create_frame().symbol().size(); ++i) {
+          frames.back().push_back(store_info{});
+        }
+        break;
+      case OpCode::kPopFrame:
+        pop_frame();
+        break;
+      case OpCode::kStore:
+        frames[frames.size() - 1 - op_code.store().frame()][op_code.store().pos_in_frame()].store.push_back(
+            program->mutable_block(traverse.back().block)->mutable_op_code(traverse.back().pos - 1));
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+void simplify_for_loop(Program* program) {
+  for (int i = 0; i < program->block().size(); ++i) {
+    for (int j = 0; j < program->block(i).op_code().size(); ++j) {
+      if (program->block(i).op_code(j).op_code_case() == OpCode::kForIterator &&
+          program->block(i).op_code(j + 1).op_code_case() == OpCode::kPop) {
+        auto address_delta = program->block(i).op_code(j).for_iterator().address_delta();
+        program->mutable_block(i)->mutable_op_code(j)->mutable_for_iterator_ext()->set_address_delta(address_delta);
+        program->mutable_block(i)->mutable_op_code(j + 1)->mutable_nop();
+      }
+    }
+  }
+}
+
 }  // namespace
 
 compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(binding) {}
@@ -1244,6 +1356,8 @@ Program* compiler::compile(std::string_view program_name, std::string_view starl
   bytecode_generator listener(*result);
   grammar::ast_walker walker;
   walker.walk(starlark_file, listener);
+  remove_extra_store(result);
+  simplify_for_loop(result);
   return result;
 }
 

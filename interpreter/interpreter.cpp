@@ -614,6 +614,17 @@ frame* run_program(
         }
         break;
       }
+      case OpCode::kForIteratorExt: {
+        assert(!state.frame_stacks.back().empty());
+        assert(!state.frame_stacks.back().back()->iterators.empty());
+        auto* it = state.frame_stacks.back().back()->iterators.back();
+        if (it->has_next()) {
+          it->next_ext();
+        } else {
+          state.instruction_ptr += op_code.for_iterator_ext().address_delta() - 1;
+        }
+        break;
+      }
       case OpCode::kEndIterator:
         assert(!state.frame_stacks.back().empty());
         assert(!state.frame_stacks.back().back()->iterators.empty());
@@ -880,6 +891,8 @@ frame* run_program(
         return result;
       case OpCode::kFail:
         return nullptr;
+      case OpCode::kNop:
+        break;
       case OpCode::OP_CODE_NOT_SET:
         error_callback.add_error(error_v2_unknown_op(std::to_underlying(op_code.op_code_case())));
         return nullptr;

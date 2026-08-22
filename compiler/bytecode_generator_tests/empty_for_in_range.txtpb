@@ -1,0 +1,26 @@
+block {
+  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "range" } }
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo" } }
+  op_code { create_frame { block_type: FILE_BLOCK } }
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }
+  op_code { store { frame: 1 pos_in_frame: 0 } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { pop_frame { } }
+  op_code { end { } }
+}
+block {
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
+  op_code { load { frame: 3 pos_in_frame: 0 } sh { start { row: 2 column: 12 pos: 22 } highlight_start { row: 2 column: 12 pos: 22 } highlight_end { row: 2 column: 17 pos: 27 } end { row: 2 column: 17 pos: 27 } } }
+  op_code { const_int { value: 10000 } }
+  op_code { call { positional_arguments_count: 1 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: false } sh { start { row: 2 column: 12 pos: 22 } highlight_start { row: 2 column: 17 pos: 27 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } }
+  op_code { get_iterator { } sh { start { row: 2 column: 3 pos: 13 } highlight_start { row: 2 column: 12 pos: 22 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } }
+  op_code { for_iterator_ext { address_delta: 3 } }
+  op_code { nop { } }
+  op_code { goto { address_delta: -2 } }
+  op_code { end_iterator { } }
+  op_code { const_none { } }
+  op_code { return { } }
+  function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo" }
+}
+

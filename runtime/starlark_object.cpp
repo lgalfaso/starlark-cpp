@@ -155,6 +155,10 @@ bool order_comparator::pending_task_equals_to::operator()(const pending_task& lh
 
 starlark_iterator::~starlark_iterator() {}
 
+void starlark_iterator::next_ext() {
+  next();
+}
+
 const std::vector<std::string>& starlark_obj::attributes() {
   static const std::vector<std::string>* result =
     new std::vector<std::string>();

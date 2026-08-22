@@ -179,6 +179,11 @@ starlark_obj* starlark_range::starlark_range_iterator::next() {
   return result;
 }
 
+void starlark_range::starlark_range_iterator::next_ext() {
+  current_pos += step;
+  remaining--;
+}
+
 void starlark_range::starlark_range_iterator::end_iterator() {}
 
 range_state calculate_state(int64_t start, int64_t end, int64_t step) {

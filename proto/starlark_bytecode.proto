@@ -15,7 +15,7 @@ message Block {
 }
 
 message OpCode {
-  // next_id: 108
+  // next_id: 110
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -70,6 +70,7 @@ message OpCode {
 
     GetIterator get_iterator = 40;
     ForIterator for_iterator = 41;
+    ForIterator for_iterator_ext = 109;
     EndIterator end_iterator = 42;
 
     Unpack unpack = 70;
@@ -138,6 +139,7 @@ message OpCode {
 
     End end = 58;
     Fail fail = 71;
+    Nop nop = 108;
   }
   SourceHighlight sh = 107;
 }
@@ -272,6 +274,7 @@ enum BlockType {
 
 message PopFrame {}
 
+message Nop {}
 message End {}
 message Fail {}
 

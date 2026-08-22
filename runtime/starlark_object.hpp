@@ -117,6 +117,7 @@ class starlark_iterator {
   virtual ~starlark_iterator();
   virtual bool has_next() const = 0;
   virtual starlark_obj* next() = 0;
+  virtual void next_ext();
   virtual void end_iterator() = 0;
 };
 
