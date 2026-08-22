@@ -166,7 +166,7 @@ TEST_F(FnTest, CallWithError) {
   error_handler error_callback;
 
   EXPECT_CALL(*fn_mock, Call(testing::_, testing::_, testing::_, testing::_, testing::_))
-      .WillOnce(testing::Invoke(fn_error));
+      .WillOnce(fn_error);
   auto* result = fn.call({}, {}, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
