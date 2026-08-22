@@ -17,9 +17,11 @@
 using ::starlark::bigint::number;
 using ::starlark::error_messages::error_v2_bad_operand_binary;
 using ::starlark::error_messages::error_v2_division_by_zero;
+using ::starlark::error_messages::error_v2_incomparable;
 using ::starlark::error_messages::error_v2_negative_shift;
 using ::starlark::error_messages::error_v2_overflow;
 using ::starlark::error_messages::error_v2_overflow_too_many_digits;
+using ::starlark::result::status_or;
 
 namespace starlark {
 namespace runtime {
@@ -32,6 +34,33 @@ std::string_view starlark_integer::type() const {
 
 bool starlark_integer::primitive() const {
   return true;
+}
+
+status_or<int> starlark_integer::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
+  switch (other.numeric_type()) {
+    case starlark_numeric_type::kFloat: {
+      if (std::isnan(other.as_float())) {
+        return status_or<int>(-1);
+      }
+      return status_or<int>(-cmp_fi(other.as_float(), as_int64()));
+    }
+    case starlark_numeric_type::kInt64: {
+      auto r = as_int64() <=> other.as_int64();
+      if (r == 0) {
+        return status_or<int>(0);
+      }
+      if (r < 0) {
+        return status_or<int>(-1);
+      }
+      return status_or<int>(1);
+    }
+    case starlark_numeric_type::kBigInt: {
+      return status_or<int>(cmp_ib(as_int64(), other.as_bigint()));
+    }
+    default:
+      error_callback.add_error(error_v2_incomparable(op, type(), other.type()));
+      return status_or<int>(starlark::result::status_code::kRuntimeError);
+  }
 }
 
 bool starlark_integer::inner_repr(printer& print, printer_action action) const {

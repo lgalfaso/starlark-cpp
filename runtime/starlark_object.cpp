@@ -200,6 +200,9 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_obj::metho
 }
 
 bool starlark_obj::equals(const starlark_obj& other) const {
+  if (&other == this) {
+    return true;
+  }
   equals_comparator cmp;
   cmp.add_task(equals_comparator::pending_task{
     .lhs = this,
