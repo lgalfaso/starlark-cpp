@@ -20,9 +20,6 @@ context::context(Arena& arena, const runtime_options& options) :
     false_value_(Arena::Create<starlark_bool>(&arena, false)),
     true_value_(Arena::Create<starlark_bool>(&arena, true)),
     none_value_(Arena::Create<starlark_none>(&arena)),
-    minus_one_(Arena::Create<starlark_integer>(&arena, -1)),
-    zero_(Arena::Create<starlark_integer>(&arena, 0)),
-    one_(Arena::Create<starlark_integer>(&arena, 1)),
     empty_bytes_(Arena::Create<starlark_bytes>(&arena, std::string_view())),
     empty_string_(Arena::Create<starlark_string>(&arena, std::string_view())) {
   runner_context_ = nullptr;
@@ -44,15 +41,15 @@ starlark_obj* context::none_value() const {
 }
 
 starlark_obj* context::minus_one() const {
-  return minus_one_;
+  return small_integers[-1 - MIN_SMALL_INT];
 }
 
 starlark_obj* context::zero() const {
-  return zero_;
+  return small_integers[0 - MIN_SMALL_INT];
 }
 
 starlark_obj* context::one() const {
-  return one_;
+  return small_integers[1 - MIN_SMALL_INT];
 }
 
 starlark_obj* context::empty_bytes() const {

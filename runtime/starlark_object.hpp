@@ -164,9 +164,6 @@ class context {
   starlark_obj* false_value_;
   starlark_obj* true_value_;
   starlark_obj* none_value_;
-  starlark_obj* minus_one_;
-  starlark_obj* zero_;
-  starlark_obj* one_;
   starlark_obj* empty_bytes_;
   starlark_obj* empty_string_;
   void* runner_context_;
@@ -188,7 +185,7 @@ class starlark_obj {
   virtual const std::vector<std::string>& dir() const;
   virtual const std::map<std::string, fn*, std::less<>>& methods_meta() const;
   bool equals(const starlark_obj& other) const;
-  starlark::result::status_or<int> cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
+  virtual starlark::result::status_or<int> cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const;
   int64_t hash() const;
   void freeze();
   virtual starlark_obj* call(const pos_args_t& pos_args, const named_args_t& named_args, context& ctx, error_fn& error_callback);
