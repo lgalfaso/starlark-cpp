@@ -31,6 +31,7 @@
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
+#include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
@@ -273,7 +274,7 @@ frame* run_program(
         stack.push_back(ctx.none_value());
         break;
       case OpCode::kConstInt:
-        stack.push_back(Arena::Create<starlark_integer>(&ctx.arena(), op_code.const_int().value()));
+        stack.push_back(create_integer(op_code.const_int().value(), ctx));
         break;
       case OpCode::kConstBigInt:
         stack.push_back(Arena::Create<starlark_bigint>(&ctx.arena(),
