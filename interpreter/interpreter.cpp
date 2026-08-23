@@ -7,6 +7,7 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <string_view>
@@ -102,7 +103,7 @@ using ::starlark::runtime::starlark_fn_type;
 using ::starlark::runtime::starlark_fn_zip;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
-using ::starlark::runtime::starlark_none;
+using ::starlark::runtime::starlark_numeric_type;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
@@ -115,6 +116,33 @@ namespace {
 
 frame* create_frame(Arena& arena, const RepeatedPtrField<std::string>* names) {
   return Arena::Create<frame>(&arena, names);
+}
+
+bool fast_equals(starlark_obj* lhs, starlark_obj* rhs) {
+  if (lhs == rhs) {
+    return true;
+  }
+  if (lhs->numeric_type() == starlark_numeric_type::kInt64 &&
+      rhs->numeric_type() == starlark_numeric_type::kInt64) {
+    return lhs->as_int64() == rhs->as_int64();
+  }
+  return lhs->equals(*rhs);
+}
+
+std::optional<int> fast_int_cmp(starlark_obj* lhs, starlark_obj* rhs) {
+  if (lhs->numeric_type() == starlark_numeric_type::kInt64 &&
+      rhs->numeric_type() == starlark_numeric_type::kInt64) {
+    auto l = lhs->as_int64();
+    auto r = rhs->as_int64();
+    if (l < r) {
+      return -1;
+    }
+    if (l > r) {
+      return 1;
+    }
+    return 0;
+  }
+  return std::nullopt;
 }
 
 class error_handler : public error_fn {
@@ -447,20 +475,24 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->equals(*element) ? ctx.true_value() : ctx.false_value());
+        stack.back() = (fast_equals(stack.back(), element) ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryBangEquals: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (stack.back()->equals(*element) ? ctx.false_value() : ctx.true_value());
+        stack.back() = (fast_equals(stack.back(), element) ? ctx.false_value() : ctx.true_value());
         break;
       }
       case OpCode::kBinaryLessThan: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
+        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+          stack.back() = (*cmp < 0 ? ctx.true_value() : ctx.false_value());
+          break;
+        }
         auto cmp = stack.back()->cmp(*element, "<", error_callback);
         if (!cmp.ok()) {
           break;
@@ -472,6 +504,10 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
+        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+          stack.back() = (*cmp <= 0 ? ctx.true_value() : ctx.false_value());
+          break;
+        }
         auto cmp = stack.back()->cmp(*element, "<=", error_callback);
         if (!cmp.ok()) {
           break;
@@ -483,6 +519,10 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
+        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+          stack.back() = (*cmp > 0 ? ctx.true_value() : ctx.false_value());
+          break;
+        }
         auto cmp = stack.back()->cmp(*element, ">", error_callback);
         if (!cmp.ok()) {
           break;
@@ -494,6 +534,10 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
+        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+          stack.back() = (*cmp >= 0 ? ctx.true_value() : ctx.false_value());
+          break;
+        }
         auto cmp = stack.back()->cmp(*element, ">=", error_callback);
         if (!cmp.ok()) {
           break;
