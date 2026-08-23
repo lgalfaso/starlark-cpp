@@ -223,6 +223,7 @@ class error_handler : public error_fn {
     state.inner = true;
     state.current_program_stack.push_back(state.current_program);
     state.current_program = base_program;
+    refresh_current_op_codes(state);
   }
 
  private:
@@ -294,8 +295,10 @@ frame* run_program(
     }
   }
 
+  refresh_current_op_codes(state);
+
   while (true) {
-    const auto& op_code = state.current_program.bytecode->block(state.block_ptr).op_code(state.instruction_ptr);
+    const auto& op_code = (*state.current_op_codes)[state.instruction_ptr];
     state.instruction_ptr++;
     switch (op_code.op_code_case()) {
       case OpCode::kConstNone:
@@ -896,6 +899,7 @@ frame* run_program(
           state.fns_in_stack.erase(state.call_fns.back());
         }
         state.call_fns.pop_back();
+        refresh_current_op_codes(state);
         break;
       }
       case OpCode::kLoadModule: {

@@ -229,6 +229,7 @@ starlark_obj* interpreter_function::call(
   state->inner = inner_;
   state->current_program_stack.push_back(state->current_program);
   state->current_program = current_program;
+  refresh_current_op_codes(*state);
   return ctx.none_value();
 }
 

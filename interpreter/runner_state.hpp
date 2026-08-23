@@ -8,8 +8,10 @@
 #include <utility>
 #include <vector>
 
+#include "google/protobuf/repeated_field.h"
 #include "interpreter/frame.hpp"
 #include "interpreter/module_loader.hpp"
+#include "proto/starlark_bytecode.pb.h"
 #include "runtime/starlark_object.hpp"
 #include "runtime/starlark_string.hpp"
 
@@ -45,10 +47,15 @@ struct runner_state {
   int instruction_ptr = 0;
   bool inner = false;
   program_info current_program;
+  const google::protobuf::RepeatedPtrField<starlark::bytecode::OpCode>* current_op_codes = nullptr;
   module_loader* loader = nullptr;
   std::vector<interpreter_function*> call_fns;
   std::map<interpreter_function*, int, less_fn> fns_in_stack;
 };
+
+inline void refresh_current_op_codes(runner_state& state) {
+  state.current_op_codes = &state.current_program.bytecode->block(state.block_ptr).op_code();
+}
 
 }  // namespace interpreter
 }  // namespace starlark
