@@ -137,6 +137,8 @@ class starlark_string : public starlark_obj {
   std::string::size_type size;
   std::string value;
   std::vector<std::string::size_type> value_index;
+  mutable bool hash_computed = false;
+  mutable int64_t cached_hash = 0;
   static constexpr std::string::size_type index_step = 64;
 };
 

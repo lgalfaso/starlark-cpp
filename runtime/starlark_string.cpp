@@ -1791,10 +1791,16 @@ void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* othe
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_string::inner_hash() const {
-  if (value.empty()) {
-    return 0;
+  if (hash_computed) {
+    return cached_hash;
   }
-  return static_cast<int64_t>(siphash(value.data(), value.length(), 0x243F6A8885A308D3, 0x13198A2E03707344));
+  if (value.empty()) {
+    cached_hash = 0;
+  } else {
+    cached_hash = static_cast<int64_t>(siphash(value.data(), value.length(), 0x243F6A8885A308D3, 0x13198A2E03707344));
+  }
+  hash_computed = true;
+  return cached_hash;
 }
 
 void starlark_string::build_index() {
