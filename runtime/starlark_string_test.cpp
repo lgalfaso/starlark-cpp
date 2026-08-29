@@ -1245,8 +1245,8 @@ TEST(StarlarkString, Format) {
   with_zero_one.push_back(ctx.zero());
   with_zero_one.push_back(ctx.one());
   pos_with_def.push_back(&def);
-  with_abc.insert("abc", &def);
-  with_dollar.insert("$", &def);
+  with_abc.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "abc"sv), &def);
+  with_dollar.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "$"sv), &def);
 
   test("{}", with_zero, empty_names, "0");
   test("abc{}def", with_zero, empty_names, "abc0def");
@@ -1927,7 +1927,7 @@ TEST(StarlarkString, CountWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("count", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2541,7 +2541,7 @@ TEST(StarlarkString, EndswithWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("endswith", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2956,7 +2956,7 @@ TEST(StarlarkString, StartswithWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("startswith", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3410,7 +3410,7 @@ TEST(StarlarkString, FindWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("find", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3777,7 +3777,7 @@ TEST(StarlarkString, IndexWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("index", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4126,7 +4126,7 @@ TEST(StarlarkString, RfindWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("rfind", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4493,7 +4493,7 @@ TEST(StarlarkString, RindexWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("rindex", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4678,7 +4678,7 @@ TEST(StarlarkString, JoinWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = str.dot("join", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4788,7 +4788,7 @@ TEST(StarlarkString, PartitionWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("x", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "x"sv), ctx.zero());
   auto* method = str.dot("partition", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4898,7 +4898,7 @@ TEST(StarlarkString, RpartitionWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("x", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "x"sv), ctx.zero());
   auto* method = str.dot("rpartition", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5229,7 +5229,7 @@ TEST(StarlarkString, ReplaceWithOldNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("replace", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5254,7 +5254,7 @@ TEST(StarlarkString, ReplaceWithCountNamedArguments) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&old);
   pos_args.push_back(&new_);
-  named_args.insert("count", ctx.one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "count"sv), ctx.one());
   auto* method = str.dot("replace", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5280,7 +5280,7 @@ TEST(StarlarkString, ReplaceWithCountPositionalAndNamedArguments) {
   pos_args.push_back(&old);
   pos_args.push_back(&new_);
   pos_args.push_back(ctx.one());
-  named_args.insert("count", ctx.one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "count"sv), ctx.one());
   auto* method = str.dot("replace", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5698,7 +5698,7 @@ TEST(StarlarkString, IsalnumWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("isalnum", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5720,7 +5720,7 @@ TEST(StarlarkString, IsalphaWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("isalpha", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5742,7 +5742,7 @@ TEST(StarlarkString, IsdigitWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("isdigit", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5764,7 +5764,7 @@ TEST(StarlarkString, IsspaceWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("isspace", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5786,7 +5786,7 @@ TEST(StarlarkString, IslowerWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("islower", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5808,7 +5808,7 @@ TEST(StarlarkString, IstitleWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("istitle", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5830,7 +5830,7 @@ TEST(StarlarkString, IsupperWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("isupper", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -5947,7 +5947,7 @@ TEST(StarlarkString, RemovesuffixWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("removesuffix", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6064,7 +6064,7 @@ TEST(StarlarkString, RemoveprefixWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("removeprefix", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6321,7 +6321,7 @@ TEST(StarlarkString, UpperWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("upper", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6342,7 +6342,7 @@ TEST(StarlarkString, TitleWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("title", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6363,7 +6363,7 @@ TEST(StarlarkString, LowerWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("lower", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6384,7 +6384,7 @@ TEST(StarlarkString, CapitalizeWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("capitalize", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6717,7 +6717,7 @@ TEST(StarlarkString, SplitWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&sep);
-  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
   auto* method = str.dot("split", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6739,8 +6739,8 @@ TEST(StarlarkString, SplitWithNamedArgumentsSep) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("sep", &sep);
-  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "sep"sv), &sep);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
   auto* method = str.dot("split", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6763,8 +6763,8 @@ TEST(StarlarkString, SplitWithNamedArgumentsSepDuplicate) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&sep);
-  named_args.insert("sep", &sep);
-  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "sep"sv), &sep);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
   auto* method = str.dot("split", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6788,7 +6788,7 @@ TEST(StarlarkString, SplitWithNamedArgumentsMaxsplitDuplicate) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&sep);
   pos_args.push_back(ctx.minus_one());
-  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
   auto* method = str.dot("split", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -6811,8 +6811,8 @@ TEST(StarlarkString, SplitWithNamedArgumentsUnknown) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&sep);
-  named_args.insert("maxsplit", ctx.minus_one());
-  named_args.insert("unknown", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "unknown"sv), ctx.minus_one());
   auto* method = str.dot("split", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7143,8 +7143,8 @@ TEST(StarlarkString, RsplitWithNamedArgumentsSep) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("sep", &sep);
-  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "sep"sv), &sep);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
   auto* method = str.dot("rsplit", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7167,8 +7167,8 @@ TEST(StarlarkString, RsplitWithNamedArgumentsSepDuplicate) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&sep);
-  named_args.insert("sep", &sep);
-  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "sep"sv), &sep);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
   auto* method = str.dot("rsplit", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7192,7 +7192,7 @@ TEST(StarlarkString, RsplitWithNamedArgumentsMaxsplitDuplicate) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&sep);
   pos_args.push_back(ctx.minus_one());
-  named_args.insert("maxsplit", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
   auto* method = str.dot("rsplit", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7215,8 +7215,8 @@ TEST(StarlarkString, RsplitWithNamedArgumentsUnknown) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&sep);
-  named_args.insert("maxsplit", ctx.minus_one());
-  named_args.insert("unknown", ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "maxsplit"sv), ctx.minus_one());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "unknown"sv), ctx.minus_one());
   auto* method = str.dot("rsplit", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7431,7 +7431,7 @@ TEST(StarlarkString, StripWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("cutset", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "cutset"sv), ctx.zero());
   auto* method = str.dot("strip", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7453,7 +7453,7 @@ TEST(StarlarkString, RstripWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("cutset", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "cutset"sv), ctx.zero());
   auto* method = str.dot("rstrip", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7475,7 +7475,7 @@ TEST(StarlarkString, LstripWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("cutset", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "cutset"sv), ctx.zero());
   auto* method = str.dot("lstrip", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7603,7 +7603,7 @@ TEST(StarlarkString, SplitlinesWithKeependsNamedArgument) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("keepends", ctx.true_value());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "keepends"sv), ctx.true_value());
   auto* method = str.dot("splitlines", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7625,7 +7625,7 @@ TEST(StarlarkString, SplitlinesWithKeependsPositionalAndNamedArgument) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.true_value());
-  named_args.insert("keepends", ctx.true_value());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "keepends"sv), ctx.true_value());
   auto* method = str.dot("splitlines", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7646,7 +7646,7 @@ TEST(StarlarkString, SplitlinesWithUnknownNamedArgument) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("unknown", ctx.true_value());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "unknown"sv), ctx.true_value());
   auto* method = str.dot("splitlines", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7709,7 +7709,7 @@ TEST(StarlarkString, ElemsWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("elems", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7772,7 +7772,7 @@ TEST(StarlarkString, ElemOrdsWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("elem_ords", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7835,7 +7835,7 @@ TEST(StarlarkString, CodepointsWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("codepoints", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -7898,7 +7898,7 @@ TEST(StarlarkString, CodepointOrdsWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("old", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "old"sv), ctx.zero());
   auto* method = str.dot("codepoint_ords", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());

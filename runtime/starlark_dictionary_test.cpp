@@ -914,7 +914,7 @@ TEST(StarlarkDictionary, GetWithNamedArgs) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
-  named_args.insert("one", &one);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "one"sv), &one);
   auto* method = dictionary.dot("get", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
@@ -1297,7 +1297,7 @@ TEST(StarlarkDictionary, PopWithNamedArgs) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
-  named_args.insert("one", &one);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "one"sv), &one);
   auto* method = dictionary.dot("pop", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
@@ -1412,7 +1412,7 @@ TEST(StarlarkDictionary, PopitemWithNamedArgs) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("one", &one);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "one"sv), &one);
   auto* method = dictionary.dot("popitem", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
@@ -1642,7 +1642,7 @@ TEST(StarlarkDictionary, SetdefaultWithNamedArgs) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   pos_args.push_back(&one);
-  named_args.insert("one", &one);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "one"sv), &one);
   auto* method = dictionary.dot("setdefault", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
@@ -1752,8 +1752,8 @@ TEST(StarlarkDictionary, UpdateFromNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert(s_two, &two);
-  named_args.insert(s_three, &three);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_two), &two);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_three), &three);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
@@ -1795,8 +1795,8 @@ TEST(StarlarkDictionary, UpdateFromNamedArgumentsAndIterable) {
   tuple2.add(ctx.none_value());
   list.append(&tuple2, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.insert(ss_two, &two);
-  named_args.insert(ss_three, &three);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), ss_two), &two);
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), ss_three), &three);
   auto* method = dictionary.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   auto* result = method->call(pos_args, named_args, ctx, error_callback);

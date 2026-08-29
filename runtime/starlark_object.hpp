@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "bigint/number.hpp"
-#include "containers/linked_hash_map.hpp"
 #include "google/protobuf/arena.h"
 #include "runtime/error_fn.hpp"
 #include "runtime/options.hpp"
@@ -173,7 +172,7 @@ class context {
 class starlark_obj {
  public:
   typedef std::vector<starlark_obj*> pos_args_t;
-  typedef starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>> named_args_t;
+  typedef std::vector<std::pair<starlark_obj*, starlark_obj*>> named_args_t;
   typedef starlark_obj* (fn)(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
   starlark_obj();
@@ -274,6 +273,7 @@ class starlark_obj {
 int64_t starlark_hash(std::span<int64_t> values);
 starlark_obj* create_function(context& ctx, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
 
+starlark_obj* find_named_arg(const starlark_obj::named_args_t& named_args, std::string_view key);
 starlark::result::status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
 starlark::result::status min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min);
 starlark::result::status max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max);

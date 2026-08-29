@@ -1701,7 +1701,7 @@ TEST(StarlarkList, AppendWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = list.dot("append", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -1766,7 +1766,7 @@ TEST(StarlarkList, ClearWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = list.dot("clear", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());

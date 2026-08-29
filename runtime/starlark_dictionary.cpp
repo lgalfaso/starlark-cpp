@@ -360,7 +360,7 @@ status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::n
     }
   }
   for (auto& [key, value] : named_args) {
-    values_.insert(Arena::Create<starlark_string>(&ctx.arena(), key), value);
+    values_.insert(key, value);
   }
   return ok_status();
 }

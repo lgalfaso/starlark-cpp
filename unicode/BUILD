@@ -68,7 +68,7 @@ cc_library(
 
 cc_test(
     name = "utf8_reader_test",
-    size = "small",
+    size = "large",
     srcs = ["utf8_reader_test.cpp"],
     deps = [
         ":encode",

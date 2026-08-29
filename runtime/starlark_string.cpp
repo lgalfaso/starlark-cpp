@@ -1551,12 +1551,12 @@ starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, 
       }
       append_with_conversion(pos_args[int_value], conversions[i], result);
     } else {
-      auto it = named_args.find(name);
-      if (it == named_args.end()) {
+      auto* named_value = find_named_arg(named_args, name);
+      if (named_value == nullptr) {
         error_callback.add_error(error_v2_dictionary_key_not_found(name));
         return nullptr;
       }
-      append_with_conversion(it->second, conversions[i], result);
+      append_with_conversion(named_value, conversions[i], result);
     }
   }
   result += parts.back();
@@ -2143,11 +2143,11 @@ starlark_obj* starlark_string_fn_partition(starlark_obj* this_obj, const starlar
 starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   starlark_obj* count = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "count") {
+    if (key->as_string() == "count") {
       assert(value != nullptr);
       count = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -2270,14 +2270,14 @@ starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_o
   starlark_obj* sep = nullptr;
   starlark_obj* maxsplit = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "sep") {
+    if (key->as_string() == "sep") {
       assert(value != nullptr);
       sep = value;
-    } else if (key == "maxsplit") {
+    } else if (key->as_string() == "maxsplit") {
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -2336,14 +2336,14 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
   starlark_obj* sep = nullptr;
   starlark_obj* maxsplit = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "sep") {
+    if (key->as_string() == "sep") {
       assert(value != nullptr);
       sep = value;
-    } else if (key == "maxsplit") {
+    } else if (key->as_string() == "maxsplit") {
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -2387,11 +2387,11 @@ starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starla
   assert(this_obj->type() == starlark_types::string_t);
   starlark_obj* keepends = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "keepends") {
+    if (key->as_string() == "keepends") {
       assert(value != nullptr);
       keepends = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }

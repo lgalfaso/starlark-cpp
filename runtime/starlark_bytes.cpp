@@ -940,11 +940,11 @@ starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_o
   starlark_obj* count = nullptr;
   // Context: https://github.com/python/cpython/pull/147943
   for (auto& [key, value] : named_args) {
-    if (key == "count") {
+    if (key->as_string() == "count") {
       assert(value != nullptr);
       count = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -1042,14 +1042,14 @@ starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_ob
   starlark_obj* sep = nullptr;
   starlark_obj* maxsplit = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "sep") {
+    if (key->as_string() == "sep") {
       assert(value != nullptr);
       sep = value;
-    } else if (key == "maxsplit") {
+    } else if (key->as_string() == "maxsplit") {
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -1109,14 +1109,14 @@ starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj
   starlark_obj* sep = nullptr;
   starlark_obj* maxsplit = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "sep") {
+    if (key->as_string() == "sep") {
       assert(value != nullptr);
       sep = value;
-    } else if (key == "maxsplit") {
+    } else if (key->as_string() == "maxsplit") {
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }

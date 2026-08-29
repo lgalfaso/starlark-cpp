@@ -265,11 +265,11 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
   // See: https://github.com/bazelbuild/starlark/issues/351
   starlark_obj* source = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "source") {
+    if (key->as_string() == "source") {
       assert(value != nullptr);
       source = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -403,14 +403,14 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
   starlark_obj* iterable = nullptr;
   starlark_obj* start = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "start") {
+    if (key->as_string() == "start") {
       assert(value != nullptr);
       start = value;
-    } else if (key == "iterable") {
+    } else if (key->as_string() == "iterable") {
       assert(value != nullptr);
       iterable = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -583,7 +583,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
   // Python allows the variation with zero parameters, so we allow it here.
   starlark_obj* base_param = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "base") {
+    if (key->as_string() == "base") {
       assert(value != nullptr);
       if (value->type() != starlark_types::int_t) {
         error_callback.add_error(error_v2_argument_interpreted_as_integer("base", value->type()));
@@ -591,7 +591,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       }
       base_param = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -712,13 +712,13 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   starlark_obj* key_fn = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "key") {
+    if (key->as_string() == "key") {
       assert(value != nullptr);
       if (value->type() != starlark_types::none_t) {
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -808,13 +808,13 @@ starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_ar
   }
   starlark_obj* key_fn = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "key") {
+    if (key->as_string() == "key") {
       assert(value != nullptr);
       if (value->type() != starlark_types::none_t) {
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -932,7 +932,7 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
 starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   std::string sep = " ";
   for (auto& [key, value] : named_args) {
-    if (key == "sep") {
+    if (key->as_string() == "sep") {
       assert(value != nullptr);
       if (value->type() != starlark_types::string_t) {
         error_callback.add_error(error_v2_argument_interpreted_as_string("sep", value->type()));
@@ -940,7 +940,7 @@ starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_
       }
       sep = value->str();
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -1079,18 +1079,18 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
   bool reverse = false;
   for (auto& [key, value] : named_args) {
     assert(value != nullptr);
-    if (key == "key") {
+    if (key->as_string() == "key") {
       if (value->type() != starlark_types::none_t) {
         key_fn = const_cast<starlark_obj*>(value);
       }
-    } else if (key == "reverse") {
+    } else if (key->as_string() == "reverse") {
       if (value->type() != starlark_types::bool_t) {
         error_callback.add_error(error_v2_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reverse", starlark_types::bool_t, value->type()));
         return nullptr;
       }
       reverse = value->truthy();
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }
@@ -1145,11 +1145,11 @@ starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_ar
   // See: https://github.com/bazelbuild/starlark/issues/351
   starlark_obj* object = nullptr;
   for (auto& [key, value] : named_args) {
-    if (key == "object") {
+    if (key->as_string() == "object") {
       assert(value != nullptr);
       object = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key));
+      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
       return nullptr;
     }
   }

@@ -103,57 +103,57 @@ status_or<runtime_options> parse_runtime_options(starlark_obj** error, starlark_
   auto allow_recursion = ctx.options().allow_recursion;
   for (auto& [key, value] : named_args) {
     if (value == nullptr) {
-      error_callback.add_error(std::format("invalid '{}' parameter (nullptr).", key));
+      error_callback.add_error(std::format("invalid '{}' parameter (nullptr).", key->as_string()));
       return status_or<runtime_options>(status_code::kRuntimeError);
     }
-    if (key == "print") {
+    if (key->as_string() == "print") {
       if (value->type() != starlark_types::string_t) {
-        error_callback.add_error(std::format("invalid '{}' parameter ({}).", key, value->type()));
+        error_callback.add_error(std::format("invalid '{}' parameter ({}).", key->as_string(), value->type()));
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       if (print == nullptr) {
-        error_callback.add_error(std::format("Unknown named argument '{}'.", key));
+        error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       *print = value;
-    } else if (key == "error_message") {
+    } else if (key->as_string() == "error_message") {
       if (value->type() != starlark_types::string_t) {
-        error_callback.add_error(std::format("invalid '{}' parameter ({}).", key, value->type()));
+        error_callback.add_error(std::format("invalid '{}' parameter ({}).", key->as_string(), value->type()));
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       if (error == nullptr) {
-        error_callback.add_error(std::format("Unknown named argument '{}'.", key));
+        error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       *error = value;
-    } else if (key == "allow_static_error") {
+    } else if (key->as_string() == "allow_static_error") {
       if (allow_static_error == nullptr) {
-        error_callback.add_error(std::format("Unknown named argument '{}'.", key));
+        error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       *allow_static_error = value->truthy();
-    } else if (key == "log2_max_bigint") {
+    } else if (key->as_string() == "log2_max_bigint") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       log2_max_bigint = *r;
-    } else if (key == "max_sequence_size") {
+    } else if (key->as_string() == "max_sequence_size") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       max_sequence_size = *r;
-    } else if (key == "max_string_length") {
+    } else if (key->as_string() == "max_string_length") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
       max_string_length = *r;
-    } else if (key == "allow_recursion") {
+    } else if (key->as_string() == "allow_recursion") {
       allow_recursion = value->truthy();
     } else {
-      error_callback.add_error(std::format("Unknown named argument '{}'.", key));
+      error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
       return status_or<runtime_options>(status_code::kRuntimeError);
     }
   }

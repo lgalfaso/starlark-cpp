@@ -731,6 +731,15 @@ int64_t starlark_hash(std::span<int64_t> values) {
   return acc;
 }
 
+starlark_obj* find_named_arg(const starlark_obj::named_args_t& named_args, std::string_view key) {
+  for (const auto& [k, v] : named_args) {
+    if (k->as_string() == key) {
+      return v;
+    }
+  }
+  return nullptr;
+}
+
 status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {
   if (!named_args.empty()) {
     error_callback.add_error(error_v2_no_keyword(fn_name));

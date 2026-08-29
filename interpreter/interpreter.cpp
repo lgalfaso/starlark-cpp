@@ -282,7 +282,6 @@ frame* run_program(
     context& ctx,
     logger& log) {
   std::vector<starlark_obj*> stack;
-  std::vector<std::string_view> sv_stack;
   runner_state state;
 
   state.current_program = starlark_program;
@@ -358,11 +357,13 @@ frame* run_program(
         break;
       case OpCode::kConstString:
         assert(op_code.const_string().const_string_pos() < state.current_program.bytecode->const_string().size());
+        assert(state.current_program.const_strings != nullptr);
         stack.push_back((*state.current_program.const_strings)[op_code.const_string().const_string_pos()]);
         break;
       case OpCode::kConstStringView:
         assert(op_code.const_string_view().const_string_pos() < state.current_program.bytecode->const_string().size());
-        sv_stack.push_back(state.current_program.bytecode->const_string(op_code.const_string_view().const_string_pos()));
+        assert(state.current_program.const_strings != nullptr);
+        stack.push_back((*state.current_program.const_strings)[op_code.const_string_view().const_string_pos()]);
         break;
       case OpCode::kConstBytes:
         stack.push_back(Arena::Create<starlark_bytes>(&ctx.arena(), op_code.const_bytes().value()));
@@ -658,62 +659,76 @@ frame* run_program(
         execute_call_pos(stack, op_code.call_pos().positional_count(), ctx, error_callback);
         break;
       case OpCode::kCallNamed: {
-        int args_count = op_code.call_named().positional_arguments_count() +
-            op_code.call_named().named_arguments_count();
+        const int named_count = op_code.call_named().named_arguments_count();
+        int args_count = op_code.call_named().positional_arguments_count() + 2 * named_count;
         assert(stack.size() >= static_cast<std::size_t>(args_count) + 1);
-        assert(sv_stack.size() >= static_cast<std::size_t>(op_code.call_named().named_arguments_count()));
-        starlark_obj::pos_args_t pos_args;
-        starlark_obj::named_args_t named_args;
+        const std::size_t args_base = stack.size() - args_count;
+        state.call_pos_args.clear();
+        state.call_pos_args.reserve(op_code.call_named().positional_arguments_count());
         for (int i = 0; i < op_code.call_named().positional_arguments_count(); ++i) {
-          pos_args.push_back(stack[stack.size() - args_count + i]);
+          state.call_pos_args.push_back(stack[args_base + i]);
         }
-        for (int i = 0; i < op_code.call_named().named_arguments_count(); ++i) {
-          auto* value = stack[stack.size() - args_count + op_code.call_named().positional_arguments_count() + i];
-          named_args.insert(sv_stack[sv_stack.size() - op_code.call_named().named_arguments_count() + i], value);
+        state.call_named_args.clear();
+        for (int i = 0; i < named_count; ++i) {
+          auto* key_obj = static_cast<starlark_string*>(stack[args_base + op_code.call_named().positional_arguments_count() + 2 * i]);
+          auto* value = stack[args_base + op_code.call_named().positional_arguments_count() + 2 * i + 1];
+          state.call_named_args.emplace_back(key_obj, value);
         }
         stack.resize(stack.size() - args_count, nullptr);
-        sv_stack.resize(sv_stack.size() - op_code.call_named().named_arguments_count(), std::string_view{});
-        stack.back() = stack.back()->call(pos_args, named_args, ctx, error_callback);
+        stack.back() = stack.back()->call(state.call_pos_args, state.call_named_args, ctx, error_callback);
         break;
       }
       case OpCode::kCallPosStar:
         execute_call_pos_star(stack, op_code.call_pos_star().positional_arguments_count(), ctx, error_callback);
         break;
       case OpCode::kCall: {
-        int args_count = op_code.call().positional_arguments_count() +
-            op_code.call().named_arguments_count() +
-            (op_code.call().has_variadic_positional_argument() ? 1 : 0) +
-            (op_code.call().has_variadic_named_argument() ? 1 : 0);
+        const auto& call = op_code.call();
+        const int named_count = call.named_arguments_count();
+        const int positional_count = call.positional_arguments_count();
+        int args_count = positional_count +
+            2 * named_count +
+            (call.has_variadic_positional_argument() ? 1 : 0) +
+            (call.has_variadic_named_argument() ? 1 : 0);
         assert(stack.size() >= args_count + 1);
-        assert(sv_stack.size() >= op_code.call().named_arguments_count());
-        starlark_obj::pos_args_t pos_args;
-        starlark_obj::named_args_t named_args;
-        for (int i = 0; i < op_code.call().positional_arguments_count(); ++i) {
-          pos_args.push_back(stack[stack.size() - args_count + i]);
+        const std::size_t args_base = stack.size() - args_count;
+        const std::size_t named_args_base = args_base + positional_count;
+        state.call_pos_args.clear();
+        state.call_pos_args.reserve(positional_count);
+        state.call_named_args.clear();
+        for (int i = 0; i < positional_count; ++i) {
+          state.call_pos_args.push_back(stack[args_base + i]);
         }
-        for (int i = 0; i < op_code.call().named_arguments_count(); ++i) {
-          auto* value = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + i];
-          named_args.insert(sv_stack[sv_stack.size() - op_code.call().named_arguments_count() + i], value);
+        for (int i = 0; i < named_count; ++i) {
+          auto* key_obj = static_cast<starlark_string*>(stack[named_args_base + 2 * i]);
+          auto* value = stack[named_args_base + 2 * i + 1];
+          state.call_named_args.emplace_back(key_obj, value);
         }
-        if (op_code.call().has_variadic_positional_argument()) {
-          auto* iterable = stack[stack.size() - args_count + op_code.call().positional_arguments_count() + op_code.call().named_arguments_count()];
+        if (call.has_variadic_positional_argument()) {
+          auto* iterable = stack[named_args_base + 2 * named_count];
           auto* it = iterable->get_iterator(true, ctx, error_callback);
           if (it == nullptr) {
             break;
           }
           while (it->has_next()) {
-            pos_args.push_back(it->next());
+            state.call_pos_args.push_back(it->next());
           }
           it->end_iterator();
         }
-        if (op_code.call().has_variadic_named_argument()) {
-          auto* iterable = stack.back();
+        if (call.has_variadic_named_argument()) {
+          auto* kwargs_dict = static_cast<starlark_dictionary*>(stack.back());
           // TODO(lmirelmann): This should be generalized if we want to support other types that are mappings.
-          if (iterable->type() != starlark_types::dict_t) {
-            error_callback.add_error(error_v2_expect_mapping_after_star_star(iterable->type()));
+          if (kwargs_dict->type() != starlark_types::dict_t) {
+            error_callback.add_error(error_v2_expect_mapping_after_star_star(kwargs_dict->type()));
             return nullptr;
           }
-          auto* it = iterable->get_iterator(true, ctx, error_callback);
+          for (int i = 0; i < named_count; ++i) {
+            auto* key_obj = static_cast<starlark_string*>(stack[named_args_base + 2 * i]);
+            if (kwargs_dict->binary_in(*key_obj, error_callback)) {
+              error_callback.add_error(error_v2_multiple_values_for_keyword(key_obj->as_string()));
+              return nullptr;
+            }
+          }
+          auto* it = kwargs_dict->get_iterator(true, ctx, error_callback);
           if (it == nullptr) {
             // Should not happen.
             break;
@@ -724,21 +739,17 @@ frame* run_program(
               error_callback.add_error(error_v2_keyword_must_be_string());
               return nullptr;
             }
-            auto* value = iterable->index(*key, ctx, error_callback);
+            auto* value = kwargs_dict->index(*key, ctx, error_callback);
             if (value == nullptr) {
               // Should not happen.
               return nullptr;
             }
-            if (!named_args.insert(key->as_string(), value).second) {
-              error_callback.add_error(error_v2_multiple_values_for_keyword(key->as_string()));
-              return nullptr;
-            }
+            state.call_named_args.emplace_back(key, value);
           }
           it->end_iterator();
         }
         stack.resize(stack.size() - args_count, nullptr);
-        sv_stack.resize(sv_stack.size() - op_code.call().named_arguments_count(), std::string_view{});
-        stack.back() = stack.back()->call(pos_args, named_args, ctx, error_callback);
+        stack.back() = stack.back()->call(state.call_pos_args, state.call_named_args, ctx, error_callback);
         break;
       }
       case OpCode::kGetIterator:

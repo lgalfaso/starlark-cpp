@@ -51,6 +51,8 @@ struct runner_state {
   module_loader* loader = nullptr;
   std::vector<interpreter_function*> call_fns;
   std::map<interpreter_function*, int, less_fn> fns_in_stack;
+  starlark::runtime::starlark_obj::pos_args_t call_pos_args;
+  starlark::runtime::starlark_obj::named_args_t call_named_args;
 };
 
 inline void refresh_current_op_codes(runner_state& state) {

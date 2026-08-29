@@ -13,6 +13,7 @@
 #include "runtime/starlark_list.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_set.hpp"
+#include "runtime/starlark_string.hpp"
 #include "runtime/starlark_testing.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
@@ -26,12 +27,14 @@ using ::starlark::runtime::starlark_list;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_set;
+using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
 using ::testing::ElementsAre;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
+using ::std::literals::string_view_literals::operator""sv;
 
 namespace {
 
@@ -851,7 +854,7 @@ TEST(StarlarkSet, AddWithNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(ctx.zero());
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("add", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -938,7 +941,7 @@ TEST(StarlarkSet, ClearWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("clear", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -1173,7 +1176,7 @@ TEST(StarlarkSet, DifferenceWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("difference", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -1401,7 +1404,7 @@ TEST(StarlarkSet, DifferenceUpdateWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("difference_update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -1540,7 +1543,7 @@ TEST(StarlarkSet, DiscardWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("discard", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -1778,7 +1781,7 @@ TEST(StarlarkSet, IntersectionWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("intersection", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2010,7 +2013,7 @@ TEST(StarlarkSet, IntersectionUpdateWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("intersection_update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2351,7 +2354,7 @@ TEST(StarlarkSet, IsdisjointWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("isdisjoint", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -2692,7 +2695,7 @@ TEST(StarlarkSet, IssubsetWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("issubset", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3033,7 +3036,7 @@ TEST(StarlarkSet, IssupersetWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("issuperset", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3142,7 +3145,7 @@ TEST(StarlarkSet, PopWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("pop", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3281,7 +3284,7 @@ TEST(StarlarkSet, RemoveWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("remove", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3511,7 +3514,7 @@ TEST(StarlarkSet, SymmetricDifferenceWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("symmetric_difference", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3736,7 +3739,7 @@ TEST(StarlarkSet, SymmetricDifferenceUpdateWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("symmetric_difference_update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -3966,7 +3969,7 @@ TEST(StarlarkSet, UnionWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("union", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());
@@ -4190,7 +4193,7 @@ TEST(StarlarkSet, UpdateWithNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.insert("zero", ctx.zero());
+  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), "zero"sv), ctx.zero());
   auto* method = set.dot("update", ctx, error_callback);
   ASSERT_NE(nullptr, method);
   EXPECT_THAT(error_callback.messages, IsEmpty());

@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "containers/linked_hash_map.hpp"
 #include "interpreter/runner_state.hpp"
 #include "string/levenshtein.hpp"
 #include "errors/runtime_error_messages.hpp"
@@ -32,6 +33,8 @@ using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
+
+using kwargs_map_t = starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>>;
 
 namespace starlark {
 namespace interpreter {
@@ -355,7 +358,7 @@ starlark_obj* interpreter_function::call(
   state->call_fns.push_back(this);
   auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
   starlark_obj::pos_args_t args;
-  starlark_obj::named_args_t kwargs;
+  kwargs_map_t kwargs;
   int next_positional_param = 0;
   const auto& function_signature = current_program.bytecode->block(entrypoint).function_signature();
   int number_of_standard_params = function_signature.param().size();
@@ -387,25 +390,25 @@ starlark_obj* interpreter_function::call(
   }
   // Process the named arguments.
   for (auto& kwparam : named_args) {
-    auto it = named_argument_index.find(kwparam.first);
+    auto it = named_argument_index.find(kwparam.first->as_string());
     if (it == named_argument_index.end()) {
       if (function_signature.has_star_star_argument()) {
-        kwargs.insert(kwparam.first, kwparam.second);
+        kwargs.insert(kwparam.first->as_string(), kwparam.second);
       } else {
         std::vector<std::string> all_candidates;
         for (const auto& param : function_signature.param()) {
           all_candidates.emplace_back(param.name());
         }
-        auto candidate = starlark::string::levenshtein(kwparam.first, all_candidates);
+        auto candidate = starlark::string::levenshtein(kwparam.first->as_string(), all_candidates);
         if (candidate >= 0) {
           error_callback.add_error(error_v2_unexpected_keyword_argument_with_hint(
               function_signature.fn_name(),
-              kwparam.first,
+              kwparam.first->as_string(),
               all_candidates[candidate]), all_candidates[candidate]);
         } else {
           error_callback.add_error(error_v2_unexpected_keyword_argument(
               function_signature.fn_name(),
-              kwparam.first));
+              kwparam.first->as_string()));
         }
         return nullptr;
       }
@@ -415,7 +418,7 @@ starlark_obj* interpreter_function::call(
     if (filled_elements[pos]) {
       error_callback.add_error(error_v2_multiple_values_for_argument(
           function_signature.fn_name(),
-          kwparam.first));
+          kwparam.first->as_string()));
       return nullptr;
     }
     new_frame->elements[function_signature.param(pos).pos().pos_in_frame()] = kwparam.second;
