@@ -305,6 +305,12 @@ starlark_obj* starlark_obj::call(const starlark_obj::pos_args_t& pos_args, const
   return nullptr;
 }
 
+starlark_obj* starlark_obj::call_pos(std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback) {
+  starlark_obj::pos_args_t pos_args_vec(pos_args.begin(), pos_args.end());
+  starlark_obj::named_args_t named_args;
+  return call(pos_args_vec, named_args, ctx, error_callback);
+}
+
 void starlark_obj::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   error_callback.add_error(error_v2_unpackable(type()));
 }

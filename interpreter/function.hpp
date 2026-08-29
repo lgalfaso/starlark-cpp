@@ -36,6 +36,34 @@ class interpreter_function : public starlark::runtime::starlark_function {
       const starlark::runtime::starlark_obj::named_args_t& named_args,
       starlark::runtime::context& ctx,
       starlark::runtime::error_fn& error_callback) override;
+  starlark::runtime::starlark_obj* call_pos(
+      std::span<starlark::runtime::starlark_obj*> pos_args,
+      starlark::runtime::context& ctx,
+      starlark::runtime::error_fn& error_callback) override;
+
+ private:
+  starlark::runtime::starlark_obj* call_pos_general(
+      std::span<starlark::runtime::starlark_obj*> pos_args,
+      starlark::runtime::context& ctx,
+      starlark::runtime::error_fn& error_callback);
+
+ public:
+  starlark::runtime::starlark_obj* call_pos_fixed_0(starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
+  starlark::runtime::starlark_obj* call_pos_fixed_1(
+      starlark::runtime::starlark_obj* arg0,
+      starlark::runtime::context& ctx,
+      starlark::runtime::error_fn& error_callback);
+  starlark::runtime::starlark_obj* call_pos_fixed_2(
+      starlark::runtime::starlark_obj* arg0,
+      starlark::runtime::starlark_obj* arg1,
+      starlark::runtime::context& ctx,
+      starlark::runtime::error_fn& error_callback);
+  starlark::runtime::starlark_obj* call_pos_fixed_3(
+      starlark::runtime::starlark_obj* arg0,
+      starlark::runtime::starlark_obj* arg1,
+      starlark::runtime::starlark_obj* arg2,
+      starlark::runtime::context& ctx,
+      starlark::runtime::error_fn& error_callback);
 
  protected:
   bool inner_equals(starlark::runtime::equals_comparator& comp, const starlark::runtime::starlark_obj* other) const override;
@@ -43,6 +71,11 @@ class interpreter_function : public starlark::runtime::starlark_function {
   void inner_freeze(std::vector<starlark::runtime::starlark_obj*>& to_freeze) override;
 
  private:
+  void compute_simple_call_metadata();
+  bool begin_call(runner_state* state, starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
+  void commit_frame(frame* new_frame, runner_state* state, starlark::runtime::context& ctx);
+  void apply_keyword_only_defaults(frame* new_frame);
+
   int entrypoint;
   std::vector<starlark::runtime::starlark_obj*> default_arguments;
   std::map<std::string_view, std::size_t> named_argument_index;
@@ -51,6 +84,12 @@ class interpreter_function : public starlark::runtime::starlark_function {
   starlark::runtime::starlark_obj* default_parameters;
   runner_state::program_info current_program;
   const bool inner_;
+
+  int simple_positional_arity_ = -1;
+  std::vector<int> positional_param_frame_pos_;
+  int keyword_only_param_start_ = 0;
+  int keyword_only_param_count_ = 0;
+  int keyword_only_default_offset_ = 0;
 
   friend std::strong_ordering cmp_fn(const interpreter_function* lhs, const interpreter_function* rhs, bool compare_stack);
 };
@@ -65,4 +104,3 @@ starlark::runtime::starlark_obj* starlark_fn_sorted_impl(starlark::runtime::star
 #pragma GCC visibility pop
 
 #endif  // INTERPRETER_FUNCTION_HPP_
-

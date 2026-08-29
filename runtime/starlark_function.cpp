@@ -156,6 +156,12 @@ starlark_obj* starlark_built_in_function::call(const starlark_obj::pos_args_t& p
   return native_fn(this_obj, pos_args, named_args, ctx, error_callback);
 }
 
+starlark_obj* starlark_built_in_function::call_pos(std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback) {
+  starlark_obj::pos_args_t pos_args_vec(pos_args.begin(), pos_args.end());
+  starlark_obj::named_args_t named_args;
+  return native_fn(this_obj, pos_args_vec, named_args, ctx, error_callback);
+}
+
 starlark_function::starlark_function(std::string_view fn_name, std::string_view module_name) : fn_name(fn_name), module_name(module_name) {}
 
 std::string_view starlark_function::type() const {

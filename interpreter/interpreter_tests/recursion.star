@@ -18,3 +18,33 @@ def fibonacci(n):
 
 print(fibonacci(6))
 """, allow_recursion = True, print = "8\n")
+
+assert_fail("""
+def foo(a, b, c):
+  return foo(a, b, c)
+
+foo(1, 2, 3)
+""", error_message = """function 'foo' called recursively
+    2 |   return foo(a, b, c)
+      |          ~~~^^^^^^^^^
+""")
+
+assert_fail("""
+def foo(a, b, c, d):
+  return foo(a, b, c, d)
+
+foo(1, 2, 3, 4)
+""", error_message = """function 'foo' called recursively
+    2 |   return foo(a, b, c, d)
+      |          ~~~^^^^^^^^^^^^
+""")
+
+assert_fail("""
+def foo(a):
+  return foo(a=a)
+
+foo(1)
+""", error_message = """function 'foo' called recursively
+    2 |   return foo(a=a)
+      |          ~~~^^^^^
+""")

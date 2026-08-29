@@ -9,6 +9,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -72,6 +73,7 @@ using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
 using ::starlark::runtime::starlark_built_in_functions;
 using ::starlark::runtime::starlark_bytes;
+using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_fn_abs;
@@ -143,6 +145,46 @@ std::optional<int> fast_int_cmp(starlark_obj* lhs, starlark_obj* rhs) {
     return 0;
   }
   return std::nullopt;
+}
+
+void execute_call_pos(std::vector<starlark_obj*>& stack, std::size_t arg_count, context& ctx, error_fn& error_callback) {
+  assert(stack.size() >= arg_count + 1);
+  const std::size_t callee_idx = stack.size() - arg_count - 1;
+  starlark_obj* callee = stack[callee_idx];
+  // CallPos0 handles zero-argument calls; the compiler only emits CallPos for 4+ arguments.
+  starlark_obj* result = callee->call_pos(
+      std::span<starlark_obj*>(stack.data() + callee_idx + 1, arg_count),
+      ctx,
+      error_callback);
+  stack.resize(callee_idx + 1, nullptr);
+  stack.back() = result;
+}
+
+void execute_call_pos_star(
+    std::vector<starlark_obj*>& stack,
+    int pos_count,
+    context& ctx,
+    error_fn& error_callback) {
+  const int args_count = pos_count + 1;
+  assert(stack.size() >= static_cast<std::size_t>(args_count) + 1);
+  starlark_obj::pos_args_t pos_args;
+  for (int i = 0; i < pos_count; ++i) {
+    pos_args.push_back(stack[stack.size() - args_count + i]);
+  }
+  auto* iterable = stack[stack.size() - args_count + pos_count];
+  auto* it = iterable->get_iterator(true, ctx, error_callback);
+  if (it == nullptr) {
+    return;
+  }
+  while (it->has_next()) {
+    pos_args.push_back(it->next());
+  }
+  it->end_iterator();
+  const std::size_t callee_idx = stack.size() - args_count - 1;
+  starlark_obj* callee = stack[callee_idx];
+  starlark_obj* result = callee->call_pos(pos_args, ctx, error_callback);
+  stack.resize(callee_idx + 1, nullptr);
+  stack.back() = result;
 }
 
 class error_handler : public error_fn {
@@ -582,6 +624,61 @@ frame* run_program(
       BINARY_OP(OpCode::kBinarySlash, binary_slash)
       BINARY_OP(OpCode::kBinarySlashSlash, binary_slash_slash)
 #undef BINARY_OP
+      case OpCode::kCallPos0:
+        stack.back() = stack.back()->call_pos({}, ctx, error_callback);
+        break;
+      case OpCode::kCallPos1: {
+        starlark_obj* arg0 = stack.back();
+        stack.pop_back();
+        starlark_obj* args[1] = {arg0};
+        stack.back() = stack.back()->call_pos(std::span<starlark_obj*>(args, 1), ctx, error_callback);
+        break;
+      }
+      case OpCode::kCallPos2: {
+        starlark_obj* arg1 = stack.back();
+        stack.pop_back();
+        starlark_obj* arg0 = stack.back();
+        stack.pop_back();
+        starlark_obj* args[2] = {arg0, arg1};
+        stack.back() = stack.back()->call_pos(std::span<starlark_obj*>(args, 2), ctx, error_callback);
+        break;
+      }
+      case OpCode::kCallPos3: {
+        starlark_obj* arg2 = stack.back();
+        stack.pop_back();
+        starlark_obj* arg1 = stack.back();
+        stack.pop_back();
+        starlark_obj* arg0 = stack.back();
+        stack.pop_back();
+        starlark_obj* args[3] = {arg0, arg1, arg2};
+        stack.back() = stack.back()->call_pos(std::span<starlark_obj*>(args, 3), ctx, error_callback);
+        break;
+      }
+      case OpCode::kCallPos:
+        execute_call_pos(stack, op_code.call_pos().positional_count(), ctx, error_callback);
+        break;
+      case OpCode::kCallNamed: {
+        int args_count = op_code.call_named().positional_arguments_count() +
+            op_code.call_named().named_arguments_count();
+        assert(stack.size() >= static_cast<std::size_t>(args_count) + 1);
+        assert(sv_stack.size() >= static_cast<std::size_t>(op_code.call_named().named_arguments_count()));
+        starlark_obj::pos_args_t pos_args;
+        starlark_obj::named_args_t named_args;
+        for (int i = 0; i < op_code.call_named().positional_arguments_count(); ++i) {
+          pos_args.push_back(stack[stack.size() - args_count + i]);
+        }
+        for (int i = 0; i < op_code.call_named().named_arguments_count(); ++i) {
+          auto* value = stack[stack.size() - args_count + op_code.call_named().positional_arguments_count() + i];
+          named_args.insert(sv_stack[sv_stack.size() - op_code.call_named().named_arguments_count() + i], value);
+        }
+        stack.resize(stack.size() - args_count, nullptr);
+        sv_stack.resize(sv_stack.size() - op_code.call_named().named_arguments_count(), std::string_view{});
+        stack.back() = stack.back()->call(pos_args, named_args, ctx, error_callback);
+        break;
+      }
+      case OpCode::kCallPosStar:
+        execute_call_pos_star(stack, op_code.call_pos_star().positional_arguments_count(), ctx, error_callback);
+        break;
       case OpCode::kCall: {
         int args_count = op_code.call().positional_arguments_count() +
             op_code.call().named_arguments_count() +

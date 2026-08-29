@@ -1,0 +1,3 @@
+main:5:5: error: '<=' not supported between instances of 'function' and 'function'
+    5 | foo <= foo
+      |     ^^

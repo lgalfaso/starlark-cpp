@@ -93,6 +93,16 @@ foo()
       | ~~~^^
 """)
 
+assert_fail("""
+def foo(a, *, bar):
+  pass
+
+foo(a=1)
+""", error_message = """foo() missing required keyword-only argument 'bar'
+    4 | foo(a=1)
+      | ~~~^^^^^
+""")
+
 x = []
 def y(p1, p2 = 2, *, p3 = 3, p4):
   x.append(p1)
@@ -102,3 +112,66 @@ def y(p1, p2 = 2, *, p3 = 3, p4):
 
 y(1, p4 = 4)
 assert_eq(x, [1, 2, 3, 4])
+
+# Keyword-only defaults applied on the positional call fast path (CallPos0-3).
+def kwonly0(*, a = 10, b = 20):
+  return a + b
+
+assert_eq(kwonly0(), 30)
+
+def kwonly1(x, *, a = 10):
+  return x + a
+
+assert_eq(kwonly1(1), 11)
+
+def kwonly2(x, y, *, a = 10):
+  return x + y + a
+
+assert_eq(kwonly2(1, 2), 13)
+
+def kwonly3(x, y, z, *, a = 10):
+  return x + y + z + a
+
+assert_eq(kwonly3(1, 2, 3), 16)
+
+# Positional defaults precede keyword-only defaults in the default-argument list.
+def kwonly_offset(x, y = 5, *, a = 10, b = 20):
+  return (x, y, a, b)
+
+assert_eq(kwonly_offset(1, 2), (1, 2, 10, 20))
+
+# Keyword-only defaults on the general positional path (4+ positional params).
+def kwonly4(a, b, c, d, *, x = 10, y = 20):
+  return (a, b, c, d, x, y)
+
+assert_eq(kwonly4(1, 2, 3, 4), (1, 2, 3, 4, 10, 20))
+
+# Fewer positional args than arity, plus keyword-only defaults.
+def kwonly_partial(a, b = 5, *, x = 10):
+  return (a, b, x)
+
+assert_eq(kwonly_partial(1), (1, 5, 10))
+
+# Keyword-only defaults with *args (no positional fast path).
+def kwonly_star(a, *args, x = 10):
+  return (a, args, x)
+
+assert_eq(kwonly_star(1, 2, 3), (1, (2, 3), 10))
+
+# Keyword-only defaults with **kwargs (no positional fast path).
+def kwonly_starstar(*, x = 10, **kwargs):
+  return (x, kwargs)
+
+assert_eq(kwonly_starstar(), (10, {}))
+
+# Multiple keyword-only defaults on call_pos_general; default_argument_pos must
+# advance for each keyword-only parameter that has a default.
+def kwonly_general_defaults(a, b, c, d = 40, *, x = 10, y = 20):
+  return (a, b, c, d, x, y)
+
+assert_eq(kwonly_general_defaults(1, 2, 3), (1, 2, 3, 40, 10, 20))
+
+def kwonly_two_defaults(a, b, c, d, *, w = 1, x = 2, y = 3, z = 4):
+  return (a, b, c, d, w, x, y, z)
+
+assert_eq(kwonly_two_defaults(1, 2, 3, 4), (1, 2, 3, 4, 1, 2, 3, 4))

@@ -2,6 +2,18 @@ assert_eq(len([]), 0)
 assert_eq(dict(), {})
 assert_eq(dict(a = 1), {'a': 1})
 assert_eq(list(range(*[2, 10, 3])), [2, 5, 8])
+
+def collect(a, b, *rest):
+  return [a, b] + list(rest)
+
+assert_eq(collect(1, 2, *[3, 4]), [1, 2, 3, 4])
+assert_eq(collect(1, 2, *[]), [1, 2])
+
+def collect3(a, b, c, *rest):
+  return [a, b, c] + list(rest)
+
+assert_eq(collect3(1, 2, 3, *[4, 5]), [1, 2, 3, 4, 5])
+
 assert_eq(dict(**{'a': 1, 'b': 2}), {'a': 1, 'b': 2})
 assert_fail("""
 len(*1)

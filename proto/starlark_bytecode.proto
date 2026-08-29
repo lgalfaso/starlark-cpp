@@ -15,7 +15,7 @@ message Block {
 }
 
 message OpCode {
-  // next_id: 110
+  // next_id: 117
   oneof op_code {
     // There are no op codes for `True` and `False` as they are not reserved words.
     // https://github.com/bazelbuild/starlark/issues/312
@@ -129,6 +129,13 @@ message OpCode {
     SliceRange assign_slice_range_greater_greater_equals = 105;
 
     Call call = 56;
+    CallPos0 call_pos0 = 110;
+    CallPos1 call_pos1 = 111;
+    CallPos2 call_pos2 = 112;
+    CallPos3 call_pos3 = 113;
+    CallPos call_pos = 114;
+    CallNamed call_named = 115;
+    CallPosStar call_pos_star = 116;
     LoadModule load_module = 57;
     Return return = 62;
 
@@ -240,6 +247,24 @@ message Call {
   int32 named_arguments_count = 2;
   bool has_variadic_positional_argument = 3;
   bool has_variadic_named_argument = 4;
+}
+
+message CallPos0 {}
+message CallPos1 {}
+message CallPos2 {}
+message CallPos3 {}
+
+message CallPos {
+  uint32 positional_count = 1;
+}
+
+message CallNamed {
+  int32 positional_arguments_count = 1;
+  int32 named_arguments_count = 2;
+}
+
+message CallPosStar {
+  int32 positional_arguments_count = 1;
 }
 
 message LoadModule {

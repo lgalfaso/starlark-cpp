@@ -1,0 +1,3 @@
+main:3:13: error: function 'foo' called recursively
+    3 |   return foo(a=a)
+      |          ~~~^^^^^

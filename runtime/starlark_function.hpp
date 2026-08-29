@@ -68,6 +68,7 @@ class starlark_built_in_function : public starlark_obj {
   std::string_view type() const override;
   bool truthy() const override;
   starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override;
+  starlark_obj* call_pos(std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback) override;
 
  protected:
   starlark_obj* const this_obj;

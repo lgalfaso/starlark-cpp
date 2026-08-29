@@ -1071,11 +1071,39 @@ void bytecode_generator::exit_call_expression(const CallExpr* call_expression) {
     }
   }
   auto* new_op = mutable_block()->add_op_code();
-  auto* call = new_op->mutable_call();
-  call->set_positional_arguments_count(pos_arguments);
-  call->set_named_arguments_count(named_arguments);
-  call->set_has_variadic_positional_argument(variadic_pos_arg);
-  call->set_has_variadic_named_argument(variadic_named_arg);
+  if (!variadic_pos_arg && !variadic_named_arg) {
+    if (named_arguments == 0) {
+      switch (pos_arguments) {
+        case 0:
+          new_op->mutable_call_pos0();
+          break;
+        case 1:
+          new_op->mutable_call_pos1();
+          break;
+        case 2:
+          new_op->mutable_call_pos2();
+          break;
+        case 3:
+          new_op->mutable_call_pos3();
+          break;
+        default:
+          new_op->mutable_call_pos()->set_positional_count(pos_arguments);
+          break;
+      }
+    } else {
+      auto* call_named = new_op->mutable_call_named();
+      call_named->set_positional_arguments_count(pos_arguments);
+      call_named->set_named_arguments_count(named_arguments);
+    }
+  } else if (variadic_pos_arg && !variadic_named_arg && named_arguments == 0) {
+    new_op->mutable_call_pos_star()->set_positional_arguments_count(pos_arguments);
+  } else {
+    auto* call = new_op->mutable_call();
+    call->set_positional_arguments_count(pos_arguments);
+    call->set_named_arguments_count(named_arguments);
+    call->set_has_variadic_positional_argument(variadic_pos_arg);
+    call->set_has_variadic_named_argument(variadic_named_arg);
+  }
   *new_op->mutable_sh()->mutable_start() = call_expression->pif().start();
   *new_op->mutable_sh()->mutable_highlight_start() = call_expression->primary_expression().pif().end();
   *new_op->mutable_sh()->mutable_highlight_end() = call_expression->pif().end();
