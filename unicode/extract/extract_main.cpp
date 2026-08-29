@@ -1,5 +1,6 @@
 // Copyright 2024-2026 Lucas Mirelmann
 
+#include <cstdlib>
 #include <cstring>
 
 #include <algorithm>
