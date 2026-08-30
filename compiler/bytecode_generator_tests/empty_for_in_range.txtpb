@@ -15,9 +15,8 @@ block {
   op_code { const_int { value: 10000 } }
   op_code { call_pos1 { } sh { start { row: 2 column: 12 pos: 22 } highlight_start { row: 2 column: 17 pos: 27 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } }
   op_code { get_iterator { } sh { start { row: 2 column: 3 pos: 13 } highlight_start { row: 2 column: 12 pos: 22 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } }
-  op_code { for_iterator_ext { address_delta: 3 } }
-  op_code { nop { } }
-  op_code { goto { address_delta: -2 } }
+  op_code { for_iterator_ext { address_delta: 2 } }
+  op_code { goto { address_delta: -1 } }
   op_code { end_iterator { } }
   op_code { const_none { } }
   op_code { return { } }

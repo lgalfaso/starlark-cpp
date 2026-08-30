@@ -1360,6 +1360,83 @@ void simplify_for_loop(Program* program) {
   }
 }
 
+void remap_address_delta(int from, int32_t& delta, const std::vector<int>& remap) {
+  delta = remap[from + delta] - remap[from];
+}
+
+void fix_jump_address_deltas(OpCode* op_code, int index, const std::vector<int>& remap) {
+  switch (op_code->op_code_case()) {
+    case OpCode::kGoto: {
+      int32_t delta = op_code->goto_().address_delta();
+      remap_address_delta(index, delta, remap);
+      op_code->mutable_goto_()->set_address_delta(delta);
+      break;
+    }
+    case OpCode::kJumpIfFalse: {
+      int32_t delta = op_code->jump_if_false().address_delta();
+      remap_address_delta(index, delta, remap);
+      op_code->mutable_jump_if_false()->set_address_delta(delta);
+      break;
+    }
+    case OpCode::kJumpIfTrueOrPop: {
+      int32_t delta = op_code->jump_if_true_or_pop().address_delta();
+      remap_address_delta(index, delta, remap);
+      op_code->mutable_jump_if_true_or_pop()->set_address_delta(delta);
+      break;
+    }
+    case OpCode::kJumpIfFalseOrPop: {
+      int32_t delta = op_code->jump_if_false_or_pop().address_delta();
+      remap_address_delta(index, delta, remap);
+      op_code->mutable_jump_if_false_or_pop()->set_address_delta(delta);
+      break;
+    }
+    case OpCode::kForIterator: {
+      int32_t delta = op_code->for_iterator().address_delta();
+      remap_address_delta(index, delta, remap);
+      op_code->mutable_for_iterator()->set_address_delta(delta);
+      break;
+    }
+    case OpCode::kForIteratorExt: {
+      int32_t delta = op_code->for_iterator_ext().address_delta();
+      remap_address_delta(index, delta, remap);
+      op_code->mutable_for_iterator_ext()->set_address_delta(delta);
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+void remove_nop_instructions(Program* program) {
+  for (int block_i = 0; block_i < program->block_size(); ++block_i) {
+    Block* block = program->mutable_block(block_i);
+    const int op_count = block->op_code_size();
+    std::vector<int> remap(op_count, -1);
+    int compact_size = 0;
+    for (int i = 0; i < op_count; ++i) {
+      if (block->op_code(i).op_code_case() == OpCode::kNop) {
+        continue;
+      }
+      remap[i] = compact_size++;
+    }
+    if (compact_size == op_count) {
+      continue;
+    }
+    int write = 0;
+    for (int read = 0; read < op_count; ++read) {
+      if (remap[read] == -1) {
+        continue;
+      }
+      fix_jump_address_deltas(block->mutable_op_code(read), read, remap);
+      if (write != read) {
+        block->mutable_op_code()->SwapElements(write, read);
+      }
+      ++write;
+    }
+    block->mutable_op_code()->DeleteSubrange(write, op_count - write);
+  }
+}
+
 }  // namespace
 
 compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(binding) {}
@@ -1386,6 +1463,7 @@ Program* compiler::compile(std::string_view program_name, std::string_view starl
   walker.walk(starlark_file, listener);
   remove_extra_store(result);
   simplify_for_loop(result);
+  remove_nop_instructions(result);
   return result;
 }
 
