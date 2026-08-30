@@ -1659,6 +1659,24 @@ void remove_nop_instructions(Program* program) {
   }
 }
 
+void eliminate_redundant_load_store(Program* program) {
+  for (int block_i = 0; block_i < program->block_size(); ++block_i) {
+    Block* block = program->mutable_block(block_i);
+    for (int i = 1; i < block->op_code_size(); ++i) {
+      OpCode* load = block->mutable_op_code(i - 1);
+      OpCode* store = block->mutable_op_code(i);
+      if (load->op_code_case() != OpCode::kLoad || store->op_code_case() != OpCode::kStore) {
+        continue;
+      }
+      if (load->load().frame() == store->store().frame() &&
+          load->load().pos_in_frame() == store->store().pos_in_frame()) {
+        load->mutable_nop();
+        store->mutable_nop();
+      }
+    }
+  }
+}
+
 }  // namespace
 
 compiler::compiler(std::set<std::string, std::less<>>& binding) : binding(binding) {}
@@ -1686,6 +1704,7 @@ Program* compiler::compile(std::string_view program_name, std::string_view starl
   remove_extra_store(result);
   simplify_for_loop(result);
   simplify_call_method(result);
+  eliminate_redundant_load_store(result);
   remove_nop_instructions(result);
   return result;
 }
