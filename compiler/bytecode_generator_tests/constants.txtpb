@@ -1,18 +1,18 @@
 const_string: "abc"
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { const_int { value: 1 } }
-  op_code { pop { } }
-  op_code { const_float { value: 1.1 } }
-  op_code { pop { } }
-  op_code { const_string { const_string_pos: 0 } sh { start { row: 3 column: 1 pos: 6 } highlight_start { row: 3 column: 1 pos: 6 } highlight_end { row: 3 column: 6 pos: 11 } end { row: 3 column: 6 pos: 11 } } }
-  op_code { pop { } }
-  op_code { const_bytes { value: "def" } sh { start { row: 4 column: 1 pos: 12 } highlight_start { row: 4 column: 1 pos: 12 } highlight_end { row: 4 column: 7 pos: 18 } end { row: 4 column: 7 pos: 18 } } }
-  op_code { pop { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                                        #  0
+  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                                                             #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                                               #  2
+  op_code { const_int { value: 1 } }                                                                                                                                                                                #  3
+  op_code { pop { } }                                                                                                                                                                                               #  4
+  op_code { const_float { value: 1.1 } }                                                                                                                                                                            #  5
+  op_code { pop { } }                                                                                                                                                                                               #  6
+  op_code { const_string { const_string_pos: 0 } sh { start { row: 3 column: 1 pos: 6 } highlight_start { row: 3 column: 1 pos: 6 } highlight_end { row: 3 column: 6 pos: 11 } end { row: 3 column: 6 pos: 11 } } } #  7
+  op_code { pop { } }                                                                                                                                                                                               #  8
+  op_code { const_bytes { value: "def" } sh { start { row: 4 column: 1 pos: 12 } highlight_start { row: 4 column: 1 pos: 12 } highlight_end { row: 4 column: 7 pos: 18 } end { row: 4 column: 7 pos: 18 } } }       #  9
+  op_code { pop { } }                                                                                                                                                                                               # 10
+  op_code { pop_frame { } }                                                                                                                                                                                         # 11
+  op_code { pop_frame { } }                                                                                                                                                                                         # 12
+  op_code { pop_frame { } }                                                                                                                                                                                         # 13
+  op_code { end { } }                                                                                                                                                                                               # 14
 }

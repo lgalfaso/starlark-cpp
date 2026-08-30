@@ -1,24 +1,23 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "foo" } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_list { reserve_size: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { make_function { entrypoint: 1 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 1 } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                      #  0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "foo" } } #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                             #  2
+  op_code { make_list { reserve_size: 0 } }                                       #  3
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                  #  4
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }             #  5
+  op_code { store { frame: 1 pos_in_frame: 1 } }                                  #  6
+  op_code { pop_frame { } }                                                       #  7
+  op_code { pop_frame { } }                                                       #  8
+  op_code { pop_frame { } }                                                       #  9
+  op_code { end { } }                                                             # 10
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
-  op_code { make_list { reserve_size: 1 } }
-  op_code { const_int { value: 1 } }
-  op_code { add_to_list { number_of_elements: 1 } }
-  op_code { store { frame: 0 pos_in_frame: 0 } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 4 column: 10 pos: 37 } highlight_start: { row: 4 column: 10 pos: 37 } highlight_end: { row: 4 column: 11 pos: 38 } end: { row: 4 column: 11 pos: 38 } } }
-  op_code { return { } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }                                                                                                                                                  #  0
+  op_code { make_list { reserve_size: 1 } }                                                                                                                                                                            #  1
+  op_code { const_int { value: 1 } }                                                                                                                                                                                   #  2
+  op_code { add_to_list { number_of_elements: 1 } }                                                                                                                                                                    #  3
+  op_code { store { frame: 0 pos_in_frame: 0 } }                                                                                                                                                                       #  4
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 4 column: 10 pos: 37 } highlight_start { row: 4 column: 10 pos: 37 } highlight_end { row: 4 column: 11 pos: 38 } end { row: 4 column: 11 pos: 38 } } } #  5
+  op_code { return { } }                                                                                                                                                                                               #  6
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo" }
 }
-

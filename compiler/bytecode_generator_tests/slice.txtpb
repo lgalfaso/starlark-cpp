@@ -1,105 +1,105 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "b" } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_list { reserve_size: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { make_list { reserve_size: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 1 } }
-  op_code { const_int { value: 2 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 3 column: 1 pos: 14 } highlight_start: { row: 3 column: 1 pos: 14 } highlight_end: { row: 3 column: 2 pos: 15 } end: { row: 3 column: 2 pos: 15 } } }
-  op_code { const_int { value: 1 } }
-  op_code { assign_index_member { } sh { start: { row: 3 column: 1 pos: 14 } highlight_start: { row: 3 column: 2 pos: 15 } highlight_end: { row: 3 column: 5 pos: 18 } end: { row: 3 column: 5 pos: 18 } } }
-  op_code { const_int { value: 3 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 4 column: 1 pos: 23 } highlight_start: { row: 4 column: 1 pos: 23 } highlight_end: { row: 4 column: 2 pos: 24 } end: { row: 4 column: 2 pos: 24 } } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 4 column: 1 pos: 23 } highlight_start: { row: 4 column: 2 pos: 24 } highlight_end: { row: 4 column: 5 pos: 27 } end: { row: 4 column: 5 pos: 27 } } }
-  op_code { const_int { value: 5 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 5 column: 1 pos: 32 } highlight_start: { row: 5 column: 1 pos: 32 } highlight_end: { row: 5 column: 2 pos: 33 } end: { row: 5 column: 2 pos: 33 } } }
-  op_code { const_int { value: 4 } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 5 column: 1 pos: 32 } highlight_start: { row: 5 column: 2 pos: 33 } highlight_end: { row: 5 column: 6 pos: 37 } end: { row: 5 column: 6 pos: 37 } } }
-  op_code { const_int { value: 7 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 6 column: 1 pos: 42 } highlight_start: { row: 6 column: 1 pos: 42 } highlight_end: { row: 6 column: 2 pos: 43 } end: { row: 6 column: 2 pos: 43 } } }
-  op_code { const_none { } }
-  op_code { const_int { value: 6 } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 6 column: 1 pos: 42 } highlight_start: { row: 6 column: 2 pos: 43 } highlight_end: { row: 6 column: 6 pos: 47 } end: { row: 6 column: 6 pos: 47 } } }
-  op_code { const_int { value: 10 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 7 column: 1 pos: 52 } highlight_start: { row: 7 column: 1 pos: 52 } highlight_end: { row: 7 column: 2 pos: 53 } end: { row: 7 column: 2 pos: 53 } } }
-  op_code { const_int { value: 8 } }
-  op_code { const_int { value: 9 } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 7 column: 1 pos: 52 } highlight_start: { row: 7 column: 2 pos: 53 } highlight_end: { row: 7 column: 7 pos: 58 } end: { row: 7 column: 7 pos: 58 } } }
-  op_code { const_int { value: 11 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 8 column: 1 pos: 64 } highlight_start: { row: 8 column: 1 pos: 64 } highlight_end: { row: 8 column: 2 pos: 65 } end: { row: 8 column: 2 pos: 65 } } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 8 column: 1 pos: 64 } highlight_start: { row: 8 column: 2 pos: 65 } highlight_end: { row: 8 column: 6 pos: 69 } end: { row: 8 column: 6 pos: 69 } } }
-  op_code { const_int { value: 13 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 9 column: 1 pos: 75 } highlight_start: { row: 9 column: 1 pos: 75 } highlight_end: { row: 9 column: 2 pos: 76 } end: { row: 9 column: 2 pos: 76 } } }
-  op_code { const_int { value: 12 } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 9 column: 1 pos: 75 } highlight_start: { row: 9 column: 2 pos: 76 } highlight_end: { row: 9 column: 8 pos: 82 } end: { row: 9 column: 8 pos: 82 } } }
-  op_code { const_int { value: 15 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 10 column: 1 pos: 88 } highlight_start: { row: 10 column: 1 pos: 88 } highlight_end: { row: 10 column: 2 pos: 89 } end: { row: 10 column: 2 pos: 89 } } }
-  op_code { const_none { } }
-  op_code { const_int { value: 14 } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 10 column: 1 pos: 88 } highlight_start: { row: 10 column: 2 pos: 89 } highlight_end: { row: 10 column: 8 pos: 95 } end: { row: 10 column: 8 pos: 95 } } }
-  op_code { const_int { value: 18 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 11 column: 1 pos: 101 } highlight_start: { row: 11 column: 1 pos: 101 } highlight_end: { row: 11 column: 2 pos: 102 } end: { row: 11 column: 2 pos: 102 } } }
-  op_code { const_int { value: 16 } }
-  op_code { const_int { value: 17 } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 11 column: 1 pos: 101 } highlight_start: { row: 11 column: 2 pos: 102 } highlight_end: { row: 11 column: 10 pos: 110 } end: { row: 11 column: 10 pos: 110 } } }
-  op_code { const_int { value: 20 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 12 column: 1 pos: 116 } highlight_start: { row: 12 column: 1 pos: 116 } highlight_end: { row: 12 column: 2 pos: 117 } end: { row: 12 column: 2 pos: 117 } } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { const_int { value: 19 } }
-  op_code { assign_slice_range { } sh { start: { row: 12 column: 1 pos: 116 } highlight_start: { row: 12 column: 2 pos: 117 } highlight_end: { row: 12 column: 8 pos: 123 } end: { row: 12 column: 8 pos: 123 } } }
-  op_code { const_int { value: 23 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 13 column: 1 pos: 129 } highlight_start: { row: 13 column: 1 pos: 129 } highlight_end: { row: 13 column: 2 pos: 130 } end: { row: 13 column: 2 pos: 130 } } }
-  op_code { const_int { value: 21 } }
-  op_code { const_none { } }
-  op_code { const_int { value: 22 } }
-  op_code { assign_slice_range { } sh { start: { row: 13 column: 1 pos: 129 } highlight_start: { row: 13 column: 2 pos: 130 } highlight_end: { row: 13 column: 10 pos: 138 } end: { row: 13 column: 10 pos: 138 } } }
-  op_code { const_int { value: 26 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 14 column: 1 pos: 144 } highlight_start: { row: 14 column: 1 pos: 144 } highlight_end: { row: 14 column: 2 pos: 145 } end: { row: 14 column: 2 pos: 145 } } }
-  op_code { const_none { } }
-  op_code { const_int { value: 24 } }
-  op_code { const_int { value: 25 } }
-  op_code { assign_slice_range { } sh { start: { row: 14 column: 1 pos: 144 } highlight_start: { row: 14 column: 2 pos: 145 } highlight_end: { row: 14 column: 10 pos: 153 } end: { row: 14 column: 10 pos: 153 } } }
-  op_code { const_int { value: 30 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 15 column: 1 pos: 159 } highlight_start: { row: 15 column: 1 pos: 159 } highlight_end: { row: 15 column: 2 pos: 160 } end: { row: 15 column: 2 pos: 160 } } }
-  op_code { const_int { value: 27 } }
-  op_code { const_int { value: 28 } }
-  op_code { const_int { value: 29 } }
-  op_code { assign_slice_range { } sh { start: { row: 15 column: 1 pos: 159 } highlight_start: { row: 15 column: 2 pos: 160 } highlight_end: { row: 15 column: 12 pos: 170 } end: { row: 15 column: 12 pos: 170 } } }
-  op_code { const_int { value: 33 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start: { row: 16 column: 1 pos: 176 } highlight_start: { row: 16 column: 1 pos: 176 } highlight_end: { row: 16 column: 2 pos: 177 } end: { row: 16 column: 2 pos: 177 } } }
-  op_code { const_int { value: 31 } }
-  op_code { index_member { } sh { start: { row: 16 column: 1 pos: 176 } highlight_start: { row: 16 column: 2 pos: 177 } highlight_end: { row: 16 column: 6 pos: 181 } end: { row: 16 column: 6 pos: 181 } } }
-  op_code { const_int { value: 32 } }
-  op_code { assign_index_member { } sh { start: { row: 16 column: 1 pos: 176 } highlight_start: { row: 16 column: 6 pos: 181 } highlight_end: { row: 16 column: 10 pos: 185 } end: { row: 16 column: 10 pos: 185 } } }
-  op_code { load: { frame: 1 pos_in_frame: 1 } sh { start: { row: 17 column: 8 pos: 198 } highlight_start: { row: 17 column: 8 pos: 198 } highlight_end: { row: 17 column: 9 pos: 199 } end: { row: 17 column: 9 pos: 199 } } }
-  op_code { const_none: { } }
-  op_code { const_none: { } }
-  op_code { const_none { } }
-  op_code { slice_range { } sh { start: { row: 17 column: 8 pos: 198 } highlight_start: { row: 17 column: 9 pos: 199 } highlight_end: { row: 17 column: 12 pos: 202 } end: { row: 17 column: 12 pos: 202 } } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 17 column: 1 pos: 191 } highlight_start: { row: 17 column: 1 pos: 191 } highlight_end: { row: 17 column: 2 pos: 192 } end: { row: 17 column: 2 pos: 192 } } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { const_none { } }
-  op_code { assign_slice_range { } sh { start: { row: 17 column: 1 pos: 191 } highlight_start: { row: 17 column: 2 pos: 192 } highlight_end: { row: 17 column: 5 pos: 195 } end: { row: 17 column: 5 pos: 195 } } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                                               #   0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" symbol: "b" } }                                                                                                                                            #   1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                                                      #   2
+  op_code { make_list { reserve_size: 0 } }                                                                                                                                                                                #   3
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                                                                                                           #   4
+  op_code { make_list { reserve_size: 0 } }                                                                                                                                                                                #   5
+  op_code { store { frame: 1 pos_in_frame: 1 } }                                                                                                                                                                           #   6
+  op_code { const_int { value: 2 } }                                                                                                                                                                                       #   7
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 3 column: 1 pos: 14 } highlight_start { row: 3 column: 1 pos: 14 } highlight_end { row: 3 column: 2 pos: 15 } end { row: 3 column: 2 pos: 15 } } }         #   8
+  op_code { const_int { value: 1 } }                                                                                                                                                                                       #   9
+  op_code { assign_index_member { } sh { start { row: 3 column: 1 pos: 14 } highlight_start { row: 3 column: 2 pos: 15 } highlight_end { row: 3 column: 5 pos: 18 } end { row: 3 column: 5 pos: 18 } } }                   #  10
+  op_code { const_int { value: 3 } }                                                                                                                                                                                       #  11
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 4 column: 1 pos: 23 } highlight_start { row: 4 column: 1 pos: 23 } highlight_end { row: 4 column: 2 pos: 24 } end { row: 4 column: 2 pos: 24 } } }         #  12
+  op_code { const_none { } }                                                                                                                                                                                               #  13
+  op_code { const_none { } }                                                                                                                                                                                               #  14
+  op_code { const_none { } }                                                                                                                                                                                               #  15
+  op_code { assign_slice_range { } sh { start { row: 4 column: 1 pos: 23 } highlight_start { row: 4 column: 2 pos: 24 } highlight_end { row: 4 column: 5 pos: 27 } end { row: 4 column: 5 pos: 27 } } }                    #  16
+  op_code { const_int { value: 5 } }                                                                                                                                                                                       #  17
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 5 column: 1 pos: 32 } highlight_start { row: 5 column: 1 pos: 32 } highlight_end { row: 5 column: 2 pos: 33 } end { row: 5 column: 2 pos: 33 } } }         #  18
+  op_code { const_int { value: 4 } }                                                                                                                                                                                       #  19
+  op_code { const_none { } }                                                                                                                                                                                               #  20
+  op_code { const_none { } }                                                                                                                                                                                               #  21
+  op_code { assign_slice_range { } sh { start { row: 5 column: 1 pos: 32 } highlight_start { row: 5 column: 2 pos: 33 } highlight_end { row: 5 column: 6 pos: 37 } end { row: 5 column: 6 pos: 37 } } }                    #  22
+  op_code { const_int { value: 7 } }                                                                                                                                                                                       #  23
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 6 column: 1 pos: 42 } highlight_start { row: 6 column: 1 pos: 42 } highlight_end { row: 6 column: 2 pos: 43 } end { row: 6 column: 2 pos: 43 } } }         #  24
+  op_code { const_none { } }                                                                                                                                                                                               #  25
+  op_code { const_int { value: 6 } }                                                                                                                                                                                       #  26
+  op_code { const_none { } }                                                                                                                                                                                               #  27
+  op_code { assign_slice_range { } sh { start { row: 6 column: 1 pos: 42 } highlight_start { row: 6 column: 2 pos: 43 } highlight_end { row: 6 column: 6 pos: 47 } end { row: 6 column: 6 pos: 47 } } }                    #  28
+  op_code { const_int { value: 10 } }                                                                                                                                                                                      #  29
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 7 column: 1 pos: 52 } highlight_start { row: 7 column: 1 pos: 52 } highlight_end { row: 7 column: 2 pos: 53 } end { row: 7 column: 2 pos: 53 } } }         #  30
+  op_code { const_int { value: 8 } }                                                                                                                                                                                       #  31
+  op_code { const_int { value: 9 } }                                                                                                                                                                                       #  32
+  op_code { const_none { } }                                                                                                                                                                                               #  33
+  op_code { assign_slice_range { } sh { start { row: 7 column: 1 pos: 52 } highlight_start { row: 7 column: 2 pos: 53 } highlight_end { row: 7 column: 7 pos: 58 } end { row: 7 column: 7 pos: 58 } } }                    #  34
+  op_code { const_int { value: 11 } }                                                                                                                                                                                      #  35
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 8 column: 1 pos: 64 } highlight_start { row: 8 column: 1 pos: 64 } highlight_end { row: 8 column: 2 pos: 65 } end { row: 8 column: 2 pos: 65 } } }         #  36
+  op_code { const_none { } }                                                                                                                                                                                               #  37
+  op_code { const_none { } }                                                                                                                                                                                               #  38
+  op_code { const_none { } }                                                                                                                                                                                               #  39
+  op_code { assign_slice_range { } sh { start { row: 8 column: 1 pos: 64 } highlight_start { row: 8 column: 2 pos: 65 } highlight_end { row: 8 column: 6 pos: 69 } end { row: 8 column: 6 pos: 69 } } }                    #  40
+  op_code { const_int { value: 13 } }                                                                                                                                                                                      #  41
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 9 column: 1 pos: 75 } highlight_start { row: 9 column: 1 pos: 75 } highlight_end { row: 9 column: 2 pos: 76 } end { row: 9 column: 2 pos: 76 } } }         #  42
+  op_code { const_int { value: 12 } }                                                                                                                                                                                      #  43
+  op_code { const_none { } }                                                                                                                                                                                               #  44
+  op_code { const_none { } }                                                                                                                                                                                               #  45
+  op_code { assign_slice_range { } sh { start { row: 9 column: 1 pos: 75 } highlight_start { row: 9 column: 2 pos: 76 } highlight_end { row: 9 column: 8 pos: 82 } end { row: 9 column: 8 pos: 82 } } }                    #  46
+  op_code { const_int { value: 15 } }                                                                                                                                                                                      #  47
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 10 column: 1 pos: 88 } highlight_start { row: 10 column: 1 pos: 88 } highlight_end { row: 10 column: 2 pos: 89 } end { row: 10 column: 2 pos: 89 } } }     #  48
+  op_code { const_none { } }                                                                                                                                                                                               #  49
+  op_code { const_int { value: 14 } }                                                                                                                                                                                      #  50
+  op_code { const_none { } }                                                                                                                                                                                               #  51
+  op_code { assign_slice_range { } sh { start { row: 10 column: 1 pos: 88 } highlight_start { row: 10 column: 2 pos: 89 } highlight_end { row: 10 column: 8 pos: 95 } end { row: 10 column: 8 pos: 95 } } }                #  52
+  op_code { const_int { value: 18 } }                                                                                                                                                                                      #  53
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 11 column: 1 pos: 101 } highlight_start { row: 11 column: 1 pos: 101 } highlight_end { row: 11 column: 2 pos: 102 } end { row: 11 column: 2 pos: 102 } } } #  54
+  op_code { const_int { value: 16 } }                                                                                                                                                                                      #  55
+  op_code { const_int { value: 17 } }                                                                                                                                                                                      #  56
+  op_code { const_none { } }                                                                                                                                                                                               #  57
+  op_code { assign_slice_range { } sh { start { row: 11 column: 1 pos: 101 } highlight_start { row: 11 column: 2 pos: 102 } highlight_end { row: 11 column: 10 pos: 110 } end { row: 11 column: 10 pos: 110 } } }          #  58
+  op_code { const_int { value: 20 } }                                                                                                                                                                                      #  59
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 12 column: 1 pos: 116 } highlight_start { row: 12 column: 1 pos: 116 } highlight_end { row: 12 column: 2 pos: 117 } end { row: 12 column: 2 pos: 117 } } } #  60
+  op_code { const_none { } }                                                                                                                                                                                               #  61
+  op_code { const_none { } }                                                                                                                                                                                               #  62
+  op_code { const_int { value: 19 } }                                                                                                                                                                                      #  63
+  op_code { assign_slice_range { } sh { start { row: 12 column: 1 pos: 116 } highlight_start { row: 12 column: 2 pos: 117 } highlight_end { row: 12 column: 8 pos: 123 } end { row: 12 column: 8 pos: 123 } } }            #  64
+  op_code { const_int { value: 23 } }                                                                                                                                                                                      #  65
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 13 column: 1 pos: 129 } highlight_start { row: 13 column: 1 pos: 129 } highlight_end { row: 13 column: 2 pos: 130 } end { row: 13 column: 2 pos: 130 } } } #  66
+  op_code { const_int { value: 21 } }                                                                                                                                                                                      #  67
+  op_code { const_none { } }                                                                                                                                                                                               #  68
+  op_code { const_int { value: 22 } }                                                                                                                                                                                      #  69
+  op_code { assign_slice_range { } sh { start { row: 13 column: 1 pos: 129 } highlight_start { row: 13 column: 2 pos: 130 } highlight_end { row: 13 column: 10 pos: 138 } end { row: 13 column: 10 pos: 138 } } }          #  70
+  op_code { const_int { value: 26 } }                                                                                                                                                                                      #  71
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 14 column: 1 pos: 144 } highlight_start { row: 14 column: 1 pos: 144 } highlight_end { row: 14 column: 2 pos: 145 } end { row: 14 column: 2 pos: 145 } } } #  72
+  op_code { const_none { } }                                                                                                                                                                                               #  73
+  op_code { const_int { value: 24 } }                                                                                                                                                                                      #  74
+  op_code { const_int { value: 25 } }                                                                                                                                                                                      #  75
+  op_code { assign_slice_range { } sh { start { row: 14 column: 1 pos: 144 } highlight_start { row: 14 column: 2 pos: 145 } highlight_end { row: 14 column: 10 pos: 153 } end { row: 14 column: 10 pos: 153 } } }          #  76
+  op_code { const_int { value: 30 } }                                                                                                                                                                                      #  77
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 15 column: 1 pos: 159 } highlight_start { row: 15 column: 1 pos: 159 } highlight_end { row: 15 column: 2 pos: 160 } end { row: 15 column: 2 pos: 160 } } } #  78
+  op_code { const_int { value: 27 } }                                                                                                                                                                                      #  79
+  op_code { const_int { value: 28 } }                                                                                                                                                                                      #  80
+  op_code { const_int { value: 29 } }                                                                                                                                                                                      #  81
+  op_code { assign_slice_range { } sh { start { row: 15 column: 1 pos: 159 } highlight_start { row: 15 column: 2 pos: 160 } highlight_end { row: 15 column: 12 pos: 170 } end { row: 15 column: 12 pos: 170 } } }          #  82
+  op_code { const_int { value: 33 } }                                                                                                                                                                                      #  83
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 16 column: 1 pos: 176 } highlight_start { row: 16 column: 1 pos: 176 } highlight_end { row: 16 column: 2 pos: 177 } end { row: 16 column: 2 pos: 177 } } } #  84
+  op_code { const_int { value: 31 } }                                                                                                                                                                                      #  85
+  op_code { index_member { } sh { start { row: 16 column: 1 pos: 176 } highlight_start { row: 16 column: 2 pos: 177 } highlight_end { row: 16 column: 6 pos: 181 } end { row: 16 column: 6 pos: 181 } } }                  #  86
+  op_code { const_int { value: 32 } }                                                                                                                                                                                      #  87
+  op_code { assign_index_member { } sh { start { row: 16 column: 1 pos: 176 } highlight_start { row: 16 column: 6 pos: 181 } highlight_end { row: 16 column: 10 pos: 185 } end { row: 16 column: 10 pos: 185 } } }         #  88
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 17 column: 8 pos: 198 } highlight_start { row: 17 column: 8 pos: 198 } highlight_end { row: 17 column: 9 pos: 199 } end { row: 17 column: 9 pos: 199 } } } #  89
+  op_code { const_none { } }                                                                                                                                                                                               #  90
+  op_code { const_none { } }                                                                                                                                                                                               #  91
+  op_code { const_none { } }                                                                                                                                                                                               #  92
+  op_code { slice_range { } sh { start { row: 17 column: 8 pos: 198 } highlight_start { row: 17 column: 9 pos: 199 } highlight_end { row: 17 column: 12 pos: 202 } end { row: 17 column: 12 pos: 202 } } }                 #  93
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 17 column: 1 pos: 191 } highlight_start { row: 17 column: 1 pos: 191 } highlight_end { row: 17 column: 2 pos: 192 } end { row: 17 column: 2 pos: 192 } } } #  94
+  op_code { const_none { } }                                                                                                                                                                                               #  95
+  op_code { const_none { } }                                                                                                                                                                                               #  96
+  op_code { const_none { } }                                                                                                                                                                                               #  97
+  op_code { assign_slice_range { } sh { start { row: 17 column: 1 pos: 191 } highlight_start { row: 17 column: 2 pos: 192 } highlight_end { row: 17 column: 5 pos: 195 } end { row: 17 column: 5 pos: 195 } } }            #  98
+  op_code { pop_frame { } }                                                                                                                                                                                                #  99
+  op_code { pop_frame { } }                                                                                                                                                                                                # 100
+  op_code { pop_frame { } }                                                                                                                                                                                                # 101
+  op_code { end { } }                                                                                                                                                                                                      # 102
 }

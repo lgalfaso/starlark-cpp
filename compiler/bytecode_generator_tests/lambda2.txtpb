@@ -1,27 +1,26 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_function { entrypoint: 1 default_values_count: 0 } }
-  op_code { make_function { entrypoint: 2 default_values_count: 1 } }
-  op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }          #  0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "a" } }   #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                 #  2
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } } #  3
+  op_code { make_function { entrypoint: 2 default_values_count: 1 } } #  4
+  op_code { store { frame: 1 pos_in_frame: 0 } }                      #  5
+  op_code { pop_frame { } }                                           #  6
+  op_code { pop_frame { } }                                           #  7
+  op_code { pop_frame { } }                                           #  8
+  op_code { end { } }                                                 #  9
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "x" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 1 column: 29 pos: 28 } highlight_start: { row: 1 column: 29 pos: 28 } highlight_end: { row: 1 column: 30 pos: 29 } end: { row: 1 column: 30 pos: 29 } } }
-  op_code { return { } }
-  function_signature { param { name: "x" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "x" } }                                                                                                                                                  #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 1 column: 29 pos: 28 } highlight_start { row: 1 column: 29 pos: 28 } highlight_end { row: 1 column: 30 pos: 29 } end { row: 1 column: 30 pos: 29 } } } #  1
+  op_code { return { } }                                                                                                                                                                                               #  2
+  function_signature { param { name: "x" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "x" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 1 column: 32 pos: 31 } highlight_start: { row: 1 column: 32 pos: 31 } highlight_end: { row: 1 column: 33 pos: 32 } end: { row: 1 column: 33 pos: 32 } } }
-  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 1 column: 34 pos: 33 } highlight_start: { row: 1 column: 34 pos: 33 } highlight_end: { row: 1 column: 35 pos: 34 } end: { row: 1 column: 35 pos: 34 } } }
-  op_code { call_pos1 { } sh { start { row: 1 column: 32 pos: 31 } highlight_start { row: 1 column: 33 pos: 32 } highlight_end { row: 1 column: 36 pos: 35 } end { row: 1 column: 36 pos: 35 } } }
-  op_code { return { } }
-  function_signature { param { name: "x" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "x" } }                                                                                                                                      #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 1 column: 32 pos: 31 } highlight_start { row: 1 column: 32 pos: 31 } highlight_end { row: 1 column: 33 pos: 32 } end { row: 1 column: 33 pos: 32 } } } #  1
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start { row: 1 column: 34 pos: 33 } highlight_start { row: 1 column: 34 pos: 33 } highlight_end { row: 1 column: 35 pos: 34 } end { row: 1 column: 35 pos: 34 } } } #  2
+  op_code { sh { start { row: 1 column: 32 pos: 31 } highlight_start { row: 1 column: 33 pos: 32 } highlight_end { row: 1 column: 36 pos: 35 } end { row: 1 column: 36 pos: 35 } } call_pos1 { } }                     #  3
+  op_code { return { } }                                                                                                                                                                                               #  4
+  function_signature { param { name: "x" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
-

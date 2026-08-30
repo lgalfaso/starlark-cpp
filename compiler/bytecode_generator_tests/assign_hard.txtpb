@@ -1,22 +1,22 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "d" symbol: "x" } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_dictionary { reserve_size: 2 } }
-  op_code { const_int { value: 1 } }
-  op_code { const_int { value: 2 } }
-  op_code { const_int { value: 3 } }
-  op_code { const_int { value: 4 } }
-  op_code { add_to_dictionary { number_of_elements: 2 } sh { start: { row: 1 column: 5 pos: 4 } highlight_start: { row: 1 column: 5 pos: 4 } highlight_end: { row: 1 column: 17 pos: 16 } end: { row: 1 column: 17 pos: 16 } } }
-  op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 2 column: 11 pos: 27 } highlight_start: { row: 2 column: 11 pos: 27 } highlight_end: { row: 2 column: 12 pos: 28 } end: { row: 2 column: 12 pos: 28 } } }
-  op_code { unpack { number_of_elements: 2 } sh { start: { row: 2 column: 1 pos: 17 } highlight_start: { row: 2 column: 11 pos: 27 } highlight_end: { row: 2 column: 12 pos: 28 } end: { row: 2 column: 12 pos: 28 } } }
-  op_code { store { frame: 1 pos_in_frame: 1 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start: { row: 2 column: 4 pos: 20 } highlight_start: { row: 2 column: 4 pos: 20 } highlight_end: { row: 2 column: 5 pos: 21 } end: { row: 2 column: 5 pos: 21 } } }
-  op_code { const_int { value: 0 } }
-  op_code { assign_index_member { } sh { start: { row: 2 column: 4 pos: 20 } highlight_start: { row: 2 column: 5 pos: 21 } highlight_end: { row: 2 column: 8 pos: 24 } end: { row: 2 column: 8 pos: 24 } } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                                                 #  0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "d" symbol: "x" } }                                                                                                                                              #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                                                        #  2
+  op_code { make_dictionary { reserve_size: 2 } }                                                                                                                                                                            #  3
+  op_code { const_int { value: 1 } }                                                                                                                                                                                         #  4
+  op_code { const_int { value: 2 } }                                                                                                                                                                                         #  5
+  op_code { const_int { value: 3 } }                                                                                                                                                                                         #  6
+  op_code { const_int { value: 4 } }                                                                                                                                                                                         #  7
+  op_code { add_to_dictionary { number_of_elements: 2 } sh { start { row: 1 column: 5 pos: 4 } highlight_start { row: 1 column: 5 pos: 4 } highlight_end { row: 1 column: 17 pos: 16 } end { row: 1 column: 17 pos: 16 } } } #  8
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                                                                                                             #  9
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 2 column: 11 pos: 27 } highlight_start { row: 2 column: 11 pos: 27 } highlight_end { row: 2 column: 12 pos: 28 } end { row: 2 column: 12 pos: 28 } } }       # 10
+  op_code { unpack { number_of_elements: 2 } sh { start { row: 2 column: 1 pos: 17 } highlight_start { row: 2 column: 11 pos: 27 } highlight_end { row: 2 column: 12 pos: 28 } end { row: 2 column: 12 pos: 28 } } }         # 11
+  op_code { store { frame: 1 pos_in_frame: 1 } }                                                                                                                                                                             # 12
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 2 column: 4 pos: 20 } highlight_start { row: 2 column: 4 pos: 20 } highlight_end { row: 2 column: 5 pos: 21 } end { row: 2 column: 5 pos: 21 } } }           # 13
+  op_code { const_int { value: 0 } }                                                                                                                                                                                         # 14
+  op_code { assign_index_member { } sh { start { row: 2 column: 4 pos: 20 } highlight_start { row: 2 column: 5 pos: 21 } highlight_end { row: 2 column: 8 pos: 24 } end { row: 2 column: 8 pos: 24 } } }                     # 15
+  op_code { pop_frame { } }                                                                                                                                                                                                  # 16
+  op_code { pop_frame { } }                                                                                                                                                                                                  # 17
+  op_code { pop_frame { } }                                                                                                                                                                                                  # 18
+  op_code { end { } }                                                                                                                                                                                                        # 19
 }

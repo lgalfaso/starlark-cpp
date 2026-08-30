@@ -2,34 +2,34 @@ const_string: "a"
 const_string: "b"
 const_string: "c"
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_dictionary { reserve_size: 0 } }
-  op_code { pop { } }
-  op_code { make_dictionary { reserve_size: 1} }
-  op_code { const_string { const_string_pos: 0 } sh { start { row: 2 column: 2 pos: 4 } highlight_start { row: 2 column: 2 pos: 4 } highlight_end { row: 2 column: 5 pos: 7 } end { row: 2 column: 5 pos: 7 } } }
-  op_code { const_int { value: 1 } }
-  op_code { add_to_dictionary { number_of_elements: 1 } sh { start: { row: 2 column: 1 pos: 3 } highlight_start: { row: 2 column: 1 pos: 3 } highlight_end: { row: 2 column: 9 pos: 11 } end: { row: 2 column: 9 pos: 11 } } }
-  op_code { pop { } }
-  op_code { make_dictionary { reserve_size: 2} }
-  op_code { const_string { const_string_pos: 0 } sh { start { row: 3 column: 2 pos: 13 } highlight_start { row: 3 column: 2 pos: 13 } highlight_end { row: 3 column: 5 pos: 16 } end { row: 3 column: 5 pos: 16 } } }
-  op_code { const_int { value: 1 } }
-  op_code { const_string { const_string_pos: 1 } sh { start { row: 3 column: 10 pos: 21 } highlight_start { row: 3 column: 10 pos: 21 } highlight_end { row: 3 column: 13 pos: 24 } end { row: 3 column: 13 pos: 24 } } }
-  op_code { const_int { value: 2 } }
-  op_code { add_to_dictionary { number_of_elements: 2 } sh { start: { row: 3 column: 1 pos: 12 } highlight_start: { row: 3 column: 1 pos: 12 } highlight_end: { row: 3 column: 17 pos: 28 } end: { row: 3 column: 17 pos: 28 } } }
-  op_code { pop { } }
-  op_code { make_dictionary { reserve_size: 3} }
-  op_code { const_string { const_string_pos: 0 } sh { start { row: 4 column: 2 pos: 30 } highlight_start { row: 4 column: 2 pos: 30 } highlight_end { row: 4 column: 5 pos: 33 } end { row: 4 column: 5 pos: 33 } } }
-  op_code { const_int { value: 1 } }
-  op_code { const_string { const_string_pos: 1 } sh { start { row: 4 column: 10 pos: 38 } highlight_start { row: 4 column: 10 pos: 38 } highlight_end { row: 4 column: 13 pos: 41 } end { row: 4 column: 13 pos: 41 } } }
-  op_code { const_int { value: 2 } }
-  op_code { const_string { const_string_pos: 2 } sh { start { row: 4 column: 18 pos: 46 } highlight_start { row: 4 column: 18 pos: 46 } highlight_end { row: 4 column: 21 pos: 49 } end { row: 4 column: 21 pos: 49 } } }
-  op_code { const_int { value: 3 } }
-  op_code { add_to_dictionary { number_of_elements: 3 } sh { start: { row: 4 column: 1 pos: 29 } highlight_start: { row: 4 column: 1 pos: 29 } highlight_end: { row: 4 column: 25 pos: 53 } end: { row: 4 column: 25 pos: 53 } } }
-  op_code { pop { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                                                   #  0
+  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                                                                        #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                                                          #  2
+  op_code { make_dictionary { reserve_size: 0 } }                                                                                                                                                                              #  3
+  op_code { pop { } }                                                                                                                                                                                                          #  4
+  op_code { make_dictionary { reserve_size: 1 } }                                                                                                                                                                              #  5
+  op_code { const_string { const_string_pos: 0 } sh { start { row: 2 column: 2 pos: 4 } highlight_start { row: 2 column: 2 pos: 4 } highlight_end { row: 2 column: 5 pos: 7 } end { row: 2 column: 5 pos: 7 } } }              #  6
+  op_code { const_int { value: 1 } }                                                                                                                                                                                           #  7
+  op_code { add_to_dictionary { number_of_elements: 1 } sh { start { row: 2 column: 1 pos: 3 } highlight_start { row: 2 column: 1 pos: 3 } highlight_end { row: 2 column: 9 pos: 11 } end { row: 2 column: 9 pos: 11 } } }     #  8
+  op_code { pop { } }                                                                                                                                                                                                          #  9
+  op_code { make_dictionary { reserve_size: 2 } }                                                                                                                                                                              # 10
+  op_code { const_string { const_string_pos: 0 } sh { start { row: 3 column: 2 pos: 13 } highlight_start { row: 3 column: 2 pos: 13 } highlight_end { row: 3 column: 5 pos: 16 } end { row: 3 column: 5 pos: 16 } } }          # 11
+  op_code { const_int { value: 1 } }                                                                                                                                                                                           # 12
+  op_code { const_string { const_string_pos: 1 } sh { start { row: 3 column: 10 pos: 21 } highlight_start { row: 3 column: 10 pos: 21 } highlight_end { row: 3 column: 13 pos: 24 } end { row: 3 column: 13 pos: 24 } } }      # 13
+  op_code { const_int { value: 2 } }                                                                                                                                                                                           # 14
+  op_code { add_to_dictionary { number_of_elements: 2 } sh { start { row: 3 column: 1 pos: 12 } highlight_start { row: 3 column: 1 pos: 12 } highlight_end { row: 3 column: 17 pos: 28 } end { row: 3 column: 17 pos: 28 } } } # 15
+  op_code { pop { } }                                                                                                                                                                                                          # 16
+  op_code { make_dictionary { reserve_size: 3 } }                                                                                                                                                                              # 17
+  op_code { const_string { const_string_pos: 0 } sh { start { row: 4 column: 2 pos: 30 } highlight_start { row: 4 column: 2 pos: 30 } highlight_end { row: 4 column: 5 pos: 33 } end { row: 4 column: 5 pos: 33 } } }          # 18
+  op_code { const_int { value: 1 } }                                                                                                                                                                                           # 19
+  op_code { const_string { const_string_pos: 1 } sh { start { row: 4 column: 10 pos: 38 } highlight_start { row: 4 column: 10 pos: 38 } highlight_end { row: 4 column: 13 pos: 41 } end { row: 4 column: 13 pos: 41 } } }      # 20
+  op_code { const_int { value: 2 } }                                                                                                                                                                                           # 21
+  op_code { const_string { const_string_pos: 2 } sh { start { row: 4 column: 18 pos: 46 } highlight_start { row: 4 column: 18 pos: 46 } highlight_end { row: 4 column: 21 pos: 49 } end { row: 4 column: 21 pos: 49 } } }      # 22
+  op_code { const_int { value: 3 } }                                                                                                                                                                                           # 23
+  op_code { add_to_dictionary { number_of_elements: 3 } sh { start { row: 4 column: 1 pos: 29 } highlight_start { row: 4 column: 1 pos: 29 } highlight_end { row: 4 column: 25 pos: 53 } end { row: 4 column: 25 pos: 53 } } } # 24
+  op_code { pop { } }                                                                                                                                                                                                          # 25
+  op_code { pop_frame { } }                                                                                                                                                                                                    # 26
+  op_code { pop_frame { } }                                                                                                                                                                                                    # 27
+  op_code { pop_frame { } }                                                                                                                                                                                                    # 28
+  op_code { end { } }                                                                                                                                                                                                          # 29
 }

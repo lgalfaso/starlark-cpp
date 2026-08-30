@@ -1,13 +1,13 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK } }
-  op_code { create_frame { block_type: FILE_BLOCK symbol: "a" symbol: "b" symbol: "c" symbol: "d" symbol: "f" symbol: "g" } }
-  op_code { load_module { module: "module1" value { pos { frame: 0 pos_in_frame: 0 } remote_symbol: "a" } } }
-  op_code { load_module { module: "module2" value { pos { frame: 0 pos_in_frame: 1 } remote_symbol: "b" } value { pos { frame: 0 pos_in_frame: 2 } remote_symbol: "c" } } }
-  op_code { load_module { module: "module3" value { pos { frame: 0 pos_in_frame: 3 } remote_symbol: "e" } } }
-  op_code { load_module { module: "module4" value { pos { frame: 0 pos_in_frame: 4 } remote_symbol: "f" } value { pos { frame: 0 pos_in_frame: 5 } remote_symbol: "h" } } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                #  0
+  op_code { create_frame { block_type: MODULE_BLOCK } }                                                                                                                     #  1
+  op_code { create_frame { block_type: FILE_BLOCK symbol: "a" symbol: "b" symbol: "c" symbol: "d" symbol: "f" symbol: "g" } }                                               #  2
+  op_code { load_module { module: "module1" value { remote_symbol: "a" pos { frame: 0 pos_in_frame: 0 } } } }                                                               #  3
+  op_code { load_module { module: "module2" value { remote_symbol: "b" pos { frame: 0 pos_in_frame: 1 } } value { remote_symbol: "c" pos { frame: 0 pos_in_frame: 2 } } } } #  4
+  op_code { load_module { module: "module3" value { remote_symbol: "e" pos { frame: 0 pos_in_frame: 3 } } } }                                                               #  5
+  op_code { load_module { module: "module4" value { remote_symbol: "f" pos { frame: 0 pos_in_frame: 4 } } value { remote_symbol: "h" pos { frame: 0 pos_in_frame: 5 } } } } #  6
+  op_code { pop_frame { } }                                                                                                                                                 #  7
+  op_code { pop_frame { } }                                                                                                                                                 #  8
+  op_code { pop_frame { } }                                                                                                                                                 #  9
+  op_code { end { } }                                                                                                                                                       # 10
 }

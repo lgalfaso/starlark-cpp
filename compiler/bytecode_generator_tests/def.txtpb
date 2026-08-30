@@ -1,95 +1,94 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "print" } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo1" symbol: "foo2" symbol: "foo3" symbol: "foo4" symbol: "foo5" symbol: "foo6" symbol: "foo7" symbol: "foo8" } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_function { entrypoint: 1 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { make_function { entrypoint: 2 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 1 } }
-  op_code { make_function { entrypoint: 3 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 2 } }
-  op_code { const_int { value: 1 } }
-  op_code { make_function { entrypoint: 4 default_values_count: 1 } }
-  op_code { store { frame: 1 pos_in_frame: 3 } }
-  op_code { make_function { entrypoint: 5 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 4 } }
-  op_code { make_function { entrypoint: 6 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 5 } }
-  op_code { const_int: { value: 2 } }
-  op_code { make_function: { entrypoint: 7 default_values_count: 1 } }
-  op_code { store { frame: 1 pos_in_frame: 6 } }
-  op_code { make_function: { entrypoint: 8 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 7 } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "print" } }                                                                                                    #  0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo1" symbol: "foo2" symbol: "foo3" symbol: "foo4" symbol: "foo5" symbol: "foo6" symbol: "foo7" symbol: "foo8" } } #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                           #  2
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }                                                                                                           #  3
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                                                                #  4
+  op_code { make_function { entrypoint: 2 default_values_count: 0 } }                                                                                                           #  5
+  op_code { store { frame: 1 pos_in_frame: 1 } }                                                                                                                                #  6
+  op_code { make_function { entrypoint: 3 default_values_count: 0 } }                                                                                                           #  7
+  op_code { store { frame: 1 pos_in_frame: 2 } }                                                                                                                                #  8
+  op_code { const_int { value: 1 } }                                                                                                                                            #  9
+  op_code { make_function { entrypoint: 4 default_values_count: 1 } }                                                                                                           # 10
+  op_code { store { frame: 1 pos_in_frame: 3 } }                                                                                                                                # 11
+  op_code { make_function { entrypoint: 5 default_values_count: 0 } }                                                                                                           # 12
+  op_code { store { frame: 1 pos_in_frame: 4 } }                                                                                                                                # 13
+  op_code { make_function { entrypoint: 6 default_values_count: 0 } }                                                                                                           # 14
+  op_code { store { frame: 1 pos_in_frame: 5 } }                                                                                                                                # 15
+  op_code { const_int { value: 2 } }                                                                                                                                            # 16
+  op_code { make_function { entrypoint: 7 default_values_count: 1 } }                                                                                                           # 17
+  op_code { store { frame: 1 pos_in_frame: 6 } }                                                                                                                                # 18
+  op_code { make_function { entrypoint: 8 default_values_count: 0 } }                                                                                                           # 19
+  op_code { store { frame: 1 pos_in_frame: 7 } }                                                                                                                                # 20
+  op_code { pop_frame { } }                                                                                                                                                     # 21
+  op_code { pop_frame { } }                                                                                                                                                     # 22
+  op_code { pop_frame { } }                                                                                                                                                     # 23
+  op_code { end { } }                                                                                                                                                           # 24
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK } }
-  op_code { const_int { value: 1 } }
-  op_code { return { } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK } } #  0
+  op_code { const_int { value: 1 } }                      #  1
+  op_code { return { } }                                  #  2
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo1" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK } }
-  op_code { const_none { } }
-  op_code { return { } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK } } #  0
+  op_code { const_none { } }                              #  1
+  op_code { return { } }                                  #  2
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo2" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 6 column: 10 pos: 64 } highlight_start: { row: 6 column: 10 pos: 64 } highlight_end: { row: 6 column: 11 pos: 65 } end: { row: 6 column: 11 pos: 65 } } }
-  op_code { const_int { value: 1 } }
-  op_code { binary_plus { } sh { start: { row: 6 column: 12 pos: 66 } highlight_start: { row: 6 column: 12 pos: 66 } highlight_end: { row: 6 column: 13 pos: 67 } end: { row: 6 column: 13 pos: 67 } } }
-  op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo3" }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }                                                                                                                                                  #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 6 column: 10 pos: 64 } highlight_start { row: 6 column: 10 pos: 64 } highlight_end { row: 6 column: 11 pos: 65 } end { row: 6 column: 11 pos: 65 } } } #  1
+  op_code { const_int { value: 1 } }                                                                                                                                                                                   #  2
+  op_code { binary_plus { } sh { start { row: 6 column: 12 pos: 66 } highlight_start { row: 6 column: 12 pos: 66 } highlight_end { row: 6 column: 13 pos: 67 } end { row: 6 column: 13 pos: 67 } } }                   #  3
+  op_code { return { } }                                                                                                                                                                                               #  4
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo3" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 0 pos_in_frame: 0 }  sh { start: { row: 8 column: 10 pos: 99 } highlight_start: { row: 8 column: 10 pos: 99 } highlight_end: { row: 8 column: 11 pos: 100 } end: { row: 8 column: 11 pos: 100 } } }
-  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 8 column: 12 pos: 101 } highlight_start: { row: 8 column: 12 pos: 101 } highlight_end: { row: 8 column: 13 pos: 102 } end: { row: 8 column: 13 pos: 102 } } }
-  op_code { call_pos1 { } sh { start { row: 8 column: 10 pos: 99 } highlight_start { row: 8 column: 11 pos: 100 } highlight_end { row: 8 column: 14 pos: 103 } end { row: 8 column: 14 pos: 103 } } }
-  op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo4" }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }                                                                                                                                          #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 8 column: 10 pos: 99 } highlight_start { row: 8 column: 10 pos: 99 } highlight_end { row: 8 column: 11 pos: 100 } end { row: 8 column: 11 pos: 100 } } }   #  1
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start { row: 8 column: 12 pos: 101 } highlight_start { row: 8 column: 12 pos: 101 } highlight_end { row: 8 column: 13 pos: 102 } end { row: 8 column: 13 pos: 102 } } } #  2
+  op_code { sh { start { row: 8 column: 10 pos: 99 } highlight_start { row: 8 column: 11 pos: 100 } highlight_end { row: 8 column: 14 pos: 103 } end { row: 8 column: 14 pos: 103 } } call_pos1 { } }                      #  3
+  op_code { return { } }                                                                                                                                                                                                   #  4
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo4" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 10 column: 10 pos: 130 } highlight_start: { row: 10 column: 10 pos: 130 } highlight_end: { row: 10 column: 11 pos: 131 } end: { row: 10 column: 11 pos: 131 } } }
-  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 10 column: 13 pos: 133 } highlight_start: { row: 10 column: 13 pos: 133 } highlight_end: { row: 10 column: 14 pos: 134 } end: { row: 10 column: 14 pos: 134 } } }
-  op_code { call_pos_star { positional_arguments_count: 0 } sh { start { row: 10 column: 10 pos: 130 } highlight_start { row: 10 column: 11 pos: 131 } highlight_end { row: 10 column: 15 pos: 135 } end { row: 10 column: 15 pos: 135 } } }
-  op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo5" }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }                                                                                                                                                            #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 10 column: 10 pos: 130 } highlight_start { row: 10 column: 10 pos: 130 } highlight_end { row: 10 column: 11 pos: 131 } end { row: 10 column: 11 pos: 131 } } }               #  1
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start { row: 10 column: 13 pos: 133 } highlight_start { row: 10 column: 13 pos: 133 } highlight_end { row: 10 column: 14 pos: 134 } end { row: 10 column: 14 pos: 134 } } }               #  2
+  op_code { sh { start { row: 10 column: 10 pos: 130 } highlight_start { row: 10 column: 11 pos: 131 } highlight_end { row: 10 column: 15 pos: 135 } end { row: 10 column: 15 pos: 135 } } call_pos_star { positional_arguments_count: 0 } } #  3
+  op_code { return { } }                                                                                                                                                                                                                     #  4
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo5" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 12 column: 10 pos: 163 } highlight_start: { row: 12 column: 10 pos: 163 } highlight_end: { row: 12 column: 11 pos: 164 } end: { row: 12 column: 11 pos: 164 } } }
-  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 12 column: 14 pos: 167 } highlight_start: { row: 12 column: 14 pos: 167 } highlight_end: { row: 12 column: 15 pos: 168 } end: { row: 12 column: 15 pos: 168 } } }
-  op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } sh { start { row: 12 column: 10 pos: 163 } highlight_start { row: 12 column: 11 pos: 164 } highlight_end { row: 12 column: 16 pos: 169 } end { row: 12 column: 16 pos: 169 } } }
-  op_code { return { } }
-  function_signature { param { name: "a" pos: { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos: { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: false has_star_star_argument: true keyword_only_parameter_count: 0 fn_name: "foo6" }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }                                                                                                                                                                                                                                                      #  0
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 12 column: 10 pos: 163 } highlight_start { row: 12 column: 10 pos: 163 } highlight_end { row: 12 column: 11 pos: 164 } end { row: 12 column: 11 pos: 164 } } }                                                                                                         #  1
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start { row: 12 column: 14 pos: 167 } highlight_start { row: 12 column: 14 pos: 167 } highlight_end { row: 12 column: 15 pos: 168 } end { row: 12 column: 15 pos: 168 } } }                                                                                                         #  2
+  op_code { call { positional_arguments_count: 0 named_arguments_count: 0 has_variadic_positional_argument: false has_variadic_named_argument: true } sh { start { row: 12 column: 10 pos: 163 } highlight_start { row: 12 column: 11 pos: 164 } highlight_end { row: 12 column: 16 pos: 169 } end { row: 12 column: 16 pos: 169 } } } #  3
+  op_code { return { } }                                                                                                                                                                                                                                                                                                               #  4
+  function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: false has_star_star_argument: true keyword_only_parameter_count: 0 fn_name: "foo6" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" symbol: "c" } }
-  op_code { load { frame: 3 pos_in_frame: 0 } sh { start: { row: 14 column: 3 pos: 198 } highlight_start: { row: 14 column: 3 pos: 198 } highlight_end: { row: 14 column: 8 pos: 203 } end: { row: 14 column: 8 pos: 203 } } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 14 column: 9 pos: 204 } highlight_start: { row: 14 column: 9 pos: 204 } highlight_end: { row: 14 column: 10 pos: 205 } end: { row: 14 column: 10 pos: 205 } } }
-  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 14 column: 12 pos: 207 } highlight_start: { row: 14 column: 12 pos: 207 } highlight_end: { row: 14 column: 13 pos: 208 } end: { row: 14 column: 13 pos: 208 } } }
-  op_code { load { frame: 0 pos_in_frame: 2 } sh { start: { row: 14 column: 15 pos: 210 } highlight_start: { row: 14 column: 15 pos: 210 } highlight_end: { row: 14 column: 16 pos: 211 } end: { row: 14 column: 16 pos: 211 } } }
-  op_code { call_pos3 { } sh { start { row: 14 column: 3 pos: 198 } highlight_start { row: 14 column: 8 pos: 203 } highlight_end { row: 14 column: 17 pos: 212 } end { row: 14 column: 17 pos: 212 } } }
-  op_code { pop { } }
-  op_code { const_none { } }
-  op_code { return { } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" symbol: "c" } }                                                                                                                                  #  0
+  op_code { load { frame: 3 pos_in_frame: 0 } sh { start { row: 14 column: 3 pos: 198 } highlight_start { row: 14 column: 3 pos: 198 } highlight_end { row: 14 column: 8 pos: 203 } end { row: 14 column: 8 pos: 203 } } }     #  1
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 14 column: 9 pos: 204 } highlight_start { row: 14 column: 9 pos: 204 } highlight_end { row: 14 column: 10 pos: 205 } end { row: 14 column: 10 pos: 205 } } }   #  2
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start { row: 14 column: 12 pos: 207 } highlight_start { row: 14 column: 12 pos: 207 } highlight_end { row: 14 column: 13 pos: 208 } end { row: 14 column: 13 pos: 208 } } } #  3
+  op_code { load { frame: 0 pos_in_frame: 2 } sh { start { row: 14 column: 15 pos: 210 } highlight_start { row: 14 column: 15 pos: 210 } highlight_end { row: 14 column: 16 pos: 211 } end { row: 14 column: 16 pos: 211 } } } #  4
+  op_code { sh { start { row: 14 column: 3 pos: 198 } highlight_start { row: 14 column: 8 pos: 203 } highlight_end { row: 14 column: 17 pos: 212 } end { row: 14 column: 17 pos: 212 } } call_pos3 { } }                       #  5
+  op_code { pop { } }                                                                                                                                                                                                          #  6
+  op_code { const_none { } }                                                                                                                                                                                                   #  7
+  op_code { return { } }                                                                                                                                                                                                       #  8
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } param { name: "c" pos { frame: 0 pos_in_frame: 2 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 2 fn_name: "foo7" }
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }
-  op_code { load { frame: 3 pos_in_frame: 0 } sh { start: { row: 16 column: 3 pos: 232 } highlight_start: { row: 16 column: 3 pos: 232 } highlight_end: { row: 16 column: 8 pos: 237 } end: { row: 16 column: 8 pos: 237 } } }
-  op_code { load { frame: 0 pos_in_frame: 1 } sh { start: { row: 16 column: 9 pos: 238 } highlight_start: { row: 16 column: 9 pos: 238 } highlight_end: { row: 16 column: 10 pos: 239 } end: { row: 16 column: 10 pos: 239 } } }
-  op_code { load { frame: 0 pos_in_frame: 0 } sh { start: { row: 16 column: 13 pos: 242 } highlight_start: { row: 16 column: 13 pos: 242 } highlight_end: { row: 16 column: 14 pos: 243 } end: { row: 16 column: 14 pos: 243 } } }
-  op_code { call_pos_star { positional_arguments_count: 1 } sh { start { row: 16 column: 3 pos: 232 } highlight_start { row: 16 column: 8 pos: 237 } highlight_end { row: 16 column: 15 pos: 244 } end { row: 16 column: 15 pos: 244 } } }
-  op_code { pop { } }
-  op_code { const_none { } }
-  op_code { return { } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" symbol: "b" } }                                                                                                                                                          #  0
+  op_code { load { frame: 3 pos_in_frame: 0 } sh { start { row: 16 column: 3 pos: 232 } highlight_start { row: 16 column: 3 pos: 232 } highlight_end { row: 16 column: 8 pos: 237 } end { row: 16 column: 8 pos: 237 } } }                 #  1
+  op_code { load { frame: 0 pos_in_frame: 1 } sh { start { row: 16 column: 9 pos: 238 } highlight_start { row: 16 column: 9 pos: 238 } highlight_end { row: 16 column: 10 pos: 239 } end { row: 16 column: 10 pos: 239 } } }               #  2
+  op_code { load { frame: 0 pos_in_frame: 0 } sh { start { row: 16 column: 13 pos: 242 } highlight_start { row: 16 column: 13 pos: 242 } highlight_end { row: 16 column: 14 pos: 243 } end { row: 16 column: 14 pos: 243 } } }             #  3
+  op_code { sh { start { row: 16 column: 3 pos: 232 } highlight_start { row: 16 column: 8 pos: 237 } highlight_end { row: 16 column: 15 pos: 244 } end { row: 16 column: 15 pos: 244 } } call_pos_star { positional_arguments_count: 1 } } #  4
+  op_code { pop { } }                                                                                                                                                                                                                      #  5
+  op_code { const_none { } }                                                                                                                                                                                                               #  6
+  op_code { return { } }                                                                                                                                                                                                                   #  7
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 1 fn_name: "foo8" }
 }
-

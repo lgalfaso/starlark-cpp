@@ -1,25 +1,24 @@
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "range" } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo" } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_function { entrypoint: 1 default_values_count: 0 } }
-  op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK symbol: "range" } } #  0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "foo" } }        #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                        #  2
+  op_code { make_function { entrypoint: 1 default_values_count: 0 } }        #  3
+  op_code { store { frame: 1 pos_in_frame: 0 } }                             #  4
+  op_code { pop_frame { } }                                                  #  5
+  op_code { pop_frame { } }                                                  #  6
+  op_code { pop_frame { } }                                                  #  7
+  op_code { end { } }                                                        #  8
 }
 block {
-  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }
-  op_code { load { frame: 3 pos_in_frame: 0 } sh { start { row: 2 column: 12 pos: 22 } highlight_start { row: 2 column: 12 pos: 22 } highlight_end { row: 2 column: 17 pos: 27 } end { row: 2 column: 17 pos: 27 } } }
-  op_code { const_int { value: 10000 } }
-  op_code { call_pos1 { } sh { start { row: 2 column: 12 pos: 22 } highlight_start { row: 2 column: 17 pos: 27 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } }
-  op_code { get_iterator { } sh { start { row: 2 column: 3 pos: 13 } highlight_start { row: 2 column: 12 pos: 22 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } }
-  op_code { for_iterator_ext { address_delta: 2 } }
-  op_code { goto { address_delta: -1 } }
-  op_code { end_iterator { } }
-  op_code { const_none { } }
-  op_code { return { } }
+  op_code { create_frame { block_type: FUNCTION_BLOCK symbol: "a" } }                                                                                                                                                  #  0
+  op_code { load { frame: 3 pos_in_frame: 0 } sh { start { row: 2 column: 12 pos: 22 } highlight_start { row: 2 column: 12 pos: 22 } highlight_end { row: 2 column: 17 pos: 27 } end { row: 2 column: 17 pos: 27 } } } #  1
+  op_code { const_int { value: 10000 } }                                                                                                                                                                               #  2
+  op_code { sh { start { row: 2 column: 12 pos: 22 } highlight_start { row: 2 column: 17 pos: 27 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } call_pos1 { } }                     #  3
+  op_code { get_iterator { } sh { start { row: 2 column: 3 pos: 13 } highlight_start { row: 2 column: 12 pos: 22 } highlight_end { row: 2 column: 24 pos: 34 } end { row: 2 column: 24 pos: 34 } } }                   #  4
+  op_code { for_iterator_ext { address_delta: 2 } }                                                                                                                                                                    #  5
+  op_code { goto { address_delta: -1 } }                                                                                                                                                                               #  6
+  op_code { end_iterator { } }                                                                                                                                                                                         #  7
+  op_code { const_none { } }                                                                                                                                                                                           #  8
+  op_code { return { } }                                                                                                                                                                                               #  9
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo" }
 }
-

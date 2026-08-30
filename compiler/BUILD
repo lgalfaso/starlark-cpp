@@ -1,6 +1,6 @@
 # Copyright 2025 Lucas Mirelmann
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("//proto:starlark_proto_encoder.bzl", "starlark_bytecode_proto_encoder")
 
 cc_library(
@@ -56,3 +56,11 @@ cc_library(
         ],
     ),
 ] for f in glob(["bytecode_generator_tests/*.star"])]
+
+cc_binary(
+    name = "update_bytecode_goldens",
+    testonly = True,
+    srcs = ["update_bytecode_goldens.cpp"],
+    tags = ["manual"],
+    deps = ["//proto/bytecode_formatter:bytecode_golden_updater"],
+)

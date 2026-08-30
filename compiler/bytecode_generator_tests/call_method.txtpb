@@ -1,37 +1,37 @@
 const_string: "k"
 const_string: "abc"
 block {
-  op_code { create_frame { block_type: PREDECLARED_BLOCK } }
-  op_code { create_frame { block_type: MODULE_BLOCK symbol: "d" symbol: "lst" } }
-  op_code { create_frame { block_type: FILE_BLOCK } }
-  op_code { make_list { reserve_size: 2 } }
-  op_code { const_int { value: 1 } }
-  op_code { const_int { value: 2 } }
-  op_code { add_to_list { number_of_elements: 2 } }
-  op_code { store { frame: 1 pos_in_frame: 1 } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 2 column: 1 pos: 13 } highlight_start { row: 2 column: 1 pos: 13 } highlight_end { row: 2 column: 4 pos: 16 } end { row: 2 column: 4 pos: 16 } } }
-  op_code { const_int { value: 3 } }
-  op_code { call_method_pos1 { member: "append" } sh { start { row: 2 column: 1 pos: 13 } highlight_start { row: 2 column: 11 pos: 23 } highlight_end { row: 2 column: 14 pos: 26 } end { row: 2 column: 14 pos: 26 } } }
-  op_code { pop { } }
-  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 3 column: 1 pos: 27 } highlight_start { row: 3 column: 1 pos: 27 } highlight_end { row: 3 column: 4 pos: 30 } end { row: 3 column: 4 pos: 30 } } }
-  op_code { call_method_pos0 { member: "pop" } sh { start { row: 3 column: 1 pos: 27 } highlight_start { row: 3 column: 8 pos: 34 } highlight_end { row: 3 column: 10 pos: 36 } end { row: 3 column: 10 pos: 36 } } }
-  op_code { pop { } }
-  op_code { make_dictionary { reserve_size: 1 } }
-  op_code { const_string { const_string_pos: 0 } sh { start { row: 4 column: 6 pos: 42 } highlight_start { row: 4 column: 6 pos: 42 } highlight_end { row: 4 column: 9 pos: 45 } end { row: 4 column: 9 pos: 45 } } }
-  op_code { make_list { reserve_size: 0 } }
-  op_code { add_to_dictionary { number_of_elements: 1 } sh { start { row: 4 column: 5 pos: 41 } highlight_start { row: 4 column: 5 pos: 41 } highlight_end { row: 4 column: 14 pos: 50 } end { row: 4 column: 14 pos: 50 } } }
-  op_code { store { frame: 1 pos_in_frame: 0 } }
-  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 5 column: 1 pos: 51 } highlight_start { row: 5 column: 1 pos: 51 } highlight_end { row: 5 column: 2 pos: 52 } end { row: 5 column: 2 pos: 52 } } }
-  op_code { const_string { const_string_pos: 0 } sh { start { row: 5 column: 3 pos: 53 } highlight_start { row: 5 column: 3 pos: 53 } highlight_end { row: 5 column: 6 pos: 56 } end { row: 5 column: 6 pos: 56 } } }
-  op_code { index_member { } sh { start { row: 5 column: 1 pos: 51 } highlight_start { row: 5 column: 2 pos: 52 } highlight_end { row: 5 column: 7 pos: 57 } end { row: 5 column: 7 pos: 57 } } }
-  op_code { const_int { value: 4 } }
-  op_code { call_method_pos1 { member: "append" } sh { start { row: 5 column: 1 pos: 51 } highlight_start { row: 5 column: 14 pos: 64 } highlight_end { row: 5 column: 17 pos: 67 } end { row: 5 column: 17 pos: 67 } } }
-  op_code { pop { } }
-  op_code { const_string { const_string_pos: 1 } sh { start { row: 6 column: 1 pos: 68 } highlight_start { row: 6 column: 1 pos: 68 } highlight_end { row: 6 column: 6 pos: 73 } end { row: 6 column: 6 pos: 73 } } }
-  op_code { dot_member { member: "capitalize" } sh { start { row: 6 column: 1 pos: 68 } highlight_start { row: 6 column: 6 pos: 73 } highlight_end { row: 6 column: 17 pos: 84 } end { row: 6 column: 17 pos: 84 } } }
-  op_code { pop { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { pop_frame { } }
-  op_code { end { } }
+  op_code { create_frame { block_type: PREDECLARED_BLOCK } }                                                                                                                                                                   #  0
+  op_code { create_frame { block_type: MODULE_BLOCK symbol: "d" symbol: "lst" } }                                                                                                                                              #  1
+  op_code { create_frame { block_type: FILE_BLOCK } }                                                                                                                                                                          #  2
+  op_code { make_list { reserve_size: 2 } }                                                                                                                                                                                    #  3
+  op_code { const_int { value: 1 } }                                                                                                                                                                                           #  4
+  op_code { const_int { value: 2 } }                                                                                                                                                                                           #  5
+  op_code { add_to_list { number_of_elements: 2 } }                                                                                                                                                                            #  6
+  op_code { store { frame: 1 pos_in_frame: 1 } }                                                                                                                                                                               #  7
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 2 column: 1 pos: 13 } highlight_start { row: 2 column: 1 pos: 13 } highlight_end { row: 2 column: 4 pos: 16 } end { row: 2 column: 4 pos: 16 } } }             #  8
+  op_code { const_int { value: 3 } }                                                                                                                                                                                           #  9
+  op_code { sh { start { row: 2 column: 1 pos: 13 } highlight_start { row: 2 column: 11 pos: 23 } highlight_end { row: 2 column: 14 pos: 26 } end { row: 2 column: 14 pos: 26 } } call_method_pos1 { member: "append" } }      # 10
+  op_code { pop { } }                                                                                                                                                                                                          # 11
+  op_code { load { frame: 1 pos_in_frame: 1 } sh { start { row: 3 column: 1 pos: 27 } highlight_start { row: 3 column: 1 pos: 27 } highlight_end { row: 3 column: 4 pos: 30 } end { row: 3 column: 4 pos: 30 } } }             # 12
+  op_code { sh { start { row: 3 column: 1 pos: 27 } highlight_start { row: 3 column: 8 pos: 34 } highlight_end { row: 3 column: 10 pos: 36 } end { row: 3 column: 10 pos: 36 } } call_method_pos0 { member: "pop" } }          # 13
+  op_code { pop { } }                                                                                                                                                                                                          # 14
+  op_code { make_dictionary { reserve_size: 1 } }                                                                                                                                                                              # 15
+  op_code { const_string { const_string_pos: 0 } sh { start { row: 4 column: 6 pos: 42 } highlight_start { row: 4 column: 6 pos: 42 } highlight_end { row: 4 column: 9 pos: 45 } end { row: 4 column: 9 pos: 45 } } }          # 16
+  op_code { make_list { reserve_size: 0 } }                                                                                                                                                                                    # 17
+  op_code { add_to_dictionary { number_of_elements: 1 } sh { start { row: 4 column: 5 pos: 41 } highlight_start { row: 4 column: 5 pos: 41 } highlight_end { row: 4 column: 14 pos: 50 } end { row: 4 column: 14 pos: 50 } } } # 18
+  op_code { store { frame: 1 pos_in_frame: 0 } }                                                                                                                                                                               # 19
+  op_code { load { frame: 1 pos_in_frame: 0 } sh { start { row: 5 column: 1 pos: 51 } highlight_start { row: 5 column: 1 pos: 51 } highlight_end { row: 5 column: 2 pos: 52 } end { row: 5 column: 2 pos: 52 } } }             # 20
+  op_code { const_string { const_string_pos: 0 } sh { start { row: 5 column: 3 pos: 53 } highlight_start { row: 5 column: 3 pos: 53 } highlight_end { row: 5 column: 6 pos: 56 } end { row: 5 column: 6 pos: 56 } } }          # 21
+  op_code { index_member { } sh { start { row: 5 column: 1 pos: 51 } highlight_start { row: 5 column: 2 pos: 52 } highlight_end { row: 5 column: 7 pos: 57 } end { row: 5 column: 7 pos: 57 } } }                              # 22
+  op_code { const_int { value: 4 } }                                                                                                                                                                                           # 23
+  op_code { sh { start { row: 5 column: 1 pos: 51 } highlight_start { row: 5 column: 14 pos: 64 } highlight_end { row: 5 column: 17 pos: 67 } end { row: 5 column: 17 pos: 67 } } call_method_pos1 { member: "append" } }      # 24
+  op_code { pop { } }                                                                                                                                                                                                          # 25
+  op_code { const_string { const_string_pos: 1 } sh { start { row: 6 column: 1 pos: 68 } highlight_start { row: 6 column: 1 pos: 68 } highlight_end { row: 6 column: 6 pos: 73 } end { row: 6 column: 6 pos: 73 } } }          # 26
+  op_code { dot_member { member: "capitalize" } sh { start { row: 6 column: 1 pos: 68 } highlight_start { row: 6 column: 6 pos: 73 } highlight_end { row: 6 column: 17 pos: 84 } end { row: 6 column: 17 pos: 84 } } }         # 27
+  op_code { pop { } }                                                                                                                                                                                                          # 28
+  op_code { pop_frame { } }                                                                                                                                                                                                    # 29
+  op_code { pop_frame { } }                                                                                                                                                                                                    # 30
+  op_code { pop_frame { } }                                                                                                                                                                                                    # 31
+  op_code { end { } }                                                                                                                                                                                                          # 32
 }
