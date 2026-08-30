@@ -24,7 +24,9 @@ context::context(Arena& arena, const runtime_options& options) :
     empty_string_(Arena::Create<starlark_string>(&arena, std::string_view())) {
   runner_context_ = nullptr;
   for (int i = MIN_SMALL_INT; i <= MAX_SMALL_INT; ++i) {
-    small_integers[i - MIN_SMALL_INT] = Arena::Create<starlark_integer>(&arena, i);
+    auto* integer = Arena::Create<starlark_integer>(&arena, i);
+    (void)integer->hash();
+    small_integers[i - MIN_SMALL_INT] = integer;
   }
 }
 

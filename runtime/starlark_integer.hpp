@@ -56,6 +56,8 @@ class starlark_integer : public starlark_obj {
 
  private:
   int64_t value;
+  mutable bool hash_computed_ = false;
+  mutable int64_t cached_hash_ = 0;
 };
 
 }  // namespace runtime

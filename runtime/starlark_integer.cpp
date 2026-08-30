@@ -551,6 +551,9 @@ starlark_obj* starlark_integer::greater_greater_equals_assign(const starlark_obj
 }
 
 std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash() const {
+  if (hash_computed_) {
+    return cached_hash_;
+  }
   // This implementation makes the assumption that the right shifting of
   // negative numbers is not sign extended, and that the representation of
   // integers is two's coplement. The point in the code that makes
@@ -599,7 +602,9 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash()
   if (result == -1) {
     result = -2;
   }
-  return static_cast<int64_t>(result);
+  cached_hash_ = static_cast<int64_t>(result);
+  hash_computed_ = true;
+  return cached_hash_;
 }
 
 starlark_numeric_type starlark_integer::numeric_type() const {
