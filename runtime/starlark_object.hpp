@@ -247,6 +247,7 @@ class starlark_obj {
   virtual double as_float() const;
   virtual std::string_view as_string() const;
   virtual starlark_obj* get_attr(bool produce_error, std::string_view attribute, context& ctx, error_fn& error_callback);
+  virtual starlark_obj* call_method(std::string_view member, std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback);
 
  protected:
   typedef std::span<const starlark_obj* const> pending_hash;

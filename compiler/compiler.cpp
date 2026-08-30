@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -1360,6 +1361,227 @@ void simplify_for_loop(Program* program) {
   }
 }
 
+bool opcode_is_control_flow_jump(OpCode::OpCodeCase op_case) {
+  switch (op_case) {
+    case OpCode::kGoto:
+    case OpCode::kJumpIfFalse:
+    case OpCode::kJumpIfTrueOrPop:
+    case OpCode::kJumpIfFalseOrPop:
+    case OpCode::kForIterator:
+    case OpCode::kForIteratorExt:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool opcode_pushes_one_value(OpCode::OpCodeCase op_case) {
+  switch (op_case) {
+    case OpCode::kLoad:
+    case OpCode::kConstInt:
+    case OpCode::kConstFloat:
+    case OpCode::kConstString:
+    case OpCode::kConstBytes:
+    case OpCode::kConstNone:
+    case OpCode::kConstBigInt:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool opcode_is_unary(OpCode::OpCodeCase op_case) {
+  switch (op_case) {
+    case OpCode::kUnaryPlus:
+    case OpCode::kUnaryMinus:
+    case OpCode::kUnaryTilde:
+    case OpCode::kUnaryNot:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool opcode_is_binary(OpCode::OpCodeCase op_case) {
+  switch (op_case) {
+    case OpCode::kBinaryEqualsEquals:
+    case OpCode::kBinaryBangEquals:
+    case OpCode::kBinaryLessThan:
+    case OpCode::kBinaryGreaterThan:
+    case OpCode::kBinaryLessThanEquals:
+    case OpCode::kBinaryGreaterThanEquals:
+    case OpCode::kBinaryIn:
+    case OpCode::kBinaryNotIn:
+    case OpCode::kBinaryPipe:
+    case OpCode::kBinaryHat:
+    case OpCode::kBinaryAmpersand:
+    case OpCode::kBinaryLessThanLessThan:
+    case OpCode::kBinaryGreaterThanGreaterThan:
+    case OpCode::kBinaryMinus:
+    case OpCode::kBinaryPlus:
+    case OpCode::kBinaryStar:
+    case OpCode::kBinaryPercent:
+    case OpCode::kBinarySlash:
+    case OpCode::kBinarySlashSlash:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool opcode_consumes_receiver_when_above_zero(OpCode::OpCodeCase op_case) {
+  switch (op_case) {
+    case OpCode::kDotMember:
+    case OpCode::kPop:
+    case OpCode::kUnaryPlus:
+    case OpCode::kUnaryMinus:
+    case OpCode::kUnaryTilde:
+    case OpCode::kUnaryNot:
+    case OpCode::kBinaryEqualsEquals:
+    case OpCode::kBinaryBangEquals:
+    case OpCode::kBinaryLessThan:
+    case OpCode::kBinaryGreaterThan:
+    case OpCode::kBinaryLessThanEquals:
+    case OpCode::kBinaryGreaterThanEquals:
+    case OpCode::kBinaryIn:
+    case OpCode::kBinaryNotIn:
+    case OpCode::kBinaryPipe:
+    case OpCode::kBinaryHat:
+    case OpCode::kBinaryAmpersand:
+    case OpCode::kBinaryLessThanLessThan:
+    case OpCode::kBinaryGreaterThanGreaterThan:
+    case OpCode::kBinaryMinus:
+    case OpCode::kBinaryPlus:
+    case OpCode::kBinaryStar:
+    case OpCode::kBinaryPercent:
+    case OpCode::kBinarySlash:
+    case OpCode::kBinarySlashSlash:
+    case OpCode::kIndexMember:
+    case OpCode::kSliceRange:
+    case OpCode::kStore:
+    case OpCode::kAssignDotMember:
+    case OpCode::kAssignIndexMember:
+    case OpCode::kAssignSliceRange:
+    case OpCode::kMakeTuple:
+    case OpCode::kMakeList:
+    case OpCode::kAddToList:
+    case OpCode::kMakeDictionary:
+    case OpCode::kAddToDictionary:
+    case OpCode::kGetIterator:
+    case OpCode::kUnpack:
+    case OpCode::kReturn:
+    case OpCode::kMakeFunction:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool opcode_adjust_above_for_intermediate(OpCode::OpCodeCase op_case, int& above) {
+  if (opcode_is_unary(op_case)) {
+    return true;
+  }
+  if (opcode_is_binary(op_case)) {
+    if (above < 2) {
+      return false;
+    }
+    above -= 1;
+    return true;
+  }
+  if (op_case == OpCode::kIndexMember) {
+    if (above < 2) {
+      return false;
+    }
+    above -= 1;
+    return true;
+  }
+  return false;
+}
+
+std::optional<int> call_pos_arity(const OpCode& op_code) {
+  switch (op_code.op_code_case()) {
+    case OpCode::kCallPos0:
+      return 0;
+    case OpCode::kCallPos1:
+      return 1;
+    case OpCode::kCallPos2:
+      return 2;
+    case OpCode::kCallPos3:
+      return 3;
+    case OpCode::kCallPos:
+      return static_cast<int>(op_code.call_pos().positional_count());
+    default:
+      return std::nullopt;
+  }
+}
+
+void fuse_dot_member_and_call(OpCode* dot_op, OpCode* call_op) {
+  const std::string member(dot_op->dot_member().member());
+  dot_op->mutable_nop();
+  switch (call_op->op_code_case()) {
+    case OpCode::kCallPos0:
+      call_op->mutable_call_method_pos0()->set_member(member);
+      break;
+    case OpCode::kCallPos1:
+      call_op->mutable_call_method_pos1()->set_member(member);
+      break;
+    case OpCode::kCallPos2:
+      call_op->mutable_call_method_pos2()->set_member(member);
+      break;
+    case OpCode::kCallPos3:
+      call_op->mutable_call_method_pos3()->set_member(member);
+      break;
+    case OpCode::kCallPos: {
+      const uint32_t positional_count = call_op->call_pos().positional_count();
+      call_op->mutable_call_method_pos()->set_member(member);
+      call_op->mutable_call_method_pos()->set_positional_count(positional_count);
+      break;
+    }
+    default:
+      assert(false);
+  }
+}
+
+void simplify_call_method(Program* program) {
+  for (int block_i = 0; block_i < program->block_size(); ++block_i) {
+    Block* block = program->mutable_block(block_i);
+    const int op_count = block->op_code_size();
+    for (int dot_pos = 0; dot_pos < op_count; ++dot_pos) {
+      OpCode* dot_op = block->mutable_op_code(dot_pos);
+      if (dot_op->op_code_case() != OpCode::kDotMember) {
+        continue;
+      }
+      int above = 0;
+      for (int scan_pos = dot_pos + 1; scan_pos < op_count; ++scan_pos) {
+        OpCode* scan_op = block->mutable_op_code(scan_pos);
+        const auto op_case = scan_op->op_code_case();
+        if (opcode_is_control_flow_jump(op_case)) {
+          break;
+        }
+        if (above == 0 && opcode_consumes_receiver_when_above_zero(op_case)) {
+          break;
+        }
+        if (opcode_pushes_one_value(op_case)) {
+          ++above;
+          continue;
+        }
+        if (const auto arity = call_pos_arity(*scan_op)) {
+          if (above == *arity) {
+            fuse_dot_member_and_call(dot_op, scan_op);
+            break;
+          }
+          above -= *arity;
+          continue;
+        }
+        if (above > 0 && opcode_adjust_above_for_intermediate(op_case, above)) {
+          continue;
+        }
+        break;
+      }
+    }
+  }
+}
+
 void remap_address_delta(int from, int32_t& delta, const std::vector<int>& remap) {
   delta = remap[from + delta] - remap[from];
 }
@@ -1463,6 +1685,7 @@ Program* compiler::compile(std::string_view program_name, std::string_view starl
   walker.walk(starlark_file, listener);
   remove_extra_store(result);
   simplify_for_loop(result);
+  simplify_call_method(result);
   remove_nop_instructions(result);
   return result;
 }

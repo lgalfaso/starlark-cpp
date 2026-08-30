@@ -580,6 +580,29 @@ starlark_obj* starlark_obj::get_attr(bool produce_error, std::string_view attrib
   return create_function(ctx, this, it->second, attribute);
 }
 
+starlark_obj* starlark_obj::call_method(std::string_view member, std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback) {
+  auto& method_fns = methods_meta();
+  auto it = method_fns.find(member);
+  if (it == method_fns.end()) {
+    auto& attributes = dir();
+    auto candidate = levenshtein(member, attributes);
+    if (candidate < 0) {
+      error_callback.add_error(error_v2_no_attribute(type(), member));
+    } else {
+      error_callback.add_error(error_v2_no_attribute(type(), member, attributes[candidate]));
+    }
+    return nullptr;
+  }
+  static const named_args_t kEmptyNamed;
+  if (pos_args.empty()) {
+    static const pos_args_t kEmptyPos;
+    return it->second(this, kEmptyPos, kEmptyNamed, ctx, error_callback);
+  }
+  static thread_local pos_args_t pos_args_vec;
+  pos_args_vec.assign(pos_args.begin(), pos_args.end());
+  return it->second(this, pos_args_vec, kEmptyNamed, ctx, error_callback);
+}
+
 starlark_numeric_type starlark_obj::numeric_type() const {
   return starlark_numeric_type::kNotNumeric;
 }

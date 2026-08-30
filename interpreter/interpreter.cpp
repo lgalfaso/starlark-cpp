@@ -167,6 +167,19 @@ void execute_call_pos(std::vector<starlark_obj*>& stack, std::size_t arg_count, 
   stack.back() = result;
 }
 
+void execute_call_method_pos(std::vector<starlark_obj*>& stack, std::string_view member, std::size_t arg_count, context& ctx, error_fn& error_callback) {
+  assert(stack.size() >= arg_count + 1);
+  const std::size_t receiver_idx = stack.size() - arg_count - 1;
+  starlark_obj* receiver = stack[receiver_idx];
+  starlark_obj* result = receiver->call_method(
+      member,
+      std::span<starlark_obj*>(stack.data() + receiver_idx + 1, arg_count),
+      ctx,
+      error_callback);
+  stack.resize(receiver_idx + 1, nullptr);
+  stack.back() = result;
+}
+
 void execute_call_pos_star(
     std::vector<starlark_obj*>& stack,
     int pos_count,
@@ -664,6 +677,39 @@ frame* run_program(
       }
       case OpCode::kCallPos:
         execute_call_pos(stack, op_code.call_pos().positional_count(), ctx, error_callback);
+        break;
+      case OpCode::kCallMethodPos0:
+        stack.back() = stack.back()->call_method(op_code.call_method_pos0().member(), {}, ctx, error_callback);
+        break;
+      case OpCode::kCallMethodPos1: {
+        starlark_obj* arg0 = stack.back();
+        stack.pop_back();
+        starlark_obj* args[1] = {arg0};
+        stack.back() = stack.back()->call_method(op_code.call_method_pos1().member(), std::span<starlark_obj*>(args, 1), ctx, error_callback);
+        break;
+      }
+      case OpCode::kCallMethodPos2: {
+        starlark_obj* arg1 = stack.back();
+        stack.pop_back();
+        starlark_obj* arg0 = stack.back();
+        stack.pop_back();
+        starlark_obj* args[2] = {arg0, arg1};
+        stack.back() = stack.back()->call_method(op_code.call_method_pos2().member(), std::span<starlark_obj*>(args, 2), ctx, error_callback);
+        break;
+      }
+      case OpCode::kCallMethodPos3: {
+        starlark_obj* arg2 = stack.back();
+        stack.pop_back();
+        starlark_obj* arg1 = stack.back();
+        stack.pop_back();
+        starlark_obj* arg0 = stack.back();
+        stack.pop_back();
+        starlark_obj* args[3] = {arg0, arg1, arg2};
+        stack.back() = stack.back()->call_method(op_code.call_method_pos3().member(), std::span<starlark_obj*>(args, 3), ctx, error_callback);
+        break;
+      }
+      case OpCode::kCallMethodPos:
+        execute_call_method_pos(stack, op_code.call_method_pos().member(), op_code.call_method_pos().positional_count(), ctx, error_callback);
         break;
       case OpCode::kCallNamed: {
         const int named_count = op_code.call_named().named_arguments_count();
