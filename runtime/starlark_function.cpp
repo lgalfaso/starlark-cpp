@@ -2,6 +2,8 @@
 
 #include "runtime/starlark_function.hpp"
 
+#include "runtime/builtin_pos.hpp"
+
 #include <algorithm>
 #include <limits>
 #include <map>
@@ -94,8 +96,8 @@ const char starlark_built_in_functions::tuple_f[] = "tuple";
 const char starlark_built_in_functions::type_f[] = "type";
 const char starlark_built_in_functions::zip_f[] = "zip";
 
-starlark_built_in_function::starlark_built_in_function(starlark_obj* this_obj, fn* native_fn, std::string_view fn_name) :
-  this_obj(this_obj), native_fn(native_fn), fn_name(fn_name) {}
+starlark_built_in_function::starlark_built_in_function(starlark_obj* this_obj, builtin_entrypoints entrypoints, std::string_view fn_name) :
+  this_obj(this_obj), entrypoints(entrypoints), fn_name(fn_name) {}
 
 std::string_view starlark_built_in_function::type() const {
   return starlark_types::builtin_function_or_method_t;
@@ -134,7 +136,7 @@ bool starlark_built_in_function::inner_equals(equals_comparator& comp, const sta
       }
     }
   }
-  return fn_name == fother->fn_name && native_fn == fother->native_fn;
+  return fn_name == fother->fn_name && entrypoints.call == fother->entrypoints.call;
 }
 
 void starlark_built_in_function::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
@@ -153,13 +155,38 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_built_in_function::in
 
 starlark_obj* starlark_built_in_function::call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args,
     context& ctx, error_fn& error_callback) {
-  return native_fn(this_obj, pos_args, named_args, ctx, error_callback);
+  return entrypoints.call(this_obj, pos_args, named_args, ctx, error_callback);
 }
 
 starlark_obj* starlark_built_in_function::call_pos(std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback) {
-  starlark_obj::pos_args_t pos_args_vec(pos_args.begin(), pos_args.end());
+  switch (pos_args.size()) {
+    case 0:
+      if (entrypoints.pos0 != nullptr) {
+        return entrypoints.pos0(this_obj, ctx, error_callback);
+      }
+      break;
+    case 1:
+      if (entrypoints.pos1 != nullptr) {
+        return entrypoints.pos1(this_obj, pos_args[0], ctx, error_callback);
+      }
+      break;
+    case 2:
+      if (entrypoints.pos2 != nullptr) {
+        return entrypoints.pos2(this_obj, pos_args[0], pos_args[1], ctx, error_callback);
+      }
+      break;
+    case 3:
+      if (entrypoints.pos3 != nullptr) {
+        return entrypoints.pos3(this_obj, pos_args[0], pos_args[1], pos_args[2], ctx, error_callback);
+      }
+      break;
+    default:
+      break;
+  }
+  static thread_local starlark_obj::pos_args_t pos_args_vec;
+  pos_args_vec.assign(pos_args.begin(), pos_args.end());
   starlark_obj::named_args_t named_args;
-  return native_fn(this_obj, pos_args_vec, named_args, ctx, error_callback);
+  return entrypoints.call(this_obj, pos_args_vec, named_args, ctx, error_callback);
 }
 
 starlark_function::starlark_function(std::string_view fn_name, std::string_view module_name) : fn_name(fn_name), module_name(module_name) {}
@@ -188,65 +215,21 @@ starlark_obj* starlark_fn_abs(starlark_obj* this_obj, const std::vector<starlark
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::abs_f).ok()) {
     return nullptr;
   }
-  auto* value = pos_args.front();
-  switch (value->numeric_type()) {
-    case starlark_numeric_type::kFloat: {
-      auto fvalue = value->as_float();
-      if (std::signbit(fvalue)) {
-        return create_float(std::abs(value->as_float()), ctx);
-      }
-      return value;
-    }
-    case starlark_numeric_type::kInt64: {
-      int64_t ivalue = value->as_int64();
-      if (ivalue < 0) {
-        return value->unary_minus(ctx, error_callback);
-      }
-      return value;
-    }
-    case starlark_numeric_type::kBigInt: {
-      const auto& bvalue = value->as_bigint();
-      if (bvalue.sign()) {
-        return value->unary_minus(ctx, error_callback);
-      }
-      return value;
-    }
-    default:
-      error_callback.add_error(error_v2_argument_bad_operand_type(starlark_built_in_functions::abs_f, value->type(), starlark_types::int_t, starlark_types::float_t));
-      return nullptr;
-  }
+  return builtin_pos::abs_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_all(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::all_f).ok()) {
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
-  if (it == nullptr) {
-    return nullptr;
-  }
-  bool result = true;
-  while (result && it->has_next()) {
-    result = it->next()->truthy();
-  }
-  it->end_iterator();
-  return result ? ctx.true_value() : ctx.false_value();
+  return builtin_pos::all_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_any(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::any_f).ok()) {
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
-  if (it == nullptr) {
-    return nullptr;
-  }
-  bool result = false;
-  while (!result && it->has_next()) {
-    result = it->next()->truthy();
-  }
-  it->end_iterator();
-  return result ? ctx.true_value() : ctx.false_value();
+  return builtin_pos::any_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -254,9 +237,9 @@ starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_a
     return nullptr;
   }
   if (pos_args.empty()) {
-    return ctx.false_value();
+    return builtin_pos::bool_pos0(this_obj, ctx, error_callback);
   }
-  return pos_args.front()->truthy() ? ctx.true_value() : ctx.false_value();
+  return builtin_pos::bool_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -287,96 +270,31 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
     source = pos_args.front();
   }
   if (source == nullptr) {
-    return ctx.empty_bytes();
+    return builtin_pos::bytes_pos0(this_obj, ctx, error_callback);
   }
-  if (source->type() == starlark_types::bytes_t) {
-    return source;
-  }
-  if (source->type() == starlark_types::string_t) {
-    // If in the future we do not allow strings to have invalid Unicode sequences, then all this can be replaced with
-    // return Arena::Create<starlark_bytes>(&ctx.arena(), source->as_string());
-    std::string result;
-    utf8_reader reader(source->as_string(), false, false);
-    while (reader.pending()) {
-      utf8_encode_code_point(reader.read_code_point(), result, false, true);
-    }
-    if (result.length() > ctx.options().max_string_length) {
-      error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
-      return nullptr;
-    }
-    return Arena::Create<starlark_bytes>(&ctx.arena(), result);
-  }
-  auto* it = source->get_iterator(false, ctx, error_callback);
-  if (it == nullptr) {
-    error_callback.add_error(error_v2_convert(source->type(), starlark_types::bytes_t));
-    return nullptr;
-  }
-  if (source->unsafe_len() > ctx.options().max_string_length) {
-    error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
-    return nullptr;
-  }
-  std::string result;
-  while (it->has_next()) {
-    auto value = it->next();
-    switch (value->numeric_type()) {
-      case starlark_numeric_type::kInt64: {
-        auto ivalue = value->as_int64();
-        if (ivalue < 0 || 255 < ivalue) {
-          error_callback.add_error(error_v2_bytes_in_range());
-          return nullptr;
-        }
-        result += static_cast<char>(ivalue);
-        break;
-      }
-      case starlark_numeric_type::kBigInt: {
-        const auto& bvalue = value->as_bigint();
-        if (bvalue.sign() || bvalue.bit_size() > 8) {
-          error_callback.add_error(error_v2_bytes_in_range());
-          return nullptr;
-        }
-        result += static_cast<char>(bvalue.at(0));
-        break;
-      }
-      default:
-        error_callback.add_error(error_v2_interpreted_as_integer(value->type()));
-        return nullptr;
-    }
-  }
-  it->end_iterator();
-  return Arena::Create<starlark_bytes>(&ctx.arena(), result);
+  return builtin_pos::bytes_pos1(this_obj, source, ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_chr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::chr_f).ok()) {
     return nullptr;
   }
-  std::string result;
-  auto* value = pos_args.front();
-  switch (value->numeric_type()) {
-    case starlark_numeric_type::kInt64:
-      if (!chr_fn(result, value->as_int64(), error_callback).ok()) {
-        return nullptr;
-      }
-      break;
-    case starlark_numeric_type::kBigInt:
-      if (!chr_fn(result, value->as_bigint(), error_callback).ok()) {
-        return nullptr;
-      }
-      break;
-    default:
-      error_callback.add_error(error_v2_interpreted_as_integer(value->type()));
-      return nullptr;
-  }
-  return Arena::Create<starlark_string>(&ctx.arena(), result);
+  return builtin_pos::chr_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!max_args(pos_args, error_callback, starlark_built_in_functions::dict_f, 1).ok()) {
     return nullptr;
   }
+  if (pos_args.empty()) {
+    starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
+    if (!result->update(nullptr, named_args, ctx, error_callback).ok()) {
+      return nullptr;
+    }
+    return result;
+  }
   starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
-  starlark_obj* iterable = pos_args.empty() ? nullptr : pos_args.front();
-  if (!result->update(iterable, named_args, ctx, error_callback).ok()) {
+  if (!result->update(pos_args.front(), named_args, ctx, error_callback).ok()) {
     return nullptr;
   }
   return result;
@@ -388,13 +306,7 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::dir_f).ok()) {
     return nullptr;
   }
-  const auto& attributes = pos_args.front()->dir();
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), attributes.size());
-  for (const auto& attribute : attributes) {
-    // This recreates the strings for every call, and can be quite wasteful. Given that this method is rarely called, then maybe this is ok.
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), attribute));
-  }
-  return result;
+  return builtin_pos::dir_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -439,6 +351,12 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
     error_callback.add_error(error_v2_missing_argument(starlark_built_in_functions::enumerate_f, "iterable"));
     return nullptr;
   }
+  if (pos_args.size() == 1 && named_args.empty()) {
+    return builtin_pos::enumerate_pos1(this_obj, iterable, ctx, error_callback);
+  }
+  if (pos_args.size() == 2 && named_args.empty()) {
+    return builtin_pos::enumerate_pos2(this_obj, iterable, start, ctx, error_callback);
+  }
   if (start != nullptr && start->type() != starlark_types::int_t) {
     error_callback.add_error(error_v2_argument_interpreted_as_integer("start", start->type()));
     return nullptr;
@@ -481,49 +399,9 @@ starlark_obj* starlark_fn_float(starlark_obj* this_obj, const starlark_obj::pos_
     return nullptr;
   }
   if (pos_args.empty()) {
-    return create_float(0.0, ctx);
+    return builtin_pos::float_pos0(this_obj, ctx, error_callback);
   }
-  auto* value = pos_args.front();
-  switch (value->numeric_type()) {
-    case starlark_numeric_type::kFloat:
-      return value;
-    case starlark_numeric_type::kInt64:
-      return create_float(value->as_int64(), ctx);
-    case starlark_numeric_type::kBigInt: {
-      auto fvalue = to_double(value->as_bigint());
-      if (std::isinf(fvalue)) {
-        error_callback.add_error(error_v2_overflow(value->type(), starlark_types::float_t));
-        return nullptr;
-      }
-      return create_float(fvalue, ctx);
-    }
-    case starlark_numeric_type::kNotNumeric:
-    default:
-      if (value->type() == starlark_types::string_t) {
-        auto svalue = value->as_string();
-        errno = 0;
-        char* end;
-        double double_value = std::strtod(svalue.data(), &end);
-        if (end != &svalue.back() + 1) {
-          error_callback.add_error(error_v2_convert_string(starlark_types::float_t, svalue));
-          return nullptr;
-        }
-        if (errno != 0) {
-          error_callback.add_error(error_v2_overflow_float_too_large());
-          return nullptr;
-        }
-        return create_float(double_value, ctx);
-      } else if (value->type() == starlark_types::bool_t) {
-        if (value->truthy()) {
-          return create_float(1.0, ctx);
-        } else {
-          return create_float(0.0, ctx);
-        }
-      } else {
-        error_callback.add_error(error_v2_argument_string_or_real(starlark_built_in_functions::float_f, value->type()));
-        return nullptr;
-      }
-  }
+  return builtin_pos::float_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -534,6 +412,12 @@ starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::po
   }
   auto* element = pos_args.front();
   auto* name = pos_args[1];
+  if (pos_args.size() == 2 && named_args.empty()) {
+    return builtin_pos::getattr_pos2(this_obj, element, name, ctx, error_callback);
+  }
+  if (pos_args.size() == 3 && named_args.empty()) {
+    return builtin_pos::getattr_pos3(this_obj, element, name, pos_args[2], ctx, error_callback);
+  }
   if (name->type() != starlark_types::string_t) {
     error_callback.add_error(error_v2_attribute_string(name->type()));
     return nullptr;
@@ -552,17 +436,7 @@ starlark_obj* starlark_fn_hasattr(starlark_obj* this_obj, const starlark_obj::po
   if (!n_pos_args(pos_args, named_args, 2, error_callback, starlark_built_in_functions::hasattr_f).ok()) {
     return nullptr;
   }
-  auto* attr = pos_args.back();
-  if (attr->type() != starlark_types::string_t) {
-    error_callback.add_error(error_v2_attribute_string(attr->type()));
-    return nullptr;
-  }
-  const auto& attributes = pos_args.front()->dir();
-  auto it = std::lower_bound(attributes.begin(), attributes.end(), attr->as_string());
-  if (it == attributes.end() || *it != attr->as_string()) {
-    return ctx.false_value();
-  }
-  return ctx.true_value();
+  return builtin_pos::hasattr_pos2(this_obj, pos_args.front(), pos_args.back(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -570,13 +444,7 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::hash_f).ok()) {
     return nullptr;
   }
-  auto* value = pos_args.front();
-  if (value->type() == starlark_types::string_t || value->type() == starlark_types::bytes_t) {
-    return create_integer(value->hash(), ctx);
-  } else {
-    error_callback.add_error(error_v2_argument_bad_operand_type(starlark_built_in_functions::hash_f, value->type(), starlark_types::string_t, starlark_types::bytes_t));
-    return nullptr;
-  }
+  return builtin_pos::hash_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -613,9 +481,15 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       error_callback.add_error(error_v2_missing_typed_argument(starlark_built_in_functions::int_f, starlark_types::string_t));
       return nullptr;
     }
-    return ctx.zero();
+    return builtin_pos::int_pos0(this_obj, ctx, error_callback);
   }
   auto* value = pos_args.front();
+  if (pos_args.size() == 1 && named_args.empty()) {
+    return builtin_pos::int_pos1(this_obj, value, ctx, error_callback);
+  }
+  if (pos_args.size() == 2 && named_args.empty()) {
+    return builtin_pos::int_pos2(this_obj, value, pos_args[1], ctx, error_callback);
+  }
   if (value->type() != starlark_types::string_t && base_param != nullptr) {
     error_callback.add_error(error_v2_non_string_with_base());
     return nullptr;
@@ -680,11 +554,7 @@ starlark_obj* starlark_fn_len(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::len_f).ok()) {
     return nullptr;
   }
-  auto result = pos_args.front()->len(error_callback);
-  if (result < 0) {
-    return nullptr;
-  }
-  return create_integer(result, ctx);
+  return builtin_pos::len_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -692,18 +562,9 @@ starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_a
     return nullptr;
   }
   if (pos_args.empty()) {
-    return Arena::Create<starlark_list>(&ctx.arena(), 0);
+    return builtin_pos::list_pos0(this_obj, ctx, error_callback);
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
-  if (it == nullptr) {
-    return nullptr;
-  }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->unsafe_len()));
-  while (it->has_next()) {
-    result->unsafe_append(it->next());
-  }
-  it->end_iterator();
-  return result;
+  return builtin_pos::list_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -904,32 +765,16 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::ord_f).ok()) {
     return nullptr;
   }
-  auto* value = pos_args.front();
-  if (value->type() == starlark_types::string_t) {
-    utf8_reader reader(value->as_string(), false, false);
-    if (!reader.pending()) {
-      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->unsafe_len()));
-      return nullptr;
-    }
-    auto result = reader.read_code_point();
-    if (reader.pending()) {
-      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->unsafe_len()));
-      return nullptr;
-    }
-    return create_integer(result, ctx);
-  } else if (value->type() == starlark_types::bytes_t) {
-    if (auto value_len = value->unsafe_len(); value_len != 1) {
-      error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value_len));
-      return nullptr;
-    }
-    return create_integer(static_cast<unsigned char>(value->as_string()[0]), ctx);
-  } else {
-    error_callback.add_error(error_v2_expect_one_character_or_one_byte(starlark_built_in_functions::ord_f, value->type()));
-    return nullptr;
-  }
+  return builtin_pos::ord_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (named_args.empty() && pos_args.size() == 1) {
+    return builtin_pos::print_pos1(this_obj, pos_args.front(), ctx, error_callback);
+  }
+  if (named_args.empty() && pos_args.empty()) {
+    return builtin_pos::print_pos0(this_obj, ctx, error_callback);
+  }
   std::string sep = " ";
   for (auto& [key, value] : named_args) {
     if (key->as_string() == "sep") {
@@ -963,89 +808,30 @@ starlark_obj* starlark_fn_range(starlark_obj* this_obj, const starlark_obj::pos_
     return nullptr;
   }
 
-  auto read_int64 = [](starlark_obj* value, int64_t& output, error_fn& error_callback) -> status {
-    switch (value->numeric_type()) {
-    case starlark_numeric_type::kInt64:
-      output = value->as_int64();
-      return ok_status();
-    case starlark_numeric_type::kBigInt: {
-      const auto& bvalue = value->as_bigint();
-      if (!bvalue.fits_in_int64()) {
-        error_callback.add_error(error_v2_overflow(value->type(), starlark_types::int64));
-        return error_status();
-      }
-      output = bvalue.as_int64();
-      return ok_status();
-    }
-    default:
-      error_callback.add_error(error_v2_interpreted_as_integer(value->type()));
-      return error_status();
-    }
-  };
-
-  int64_t start = 0;
-  int64_t end;
-  int64_t step = 1;
   switch (pos_args.size()) {
     case 1:
-      if (!read_int64(pos_args[0], end, error_callback).ok()) {
-        return nullptr;
-      }
-      break;
+      return builtin_pos::range_pos1(this_obj, pos_args[0], ctx, error_callback);
     case 2:
-      if (!read_int64(pos_args[0], start, error_callback).ok() ||
-          !read_int64(pos_args[1], end, error_callback).ok()) {
-        return nullptr;
-      }
-      break;
+      return builtin_pos::range_pos2(this_obj, pos_args[0], pos_args[1], ctx, error_callback);
     case 3:
-      if (!read_int64(pos_args[0], start, error_callback).ok() ||
-          !read_int64(pos_args[1], end, error_callback).ok() ||
-          !read_int64(pos_args[2], step, error_callback).ok()) {
-        return nullptr;
-      }
-      if (step == 0) {
-        error_callback.add_error(error_v2_argument_non_zero(starlark_built_in_functions::range_f, 3));
-        return nullptr;
-      }
-      break;
+      return builtin_pos::range_pos3(this_obj, pos_args[0], pos_args[1], pos_args[2], ctx, error_callback);
+    default:
+      return nullptr;
   }
-
-
-  auto* result = Arena::Create<starlark_range>(&ctx.arena(), start, end, step);
-  if (!result->valid()) {
-    error_callback.add_error(error_v2_overflow(starlark_types::int_t, starlark_types::int64));
-    return nullptr;
-  }
-  return result;
 }
 
 starlark_obj* starlark_fn_repr(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::repr_f).ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), pos_args.front()->repr());
+  return builtin_pos::repr_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_reversed(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::reversed_f).ok()) {
     return nullptr;
   }
-  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
-  if (it == nullptr) {
-    return nullptr;
-  }
-  std::vector<starlark_obj*> elements;
-  while (it->has_next()) {
-    elements.push_back(it->next());
-  }
-  it->end_iterator();
-  std::reverse(elements.begin(), elements.end());
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), elements.size());
-  for (auto* element : elements) {
-    result->unsafe_append(element);
-  }
-  return result;
+  return builtin_pos::reversed_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1053,27 +839,18 @@ starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_ar
     return nullptr;
   }
   if (pos_args.empty()) {
-    return Arena::Create<starlark_set>(&ctx.arena());
+    return builtin_pos::set_pos0(this_obj, ctx, error_callback);
   }
-
-  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
-  if (it == nullptr) {
-    return nullptr;
-  }
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
-  while (it->has_next()) {
-    if (!result->add(it->next(), error_callback).ok()) {
-      return nullptr;
-    }
-  }
-  it->end_iterator();
-  return result;
+  return builtin_pos::set_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (pos_args.size() != 1) {
     error_callback.add_error(error_v2_arguments_exactly_one(starlark_built_in_functions::sorted_f, pos_args.size()));
     return nullptr;
+  }
+  if (named_args.empty()) {
+    return builtin_pos::sorted_pos1(this_obj, pos_args.front(), ctx, error_callback);
   }
   starlark_obj* key_fn = nullptr;
   bool reverse = false;
@@ -1167,9 +944,9 @@ starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_ar
     object = pos_args.front();
   }
   if (object == nullptr) {
-    return ctx.empty_string();
+    return builtin_pos::str_pos0(this_obj, ctx, error_callback);
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), object->str());
+  return builtin_pos::str_pos1(this_obj, object, ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_tuple(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1177,29 +954,34 @@ starlark_obj* starlark_fn_tuple(starlark_obj* this_obj, const starlark_obj::pos_
     return nullptr;
   }
   if (pos_args.empty()) {
-    return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+    return builtin_pos::tuple_pos0(this_obj, ctx, error_callback);
   }
-
-  auto* it = pos_args.front()->get_iterator(true, ctx, error_callback);
-  if (it == nullptr) {
-    return nullptr;
-  }
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), std::max<int64_t>(0, pos_args.front()->unsafe_len()));
-  while (it->has_next()) {
-    result->add(it->next());
-  }
-  it->end_iterator();
-  return result;
+  return builtin_pos::tuple_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_type(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   if (!one_pos_arg(pos_args, named_args, error_callback, starlark_built_in_functions::type_f).ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), pos_args.front()->type());
+  return builtin_pos::type_pos1(this_obj, pos_args.front(), ctx, error_callback);
 }
 
 starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::zip_f).ok()) {
+    return nullptr;
+  }
+  switch (pos_args.size()) {
+    case 0:
+      return builtin_pos::zip_pos0(this_obj, ctx, error_callback);
+    case 1:
+      return builtin_pos::zip_pos1(this_obj, pos_args[0], ctx, error_callback);
+    case 2:
+      return builtin_pos::zip_pos2(this_obj, pos_args[0], pos_args[1], ctx, error_callback);
+    case 3:
+      return builtin_pos::zip_pos3(this_obj, pos_args[0], pos_args[1], pos_args[2], ctx, error_callback);
+    default:
+      break;
+  }
   auto all_available = [](const std::vector<starlark_iterator*>& its) -> bool {
     for (const auto* it : its) {
       if (!it->has_next()) {
@@ -1208,13 +990,6 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
     }
     return true;
   };
-
-  if (!no_named_args(named_args, error_callback, starlark_built_in_functions::zip_f).ok()) {
-    return nullptr;
-  }
-  if (pos_args.empty()) {
-    return Arena::Create<starlark_list>(&ctx.arena(), 0);
-  }
   auto len = std::numeric_limits<int64_t>::max();
   std::vector<starlark_iterator*> its;
   its.reserve(pos_args.size());

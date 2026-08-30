@@ -9,9 +9,12 @@ namespace starlark {
 namespace runtime {
 
 starlark_obj* create_function(context& ctx, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name) {
-  return Arena::Create<starlark_built_in_function>(&ctx.arena(), this_obj, native_fn, fn_name);
+  return create_function(ctx, this_obj, builtin_entrypoints{.call = native_fn}, fn_name);
+}
+
+starlark_obj* create_function(context& ctx, starlark_obj* this_obj, builtin_entrypoints entrypoints, std::string_view fn_name) {
+  return Arena::Create<starlark_built_in_function>(&ctx.arena(), this_obj, entrypoints, fn_name);
 }
 
 }  // namespace runtime
 }  // namespace starlark
-

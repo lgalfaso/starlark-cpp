@@ -699,8 +699,14 @@ cc_test(
 
 cc_library(
     name = "starlark_function",
-    srcs = ["starlark_function.cpp"],
-    hdrs = ["starlark_function.hpp"],
+    srcs = [
+        "starlark_function.cpp",
+        "starlark_predeclared_builtins.cpp",
+    ],
+    hdrs = [
+        "builtin_pos.hpp",
+        "starlark_function.hpp",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":starlark_bool",

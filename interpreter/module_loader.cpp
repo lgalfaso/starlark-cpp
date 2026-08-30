@@ -14,6 +14,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::bytecode::OpCode;
 using ::starlark::bytecode::Program;
+using ::starlark::runtime::builtin_entrypoints;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_obj;
 
@@ -105,9 +106,9 @@ std::pair<frame*, const starlark::bytecode::Program*>& module_info::get() {
 }
 
 module_loader::module_loader() {
-  custom_binding["inner_max"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_inner_max, "inner_max");
-  custom_binding["inner_min"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_inner_min, "inner_min");
-  custom_binding["inner_sorted"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, starlark_fn_inner_sorted, "inner_sorted");
+  custom_binding["inner_max"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = starlark_fn_inner_max}, "inner_max");
+  custom_binding["inner_min"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = starlark_fn_inner_min}, "inner_min");
+  custom_binding["inner_sorted"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = starlark_fn_inner_sorted}, "inner_sorted");
 }
 
 starlark::result::status_or<module_info*> module_loader::load_module(std::string_view local_module_name, std::string_view caller_cannonical_name) {

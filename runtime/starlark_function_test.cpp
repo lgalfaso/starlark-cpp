@@ -36,6 +36,7 @@ using ::starlark::runtime::error_fn;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::builtin_entrypoints;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_bytes;
 using ::starlark::runtime::starlark_dictionary;
@@ -93,30 +94,30 @@ class FnTest : public ::testing::Test {
 
 TEST(StarlarkFunction, Type) {
   EXPECT_EQ("function", starlark_testing_function().type());
-  EXPECT_EQ("builtin_function_or_method", starlark_built_in_function(nullptr, base_fn, "fn_name").type());
+  EXPECT_EQ("builtin_function_or_method", starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").type());
 }
 
 TEST(StarlarkFunction, Primitve) {
   EXPECT_FALSE(starlark_testing_function().primitive());
-  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").primitive());
+  EXPECT_FALSE(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").primitive());
 }
 
 TEST(StarlarkFunction, Truthy) {
   EXPECT_TRUE(starlark_testing_function().truthy());
-  EXPECT_TRUE(starlark_built_in_function(nullptr, base_fn, "fn_name").truthy());
+  EXPECT_TRUE(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").truthy());
 }
 
 TEST(StarlarkFunction, Str) {
   starlark_list list(0);
-  EXPECT_EQ("<built-in function fn_name>", starlark_built_in_function(nullptr, base_fn, "fn_name").str());
-  EXPECT_EQ("<built-in method fn_name of list value>", starlark_built_in_function(&list, base_fn, "fn_name").str());
+  EXPECT_EQ("<built-in function fn_name>", starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").str());
+  EXPECT_EQ("<built-in method fn_name of list value>", starlark_built_in_function(&list, builtin_entrypoints{.call = base_fn}, "fn_name").str());
   EXPECT_EQ("<function foo from //:test.star>", starlark_testing_function("foo", "//:test.star").str());
 }
 
 TEST(StarlarkFunction, Hash) {
-  EXPECT_EQ(0, starlark_built_in_function(nullptr, base_fn, "").hash());
-  EXPECT_EQ(-5056436948751091085, starlark_built_in_function(nullptr, base_fn, "fn_name").hash());
-  EXPECT_EQ(-342786463226536281, starlark_built_in_function(nullptr, base_fn, "some_fn").hash());
+  EXPECT_EQ(0, starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "").hash());
+  EXPECT_EQ(-5056436948751091085, starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").hash());
+  EXPECT_EQ(-342786463226536281, starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "some_fn").hash());
   EXPECT_EQ(0, starlark_testing_function("").hash());
   EXPECT_EQ(-8419484683692405967, starlark_testing_function("fn_name").hash());
   EXPECT_EQ(-4071090497886085033, starlark_testing_function("some_fn").hash());
@@ -127,21 +128,21 @@ TEST(StarlarkFunction, Equals) {
   starlark_list list2(0);
   starlark_integer zero(0);
   starlark_integer one(1);
-  EXPECT_TRUE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
-  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base2_fn, "fn_name")));
-  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "another_name")));
-  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base2_fn, "another_name")));
-  EXPECT_FALSE(starlark_built_in_function(nullptr, base_fn, "fn_name").equals(starlark_list(0)));
-  EXPECT_FALSE(starlark_built_in_function(&list1, base_fn, "fn_name").equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
-  EXPECT_FALSE(starlark_built_in_function(&list1, base_fn, "fn_name").equals(starlark_built_in_function(&list2, base_fn, "fn_name")));
-  EXPECT_TRUE(starlark_built_in_function(&list1, base_fn, "fn_name").equals(starlark_built_in_function(&list1, base_fn, "fn_name")));
-  EXPECT_FALSE(starlark_built_in_function(&zero, base_fn, "fn_name").equals(starlark_built_in_function(&list1, base_fn, "fn_name")));
-  EXPECT_FALSE(starlark_built_in_function(&zero, base_fn, "fn_name").equals(starlark_built_in_function(&one, base_fn, "fn_name")));
-  EXPECT_TRUE(starlark_built_in_function(&zero, base_fn, "fn_name").equals(starlark_built_in_function(&zero, base_fn, "fn_name")));
+  EXPECT_TRUE(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base2_fn}, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "another_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base2_fn}, "another_name")));
+  EXPECT_FALSE(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_list(0)));
+  EXPECT_FALSE(starlark_built_in_function(&list1, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(&list1, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(&list2, builtin_entrypoints{.call = base_fn}, "fn_name")));
+  EXPECT_TRUE(starlark_built_in_function(&list1, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(&list1, builtin_entrypoints{.call = base_fn}, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(&zero, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(&list1, builtin_entrypoints{.call = base_fn}, "fn_name")));
+  EXPECT_FALSE(starlark_built_in_function(&zero, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(&one, builtin_entrypoints{.call = base_fn}, "fn_name")));
+  EXPECT_TRUE(starlark_built_in_function(&zero, builtin_entrypoints{.call = base_fn}, "fn_name").equals(starlark_built_in_function(&zero, builtin_entrypoints{.call = base_fn}, "fn_name")));
 }
 
 TEST_F(FnTest, Call) {
-  starlark_built_in_function fn(nullptr, base_fn, "fn_name");
+  starlark_built_in_function fn(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name");
   Arena arena;
   context ctx(arena);
   error_handler error_callback;
@@ -160,7 +161,7 @@ starlark_obj* fn_error(starlark_obj* this_obj, const starlark_obj::pos_args_t&, 
 }
 
 TEST_F(FnTest, CallWithError) {
-  starlark_built_in_function fn(nullptr, base_fn, "fn_name");
+  starlark_built_in_function fn(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name");
   Arena arena;
   context ctx(arena);
   error_handler error_callback;

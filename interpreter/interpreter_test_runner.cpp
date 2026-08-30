@@ -32,6 +32,7 @@ using ::starlark::runtime::append_for_repr;
 using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::runtime_options;
+using ::starlark::runtime::builtin_entrypoints;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_none;
 using ::starlark::runtime::starlark_obj;
@@ -358,12 +359,12 @@ status_or<frame*> run_test(std::map<std::string, std::string> programs, logger& 
 
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
   std::map<std::string, starlark_obj*, std::less<>> custom_binding;
-  custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_eq_fn, "assert_eq");
-  custom_binding["assert_ne"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_ne_fn, "assert_eq");
-  custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_fail_fn, "assert_fail");
-  custom_binding["assert_succeed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_succeed_fn, "assert_succeed");
-  custom_binding["assert_true"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_true_fn, "assert_true");
-  custom_binding["assert_false"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, assert_false_fn, "assert_false");
+  custom_binding["assert_eq"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = assert_eq_fn}, "assert_eq");
+  custom_binding["assert_ne"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = assert_ne_fn}, "assert_eq");
+  custom_binding["assert_fail"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = assert_fail_fn}, "assert_fail");
+  custom_binding["assert_succeed"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = assert_succeed_fn}, "assert_succeed");
+  custom_binding["assert_true"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = assert_true_fn}, "assert_true");
+  custom_binding["assert_false"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = assert_false_fn}, "assert_false");
   for (const auto& [k, v] : programs) {
     modules.try_emplace(k, v, custom_binding);
   }

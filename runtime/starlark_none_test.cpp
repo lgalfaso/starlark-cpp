@@ -28,6 +28,7 @@ using ::starlark::runtime::context;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::builtin_entrypoints;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_bytes;
 using ::starlark::runtime::starlark_dictionary;
@@ -71,7 +72,7 @@ TEST(StarlarkNone, Equals) {
   EXPECT_FALSE(starlark_none().equals(starlark_bigint(0)));
   EXPECT_FALSE(starlark_none().equals(starlark_bool(false)));
   EXPECT_FALSE(starlark_none().equals(starlark_bytes(""sv)));
-  EXPECT_FALSE(starlark_none().equals(starlark_built_in_function(nullptr, base_fn, "fn_name")));
+  EXPECT_FALSE(starlark_none().equals(starlark_built_in_function(nullptr, builtin_entrypoints{.call = base_fn}, "fn_name")));
   EXPECT_FALSE(starlark_none().equals(starlark_dictionary()));
   EXPECT_FALSE(starlark_none().equals(starlark_float(0.0)));
   EXPECT_FALSE(starlark_none().equals(starlark_testing_function()));
