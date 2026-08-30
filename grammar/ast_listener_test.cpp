@@ -1,7 +1,5 @@
 // Copyright 2025 Lucas Mirelmann
 
-#include <fcntl.h>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
@@ -12,8 +10,8 @@
 #include "grammar/parser.hpp"
 #include "grammar/parsing_options.hpp"
 #include "grammar/quoted.hpp"
+#include "io/read_file.hpp"
 #include "proto/starlark_ast.pb.h"
-#include "third-party/defer.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::ast::AssignStmt;
@@ -498,31 +496,15 @@ TEST(Parser, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(3));
 
-  std::string starlark_program;
-  {
-    int starlark_fd = open(argv[1].c_str(), O_RDONLY);
-    ASSERT_GT(starlark_fd, 0);
-    defer { close(starlark_fd); };
-    struct stat sb;
-    ASSERT_GE(fstat(starlark_fd, &sb), 0);
-    starlark_program.resize(sb.st_size);
-    read(starlark_fd, starlark_program.data(), sb.st_size);
-  }
-  std::string expeted_ast_walking_output;
-  {
-    int ast_walk_output_fd = open(argv[2].c_str(), O_RDONLY);
-    ASSERT_GT(ast_walk_output_fd, 0);
-    defer { close(ast_walk_output_fd); };
-    struct stat sb;
-    ASSERT_GE(fstat(ast_walk_output_fd, &sb), 0);
-    expeted_ast_walking_output.resize(sb.st_size);
-    read(ast_walk_output_fd, expeted_ast_walking_output.data(), sb.st_size);
-  }
+  auto starlark_program = starlark::io::read_file(argv[1]);
+  ASSERT_TRUE(starlark_program.has_value());
+  auto expeted_ast_walking_output = starlark::io::read_file(argv[2]);
+  ASSERT_TRUE(expeted_ast_walking_output.has_value());
 
   logger logging;
   logging.set_level(LogLevel::LOG_LEVEL_ERROR);
-  starlark::grammar::grammar_options opts = starlark::grammar::get_parsing_options(starlark_program);
-  parser star_parser(argv[1], starlark_program, opts, {}, logging);
+  starlark::grammar::grammar_options opts = starlark::grammar::get_parsing_options(*starlark_program);
+  parser star_parser(argv[1], *starlark_program, opts, {}, logging);
   Arena arena;
   File* starlark_file = star_parser.parse_file(arena);
   EXPECT_THAT(logging, IsEmpty()) << show_errors(logging);
@@ -531,7 +513,7 @@ TEST(Parser, TestCase) {
   ast_listener_logger listener(ast_walk_output);
   starlark::grammar::ast_walker walker;
   walker.walk(starlark_file, listener);
-  EXPECT_EQ(ast_walk_output, expeted_ast_walking_output) << starlark_file->DebugString();
+  EXPECT_EQ(ast_walk_output, *expeted_ast_walking_output) << starlark_file->DebugString();
 
   starlark::grammar::ast_listener_base base;
   walker.walk(starlark_file, base);

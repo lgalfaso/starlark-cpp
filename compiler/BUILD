@@ -25,6 +25,7 @@ cc_library(
     testonly = True,
     deps = [
         ":compiler",
+        "//io:read_file",
         "//proto:starlark_bytecode_cc_proto",
         "//third-party:defer",
         "@googletest//:gtest",

@@ -1,7 +1,5 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include <fcntl.h>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
@@ -16,11 +14,11 @@
 #include "interpreter/interpreter.hpp"
 #include "interpreter/interpreter_test_runner.hpp"
 #include "interpreter/module_loader.hpp"
+#include "io/read_file.hpp"
 #include "logging/logging.hpp"
 #include "runtime/options.hpp"
 #include "runtime/parsing_options.hpp"
 #include "runtime/starlark_object.hpp"
-#include "third-party/defer.hpp"
 
 using ::starlark::grammar::get_parsing_options;
 using ::starlark::grammar::grammar_options;
@@ -41,33 +39,17 @@ TEST(Parser, TestCase) {
   ASSERT_THAT(argv, SizeIs(3));
 
   // Read the two files.
-  std::string starlark_program;
-  {
-    int starlark_fd = open(argv[1].c_str(), O_RDONLY);
-    ASSERT_GT(starlark_fd, 0);
-    defer { close(starlark_fd); };
-    struct stat sb;
-    ASSERT_GE(fstat(starlark_fd, &sb), 0);
-    starlark_program.resize(sb.st_size);
-    read(starlark_fd, starlark_program.data(), sb.st_size);
-  }
-  std::string expeted_error_message;
-  {
-    int error_message_fd = open(argv[2].c_str(), O_RDONLY);
-    ASSERT_GT(error_message_fd, 0);
-    defer { close(error_message_fd); };
-    struct stat sb;
-    ASSERT_GE(fstat(error_message_fd, &sb), 0);
-    expeted_error_message.resize(sb.st_size);
-    read(error_message_fd, expeted_error_message.data(), sb.st_size);
-  }
+  auto starlark_program = starlark::io::read_file(argv[1]);
+  ASSERT_TRUE(starlark_program.has_value());
+  auto expeted_error_message = starlark::io::read_file(argv[2]);
+  ASSERT_TRUE(expeted_error_message.has_value());
 
   // Get the grammar and runtime options.
-  grammar_options g_options = get_parsing_options(starlark_program);
-  runtime_options r_options = get_runtime_options(starlark_program, std::cout);
+  grammar_options g_options = get_parsing_options(*starlark_program);
+  runtime_options r_options = get_runtime_options(*starlark_program, std::cout);
 
   // Prepare the modules.
-  auto modules_parts = split_test_case(starlark_program);
+  auto modules_parts = split_test_case(*starlark_program);
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
   for (const auto& [module_name, source] : modules_parts) {
     modules.try_emplace(module_name, source, std::map<std::string, starlark_obj*, std::less<>>{});
@@ -80,7 +62,7 @@ TEST(Parser, TestCase) {
   ASSERT_FALSE(result.ok());
   ASSERT_FALSE(logging.empty());
   // TODO(lmirelmann): We should check all the errors.
-  EXPECT_EQ(pretty_log(*logging.begin()), expeted_error_message);
+  EXPECT_EQ(pretty_log(*logging.begin()), *expeted_error_message);
 }
 
 }  // namespace

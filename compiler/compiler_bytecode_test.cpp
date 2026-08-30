@@ -12,6 +12,7 @@
 #include <string>
 
 #include "compiler/compiler.hpp"
+#include "io/read_file.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "protobuf-matchers/protocol-buffer-matchers.h"
 #include "third-party/defer.hpp"
@@ -40,16 +41,8 @@ TEST(CompilerBytecode, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(3));
 
-  std::string starlark_code;
-  {
-    int starlark_fd = open(argv[1].c_str(), O_RDONLY);
-    ASSERT_GT(starlark_fd, 0);
-    defer { close(starlark_fd); };
-    struct stat sb;
-    ASSERT_GE(fstat(starlark_fd, &sb), 0);
-    starlark_code.resize(sb.st_size);
-    read(starlark_fd, starlark_code.data(), sb.st_size);
-  }
+  auto starlark_code = starlark::io::read_file(argv[1]);
+  ASSERT_TRUE(starlark_code.has_value());
 
   Program expected_starlark_program;
   {
@@ -69,7 +62,7 @@ TEST(CompilerBytecode, TestCase) {
   };
   logger logging;
   Arena arena;
-  Program* actual_starlark_program = star_compiler.compile(argv[1], starlark_code, opt, logging, arena);
+  Program* actual_starlark_program = star_compiler.compile(argv[1], *starlark_code, opt, logging, arena);
 
   ASSERT_NE(actual_starlark_program, nullptr) << get_errors(logging);
   EXPECT_THAT(*actual_starlark_program, EqualsProto(expected_starlark_program));

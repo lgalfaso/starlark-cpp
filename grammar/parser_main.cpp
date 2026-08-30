@@ -1,16 +1,13 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
-#include <sys/stat.h>
-#include <fcntl.h>
-
 #include <functional>
 #include <iostream>
 #include <set>
 #include <string>
 
-#include "third-party/defer.hpp"
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
+#include "io/read_file.hpp"
 #include "proto/starlark_ast.pb.h"
 
 using ::google::protobuf::Arena;
@@ -126,19 +123,9 @@ static const std::set<std::string, std::less<>> bzl_symbols = {
 
 int main(int argc, char* argv[]) {
   for (int i = 1; i < argc; ++i) {
-    std::string starlark_program;
-    {
-      int in_fd = open(argv[i], O_RDONLY);
-      if (in_fd < 0) {
-        return 2;
-      }
-      defer { close(in_fd); };
-      struct stat sb;
-      if (fstat(in_fd, &sb) != 0) {
-        return 3;
-      }
-      starlark_program.resize(sb.st_size);
-      read(in_fd, starlark_program.data(), sb.st_size);
+    auto starlark_program = starlark::io::read_file(argv[i]);
+    if (!starlark_program) {
+      return 2;
     }
 
     std::string arg{argv[i]};
@@ -163,7 +150,7 @@ int main(int argc, char* argv[]) {
       extra_symbols = bzl_symbols;
     }
     parser star_parser(argv[i],
-                       starlark_program,
+                       *starlark_program,
                        grammar_options{
                            .escaped_octal_and_hex_char_are_ascii = false,
                            .require_load_statements_first = !is_build_or_workspace,

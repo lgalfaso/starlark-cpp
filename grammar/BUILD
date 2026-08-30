@@ -24,8 +24,8 @@ cc_library(
         ":parser",
         ":parsing_options",
         ":quoted",
+        "//io:read_file",
         "//proto:starlark_ast_cc_proto",
-        "//third-party:defer",
         "@googletest//:gtest",
         "@protobuf",
     ],
@@ -135,8 +135,8 @@ cc_binary(
     srcs = ["parser_main.cpp"],
     deps = [
         ":parser",
+        "//io:read_file",
         "//proto:starlark_ast_cc_proto",
-        "//third-party:defer",
         "@protobuf",
     ],
 )
@@ -149,6 +149,7 @@ cc_library(
     deps = [
         ":parser",
         ":parsing_options",
+        "//io:read_file",
         "//proto:starlark_ast_cc_proto",
         "//third-party:defer",
         "@googletest//:gtest",
@@ -189,8 +190,8 @@ cc_library(
     deps = [
         ":parser",
         ":parsing_options",
+        "//io:read_file",
         "//proto:starlark_ast_cc_proto",
-        "//third-party:defer",
         "@googletest//:gtest",
         "@protobuf",
     ],
@@ -222,8 +223,8 @@ cc_library(
     deps = [
         ":parser",
         ":parsing_options",
+        "//io:read_file",
         "//proto:starlark_ast_cc_proto",
-        "//third-party:defer",
         "@googletest//:gtest",
         "@protobuf",
     ],

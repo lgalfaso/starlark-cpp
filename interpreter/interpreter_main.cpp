@@ -1,8 +1,5 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include <fcntl.h>
-#include <sys/stat.h>
-
 #include <format>
 #include <functional>
 #include <iostream>
@@ -11,7 +8,7 @@
 #include <utility>
 
 #include "interpreter/interpreter.hpp"
-#include "third-party/defer.hpp"
+#include "io/read_file.hpp"
 
 using ::starlark::grammar::grammar_options;
 using ::starlark::interpreter::interpreter;
@@ -34,25 +31,14 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   std::string module_name = argv[1];
-  std::string starlark_code;
-  {
-    int starlark_fd = open(argv[1], O_RDONLY);
-    if (starlark_fd == 0) {
-      std::cout << "Unable to open " << module_name << "\n";
-      return 1;
-    }
-    defer { close(starlark_fd); };
-    struct stat sb;
-    if (fstat(starlark_fd, &sb) < 0) {
-      std::cout << "Unable to read metadata on " << module_name << "\n";
-      return 1;
-    }
-    starlark_code.resize(sb.st_size);
-    read(starlark_fd, starlark_code.data(), sb.st_size);
+  auto starlark_code = starlark::io::read_file(module_name);
+  if (!starlark_code) {
+    std::cout << "Unable to read " << module_name << "\n";
+    return 1;
   }
 
   std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> modules;
-  modules.try_emplace(module_name, starlark_code, std::map<std::string, starlark_obj*, std::less<>>{});
+  modules.try_emplace(module_name, *starlark_code, std::map<std::string, starlark_obj*, std::less<>>{});
   kv_module_loader loader{modules};
 
   interpreter runner;

@@ -1,7 +1,5 @@
 // Copyright 2025-2026 Lucas Mirelmann
 
-#include <fcntl.h>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
@@ -11,7 +9,7 @@
 
 #include "interpreter/frame.hpp"
 #include "interpreter/interpreter_test_runner.hpp"
-#include "third-party/defer.hpp"
+#include "io/read_file.hpp"
 
 using ::starlark::logging::logger;
 using ::starlark::interpreter::frame;
@@ -32,20 +30,12 @@ TEST(Interpreter, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(2));
 
-  std::string starlark_code;
-  {
-    int starlark_fd = open(argv[1].c_str(), O_RDONLY);
-    ASSERT_GT(starlark_fd, 0);
-    defer { close(starlark_fd); };
-    struct stat sb;
-    ASSERT_GE(fstat(starlark_fd, &sb), 0);
-    starlark_code.resize(sb.st_size);
-    read(starlark_fd, starlark_code.data(), sb.st_size);
-  }
+  auto starlark_code = starlark::io::read_file(argv[1]);
+  ASSERT_TRUE(starlark_code.has_value());
 
   logger logging;
   std::map<std::string, std::string> programs;
-  programs["main"] = starlark_code;
+  programs["main"] = *starlark_code;
   auto result = run_test(programs, logging);
   ASSERT_TRUE(result.ok()) << print_logs(logging);
 }

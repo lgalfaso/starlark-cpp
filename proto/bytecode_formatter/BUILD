@@ -23,9 +23,9 @@ cc_library(
         ":bytecode_txtpb_printer",
         "//compiler",
         "//grammar:options",
+        "//io:read_file",
         "//logging",
         "//proto:starlark_bytecode_cc_proto",
-        "//third-party:defer",
         "@protobuf",
     ],
 )

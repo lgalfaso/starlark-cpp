@@ -12,10 +12,10 @@ cc_library(
         "//interpreter:interpreter",
         "//interpreter:interpreter_test_runner",
         "//interpreter:module_loader",
+        "//io:read_file",
         "//logging",
         "//runtime:parsing_options",
         "//runtime:starlark_object",
-        "//third-party:defer",
         "@googletest//:gtest",
     ],
 )

@@ -127,7 +127,7 @@ cc_library(
     testonly = True,
     deps = [
         ":interpreter_test_runner",
-        "//third-party:defer",
+        "//io:read_file",
         "@googletest//:gtest",
     ],
 )
@@ -162,7 +162,7 @@ cc_binary(
     srcs = ["interpreter_main.cpp"],
     deps = [
         ":interpreter",
-        "//third-party:defer",
+        "//io:read_file",
     ],
 )
 

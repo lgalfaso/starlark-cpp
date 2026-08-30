@@ -10,7 +10,7 @@ cc_library(
     testonly = True,
     deps = [
         "//interpreter:interpreter_test_runner",
-        "//third-party:defer",
+        "//io:read_file",
         "@googletest//:gtest_main",
     ],
 )
