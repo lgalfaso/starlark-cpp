@@ -9,12 +9,12 @@
 #include <vector>
 
 #include "containers/linked_hash_map.hpp"
-#include "interpreter/runner_state.hpp"
-#include "string/levenshtein.hpp"
 #include "errors/runtime_error_messages.hpp"
+#include "interpreter/runner_state.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
+#include "string/levenshtein.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_v2_arguments_exactly;
@@ -33,6 +33,8 @@ using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
+using ::starlark::vm::builtin_star_module;
+using ::starlark::vm::frame;
 
 using kwargs_map_t = starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>>;
 

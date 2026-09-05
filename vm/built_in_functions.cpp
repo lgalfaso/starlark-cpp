@@ -1,6 +1,6 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include "interpreter/built_in_functions.hpp"
+#include "vm/built_in_functions.hpp"
 
 #include <cassert>
 
@@ -23,7 +23,7 @@ using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_types;
 
 namespace starlark {
-namespace interpreter {
+namespace vm {
 
 starlark_obj* starlark_fn_inner_max(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   assert(pos_args.size() == 2);
@@ -38,14 +38,26 @@ starlark_obj* starlark_fn_inner_max(starlark_obj* this_obj, const starlark_obj::
     return nullptr;
   }
   auto* it2 = pos_args[1]->get_iterator(true, ctx, error_callback);
-  assert(it2 != nullptr);
-  assert(it2->has_next());
+  if (it2 == nullptr) {
+    return nullptr;
+  }
+  if (!it2->has_next()) {
+    it2->end_iterator();
+    error_callback.add_error(error_v2_empty_iterator(starlark_built_in_functions::max_f));
+    return nullptr;
+  }
   starlark_obj* candidate = it1->next();
   const starlark_obj* candidate_key = it2->next();
+  if (candidate_key == nullptr) {
+    return nullptr;
+  }
   while (it1->has_next()) {
     auto* element = it1->next();
     assert(it2->has_next());
     const starlark_obj* element_key = it2->next();
+    if (element_key == nullptr) {
+      return nullptr;
+    }
     auto cmp = candidate_key->cmp(*element_key, "<", error_callback);
     if (!cmp.ok()) {
       return nullptr;
@@ -74,14 +86,26 @@ starlark_obj* starlark_fn_inner_min(starlark_obj* this_obj, const starlark_obj::
     return nullptr;
   }
   auto* it2 = pos_args[1]->get_iterator(true, ctx, error_callback);
-  assert(it2 != nullptr);
-  assert(it2->has_next());
+  if (it2 == nullptr) {
+    return nullptr;
+  }
+  if (!it2->has_next()) {
+    it2->end_iterator();
+    error_callback.add_error(error_v2_empty_iterator(starlark_built_in_functions::min_f));
+    return nullptr;
+  }
   starlark_obj* candidate = it1->next();
   const starlark_obj* candidate_key = it2->next();
+  if (candidate_key == nullptr) {
+    return nullptr;
+  }
   while (it1->has_next()) {
     auto* element = it1->next();
     assert(it2->has_next());
     const starlark_obj* element_key = it2->next();
+    if (element_key == nullptr) {
+      return nullptr;
+    }
     auto cmp = candidate_key->cmp(*element_key, "<", error_callback);
     if (!cmp.ok()) {
       return nullptr;
@@ -149,6 +173,5 @@ starlark_obj* starlark_fn_inner_sorted(starlark_obj* this_obj, const starlark_ob
   return result;
 }
 
-}  // namespace interpreter
+}  // namespace vm
 }  // namespace starlark
-

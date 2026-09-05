@@ -2,6 +2,7 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
+load("//bzl:program_test.bzl", "program_test")
 load("//proto:starlark_proto_encoder.bzl", "starlark_ast_proto_encoder")
 
 cc_library(
@@ -31,9 +32,19 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "ast_listener_test",
+    testonly = True,
+    deps = [
+        ":ast_listener_test_base",
+        "@googletest//:gtest_main",
+    ],
+)
+
 [
-    cc_test(
+    program_test(
         name = "ast_listener_test_" + f.replace("/", "_"),
+        program = ":ast_listener_test",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -42,10 +53,6 @@ cc_library(
         data = [
             f,
             f.replace(".star", ".txt"),
-        ],
-        deps = [
-            ":ast_listener_test_base",
-            "@googletest//:gtest_main",
         ],
     )
     for f in glob(["ast_listener_tests/*.star"])
@@ -158,14 +165,24 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "parser_test_check",
+    testonly = True,
+    deps = [
+        ":parser_test_check_base",
+        "@googletest//:gtest_main",
+    ],
+)
+
 [[
     starlark_ast_proto_encoder(
         name = "parser_test_encoder_" + f.replace("/", "_"),
         testonly = True,
         input = [f.removesuffix(".star") + ".txtpb"],
     ),
-    cc_test(
+    program_test(
         name = "parser_test_" + f.replace("/", "_"),
+        program = ":parser_test_check",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -174,10 +191,6 @@ cc_library(
         data = [
             f,
             ":parser_test_encoder_" + f.replace("/", "_"),
-        ],
-        deps = [
-            ":parser_test_check_base",
-            "@googletest//:gtest_main",
         ],
     ),
 ] for f in glob(["parser_tests/*.star"])]
@@ -197,19 +210,25 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "parser_test_valid",
+    testonly = True,
+    deps = [
+        ":parser_test_valid_base",
+        "@googletest//:gtest_main",
+    ],
+)
+
 [
-    cc_test(
+    program_test(
         name = "parser_test_" + f.replace("/", "_"),
+        program = ":parser_test_valid",
         size = "small",
         args = [
             "$(location " + f + ")",
         ],
         data = [
             f,
-        ],
-        deps = [
-            ":parser_test_valid_base",
-            "@googletest//:gtest_main",
         ],
     )
     for f in glob(["parser_tests_valid/*.star"])
@@ -229,19 +248,25 @@ cc_library(
         "@protobuf",
     ],
 )
+cc_binary(
+    name = "parser_test_invalid",
+    testonly = True,
+    deps = [
+        ":parser_test_invalid_base",
+        "@googletest//:gtest_main",
+    ],
+)
+
 [
-    cc_test(
+    program_test(
         name = "parser_test_" + f.replace("/", "_"),
+        program = ":parser_test_invalid",
         size = "small",
         args = [
             "$(location " + f + ")",
         ],
         data = [
             f,
-        ],
-        deps = [
-            ":parser_test_invalid_base",
-            "@googletest//:gtest_main",
         ],
     )
     for f in glob(["parser_tests_invalid/*.star"])

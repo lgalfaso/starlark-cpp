@@ -12,10 +12,10 @@
 
 using ::starlark::grammar::grammar_options;
 using ::starlark::interpreter::interpreter;
-using ::starlark::interpreter::kv_module_loader;
 using ::starlark::logging::logger;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_obj;
+using ::starlark::vm::kv_module_loader;
 
 std::string print_logs(logger& logging) {
   std::string result;

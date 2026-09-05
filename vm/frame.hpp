@@ -1,7 +1,7 @@
-// Copyright 2026 Lucas Mirelmann
+// Copyright 2024-2026 Lucas Mirelmann
 
-#ifndef INTERPRETER_FRAME_HPP_
-#define INTERPRETER_FRAME_HPP_
+#ifndef VM_FRAME_HPP_
+#define VM_FRAME_HPP_
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@
 #pragma GCC visibility push(default)
 
 namespace starlark {
-namespace interpreter {
+namespace vm {
 
 struct frame {
   explicit frame(const google::protobuf::RepeatedPtrField<std::string>* names);
@@ -23,10 +23,9 @@ struct frame {
   std::vector<starlark::runtime::starlark_iterator*> iterators;
 };
 
-}  // namespace interpreter
+}  // namespace vm
 }  // namespace starlark
 
 #pragma GCC visibility pop
 
-#endif  // INTERPRETER_FRAME_HPP_
-
+#endif  // VM_FRAME_HPP_

@@ -8,10 +8,10 @@
 #include <utility>
 #include <vector>
 
-#include "interpreter/frame.hpp"
 #include "interpreter/runner_state.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "runtime/starlark_function.hpp"
+#include "vm/frame.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -30,7 +30,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
       const runner_state::program_info& current_program_,
       bool inner_,
       const google::protobuf::RepeatedPtrField<std::string>* frame_names,
-      const std::vector<frame*>& frame_stack);
+      const std::vector<starlark::vm::frame*>& frame_stack);
   starlark::runtime::starlark_obj* call(
       const starlark::runtime::starlark_obj::pos_args_t& pos_args,
       const starlark::runtime::starlark_obj::named_args_t& named_args,
@@ -73,14 +73,14 @@ class interpreter_function : public starlark::runtime::starlark_function {
  private:
   void compute_simple_call_metadata();
   bool begin_call(runner_state* state, starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
-  void commit_frame(frame* new_frame, runner_state* state, starlark::runtime::context& ctx);
-  void apply_keyword_only_defaults(frame* new_frame);
+  void commit_frame(starlark::vm::frame* new_frame, runner_state* state, starlark::runtime::context& ctx);
+  void apply_keyword_only_defaults(starlark::vm::frame* new_frame);
 
   int entrypoint;
   std::vector<starlark::runtime::starlark_obj*> default_arguments;
   std::map<std::string_view, std::size_t> named_argument_index;
   const google::protobuf::RepeatedPtrField<std::string>* frame_names;
-  std::vector<frame*> frame_stack;
+  std::vector<starlark::vm::frame*> frame_stack;
   starlark::runtime::starlark_obj* default_parameters;
   runner_state::program_info current_program;
   const bool inner_;

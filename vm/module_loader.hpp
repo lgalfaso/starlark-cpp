@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef INTERPRETER_MODULE_LOADER_HPP_
-#define INTERPRETER_MODULE_LOADER_HPP_
+#ifndef VM_MODULE_LOADER_HPP_
+#define VM_MODULE_LOADER_HPP_
 
 #include <functional>
 #include <map>
@@ -9,14 +9,15 @@
 #include <utility>
 #include <vector>
 
-#include "interpreter/frame.hpp"
+#include "vm/frame.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "runtime/starlark_object.hpp"
+#include "status_or/status.hpp"
 
 #pragma GCC visibility push(default)
 
 namespace starlark {
-namespace interpreter {
+namespace vm {
 
 static const char builtin_star_module[] = "@@//:builtin.star";
 
@@ -72,11 +73,9 @@ class kv_module_loader : public module_loader {
 
 std::vector<std::string_view> get_dependencies(const starlark::bytecode::Program* program);
 
-}  // namespace interpreter
+}  // namespace vm
 }  // namespace starlark
 
 #pragma GCC visibility pop
 
-#endif  // INTERPRETER_MODULE_LOADER_HPP_
-
-
+#endif  // VM_MODULE_LOADER_HPP_

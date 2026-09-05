@@ -3,14 +3,15 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
-    name = "benchmark_interpreter",
+    name = "benchmark",
     testonly = True,
     srcs = ["benchmark_main.cpp"],
     data = glob(["*.star"]),
     deps = [
-        "//interpreter",
+        "//grammar:options",
+        "//interpreter:interpreter",
         "//io:read_file",
+        "//vm:module_loader",
         "@google_benchmark//:benchmark",
     ],
 )
-

@@ -4,38 +4,11 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 
 cc_library(
-    name = "frame",
-    srcs = ["frame.cpp"],
-    hdrs = ["frame.hpp"],
-    deps = [
-        "//runtime:starlark_object",
-        "@protobuf",
-    ],
-)
-
-cc_library(
-    name = "module_loader",
-    srcs = ["module_loader.cpp"],
-    hdrs = [
-        "module_loader.hpp",
-        "builtin.star",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":built_in_functions",
-        ":frame",
-        "//proto:starlark_bytecode_cc_proto",
-        "//runtime:starlark_function",
-        "//runtime:starlark_object",
-    ],
-)
-
-cc_library(
     name = "runner_state",
     hdrs = ["runner_state.hpp"],
     deps = [
-        ":frame",
-        ":module_loader",
+        "//vm:frame",
+        "//vm:module_loader",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_object",
     ],
@@ -46,7 +19,7 @@ cc_library(
     srcs = ["function.cpp"],
     hdrs = ["function.hpp"],
     deps = [
-        ":frame",
+        "//vm:frame",
         ":runner_state",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_dictionary",
@@ -58,25 +31,15 @@ cc_library(
 )
 
 cc_library(
-    name = "built_in_functions",
-    srcs = ["built_in_functions.cpp"],
-    hdrs = ["built_in_functions.hpp"],
-    deps = [
-        "//runtime:starlark_function",
-        "//runtime:starlark_object",
-    ],
-)
-
-cc_library(
     name = "interpreter",
     srcs = ["interpreter.cpp"],
     hdrs = ["interpreter.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        ":frame",
         ":function",
-        ":module_loader",
         ":runner_state",
+        "//vm:module_loader",
+        "//vm:frame",
         "//compiler",
         "//runtime:starlark_bigint",
         "//runtime:starlark_bool",
@@ -106,47 +69,27 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":interpreter",
-        "//runtime:starlark_bigint",
-        "//runtime:starlark_bool",
-        "//runtime:starlark_bytes",
-        "//runtime:starlark_dictionary",
-        "//runtime:starlark_float",
-        "//runtime:starlark_integer",
-        "//runtime:starlark_list",
-        "//runtime:starlark_none",
-        "//runtime:starlark_string",
-        "//runtime:starlark_testing",
-        "//runtime:starlark_tuple",
+        "//grammar:options",
+        "//runtime:starlark_function",
+        "//runtime:starlark_types",
+        "//vm:test_assertions",
+        "//vm:test_case",
+        "@protobuf",
     ],
 )
 
-cc_library(
-    name = "interpreter_test_base",
+cc_binary(
+    name = "interpreter_test",
     srcs = ["interpreter_test.cpp"],
-    alwayslink = 1,
     testonly = True,
+    visibility = ["//visibility:public"],
     deps = [
         ":interpreter_test_runner",
         "//io:read_file",
         "@googletest//:gtest",
+        "@googletest//:gtest_main",
     ],
 )
-
-[
-    cc_test(
-        name = "interpreter_test_" + f.replace("/", "_"),
-        args = [
-            "$(location " + f + ")",
-        ],
-        data = [
-            f,
-        ],
-        deps = [
-            ":interpreter_test_base",
-            "@googletest//:gtest_main",
-        ],
-    ) for f in glob(["interpreter_tests/*.star"])
-]
 
 cc_test(
     name = "module_test",
@@ -181,4 +124,3 @@ cc_fuzz_test(
         ":interpreter",
     ],
 )
-

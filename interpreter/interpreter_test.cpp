@@ -7,13 +7,13 @@
 #include <map>
 #include <string>
 
-#include "interpreter/frame.hpp"
 #include "interpreter/interpreter_test_runner.hpp"
 #include "io/read_file.hpp"
+#include "vm/frame.hpp"
 
-using ::starlark::logging::logger;
-using ::starlark::interpreter::frame;
 using ::starlark::interpreter_runner::run_test;
+using ::starlark::logging::logger;
+using ::starlark::vm::frame;
 using ::testing::SizeIs;
 
 namespace {

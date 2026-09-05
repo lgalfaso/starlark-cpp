@@ -14,6 +14,9 @@ bazel_dep(name = "rules_fuzzing", version = "0.8.0")
 
 # Added as the build is too noisy when using @20260526.0 from the dependencies.
 bazel_dep(name = "abseil-cpp", version = "20260817.0")
+bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "llvm-project", version = "17.0.4.bcr.1")
+bazel_dep(name = "platforms", version = "1.0.0")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 

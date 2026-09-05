@@ -19,17 +19,15 @@
 #include "compiler/compiler.hpp"
 #include "errors/runtime_error_messages.hpp"
 #include "errors/source_highlight.hpp"
-#include "interpreter/built_in_functions.hpp"
-#include "interpreter/frame.hpp"
 #include "interpreter/function.hpp"
 #include "interpreter/runner_state.hpp"
+#include "runtime/builtin_pos.hpp"
 #include "runtime/error_fn.hpp"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_float.hpp"
-#include "runtime/builtin_pos.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_list.hpp"
@@ -38,6 +36,8 @@
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
+#include "vm/frame.hpp"
+
 
 using ::google::protobuf::Arena;
 using ::google::protobuf::RepeatedPtrField;
@@ -63,10 +63,11 @@ using ::starlark::error_messages::error_v2_unknown_op;
 using ::starlark::error_messages::get_line_and_underline;
 using ::starlark::grammar::grammar_options;
 using ::starlark::grammar::predeclared_symbols;
+using ::starlark::logging::LogLevel;
+using ::starlark::logging::Position;
 using ::starlark::logging::logger;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
-using ::starlark::runtime::context;
 using ::starlark::runtime::add_predeclared_builtins;
 using ::starlark::runtime::builtin_entrypoints;
 using ::starlark::runtime::builtin_pos::max_pos1;
@@ -76,13 +77,15 @@ using ::starlark::runtime::builtin_pos::min_pos1;
 using ::starlark::runtime::builtin_pos::min_pos2;
 using ::starlark::runtime::builtin_pos::min_pos3;
 using ::starlark::runtime::builtin_pos::sorted_pos1;
+using ::starlark::runtime::context;
+using ::starlark::runtime::create_function;
 using ::starlark::runtime::error_fn;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
+using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_built_in_functions;
 using ::starlark::runtime::starlark_bytes;
-using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_float;
 using ::starlark::runtime::starlark_fn_abs;
@@ -100,10 +103,9 @@ using ::starlark::runtime::starlark_fn_getattr;
 using ::starlark::runtime::starlark_fn_hasattr;
 using ::starlark::runtime::starlark_fn_hash;
 using ::starlark::runtime::starlark_fn_int;
-using ::starlark::runtime::create_function;
+using ::starlark::runtime::starlark_fn_list;
 using ::starlark::runtime::starlark_fn_ord;
 using ::starlark::runtime::starlark_fn_print;
-using ::starlark::runtime::starlark_fn_list;
 using ::starlark::runtime::starlark_fn_reversed;
 using ::starlark::runtime::starlark_fn_set;
 using ::starlark::runtime::starlark_fn_str;
@@ -117,7 +119,9 @@ using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
-
+using ::starlark::vm::frame;
+using ::starlark::vm::get_dependencies;
+using ::starlark::vm::module_loader;
 namespace starlark {
 namespace interpreter {
 
@@ -212,19 +216,19 @@ class error_handler : public error_fn {
   error_handler(runner_state& state, logger& log, module_loader& loader) : state(state), log(log), loader(loader) {}
 
   void add_error(std::string_view error_msg) override {
-    add_error(error_msg, starlark::logging::Position::default_instance(), "");
+    add_error(error_msg, Position::default_instance(), "");
   }
 
   void add_error(std::string_view error_msg, std::string_view hint) override {
-    add_error(error_msg, starlark::logging::Position::default_instance(), hint);
+    add_error(error_msg, Position::default_instance(), hint);
   }
 
-  void add_error(std::string_view error_msg, const starlark::logging::Position& pos) override {
+  void add_error(std::string_view error_msg, const Position& pos) override {
     add_error(error_msg, pos, "");
   }
 
-  void add_error(std::string_view error_msg, const starlark::logging::Position& pos, std::string_view hint) override {
-    static Program fail_program = std::invoke([] -> Program {
+  void add_error(std::string_view error_msg, const Position& pos, std::string_view hint) override {
+    static const Program fail_program = std::invoke([] -> Program {
       Program result;
       result.mutable_block()->Add()->add_op_code()->mutable_fail();
       return result;
@@ -239,7 +243,7 @@ class error_handler : public error_fn {
     if (state.instruction_ptr != 0) {
       auto current_module = loader.load_module(state.current_program.module_name);
       if (!current_module.ok()) {
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, "internal error (0)", state.current_program.module_name, pos);
+        log.log(LogLevel::LOG_LEVEL_ERROR, "internal error (0)", state.current_program.module_name, pos);
       } else if (!(*current_module)->inner()) {
         program_stack = &state.current_program;
         block_ptr = state.block_ptr;
@@ -250,7 +254,7 @@ class error_handler : public error_fn {
     for (int i = state.current_program_stack.size() - 1; program_stack == nullptr && i >= 0; --i) {
       auto current_module = loader.load_module(state.current_program_stack[i].module_name);
       if (!current_module.ok()) {
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, "internal error (1)", state.current_program_stack[i].module_name, pos);
+        log.log(LogLevel::LOG_LEVEL_ERROR, "internal error (1)", state.current_program_stack[i].module_name, pos);
         break;
       }
       if (!(*current_module)->inner()) {
@@ -264,16 +268,16 @@ class error_handler : public error_fn {
 
     // Log the error message.
     if (program_stack == nullptr) {
-      log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program.module_name, pos);
+      log.log(LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program.module_name, pos);
     } else {
       const auto& op_code = program_stack->bytecode->block(block_ptr).op_code(instruction_ptr - 1);
       // If we have the position, then use it.
       if (op_code.has_sh()) {
         auto msg = std::format("{}\n{}", error_msg, get_line_and_underline(source_code, op_code.sh().start(), op_code.sh().highlight_start(), op_code.sh().highlight_end(), op_code.sh().end(), hint));
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, msg, program_stack->module_name, op_code.sh().highlight_start());
+        log.log(LogLevel::LOG_LEVEL_ERROR, msg, program_stack->module_name, op_code.sh().highlight_start());
       } else {
         // There are a few operations that do not have code assigned to them.
-        log.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR, std::format("{}\n", error_msg), program_stack->module_name, pos);
+        log.log(LogLevel::LOG_LEVEL_ERROR, std::format("{}\n", error_msg), program_stack->module_name, pos);
       }
     }
 
@@ -1163,10 +1167,10 @@ status_or<frame*> interpreter::run(module_loader& loader,
     auto mod_info = loader.load_module(entry.module_name, entry.caller_module_name);
     if (!mod_info.ok()) {
       // TODO(lmirelmann): This should point to the part where the `load` statement is.
-      logging.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR,
+      logging.log(LogLevel::LOG_LEVEL_ERROR,
                   std::format("ModuleNotFoundError: No module named '{}'", entry.module_name),
                   entry.caller_module_name,
-                  starlark::logging::Position::default_instance());
+                  Position::default_instance());
       return status_or<frame*>(status_code::kStaticError);
     }
     if ((*mod_info)->ready()) {
@@ -1180,10 +1184,10 @@ status_or<frame*> interpreter::run(module_loader& loader,
     auto module_processing_it = module_processing.find(c_name);
     if (module_processing_it != module_processing.end() &&
         (!module_reduction || module_processing_it->second + 1 != module_lookup.size())) {
-      logging.log(starlark::logging::LogLevel::LOG_LEVEL_ERROR,
+      logging.log(LogLevel::LOG_LEVEL_ERROR,
                   std::format("recursion found during module lookup\n{}", report_recursion_in_modules(module_lookup, module_processing[std::string{c_name}])),
                   entry.caller_module_name,
-                  starlark::logging::Position::default_instance());
+                  Position::default_instance());
       return status_or<frame*>(status_code::kStaticError);
     }
     if (module_processing_it == module_processing.end()) {
@@ -1245,7 +1249,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
   return status_or<frame*>(last_frame);
 }
 
-void interpreter::add_base_global_context(std::map<std::string, starlark_obj*, std::less<>>& global_context, starlark::runtime::context& ctx) const {
+void interpreter::add_base_global_context(std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx) const {
   global_context["True"] = ctx.true_value();
   global_context["False"] = ctx.false_value();
   global_context["None"] = ctx.none_value();

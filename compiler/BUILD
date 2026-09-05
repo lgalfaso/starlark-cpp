@@ -1,6 +1,7 @@
 # Copyright 2025 Lucas Mirelmann
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("//bzl:program_test.bzl", "program_test")
 load("//proto:starlark_proto_encoder.bzl", "starlark_bytecode_proto_encoder")
 
 cc_library(
@@ -34,14 +35,24 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "compiler_bytecode_test",
+    testonly = True,
+    deps = [
+        ":compiler_bytecode_test_base",
+        "@googletest//:gtest_main",
+    ],
+)
+
 [[
     starlark_bytecode_proto_encoder(
         name = "compiler_bytecode_test_encoder_" + f.replace("/", "_"),
         testonly = True,
         input = [f.removesuffix(".star") + ".txtpb"],
     ),
-    cc_test(
+    program_test(
         name = "compiler_bytecode_test_" + f.replace("/", "_"),
+        program = ":compiler_bytecode_test",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -50,10 +61,6 @@ cc_library(
         data = [
             f,
             ":compiler_bytecode_test_encoder_" + f.replace("/", "_"),
-        ],
-        deps = [
-            ":compiler_bytecode_test_base",
-            "@googletest//:gtest_main",
         ],
     ),
 ] for f in glob(["bytecode_generator_tests/*.star"])]

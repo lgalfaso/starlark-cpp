@@ -12,13 +12,13 @@
 #include "interpreter/interpreter.hpp"
 
 using ::starlark::grammar::grammar_options;
-using ::starlark::interpreter::frame;
 using ::starlark::interpreter::interpreter;
-using ::starlark::interpreter::kv_module_loader;
-using ::starlark::interpreter::module_info;
 using ::starlark::logging::logger;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_obj;
+using ::starlark::vm::frame;
+using ::starlark::vm::kv_module_loader;
+using ::starlark::vm::module_info;
 using ::testing::SizeIs;
 
 namespace {
