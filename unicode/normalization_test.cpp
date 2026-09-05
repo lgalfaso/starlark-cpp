@@ -12,16 +12,16 @@
 #include "unicode/normalization.hpp"
 #include "unicode/ucd_code_points.hpp"
 
-using starlark::ucd::is_assigned;
-using starlark::unicode::to_nfc;
-using starlark::unicode::to_nfc_x;
-using starlark::unicode::to_nfd;
-using starlark::unicode::to_nfd_x;
-using starlark::unicode::to_nfkc;
-using starlark::unicode::to_nfkc_x;
-using starlark::unicode::to_nfkd;
-using starlark::unicode::to_nfkd_x;
-using starlark::unicode::utf8_encode_code_point;
+using ::starlark::ucd::is_assigned;
+using ::starlark::unicode::to_nfc;
+using ::starlark::unicode::to_nfc_x;
+using ::starlark::unicode::to_nfd;
+using ::starlark::unicode::to_nfd_x;
+using ::starlark::unicode::to_nfkc;
+using ::starlark::unicode::to_nfkc_x;
+using ::starlark::unicode::to_nfkd;
+using ::starlark::unicode::to_nfkd_x;
+using ::starlark::unicode::utf8_encode_code_point;
 using testing::SizeIs;
 
 namespace {

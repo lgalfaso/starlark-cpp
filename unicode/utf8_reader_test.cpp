@@ -13,8 +13,8 @@
 #include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
 
-using starlark::unicode::utf8_encode_code_point;
-using starlark::unicode::utf8_reader;
+using ::starlark::unicode::utf8_encode_code_point;
+using ::starlark::unicode::utf8_reader;
 
 namespace {
 

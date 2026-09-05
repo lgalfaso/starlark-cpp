@@ -6,7 +6,7 @@
 
 #include "bigint/number.hpp"
 
-using starlark::bigint::number;
+using ::starlark::bigint::number;
 
 namespace starlark {
 namespace number_benchmark {

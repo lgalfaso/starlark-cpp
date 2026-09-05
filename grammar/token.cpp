@@ -4,7 +4,7 @@
 
 #include <string>
 
-using starlark::logging::Position;
+using ::starlark::logging::Position;
 
 namespace starlark {
 namespace grammar {

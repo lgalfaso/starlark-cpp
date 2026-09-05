@@ -55,7 +55,7 @@ using ::starlark::testing::starlark_testing_function;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
-using starlark::unicode::utf8_reader;
+using ::starlark::unicode::utf8_reader;
 
 namespace {
 

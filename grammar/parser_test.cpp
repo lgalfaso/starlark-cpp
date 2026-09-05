@@ -12,15 +12,15 @@
 #include "grammar/parser.hpp"
 #include "proto/starlark_ast.pb.h"
 
-using google::protobuf::Arena;
-using starlark::ast::File;
-using starlark::grammar::grammar_options;
-using starlark::grammar::parser;
-using starlark::logging::LogLevel;
-using starlark::logging::logger;
-using testing::IsEmpty;
-using testing::Not;
-using testing::SizeIs;
+using ::google::protobuf::Arena;
+using ::starlark::ast::File;
+using ::starlark::grammar::grammar_options;
+using ::starlark::grammar::parser;
+using ::starlark::logging::LogLevel;
+using ::starlark::logging::logger;
+using ::testing::IsEmpty;
+using ::testing::Not;
+using ::testing::SizeIs;
 
 namespace {
 

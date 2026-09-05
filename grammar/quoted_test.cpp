@@ -8,7 +8,7 @@
 
 #include "grammar/quoted.hpp"
 
-using starlark::grammar::quoted;
+using ::starlark::grammar::quoted;
 
 namespace {
 

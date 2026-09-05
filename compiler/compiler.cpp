@@ -1699,7 +1699,7 @@ Program* compiler::compile(std::string_view program_name, std::string_view starl
 
   Program* result = Arena::Create<Program>(&arena);
   bytecode_generator listener(*result);
-  grammar::ast_walker walker;
+  starlark::grammar::ast_walker walker;
   walker.walk(starlark_file, listener);
   remove_extra_store(result);
   simplify_for_loop(result);

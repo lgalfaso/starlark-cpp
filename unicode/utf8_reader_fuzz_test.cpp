@@ -4,7 +4,7 @@
 
 #include "unicode/utf8_reader.hpp"
 
-using starlark::unicode::utf8_reader;
+using ::starlark::unicode::utf8_reader;
 
 namespace {
 

@@ -11,14 +11,14 @@
 #include "grammar/parsing_options.hpp"
 #include "io/read_file.hpp"
 
-using google::protobuf::Arena;
-using google::protobuf::Message;
-using starlark::ast::File;
-using starlark::grammar::parser;
-using starlark::logging::LogLevel;
-using starlark::logging::logger;
-using testing::IsEmpty;
-using testing::SizeIs;
+using ::google::protobuf::Arena;
+using ::google::protobuf::Message;
+using ::starlark::ast::File;
+using ::starlark::grammar::parser;
+using ::starlark::logging::LogLevel;
+using ::starlark::logging::logger;
+using ::testing::IsEmpty;
+using ::testing::SizeIs;
 
 namespace {
 

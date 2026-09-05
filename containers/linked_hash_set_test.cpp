@@ -6,11 +6,11 @@
 
 #include "containers/linked_hash_set.hpp"
 
-using starlark::cnt::linked_hash_set;
-using testing::ElementsAre;
-using testing::Eq;
-using testing::Pair;
-using testing::Pointee;
+using ::starlark::cnt::linked_hash_set;
+using ::testing::ElementsAre;
+using ::testing::Eq;
+using ::testing::Pair;
+using ::testing::Pointee;
 
 namespace {
 

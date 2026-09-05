@@ -8,8 +8,8 @@
 
 #include "grammar/numeric_parser.hpp"
 
-using starlark::grammar::read_number;
-using starlark::unicode::utf8_reader;
+using ::starlark::grammar::read_number;
+using ::starlark::unicode::utf8_reader;
 
 namespace {
 

@@ -8,8 +8,8 @@
 
 #include "containers/flat_map.hpp"
 
-using starlark::cnt::flat_map;
-using testing::Pair;
+using ::starlark::cnt::flat_map;
+using ::testing::Pair;
 
 namespace {
 

@@ -8,11 +8,11 @@
 
 #include "containers/linked_hash_map.hpp"
 
-using starlark::cnt::linked_hash_map;
-using testing::ElementsAre;
-using testing::Eq;
-using testing::Pair;
-using testing::Pointee;
+using ::starlark::cnt::linked_hash_map;
+using ::testing::ElementsAre;
+using ::testing::Eq;
+using ::testing::Pair;
+using ::testing::Pointee;
 
 namespace {
 

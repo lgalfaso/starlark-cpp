@@ -13,12 +13,12 @@
 #include "grammar/quoted.hpp"
 #include "logging/logging.hpp"
 
-using starlark::bigint::number;
-using starlark::grammar::lexer;
-using starlark::grammar::grammar_options;
-using starlark::grammar::token_type;
-using starlark::logging::logger;
-using testing::IsEmpty;
+using ::starlark::bigint::number;
+using ::starlark::grammar::lexer;
+using ::starlark::grammar::grammar_options;
+using ::starlark::grammar::token_type;
+using ::starlark::logging::logger;
+using ::testing::IsEmpty;
 
 namespace {
 
@@ -433,7 +433,8 @@ foo = "bar\z")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 ILLEGAL(\"\\\"bar\\\\z\\\"\"):2,7:2,14 NEWLINE:2,14:2,14 EOF:2,14:2,14",
        { "invalid escape sequence. The escape sequence is unknown\n    2 | foo = \"bar\\z\"\n      |           ^\n:2,11" });
   check(R"starlark(
-foo = "bar")starlark",
+foo = "bar
+")starlark",
         "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"bar\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13");
   check(R"starlark(
 foo = "\200")starlark",

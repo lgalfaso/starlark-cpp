@@ -9,7 +9,7 @@
 
 #include "runtime/starlark_float.hpp"
 
-using starlark::runtime::starlark_float;
+using ::starlark::runtime::starlark_float;
 
 namespace {
 

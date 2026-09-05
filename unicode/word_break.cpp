@@ -12,6 +12,7 @@ namespace unicode {
 
 using ::starlark::ucd::word_break_type;
 using ::starlark::ucd::is_Extended_Pictographic;
+using ::starlark::ucd::word_break;
 
 // Based on Unicode Standard Annex #29, revision 47.
 void word_break(const std::vector<char32_t>& code_points, std::vector<std::uint64_t>& output) {
@@ -32,7 +33,7 @@ void word_break(const std::vector<char32_t>& code_points, std::vector<std::uint6
       reduced_previous_previous_word_break = reduced_previous_word_break;
       reduced_previous_word_break = current_word_break;
     }
-    current_word_break = starlark::ucd::word_break(code_points[pos]);
+    current_word_break = word_break(code_points[pos]);
     previous_ri_count = ri_count;
     if (current_word_break == word_break_type::kRegional_Indicator) {
       ri_count += 1;
@@ -96,7 +97,7 @@ void word_break(const std::vector<char32_t>& code_points, std::vector<std::uint6
     word_break_type reduced_next_word_break = word_break_type::kOther;
     for (std::size_t i = std::max(last_reduced_next_word_break_check, pos + 1); i < code_points.size(); ++i) {
       last_reduced_next_word_break_check = i;
-      auto candidate = starlark::ucd::word_break(code_points[i]);
+      auto candidate = word_break(code_points[i]);
       if (candidate == word_break_type::kExtend || candidate == word_break_type::kFormat || candidate == word_break_type::kZWJ) {
         continue;
       }

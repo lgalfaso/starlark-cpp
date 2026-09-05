@@ -7,8 +7,8 @@
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 
-using starlark::unicode::utf8_encode_code_point;
-using starlark::ucd::is_printable;
+using ::starlark::unicode::utf8_encode_code_point;
+using ::starlark::ucd::is_printable;
 
 namespace starlark {
 namespace runtime {

@@ -6,7 +6,7 @@
 
 #include "runtime/siphash.hpp"
 
-using starlark::runtime::siphash;
+using ::starlark::runtime::siphash;
 
 namespace {
 

@@ -4,9 +4,9 @@
 
 #include "grammar/lexer.hpp"
 
-using starlark::grammar::lexer;
-using starlark::grammar::token_type;
-using starlark::logging::logger;
+using ::starlark::grammar::lexer;
+using ::starlark::grammar::token_type;
+using ::starlark::logging::logger;
 
 namespace {
 
