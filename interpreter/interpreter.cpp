@@ -37,7 +37,7 @@
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 #include "vm/frame.hpp"
-
+#include "vm/program_limits.hpp"
 
 using ::google::protobuf::Arena;
 using ::google::protobuf::RepeatedPtrField;
@@ -50,9 +50,6 @@ using ::starlark::compiler::compiler;
 using ::starlark::error_messages::error_v2_dictionary_duplicate_key;
 using ::starlark::error_messages::error_v2_expect_mapping_after_star_star;
 using ::starlark::error_messages::error_v2_keyword_must_be_string;
-using ::starlark::error_messages::error_v2_max_bytes_length;
-using ::starlark::error_messages::error_v2_max_sequence_length;
-using ::starlark::error_messages::error_v2_max_string_length;
 using ::starlark::error_messages::error_v2_module_does_not_define_symbol;
 using ::starlark::error_messages::error_v2_module_not_ready;
 using ::starlark::error_messages::error_v2_multiple_values_for_keyword;
@@ -317,47 +314,14 @@ frame* run_program(
   frame* result = nullptr;
 
   // Limit checks.
-  for (const auto& block : starlark_program.bytecode->block()) {
-    for (const auto& op : block.op_code()) {
-      switch (op.op_code_case()) {
-        case OpCode::kConstString:
-          if (starlark_program.bytecode->const_string(op.const_string().const_string_pos()).length() > ctx.options().max_string_length) {
-            auto current_module = loader.load_module(starlark_program.module_name);
-            if (!current_module.ok()) {
-              error_callback.add_error("internal error (2)");
-            } else {
-              error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length, (*current_module)->source_code(), op.sh().highlight_start(), op.sh().highlight_end()), op.sh().highlight_start());
-            }
-            return nullptr;
-          }
-          break;
-        case OpCode::kConstBytes:
-          if (op.const_bytes().value().length() > ctx.options().max_string_length) {
-            auto current_module = loader.load_module(starlark_program.module_name);
-            if (!current_module.ok()) {
-              error_callback.add_error("internal error (3)");
-            } else {
-              error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length, (*current_module)->source_code(), op.sh().highlight_start(), op.sh().highlight_end()), op.sh().highlight_start());
-            }
-            return nullptr;
-          }
-          break;
-        case OpCode::kMakeTuple:
-          if (op.make_tuple().number_of_elements() > ctx.options().max_sequence_size) {
-            auto current_module = loader.load_module(starlark_program.module_name);
-            if (!current_module.ok()) {
-              error_callback.add_error("internal error (4)");
-            } else {
-              error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size, (*current_module)->source_code(), op.sh().highlight_start(), op.sh().highlight_end()), op.sh().highlight_start());
-            }
-            return nullptr;
-          }
-          break;
-        // TODO(lmirelmann): We should check that all ConstInt follow `log2_max_bigint`.
-        default:
-          break;
-      }
-    }
+  auto current_module = loader.load_module(starlark_program.module_name);
+  if (!current_module.ok()) {
+    error_callback.add_error("internal error (2)");
+    return nullptr;
+  }
+  if (auto violation = starlark::vm::check_program_limits(*starlark_program.bytecode, (*current_module)->source_code(), ctx.options())) {
+    error_callback.add_error(violation->message, violation->position);
+    return nullptr;
   }
 
   refresh_current_op_codes(state);

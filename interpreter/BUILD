@@ -38,8 +38,6 @@ cc_library(
     deps = [
         ":function",
         ":runner_state",
-        "//vm:module_loader",
-        "//vm:frame",
         "//compiler",
         "//runtime:starlark_bigint",
         "//runtime:starlark_bool",
@@ -57,6 +55,9 @@ cc_library(
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
         "//runtime:starlark_types",
+        "//vm:module_loader",
+        "//vm:frame",
+        "//vm:program_limits",
         "@bazel_tools//tools/cpp/runfiles",
     ],
 )

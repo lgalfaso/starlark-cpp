@@ -55,6 +55,18 @@ cc_library(
 )
 
 cc_library(
+    name = "program_limits",
+    srcs = ["program_limits.cpp"],
+    hdrs = ["program_limits.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//errors:runtime_error_messages",
+        "//proto:starlark_bytecode_cc_proto",
+        "//runtime:options",
+    ],
+)
+
+cc_library(
     name = "module_loader",
     srcs = ["module_loader.cpp"],
     hdrs = [
