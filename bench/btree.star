@@ -5,6 +5,8 @@ Leaf splits use B+tree-style duplication so promoted separators retain values.
 `order` is the minimum degree t (CLRS): max keys 2t-1, min keys t-1.
 """
 
+_BENCH_SIZES = [0, 10, 30, 100, 1000, 5000] # + [0x110000]  # We are too slow for the moment to be able to handle this one.
+
 DEFAULT_ORDER = 8
 
 def _max_keys(order):
@@ -381,8 +383,6 @@ def btree_to_dict(tree):
     return d
 
 
-
-_BENCH_SIZES = [0, 10, 30, 100, 1000, 5000] # + [0x110000]  # We are too slow for the moment to be able to handle this one.
 
 # Knuth multiplicative hash for deterministic pseudo-random byte payloads.
 _HASH_MIX = 2654435761

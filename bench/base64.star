@@ -1,5 +1,7 @@
 """Pure-Starlark base64 encode/decode (RFC 4648, standard alphabet)."""
 
+_BENCH_SIZES = [0, 10, 30, 100, 1000, 5000]
+
 _BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 _REVERSE_ALPHABET = {
@@ -87,8 +89,6 @@ def base64_decode(encoded):
             out.append(triple & 255)
     return bytes(out)
 
-
-_BENCH_SIZES = [0, 10, 30, 100, 1000, 5000]
 
 # Knuth multiplicative hash for deterministic pseudo-random byte payloads.
 _HASH_MIX = 2654435761

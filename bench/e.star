@@ -1,5 +1,7 @@
 """Pure-Starlark computation of decimal digits of e (Taylor series, integer-only)."""
 
+_BENCH_SIZES = [1, 5, 10, 20, 50, 80, 100, 200]
+
 # Extra fixed-point digits for rounding before truncation.
 _ROUND_GUARD = 2
 
@@ -66,8 +68,6 @@ def e_digits(n_digits):
         s = ("0" * (n_digits - len(s))) + s
     return s
 
-
-_BENCH_SIZES = [1, 5, 10, 20, 50, 80, 100, 200]
 
 def run():
     for n in _BENCH_SIZES:
