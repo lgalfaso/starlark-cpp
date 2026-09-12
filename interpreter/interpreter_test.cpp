@@ -4,7 +4,6 @@
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
-#include <map>
 #include <string>
 
 #include "interpreter/interpreter_test_runner.hpp"
@@ -12,6 +11,7 @@
 #include "vm/frame.hpp"
 
 using ::starlark::interpreter_runner::run_test;
+using ::starlark::interpreter_runner::split_test_case;
 using ::starlark::logging::logger;
 using ::starlark::vm::frame;
 using ::testing::SizeIs;
@@ -34,9 +34,7 @@ TEST(Interpreter, TestCase) {
   ASSERT_TRUE(starlark_code.has_value());
 
   logger logging;
-  std::map<std::string, std::string> programs;
-  programs["main"] = *starlark_code;
-  auto result = run_test(programs, logging);
+  auto result = run_test(split_test_case(*starlark_code), logging);
   ASSERT_TRUE(result.ok()) << print_logs(logging);
 }
 
