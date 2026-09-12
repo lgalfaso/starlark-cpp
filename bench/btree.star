@@ -382,8 +382,6 @@ def btree_to_dict(tree):
         d[k] = v
     return d
 
-
-
 # Knuth multiplicative hash for deterministic pseudo-random byte payloads.
 _HASH_MIX = 2654435761
 
