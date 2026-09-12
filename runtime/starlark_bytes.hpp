@@ -21,7 +21,6 @@ class starlark_bytes : public starlark_obj {
  public:
   explicit starlark_bytes(std::string&& value);
   explicit starlark_bytes(std::string_view value);
-  std::string_view type() const override;
   bool primitive() const override;
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
@@ -62,7 +61,6 @@ class starlark_bytes : public starlark_obj {
   class bytes_elems : public starlark_obj {
    public:
     bytes_elems(const starlark_bytes* bytes, range_state state, bool ords);
-    std::string_view type() const override;
     bool truthy() const override;
 
     bool binary_in(const starlark_obj& other, error_fn& error_callback) const override;

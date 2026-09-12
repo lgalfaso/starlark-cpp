@@ -84,11 +84,8 @@ const std::vector<std::string>& starlark_set::attributes() {
   return *result;
 }
 
-starlark_set::starlark_set() : iterators_count(0) {}
+starlark_set::starlark_set() : starlark_obj(object_kind::kSet), iterators_count(0) {}
 
-std::string_view starlark_set::type() const {
-  return starlark_types::set_t;
-}
 
 const std::vector<std::string>& starlark_set::dir() const {
   return attributes();
@@ -644,7 +641,7 @@ status starlark_set::update(const std::vector<starlark_obj*>& others, context& c
 }
 
 bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (type() != other->type()) {
+  if (!same_starlark_type(kind(), other->kind())) {
     return false;
   }
   const starlark_set* n_other = static_cast<const starlark_set*>(other);
@@ -661,7 +658,7 @@ bool starlark_set::inner_equals(equals_comparator& comp, const starlark_obj* oth
 }
 
 void starlark_set::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
@@ -711,7 +708,7 @@ starlark_obj* starlark_set_fn_add(starlark_obj* this_obj, const starlark_obj::po
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->add(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
@@ -723,7 +720,7 @@ starlark_obj* starlark_set_fn_clear(starlark_obj* this_obj, const starlark_obj::
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->clear(error_callback).ok()) {
     return nullptr;
   }
@@ -735,7 +732,7 @@ starlark_obj* starlark_set_fn_difference(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   return static_cast<starlark_set*>(this_obj)->difference(pos_args, ctx, error_callback);
 }
 
@@ -744,7 +741,7 @@ starlark_obj* starlark_set_fn_difference_update(starlark_obj* this_obj, const st
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->difference_update(pos_args, ctx, error_callback).ok()) {
     return nullptr;
   }
@@ -756,7 +753,7 @@ starlark_obj* starlark_set_fn_discard(starlark_obj* this_obj, const starlark_obj
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->discard(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
@@ -768,7 +765,7 @@ starlark_obj* starlark_set_fn_intersection(starlark_obj* this_obj, const starlar
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   return static_cast<starlark_set*>(this_obj)->intersection(pos_args, ctx, error_callback);
 }
 
@@ -777,7 +774,7 @@ starlark_obj* starlark_set_fn_intersection_update(starlark_obj* this_obj, const 
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->intersection_update(pos_args, ctx, error_callback).ok()) {
     return nullptr;
   }
@@ -789,7 +786,7 @@ starlark_obj* starlark_set_fn_isdisjoint(starlark_obj* this_obj, const starlark_
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   auto result = static_cast<starlark_set*>(this_obj)->isdisjoint(pos_args.front(), ctx, error_callback);
   if (!result.ok()) {
     return nullptr;
@@ -802,7 +799,7 @@ starlark_obj* starlark_set_fn_issubset(starlark_obj* this_obj, const starlark_ob
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   auto result = static_cast<starlark_set*>(this_obj)->issubset(pos_args.front(), ctx, error_callback);
   if (!result.ok()) {
     return nullptr;
@@ -815,7 +812,7 @@ starlark_obj* starlark_set_fn_issuperset(starlark_obj* this_obj, const starlark_
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   auto result = static_cast<starlark_set*>(this_obj)->issuperset(pos_args.front(), ctx, error_callback);
   if (!result.ok()) {
     return nullptr;
@@ -828,7 +825,7 @@ starlark_obj* starlark_set_fn_pop(starlark_obj* this_obj, const starlark_obj::po
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   return static_cast<starlark_set*>(this_obj)->pop(error_callback);
 }
 
@@ -837,7 +834,7 @@ starlark_obj* starlark_set_fn_remove(starlark_obj* this_obj, const starlark_obj:
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->remove(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }
@@ -849,7 +846,7 @@ starlark_obj* starlark_set_fn_symmetric_difference(starlark_obj* this_obj, const
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   return static_cast<starlark_set*>(this_obj)->symmetric_difference(pos_args.front(), ctx, error_callback);
 }
 
@@ -858,7 +855,7 @@ starlark_obj* starlark_set_fn_symmetric_difference_update(starlark_obj* this_obj
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->symmetric_difference_update(pos_args.front(), ctx, error_callback).ok()) {
     return nullptr;
   }
@@ -870,7 +867,7 @@ starlark_obj* starlark_set_fn_union(starlark_obj* this_obj, const starlark_obj::
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   return static_cast<starlark_set*>(this_obj)->union_(pos_args, ctx, error_callback);
 }
 
@@ -879,7 +876,7 @@ starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj:
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::set_t);
+  assert(is_set_kind(this_obj->kind()));
   if (!static_cast<starlark_set*>(this_obj)->update(pos_args, ctx, error_callback).ok()) {
     return nullptr;
   }

@@ -18,7 +18,7 @@ using ::starlark::runtime::context;
 using ::starlark::runtime::create_integer;
 using ::starlark::runtime::create_integer_from_float;
 using ::starlark::runtime::equals_fi;
-using ::starlark::runtime::starlark_numeric_type;
+using ::starlark::runtime::object_kind;
 using ::starlark::runtime::to_double;
 using ::starlark::testing::error_handler;
 using ::testing::Gt;
@@ -357,19 +357,19 @@ TEST(ToDouble, FromBigInt) {
 }
 
 TEST(CreateIntegerFromBigInt, Downgrades) {
-  auto test = [](starlark_numeric_type numeric_type, number&& value) {
+  auto test = [](object_kind expected_kind, number&& value) {
     Arena arena;
     context ctx(arena);
-    EXPECT_EQ(numeric_type, create_integer(std::move(value), ctx)->numeric_type());
+    EXPECT_EQ(expected_kind, create_integer(std::move(value), ctx)->kind());
   };
-  test(starlark_numeric_type::kBigInt, (number::minus_one() << 63) - number::one());
-  test(starlark_numeric_type::kInt64, number::minus_one() << 63);
-  test(starlark_numeric_type::kInt64, (number::minus_one() << 63) + number::one());
-  test(starlark_numeric_type::kInt64, number(number::minus_one()));
-  test(starlark_numeric_type::kInt64, number(number::zero()));
-  test(starlark_numeric_type::kInt64, number(number::one()));
-  test(starlark_numeric_type::kInt64, (number::one() << 63) - number::one());
-  test(starlark_numeric_type::kBigInt, number::one() << 63);
+  test(object_kind::kBigInt, (number::minus_one() << 63) - number::one());
+  test(object_kind::kInt, number::minus_one() << 63);
+  test(object_kind::kInt, (number::minus_one() << 63) + number::one());
+  test(object_kind::kInt, number(number::minus_one()));
+  test(object_kind::kInt, number(number::zero()));
+  test(object_kind::kInt, number(number::one()));
+  test(object_kind::kInt, (number::one() << 63) - number::one());
+  test(object_kind::kBigInt, number::one() << 63);
 }
 
 TEST(CreateIntegerFromFloat, SpecialCases) {

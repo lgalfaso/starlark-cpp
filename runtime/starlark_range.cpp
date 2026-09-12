@@ -20,11 +20,8 @@ using ::starlark::error_messages::error_v2_unpack_too_many;
 namespace starlark {
 namespace runtime {
 
-starlark_range::starlark_range(int64_t start, int64_t end, int64_t step) : state(calculate_state(start, end, step)) {}
+starlark_range::starlark_range(int64_t start, int64_t end, int64_t step) : starlark_obj(object_kind::kRange), state(calculate_state(start, end, step)) {}
 
-std::string_view starlark_range::type() const {
-  return starlark_types::range_t;
-}
 
 void starlark_range::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   if (number_of_elements != state.len) {
@@ -61,7 +58,7 @@ bool starlark_range::truthy() const {
 }
 
 bool starlark_range::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (other->type() != starlark_types::range_t) {
+  if (!is_range_kind(other->kind())) {
     return false;
   }
   auto* rother = static_cast<const starlark_range*>(other);
@@ -81,7 +78,7 @@ bool starlark_range::inner_equals(equals_comparator& comp, const starlark_obj* o
 }
 
 void starlark_range::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
@@ -101,17 +98,17 @@ bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callba
     }
   };
 
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (other.kind()) {
+    case object_kind::kInt:
       return check(other.as_int64());
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       const auto& bvalue = other.as_bigint();
       if (!bvalue.fits_in_int64()) {
         return false;
       }
       return check(bvalue.as_int64());
     }
-    case starlark_numeric_type::kFloat: {
+    case object_kind::kFloat: {
       // Note: There is a dicrepancy between the spec and Bazel. The spec states:
       //   The `x in y` operator, where `y` is a range, reports whether `x` is equal to
       //   some member of the sequence `y`; the operation fails unless `x` is a number.

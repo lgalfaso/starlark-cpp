@@ -15,7 +15,6 @@ namespace runtime {
 class starlark_float : public starlark_obj {
  public:
   explicit starlark_float(double value);
-  std::string_view type() const override;
   bool truthy() const override;
   bool primitive() const override;
   starlark::result::status_or<int> cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const override;
@@ -34,7 +33,6 @@ class starlark_float : public starlark_obj {
   starlark_obj* slash_slash_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
   starlark_obj* percent_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
 
-  starlark_numeric_type numeric_type() const override;
   double as_float() const override;
 
  protected:

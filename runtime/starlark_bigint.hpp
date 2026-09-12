@@ -17,7 +17,6 @@ class starlark_bigint : public starlark_obj {
  public:
   explicit starlark_bigint(int64_t value);
   explicit starlark_bigint(const starlark::bigint::number& value);
-  std::string_view type() const override;
   bool truthy() const override;
   bool primitive() const override;
   starlark_obj* unary_plus(context& ctx, error_fn& error_callback) const override;
@@ -46,7 +45,6 @@ class starlark_bigint : public starlark_obj {
   starlark_obj* less_less_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
   starlark_obj* greater_greater_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
 
-  starlark_numeric_type numeric_type() const override;
   const starlark::bigint::number& as_bigint() const override;
 
  protected:

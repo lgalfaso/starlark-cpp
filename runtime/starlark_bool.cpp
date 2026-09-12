@@ -11,11 +11,8 @@
 namespace starlark {
 namespace runtime {
 
-starlark_bool::starlark_bool(bool value) : value(value) {}
+starlark_bool::starlark_bool(bool value) : starlark_obj(object_kind::kBool), value(value) {}
 
-std::string_view starlark_bool::type() const {
-  return starlark_types::bool_t;
-}
 
 bool starlark_bool::primitive() const {
   return true;
@@ -41,7 +38,7 @@ bool starlark_bool::inner_equals(equals_comparator& comp, const starlark_obj* ot
 }
 
 void starlark_bool::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (other->type() != type()) {
+  if (!same_starlark_type(other->kind(), kind())) {
     starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }

@@ -123,7 +123,7 @@ starlark_obj* starlark_fn_inner_min(starlark_obj* this_obj, const starlark_obj::
 
 starlark_obj* starlark_fn_inner_sorted(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   assert(pos_args.size() == 3);
-  if (pos_args[2]->type() != starlark_types::bool_t) {
+  if (!is_bool_kind(pos_args[2]->kind())) {
     error_callback.add_error(error_v2_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reverse", starlark_types::bool_t, pos_args[2]->type()));
     return nullptr;
   }

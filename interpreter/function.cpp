@@ -76,7 +76,9 @@ interpreter_function::interpreter_function(
     bool inner_fn,
     const google::protobuf::RepeatedPtrField<std::string>* frame_names,
     const std::vector<frame*>& frame_stack) :
-      starlark::runtime::starlark_function(current_program_.bytecode->block(entrypoint).function_signature().fn_name(), current_program_.module_name),
+      starlark::runtime::starlark_function(current_program_.bytecode->block(entrypoint).function_signature().fn_name(),
+          current_program_.module_name,
+          starlark::runtime::object_kind::kFunction),
       entrypoint(entrypoint),
       default_arguments(default_arguments),
       frame_names(frame_names),
@@ -493,7 +495,7 @@ starlark_obj* interpreter_function::call(
 }
 
 bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& comp, const starlark_obj* other) const {
-  if (other->type() != type()) {
+  if (!same_starlark_type(other->kind(), kind())) {
     return false;
   }
   const interpreter_function* f_other = reinterpret_cast<const interpreter_function*>(other);
@@ -501,7 +503,7 @@ bool interpreter_function::inner_equals(starlark::runtime::equals_comparator& co
 }
 
 void interpreter_function::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);

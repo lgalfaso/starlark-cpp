@@ -63,12 +63,11 @@ struct builtin_entrypoints {
 
 class starlark_function : public starlark_obj {
  public:
-  explicit starlark_function(std::string_view fn_name, std::string_view module_name);
-  std::string_view type() const override;
   bool truthy() const override;
   starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override = 0;
 
  protected:
+  starlark_function(std::string_view fn_name, std::string_view module_name, object_kind kind);
   const std::string fn_name;
   const std::string module_name;
 
@@ -79,7 +78,6 @@ class starlark_function : public starlark_obj {
 class starlark_built_in_function : public starlark_obj {
  public:
   starlark_built_in_function(starlark_obj* this_obj, builtin_entrypoints entrypoints, std::string_view fn_name);
-  std::string_view type() const override;
   bool truthy() const override;
   starlark_obj* call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) override;
   starlark_obj* call_pos(std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback) override;

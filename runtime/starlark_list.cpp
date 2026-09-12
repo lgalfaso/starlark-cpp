@@ -72,13 +72,10 @@ const std::vector<std::string>& starlark_list::attributes() {
   return *result;
 }
 
-starlark_list::starlark_list(std::size_t reserve_size) {
+starlark_list::starlark_list(std::size_t reserve_size) : starlark_obj(object_kind::kList) {
   values.reserve(reserve_size);
 }
 
-std::string_view starlark_list::type() const {
-  return starlark_types::list_t;
-}
 
 const std::vector<std::string>& starlark_list::dir() const {
   return attributes();
@@ -174,8 +171,8 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, context& ctx
 }
 
 starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       if (values.empty()) {
         return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
@@ -195,7 +192,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
       }
       return result;
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       if (values.empty()) {
         return Arena::Create<starlark_list>(&ctx.arena(), 0);
       }
@@ -249,8 +246,8 @@ starlark_obj* starlark_list::plus_equals_assign(const starlark_obj& other, conte
 }
 
 starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       if (!can_modify("append", error_callback)) {
         return nullptr;
       }
@@ -276,7 +273,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
       }
       return this;
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       if (!can_modify("append", error_callback)) {
         return nullptr;
       }
@@ -481,7 +478,7 @@ void starlark_list::unsafe_reverse() {
 }
 
 bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (type() != other->type()) {
+  if (!same_starlark_type(kind(), other->kind())) {
     return false;
   }
   const starlark_list* l_other = reinterpret_cast<const starlark_list*>(other);
@@ -498,7 +495,7 @@ bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* ot
 }
 
 void starlark_list::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (other->type() != type()) {
+  if (!same_starlark_type(other->kind(), kind())) {
     starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }
@@ -555,7 +552,7 @@ starlark_obj* starlark_list_fn_append(starlark_obj* this_obj, const starlark_obj
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::list_t);
+  assert(is_list_kind(this_obj->kind()));
   if (!static_cast<starlark_list*>(this_obj)->append(pos_args.front(), ctx, error_callback).ok()) {
     return nullptr;
   }
@@ -567,7 +564,7 @@ starlark_obj* starlark_list_fn_clear(starlark_obj* this_obj, const starlark_obj:
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::list_t);
+  assert(is_list_kind(this_obj->kind()));
   if (!static_cast<starlark_list*>(this_obj)->clear(error_callback).ok()) {
     return nullptr;
   }
@@ -579,7 +576,7 @@ starlark_obj* starlark_list_fn_extend(starlark_obj* this_obj, const starlark_obj
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::list_t);
+  assert(is_list_kind(this_obj->kind()));
   if (!static_cast<starlark_list*>(this_obj)->extend(pos_args.front(), ctx, error_callback).ok()) {
     return nullptr;
   }
@@ -640,7 +637,7 @@ starlark_obj* starlark_list_fn_remove(starlark_obj* this_obj, const starlark_obj
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::list_t);
+  assert(is_list_kind(this_obj->kind()));
   if (!static_cast<starlark_list*>(this_obj)->remove(pos_args.front(), error_callback).ok()) {
     return nullptr;
   }

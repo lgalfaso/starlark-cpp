@@ -14,7 +14,7 @@ namespace runtime {
 
 class starlark_none : public starlark_obj {
  public:
-  std::string_view type() const override;
+  starlark_none();
   bool truthy() const override;
   bool primitive() const override;
 

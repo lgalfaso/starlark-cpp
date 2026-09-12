@@ -23,7 +23,6 @@ class starlark_set : public starlark_obj {
   typedef starlark::cnt::linked_hash_set<starlark_obj*, starlark_hash_op, starlark_equals_to> set_t;
 
   starlark_set();
-  std::string_view type() const override;
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;

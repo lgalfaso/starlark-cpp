@@ -173,7 +173,7 @@ const std::map<std::string, starlark_obj::fn*, std::less<>>& starlark_obj::metho
   return *result;
 }
 
-starlark_obj::starlark_obj() : freezed(false) {}
+starlark_obj::starlark_obj(object_kind kind) : freezed(false), kind_(kind) {}
 
 starlark_obj::~starlark_obj() {}
 
@@ -603,9 +603,6 @@ starlark_obj* starlark_obj::call_method(std::string_view member, std::span<starl
   return it->second(this, pos_args_vec, kEmptyNamed, ctx, error_callback);
 }
 
-starlark_numeric_type starlark_obj::numeric_type() const {
-  return starlark_numeric_type::kNotNumeric;
-}
 
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   error_callback.add_error(error_v2_incomparable(op, type(), other->type()));
@@ -617,8 +614,8 @@ void starlark_obj::inner_freeze(std::vector<starlark_obj*>& to_freeze) {
 }
 
 status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t obj_len, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       auto idx = other.as_int64();
       if (idx < 0) {
         idx += obj_len;
@@ -629,7 +626,7 @@ status_or<int64_t> starlark_obj::inner_index(const starlark_obj& other, int64_t 
       }
       return status_or<int64_t>(idx);
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       const auto& idx = other.as_bigint();
       if (!idx.fits_in_int64()) {
         error_callback.add_error(error_v2_index_out_of_range(type()));
@@ -829,10 +826,10 @@ status zero_or_one_pos_arg(const starlark_obj::pos_args_t& pos_args, const starl
 }
 
 status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& error_callback) {
-  switch (iidx.numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (iidx.kind()) {
+    case object_kind::kInt:
       return status_or<int64_t>(iidx.as_int64());
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       if (!iidx.as_bigint().fits_in_int64()) {
         if (iidx.as_bigint().sign()) {
           return status_or<int64_t>(std::numeric_limits<int64_t>::min());
@@ -850,11 +847,11 @@ status_or<int64_t> to_int64_with_clamping(const starlark_obj& iidx, error_fn& er
 }
 
 status_or<int64_t> to_int64_with_clamping_for_index(const starlark_obj& iidx, error_fn& error_callback) {
-  switch (iidx.numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (iidx.kind()) {
+    case object_kind::kInt:
       return status_or<int64_t>(iidx.as_int64());
       break;
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       if (!iidx.as_bigint().fits_in_int64()) {
         if (iidx.as_bigint().sign()) {
           return status_or<int64_t>(std::numeric_limits<int64_t>::min());
@@ -873,11 +870,11 @@ status_or<int64_t> to_int64_with_clamping_for_index(const starlark_obj& iidx, er
 }
 
 status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int64_t& idx, error_fn& error_callback) {
-  switch (iidx.numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (iidx.kind()) {
+    case object_kind::kInt:
       idx = iidx.as_int64();
       break;
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       if (!iidx.as_bigint().fits_in_int64()) {
         if (iidx.as_bigint().sign()) {
           idx = std::numeric_limits<int64_t>::min();
@@ -889,7 +886,7 @@ status to_int64_with_clamping_for_index_allow_none(const starlark_obj& iidx, int
       }
       break;
     default:
-      if (iidx.type() == starlark_types::none_t) {
+      if (is_none_kind(iidx.kind())) {
         return ok_status();
       }
       error_callback.add_error(error_v2_index_integer_on_a_slice(iidx.type()));

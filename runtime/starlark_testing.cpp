@@ -33,7 +33,8 @@ starlark_testing_function::starlark_testing_function() : starlark_testing_functi
 
 starlark_testing_function::starlark_testing_function(std::string_view fn_name) : starlark_testing_function(fn_name, "//:test_module.star") {}
 
-starlark_testing_function::starlark_testing_function(std::string_view fn_name, std::string_view module_name) : starlark_function(fn_name, module_name) {}
+starlark_testing_function::starlark_testing_function(std::string_view fn_name, std::string_view module_name) :
+    starlark_function(fn_name, module_name, starlark::runtime::object_kind::kTestingFunction) {}
 
 starlark_obj* starlark_testing_function::call(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   return starlark_obj::call(pos_args, named_args, ctx, error_callback);

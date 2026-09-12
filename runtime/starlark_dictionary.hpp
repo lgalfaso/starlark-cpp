@@ -22,7 +22,6 @@ namespace runtime {
 class starlark_dictionary : public starlark_obj {
  public:
   starlark_dictionary();
-  std::string_view type() const override;
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;

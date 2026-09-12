@@ -30,18 +30,15 @@ const std::vector<starlark_obj*>& inspect_tuple(const starlark_tuple& tuple) {
   return tuple.values;
 }
 
-starlark_tuple::starlark_tuple(std::size_t reserve_size) {
+starlark_tuple::starlark_tuple(std::size_t reserve_size) : starlark_obj(object_kind::kTuple) {
   values.reserve(reserve_size);
 }
 
-std::string_view starlark_tuple::type() const {
-  return starlark_types::tuple_t;
-}
 
 namespace {
 
 starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  if (other.type() != this_obj.type()) {
+  if (!same_starlark_type(other.kind(), this_obj.kind())) {
     error_callback.add_error(error_v2_no_concat(this_obj.type(), other.type(), this_obj.type()));
     return nullptr;
   }
@@ -66,8 +63,8 @@ starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other,
 
 starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   const auto& this_values = inspect_tuple(this_obj);
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       if (this_values.empty()) {
         return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
@@ -89,7 +86,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
       }
       return result;
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       if (this_values.empty()) {
         return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
       }
@@ -185,7 +182,7 @@ bool starlark_tuple::inner_repr(printer& print, printer_action action) const {
 }
 
 bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (type() != other->type()) {
+  if (!same_starlark_type(kind(), other->kind())) {
     return false;
   }
   const starlark_tuple* t_other = reinterpret_cast<const starlark_tuple*>(other);
@@ -202,7 +199,7 @@ bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* o
 }
 
 void starlark_tuple::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (other->type() != type()) {
+  if (!same_starlark_type(other->kind(), kind())) {
     starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }

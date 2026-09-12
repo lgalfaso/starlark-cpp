@@ -3,6 +3,7 @@
 #ifndef RUNTIME_STARLARK_OBJECT_HPP_
 #define RUNTIME_STARLARK_OBJECT_HPP_
 
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <span>
@@ -16,6 +17,7 @@
 #include "bigint/number.hpp"
 #include "google/protobuf/arena.h"
 #include "runtime/error_fn.hpp"
+#include "runtime/object_kind.hpp"
 #include "runtime/options.hpp"
 #include "status_or/status.hpp"
 
@@ -120,13 +122,6 @@ class starlark_iterator {
   virtual void end_iterator() = 0;
 };
 
-enum class starlark_numeric_type {
-  kInt64,
-  kBigInt,
-  kFloat,
-  kNotNumeric
-};
-
 struct starlark_hash_op {
   size_t operator()(const starlark_obj* value) const;
 };
@@ -175,9 +170,9 @@ class starlark_obj {
   typedef std::vector<std::pair<starlark_obj*, starlark_obj*>> named_args_t;
   typedef starlark_obj* (fn)(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
-  starlark_obj();
   virtual ~starlark_obj();
-  virtual std::string_view type() const = 0;
+  std::string_view type() const { return kind_to_type_name(kind_); }
+  object_kind kind() const { return kind_; }
   virtual std::string str() const;
   std::string repr() const;
   virtual bool truthy() const = 0;
@@ -241,7 +236,6 @@ class starlark_obj {
   virtual void slice_range_less_less_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
   virtual void slice_range_greater_greater_equals_assign(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, const starlark_obj& element, context& ctx, error_fn& error_callback);
 
-  virtual starlark_numeric_type numeric_type() const;
   virtual int64_t as_int64() const;
   virtual const starlark::bigint::number& as_bigint() const;
   virtual double as_float() const;
@@ -250,8 +244,10 @@ class starlark_obj {
   virtual starlark_obj* call_method(std::string_view member, std::span<starlark_obj*> pos_args, context& ctx, error_fn& error_callback);
 
  protected:
+  explicit starlark_obj(object_kind kind);
   typedef std::span<const starlark_obj* const> pending_hash;
   bool freezed;
+  object_kind kind_ = object_kind::kUnknown;
 
   virtual bool inner_repr(printer& print, printer_action action) const = 0;
   virtual bool inner_equals(equals_comparator& comp, const starlark_obj* other) const = 0;

@@ -116,12 +116,9 @@ const std::vector<std::string>& starlark_bytes::attributes() {
   return *result;
 }
 
-starlark_bytes::starlark_bytes(std::string&& value) : value(value) {}
-starlark_bytes::starlark_bytes(std::string_view value) : value(value) {}
+starlark_bytes::starlark_bytes(std::string&& value) : starlark_obj(object_kind::kBytes), value(value) {}
+starlark_bytes::starlark_bytes(std::string_view value) : starlark_obj(object_kind::kBytes), value(value) {}
 
-std::string_view starlark_bytes::type() const {
-  return starlark_types::bytes_t;
-}
 
 bool starlark_bytes::primitive() const {
   return true;
@@ -155,8 +152,8 @@ bool starlark_bytes::truthy() const {
 }
 
 bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callback) const {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       auto other_value = other.as_int64();
       if (other_value < 0 || 255 < other_value) {
         error_callback.add_error(error_v2_byte_in_range());
@@ -164,7 +161,7 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
       }
       return value.contains(static_cast<char>(other.as_int64()));
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       auto& other_value = other.as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
         error_callback.add_error(error_v2_byte_in_range());
@@ -172,24 +169,20 @@ bool starlark_bytes::binary_in(const starlark_obj& other, error_fn& error_callba
       }
       return value.contains(static_cast<char>(other_value.at(0)));
     }
-    case starlark_numeric_type::kNotNumeric: {
-      if (other.type() != type()) {
-        error_callback.add_error(error_v2_integer_or_type(type(), other.type()));
-        return false;
-      }
+    case object_kind::kBytes: {
       const starlark_bytes& s_other = static_cast<const starlark_bytes&>(other);
       return value.contains(s_other.value);
     }
     default:
-     error_callback.add_error(error_v2_integer_or_type(type(), other.type()));
-     return false;
+      error_callback.add_error(error_v2_integer_or_type(type(), other.type()));
+      return false;
   }
 }
 
 namespace {
 
 starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  if (other.type() != this_obj.type()) {
+  if (!same_starlark_type(other.kind(), this_obj.kind())) {
     error_callback.add_error(error_v2_no_concat(this_obj.type(), other.type()));
     return nullptr;
   }
@@ -205,8 +198,8 @@ starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other,
 }
 
 starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       if (this_obj.as_string().empty()) {
         return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
@@ -225,7 +218,7 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
       }
       return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       if (this_obj.as_string().empty()) {
         return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
       }
@@ -681,7 +674,7 @@ status_or<int> starlark_bytes::cmp(const starlark_obj& other, std::string_view o
 }
 
 void starlark_bytes::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (other->type() != type()) {
+  if (!same_starlark_type(other->kind(), kind())) {
     starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }
@@ -710,8 +703,8 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
       "\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277"
       "\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337"
       "\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377";
-  switch (element->numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (element->kind()) {
+    case object_kind::kInt: {
       auto other_value = element->as_int64();
       if (other_value < 0 || 255 < other_value) {
         error_callback.add_error(error_v2_byte_in_range());
@@ -719,7 +712,7 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
       }
       return status_or<std::string_view>(std::string_view(&all_chars[other_value], 1));
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       auto& other_value = element->as_bigint();
       if (other_value.sign() || other_value.bit_size() >= 8) {
         error_callback.add_error(error_v2_byte_in_range());
@@ -727,13 +720,8 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
       }
       return status_or<std::string_view>(std::string_view(&all_chars[other_value.at(0)], 1));
     }
-    case starlark_numeric_type::kNotNumeric: {
-      if (element->type() != starlark_types::bytes_t) {
-        error_callback.add_error(error_v2_integer_or_type(starlark_types::bytes_t, element->type()));
-        return status_or<std::string_view>(status_code::kRuntimeError);
-      }
+    case object_kind::kBytes:
       return status_or<std::string_view>(element->as_string());
-    }
     default:
       error_callback.add_error(error_v2_integer_or_type(starlark_types::bytes_t, element->type()));
       return status_or<std::string_view>(status_code::kRuntimeError);
@@ -742,18 +730,18 @@ status_or<std::string_view> bytes_or_int_as_bytes(const starlark_obj* element, e
 
 status_or<std::vector<std::string_view>> bytes_or_tuple_as_vector_of_bytes(std::string_view fn_name, const starlark_obj* element, error_fn& error_callback) {
   std::vector<std::string_view> result;
-  if (element->type() == starlark_types::tuple_t) {
+  if (is_tuple_kind(element->kind())) {
     auto* tuple = static_cast<const starlark_tuple*>(element);
     for (int i = 0; i < tuple->size(); ++i) {
       auto* entry = tuple->at(i);
-      if (entry->type() != starlark_types::bytes_t) {
+      if (!is_bytes_kind(entry->kind())) {
         error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, entry->type()));
         return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
       }
       result.emplace_back(entry->as_string());
     }
   } else {
-    if (element->type() != starlark_types::bytes_t) {
+    if (!is_bytes_kind(element->kind())) {
       error_callback.add_error(error_v2_bytes_or_tuple_of_bytes(fn_name, element->type()));
       return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
     }
@@ -787,7 +775,7 @@ starlark_obj* starlark_bytes_fn_count(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -804,7 +792,7 @@ starlark_obj* starlark_bytes_fn_elems(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   return static_cast<starlark_bytes*>(this_obj)->elems(ctx);
 }
 
@@ -813,7 +801,7 @@ starlark_obj* starlark_bytes_fn_elem_ords(starlark_obj* this_obj, const starlark
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   return static_cast<starlark_bytes*>(this_obj)->elem_ords(ctx);
 }
 
@@ -824,7 +812,7 @@ starlark_obj* starlark_bytes_fn_endswith(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   auto subs = bytes_or_tuple_as_vector_of_bytes("endswith", pos_args.front(), error_callback);
   if (!subs.ok()) {
     return nullptr;
@@ -843,7 +831,7 @@ starlark_obj* starlark_bytes_fn_find(starlark_obj* this_obj, const starlark_obj:
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -862,7 +850,7 @@ starlark_obj* starlark_bytes_fn_index(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -884,7 +872,7 @@ starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj:
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
 
   auto it = pos_args.front()->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
@@ -894,7 +882,7 @@ starlark_obj* starlark_bytes_fn_join(starlark_obj* this_obj, const starlark_obj:
   std::vector<std::string_view> elements;
   while (it->has_next()) {
     auto* element = it->next();
-    if (element->type() != starlark_types::bytes_t) {
+    if (!is_bytes_kind(element->kind())) {
       error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, element->type()));
       return nullptr;
     }
@@ -909,12 +897,12 @@ starlark_obj* starlark_bytes_fn_lstrip(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+  assert(is_bytes_kind(this_obj->kind()));
+  if (pos_args.empty() || is_none_kind(pos_args.front()->kind())) {
     return static_cast<starlark_bytes*>(this_obj)->lstrip(ctx);
   }
   auto* cutset = pos_args.front();
-  if (cutset->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(cutset->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, cutset->type()));
     return nullptr;
   }
@@ -926,10 +914,10 @@ starlark_obj* starlark_bytes_fn_partition(starlark_obj* this_obj, const starlark
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
 
   auto* separator = pos_args.front();
-  if (separator->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(separator->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, separator->type()));
     return nullptr;
   }
@@ -960,12 +948,12 @@ starlark_obj* starlark_bytes_fn_replace(starlark_obj* this_obj, const starlark_o
     return nullptr;
   }
   auto* old = pos_args.front();
-  if (old->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(old->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, old->type()));
     return nullptr;
   }
   auto* new_ = pos_args[1];
-  if (new_->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(new_->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, new_->type()));
     return nullptr;
   }
@@ -987,7 +975,7 @@ starlark_obj* starlark_bytes_fn_rfind(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -1006,7 +994,7 @@ starlark_obj* starlark_bytes_fn_rindex(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   auto sub = bytes_or_int_as_bytes(pos_args.front(), error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -1028,10 +1016,10 @@ starlark_obj* starlark_bytes_fn_rpartition(starlark_obj* this_obj, const starlar
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
 
   auto* separator = pos_args.front();
-  if (separator->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(separator->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, separator->type()));
     return nullptr;
   }
@@ -1078,10 +1066,10 @@ starlark_obj* starlark_bytes_fn_rsplit(starlark_obj* this_obj, const starlark_ob
     }
     maxsplit_value = *status_or_maxsplit;
   }
-  if (sep == nullptr || sep->type() == starlark_types::none_t) {
+  if (sep == nullptr || is_none_kind(sep->kind())) {
     return static_cast<starlark_bytes*>(this_obj)->rsplit(maxsplit_value, ctx);
   }
-  if (sep->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(sep->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, sep->type()));
     return nullptr;
   }
@@ -1093,12 +1081,12 @@ starlark_obj* starlark_bytes_fn_rstrip(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+  assert(is_bytes_kind(this_obj->kind()));
+  if (pos_args.empty() || is_none_kind(pos_args.front()->kind())) {
     return static_cast<starlark_bytes*>(this_obj)->rstrip(ctx);
   }
   auto* cutset = pos_args.front();
-  if (cutset->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(cutset->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, cutset->type()));
     return nullptr;
   }
@@ -1145,10 +1133,10 @@ starlark_obj* starlark_bytes_fn_split(starlark_obj* this_obj, const starlark_obj
     }
     maxsplit_value = *status_or_maxsplit;
   }
-  if (sep == nullptr || sep->type() == starlark_types::none_t) {
+  if (sep == nullptr || is_none_kind(sep->kind())) {
     return static_cast<starlark_bytes*>(this_obj)->split(maxsplit_value, ctx);
   }
-  if (sep->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(sep->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, sep->type()));
     return nullptr;
   }
@@ -1162,7 +1150,7 @@ starlark_obj* starlark_bytes_fn_startswith(starlark_obj* this_obj, const starlar
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
+  assert(is_bytes_kind(this_obj->kind()));
   auto subs = bytes_or_tuple_as_vector_of_bytes("startswith", pos_args.front(), error_callback);
   if (!subs.ok()) {
     return nullptr;
@@ -1187,27 +1175,20 @@ starlark_obj* starlark_bytes_fn_strip(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::bytes_t);
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+  assert(is_bytes_kind(this_obj->kind()));
+  if (pos_args.empty() || is_none_kind(pos_args.front()->kind())) {
     return static_cast<starlark_bytes*>(this_obj)->strip(ctx);
   }
   auto* cutset = pos_args.front();
-  if (cutset->type() != starlark_types::bytes_t) {
+  if (!is_bytes_kind(cutset->kind())) {
     error_callback.add_error(error_v2_type_required(starlark_types::bytes_t, cutset->type()));
     return nullptr;
   }
   return static_cast<starlark_bytes*>(this_obj)->strip(cutset->as_string(), ctx);
 }
 
-starlark_bytes::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state, bool ords) : bytes(bytes), state(state), ords(ords) {}
-
-std::string_view starlark_bytes::bytes_elems::type() const {
-  if (ords) {
-    return "bytes.elem_ords";
-  } else {
-    return "bytes.elems";
-  }
-}
+starlark_bytes::bytes_elems::bytes_elems(const starlark_bytes* bytes, range_state state, bool ords) :
+    starlark_obj(ords ? object_kind::kBytesElemOrds : object_kind::kBytesElems), bytes(bytes), state(state), ords(ords) {}
 
 bool starlark_bytes::bytes_elems::truthy() const {
   return state.len > 0;
@@ -1280,7 +1261,7 @@ bool starlark_bytes::bytes_elems::inner_repr(printer& print, printer_action acti
 }
 
 bool starlark_bytes::bytes_elems::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (type() != other->type()) {
+  if (!same_starlark_type(kind(), other->kind())) {
     return false;
   }
   const bytes_elems* e_other = static_cast<const bytes_elems*>(other);
@@ -1296,7 +1277,7 @@ bool starlark_bytes::bytes_elems::inner_equals(equals_comparator& comp, const st
 }
 
 void starlark_bytes::bytes_elems::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);

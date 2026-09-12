@@ -15,7 +15,6 @@ namespace runtime {
 class starlark_integer : public starlark_obj {
  public:
   explicit starlark_integer(int64_t value);
-  std::string_view type() const override;
   bool truthy() const override;
   bool primitive() const override;
   starlark::result::status_or<int> cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const override;
@@ -45,7 +44,6 @@ class starlark_integer : public starlark_obj {
   starlark_obj* less_less_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
   starlark_obj* greater_greater_equals_assign(const starlark_obj& other, context& ctx, error_fn& error_callback) override;
 
-  starlark_numeric_type numeric_type() const override;
   int64_t as_int64() const override;
 
  protected:

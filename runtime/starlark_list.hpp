@@ -19,7 +19,6 @@ namespace runtime {
 class starlark_list : public starlark_obj {
  public:
   explicit starlark_list(std::size_t reserve_size);
-  std::string_view type() const override;
   bool truthy() const override;
   const std::vector<std::string>& dir() const override;
   const std::map<std::string, fn*, std::less<>>& methods_meta() const override;

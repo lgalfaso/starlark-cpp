@@ -57,11 +57,11 @@ namespace runtime {
 namespace {
 
 status read_range_int64(starlark_obj* value, int64_t& output, error_fn& error_callback) {
-  switch (value->numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (value->kind()) {
+    case object_kind::kInt:
       output = value->as_int64();
       return ok_status();
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       const auto& bvalue = value->as_bigint();
       if (!bvalue.fits_in_int64()) {
         error_callback.add_error(error_v2_overflow(value->type(), starlark_types::int64));
@@ -86,7 +86,7 @@ starlark_obj* make_range_int64(int64_t start, int64_t end, int64_t step, context
 }
 
 starlark_obj* enumerate_from(starlark_obj* iterable, starlark_obj* start, context& ctx, error_fn& error_callback) {
-  if (start != nullptr && start->type() != starlark_types::int_t) {
+  if (start != nullptr && !is_int_kind(start->kind())) {
     error_callback.add_error(error_v2_argument_interpreted_as_integer("start", start->type()));
     return nullptr;
   }
@@ -111,10 +111,10 @@ starlark_obj* enumerate_from(starlark_obj* iterable, starlark_obj* start, contex
 }
 
 starlark_obj* bytes_from_source(starlark_obj* source, context& ctx, error_fn& error_callback) {
-  if (source->type() == starlark_types::bytes_t) {
+  if (is_bytes_kind(source->kind())) {
     return source;
   }
-  if (source->type() == starlark_types::string_t) {
+  if (is_string_kind(source->kind())) {
     std::string result;
     utf8_reader reader(source->as_string(), false, false);
     while (reader.pending()) {
@@ -138,8 +138,8 @@ starlark_obj* bytes_from_source(starlark_obj* source, context& ctx, error_fn& er
   std::string result;
   while (it->has_next()) {
     auto value = it->next();
-    switch (value->numeric_type()) {
-      case starlark_numeric_type::kInt64: {
+    switch (value->kind()) {
+      case object_kind::kInt: {
         auto ivalue = value->as_int64();
         if (ivalue < 0 || 255 < ivalue) {
           error_callback.add_error(error_v2_bytes_in_range());
@@ -148,7 +148,7 @@ starlark_obj* bytes_from_source(starlark_obj* source, context& ctx, error_fn& er
         result += static_cast<char>(ivalue);
         break;
       }
-      case starlark_numeric_type::kBigInt: {
+      case object_kind::kBigInt: {
         const auto& bvalue = value->as_bigint();
         if (bvalue.sign() || bvalue.bit_size() > 8) {
           error_callback.add_error(error_v2_bytes_in_range());
@@ -167,24 +167,24 @@ starlark_obj* bytes_from_source(starlark_obj* source, context& ctx, error_fn& er
 }
 
 starlark_obj* int_from_value(starlark_obj* value, starlark_obj* base_param, context& ctx, error_fn& error_callback) {
-  if (value->type() != starlark_types::string_t && base_param != nullptr) {
+  if (!is_string_kind(value->kind()) && base_param != nullptr) {
     error_callback.add_error(error_v2_non_string_with_base());
     return nullptr;
   }
-  if (value->type() == starlark_types::int_t) {
+  if (is_int_kind(value->kind())) {
     return value;
   }
-  if (value->type() == starlark_types::float_t) {
+  if (is_float_kind(value->kind())) {
     return create_integer_from_float(value->as_float(), ctx, error_callback);
   }
-  if (value->type() == starlark_types::bool_t) {
+  if (is_bool_kind(value->kind())) {
     return value->truthy() ? ctx.one() : ctx.zero();
   }
-  if (value->type() == starlark_types::string_t) {
+  if (is_string_kind(value->kind())) {
     int base = 10;
     if (base_param != nullptr) {
-      switch (base_param->numeric_type()) {
-        case starlark_numeric_type::kInt64: {
+      switch (base_param->kind()) {
+        case object_kind::kInt: {
           auto ibase = base_param->as_int64();
           if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
             error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
@@ -193,7 +193,7 @@ starlark_obj* int_from_value(starlark_obj* value, starlark_obj* base_param, cont
           base = ibase;
           break;
         }
-        case starlark_numeric_type::kBigInt: {
+        case object_kind::kBigInt: {
           const auto& bbase = base_param->as_bigint();
           if (bbase.sign() || bbase.length() > 1) {
             error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
@@ -355,21 +355,21 @@ starlark_obj* zip_from(std::span<starlark_obj*> pos_args, context& ctx, error_fn
 namespace builtin_pos {
 
 starlark_obj* abs_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
-  switch (value->numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (value->kind()) {
+    case object_kind::kFloat: {
       if (std::signbit(value->as_float())) {
         return create_float(std::abs(value->as_float()), ctx);
       }
       return value;
     }
-    case starlark_numeric_type::kInt64: {
+    case object_kind::kInt: {
       int64_t ivalue = value->as_int64();
       if (ivalue < 0) {
         return value->unary_minus(ctx, error_callback);
       }
       return value;
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       const auto& bvalue = value->as_bigint();
       if (bvalue.sign()) {
         return value->unary_minus(ctx, error_callback);
@@ -426,13 +426,13 @@ starlark_obj* bytes_pos1(starlark_obj* this_obj, starlark_obj* source, context& 
 
 starlark_obj* chr_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
   std::string result;
-  switch (value->numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (value->kind()) {
+    case object_kind::kInt:
       if (!chr_fn(result, value->as_int64(), error_callback).ok()) {
         return nullptr;
       }
       break;
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       if (!chr_fn(result, value->as_bigint(), error_callback).ok()) {
         return nullptr;
       }
@@ -479,12 +479,12 @@ starlark_obj* float_pos0(starlark_obj* this_obj, context& ctx, error_fn& error_c
 }
 
 starlark_obj* float_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
-  switch (value->numeric_type()) {
-    case starlark_numeric_type::kFloat:
+  switch (value->kind()) {
+    case object_kind::kFloat:
       return value;
-    case starlark_numeric_type::kInt64:
+    case object_kind::kInt:
       return create_float(value->as_int64(), ctx);
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       auto fvalue = to_double(value->as_bigint());
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(value->type(), starlark_types::float_t));
@@ -492,33 +492,31 @@ starlark_obj* float_pos1(starlark_obj* this_obj, starlark_obj* value, context& c
       }
       return create_float(fvalue, ctx);
     }
-    case starlark_numeric_type::kNotNumeric:
+    case object_kind::kString: {
+      auto svalue = value->as_string();
+      errno = 0;
+      char* end;
+      double double_value = std::strtod(svalue.data(), &end);
+      if (end != &svalue.back() + 1) {
+        error_callback.add_error(error_v2_convert_string(starlark_types::float_t, svalue));
+        return nullptr;
+      }
+      if (errno != 0) {
+        error_callback.add_error(error_v2_overflow_float_too_large());
+        return nullptr;
+      }
+      return create_float(double_value, ctx);
+    }
+    case object_kind::kBool:
+      return create_float(value->truthy() ? 1.0 : 0.0, ctx);
     default:
-      if (value->type() == starlark_types::string_t) {
-        auto svalue = value->as_string();
-        errno = 0;
-        char* end;
-        double double_value = std::strtod(svalue.data(), &end);
-        if (end != &svalue.back() + 1) {
-          error_callback.add_error(error_v2_convert_string(starlark_types::float_t, svalue));
-          return nullptr;
-        }
-        if (errno != 0) {
-          error_callback.add_error(error_v2_overflow_float_too_large());
-          return nullptr;
-        }
-        return create_float(double_value, ctx);
-      }
-      if (value->type() == starlark_types::bool_t) {
-        return create_float(value->truthy() ? 1.0 : 0.0, ctx);
-      }
       error_callback.add_error(error_v2_argument_string_or_real(starlark_built_in_functions::float_f, value->type()));
       return nullptr;
   }
 }
 
 starlark_obj* getattr_pos2(starlark_obj* this_obj, starlark_obj* element, starlark_obj* name, context& ctx, error_fn& error_callback) {
-  if (name->type() != starlark_types::string_t) {
+  if (!is_string_kind(name->kind())) {
     error_callback.add_error(error_v2_attribute_string(name->type()));
     return nullptr;
   }
@@ -526,7 +524,7 @@ starlark_obj* getattr_pos2(starlark_obj* this_obj, starlark_obj* element, starla
 }
 
 starlark_obj* getattr_pos3(starlark_obj* this_obj, starlark_obj* element, starlark_obj* name, starlark_obj* default_value, context& ctx, error_fn& error_callback) {
-  if (name->type() != starlark_types::string_t) {
+  if (!is_string_kind(name->kind())) {
     error_callback.add_error(error_v2_attribute_string(name->type()));
     return nullptr;
   }
@@ -538,7 +536,7 @@ starlark_obj* getattr_pos3(starlark_obj* this_obj, starlark_obj* element, starla
 }
 
 starlark_obj* hasattr_pos2(starlark_obj* this_obj, starlark_obj* element, starlark_obj* attr, context& ctx, error_fn& error_callback) {
-  if (attr->type() != starlark_types::string_t) {
+  if (!is_string_kind(attr->kind())) {
     error_callback.add_error(error_v2_attribute_string(attr->type()));
     return nullptr;
   }
@@ -551,7 +549,7 @@ starlark_obj* hasattr_pos2(starlark_obj* this_obj, starlark_obj* element, starla
 }
 
 starlark_obj* hash_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
-  if (value->type() == starlark_types::string_t || value->type() == starlark_types::bytes_t) {
+  if (is_string_kind(value->kind()) || is_bytes_kind(value->kind())) {
     return create_integer(value->hash(), ctx);
   }
   error_callback.add_error(error_v2_argument_bad_operand_type(starlark_built_in_functions::hash_f, value->type(), starlark_types::string_t, starlark_types::bytes_t));
@@ -620,7 +618,7 @@ starlark_obj* min_pos3(starlark_obj* this_obj, starlark_obj* a0, starlark_obj* a
 }
 
 starlark_obj* ord_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
-  if (value->type() == starlark_types::string_t) {
+  if (is_string_kind(value->kind())) {
     utf8_reader reader(value->as_string(), false, false);
     if (!reader.pending()) {
       error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value->unsafe_len()));
@@ -633,7 +631,7 @@ starlark_obj* ord_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx
     }
     return create_integer(result, ctx);
   }
-  if (value->type() == starlark_types::bytes_t) {
+  if (is_bytes_kind(value->kind())) {
     if (auto value_len = value->unsafe_len(); value_len != 1) {
       error_callback.add_error(error_v2_expect_character(starlark_built_in_functions::ord_f, value->type(), value_len));
       return nullptr;

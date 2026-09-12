@@ -15,7 +15,6 @@ namespace runtime {
 class starlark_bool : public starlark_obj {
  public:
   explicit starlark_bool(bool value);
-  std::string_view type() const override;
   bool truthy() const override;
   bool primitive() const override;
 

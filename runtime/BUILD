@@ -78,12 +78,31 @@ cc_library(
 )
 
 cc_library(
+    name = "object_kind",
+    srcs = ["object_kind.cpp"],
+    hdrs = ["object_kind.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [":starlark_types"],
+)
+
+cc_test(
+    name = "object_kind_test",
+    size = "small",
+    srcs = ["object_kind_test.cpp"],
+    deps = [
+        ":object_kind",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "starlark_object",
     srcs = ["starlark_object.cpp"],
     hdrs = ["starlark_object.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
+        ":object_kind",
         ":options",
         ":starlark_types",
         "//bigint:number",

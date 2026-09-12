@@ -220,17 +220,14 @@ const std::vector<std::string>& starlark_string::attributes() {
   return *result;
 }
 
-starlark_string::starlark_string(std::string&& value) : value(std::forward<std::string>(value)) {
+starlark_string::starlark_string(std::string&& value) : starlark_obj(object_kind::kString), value(std::forward<std::string>(value)) {
   build_index();
 }
 
-starlark_string::starlark_string(std::string_view value) : value(value) {
+starlark_string::starlark_string(std::string_view value) : starlark_obj(object_kind::kString), value(value) {
   build_index();
 }
 
-std::string_view starlark_string::type() const {
-  return starlark_types::string_t;
-}
 
 bool starlark_string::primitive() const {
   return true;
@@ -282,7 +279,7 @@ bool starlark_string::binary_in(const starlark_obj& other, error_fn& error_callb
 namespace {
 
 starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  if (other.type() != this_obj.type()) {
+  if (!same_starlark_type(other.kind(), this_obj.kind())) {
     error_callback.add_error(error_v2_no_concat(this_obj.type(), other.type()));
     return nullptr;
   }
@@ -298,8 +295,8 @@ starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other
 }
 
 starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       if (this_obj.as_string().empty()) {
         return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
@@ -318,7 +315,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       }
       return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       if (this_obj.as_string().empty()) {
         return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
       }
@@ -388,22 +385,18 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
       result += element.repr();
       break;
     case 'c':
-      switch (element.numeric_type()) {
-        case starlark_numeric_type::kInt64:
+      switch (element.kind()) {
+        case object_kind::kInt:
           if (!chr_fn(result, element.as_int64(), error_callback).ok()) {
             return error_status();
           }
           break;
-        case starlark_numeric_type::kBigInt:
+        case object_kind::kBigInt:
           if (!chr_fn(result, element.as_bigint(), error_callback).ok()) {
             return error_status();
           }
           break;
-        case starlark_numeric_type::kNotNumeric: {
-          if (element.type() != starlark_types::string_t) {
-            error_callback.add_error(error_v2_integer_or_unicode_character(element.type()));
-            return error_status();
-          }
+        case object_kind::kString: {
           auto len = element.unsafe_len();
           if (len != 1) {
             error_callback.add_error(error_v2_integer_or_unicode_character_type_and_length(element.type(), len));
@@ -423,12 +416,12 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
     case 'x':
     case 'X': {
       const starlark_obj* n_element;
-      switch (element.numeric_type()) {
-        case starlark_numeric_type::kInt64:
-        case starlark_numeric_type::kBigInt:
+      switch (element.kind()) {
+        case object_kind::kInt:
+        case object_kind::kBigInt:
           n_element = &element;
           break;
-        case starlark_numeric_type::kFloat:
+        case object_kind::kFloat:
           n_element = create_integer_from_float(element.as_float(), ctx, error_callback);
           if (n_element == nullptr) {
             return error_status();
@@ -441,45 +434,45 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
       switch (format) {
         case 'd':
         case 'i':
-          switch (n_element->numeric_type()) {
-            case starlark_numeric_type::kInt64:
+          switch (n_element->kind()) {
+            case object_kind::kInt:
             default:
               result += std::format("{:d}", n_element->as_int64());
               break;
-            case starlark_numeric_type::kBigInt:
+            case object_kind::kBigInt:
               result += n_element->as_bigint().to_string(10, false);
               break;
           }
           break;
         case 'o':
-          switch (n_element->numeric_type()) {
-            case starlark_numeric_type::kInt64:
+          switch (n_element->kind()) {
+            case object_kind::kInt:
             default:
               result += std::format("{:o}", n_element->as_int64());
               break;
-            case starlark_numeric_type::kBigInt:
+            case object_kind::kBigInt:
               result += n_element->as_bigint().to_string(8, false);
               break;
           }
           break;
         case 'x':
-          switch (n_element->numeric_type()) {
-            case starlark_numeric_type::kInt64:
+          switch (n_element->kind()) {
+            case object_kind::kInt:
             default:
               result += std::format("{:x}", n_element->as_int64());
               break;
-            case starlark_numeric_type::kBigInt:
+            case object_kind::kBigInt:
               result += n_element->as_bigint().to_string(16, false);
               break;
           }
           break;
         case 'X':
-          switch (n_element->numeric_type()) {
-            case starlark_numeric_type::kInt64:
+          switch (n_element->kind()) {
+            case object_kind::kInt:
             default:
               result += std::format("{:X}", n_element->as_int64());
               break;
-            case starlark_numeric_type::kBigInt:
+            case object_kind::kBigInt:
               result += n_element->as_bigint().to_string(16, true);
               break;
           }
@@ -494,15 +487,15 @@ status interpolation_convertion(std::string& result, const starlark_obj& element
     case 'g':
     case 'G': {
       double float_value;
-      switch (element.numeric_type()) {
-        case starlark_numeric_type::kInt64:
+      switch (element.kind()) {
+        case object_kind::kInt:
           float_value = static_cast<double>(element.as_int64());
           break;
-        case starlark_numeric_type::kBigInt: {
+        case object_kind::kBigInt: {
           float_value = to_double(element.as_bigint());
           break;
         }
-        case starlark_numeric_type::kFloat:
+        case object_kind::kFloat:
           float_value = element.as_float();
           break;
         default:
@@ -693,7 +686,7 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
     return nullptr;
   }
   std::string result = parts[0];
-  if (other.type() != starlark_types::tuple_t) {
+  if (!is_tuple_kind(other.kind())) {
     if (parts.size() != 2) {
       error_callback.add_error(error_v2_not_enough_arguments_for_format_string());
       return nullptr;
@@ -874,7 +867,7 @@ std::string_view strip_impl(std::string_view value, std::string_view cutset, str
 }
 
 status_or<std::string_view> string_as_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
-  if (element->type() != starlark_types::string_t) {
+  if (!is_string_kind(element->kind())) {
     error_callback.add_error(error_v2_argument_must_be_type(fn_name, arg_pos, starlark_types::string_t, element->type()));
     return status_or<std::string_view>(status_code::kRuntimeError);
   }
@@ -1593,23 +1586,13 @@ starlark_obj* starlark_string::codepoint_ords(context& ctx) const {
   return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, size, 1), true, true);
 }
 
-starlark_string::string_elems::string_elems(const starlark_string* str, range_state state, bool is_cp, bool ords) : str(str), state(state), is_cp(is_cp), ords(ords) {}
-
-std::string_view starlark_string::string_elems::type() const {
-  if (is_cp) {
-    if (ords) {
-      return "string.codepoint_ords";
-    } else {
-      return "string.codepoints";
-    }
-  } else {
-    if (ords) {
-      return "string.elem_ords";
-    } else {
-      return "string.elems";
-    }
-  }
-}
+starlark_string::string_elems::string_elems(const starlark_string* str, range_state state, bool is_cp, bool ords) :
+    starlark_obj(is_cp ? (ords ? object_kind::kStringCodepointOrds : object_kind::kStringCodepoints)
+                       : (ords ? object_kind::kStringElemOrds : object_kind::kStringElems)),
+    str(str),
+    state(state),
+    is_cp(is_cp),
+    ords(ords) {}
 
 bool starlark_string::string_elems::truthy() const {
   return state.len > 0;
@@ -1618,11 +1601,11 @@ bool starlark_string::string_elems::truthy() const {
 bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_fn& error_callback) const {
   if (ords) {
     int64_t value;
-    switch (other.numeric_type()) {
-      case starlark_numeric_type::kInt64:
+    switch (other.kind()) {
+      case object_kind::kInt:
         value = other.as_int64();
         break;
-      case starlark_numeric_type::kBigInt: {
+      case object_kind::kBigInt: {
         auto& bvalue = other.as_bigint();
         if (bvalue.sign() || bvalue.bit_size() > 21) {
           return false;
@@ -1640,7 +1623,7 @@ bool starlark_string::string_elems::binary_in(const starlark_obj& other, error_f
       }
     }
   } else {
-    if (other.type() != starlark_types::string_t) {
+    if (!is_string_kind(other.kind())) {
       error_callback.add_error(error_v2_in_type_requires_type(type(), starlark_types::string_t, other.type()));
       return false;
     }
@@ -1711,7 +1694,7 @@ bool starlark_string::string_elems::inner_repr(printer& print, printer_action ac
 }
 
 bool starlark_string::string_elems::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (type() != other->type()) {
+  if (!same_starlark_type(kind(), other->kind())) {
     return false;
   }
   const string_elems* e_other = static_cast<const string_elems*>(other);
@@ -1727,7 +1710,7 @@ bool starlark_string::string_elems::inner_equals(equals_comparator& comp, const 
 }
 
 void starlark_string::string_elems::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
@@ -1780,7 +1763,7 @@ status_or<int> starlark_string::cmp(const starlark_obj& other, std::string_view 
 }
 
 void starlark_string::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (other->type() != type()) {
+  if (!same_starlark_type(other->kind(), kind())) {
     starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
     return;
   }
@@ -1843,18 +1826,18 @@ namespace {
 
 status_or<std::vector<std::string_view>> string_or_tuple_as_vector_of_string(const starlark_obj* element, std::string_view fn_name, int64_t arg_pos, error_fn& error_callback) {
   std::vector<std::string_view> result;
-  if (element->type() == starlark_types::tuple_t) {
+  if (is_tuple_kind(element->kind())) {
     auto* tuple = static_cast<const starlark_tuple*>(element);
     for (int i = 0; i < tuple->size(); ++i) {
       auto* entry = tuple->at(i);
-      if (entry->type() != starlark_types::string_t) {
+      if (!is_string_kind(entry->kind())) {
         error_callback.add_error(error_v2_tuple_must_contain_type(fn_name, starlark_types::string_t, entry->type()));
         return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
       }
       result.emplace_back(entry->as_string());
     }
   } else {
-    if (element->type() != starlark_types::string_t) {
+    if (!is_string_kind(element->kind())) {
       error_callback.add_error(error_v2_string_or_tuple_of_string(fn_name, element->type()));
       return status_or<std::vector<std::string_view>>(status_code::kRuntimeError);
     }
@@ -1886,7 +1869,7 @@ starlark_obj* starlark_string_fn_capitalize(starlark_obj* this_obj, const starla
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->capitalize(ctx);
 }
 
@@ -1897,7 +1880,7 @@ starlark_obj* starlark_string_fn_count(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   auto sub = string_as_string(pos_args.front(), "count", 1, error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -1914,7 +1897,7 @@ starlark_obj* starlark_string_fn_elems(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->elems(ctx);
 }
 
@@ -1923,7 +1906,7 @@ starlark_obj* starlark_string_fn_elem_ords(starlark_obj* this_obj, const starlar
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->elem_ords(ctx);
 }
 
@@ -1932,7 +1915,7 @@ starlark_obj* starlark_string_fn_codepoints(starlark_obj* this_obj, const starla
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->codepoints(ctx);
 }
 
@@ -1941,7 +1924,7 @@ starlark_obj* starlark_string_fn_codepoint_ords(starlark_obj* this_obj, const st
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->codepoint_ords(ctx);
 }
 
@@ -1952,7 +1935,7 @@ starlark_obj* starlark_string_fn_endswith(starlark_obj* this_obj, const starlark
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   auto subs = string_or_tuple_as_vector_of_string(pos_args.front(), "endswith", 1, error_callback);
   if (!subs.ok()) {
     return nullptr;
@@ -1971,7 +1954,7 @@ starlark_obj* starlark_string_fn_find(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   auto sub = string_as_string(pos_args.front(), "find", 1, error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -1985,7 +1968,7 @@ starlark_obj* starlark_string_fn_find(starlark_obj* this_obj, const starlark_obj
 
 starlark_obj* starlark_string_fn_format(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->format(pos_args, named_args, ctx, error_callback);
 }
 
@@ -1996,7 +1979,7 @@ starlark_obj* starlark_string_fn_index(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   auto sub = string_as_string(pos_args.front(), "index", 1, error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -2018,7 +2001,7 @@ starlark_obj* starlark_string_fn_isalnum(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->isalnum() ? ctx.true_value() : ctx.false_value();
 }
 
@@ -2027,7 +2010,7 @@ starlark_obj* starlark_string_fn_isalpha(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->isalpha() ? ctx.true_value() : ctx.false_value();
 }
 
@@ -2036,7 +2019,7 @@ starlark_obj* starlark_string_fn_isdigit(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->isdigit() ? ctx.true_value() : ctx.false_value();
 }
 
@@ -2045,7 +2028,7 @@ starlark_obj* starlark_string_fn_islower(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->islower() ? ctx.true_value() : ctx.false_value();
 }
 
@@ -2054,7 +2037,7 @@ starlark_obj* starlark_string_fn_isspace(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->isspace() ? ctx.true_value() : ctx.false_value();
 }
 
@@ -2063,7 +2046,7 @@ starlark_obj* starlark_string_fn_istitle(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->istitle() ? ctx.true_value() : ctx.false_value();
 }
 
@@ -2072,7 +2055,7 @@ starlark_obj* starlark_string_fn_isupper(starlark_obj* this_obj, const starlark_
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->isupper() ? ctx.true_value() : ctx.false_value();
 }
 
@@ -2081,7 +2064,7 @@ starlark_obj* starlark_string_fn_join(starlark_obj* this_obj, const starlark_obj
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
 
   auto it = pos_args.front()->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
@@ -2106,7 +2089,7 @@ starlark_obj* starlark_string_fn_lower(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->lower(ctx);
 }
 
@@ -2115,8 +2098,8 @@ starlark_obj* starlark_string_fn_lstrip(starlark_obj* this_obj, const starlark_o
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+  assert(is_string_kind(this_obj->kind()));
+  if (pos_args.empty() || is_none_kind(pos_args.front()->kind())) {
     return static_cast<starlark_string*>(this_obj)->lstrip(ctx);
   }
   auto cutset = string_as_string(pos_args.front(), "lstrip", 1, error_callback);
@@ -2131,7 +2114,7 @@ starlark_obj* starlark_string_fn_partition(starlark_obj* this_obj, const starlar
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
 
   auto separator = string_as_string(pos_args.front(), "partition", 1, error_callback);
   if (!separator.ok()) {
@@ -2186,7 +2169,7 @@ starlark_obj* starlark_string_fn_removeprefix(starlark_obj* this_obj, const star
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
 
   auto sub = string_as_string(pos_args.front(), "removeprefix", 1, error_callback);
   if (!sub.ok()) {
@@ -2200,7 +2183,7 @@ starlark_obj* starlark_string_fn_removesuffix(starlark_obj* this_obj, const star
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
 
   auto sub = string_as_string(pos_args.front(), "removesuffix", 1, error_callback);
   if (!sub.ok()) {
@@ -2216,7 +2199,7 @@ starlark_obj* starlark_string_fn_rfind(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   auto sub = string_as_string(pos_args.front(), "rfind", 1, error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -2235,7 +2218,7 @@ starlark_obj* starlark_string_fn_rindex(starlark_obj* this_obj, const starlark_o
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   auto sub = string_as_string(pos_args.front(), "rindex", 1, error_callback);
   if (!sub.ok()) {
     return nullptr;
@@ -2257,7 +2240,7 @@ starlark_obj* starlark_string_fn_rpartition(starlark_obj* this_obj, const starla
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
 
   auto separator = string_as_string(pos_args.front(), "rpartition", 1, error_callback);
   if (!separator.ok()) {
@@ -2306,7 +2289,7 @@ starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_o
     }
     maxsplit_value = *status_or_maxsplit;
   }
-  if (sep == nullptr || sep->type() == starlark_types::none_t) {
+  if (sep == nullptr || is_none_kind(sep->kind())) {
     return static_cast<starlark_string*>(this_obj)->rsplit(maxsplit_value, ctx);
   }
   auto sep_value = string_as_string(sep, "rsplit", 1, error_callback);
@@ -2321,8 +2304,8 @@ starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_o
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+  assert(is_string_kind(this_obj->kind()));
+  if (pos_args.empty() || is_none_kind(pos_args.front()->kind())) {
     return static_cast<starlark_string*>(this_obj)->rstrip(ctx);
   }
   auto cutset = string_as_string(pos_args.front(), "rstrip", 1, error_callback);
@@ -2372,7 +2355,7 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
     }
     maxsplit_value = *status_or_maxsplit;
   }
-  if (sep == nullptr || sep->type() == starlark_types::none_t) {
+  if (sep == nullptr || is_none_kind(sep->kind())) {
     return static_cast<starlark_string*>(this_obj)->split(maxsplit_value, ctx);
   }
   auto sep_value = string_as_string(sep, "split", 1, error_callback);
@@ -2384,7 +2367,7 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
 
 starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   starlark_obj* keepends = nullptr;
   for (auto& [key, value] : named_args) {
     if (key->as_string() == "keepends") {
@@ -2408,7 +2391,7 @@ starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starla
   bool keepends_value = false;
   if (keepends != nullptr) {
     // Python does not have the restriction that this need to be a bool.
-    if (keepends->type() != starlark_types::bool_t) {
+    if (!is_bool_kind(keepends->kind())) {
       error_callback.add_error(error_v2_argument_must_be_type("splitlines", 1, starlark_types::bool_t, keepends->type()));
       return nullptr;
     }
@@ -2424,7 +2407,7 @@ starlark_obj* starlark_string_fn_startswith(starlark_obj* this_obj, const starla
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   auto subs = string_or_tuple_as_vector_of_string(pos_args.front(), "startswith", 1, error_callback);
   if (!subs.ok()) {
     return nullptr;
@@ -2441,8 +2424,8 @@ starlark_obj* starlark_string_fn_strip(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
-  if (pos_args.empty() || pos_args.front()->type() == starlark_types::none_t) {
+  assert(is_string_kind(this_obj->kind()));
+  if (pos_args.empty() || is_none_kind(pos_args.front()->kind())) {
     return static_cast<starlark_string*>(this_obj)->strip(ctx);
   }
   auto cutset = string_as_string(pos_args.front(), "strip", 1, error_callback);
@@ -2457,7 +2440,7 @@ starlark_obj* starlark_string_fn_title(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->title(ctx);
 }
 
@@ -2466,7 +2449,7 @@ starlark_obj* starlark_string_fn_upper(starlark_obj* this_obj, const starlark_ob
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::string_t);
+  assert(is_string_kind(this_obj->kind()));
   return static_cast<starlark_string*>(this_obj)->upper(ctx);
 }
 

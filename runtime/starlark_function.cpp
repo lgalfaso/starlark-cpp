@@ -97,11 +97,8 @@ const char starlark_built_in_functions::type_f[] = "type";
 const char starlark_built_in_functions::zip_f[] = "zip";
 
 starlark_built_in_function::starlark_built_in_function(starlark_obj* this_obj, builtin_entrypoints entrypoints, std::string_view fn_name) :
-  this_obj(this_obj), entrypoints(entrypoints), fn_name(fn_name) {}
+  starlark_obj(object_kind::kBuiltinFunction), this_obj(this_obj), entrypoints(entrypoints), fn_name(fn_name) {}
 
-std::string_view starlark_built_in_function::type() const {
-  return starlark_types::builtin_function_or_method_t;
-}
 
 bool starlark_built_in_function::inner_repr(printer& print, printer_action action) const {
   if (this_obj != nullptr) {
@@ -117,7 +114,7 @@ bool starlark_built_in_function::truthy() const {
 }
 
 bool starlark_built_in_function::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (other->type() != starlark_types::builtin_function_or_method_t) {
+  if (!is_builtin_function_kind(other->kind())) {
     return false;
   }
   const starlark_built_in_function* fother = static_cast<const starlark_built_in_function*>(other);
@@ -140,7 +137,7 @@ bool starlark_built_in_function::inner_equals(equals_comparator& comp, const sta
 }
 
 void starlark_built_in_function::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
@@ -189,11 +186,9 @@ starlark_obj* starlark_built_in_function::call_pos(std::span<starlark_obj*> pos_
   return entrypoints.call(this_obj, pos_args_vec, named_args, ctx, error_callback);
 }
 
-starlark_function::starlark_function(std::string_view fn_name, std::string_view module_name) : fn_name(fn_name), module_name(module_name) {}
+starlark_function::starlark_function(std::string_view fn_name, std::string_view module_name, object_kind kind) :
+    starlark_obj(kind), fn_name(fn_name), module_name(module_name) {}
 
-std::string_view starlark_function::type() const {
-  return starlark_types::function_t;
-}
 
 bool starlark_function::inner_repr(printer& print, printer_action action) const {
   print.append(std::format("<function {} from {}>", fn_name, module_name));
@@ -357,7 +352,7 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
   if (pos_args.size() == 2 && named_args.empty()) {
     return builtin_pos::enumerate_pos2(this_obj, iterable, start, ctx, error_callback);
   }
-  if (start != nullptr && start->type() != starlark_types::int_t) {
+  if (start != nullptr && !is_int_kind(start->kind())) {
     error_callback.add_error(error_v2_argument_interpreted_as_integer("start", start->type()));
     return nullptr;
   }
@@ -418,7 +413,7 @@ starlark_obj* starlark_fn_getattr(starlark_obj* this_obj, const starlark_obj::po
   if (pos_args.size() == 3 && named_args.empty()) {
     return builtin_pos::getattr_pos3(this_obj, element, name, pos_args[2], ctx, error_callback);
   }
-  if (name->type() != starlark_types::string_t) {
+  if (!is_string_kind(name->kind())) {
     error_callback.add_error(error_v2_attribute_string(name->type()));
     return nullptr;
   }
@@ -453,7 +448,7 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
   for (auto& [key, value] : named_args) {
     if (key->as_string() == "base") {
       assert(value != nullptr);
-      if (value->type() != starlark_types::int_t) {
+      if (!is_int_kind(value->kind())) {
         error_callback.add_error(error_v2_argument_interpreted_as_integer("base", value->type()));
         return nullptr;
       }
@@ -490,63 +485,66 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
   if (pos_args.size() == 2 && named_args.empty()) {
     return builtin_pos::int_pos2(this_obj, value, pos_args[1], ctx, error_callback);
   }
-  if (value->type() != starlark_types::string_t && base_param != nullptr) {
+  if (!is_string_kind(value->kind()) && base_param != nullptr) {
     error_callback.add_error(error_v2_non_string_with_base());
     return nullptr;
   }
-  if (value->type() == starlark_types::int_t) {
-    return value;
-  } else if (value->type() == starlark_types::float_t) {
-    return create_integer_from_float(value->as_float(), ctx, error_callback);
-  } else if (value->type() == starlark_types::bool_t) {
-    return value->truthy() ? ctx.one() : ctx.zero();
-  } else if (value->type() == starlark_types::string_t) {
-    int base = 10;
-    if (base_param != nullptr) {
-      switch (base_param->numeric_type()) {
-        case starlark_numeric_type::kInt64: {
-          auto ibase = base_param->as_int64();
-          if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
-            error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
-            return nullptr;
+  switch (value->kind()) {
+    case object_kind::kInt:
+    case object_kind::kBigInt:
+      return value;
+    case object_kind::kFloat:
+      return create_integer_from_float(value->as_float(), ctx, error_callback);
+    case object_kind::kBool:
+      return value->truthy() ? ctx.one() : ctx.zero();
+    case object_kind::kString: {
+      int base = 10;
+      if (base_param != nullptr) {
+        switch (base_param->kind()) {
+          case object_kind::kInt: {
+            auto ibase = base_param->as_int64();
+            if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
+              error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
+              return nullptr;
+            }
+            base = ibase;
+            break;
           }
-          base = ibase;
-          break;
+          case object_kind::kBigInt: {
+            const auto& bbase = base_param->as_bigint();
+            if (bbase.sign() || bbase.length() > 1) {
+              error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
+              return nullptr;
+            }
+            auto ibase = bbase.at(0);
+            if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
+              error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
+              return nullptr;
+            }
+            base = ibase;
+            break;
+          }
+          default:
+            error_callback.add_error(error_v2_interpreted_as_integer(base_param->type()));
+            return nullptr;
         }
-        case starlark_numeric_type::kBigInt: {
-          const auto& bbase = base_param->as_bigint();
-          if (bbase.sign() || bbase.length() > 1) {
-            error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
-            return nullptr;
-          }
-          auto ibase = bbase.at(0);
-          if (ibase != 0 && !(2 <= ibase && ibase <= 36)) {
-            error_callback.add_error(error_v2_int_base(starlark_built_in_functions::int_f));
-            return nullptr;
-          }
-          base = ibase;
-          break;
-        }
-        default:
-          error_callback.add_error(error_v2_interpreted_as_integer(base_param->type()));
-          return nullptr;
       }
+      auto svalue = value->as_string();
+      if (svalue.empty()) {
+        error_callback.add_error(error_v2_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
+        return nullptr;
+      }
+      const char* end;
+      auto result = parse_number(svalue, &end, base);
+      if (end != (&svalue.back() + 1)) {
+        error_callback.add_error(error_v2_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
+        return nullptr;
+      }
+      return create_integer(std::move(result), ctx);
     }
-    auto svalue = value->as_string();
-    if (svalue.empty()) {
-      error_callback.add_error(error_v2_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
+    default:
+      error_callback.add_error(error_v2_argument_string_int_bool_or_real(starlark_built_in_functions::int_f, value->type()));
       return nullptr;
-    }
-    const char* end;
-    auto result = parse_number(svalue, &end, base);
-    if (end != (&svalue.back() + 1)) {
-      error_callback.add_error(error_v2_invalid_literal_with_base(starlark_built_in_functions::int_f, base, svalue));
-      return nullptr;
-    }
-    return create_integer(std::move(result), ctx);
-  } else {
-    error_callback.add_error(error_v2_argument_string_int_bool_or_real(starlark_built_in_functions::int_f, value->type()));
-    return nullptr;
   }
 }
 
@@ -575,7 +573,7 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
   for (auto& [key, value] : named_args) {
     if (key->as_string() == "key") {
       assert(value != nullptr);
-      if (value->type() != starlark_types::none_t) {
+      if (!is_none_kind(value->kind())) {
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
@@ -671,7 +669,7 @@ starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_ar
   for (auto& [key, value] : named_args) {
     if (key->as_string() == "key") {
       assert(value != nullptr);
-      if (value->type() != starlark_types::none_t) {
+      if (!is_none_kind(value->kind())) {
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
@@ -779,7 +777,7 @@ starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_
   for (auto& [key, value] : named_args) {
     if (key->as_string() == "sep") {
       assert(value != nullptr);
-      if (value->type() != starlark_types::string_t) {
+      if (!is_string_kind(value->kind())) {
         error_callback.add_error(error_v2_argument_interpreted_as_string("sep", value->type()));
         return nullptr;
       }
@@ -857,11 +855,11 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
   for (auto& [key, value] : named_args) {
     assert(value != nullptr);
     if (key->as_string() == "key") {
-      if (value->type() != starlark_types::none_t) {
+      if (!is_none_kind(value->kind())) {
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else if (key->as_string() == "reverse") {
-      if (value->type() != starlark_types::bool_t) {
+      if (!is_bool_kind(value->kind())) {
         error_callback.add_error(error_v2_named_argument_must_be_type(starlark_built_in_functions::sorted_f, "reverse", starlark_types::bool_t, value->type()));
         return nullptr;
       }

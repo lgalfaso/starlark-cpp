@@ -71,11 +71,8 @@ const std::vector<std::string>& starlark_dictionary::attributes() {
   return *result;
 }
 
-starlark_dictionary::starlark_dictionary() : iterators_count(0) {}
+starlark_dictionary::starlark_dictionary() : starlark_obj(object_kind::kDict), iterators_count(0) {}
 
-std::string_view starlark_dictionary::type() const {
-  return starlark_types::dict_t;
-}
 
 const std::vector<std::string>& starlark_dictionary::dir() const {
   return attributes();
@@ -316,7 +313,7 @@ status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::n
   }
   if (iterable != nullptr) {
     // This is a special case. This should be extended to understand any mapping, but at the moment only `dictionary` implements it.
-    if (iterable->type() == starlark_types::dict_t) {
+    if (is_dict_kind(iterable->kind())) {
       starlark_dictionary* d_iterable = static_cast<starlark_dictionary*>(iterable);
       for (auto& kv : d_iterable->values_) {
         values_.insert(kv.first, kv.second);
@@ -374,7 +371,7 @@ starlark_obj* starlark_dictionary::values(context& ctx) const {
 }
 
 bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  if (type() != other->type()) {
+  if (!same_starlark_type(kind(), other->kind())) {
     return false;
   }
   const starlark_dictionary* n_other = reinterpret_cast<const starlark_dictionary*>(other);
@@ -395,7 +392,7 @@ bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_o
 }
 
 void starlark_dictionary::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);
@@ -459,7 +456,7 @@ starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlar
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   if (!static_cast<starlark_dictionary*>(this_obj)->clear(error_callback).ok()) {
     return nullptr;
   }
@@ -469,7 +466,7 @@ starlark_obj* starlark_dictionary_fn_clear(starlark_obj* this_obj, const starlar
 starlark_obj* starlark_dictionary_fn_get(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // Bazel allows the second parameter to be named with name `default`. This is not allowed in Python.
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   if (!no_named_args(named_args, error_callback, "dict.get").ok() ||
       !min_args(pos_args, error_callback, "get", 1).ok() ||
       !max_args(pos_args, error_callback, "get", 2).ok()) {
@@ -484,7 +481,7 @@ starlark_obj* starlark_dictionary_fn_items(starlark_obj* this_obj, const starlar
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   return static_cast<starlark_dictionary*>(this_obj)->items(ctx);
 }
 
@@ -493,14 +490,14 @@ starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   return static_cast<starlark_dictionary*>(this_obj)->keys(ctx);
 }
 
 starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   // Bazel allows the second paramter to be a named argument with name `unbound`. This is not allowed in Python. In the spec and Python the name of the argument is called `default`.
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   if (!no_named_args(named_args, error_callback, "dict.pop").ok() ||
       !min_args(pos_args, error_callback, "pop", 1).ok() ||
       !max_args(pos_args, error_callback, "pop", 2).ok()) {
@@ -515,7 +512,7 @@ starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starl
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   return static_cast<starlark_dictionary*>(this_obj)->popitem(ctx, error_callback);
 }
 
@@ -527,7 +524,7 @@ starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const st
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   auto* default_value = pos_args.size() > 1 ? pos_args[1] : ctx.none_value();
   return static_cast<starlark_dictionary*>(this_obj)->setdefault(pos_args.front(), default_value, error_callback);
 }
@@ -537,7 +534,7 @@ starlark_obj* starlark_dictionary_fn_update(starlark_obj* this_obj, const starla
     return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   starlark_obj* pos_arg = pos_args.empty() ? nullptr : pos_args.front();
   if (!static_cast<starlark_dictionary*>(this_obj)->update(pos_arg, named_args, ctx, error_callback).ok()) {
     return nullptr;
@@ -550,7 +547,7 @@ starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starla
      return nullptr;
   }
   assert(this_obj != nullptr);
-  assert(this_obj->type() == starlark_types::dict_t);
+  assert(is_dict_kind(this_obj->kind()));
   return static_cast<starlark_dictionary*>(this_obj)->values(ctx);
 }
 

@@ -175,7 +175,7 @@ status_or<runtime_options> parse_runtime_options(starlark_obj** error,
       return status_or<runtime_options>(status_code::kRuntimeError);
     }
     if (key->as_string() == "print") {
-      if (value->type() != starlark_types::string_t) {
+      if (!is_string_kind(value->kind())) {
         error_callback.add_error(std::format("invalid '{}' parameter ({}).", key->as_string(), value->type()));
         return status_or<runtime_options>(status_code::kRuntimeError);
       }
@@ -185,7 +185,7 @@ status_or<runtime_options> parse_runtime_options(starlark_obj** error,
       }
       *print = value;
     } else if (key->as_string() == "error_message") {
-      if (value->type() != starlark_types::string_t) {
+      if (!is_string_kind(value->kind())) {
         error_callback.add_error(std::format("invalid '{}' parameter ({}).", key->as_string(), value->type()));
         return status_or<runtime_options>(status_code::kRuntimeError);
       }

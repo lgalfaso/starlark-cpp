@@ -11,9 +11,8 @@
 namespace starlark {
 namespace runtime {
 
-std::string_view starlark_none::type() const {
-  return starlark_types::none_t;
-}
+starlark_none::starlark_none() : starlark_obj(object_kind::kNone) {}
+
 
 bool starlark_none::primitive() const {
   return true;
@@ -34,7 +33,7 @@ bool starlark_none::inner_equals(equals_comparator& comp, const starlark_obj* ot
 }
 
 void starlark_none::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  if (extended && type() == other->type() && equals(*other)) {
+  if (extended && same_starlark_type(kind(), other->kind()) && equals(*other)) {
     return;
   }
   starlark_obj::inner_cmp(comp, other, op, extended, error_callback);

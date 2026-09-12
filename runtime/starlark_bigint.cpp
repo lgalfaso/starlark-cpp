@@ -22,13 +22,10 @@ using ::starlark::error_messages::error_v2_overflow_too_many_digits;
 namespace starlark {
 namespace runtime {
 
-starlark_bigint::starlark_bigint(int64_t value) : value(from_int64(value)) {}
+starlark_bigint::starlark_bigint(int64_t value) : starlark_obj(object_kind::kBigInt), value(from_int64(value)) {}
 
-starlark_bigint::starlark_bigint(const number& value) : value(value) {}
+starlark_bigint::starlark_bigint(const number& value) : starlark_obj(object_kind::kBigInt), value(value) {}
 
-std::string_view starlark_bigint::type() const {
-  return starlark_types::int_t;
-}
 
 bool starlark_bigint::primitive() const {
   return true;
@@ -41,12 +38,12 @@ bool starlark_bigint::inner_repr(printer& print, printer_action action) const {
 }
 
 bool starlark_bigint::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
-  switch (other->numeric_type()) {
-    case starlark_numeric_type::kFloat:
+  switch (other->kind()) {
+    case object_kind::kFloat:
       return equals_fb(other->as_float(), as_bigint());
-    case starlark_numeric_type::kInt64:
+    case object_kind::kInt:
       return equals_ib(other->as_int64(), as_bigint());
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       return as_bigint() == other->as_bigint();
     default:
       return false;
@@ -54,8 +51,8 @@ bool starlark_bigint::inner_equals(equals_comparator& comp, const starlark_obj* 
 }
 
 void starlark_bigint::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
-  switch (other->numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (other->kind()) {
+    case object_kind::kFloat: {
       if (std::isnan(other->as_float())) {
         comp.add_task(order_comparator::pending_task_type::kLessThan);
         break;
@@ -66,14 +63,14 @@ void starlark_bigint::inner_cmp(order_comparator& comp, const starlark_obj* othe
       }
       break;
     }
-    case starlark_numeric_type::kInt64: {
+    case object_kind::kInt: {
       auto r = cmp_ib(other->as_int64(), as_bigint());
       if (r != 0) {
         comp.add_task(r > 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan);
       }
       break;
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       auto r = as_bigint().cmp(other->as_bigint());
       if (r != 0) {
         comp.add_task(r < 0 ? order_comparator::pending_task_type::kLessThan : order_comparator::pending_task_type::kGreaterThan);
@@ -105,8 +102,8 @@ starlark_obj* starlark_bigint::unary_tilde(context& ctx, error_fn& error_callbac
 namespace {
 
 starlark_obj* plus_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (other.kind()) {
+    case object_kind::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -114,9 +111,9 @@ starlark_obj* plus_op(const number& value, const starlark_bigint& this_obj, cons
       }
       return create_float(fvalue + other.as_float(), ctx);
     }
-    case starlark_numeric_type::kInt64:
+    case object_kind::kInt:
       return create_integer(value + from_int64(other.as_int64()), ctx);
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       return create_integer(value + other.as_bigint(), ctx);
     default:
       error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -125,8 +122,8 @@ starlark_obj* plus_op(const number& value, const starlark_bigint& this_obj, cons
 }
 
 starlark_obj* minus_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (other.kind()) {
+    case object_kind::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -134,9 +131,9 @@ starlark_obj* minus_op(const number& value, const starlark_bigint& this_obj, con
       }
       return create_float(fvalue - other.as_float(), ctx);
     }
-    case starlark_numeric_type::kInt64:
+    case object_kind::kInt:
       return create_integer(value - from_int64(other.as_int64()), ctx);
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       return create_integer(value - other.as_bigint(), ctx);
     default:
       error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -145,11 +142,11 @@ starlark_obj* minus_op(const number& value, const starlark_bigint& this_obj, con
 }
 
 starlark_obj* star_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  if (other.type() == starlark_types::string_t || other.type() == starlark_types::bytes_t || other.type() == starlark_types::list_t || other.type() == starlark_types::tuple_t) {
+  if (is_string_kind(other.kind()) || is_bytes_kind(other.kind()) || is_list_kind(other.kind()) || is_tuple_kind(other.kind())) {
     return other.binary_star(this_obj, ctx, error_callback);
   }
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (other.kind()) {
+    case object_kind::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -157,9 +154,9 @@ starlark_obj* star_op(const number& value, const starlark_bigint& this_obj, cons
       }
       return create_float(fvalue * other.as_float(), ctx);
     }
-    case starlark_numeric_type::kInt64:
+    case object_kind::kInt:
       return create_integer(value * from_int64(other.as_int64()), ctx);
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       return create_integer(value * other.as_bigint(), ctx);
     default:
       error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -168,8 +165,8 @@ starlark_obj* star_op(const number& value, const starlark_bigint& this_obj, cons
 }
 
 starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (other.kind()) {
+    case object_kind::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -182,7 +179,7 @@ starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, con
       }
       return create_float(fvalue / fother, ctx);
     }
-    case starlark_numeric_type::kInt64: {
+    case object_kind::kInt: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -195,7 +192,7 @@ starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, con
       }
       return create_float(fvalue / iother, ctx);
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -219,8 +216,8 @@ starlark_obj* slash_op(const number& value, const starlark_bigint& this_obj, con
 }
 
 starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (other.kind()) {
+    case object_kind::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -233,7 +230,7 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
       }
       return create_float(std::floor(fvalue / fother), ctx);
     }
-    case starlark_numeric_type::kInt64: {
+    case object_kind::kInt: {
       auto iother = other.as_int64();
       if (iother == 0) {
         error_callback.add_error(error_v2_division_by_zero());
@@ -241,7 +238,7 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
       }
       return create_integer(starlark_div(value, from_int64(iother)), ctx);
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       const auto& bother = other.as_bigint();
       if (bother == number::zero()) {
         error_callback.add_error(error_v2_division_by_zero());
@@ -256,8 +253,8 @@ starlark_obj* slash_slash_op(const number& value, const starlark_bigint& this_ob
 }
 
 starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kFloat: {
+  switch (other.kind()) {
+    case object_kind::kFloat: {
       auto fvalue = to_double(value);
       if (std::isinf(fvalue)) {
         error_callback.add_error(error_v2_overflow(this_obj.type(), starlark_types::float_t));
@@ -270,7 +267,7 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
       }
       return create_float(starlark_fmod(fvalue, fother), ctx);
     }
-    case starlark_numeric_type::kInt64: {
+    case object_kind::kInt: {
       auto iother = other.as_int64();
       if (iother == 0) {
         error_callback.add_error(error_v2_division_by_zero());
@@ -278,7 +275,7 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
       }
       return create_integer(starlark_mod(value, from_int64(iother)), ctx);
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       const auto& bother = other.as_bigint();
       if (bother == number::zero()) {
         error_callback.add_error(error_v2_division_by_zero());
@@ -293,10 +290,10 @@ starlark_obj* percent_op(const number& value, const starlark_bigint& this_obj, c
 }
 
 starlark_obj* and_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (other.kind()) {
+    case object_kind::kInt:
       return create_integer(value & from_int64(other.as_int64()), ctx);
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       return create_integer(value & other.as_bigint(), ctx);
     default:
       error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -305,10 +302,10 @@ starlark_obj* and_op(const number& value, const starlark_bigint& this_obj, const
 }
 
 starlark_obj* pipe_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (other.kind()) {
+    case object_kind::kInt:
       return create_integer(value | from_int64(other.as_int64()), ctx);
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       return create_integer(value | other.as_bigint(), ctx);
     default:
       error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -317,10 +314,10 @@ starlark_obj* pipe_op(const number& value, const starlark_bigint& this_obj, cons
 }
 
 starlark_obj* hat_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64:
+  switch (other.kind()) {
+    case object_kind::kInt:
       return create_integer(value ^ from_int64(other.as_int64()), ctx);
-    case starlark_numeric_type::kBigInt:
+    case object_kind::kBigInt:
       return create_integer(value ^ other.as_bigint(), ctx);
     default:
       error_callback.add_error(error_v2_bad_operand_binary(op, this_obj.type(), other.type()));
@@ -329,8 +326,8 @@ starlark_obj* hat_op(const number& value, const starlark_bigint& this_obj, const
 }
 
 starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
@@ -346,7 +343,7 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
       }
       return create_integer(value << shift, ctx);
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
@@ -374,8 +371,8 @@ starlark_obj* less_less_op(const number& value, const starlark_bigint& this_obj,
 }
 
 starlark_obj* greater_greater_op(const number& value, const starlark_bigint& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
-  switch (other.numeric_type()) {
-    case starlark_numeric_type::kInt64: {
+  switch (other.kind()) {
+    case object_kind::kInt: {
       if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
@@ -389,7 +386,7 @@ starlark_obj* greater_greater_op(const number& value, const starlark_bigint& thi
       }
       return create_integer(value >> shift, ctx);
     }
-    case starlark_numeric_type::kBigInt: {
+    case object_kind::kBigInt: {
       if (value == number::zero()) {
         return const_cast<starlark_bigint*>(&this_obj);
       }
@@ -529,9 +526,6 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bigint::inner_hash() 
   return result;
 }
 
-starlark_numeric_type starlark_bigint::numeric_type() const {
-  return starlark_numeric_type::kBigInt;
-}
 
 const number& starlark_bigint::as_bigint() const {
   return value;

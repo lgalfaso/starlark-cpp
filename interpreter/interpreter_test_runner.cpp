@@ -62,7 +62,7 @@ starlark_obj* interpreter_assert_fail_fn(starlark_obj* this_obj, const starlark_
     error_callback.add_error("invalid 'source_code' parameter (nullptr).");
     return nullptr;
   }
-  if (source_code->type() != starlark_types::string_t) {
+  if (!is_string_kind(source_code->kind())) {
     error_callback.add_error(std::format("invalid 'source_code' parameter ({}).", source_code->type()));
     return nullptr;
   }
@@ -90,7 +90,7 @@ starlark_obj* interpreter_assert_succeed_fn(starlark_obj* this_obj, const starla
     error_callback.add_error("invalid 'source_code' parameter (nullptr).");
     return nullptr;
   }
-  if (source_code->type() != starlark_types::string_t) {
+  if (!is_string_kind(source_code->kind())) {
     error_callback.add_error(std::format("invalid 'source_code' parameter ({}).", source_code->type()));
     return nullptr;
   }
