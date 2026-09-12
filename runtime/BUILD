@@ -61,8 +61,8 @@ cc_library(
 cc_library(
     name = "starlark_testing",
     testonly = True,
-    hdrs = ["starlark_testing.hpp"],
     srcs = ["starlark_testing.cpp"],
+    hdrs = ["starlark_testing.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         ":error_fn",
@@ -773,7 +773,6 @@ cc_library(
         ":starlark_function",
     ],
 )
-
 
 cc_test(
     name = "float_hash_test",

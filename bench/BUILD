@@ -9,7 +9,7 @@ cc_binary(
     data = glob(["*.star"]),
     deps = [
         "//grammar:options",
-        "//interpreter:interpreter",
+        "//interpreter",
         "//io:read_file",
         "//vm:module_loader",
         "@google_benchmark//:benchmark",

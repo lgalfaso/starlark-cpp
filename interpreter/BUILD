@@ -7,10 +7,10 @@ cc_library(
     name = "runner_state",
     hdrs = ["runner_state.hpp"],
     deps = [
-        "//vm:frame",
-        "//vm:module_loader",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_object",
+        "//vm:frame",
+        "//vm:module_loader",
     ],
 )
 
@@ -19,7 +19,6 @@ cc_library(
     srcs = ["function.cpp"],
     hdrs = ["function.hpp"],
     deps = [
-        "//vm:frame",
         ":runner_state",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_dictionary",
@@ -27,6 +26,7 @@ cc_library(
         "//runtime:starlark_object",
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
+        "//vm:frame",
     ],
 )
 
@@ -55,8 +55,8 @@ cc_library(
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
         "//runtime:starlark_types",
-        "//vm:module_loader",
         "//vm:frame",
+        "//vm:module_loader",
         "//vm:program_limits",
         "@bazel_tools//tools/cpp/runfiles",
     ],
@@ -64,9 +64,9 @@ cc_library(
 
 cc_library(
     name = "interpreter_test_runner",
+    testonly = True,
     srcs = ["interpreter_test_runner.cpp"],
     hdrs = ["interpreter_test_runner.hpp"],
-    testonly = True,
     visibility = ["//visibility:public"],
     deps = [
         ":interpreter",
@@ -81,8 +81,8 @@ cc_library(
 
 cc_binary(
     name = "interpreter_test",
-    srcs = ["interpreter_test.cpp"],
     testonly = True,
+    srcs = ["interpreter_test.cpp"],
     visibility = ["//visibility:public"],
     deps = [
         ":interpreter_test_runner",

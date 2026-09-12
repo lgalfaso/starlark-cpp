@@ -28,9 +28,9 @@ cc_library(
 
 cc_library(
     name = "test_case",
+    testonly = True,
     srcs = ["test_case.cpp"],
     hdrs = ["test_case.hpp"],
-    testonly = True,
     visibility = ["//visibility:public"],
     deps = [
         ":module_loader",
@@ -39,9 +39,9 @@ cc_library(
 
 cc_library(
     name = "test_assertions",
+    testonly = True,
     srcs = ["test_assertions.cpp"],
     hdrs = ["test_assertions.hpp"],
-    testonly = True,
     visibility = ["//visibility:public"],
     deps = [
         ":test_case",

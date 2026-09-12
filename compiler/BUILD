@@ -21,9 +21,8 @@ cc_library(
 
 cc_library(
     name = "compiler_bytecode_test_base",
-    srcs = ["compiler_bytecode_test.cpp"],
-    alwayslink = 1,
     testonly = True,
+    srcs = ["compiler_bytecode_test.cpp"],
     deps = [
         ":compiler",
         "//io:read_file",
@@ -33,6 +32,7 @@ cc_library(
         "@protobuf",
         "@protobuf-matchers//protobuf-matchers",
     ],
+    alwayslink = 1,
 )
 
 cc_binary(
@@ -52,7 +52,6 @@ cc_binary(
     ),
     program_test(
         name = "compiler_bytecode_test_" + f.replace("/", "_"),
-        program = ":compiler_bytecode_test",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -62,6 +61,7 @@ cc_binary(
             f,
             ":compiler_bytecode_test_encoder_" + f.replace("/", "_"),
         ],
+        program = ":compiler_bytecode_test",
     ),
 ] for f in glob(["bytecode_generator_tests/*.star"])]
 

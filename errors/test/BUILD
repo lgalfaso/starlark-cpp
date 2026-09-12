@@ -5,11 +5,11 @@ load("//bzl:program_test.bzl", "program_test")
 
 cc_binary(
     name = "errors_interpreter_test",
-    srcs = ["errors_interpreter_test.cpp"],
     testonly = True,
+    srcs = ["errors_interpreter_test.cpp"],
     deps = [
         "//grammar:parsing_options",
-        "//interpreter:interpreter",
+        "//interpreter",
         "//interpreter:interpreter_test_runner",
         "//io:read_file",
         "//logging",
@@ -24,7 +24,6 @@ cc_binary(
 [
     program_test(
         name = "errors_test_" + f.replace("/", "_"),
-        program = ":errors_interpreter_test",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -34,6 +33,7 @@ cc_binary(
             f,
             f.replace(".star", ".error"),
         ],
+        program = ":errors_interpreter_test",
     )
     for f in glob(["*.star"])
 ]

@@ -27,12 +27,12 @@ cc_test(
     name = "number_test",
     size = "large",
     srcs = ["number_test.cpp"],
+    shard_count = 48,
     deps = [
         ":number",
         ":number_stream_for_test",
         "@googletest//:gtest_main",
     ],
-    shard_count = 48,
 )
 
 cc_test(
@@ -102,10 +102,10 @@ cc_binary(
 cc_fuzz_test(
     name = "number_div_fuzz_test",
     srcs = ["number_div_fuzz_test.cpp"],
+    dicts = [
+        "dictionaries/numbers.dict",
+    ],
     deps = [
         ":number",
-    ],
-    dicts = [
-      "dictionaries/numbers.dict",
     ],
 )

@@ -17,9 +17,8 @@ cc_library(
 
 cc_library(
     name = "ast_listener_test_base",
-    srcs = ["ast_listener_test.cpp"],
-    alwayslink = 1,
     testonly = True,
+    srcs = ["ast_listener_test.cpp"],
     deps = [
         ":ast_listener",
         ":parser",
@@ -30,6 +29,7 @@ cc_library(
         "@googletest//:gtest",
         "@protobuf",
     ],
+    alwayslink = 1,
 )
 
 cc_binary(
@@ -44,7 +44,6 @@ cc_binary(
 [
     program_test(
         name = "ast_listener_test_" + f.replace("/", "_"),
-        program = ":ast_listener_test",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -54,6 +53,7 @@ cc_binary(
             f,
             f.replace(".star", ".txt"),
         ],
+        program = ":ast_listener_test",
     )
     for f in glob(["ast_listener_tests/*.star"])
 ]
@@ -150,9 +150,8 @@ cc_binary(
 
 cc_library(
     name = "parser_test_check_base",
-    srcs = ["parser_test_check.cpp"],
-    alwayslink = 1,
     testonly = True,
+    srcs = ["parser_test_check.cpp"],
     deps = [
         ":parser",
         ":parsing_options",
@@ -163,6 +162,7 @@ cc_library(
         "@protobuf",
         "@protobuf-matchers//protobuf-matchers",
     ],
+    alwayslink = 1,
 )
 
 cc_binary(
@@ -182,7 +182,6 @@ cc_binary(
     ),
     program_test(
         name = "parser_test_" + f.replace("/", "_"),
-        program = ":parser_test_check",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -192,14 +191,14 @@ cc_binary(
             f,
             ":parser_test_encoder_" + f.replace("/", "_"),
         ],
+        program = ":parser_test_check",
     ),
 ] for f in glob(["parser_tests/*.star"])]
 
 cc_library(
     name = "parser_test_valid_base",
-    srcs = ["parser_test_valid.cpp"],
-    alwayslink = 1,
     testonly = True,
+    srcs = ["parser_test_valid.cpp"],
     deps = [
         ":parser",
         ":parsing_options",
@@ -208,6 +207,7 @@ cc_library(
         "@googletest//:gtest",
         "@protobuf",
     ],
+    alwayslink = 1,
 )
 
 cc_binary(
@@ -222,7 +222,6 @@ cc_binary(
 [
     program_test(
         name = "parser_test_" + f.replace("/", "_"),
-        program = ":parser_test_valid",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -230,15 +229,15 @@ cc_binary(
         data = [
             f,
         ],
+        program = ":parser_test_valid",
     )
     for f in glob(["parser_tests_valid/*.star"])
 ]
 
 cc_library(
     name = "parser_test_invalid_base",
-    srcs = ["parser_test_invalid.cpp"],
-    alwayslink = 1,
     testonly = True,
+    srcs = ["parser_test_invalid.cpp"],
     deps = [
         ":parser",
         ":parsing_options",
@@ -247,7 +246,9 @@ cc_library(
         "@googletest//:gtest",
         "@protobuf",
     ],
+    alwayslink = 1,
 )
+
 cc_binary(
     name = "parser_test_invalid",
     testonly = True,
@@ -260,7 +261,6 @@ cc_binary(
 [
     program_test(
         name = "parser_test_" + f.replace("/", "_"),
-        program = ":parser_test_invalid",
         size = "small",
         args = [
             "$(location " + f + ")",
@@ -268,6 +268,7 @@ cc_binary(
         data = [
             f,
         ],
+        program = ":parser_test_invalid",
     )
     for f in glob(["parser_tests_invalid/*.star"])
 ]

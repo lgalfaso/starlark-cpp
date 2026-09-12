@@ -8,4 +8,3 @@ cc_library(
     hdrs = ["status.hpp"],
     visibility = ["//visibility:public"],
 )
-

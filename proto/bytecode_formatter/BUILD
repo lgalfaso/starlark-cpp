@@ -15,9 +15,9 @@ cc_library(
 
 cc_library(
     name = "bytecode_golden_updater",
+    testonly = True,
     srcs = ["bytecode_golden_updater.cpp"],
     hdrs = ["bytecode_golden_updater.hpp"],
-    testonly = True,
     visibility = ["//visibility:public"],
     deps = [
         ":bytecode_txtpb_printer",
