@@ -14,7 +14,6 @@ namespace compiler {
 namespace analysis {
 
 std::map<int, int> analyze_static_self_calls(const starlark::bytecode::Program& program, int block_idx);
-void annotate_static_self_calls(starlark::bytecode::Program& program);
 
 }  // namespace analysis
 }  // namespace compiler

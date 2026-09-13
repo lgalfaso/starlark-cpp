@@ -1707,7 +1707,6 @@ Program* compiler::compile(std::string_view program_name, std::string_view starl
   eliminate_redundant_load_store(result);
   remove_nop_instructions(result);
   result->set_max_eval_stack_depth(starlark::compiler::analysis::analyze_max_stack_depth(*result));
-  starlark::compiler::analysis::annotate_static_self_calls(*result);
   return result;
 }
 

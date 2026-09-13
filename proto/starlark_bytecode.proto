@@ -255,25 +255,16 @@ message Call {
   bool has_variadic_named_argument = 4;
 }
 
-message CallPos0 {
-  int32 known_callee_block = 1;
-}
+message CallPos0 {}
 
-message CallPos1 {
-  int32 known_callee_block = 1;
-}
+message CallPos1 {}
 
-message CallPos2 {
-  int32 known_callee_block = 1;
-}
+message CallPos2 {}
 
-message CallPos3 {
-  int32 known_callee_block = 1;
-}
+message CallPos3 {}
 
 message CallPos {
   uint32 positional_count = 1;
-  int32 known_callee_block = 2;
 }
 
 message CallNamed {

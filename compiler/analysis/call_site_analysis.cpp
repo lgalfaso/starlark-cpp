@@ -96,28 +96,6 @@ std::optional<int> callee_entry_for_call(const Program& program,
   return std::nullopt;
 }
 
-void set_known_callee_block(OpCode& op, int32_t block_idx) {
-  switch (op.op_code_case()) {
-    case OpCode::kCallPos0:
-      op.mutable_call_pos0()->set_known_callee_block(block_idx);
-      return;
-    case OpCode::kCallPos1:
-      op.mutable_call_pos1()->set_known_callee_block(block_idx);
-      return;
-    case OpCode::kCallPos2:
-      op.mutable_call_pos2()->set_known_callee_block(block_idx);
-      return;
-    case OpCode::kCallPos3:
-      op.mutable_call_pos3()->set_known_callee_block(block_idx);
-      return;
-    case OpCode::kCallPos:
-      op.mutable_call_pos()->set_known_callee_block(block_idx);
-      return;
-    default:
-      return;
-  }
-}
-
 }  // namespace
 
 std::map<int, int> analyze_static_self_calls(const Program& program, int block_idx) {
@@ -138,16 +116,6 @@ std::map<int, int> analyze_static_self_calls(const Program& program, int block_i
     }
   }
   return known_calls;
-}
-
-void annotate_static_self_calls(Program& program) {
-  for (int block_idx = 1; block_idx < program.block().size(); ++block_idx) {
-    const auto known_calls = analyze_static_self_calls(program, block_idx);
-    auto* block = program.mutable_block(block_idx);
-    for (const auto& [call_ip, entry] : known_calls) {
-      set_known_callee_block(*block->mutable_op_code(call_ip), entry);
-    }
-  }
 }
 
 }  // namespace analysis
