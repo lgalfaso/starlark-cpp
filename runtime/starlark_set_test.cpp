@@ -31,10 +31,10 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
+using ::std::literals::string_view_literals::operator""sv;
 using ::testing::ElementsAre;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
-using ::std::literals::string_view_literals::operator""sv;
 
 namespace {
 

@@ -76,7 +76,6 @@ starlark_list::starlark_list(std::size_t reserve_size) : starlark_obj(object_kin
   values.reserve(reserve_size);
 }
 
-
 const std::vector<std::string>& starlark_list::dir() const {
   return attributes();
 }
@@ -646,5 +645,4 @@ starlark_obj* starlark_list_fn_remove(starlark_obj* this_obj, const starlark_obj
 
 }  // namespace runtime
 }  // namespace starlark
-
 

@@ -4,6 +4,7 @@
 #define UNICODE_EXTRACT_EXTRACT_HPP_
 
 #include <cstdint>
+
 #include <map>
 #include <set>
 #include <string>

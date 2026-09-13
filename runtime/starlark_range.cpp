@@ -22,7 +22,6 @@ namespace runtime {
 
 starlark_range::starlark_range(int64_t start, int64_t end, int64_t step) : starlark_obj(object_kind::kRange), state(calculate_state(start, end, step)) {}
 
-
 void starlark_range::unpack(int32_t number_of_elements, std::vector<starlark_obj*>& consumer, context& ctx, error_fn& error_callback) {
   if (number_of_elements != state.len) {
     if (state.len < number_of_elements) {
@@ -194,5 +193,4 @@ range_state calculate_state(int64_t start, int64_t end, int64_t step) {
 
 }  // namespace runtime
 }  // namespace starlark
-
 

@@ -9,11 +9,11 @@
 #include <utility>
 #include <vector>
 
-#include "vm/frame.hpp"
-#include "vm/module_metadata.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "runtime/starlark_object.hpp"
 #include "status_or/status.hpp"
+#include "vm/frame.hpp"
+#include "vm/module_metadata.hpp"
 
 #pragma GCC visibility push(default)
 

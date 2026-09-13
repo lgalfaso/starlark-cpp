@@ -29,6 +29,7 @@
 using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::bigint::parse_number;
+using ::starlark::runtime::builtin_entrypoints;
 using ::starlark::runtime::context;
 using ::starlark::runtime::create_float;
 using ::starlark::runtime::create_integer;
@@ -36,7 +37,6 @@ using ::starlark::runtime::error_fn;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
-using ::starlark::runtime::builtin_entrypoints;
 using ::starlark::runtime::starlark_built_in_function;
 using ::starlark::runtime::starlark_bytes;
 using ::starlark::runtime::starlark_dictionary;
@@ -52,10 +52,10 @@ using ::starlark::runtime::starlark_tuple;
 using ::starlark::runtime::starlark_types;
 using ::starlark::testing::error_handler;
 using ::starlark::testing::starlark_testing_function;
+using ::starlark::unicode::utf8_reader;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
-using ::starlark::unicode::utf8_reader;
 
 namespace {
 

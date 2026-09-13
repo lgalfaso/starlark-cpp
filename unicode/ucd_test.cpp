@@ -5,11 +5,13 @@
 #include <gmock/gmock.h>
 
 #include <cstdio>
+
 #include <map>
 #include <set>
 #include <string>
 #include <utility>
 
+#include "unicode/extract/extract.hpp"
 #include "unicode/ucd_code_points.hpp"
 #include "unicode/extract/extract.hpp"
 

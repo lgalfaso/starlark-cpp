@@ -13,7 +13,6 @@ namespace runtime {
 
 starlark_none::starlark_none() : starlark_obj(object_kind::kNone) {}
 
-
 bool starlark_none::primitive() const {
   return true;
 }
@@ -45,5 +44,4 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_none::inner_hash() co
 
 }  // namespace runtime
 }  // namespace starlark
-
 

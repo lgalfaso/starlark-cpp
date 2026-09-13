@@ -34,7 +34,6 @@ starlark_tuple::starlark_tuple(std::size_t reserve_size) : starlark_obj(object_k
   values.reserve(reserve_size);
 }
 
-
 namespace {
 
 starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
@@ -310,5 +309,4 @@ const starlark_obj* starlark_tuple::at(std::size_t pos) const {
 
 }  // namespace runtime
 }  // namespace starlark
-
 

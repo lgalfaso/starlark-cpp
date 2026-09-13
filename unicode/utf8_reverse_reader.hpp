@@ -4,6 +4,7 @@
 #define UNICODE_UTF8_REVERSE_READER_HPP_
 
 #include <cstdint>
+
 #include <string_view>
 
 #pragma GCC visibility push(default)

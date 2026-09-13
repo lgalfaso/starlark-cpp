@@ -12,19 +12,16 @@
 #include "runtime/starlark_types.hpp"
 #include "vm/test_case.hpp"
 
-
-using context = ::starlark::runtime::context;
-using starlark_obj = ::starlark::runtime::starlark_obj;
-using logger = ::starlark::logging::logger;
-using runtime_options = ::starlark::runtime::runtime_options;
-using error_fn = ::starlark::runtime::error_fn;
-using pos_args_t = ::starlark::runtime::starlark_obj::pos_args_t;
-using named_args_t = ::starlark::runtime::starlark_obj::named_args_t;
+using ::starlark::logging::logger;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
 using ::starlark::runtime::append_for_repr;
 using ::starlark::runtime::builtin_entrypoints;
+using ::starlark::runtime::context;
+using ::starlark::runtime::error_fn;
+using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_built_in_function;
+using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_types;
 using ::starlark::runtime::to_int64_with_clamping;
 using ::starlark::vm::module_loader;

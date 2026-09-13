@@ -1,7 +1,7 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
-#include "proto/starlark_ast.pb.h"
 #include "proto/base_proto_encoder.hpp"
+#include "proto/starlark_ast.pb.h"
 
 using ::starlark::ast::File;
 

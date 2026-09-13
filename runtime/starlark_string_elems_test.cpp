@@ -338,7 +338,6 @@ TEST(StarlarkStringElems, Equals) {
   EXPECT_FALSE(starlark_string("a"sv).codepoint_ords(ctx)->equals(*starlark_string("b"sv).codepoint_ords(ctx)));
   EXPECT_FALSE(starlark_string("a"sv).codepoint_ords(ctx)->equals(*ctx.true_value()));
 
-
   EXPECT_FALSE(starlark_string(""sv).elems(ctx)->equals(*starlark_string(""sv).elem_ords(ctx)));
   EXPECT_FALSE(starlark_string(""sv).elems(ctx)->equals(*starlark_string(""sv).codepoints(ctx)));
   EXPECT_FALSE(starlark_string(""sv).elems(ctx)->equals(*starlark_string(""sv).codepoint_ords(ctx)));

@@ -2,16 +2,15 @@
 
 #include "vm/module_loader.hpp"
 
-#include <vector>
 #include <functional>
 #include <map>
-#include <utility>
 #include <string>
+#include <utility>
+#include <vector>
 
+#include "runtime/starlark_function.hpp"
 #include "vm/built_in_functions.hpp"
 #include "vm/module_metadata.hpp"
-#include "runtime/starlark_function.hpp"
-
 
 using ::google::protobuf::Arena;
 using ::starlark::bytecode::OpCode;

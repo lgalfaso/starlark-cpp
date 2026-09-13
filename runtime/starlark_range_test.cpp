@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "runtime/starlark_bigint.hpp"
-#include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_float.hpp"
+#include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_none.hpp"
 #include "runtime/starlark_range.hpp"
 #include "runtime/starlark_testing.hpp"

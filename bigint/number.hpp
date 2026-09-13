@@ -9,7 +9,6 @@
 
 #include <cstdint>
 
-#include <climits>
 #include <compare>
 #include <string>
 #include <string_view>

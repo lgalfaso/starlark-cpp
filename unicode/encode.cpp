@@ -37,4 +37,3 @@ void utf8_encode_code_point(char32_t code_point, std::string& output, bool stric
 }  // namespace unicode
 }  // namespace starlark
 
-

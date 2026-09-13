@@ -112,4 +112,3 @@ uint64_t siphash(const char *in, const size_t inlen, uint64_t k0, uint64_t k1) {
 }  // namespace runtime
 }  // namespace starlark
 
-

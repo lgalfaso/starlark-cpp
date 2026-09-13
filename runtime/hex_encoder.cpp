@@ -7,8 +7,8 @@
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 
-using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::ucd::is_printable;
+using ::starlark::unicode::utf8_encode_code_point;
 
 namespace starlark {
 namespace runtime {
@@ -18,7 +18,6 @@ namespace {
 static const char hex[] = "0123456789abcdef";
 
 }  // namespace
-
 
 void write_printable(uint64_t codepoint, bool allow_non_ascii_printable, std::string& output) {
   if (codepoint == '\\' || codepoint == '"') {

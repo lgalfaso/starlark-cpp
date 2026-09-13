@@ -265,7 +265,5 @@ TEST(Number, LogicalNot) {
   EXPECT_EQ(parse_number("-0x1000000000000000000000000000000000000000000000000", nullptr, 0), parse_number("0xffffffffffffffffffffffffffffffffffffffffffffffff", nullptr, 0).logical_not());
 }
 
-
 }  // namespace
-
 

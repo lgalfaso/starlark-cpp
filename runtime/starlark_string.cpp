@@ -2,8 +2,8 @@
 
 #include "runtime/starlark_string.hpp"
 
-#include <stdckdint.h>
 #include <cassert>
+#include <stdckdint.h>
 
 #include <algorithm>
 #include <functional>
@@ -227,7 +227,6 @@ starlark_string::starlark_string(std::string&& value) : starlark_obj(object_kind
 starlark_string::starlark_string(std::string_view value) : starlark_obj(object_kind::kString), value(value) {
   build_index();
 }
-
 
 bool starlark_string::primitive() const {
   return true;
@@ -1722,7 +1721,6 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_string::string_elems:
 
 starlark_string::starlark_elems_iterator::starlark_elems_iterator(const starlark_string* str, int64_t current_pos, int64_t step, int64_t remaining, bool ords, context& ctx)
   : str(str), current_pos(current_pos), step(step), remaining(remaining), ords(ords), ctx(ctx) {}
-
 
 bool starlark_string::starlark_elems_iterator::has_next() const {
   return remaining > 0;

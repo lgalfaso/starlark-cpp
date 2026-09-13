@@ -491,7 +491,6 @@ class ast_listener_logger : public starlark::grammar::ast_listener {
   std::string& output;
 };
 
-
 TEST(Parser, TestCase) {
   const auto& argv = ::testing::internal::GetArgvs();
   ASSERT_THAT(argv, SizeIs(3));

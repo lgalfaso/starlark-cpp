@@ -3,8 +3,8 @@
 #include <limits>
 #include <utility>
 
-#include "google/protobuf/arena.h"
 #include "errors/runtime_error_messages.hpp"
+#include "google/protobuf/arena.h"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_float.hpp"
 #include "runtime/starlark_integer.hpp"

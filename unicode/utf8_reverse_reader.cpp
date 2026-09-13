@@ -4,8 +4,8 @@
 
 #include <bit>
 
-#include "unicode/utf8_reader.hpp"
 #include "unicode/ucd_code_points.hpp"
+#include "unicode/utf8_reader.hpp"
 
 using std::string_view;
 

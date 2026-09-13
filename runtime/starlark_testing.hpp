@@ -7,9 +7,9 @@
 #include <string_view>
 #include <vector>
 
+#include "proto/starlark_logging.pb.h"
 #include "runtime/error_fn.hpp"
 #include "runtime/starlark_function.hpp"
-#include "proto/starlark_logging.pb.h"
 
 namespace starlark {
 namespace testing {

@@ -1,10 +1,10 @@
 // Copyright 2024-2026 Lucas Mirelmann
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include <algorithm>
-#include <cstdio>
 #include <map>
 #include <set>
 #include <string>
@@ -639,7 +639,6 @@ void print_to_lower(FILE* output,
   FWRITE("  return {};\n", output);
   FWRITE("}\n\n", output);
 }
-
 
 void print_word_break(FILE* output,
                       const std::map<std::pair<char32_t, char32_t>, std::string>& word_break) {

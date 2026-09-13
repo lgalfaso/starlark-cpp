@@ -13,7 +13,6 @@ namespace runtime {
 
 starlark_bool::starlark_bool(bool value) : starlark_obj(object_kind::kBool), value(value) {}
 
-
 bool starlark_bool::primitive() const {
   return true;
 }
@@ -54,5 +53,4 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bool::inner_hash() co
 
 }  // namespace runtime
 }  // namespace starlark
-
 

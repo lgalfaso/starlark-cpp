@@ -26,7 +26,6 @@ starlark_bigint::starlark_bigint(int64_t value) : starlark_obj(object_kind::kBig
 
 starlark_bigint::starlark_bigint(const number& value) : starlark_obj(object_kind::kBigInt), value(value) {}
 
-
 bool starlark_bigint::primitive() const {
   return true;
 }
@@ -526,12 +525,10 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_bigint::inner_hash() 
   return result;
 }
 
-
 const number& starlark_bigint::as_bigint() const {
   return value;
 }
 
 }  // namespace runtime
 }  // namespace starlark
-
 

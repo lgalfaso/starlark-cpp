@@ -4,6 +4,7 @@
 #define UNICODE_ENCODE_HPP_
 
 #include <cstdint>
+
 #include <string>
 
 namespace starlark {

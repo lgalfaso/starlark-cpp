@@ -1172,7 +1172,6 @@ TEST(StarlarkString, Interpolation) {
   test("%G", &minus_nan, "nan");
   test_with_error("%G", &small_string, "%G format requires a real number, not string");
 
-
   test_with_error("%", &one, "incomplete format");
   test_with_error("%w", &one, "unsupported format character 'w' (0x77) at index 1");
   test_with_error("%w %w", &tuple_one_two, "unsupported format character 'w' (0x77) at index 1");

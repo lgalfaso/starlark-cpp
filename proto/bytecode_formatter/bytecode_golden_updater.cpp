@@ -3,6 +3,7 @@
 #include "proto/bytecode_formatter/bytecode_golden_updater.hpp"
 
 #include <cstdlib>
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -13,11 +14,11 @@
 
 #include "compiler/compiler.hpp"
 #include "google/protobuf/arena.h"
-#include "proto/bytecode_formatter/bytecode_txtpb_printer.hpp"
-#include "proto/starlark_bytecode.pb.h"
 #include "grammar/options.hpp"
 #include "io/read_file.hpp"
 #include "logging/logging.hpp"
+#include "proto/bytecode_formatter/bytecode_txtpb_printer.hpp"
+#include "proto/starlark_bytecode.pb.h"
 
 using ::google::protobuf::Arena;
 using ::starlark::bytecode::Program;

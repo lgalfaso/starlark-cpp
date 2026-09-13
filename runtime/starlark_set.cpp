@@ -86,7 +86,6 @@ const std::vector<std::string>& starlark_set::attributes() {
 
 starlark_set::starlark_set() : starlark_obj(object_kind::kSet), iterators_count(0) {}
 
-
 const std::vector<std::string>& starlark_set::dir() const {
   return attributes();
 }
@@ -885,5 +884,4 @@ starlark_obj* starlark_set_fn_update(starlark_obj* this_obj, const starlark_obj:
 
 }  // namespace runtime
 }  // namespace starlark
-
 

@@ -13,17 +13,16 @@
 #include "runtime/starlark_numeric.hpp"
 #include "runtime/starlark_types.hpp"
 
-using ::starlark::result::status_or;
 using ::starlark::error_messages::error_v2_bad_operand_binary;
 using ::starlark::error_messages::error_v2_division_by_zero;
 using ::starlark::error_messages::error_v2_incomparable;
 using ::starlark::error_messages::error_v2_overflow;
+using ::starlark::result::status_or;
 
 namespace starlark {
 namespace runtime {
 
 starlark_float::starlark_float(double value) : starlark_obj(object_kind::kFloat), value(value) {}
-
 
 bool starlark_float::primitive() const {
   return true;
@@ -402,12 +401,10 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_float::inner_hash() c
   return mantissa;
 }
 
-
 double starlark_float::as_float() const {
   return value;
 }
 
 }  // namespace runtime
 }  // namespace starlark
-
 

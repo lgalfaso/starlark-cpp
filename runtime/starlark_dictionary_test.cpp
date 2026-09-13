@@ -1779,7 +1779,6 @@ TEST(StarlarkDictionary, UpdateFromNamedArgumentsAndIterable) {
   std::string ss_two("key2"sv);
   std::string ss_three("key3"sv);
 
-
   dictionary.insert(&s_zero, &zero, error_callback);
   dictionary.insert(&s_one, &one, error_callback);
 

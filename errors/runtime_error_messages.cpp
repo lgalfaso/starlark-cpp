@@ -42,7 +42,6 @@ std::string error_v2_not_callable(std::string_view type) {
   return std::format("'{}' object is not callable", type);
 }
 
-
 std::string error_v2_unpackable(std::string_view type) {
   return std::format("cannot unpack non-iterable {} object", type);
 }
@@ -55,7 +54,6 @@ std::string error_v2_unpack_too_many(int64_t actual, int64_t expected) {
   return std::format("too many values to unpack (expected {}, got {})", expected, actual);
 }
 
-
 std::string error_v2_unhashable_key(std::string_view type, std::string_view key_type) {
   return std::format("cannot use '{}' as a {} key (unhashable type: '{}')", key_type, type, key_type);
 }
@@ -63,7 +61,6 @@ std::string error_v2_unhashable_key(std::string_view type, std::string_view key_
 std::string error_v2_unhashable_value(std::string_view type, std::string_view value_type) {
   return std::format("cannot use '{}' as a {} element (unhashable type: '{}')", value_type, type, value_type);
 }
-
 
 std::string error_v2_empty_dictionary(std::string_view fn_name) {
   return std::format("{}(): dictionary is empty", fn_name);
@@ -117,7 +114,6 @@ std::string error_v2_interpreted_as_integer(std::string_view type) {
   return std::format("'{}' object cannot be interpreted as an integer", type);
 }
 
-
 std::string error_v2_bad_operand_unary(std::string_view op, std::string_view type) {
   return std::format("bad operand type for unary {}: '{}'", op, type);
 }
@@ -141,7 +137,6 @@ std::string error_v2_no_attribute(std::string_view type, std::string_view attrib
 std::string error_v2_read_only_attribute(std::string_view type, std::string_view attribute) {
   return std::format("'{}' object attribute '{}' is read-only", type, attribute);
 }
-
 
 std::string error_v2_convert(std::string_view from, std::string_view to) {
   return std::format("cannot convert '{}' object to {}", from, to);
@@ -175,7 +170,6 @@ std::string error_v2_dictionary_update_sequence(int64_t position, int64_t actual
   return std::format("dictionary update sequence element #{} has length {}; {} is required", position, actual, expected);
 }
 
-
 std::string_view error_v2_byte_in_range() {
   return "byte must be in range(0, 256)";
 }
@@ -187,7 +181,6 @@ std::string_view error_v2_bytes_in_range() {
 std::string_view error_v2_unicode_in_range() {
   return "Unicode code point must be in range(0, 0x110000)";
 }
-
 
 std::string_view error_v2_negative_shift() {
   return "negative shift count";
@@ -216,7 +209,6 @@ std::string error_v2_int_base(std::string_view fn_name) {
 std::string error_v2_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value) {
   return std::format("invalid literal for {}() with base {}: '{}'", fn_name, base, literal_value);
 }
-
 
 std::string error_v2_no_keyword(std::string_view fn_name) {
   return std::format("{}() takes no keyword arguments", fn_name);
@@ -283,7 +275,6 @@ std::string_view error_v2_step_non_zero() {
   return "slice step cannot be zero";
 }
 
-
 std::string error_v2_op_in_loop(std::string_view type, std::string_view op) {
   return std::format("cannot perform {}, {} value is temporarily immutable due to active for-loop iteration", op, type);
 }
@@ -340,7 +331,6 @@ std::string error_v2_integer_or_unicode_character(std::string_view type) {
 std::string error_v2_integer_or_unicode_character_type_and_length(std::string_view type, int64_t len) {
   return std::format("%c requires an int or a unicode character, not {} of length {}", type, len);
 }
-
 
 std::string error_v2_integer_or_type(std::string_view type, std::string_view other_type) {
   return std::format("argument should be integer or {} object, not '{}'", type, other_type);
@@ -421,7 +411,6 @@ std::string error_v2_missing_typed_argument(std::string_view fn_name, std::strin
 std::string error_v2_empty_iterator(std::string_view fn_name) {
   return std::format("{}() iterable argument is empty", fn_name);
 }
-
 
 std::string error_v2_unexpected_in_field_name(std::string_view unexpected) {
   return std::format("unexpected '{}' in field name", unexpected);
@@ -506,9 +495,6 @@ std::string error_v2_unknown_op(int op_code) {
 std::string error_v2_recursive_call(std::string_view fn_name) {
   return std::format("function '{}' called recursively", fn_name);
 }
-
-
-
 
 }  // namespace error_messages
 }  // namespace starlark

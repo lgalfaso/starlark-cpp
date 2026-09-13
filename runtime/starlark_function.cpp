@@ -2,8 +2,6 @@
 
 #include "runtime/starlark_function.hpp"
 
-#include "runtime/builtin_pos.hpp"
-
 #include <algorithm>
 #include <limits>
 #include <map>
@@ -12,6 +10,7 @@
 #include <vector>
 
 #include "errors/runtime_error_messages.hpp"
+#include "runtime/builtin_pos.hpp"
 #include "runtime/siphash.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
@@ -98,7 +97,6 @@ const char starlark_built_in_functions::zip_f[] = "zip";
 
 starlark_built_in_function::starlark_built_in_function(starlark_obj* this_obj, builtin_entrypoints entrypoints, std::string_view fn_name) :
   starlark_obj(object_kind::kBuiltinFunction), this_obj(this_obj), entrypoints(entrypoints), fn_name(fn_name) {}
-
 
 bool starlark_built_in_function::inner_repr(printer& print, printer_action action) const {
   if (this_obj != nullptr) {
@@ -188,7 +186,6 @@ starlark_obj* starlark_built_in_function::call_pos(std::span<starlark_obj*> pos_
 
 starlark_function::starlark_function(std::string_view fn_name, std::string_view module_name, object_kind kind) :
     starlark_obj(kind), fn_name(fn_name), module_name(module_name) {}
-
 
 bool starlark_function::inner_repr(printer& print, printer_action action) const {
   print.append(std::format("<function {} from {}>", fn_name, module_name));
@@ -1018,5 +1015,4 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
 
 }  // namespace runtime
 }  // namespace starlark
-
 

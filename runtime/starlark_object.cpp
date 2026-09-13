@@ -603,7 +603,6 @@ starlark_obj* starlark_obj::call_method(std::string_view member, std::span<starl
   return it->second(this, pos_args_vec, kEmptyNamed, ctx, error_callback);
 }
 
-
 void starlark_obj::inner_cmp(order_comparator& comp, const starlark_obj* other, std::string_view op, bool extended, error_fn& error_callback) const {
   error_callback.add_error(error_v2_incomparable(op, type(), other->type()));
   comp.add_task(order_comparator::pending_task_type::kFail);
@@ -918,5 +917,4 @@ int64_t calculate_len(int64_t start, int64_t end, int64_t step) {
 
 }  // namespace runtime
 }  // namespace starlark
-
 

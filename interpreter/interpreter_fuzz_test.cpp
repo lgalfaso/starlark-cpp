@@ -1,10 +1,10 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include <string_view>
-#include <utility>
 #include <functional>
 #include <map>
 #include <string>
+#include <string_view>
+#include <utility>
 
 #include "interpreter/interpreter.hpp"
 

@@ -26,8 +26,6 @@ std::string error_v2_for_not_allowed_at_top_level(std::string_view program, cons
   return std::format("`for` statements are not allowed at the top level\n{}", get_line_and_underline(program, start, end));
 }
 
-
-
 std::string error_v2_load_first(std::string_view program, const Position& start, const Position& end) {
   return std::format("`load` statements must appear before other statements\n{}", get_line_and_underline(program, start, end));
 }
@@ -39,8 +37,6 @@ std::string error_v2_load_not_at_top_level(std::string_view program, const Posit
 std::string error_v2_load_at_least_one_symbol(std::string_view program, const Position& start, const Position& end) {
   return std::format("expect to load at least one symbol\n{}", get_line_and_underline(program, start, previous_position(program, end), end, end, ""));
 }
-
-
 
 std::string error_v2_params_star_parameter_may_appear_only_once(std::string_view program, const Position& start, const Position& end) {
   return std::format("variadic parameter may appear only once\n{}", get_line_and_underline(program, start, end));
@@ -70,16 +66,13 @@ std::string error_v2_params_duplicate_params(std::string_view name, std::string_
   return std::format("duplicate parameter '{}' in function definition\n{}", name, get_line_and_underline(program, start, end));
 }
 
-
 std::string error_v2_illegal_target_for_augmented_assignment(std::string_view program, const Position& start, const Position& end) {
   return std::format("target is an illegal expression for augmented assignment\n{}", get_line_and_underline(program, start, end));
 }
 
-
 std::string error_v2_comparison_operators_are_not_associative(std::string_view program, const Position& start, const Position& end) {
   return std::format("comparison operators are not associative. Use parens\n{}", get_line_and_underline(program, start, end));
 }
-
 
 std::string error_v2_arguments_duplicate_star_args(std::string_view program, const Position& start, const Position& end) {
   return std::format("multiple variadic arguments\n{}", get_line_and_underline(program, start, end));
@@ -108,7 +101,6 @@ std::string error_v2_arguments_expected_identifier_for_named_arguments(std::stri
 std::string error_v2_arguments_positional_before_named_arguments(std::string_view program, const Position& start, const Position& end) {
   return std::format("positional arguments must come before named arguments\n{}", get_line_and_underline(program, start, end));
 }
-
 
 std::string error_v2_duplicate_binding_previous_load(std::string_view symbol, std::string_view program, const Position& start, const Position& end) {
   return std::format("`def` statement redefines previously defined `load` symbol '{}'\n{}", symbol, get_line_and_underline(program, start, end));
@@ -145,7 +137,6 @@ std::string error_v2_undefined_name(std::string_view name, std::string_view best
     return std::format("name '{}' is not defined; did you mean '{}'?\n{}", name, best_candidate, get_line_and_underline(program, start, end, best_candidate));
   }
 }
-
 
 std::string error_v2_expected_identifier(std::string_view program, const Position& start, const Position& end) {
   return std::format("expecting an identifier\n{}", get_line_and_underline(program, start, end));
@@ -211,7 +202,6 @@ std::string error_v2_expected_lambda(std::string_view program, const Position& s
   return std::format("expecting a `lambda`\n{}", get_line_and_underline(program, start, end));
 }
 
-
 std::string error_v2_unexpected_return(std::string_view program, const Position& start, const Position& end) {
   return std::format("unexpected `return`\n{}", get_line_and_underline(program, start, end));
 }
@@ -238,5 +228,4 @@ std::string error_v2_expected_target(std::string_view program, const Position& s
 
 }  // namespace error_messages
 }  // namespace starlark
-
 

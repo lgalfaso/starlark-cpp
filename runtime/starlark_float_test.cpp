@@ -525,7 +525,6 @@ TEST(StarlarkFloat, OrderVsInteger) {
   cmp_helper(starlark_float(1).cmp(starlark_integer(-1), "cmp", error_callback), Gt(0));
   cmp_helper(starlark_float(1).cmp(starlark_integer(1), "cmp", error_callback), Eq(0));
 
-
   cmp_helper(starlark_float(0).cmp(starlark_integer(0), "cmp", error_callback), Eq(0));
 
   cmp_helper(starlark_float(-2).cmp(starlark_integer(-2), "cmp", error_callback), Eq(0));
@@ -571,7 +570,6 @@ TEST(StarlarkFloat, OrderVsBigInt) {
   cmp_helper(starlark_float(1).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
   cmp_helper(starlark_float(1).cmp(starlark_bigint(1), "cmp", error_callback), Eq(0));
 
-
   cmp_helper(starlark_float(0).cmp(starlark_bigint(0), "cmp", error_callback), Eq(0));
 
   cmp_helper(starlark_float(-2).cmp(starlark_bigint(-2), "cmp", error_callback), Eq(0));
@@ -593,7 +591,6 @@ TEST(StarlarkFloat, OrderVsBigInt) {
   cmp_helper(starlark_float(2).cmp(starlark_bigint(-1), "cmp", error_callback), Gt(0));
   cmp_helper(starlark_float(2).cmp(starlark_bigint(1), "cmp", error_callback), Gt(0));
   cmp_helper(starlark_float(2).cmp(starlark_bigint(2), "cmp", error_callback), Eq(0));
-
 
   cmp_helper(starlark_float(1e50).cmp(starlark_bigint(parse_number("100100000000000007629769841091887003294964970946560", nullptr, 0)), "cmp", error_callback), Lt(0));
   cmp_helper(starlark_float(1e50).cmp(starlark_bigint(parse_number("100000000000000006629769841091887003294964970946560", nullptr, 0)), "cmp", error_callback), Gt(0));

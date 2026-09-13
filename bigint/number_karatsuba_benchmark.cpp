@@ -1,8 +1,8 @@
 // Copyright 2025-2026 Lucas Mirelmann
 
-#include <string>
+#include <benchmark/benchmark.h>
 
-#include "benchmark/benchmark.h"
+#include <string>
 
 #include "bigint/number.hpp"
 

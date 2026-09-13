@@ -73,7 +73,6 @@ const std::vector<std::string>& starlark_dictionary::attributes() {
 
 starlark_dictionary::starlark_dictionary() : starlark_obj(object_kind::kDict), iterators_count(0) {}
 
-
 const std::vector<std::string>& starlark_dictionary::dir() const {
   return attributes();
 }
@@ -553,5 +552,4 @@ starlark_obj* starlark_dictionary_fn_values(starlark_obj* this_obj, const starla
 
 }  // namespace runtime
 }  // namespace starlark
-
 

@@ -54,7 +54,6 @@ status_or<std::string> read_number_over(bool(*match)(char), utf8_reader& input) 
 
 }  // namespace
 
-
 status_or<std::string> read_number(utf8_reader& input, bool allow_binary_literals) {
   std::string result;
 

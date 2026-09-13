@@ -1,7 +1,6 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
-#include "benchmark/benchmark.h"
-
+#include <benchmark/benchmark.h>
 #include "unicode/ucd_code_points.hpp"
 
 namespace starlark {

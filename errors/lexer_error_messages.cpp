@@ -65,4 +65,3 @@ std::string error_v2_invalid_escape_sequence_unknown(std::string_view program, c
 }  // namespace error_messages
 }  // namespace starlark
 
-

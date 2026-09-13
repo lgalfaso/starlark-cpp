@@ -15,7 +15,5 @@ int levenshtein(std::string_view value, const std::vector<std::string>& candidat
 }  // namespace string
 }  // namespace starlark
 
-
-
 #endif  // STRING_LEVENSHTEIN_HPP_
 

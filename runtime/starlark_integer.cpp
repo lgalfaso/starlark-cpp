@@ -28,7 +28,6 @@ namespace runtime {
 
 starlark_integer::starlark_integer(int64_t value) : starlark_obj(object_kind::kInt), value(value) {}
 
-
 bool starlark_integer::primitive() const {
   return true;
 }
@@ -604,12 +603,10 @@ std::variant<int64_t, starlark_obj::pending_hash> starlark_integer::inner_hash()
   return cached_hash_;
 }
 
-
 int64_t starlark_integer::as_int64() const {
   return value;
 }
 
 }  // namespace runtime
 }  // namespace starlark
-
 

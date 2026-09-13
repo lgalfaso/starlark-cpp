@@ -409,4 +409,3 @@ std::string float_to_string(double value, bool uppercase) {
 }  // namespace runtime
 }  // namespace starlark
 
-

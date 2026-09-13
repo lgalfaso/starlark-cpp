@@ -1,16 +1,17 @@
 // Copyright 2024-2026 Lucas Mirelmann
 
+#include "unicode/extract/extract.hpp"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
 #include <map>
 #include <set>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
-
-#include "unicode/extract/extract.hpp"
 
 namespace starlark {
 namespace ucd {

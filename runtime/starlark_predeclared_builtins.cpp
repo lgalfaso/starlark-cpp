@@ -2,10 +2,11 @@
 
 #include "runtime/builtin_pos.hpp"
 
-#include <algorithm>
-#include <cmath>
 #include <cerrno>
+#include <cmath>
 #include <cstdlib>
+
+#include <algorithm>
 #include <limits>
 #include <string>
 #include <vector>
@@ -42,15 +43,15 @@ using ::starlark::error_messages::error_v2_expect_one_character_or_one_byte;
 using ::starlark::error_messages::error_v2_int_base;
 using ::starlark::error_messages::error_v2_interpreted_as_integer;
 using ::starlark::error_messages::error_v2_invalid_literal_with_base;
-using ::starlark::error_messages::error_v2_non_string_with_base;
 using ::starlark::error_messages::error_v2_max_bytes_length;
+using ::starlark::error_messages::error_v2_non_string_with_base;
 using ::starlark::error_messages::error_v2_overflow;
 using ::starlark::error_messages::error_v2_overflow_float_too_large;
-using ::starlark::unicode::utf8_encode_code_point;
-using ::starlark::unicode::utf8_reader;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
+using ::starlark::unicode::utf8_encode_code_point;
+using ::starlark::unicode::utf8_reader;
 
 namespace starlark {
 namespace runtime {

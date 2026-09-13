@@ -2,8 +2,8 @@
 
 #include "runtime/starlark_bytes.hpp"
 
-#include <stdckdint.h>
 #include <cassert>
+#include <stdckdint.h>
 
 #include <algorithm>
 #include <functional>
@@ -118,7 +118,6 @@ const std::vector<std::string>& starlark_bytes::attributes() {
 
 starlark_bytes::starlark_bytes(std::string&& value) : starlark_obj(object_kind::kBytes), value(value) {}
 starlark_bytes::starlark_bytes(std::string_view value) : starlark_obj(object_kind::kBytes), value(value) {}
-
 
 bool starlark_bytes::primitive() const {
   return true;
@@ -1310,5 +1309,4 @@ void starlark_bytes::starlark_elems_iterator::end_iterator() {}
 
 }  // namespace runtime
 }  // namespace starlark
-
 

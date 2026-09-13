@@ -42,6 +42,5 @@ int levenshtein(std::string_view value, const std::vector<std::string>& candidat
   return result;
 }
 
-
 }  // namespace string
 }  // namespace starlark

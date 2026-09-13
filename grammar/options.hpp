@@ -63,4 +63,3 @@ const std::set<std::string>& predeclared_symbols();
 
 #endif  // GRAMMAR_OPTIONS_HPP_
 
-

@@ -468,7 +468,6 @@ void number::long_mult(
   normalize(c);
 }
 
-
 number& number::operator*=(const number& other) {
   static const values_size_type karatsuba_threshold = 128;
   return karatsuba(other, karatsuba_threshold);
@@ -906,7 +905,6 @@ number& number::pow_mod(const number& power, const number& modulus) {
   number q_inv;
   std::tie(q_inv, std::ignore, std::ignore) = gcd(q, one() << j);
   number y = ((x_2 - x_1) * q_inv).mod_pow2(j);
-
 
   // 5. Compute `x = x_1 + q * y`, and return x.
   *this = x_1 + q * y;

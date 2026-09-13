@@ -109,7 +109,6 @@ const std::map<std::string, token_type, std::less<>>& all_keywords() {
       {"pass", token_type::kPass},
       {"return", token_type::kReturn},
 
-
       {"as", token_type::kAs},
       {"assert", token_type::kAssert},
       {"async", token_type::kAsync},

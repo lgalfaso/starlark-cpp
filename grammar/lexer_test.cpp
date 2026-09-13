@@ -14,8 +14,8 @@
 #include "logging/logging.hpp"
 
 using ::starlark::bigint::number;
-using ::starlark::grammar::lexer;
 using ::starlark::grammar::grammar_options;
+using ::starlark::grammar::lexer;
 using ::starlark::grammar::token_type;
 using ::starlark::logging::logger;
 using ::testing::IsEmpty;

@@ -27,7 +27,6 @@ t = ["test({}, {}, {}, {}, {}, {}, {});\n".format(a, b, c, d, e, f, repr(str(ran
 ll = (len(x)**2) * (len(x) - 1)
 st = [t[i:i + ll] for i in range(0, len(t), ll)]
 
-
 for n,l in enumerate(st):
   print("""
 TEST(StarlarkRange, SliceRange_{}) {{
@@ -70,7 +69,6 @@ TEST(StarlarkRange, SliceRange_0) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -3, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, -3, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -384,7 +382,6 @@ TEST(StarlarkRange, SliceRange_1) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -3, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, -3, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, -3, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -696,7 +693,6 @@ TEST(StarlarkRange, SliceRange_2) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -3, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, -3, -1, -3, -3, -2, "range(-2, -2, 2)");
@@ -1010,7 +1006,6 @@ TEST(StarlarkRange, SliceRange_3) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -3, 1, -3, -3, -3, "range(-4, -4, -3)");
   test(-3, -3, 1, -3, -3, -2, "range(-4, -4, -2)");
   test(-3, -3, 1, -3, -3, -1, "range(-4, -4, -1)");
@@ -1322,7 +1317,6 @@ TEST(StarlarkRange, SliceRange_4) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -3, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, -3, 2, -3, -3, -2, "range(-5, -5, -4)");
@@ -1636,7 +1630,6 @@ TEST(StarlarkRange, SliceRange_5) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -3, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, -3, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, -3, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -1948,7 +1941,6 @@ TEST(StarlarkRange, SliceRange_6) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -2, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, -2, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -2262,7 +2254,6 @@ TEST(StarlarkRange, SliceRange_7) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -2, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, -2, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, -2, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -2574,7 +2565,6 @@ TEST(StarlarkRange, SliceRange_8) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -2, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, -2, -1, -3, -3, -2, "range(-2, -2, 2)");
@@ -2888,7 +2878,6 @@ TEST(StarlarkRange, SliceRange_9) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -2, 1, -3, -3, -3, "range(-4, -4, -3)");
   test(-3, -2, 1, -3, -3, -2, "range(-4, -4, -2)");
   test(-3, -2, 1, -3, -3, -1, "range(-4, -4, -1)");
@@ -3200,7 +3189,6 @@ TEST(StarlarkRange, SliceRange_10) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -2, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, -2, 2, -3, -3, -2, "range(-5, -5, -4)");
@@ -3514,7 +3502,6 @@ TEST(StarlarkRange, SliceRange_11) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -2, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, -2, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, -2, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -3826,7 +3813,6 @@ TEST(StarlarkRange, SliceRange_12) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -1, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, -1, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -4140,7 +4126,6 @@ TEST(StarlarkRange, SliceRange_13) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -1, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, -1, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, -1, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -4452,7 +4437,6 @@ TEST(StarlarkRange, SliceRange_14) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -1, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, -1, -1, -3, -3, -2, "range(-2, -2, 2)");
@@ -4766,7 +4750,6 @@ TEST(StarlarkRange, SliceRange_15) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -1, 1, -3, -3, -3, "range(-4, -4, -3)");
   test(-3, -1, 1, -3, -3, -2, "range(-4, -4, -2)");
   test(-3, -1, 1, -3, -3, -1, "range(-4, -4, -1)");
@@ -5078,7 +5061,6 @@ TEST(StarlarkRange, SliceRange_16) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, -1, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, -1, 2, -3, -3, -2, "range(-5, -5, -4)");
@@ -5392,7 +5374,6 @@ TEST(StarlarkRange, SliceRange_17) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, -1, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, -1, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, -1, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -5704,7 +5685,6 @@ TEST(StarlarkRange, SliceRange_18) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 0, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 0, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -6018,7 +5998,6 @@ TEST(StarlarkRange, SliceRange_19) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 0, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 0, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 0, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -6330,7 +6309,6 @@ TEST(StarlarkRange, SliceRange_20) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 0, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 0, -1, -3, -3, -2, "range(-2, -2, 2)");
@@ -6644,7 +6622,6 @@ TEST(StarlarkRange, SliceRange_21) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 0, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-3, 0, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-3, 0, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -6956,7 +6933,6 @@ TEST(StarlarkRange, SliceRange_22) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 0, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, 0, 2, -3, -3, -2, "range(-5, -5, -4)");
@@ -7270,7 +7246,6 @@ TEST(StarlarkRange, SliceRange_23) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 0, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 0, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 0, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -7582,7 +7557,6 @@ TEST(StarlarkRange, SliceRange_24) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 1, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 1, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -7896,7 +7870,6 @@ TEST(StarlarkRange, SliceRange_25) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 1, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 1, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 1, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -8208,7 +8181,6 @@ TEST(StarlarkRange, SliceRange_26) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 1, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 1, -1, -3, -3, -2, "range(-2, -2, 2)");
@@ -8522,7 +8494,6 @@ TEST(StarlarkRange, SliceRange_27) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-3, 1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-3, 1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -8834,7 +8805,6 @@ TEST(StarlarkRange, SliceRange_28) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 1, 2, -3, -3, -3, "range(-5, -5, -6)");
   test(-3, 1, 2, -3, -3, -2, "range(-5, -5, -4)");
@@ -9148,7 +9118,6 @@ TEST(StarlarkRange, SliceRange_29) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 1, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 1, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 1, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -9460,7 +9429,6 @@ TEST(StarlarkRange, SliceRange_30) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 2, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 2, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -9774,7 +9742,6 @@ TEST(StarlarkRange, SliceRange_31) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 2, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 2, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 2, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -10086,7 +10053,6 @@ TEST(StarlarkRange, SliceRange_32) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 2, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 2, -1, -3, -3, -2, "range(-2, -2, 2)");
@@ -10400,7 +10366,6 @@ TEST(StarlarkRange, SliceRange_33) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(-3, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(-3, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -10712,7 +10677,6 @@ TEST(StarlarkRange, SliceRange_34) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 2, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-3, 2, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -11026,7 +10990,6 @@ TEST(StarlarkRange, SliceRange_35) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 2, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 2, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 2, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -11338,7 +11301,6 @@ TEST(StarlarkRange, SliceRange_36) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 3, -3, -3, -3, -3, "range(0, 0, 9)");
   test(-3, 3, -3, -3, -3, -2, "range(0, 0, 6)");
@@ -11652,7 +11614,6 @@ TEST(StarlarkRange, SliceRange_37) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 3, -2, -3, -3, -3, "range(-1, -1, 6)");
   test(-3, 3, -2, -3, -3, -2, "range(-1, -1, 4)");
   test(-3, 3, -2, -3, -3, -1, "range(-1, -1, 2)");
@@ -11964,7 +11925,6 @@ TEST(StarlarkRange, SliceRange_38) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 3, -1, -3, -3, -3, "range(-2, -2, 3)");
   test(-3, 3, -1, -3, -3, -2, "range(-2, -2, 2)");
@@ -12278,7 +12238,6 @@ TEST(StarlarkRange, SliceRange_39) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(-3, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(-3, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -12590,7 +12549,6 @@ TEST(StarlarkRange, SliceRange_40) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-3, 3, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-3, 3, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -12904,7 +12862,6 @@ TEST(StarlarkRange, SliceRange_41) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-3, 3, 3, -3, -3, -3, "range(-6, -6, -9)");
   test(-3, 3, 3, -3, -3, -2, "range(-6, -6, -6)");
   test(-3, 3, 3, -3, -3, -1, "range(-6, -6, -3)");
@@ -13216,7 +13173,6 @@ TEST(StarlarkRange, SliceRange_42) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -3, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, -3, -3, -3, -3, -2, "range(1, 1, 6)");
@@ -13530,7 +13486,6 @@ TEST(StarlarkRange, SliceRange_43) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -3, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, -3, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, -3, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -13842,7 +13797,6 @@ TEST(StarlarkRange, SliceRange_44) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -3, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, -3, -1, -3, -3, -2, "range(-1, -1, 2)");
@@ -14156,7 +14110,6 @@ TEST(StarlarkRange, SliceRange_45) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -3, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, -3, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, -3, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -14468,7 +14421,6 @@ TEST(StarlarkRange, SliceRange_46) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -3, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, -3, 2, -3, -3, -2, "range(-4, -4, -4)");
@@ -14782,7 +14734,6 @@ TEST(StarlarkRange, SliceRange_47) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -3, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, -3, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, -3, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -15094,7 +15045,6 @@ TEST(StarlarkRange, SliceRange_48) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -2, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, -2, -3, -3, -3, -2, "range(1, 1, 6)");
@@ -15408,7 +15358,6 @@ TEST(StarlarkRange, SliceRange_49) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -2, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, -2, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, -2, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -15720,7 +15669,6 @@ TEST(StarlarkRange, SliceRange_50) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -2, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, -2, -1, -3, -3, -2, "range(-1, -1, 2)");
@@ -16034,7 +15982,6 @@ TEST(StarlarkRange, SliceRange_51) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -2, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, -2, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, -2, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -16346,7 +16293,6 @@ TEST(StarlarkRange, SliceRange_52) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -2, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, -2, 2, -3, -3, -2, "range(-4, -4, -4)");
@@ -16660,7 +16606,6 @@ TEST(StarlarkRange, SliceRange_53) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -2, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, -2, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, -2, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -16972,7 +16917,6 @@ TEST(StarlarkRange, SliceRange_54) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -1, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, -1, -3, -3, -3, -2, "range(1, 1, 6)");
@@ -17286,7 +17230,6 @@ TEST(StarlarkRange, SliceRange_55) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -1, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, -1, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, -1, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -17598,7 +17541,6 @@ TEST(StarlarkRange, SliceRange_56) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -1, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, -1, -1, -3, -3, -2, "range(-1, -1, 2)");
@@ -17912,7 +17854,6 @@ TEST(StarlarkRange, SliceRange_57) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -1, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, -1, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, -1, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -18224,7 +18165,6 @@ TEST(StarlarkRange, SliceRange_58) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, -1, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, -1, 2, -3, -3, -2, "range(-4, -4, -4)");
@@ -18538,7 +18478,6 @@ TEST(StarlarkRange, SliceRange_59) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, -1, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, -1, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, -1, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -18850,7 +18789,6 @@ TEST(StarlarkRange, SliceRange_60) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 0, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 0, -3, -3, -3, -2, "range(1, 1, 6)");
@@ -19164,7 +19102,6 @@ TEST(StarlarkRange, SliceRange_61) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 0, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 0, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 0, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -19476,7 +19413,6 @@ TEST(StarlarkRange, SliceRange_62) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 0, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 0, -1, -3, -3, -2, "range(-1, -1, 2)");
@@ -19790,7 +19726,6 @@ TEST(StarlarkRange, SliceRange_63) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 0, 1, -3, -3, -3, "range(-3, -3, -3)");
   test(-2, 0, 1, -3, -3, -2, "range(-3, -3, -2)");
   test(-2, 0, 1, -3, -3, -1, "range(-3, -3, -1)");
@@ -20102,7 +20037,6 @@ TEST(StarlarkRange, SliceRange_64) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 0, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, 0, 2, -3, -3, -2, "range(-4, -4, -4)");
@@ -20416,7 +20350,6 @@ TEST(StarlarkRange, SliceRange_65) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 0, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 0, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 0, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -20728,7 +20661,6 @@ TEST(StarlarkRange, SliceRange_66) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 1, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 1, -3, -3, -3, -2, "range(1, 1, 6)");
@@ -21042,7 +20974,6 @@ TEST(StarlarkRange, SliceRange_67) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 1, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 1, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 1, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -21354,7 +21285,6 @@ TEST(StarlarkRange, SliceRange_68) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 1, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 1, -1, -3, -3, -2, "range(-1, -1, 2)");
@@ -21668,7 +21598,6 @@ TEST(StarlarkRange, SliceRange_69) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-2, 1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-2, 1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -21980,7 +21909,6 @@ TEST(StarlarkRange, SliceRange_70) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 1, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, 1, 2, -3, -3, -2, "range(-4, -4, -4)");
@@ -22294,7 +22222,6 @@ TEST(StarlarkRange, SliceRange_71) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 1, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 1, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 1, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -22606,7 +22533,6 @@ TEST(StarlarkRange, SliceRange_72) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 2, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 2, -3, -3, -3, -2, "range(1, 1, 6)");
@@ -22920,7 +22846,6 @@ TEST(StarlarkRange, SliceRange_73) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 2, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 2, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 2, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -23232,7 +23157,6 @@ TEST(StarlarkRange, SliceRange_74) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 2, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 2, -1, -3, -3, -2, "range(-1, -1, 2)");
@@ -23546,7 +23470,6 @@ TEST(StarlarkRange, SliceRange_75) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(-2, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(-2, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -23858,7 +23781,6 @@ TEST(StarlarkRange, SliceRange_76) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 2, 2, -3, -3, -3, "range(-4, -4, -6)");
   test(-2, 2, 2, -3, -3, -2, "range(-4, -4, -4)");
@@ -24172,7 +24094,6 @@ TEST(StarlarkRange, SliceRange_77) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 2, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 2, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 2, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -24484,7 +24405,6 @@ TEST(StarlarkRange, SliceRange_78) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 3, -3, -3, -3, -3, "range(1, 1, 9)");
   test(-2, 3, -3, -3, -3, -2, "range(1, 1, 6)");
@@ -24798,7 +24718,6 @@ TEST(StarlarkRange, SliceRange_79) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 3, -2, -3, -3, -3, "range(0, 0, 6)");
   test(-2, 3, -2, -3, -3, -2, "range(0, 0, 4)");
   test(-2, 3, -2, -3, -3, -1, "range(0, 0, 2)");
@@ -25110,7 +25029,6 @@ TEST(StarlarkRange, SliceRange_80) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 3, -1, -3, -3, -3, "range(-1, -1, 3)");
   test(-2, 3, -1, -3, -3, -2, "range(-1, -1, 2)");
@@ -25424,7 +25342,6 @@ TEST(StarlarkRange, SliceRange_81) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(-2, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(-2, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -25736,7 +25653,6 @@ TEST(StarlarkRange, SliceRange_82) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-2, 3, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(-2, 3, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -26050,7 +25966,6 @@ TEST(StarlarkRange, SliceRange_83) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-2, 3, 3, -3, -3, -3, "range(-5, -5, -9)");
   test(-2, 3, 3, -3, -3, -2, "range(-5, -5, -6)");
   test(-2, 3, 3, -3, -3, -1, "range(-5, -5, -3)");
@@ -26362,7 +26277,6 @@ TEST(StarlarkRange, SliceRange_84) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -3, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, -3, -3, -3, -3, -2, "range(2, 2, 6)");
@@ -26676,7 +26590,6 @@ TEST(StarlarkRange, SliceRange_85) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -3, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, -3, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, -3, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -26988,7 +26901,6 @@ TEST(StarlarkRange, SliceRange_86) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, -3, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -27302,7 +27214,6 @@ TEST(StarlarkRange, SliceRange_87) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -3, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, -3, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, -3, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -27614,7 +27525,6 @@ TEST(StarlarkRange, SliceRange_88) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -3, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, -3, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -27928,7 +27838,6 @@ TEST(StarlarkRange, SliceRange_89) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -3, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, -3, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, -3, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -28240,7 +28149,6 @@ TEST(StarlarkRange, SliceRange_90) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -2, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, -2, -3, -3, -3, -2, "range(2, 2, 6)");
@@ -28554,7 +28462,6 @@ TEST(StarlarkRange, SliceRange_91) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -2, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, -2, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, -2, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -28866,7 +28773,6 @@ TEST(StarlarkRange, SliceRange_92) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -2, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, -2, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -29180,7 +29086,6 @@ TEST(StarlarkRange, SliceRange_93) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -2, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, -2, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, -2, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -29492,7 +29397,6 @@ TEST(StarlarkRange, SliceRange_94) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -2, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, -2, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -29806,7 +29710,6 @@ TEST(StarlarkRange, SliceRange_95) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -2, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, -2, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, -2, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -30118,7 +30021,6 @@ TEST(StarlarkRange, SliceRange_96) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -1, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, -1, -3, -3, -3, -2, "range(2, 2, 6)");
@@ -30432,7 +30334,6 @@ TEST(StarlarkRange, SliceRange_97) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -1, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, -1, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, -1, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -30744,7 +30645,6 @@ TEST(StarlarkRange, SliceRange_98) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -1, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, -1, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -31058,7 +30958,6 @@ TEST(StarlarkRange, SliceRange_99) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, -1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, -1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -31370,7 +31269,6 @@ TEST(StarlarkRange, SliceRange_100) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, -1, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, -1, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -31684,7 +31582,6 @@ TEST(StarlarkRange, SliceRange_101) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, -1, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, -1, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, -1, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -31996,7 +31893,6 @@ TEST(StarlarkRange, SliceRange_102) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 0, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 0, -3, -3, -3, -2, "range(2, 2, 6)");
@@ -32310,7 +32206,6 @@ TEST(StarlarkRange, SliceRange_103) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 0, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 0, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 0, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -32622,7 +32517,6 @@ TEST(StarlarkRange, SliceRange_104) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 0, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 0, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -32936,7 +32830,6 @@ TEST(StarlarkRange, SliceRange_105) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 0, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, 0, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, 0, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -33248,7 +33141,6 @@ TEST(StarlarkRange, SliceRange_106) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 0, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 0, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -33562,7 +33454,6 @@ TEST(StarlarkRange, SliceRange_107) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 0, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 0, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 0, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -33874,7 +33765,6 @@ TEST(StarlarkRange, SliceRange_108) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 1, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 1, -3, -3, -3, -2, "range(2, 2, 6)");
@@ -34188,7 +34078,6 @@ TEST(StarlarkRange, SliceRange_109) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 1, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 1, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 1, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -34500,7 +34389,6 @@ TEST(StarlarkRange, SliceRange_110) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 1, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 1, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -34814,7 +34702,6 @@ TEST(StarlarkRange, SliceRange_111) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 1, 1, -3, -3, -3, "range(-2, -2, -3)");
   test(-1, 1, 1, -3, -3, -2, "range(-2, -2, -2)");
   test(-1, 1, 1, -3, -3, -1, "range(-2, -2, -1)");
@@ -35126,7 +35013,6 @@ TEST(StarlarkRange, SliceRange_112) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 1, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 1, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -35440,7 +35326,6 @@ TEST(StarlarkRange, SliceRange_113) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 1, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 1, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 1, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -35752,7 +35637,6 @@ TEST(StarlarkRange, SliceRange_114) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 2, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 2, -3, -3, -3, -2, "range(2, 2, 6)");
@@ -36066,7 +35950,6 @@ TEST(StarlarkRange, SliceRange_115) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 2, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 2, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 2, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -36378,7 +36261,6 @@ TEST(StarlarkRange, SliceRange_116) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 2, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 2, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -36692,7 +36574,6 @@ TEST(StarlarkRange, SliceRange_117) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(-1, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(-1, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -37004,7 +36885,6 @@ TEST(StarlarkRange, SliceRange_118) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 2, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 2, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -37318,7 +37198,6 @@ TEST(StarlarkRange, SliceRange_119) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 2, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 2, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 2, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -37630,7 +37509,6 @@ TEST(StarlarkRange, SliceRange_120) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 3, -3, -3, -3, -3, "range(2, 2, 9)");
   test(-1, 3, -3, -3, -3, -2, "range(2, 2, 6)");
@@ -37944,7 +37822,6 @@ TEST(StarlarkRange, SliceRange_121) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 3, -2, -3, -3, -3, "range(1, 1, 6)");
   test(-1, 3, -2, -3, -3, -2, "range(1, 1, 4)");
   test(-1, 3, -2, -3, -3, -1, "range(1, 1, 2)");
@@ -38256,7 +38133,6 @@ TEST(StarlarkRange, SliceRange_122) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(-1, 3, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -38570,7 +38446,6 @@ TEST(StarlarkRange, SliceRange_123) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(-1, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(-1, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -38882,7 +38757,6 @@ TEST(StarlarkRange, SliceRange_124) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(-1, 3, 2, -3, -3, -3, "range(-3, -3, -6)");
   test(-1, 3, 2, -3, -3, -2, "range(-3, -3, -4)");
@@ -39196,7 +39070,6 @@ TEST(StarlarkRange, SliceRange_125) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(-1, 3, 3, -3, -3, -3, "range(-4, -4, -9)");
   test(-1, 3, 3, -3, -3, -2, "range(-4, -4, -6)");
   test(-1, 3, 3, -3, -3, -1, "range(-4, -4, -3)");
@@ -39508,7 +39381,6 @@ TEST(StarlarkRange, SliceRange_126) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -3, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, -3, -3, -3, -3, -2, "range(3, 3, 6)");
@@ -39822,7 +39694,6 @@ TEST(StarlarkRange, SliceRange_127) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -3, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, -3, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, -3, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -40134,7 +40005,6 @@ TEST(StarlarkRange, SliceRange_128) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(0, -3, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -40448,7 +40318,6 @@ TEST(StarlarkRange, SliceRange_129) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -3, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, -3, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, -3, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -40760,7 +40629,6 @@ TEST(StarlarkRange, SliceRange_130) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -3, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, -3, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -41074,7 +40942,6 @@ TEST(StarlarkRange, SliceRange_131) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -3, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, -3, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, -3, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -41386,7 +41253,6 @@ TEST(StarlarkRange, SliceRange_132) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -2, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, -2, -3, -3, -3, -2, "range(3, 3, 6)");
@@ -41700,7 +41566,6 @@ TEST(StarlarkRange, SliceRange_133) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -2, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, -2, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, -2, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -42012,7 +41877,6 @@ TEST(StarlarkRange, SliceRange_134) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, -2, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -42326,7 +42190,6 @@ TEST(StarlarkRange, SliceRange_135) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, -2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, -2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -42638,7 +42501,6 @@ TEST(StarlarkRange, SliceRange_136) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -2, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, -2, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -42952,7 +42814,6 @@ TEST(StarlarkRange, SliceRange_137) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -2, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, -2, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, -2, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -43264,7 +43125,6 @@ TEST(StarlarkRange, SliceRange_138) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -1, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, -1, -3, -3, -3, -2, "range(3, 3, 6)");
@@ -43578,7 +43438,6 @@ TEST(StarlarkRange, SliceRange_139) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -1, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, -1, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, -1, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -43890,7 +43749,6 @@ TEST(StarlarkRange, SliceRange_140) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -1, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, -1, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -44204,7 +44062,6 @@ TEST(StarlarkRange, SliceRange_141) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -1, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, -1, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, -1, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -44516,7 +44373,6 @@ TEST(StarlarkRange, SliceRange_142) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, -1, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, -1, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -44830,7 +44686,6 @@ TEST(StarlarkRange, SliceRange_143) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, -1, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, -1, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, -1, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -45142,7 +44997,6 @@ TEST(StarlarkRange, SliceRange_144) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 0, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 0, -3, -3, -3, -2, "range(3, 3, 6)");
@@ -45456,7 +45310,6 @@ TEST(StarlarkRange, SliceRange_145) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 0, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 0, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 0, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -45768,7 +45621,6 @@ TEST(StarlarkRange, SliceRange_146) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 0, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 0, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -46082,7 +45934,6 @@ TEST(StarlarkRange, SliceRange_147) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 0, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, 0, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, 0, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -46394,7 +46245,6 @@ TEST(StarlarkRange, SliceRange_148) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 0, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 0, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -46708,7 +46558,6 @@ TEST(StarlarkRange, SliceRange_149) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 0, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 0, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 0, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -47020,7 +46869,6 @@ TEST(StarlarkRange, SliceRange_150) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 1, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 1, -3, -3, -3, -2, "range(3, 3, 6)");
@@ -47334,7 +47182,6 @@ TEST(StarlarkRange, SliceRange_151) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 1, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 1, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 1, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -47646,7 +47493,6 @@ TEST(StarlarkRange, SliceRange_152) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 1, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 1, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -47960,7 +47806,6 @@ TEST(StarlarkRange, SliceRange_153) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 1, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, 1, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, 1, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -48272,7 +48117,6 @@ TEST(StarlarkRange, SliceRange_154) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 1, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 1, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -48586,7 +48430,6 @@ TEST(StarlarkRange, SliceRange_155) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 1, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 1, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 1, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -48898,7 +48741,6 @@ TEST(StarlarkRange, SliceRange_156) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 2, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 2, -3, -3, -3, -2, "range(3, 3, 6)");
@@ -49212,7 +49054,6 @@ TEST(StarlarkRange, SliceRange_157) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 2, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 2, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 2, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -49524,7 +49365,6 @@ TEST(StarlarkRange, SliceRange_158) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 2, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -49838,7 +49678,6 @@ TEST(StarlarkRange, SliceRange_159) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 2, 1, -3, -3, -3, "range(-1, -1, -3)");
   test(0, 2, 1, -3, -3, -2, "range(-1, -1, -2)");
   test(0, 2, 1, -3, -3, -1, "range(-1, -1, -1)");
@@ -50150,7 +49989,6 @@ TEST(StarlarkRange, SliceRange_160) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 2, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 2, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -50464,7 +50302,6 @@ TEST(StarlarkRange, SliceRange_161) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 2, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 2, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 2, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -50776,7 +50613,6 @@ TEST(StarlarkRange, SliceRange_162) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 3, -3, -3, -3, -3, "range(3, 3, 9)");
   test(0, 3, -3, -3, -3, -2, "range(3, 3, 6)");
@@ -51090,7 +50926,6 @@ TEST(StarlarkRange, SliceRange_163) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 3, -2, -3, -3, -3, "range(2, 2, 6)");
   test(0, 3, -2, -3, -3, -2, "range(2, 2, 4)");
   test(0, 3, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -51402,7 +51237,6 @@ TEST(StarlarkRange, SliceRange_164) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 3, -1, -3, -3, -3, "range(1, 1, 3)");
   test(0, 3, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -51716,7 +51550,6 @@ TEST(StarlarkRange, SliceRange_165) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(0, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(0, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -52028,7 +51861,6 @@ TEST(StarlarkRange, SliceRange_166) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(0, 3, 2, -3, -3, -3, "range(-2, -2, -6)");
   test(0, 3, 2, -3, -3, -2, "range(-2, -2, -4)");
@@ -52342,7 +52174,6 @@ TEST(StarlarkRange, SliceRange_167) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(0, 3, 3, -3, -3, -3, "range(-3, -3, -9)");
   test(0, 3, 3, -3, -3, -2, "range(-3, -3, -6)");
   test(0, 3, 3, -3, -3, -1, "range(-3, -3, -3)");
@@ -52654,7 +52485,6 @@ TEST(StarlarkRange, SliceRange_168) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -3, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, -3, -3, -3, -3, -2, "range(4, 4, 6)");
@@ -52968,7 +52798,6 @@ TEST(StarlarkRange, SliceRange_169) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -3, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, -3, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, -3, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -53280,7 +53109,6 @@ TEST(StarlarkRange, SliceRange_170) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(1, -3, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -53594,7 +53422,6 @@ TEST(StarlarkRange, SliceRange_171) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, -3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, -3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -53906,7 +53733,6 @@ TEST(StarlarkRange, SliceRange_172) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -3, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, -3, 2, -3, -3, -2, "range(-1, -1, -4)");
@@ -54220,7 +54046,6 @@ TEST(StarlarkRange, SliceRange_173) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -3, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, -3, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, -3, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -54532,7 +54357,6 @@ TEST(StarlarkRange, SliceRange_174) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -2, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, -2, -3, -3, -3, -2, "range(4, 4, 6)");
@@ -54846,7 +54670,6 @@ TEST(StarlarkRange, SliceRange_175) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -2, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, -2, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, -2, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -55158,7 +54981,6 @@ TEST(StarlarkRange, SliceRange_176) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(1, -2, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -55472,7 +55294,6 @@ TEST(StarlarkRange, SliceRange_177) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -2, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, -2, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, -2, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -55784,7 +55605,6 @@ TEST(StarlarkRange, SliceRange_178) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -2, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, -2, 2, -3, -3, -2, "range(-1, -1, -4)");
@@ -56098,7 +55918,6 @@ TEST(StarlarkRange, SliceRange_179) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -2, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, -2, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, -2, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -56410,7 +56229,6 @@ TEST(StarlarkRange, SliceRange_180) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -1, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, -1, -3, -3, -3, -2, "range(4, 4, 6)");
@@ -56724,7 +56542,6 @@ TEST(StarlarkRange, SliceRange_181) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -1, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, -1, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, -1, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -57036,7 +56853,6 @@ TEST(StarlarkRange, SliceRange_182) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, -1, -1, -3, -3, -2, "range(2, 2, 2)");
@@ -57350,7 +57166,6 @@ TEST(StarlarkRange, SliceRange_183) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -1, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, -1, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, -1, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -57662,7 +57477,6 @@ TEST(StarlarkRange, SliceRange_184) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, -1, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, -1, 2, -3, -3, -2, "range(-1, -1, -4)");
@@ -57976,7 +57790,6 @@ TEST(StarlarkRange, SliceRange_185) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, -1, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, -1, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, -1, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -58288,7 +58101,6 @@ TEST(StarlarkRange, SliceRange_186) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 0, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 0, -3, -3, -3, -2, "range(4, 4, 6)");
@@ -58602,7 +58414,6 @@ TEST(StarlarkRange, SliceRange_187) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 0, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 0, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 0, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -58914,7 +58725,6 @@ TEST(StarlarkRange, SliceRange_188) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 0, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 0, -1, -3, -3, -2, "range(2, 2, 2)");
@@ -59228,7 +59038,6 @@ TEST(StarlarkRange, SliceRange_189) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 0, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 0, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 0, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -59540,7 +59349,6 @@ TEST(StarlarkRange, SliceRange_190) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 0, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 0, 2, -3, -3, -2, "range(-1, -1, -4)");
@@ -59854,7 +59662,6 @@ TEST(StarlarkRange, SliceRange_191) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 0, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 0, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 0, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -60166,7 +59973,6 @@ TEST(StarlarkRange, SliceRange_192) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 1, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 1, -3, -3, -3, -2, "range(4, 4, 6)");
@@ -60480,7 +60286,6 @@ TEST(StarlarkRange, SliceRange_193) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 1, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 1, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 1, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -60792,7 +60597,6 @@ TEST(StarlarkRange, SliceRange_194) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 1, -1, -3, -3, -2, "range(2, 2, 2)");
@@ -61106,7 +60910,6 @@ TEST(StarlarkRange, SliceRange_195) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 1, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 1, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 1, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -61418,7 +61221,6 @@ TEST(StarlarkRange, SliceRange_196) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 1, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 1, 2, -3, -3, -2, "range(-1, -1, -4)");
@@ -61732,7 +61534,6 @@ TEST(StarlarkRange, SliceRange_197) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 1, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 1, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 1, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -62044,7 +61845,6 @@ TEST(StarlarkRange, SliceRange_198) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 2, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 2, -3, -3, -3, -2, "range(4, 4, 6)");
@@ -62358,7 +62158,6 @@ TEST(StarlarkRange, SliceRange_199) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 2, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 2, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 2, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -62670,7 +62469,6 @@ TEST(StarlarkRange, SliceRange_200) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 2, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 2, -1, -3, -3, -2, "range(2, 2, 2)");
@@ -62984,7 +62782,6 @@ TEST(StarlarkRange, SliceRange_201) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 2, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 2, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 2, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -63296,7 +63093,6 @@ TEST(StarlarkRange, SliceRange_202) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 2, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 2, 2, -3, -3, -2, "range(-1, -1, -4)");
@@ -63610,7 +63406,6 @@ TEST(StarlarkRange, SliceRange_203) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 2, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 2, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 2, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -63922,7 +63717,6 @@ TEST(StarlarkRange, SliceRange_204) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 3, -3, -3, -3, -3, "range(4, 4, 9)");
   test(1, 3, -3, -3, -3, -2, "range(4, 4, 6)");
@@ -64236,7 +64030,6 @@ TEST(StarlarkRange, SliceRange_205) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 3, -2, -3, -3, -3, "range(3, 3, 6)");
   test(1, 3, -2, -3, -3, -2, "range(3, 3, 4)");
   test(1, 3, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -64548,7 +64341,6 @@ TEST(StarlarkRange, SliceRange_206) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 3, -1, -3, -3, -3, "range(2, 2, 3)");
   test(1, 3, -1, -3, -3, -2, "range(2, 2, 2)");
@@ -64862,7 +64654,6 @@ TEST(StarlarkRange, SliceRange_207) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 3, 1, -3, -3, -3, "range(0, 0, -3)");
   test(1, 3, 1, -3, -3, -2, "range(0, 0, -2)");
   test(1, 3, 1, -3, -3, -1, "range(0, 0, -1)");
@@ -65174,7 +64965,6 @@ TEST(StarlarkRange, SliceRange_208) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(1, 3, 2, -3, -3, -3, "range(-1, -1, -6)");
   test(1, 3, 2, -3, -3, -2, "range(-1, -1, -4)");
@@ -65488,7 +65278,6 @@ TEST(StarlarkRange, SliceRange_209) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(1, 3, 3, -3, -3, -3, "range(-2, -2, -9)");
   test(1, 3, 3, -3, -3, -2, "range(-2, -2, -6)");
   test(1, 3, 3, -3, -3, -1, "range(-2, -2, -3)");
@@ -65800,7 +65589,6 @@ TEST(StarlarkRange, SliceRange_210) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -3, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, -3, -3, -3, -3, -2, "range(5, 5, 6)");
@@ -66114,7 +65902,6 @@ TEST(StarlarkRange, SliceRange_211) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -3, -2, -3, -3, -3, "range(2, 2, 6)");
   test(2, -3, -2, -3, -3, -2, "range(2, 2, 4)");
   test(2, -3, -2, -3, -3, -1, "range(2, 2, 2)");
@@ -66426,7 +66213,6 @@ TEST(StarlarkRange, SliceRange_212) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(2, -3, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -66740,7 +66526,6 @@ TEST(StarlarkRange, SliceRange_213) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -3, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, -3, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, -3, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -67052,7 +66837,6 @@ TEST(StarlarkRange, SliceRange_214) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -3, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, -3, 2, -3, -3, -2, "range(0, 0, -4)");
@@ -67366,7 +67150,6 @@ TEST(StarlarkRange, SliceRange_215) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -3, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, -3, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, -3, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -67678,7 +67461,6 @@ TEST(StarlarkRange, SliceRange_216) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -2, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, -2, -3, -3, -3, -2, "range(5, 5, 6)");
@@ -67992,7 +67774,6 @@ TEST(StarlarkRange, SliceRange_217) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -2, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, -2, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, -2, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -68304,7 +68085,6 @@ TEST(StarlarkRange, SliceRange_218) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(2, -2, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -68618,7 +68398,6 @@ TEST(StarlarkRange, SliceRange_219) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -2, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, -2, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, -2, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -68930,7 +68709,6 @@ TEST(StarlarkRange, SliceRange_220) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -2, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, -2, 2, -3, -3, -2, "range(0, 0, -4)");
@@ -69244,7 +69022,6 @@ TEST(StarlarkRange, SliceRange_221) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -2, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, -2, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, -2, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -69556,7 +69333,6 @@ TEST(StarlarkRange, SliceRange_222) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -1, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, -1, -3, -3, -3, -2, "range(5, 5, 6)");
@@ -69870,7 +69646,6 @@ TEST(StarlarkRange, SliceRange_223) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -1, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, -1, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, -1, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -70182,7 +69957,6 @@ TEST(StarlarkRange, SliceRange_224) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(2, -1, -1, -3, -3, -2, "range(2, 2, 2)");
@@ -70496,7 +70270,6 @@ TEST(StarlarkRange, SliceRange_225) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -1, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, -1, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, -1, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -70808,7 +70581,6 @@ TEST(StarlarkRange, SliceRange_226) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, -1, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, -1, 2, -3, -3, -2, "range(0, 0, -4)");
@@ -71122,7 +70894,6 @@ TEST(StarlarkRange, SliceRange_227) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, -1, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, -1, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, -1, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -71434,7 +71205,6 @@ TEST(StarlarkRange, SliceRange_228) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 0, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 0, -3, -3, -3, -2, "range(5, 5, 6)");
@@ -71748,7 +71518,6 @@ TEST(StarlarkRange, SliceRange_229) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 0, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 0, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 0, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -72060,7 +71829,6 @@ TEST(StarlarkRange, SliceRange_230) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 0, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 0, -1, -3, -3, -2, "range(3, 3, 2)");
@@ -72374,7 +72142,6 @@ TEST(StarlarkRange, SliceRange_231) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 0, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 0, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 0, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -72686,7 +72453,6 @@ TEST(StarlarkRange, SliceRange_232) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 0, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 0, 2, -3, -3, -2, "range(0, 0, -4)");
@@ -73000,7 +72766,6 @@ TEST(StarlarkRange, SliceRange_233) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 0, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 0, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 0, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -73312,7 +73077,6 @@ TEST(StarlarkRange, SliceRange_234) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 1, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 1, -3, -3, -3, -2, "range(5, 5, 6)");
@@ -73626,7 +73390,6 @@ TEST(StarlarkRange, SliceRange_235) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 1, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 1, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 1, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -73938,7 +73701,6 @@ TEST(StarlarkRange, SliceRange_236) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 1, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 1, -1, -3, -3, -2, "range(3, 3, 2)");
@@ -74252,7 +74014,6 @@ TEST(StarlarkRange, SliceRange_237) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 1, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 1, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 1, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -74564,7 +74325,6 @@ TEST(StarlarkRange, SliceRange_238) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 1, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 1, 2, -3, -3, -2, "range(0, 0, -4)");
@@ -74878,7 +74638,6 @@ TEST(StarlarkRange, SliceRange_239) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 1, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 1, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 1, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -75190,7 +74949,6 @@ TEST(StarlarkRange, SliceRange_240) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 2, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 2, -3, -3, -3, -2, "range(5, 5, 6)");
@@ -75504,7 +75262,6 @@ TEST(StarlarkRange, SliceRange_241) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 2, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 2, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 2, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -75816,7 +75573,6 @@ TEST(StarlarkRange, SliceRange_242) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 2, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 2, -1, -3, -3, -2, "range(3, 3, 2)");
@@ -76130,7 +75886,6 @@ TEST(StarlarkRange, SliceRange_243) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 2, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 2, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 2, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -76442,7 +76197,6 @@ TEST(StarlarkRange, SliceRange_244) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 2, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 2, 2, -3, -3, -2, "range(0, 0, -4)");
@@ -76756,7 +76510,6 @@ TEST(StarlarkRange, SliceRange_245) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 2, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 2, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 2, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -77068,7 +76821,6 @@ TEST(StarlarkRange, SliceRange_246) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 3, -3, -3, -3, -3, "range(5, 5, 9)");
   test(2, 3, -3, -3, -3, -2, "range(5, 5, 6)");
@@ -77382,7 +77134,6 @@ TEST(StarlarkRange, SliceRange_247) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 3, -2, -3, -3, -3, "range(4, 4, 6)");
   test(2, 3, -2, -3, -3, -2, "range(4, 4, 4)");
   test(2, 3, -2, -3, -3, -1, "range(4, 4, 2)");
@@ -77694,7 +77445,6 @@ TEST(StarlarkRange, SliceRange_248) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 3, -1, -3, -3, -3, "range(3, 3, 3)");
   test(2, 3, -1, -3, -3, -2, "range(3, 3, 2)");
@@ -78008,7 +77758,6 @@ TEST(StarlarkRange, SliceRange_249) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 3, 1, -3, -3, -3, "range(1, 1, -3)");
   test(2, 3, 1, -3, -3, -2, "range(1, 1, -2)");
   test(2, 3, 1, -3, -3, -1, "range(1, 1, -1)");
@@ -78320,7 +78069,6 @@ TEST(StarlarkRange, SliceRange_250) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(2, 3, 2, -3, -3, -3, "range(0, 0, -6)");
   test(2, 3, 2, -3, -3, -2, "range(0, 0, -4)");
@@ -78634,7 +78382,6 @@ TEST(StarlarkRange, SliceRange_251) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(2, 3, 3, -3, -3, -3, "range(-1, -1, -9)");
   test(2, 3, 3, -3, -3, -2, "range(-1, -1, -6)");
   test(2, 3, 3, -3, -3, -1, "range(-1, -1, -3)");
@@ -78946,7 +78693,6 @@ TEST(StarlarkRange, SliceRange_252) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -3, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, -3, -3, -3, -3, -2, "range(6, 6, 6)");
@@ -79260,7 +79006,6 @@ TEST(StarlarkRange, SliceRange_253) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -3, -2, -3, -3, -3, "range(3, 3, 6)");
   test(3, -3, -2, -3, -3, -2, "range(3, 3, 4)");
   test(3, -3, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -79572,7 +79317,6 @@ TEST(StarlarkRange, SliceRange_254) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -3, -1, -3, -3, -3, "range(0, 0, 3)");
   test(3, -3, -1, -3, -3, -2, "range(0, 0, 2)");
@@ -79886,7 +79630,6 @@ TEST(StarlarkRange, SliceRange_255) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -3, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, -3, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, -3, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -80198,7 +79941,6 @@ TEST(StarlarkRange, SliceRange_256) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -3, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, -3, 2, -3, -3, -2, "range(1, 1, -4)");
@@ -80512,7 +80254,6 @@ TEST(StarlarkRange, SliceRange_257) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -3, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, -3, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, -3, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -80824,7 +80565,6 @@ TEST(StarlarkRange, SliceRange_258) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -2, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, -2, -3, -3, -3, -2, "range(6, 6, 6)");
@@ -81138,7 +80878,6 @@ TEST(StarlarkRange, SliceRange_259) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -2, -2, -3, -3, -3, "range(3, 3, 6)");
   test(3, -2, -2, -3, -3, -2, "range(3, 3, 4)");
   test(3, -2, -2, -3, -3, -1, "range(3, 3, 2)");
@@ -81450,7 +81189,6 @@ TEST(StarlarkRange, SliceRange_260) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -2, -1, -3, -3, -3, "range(1, 1, 3)");
   test(3, -2, -1, -3, -3, -2, "range(1, 1, 2)");
@@ -81764,7 +81502,6 @@ TEST(StarlarkRange, SliceRange_261) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -2, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, -2, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, -2, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -82076,7 +81813,6 @@ TEST(StarlarkRange, SliceRange_262) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -2, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, -2, 2, -3, -3, -2, "range(1, 1, -4)");
@@ -82390,7 +82126,6 @@ TEST(StarlarkRange, SliceRange_263) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -2, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, -2, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, -2, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -82702,7 +82437,6 @@ TEST(StarlarkRange, SliceRange_264) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -1, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, -1, -3, -3, -3, -2, "range(6, 6, 6)");
@@ -83016,7 +82750,6 @@ TEST(StarlarkRange, SliceRange_265) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -1, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, -1, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, -1, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -83328,7 +83061,6 @@ TEST(StarlarkRange, SliceRange_266) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -1, -1, -3, -3, -3, "range(2, 2, 3)");
   test(3, -1, -1, -3, -3, -2, "range(2, 2, 2)");
@@ -83642,7 +83374,6 @@ TEST(StarlarkRange, SliceRange_267) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -1, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, -1, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, -1, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -83954,7 +83685,6 @@ TEST(StarlarkRange, SliceRange_268) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, -1, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, -1, 2, -3, -3, -2, "range(1, 1, -4)");
@@ -84268,7 +83998,6 @@ TEST(StarlarkRange, SliceRange_269) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, -1, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, -1, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, -1, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -84580,7 +84309,6 @@ TEST(StarlarkRange, SliceRange_270) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 0, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 0, -3, -3, -3, -2, "range(6, 6, 6)");
@@ -84894,7 +84622,6 @@ TEST(StarlarkRange, SliceRange_271) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 0, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 0, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 0, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -85206,7 +84933,6 @@ TEST(StarlarkRange, SliceRange_272) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 0, -1, -3, -3, -3, "range(3, 3, 3)");
   test(3, 0, -1, -3, -3, -2, "range(3, 3, 2)");
@@ -85520,7 +85246,6 @@ TEST(StarlarkRange, SliceRange_273) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 0, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 0, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 0, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -85832,7 +85557,6 @@ TEST(StarlarkRange, SliceRange_274) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 0, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 0, 2, -3, -3, -2, "range(1, 1, -4)");
@@ -86146,7 +85870,6 @@ TEST(StarlarkRange, SliceRange_275) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 0, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 0, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, 0, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -86458,7 +86181,6 @@ TEST(StarlarkRange, SliceRange_276) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 1, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 1, -3, -3, -3, -2, "range(6, 6, 6)");
@@ -86772,7 +86494,6 @@ TEST(StarlarkRange, SliceRange_277) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 1, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 1, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 1, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -87084,7 +86805,6 @@ TEST(StarlarkRange, SliceRange_278) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 1, -1, -3, -3, -3, "range(4, 4, 3)");
   test(3, 1, -1, -3, -3, -2, "range(4, 4, 2)");
@@ -87398,7 +87118,6 @@ TEST(StarlarkRange, SliceRange_279) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 1, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 1, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 1, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -87710,7 +87429,6 @@ TEST(StarlarkRange, SliceRange_280) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 1, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 1, 2, -3, -3, -2, "range(1, 1, -4)");
@@ -88024,7 +87742,6 @@ TEST(StarlarkRange, SliceRange_281) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 1, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 1, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, 1, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -88336,7 +88053,6 @@ TEST(StarlarkRange, SliceRange_282) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 2, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 2, -3, -3, -3, -2, "range(6, 6, 6)");
@@ -88650,7 +88366,6 @@ TEST(StarlarkRange, SliceRange_283) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 2, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 2, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 2, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -88962,7 +88677,6 @@ TEST(StarlarkRange, SliceRange_284) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 2, -1, -3, -3, -3, "range(4, 4, 3)");
   test(3, 2, -1, -3, -3, -2, "range(4, 4, 2)");
@@ -89276,7 +88990,6 @@ TEST(StarlarkRange, SliceRange_285) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 2, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 2, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 2, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -89588,7 +89301,6 @@ TEST(StarlarkRange, SliceRange_286) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 2, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 2, 2, -3, -3, -2, "range(1, 1, -4)");
@@ -89902,7 +89614,6 @@ TEST(StarlarkRange, SliceRange_287) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 2, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 2, 3, -3, -3, -2, "range(0, 0, -6)");
   test(3, 2, 3, -3, -3, -1, "range(0, 0, -3)");
@@ -90214,7 +89925,6 @@ TEST(StarlarkRange, SliceRange_288) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 3, -3, -3, -3, -3, "range(6, 6, 9)");
   test(3, 3, -3, -3, -3, -2, "range(6, 6, 6)");
@@ -90528,7 +90238,6 @@ TEST(StarlarkRange, SliceRange_289) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 3, -2, -3, -3, -3, "range(5, 5, 6)");
   test(3, 3, -2, -3, -3, -2, "range(5, 5, 4)");
   test(3, 3, -2, -3, -3, -1, "range(5, 5, 2)");
@@ -90840,7 +90549,6 @@ TEST(StarlarkRange, SliceRange_290) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 3, -1, -3, -3, -3, "range(4, 4, 3)");
   test(3, 3, -1, -3, -3, -2, "range(4, 4, 2)");
@@ -91154,7 +90862,6 @@ TEST(StarlarkRange, SliceRange_291) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 3, 1, -3, -3, -3, "range(2, 2, -3)");
   test(3, 3, 1, -3, -3, -2, "range(2, 2, -2)");
   test(3, 3, 1, -3, -3, -1, "range(2, 2, -1)");
@@ -91467,7 +91174,6 @@ TEST(StarlarkRange, SliceRange_292) {
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
 
-
   test(3, 3, 2, -3, -3, -3, "range(1, 1, -6)");
   test(3, 3, 2, -3, -3, -2, "range(1, 1, -4)");
   test(3, 3, 2, -3, -3, -1, "range(1, 1, -2)");
@@ -91779,7 +91485,6 @@ TEST(StarlarkRange, SliceRange_293) {
     EXPECT_EQ(expected_value, result->str()) << "range(" << istart << ", " << iend << ", " << istep << ")[" << sstart << ":" << send << ":" << sstep << "]\n";
     EXPECT_THAT(error_callback.messages, IsEmpty());
   };
-
 
   test(3, 3, 3, -3, -3, -3, "range(0, 0, -9)");
   test(3, 3, 3, -3, -3, -2, "range(0, 0, -6)");
