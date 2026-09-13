@@ -11,3 +11,4 @@ block {
   op_code { pop_frame { } }                                                                                                                                                 #  9
   op_code { end { } }                                                                                                                                                       # 10
 }
+max_eval_stack_depth: 1

@@ -70,3 +70,4 @@ block {
   op_code { pop_frame { } }                                                                                                                                                                                                       # 64
   op_code { end { } }                                                                                                                                                                                                             # 65
 }
+max_eval_stack_depth: 5

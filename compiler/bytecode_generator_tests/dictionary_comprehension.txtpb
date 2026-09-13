@@ -154,3 +154,4 @@ block {
   op_code { pop_frame { } }                                                                                                                                                                                                # 152
   op_code { end { } }                                                                                                                                                                                                      # 153
 }
+max_eval_stack_depth: 7

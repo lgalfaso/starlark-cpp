@@ -10,6 +10,8 @@ cc_library(
     hdrs = ["compiler.hpp"],
     visibility = ["//visibility:public"],
     deps = [
+        "//compiler/analysis:call_site_analysis",
+        "//compiler/analysis:stack_depth_analysis",
         "//grammar:ast_listener",
         "//grammar:options",
         "//grammar:parser",

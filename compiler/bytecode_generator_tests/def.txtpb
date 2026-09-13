@@ -92,3 +92,4 @@ block {
   op_code { return { } }                                                                                                                                                                                                                   #  7
   function_signature { param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: false } param { name: "b" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } has_star_argument: true has_star_star_argument: false keyword_only_parameter_count: 1 fn_name: "foo8" }
 }
+max_eval_stack_depth: 5

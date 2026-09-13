@@ -24,3 +24,4 @@ block {
   op_code { return { } }                                                                                                                                                                                               #  4
   function_signature { param { name: "x" pos { frame: 0 pos_in_frame: 1 } default_initialization: false } param { name: "a" pos { frame: 0 pos_in_frame: 0 } default_initialization: true } has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "<lambda>" }
 }
+max_eval_stack_depth: 3

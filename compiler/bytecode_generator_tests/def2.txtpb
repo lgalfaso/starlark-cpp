@@ -21,3 +21,4 @@ block {
   op_code { return { } }                                                                                                                                                                                               #  6
   function_signature { has_star_argument: false has_star_star_argument: false keyword_only_parameter_count: 0 fn_name: "foo" }
 }
+max_eval_stack_depth: 3

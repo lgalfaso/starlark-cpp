@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "compiler/analysis/call_site_analysis.hpp"
+#include "compiler/analysis/stack_depth_analysis.hpp"
 #include "grammar/ast_listener.hpp"
 #include "grammar/options.hpp"
 #include "grammar/parser.hpp"
@@ -467,7 +469,6 @@ void bytecode_generator::exit_dot_expression_for_assignment(const DotExpr* dot_e
   *op_code->mutable_sh()->mutable_highlight_end() = dot_expression->pif().end();
   *op_code->mutable_sh()->mutable_end() = dot_expression->pif().end();
 }
-
 
 void bytecode_generator::exit_slice_expression(const SliceExpr* slice_expression) {
   switch (slice_expression->slice_type_case()) {
@@ -1249,7 +1250,6 @@ const Block& bytecode_generator::block() const {
   return output.block(blocks.back());
 }
 
-
 void remove_extra_store(Program* program) {
   struct store_info {
     std::vector<OpCode*> store;
@@ -1706,6 +1706,8 @@ Program* compiler::compile(std::string_view program_name, std::string_view starl
   simplify_call_method(result);
   eliminate_redundant_load_store(result);
   remove_nop_instructions(result);
+  result->set_max_eval_stack_depth(starlark::compiler::analysis::analyze_max_stack_depth(*result));
+  starlark::compiler::analysis::annotate_static_self_calls(*result);
   return result;
 }
 

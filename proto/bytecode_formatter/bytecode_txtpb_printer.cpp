@@ -97,6 +97,9 @@ void print_bytecode_txtpb(const starlark::bytecode::Program& program, std::ostre
   for (const auto& block : program.block()) {
     print_block(block, printer, out);
   }
+  if (program.max_eval_stack_depth() != 0) {
+    out << "max_eval_stack_depth: " << program.max_eval_stack_depth() << '\n';
+  }
 }
 
 }  // namespace proto
