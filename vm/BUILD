@@ -3,6 +3,16 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 cc_library(
+    name = "module_metadata",
+    srcs = ["module_metadata.cpp"],
+    hdrs = ["module_metadata.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:starlark_bytecode_cc_proto",
+    ],
+)
+
+cc_library(
     name = "frame",
     srcs = ["frame.cpp"],
     hdrs = ["frame.hpp"],
@@ -70,13 +80,14 @@ cc_library(
     name = "module_loader",
     srcs = ["module_loader.cpp"],
     hdrs = [
-        "module_loader.hpp",
         "builtin.star",
+        "module_loader.hpp",
     ],
     visibility = ["//visibility:public"],
     deps = [
         ":built_in_functions",
         ":frame",
+        ":module_metadata",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_function",
         "//runtime:starlark_object",

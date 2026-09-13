@@ -14,6 +14,7 @@
 #include "runtime/starlark_string.hpp"
 #include "vm/frame.hpp"
 #include "vm/module_loader.hpp"
+#include "vm/module_metadata.hpp"
 
 #pragma GCC visibility push(default)
 
@@ -36,6 +37,7 @@ struct runner_state {
     const starlark::bytecode::Program* bytecode;
     std::string module_name;
     std::vector<starlark::runtime::starlark_string*>* const_strings = nullptr;
+    const starlark::vm::module_metadata* metadata = nullptr;
   };
   // If recursion is not allowed, then it is possible to replace this with `std::vector<std::vector<frame*>*> frame_stacks;`.
   // Doing so would prevent the copying of a std::vector during a call. Given that there is a chance that recursion will be allowed,

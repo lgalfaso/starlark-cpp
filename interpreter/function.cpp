@@ -15,6 +15,7 @@
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "string/levenshtein.hpp"
+#include "vm/module_metadata.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_v2_arguments_exactly;
@@ -35,6 +36,7 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::vm::builtin_star_module;
 using ::starlark::vm::frame;
+using ::starlark::vm::function_metadata_for_block;
 
 using kwargs_map_t = starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>>;
 
@@ -74,9 +76,11 @@ interpreter_function::interpreter_function(
     std::vector<starlark::runtime::starlark_obj*>&& default_arguments,
     const runner_state::program_info& current_program_,
     bool inner_fn,
+    std::string_view fn_name,
     const google::protobuf::RepeatedPtrField<std::string>* frame_names,
     const std::vector<frame*>& frame_stack) :
-      starlark::runtime::starlark_function(current_program_.bytecode->block(entrypoint).function_signature().fn_name(),
+      starlark::runtime::starlark_function(
+          fn_name,
           current_program_.module_name,
           starlark::runtime::object_kind::kFunction),
       entrypoint(entrypoint),
@@ -86,10 +90,16 @@ interpreter_function::interpreter_function(
       current_program(current_program_),
       inner_(inner_fn) {
   default_parameters = nullptr;
-  for (std::size_t i = 0; i < current_program_.bytecode->block(entrypoint).function_signature().param().size(); ++i) {
-    named_argument_index[current_program_.bytecode->block(entrypoint).function_signature().param(i).name()] = i;
+  assert(fn_meta() != nullptr);
+  for (std::size_t i = 0; i < fn_meta()->params.size(); ++i) {
+    named_argument_index[fn_meta()->params[i].name] = i;
   }
   compute_simple_call_metadata();
+}
+
+const starlark::vm::function_signature_metadata* interpreter_function::fn_meta() const {
+  assert(current_program.metadata != nullptr);
+  return function_metadata_for_block(*current_program.metadata, entrypoint);
 }
 
 void interpreter_function::compute_simple_call_metadata() {
@@ -99,25 +109,25 @@ void interpreter_function::compute_simple_call_metadata() {
   keyword_only_param_count_ = 0;
   keyword_only_default_offset_ = 0;
 
-  const auto& function_signature = current_program.bytecode->block(entrypoint).function_signature();
-  if (function_signature.has_star_argument() || function_signature.has_star_star_argument()) {
+  assert(fn_meta() != nullptr);
+  if (fn_meta()->has_star_argument || fn_meta()->has_star_star_argument) {
     return;
   }
-  int number_of_standard_params = function_signature.param().size();
-  int keyword_only_count = function_signature.keyword_only_parameter_count();
-  int number_positional_params = number_of_standard_params - keyword_only_count;
+  const int number_of_standard_params = fn_meta()->param_count;
+  const int keyword_only_count = fn_meta()->keyword_only_parameter_count;
+  const int number_positional_params = fn_meta()->positional_param_count;
   // Positional-only fast path (call_pos / CallPos*) cannot supply keyword-only
   // arguments. Skip optimization when any keyword-only param lacks a default.
   for (int i = number_positional_params; i < number_of_standard_params; ++i) {
-    if (!function_signature.param(i).default_initialization()) {
+    if (!fn_meta()->params[i].default_initialization) {
       return;
     }
   }
   simple_positional_arity_ = number_positional_params;
   positional_param_frame_pos_.resize(number_positional_params);
   for (int i = 0; i < number_positional_params; ++i) {
-    positional_param_frame_pos_[i] = function_signature.param(i).pos().pos_in_frame();
-    if (function_signature.param(i).default_initialization()) {
+    positional_param_frame_pos_[i] = fn_meta()->params[i].pos_in_frame;
+    if (fn_meta()->params[i].default_initialization) {
       keyword_only_default_offset_++;
     }
   }
@@ -153,11 +163,11 @@ void interpreter_function::apply_keyword_only_defaults(frame* new_frame) {
   if (keyword_only_param_count_ == 0) {
     return;
   }
-  const auto& function_signature = current_program.bytecode->block(entrypoint).function_signature();
+  assert(fn_meta() != nullptr);
   int default_argument_pos = keyword_only_default_offset_;
   for (int i = 0; i < keyword_only_param_count_; ++i) {
-    int param_idx = keyword_only_param_start_ + i;
-    new_frame->elements[function_signature.param(param_idx).pos().pos_in_frame()] = default_arguments[default_argument_pos];
+    const int param_idx = keyword_only_param_start_ + i;
+    new_frame->elements[fn_meta()->params[param_idx].pos_in_frame] = default_arguments[default_argument_pos];
     default_argument_pos++;
   }
 }
@@ -258,28 +268,21 @@ starlark_obj* interpreter_function::call_pos_general(
   auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
   starlark_obj::pos_args_t star_args;
   int next_positional_param = 0;
-  const auto& function_signature = current_program.bytecode->block(entrypoint).function_signature();
-  int number_of_standard_params = function_signature.param().size();
-  if (function_signature.has_star_argument()) {
-    number_of_standard_params--;
-  }
-  if (function_signature.has_star_star_argument()) {
-    number_of_standard_params--;
-  }
-  int number_positional_params = number_of_standard_params - function_signature.keyword_only_parameter_count();
+  assert(fn_meta() != nullptr);
+  const int number_positional_params = fn_meta()->positional_param_count;
 
   std::vector<bool> filled_elements(frame_names->size());
   for (auto* param : pos_args) {
     if (next_positional_param < number_positional_params) {
-      auto& signature_param = function_signature.param(next_positional_param);
-      new_frame->elements[signature_param.pos().pos_in_frame()] = param;
+      auto& signature_param = fn_meta()->params[next_positional_param];
+      new_frame->elements[signature_param.pos_in_frame] = param;
       filled_elements[next_positional_param] = true;
       next_positional_param++;
-    } else if (function_signature.has_star_argument()) {
+    } else if (fn_meta()->has_star_argument) {
       star_args.push_back(param);
     } else {
       error_callback.add_error(error_v2_arguments_exactly(
-          function_signature.fn_name(),
+          fn_name,
           pos_args.size(),
           number_positional_params));
       return nullptr;
@@ -288,48 +291,48 @@ starlark_obj* interpreter_function::call_pos_general(
   int default_argument_pos = 0;
   for (int i = 0; i < number_positional_params; ++i) {
     if (!filled_elements[i]) {
-      if (function_signature.param(i).default_initialization()) {
-        new_frame->elements[function_signature.param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
+      if (fn_meta()->params[i].default_initialization) {
+        new_frame->elements[fn_meta()->params[i].pos_in_frame] = default_arguments[default_argument_pos];
       } else {
         error_callback.add_error(error_v2_missing_positional_argument(
-            function_signature.fn_name(),
-            function_signature.param(i).name()));
+            fn_name,
+            fn_meta()->params[i].name));
         return nullptr;
       }
     }
-    if (function_signature.param(i).default_initialization()) {
+    if (fn_meta()->params[i].default_initialization) {
       default_argument_pos++;
     }
   }
   auto keyword_only_parameter_start = number_positional_params;
-  if (function_signature.has_star_argument()) {
+  if (fn_meta()->has_star_argument) {
     keyword_only_parameter_start++;
   }
-  for (int i = keyword_only_parameter_start; i < keyword_only_parameter_start + function_signature.keyword_only_parameter_count(); ++i) {
+  for (int i = keyword_only_parameter_start; i < keyword_only_parameter_start + fn_meta()->keyword_only_parameter_count; ++i) {
     if (!filled_elements[i]) {
-      if (function_signature.param(i).default_initialization()) {
-        new_frame->elements[function_signature.param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
+      if (fn_meta()->params[i].default_initialization) {
+        new_frame->elements[fn_meta()->params[i].pos_in_frame] = default_arguments[default_argument_pos];
       } else {
         error_callback.add_error(error_v2_missing_keyword_only_argument(
-            function_signature.fn_name(),
-            function_signature.param(i).name()));
+            fn_name,
+            fn_meta()->params[i].name));
         return nullptr;
       }
     }
-    if (function_signature.param(i).default_initialization()) {
+    if (fn_meta()->params[i].default_initialization) {
       default_argument_pos++;
     }
   }
-  if (function_signature.has_star_argument()) {
+  if (fn_meta()->has_star_argument) {
     auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), star_args.size());
     for (auto* element : star_args) {
       tuple->add(element);
     }
-    new_frame->elements[function_signature.param(number_positional_params).pos().pos_in_frame()] = tuple;
+    new_frame->elements[fn_meta()->params[number_positional_params].pos_in_frame] = tuple;
   }
-  if (function_signature.has_star_star_argument()) {
+  if (fn_meta()->has_star_star_argument) {
     auto* dict = Arena::Create<starlark_dictionary>(&ctx.arena());
-    new_frame->elements[function_signature.param(function_signature.param().size() - 1).pos().pos_in_frame()] = dict;
+    new_frame->elements[fn_meta()->params[fn_meta()->param_count - 1].pos_in_frame] = dict;
   }
 
   state->frame_stacks.push_back(frame_stack);
@@ -364,29 +367,22 @@ starlark_obj* interpreter_function::call(
   starlark_obj::pos_args_t args;
   kwargs_map_t kwargs;
   int next_positional_param = 0;
-  const auto& function_signature = current_program.bytecode->block(entrypoint).function_signature();
-  int number_of_standard_params = function_signature.param().size();
-  if (function_signature.has_star_argument()) {
-    number_of_standard_params--;
-  }
-  if (function_signature.has_star_star_argument()) {
-    number_of_standard_params--;
-  }
-  int number_positional_params = number_of_standard_params - function_signature.keyword_only_parameter_count();
+  assert(fn_meta() != nullptr);
+  const int number_positional_params = fn_meta()->positional_param_count;
 
   std::vector<bool> filled_elements(frame_names->size());
   // Process the positional arguments.
   for (auto* param : pos_args) {
     if (next_positional_param < number_positional_params) {
-      auto& signature_param = function_signature.param(next_positional_param);
-      new_frame->elements[signature_param.pos().pos_in_frame()] = param;
+      auto& signature_param = fn_meta()->params[next_positional_param];
+      new_frame->elements[signature_param.pos_in_frame] = param;
       filled_elements[next_positional_param] = true;
       next_positional_param++;
-    } else if (function_signature.has_star_argument()) {
+    } else if (fn_meta()->has_star_argument) {
       args.push_back(param);
     } else {
       error_callback.add_error(error_v2_arguments_exactly(
-          function_signature.fn_name(),
+          fn_name,
           pos_args.size(),
           number_positional_params));
       return nullptr;
@@ -396,22 +392,22 @@ starlark_obj* interpreter_function::call(
   for (auto& kwparam : named_args) {
     auto it = named_argument_index.find(kwparam.first->as_string());
     if (it == named_argument_index.end()) {
-      if (function_signature.has_star_star_argument()) {
+      if (fn_meta()->has_star_star_argument) {
         kwargs.insert(kwparam.first->as_string(), kwparam.second);
       } else {
         std::vector<std::string> all_candidates;
-        for (const auto& param : function_signature.param()) {
-          all_candidates.emplace_back(param.name());
+        for (const auto& param : fn_meta()->params) {
+          all_candidates.emplace_back(param.name);
         }
         auto candidate = starlark::string::levenshtein(kwparam.first->as_string(), all_candidates);
         if (candidate >= 0) {
           error_callback.add_error(error_v2_unexpected_keyword_argument_with_hint(
-              function_signature.fn_name(),
+              fn_name,
               kwparam.first->as_string(),
               all_candidates[candidate]), all_candidates[candidate]);
         } else {
           error_callback.add_error(error_v2_unexpected_keyword_argument(
-              function_signature.fn_name(),
+              fn_name,
               kwparam.first->as_string()));
         }
         return nullptr;
@@ -421,65 +417,65 @@ starlark_obj* interpreter_function::call(
     auto pos = it->second;
     if (filled_elements[pos]) {
       error_callback.add_error(error_v2_multiple_values_for_argument(
-          function_signature.fn_name(),
+          fn_name,
           kwparam.first->as_string()));
       return nullptr;
     }
-    new_frame->elements[function_signature.param(pos).pos().pos_in_frame()] = kwparam.second;
+    new_frame->elements[fn_meta()->params[pos].pos_in_frame] = kwparam.second;
     filled_elements[pos] = true;
   }
   // Put the default arguments, and check that all the slots are filled on positional arguments.
   int default_argument_pos = 0;
   for (int i = 0; i < number_positional_params; ++i) {
     if (!filled_elements[i]) {
-      if (function_signature.param(i).default_initialization()) {
-        new_frame->elements[function_signature.param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
+      if (fn_meta()->params[i].default_initialization) {
+        new_frame->elements[fn_meta()->params[i].pos_in_frame] = default_arguments[default_argument_pos];
       } else {
         error_callback.add_error(error_v2_missing_positional_argument(
-            function_signature.fn_name(),
-            function_signature.param(i).name()));
+            fn_name,
+            fn_meta()->params[i].name));
         return nullptr;
       }
     }
-    if (function_signature.param(i).default_initialization()) {
+    if (fn_meta()->params[i].default_initialization) {
       default_argument_pos++;
     }
   }
   // Put the default arguments, and check that all the slots are filled on keyword-only arguments.
   auto keyword_only_parameter_start = number_positional_params;
-  if (function_signature.has_star_argument()) {
+  if (fn_meta()->has_star_argument) {
     keyword_only_parameter_start++;
   }
-  for (int i = keyword_only_parameter_start; i < keyword_only_parameter_start + function_signature.keyword_only_parameter_count(); ++i) {
+  for (int i = keyword_only_parameter_start; i < keyword_only_parameter_start + fn_meta()->keyword_only_parameter_count; ++i) {
     if (!filled_elements[i]) {
-      if (function_signature.param(i).default_initialization()) {
-        new_frame->elements[function_signature.param(i).pos().pos_in_frame()] = default_arguments[default_argument_pos];
+      if (fn_meta()->params[i].default_initialization) {
+        new_frame->elements[fn_meta()->params[i].pos_in_frame] = default_arguments[default_argument_pos];
       } else {
         error_callback.add_error(error_v2_missing_keyword_only_argument(
-            function_signature.fn_name(),
-            function_signature.param(i).name()));
+            fn_name,
+            fn_meta()->params[i].name));
         return nullptr;
       }
     }
-    if (function_signature.param(i).default_initialization()) {
+    if (fn_meta()->params[i].default_initialization) {
       default_argument_pos++;
     }
   }
   // Fill *args.
-  if (function_signature.has_star_argument()) {
+  if (fn_meta()->has_star_argument) {
     auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), args.size());
     for (auto* element : args) {
       tuple->add(element);
     }
-    new_frame->elements[function_signature.param(number_positional_params).pos().pos_in_frame()] = tuple;
+    new_frame->elements[fn_meta()->params[number_positional_params].pos_in_frame] = tuple;
   }
   // Fill **kwargs.
-  if (function_signature.has_star_star_argument()) {
+  if (fn_meta()->has_star_star_argument) {
     auto* dict = Arena::Create<starlark_dictionary>(&ctx.arena());
     for (auto& element : kwargs) {
       dict->insert(Arena::Create<starlark_string>(&ctx.arena(), element.first), element.second, error_callback);
     }
-    new_frame->elements[function_signature.param(function_signature.param().size() - 1).pos().pos_in_frame()] = dict;
+    new_frame->elements[fn_meta()->params[fn_meta()->param_count - 1].pos_in_frame] = dict;
   }
 
   state->frame_stacks.push_back(frame_stack);

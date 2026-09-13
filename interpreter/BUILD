@@ -11,6 +11,7 @@ cc_library(
         "//runtime:starlark_object",
         "//vm:frame",
         "//vm:module_loader",
+        "//vm:module_metadata",
     ],
 )
 
@@ -27,6 +28,7 @@ cc_library(
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
         "//vm:frame",
+        "//vm:module_metadata",
     ],
 )
 
@@ -57,6 +59,7 @@ cc_library(
         "//runtime:starlark_types",
         "//vm:frame",
         "//vm:module_loader",
+        "//vm:module_metadata",
         "//vm:program_limits",
         "@bazel_tools//tools/cpp/runfiles",
     ],

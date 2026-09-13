@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "vm/frame.hpp"
+#include "vm/module_metadata.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "runtime/starlark_object.hpp"
 #include "status_or/status.hpp"
@@ -34,6 +35,7 @@ class module_info {
   bool inner() const;
   void loaded(frame* base_frame, const starlark::bytecode::Program* program);
   std::pair<frame*, const starlark::bytecode::Program*>& get();
+  const module_metadata& metadata_for(const starlark::bytecode::Program& program);
 
  private:
   std::string cannonical_name_;
@@ -42,6 +44,7 @@ class module_info {
   const bindings_t custom_binding_;
   google::protobuf::Arena arena_;
   std::pair<frame*, const starlark::bytecode::Program*> frame_and_program;
+  const module_metadata* metadata_ = nullptr;
 };
 
 class module_loader {

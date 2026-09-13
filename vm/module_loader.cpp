@@ -9,6 +9,7 @@
 #include <string>
 
 #include "vm/built_in_functions.hpp"
+#include "vm/module_metadata.hpp"
 #include "runtime/starlark_function.hpp"
 
 
@@ -106,6 +107,13 @@ void starlark::vm::module_info::loaded(frame* base_frame, const Program* program
 
 std::pair<frame*, const starlark::bytecode::Program*>& starlark::vm::module_info::get() {
   return frame_and_program;
+}
+
+const module_metadata& starlark::vm::module_info::metadata_for(const Program& program) {
+  if (metadata_ == nullptr) {
+    metadata_ = Arena::Create<module_metadata>(&arena_, module_metadata::build(program));
+  }
+  return *metadata_;
 }
 
 module_loader::module_loader() {

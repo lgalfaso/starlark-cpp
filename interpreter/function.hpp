@@ -29,6 +29,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
       std::vector<starlark::runtime::starlark_obj*>&& default_arguments,
       const runner_state::program_info& current_program_,
       bool inner_,
+      std::string_view fn_name,
       const google::protobuf::RepeatedPtrField<std::string>* frame_names,
       const std::vector<starlark::vm::frame*>& frame_stack);
   starlark::runtime::starlark_obj* call(
@@ -75,6 +76,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
   bool begin_call(runner_state* state, starlark::runtime::context& ctx, starlark::runtime::error_fn& error_callback);
   void commit_frame(starlark::vm::frame* new_frame, runner_state* state, starlark::runtime::context& ctx);
   void apply_keyword_only_defaults(starlark::vm::frame* new_frame);
+  const starlark::vm::function_signature_metadata* fn_meta() const;
 
   int entrypoint;
   std::vector<starlark::runtime::starlark_obj*> default_arguments;

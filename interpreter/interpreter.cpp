@@ -37,6 +37,7 @@
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
 #include "vm/frame.hpp"
+#include "vm/module_metadata.hpp"
 #include "vm/program_limits.hpp"
 
 using ::google::protobuf::Arena;
@@ -230,7 +231,8 @@ class error_handler : public error_fn {
       result.mutable_block()->Add()->add_op_code()->mutable_fail();
       return result;
     });
-    static runner_state::program_info base_program{&fail_program, "@@//:fail.star"};
+    static const starlark::vm::module_metadata fail_metadata = starlark::vm::module_metadata::build(fail_program);
+    static runner_state::program_info base_program{&fail_program, "@@//:fail.star", nullptr, &fail_metadata};
 
     // Get the current operation that is being executed. Skip the operation if this is an internal module.
     runner_state::program_info* program_stack = nullptr;
@@ -998,13 +1000,17 @@ frame* run_program(
           default_values.push_back(stack[stack.size() - i]);
         }
         stack.resize(stack.size() - op_code.make_function().default_values_count(), nullptr);
+        const auto entrypoint = op_code.make_function().entrypoint();
+        const auto* fn_meta = starlark::vm::function_metadata_for_block(*state.current_program.metadata, entrypoint);
+        assert(fn_meta != nullptr);
         stack.push_back(Arena::Create<interpreter_function>(
             &ctx.arena(),
-            op_code.make_function().entrypoint(),
+            entrypoint,
             std::move(default_values),
             state.current_program,
             state.inner,
-            &state.current_program.bytecode->block(op_code.make_function().entrypoint()).op_code(0).create_frame().symbol(),
+            fn_meta->fn_name,
+            &state.current_program.bytecode->block(entrypoint).op_code(0).create_frame().symbol(),
             state.frame_stacks.back()));
         break;
       }
@@ -1193,7 +1199,12 @@ status_or<frame*> interpreter::run(module_loader& loader,
     for (const auto& kv : (*mod_info)->custom_binding()) {
       global_context.insert(kv);
     }
-    auto current_program = runner_state::program_info{entry.program, std::string{(*mod_info)->cannonical_name()}};
+    auto current_program = runner_state::program_info{
+        entry.program,
+        std::string{(*mod_info)->cannonical_name()},
+        nullptr,
+        &(*mod_info)->metadata_for(*entry.program),
+    };
     if (!current_program.bytecode->const_string().empty()) {
       current_program.const_strings = Arena::Create<std::vector<starlark_string*>>(&ctx.arena(), current_program.bytecode->const_string().size());
       for (int i = 0; i < current_program.bytecode->const_string().size(); ++i) {
