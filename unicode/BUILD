@@ -95,8 +95,8 @@ cc_library(
     hdrs = ["utf8_reverse_reader.hpp"],
     visibility = ["//visibility:public"],
     deps = [
-        ":utf8_reader",
         ":ucd",
+        ":utf8_reader",
     ],
 )
 
@@ -185,5 +185,3 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
-
-
