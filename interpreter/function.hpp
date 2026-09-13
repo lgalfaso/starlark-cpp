@@ -80,7 +80,7 @@ class interpreter_function : public starlark::runtime::starlark_function {
 
   int entrypoint;
   std::vector<starlark::runtime::starlark_obj*> default_arguments;
-  std::map<std::string_view, std::size_t> named_argument_index;
+  std::map<std::string, int, std::less<>> named_argument_index;
   const google::protobuf::RepeatedPtrField<std::string>* frame_names;
   std::vector<starlark::vm::frame*> frame_stack;
   starlark::runtime::starlark_obj* default_parameters;

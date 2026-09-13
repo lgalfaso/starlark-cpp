@@ -3,6 +3,65 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 cc_library(
+    name = "fast_compare",
+    hdrs = ["fast_compare.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//runtime:starlark_object",
+    ],
+)
+
+cc_library(
+    name = "predeclared_context",
+    srcs = ["predeclared_context.cpp"],
+    hdrs = ["predeclared_context.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//runtime:starlark_function",
+        "//runtime:starlark_function_builder_impl",
+        "//runtime:starlark_object",
+        "//runtime:starlark_object_impl",
+        "//runtime:starlark_types",
+    ],
+)
+
+cc_library(
+    name = "module_load_tracker",
+    srcs = ["module_load_tracker.cpp"],
+    hdrs = ["module_load_tracker.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "frame_factory",
+    hdrs = ["frame_factory.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":module_metadata",
+        "//vm:frame",
+        "@protobuf",
+    ],
+)
+
+cc_library(
+    name = "function_call_binding",
+    srcs = ["function_call_binding.cpp"],
+    hdrs = ["function_call_binding.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":module_metadata",
+        "//containers:linked_hash_map",
+        "//errors:runtime_error_messages",
+        "//runtime:starlark_dictionary",
+        "//runtime:starlark_object",
+        "//runtime:starlark_string",
+        "//runtime:starlark_tuple",
+        "//string:levenshtein",
+        "@protobuf",
+    ],
+)
+
+cc_library(
     name = "module_metadata",
     srcs = ["module_metadata.cpp"],
     hdrs = ["module_metadata.hpp"],

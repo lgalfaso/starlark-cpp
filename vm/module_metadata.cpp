@@ -5,20 +5,44 @@
 namespace starlark {
 namespace vm {
 
+using ::starlark::bytecode::BlockType;
 using ::starlark::bytecode::OpCode;
 
 module_metadata module_metadata::build(const starlark::bytecode::Program& program) {
   module_metadata result;
   if (!program.block().empty()) {
-    for (const auto& op : program.block(0).op_code()) {
+    for (int ip = 0; ip < program.block(0).op_code().size(); ++ip) {
+      const auto& op = program.block(0).op_code(ip);
       if (op.op_code_case() == OpCode::kCreateFrame) {
         frame_metadata frame;
         frame.block_type = op.create_frame().block_type();
+        frame.block_idx = 0;
+        frame.ip = ip;
         for (const auto& symbol : op.create_frame().symbol()) {
           frame.symbols.push_back(symbol);
         }
         result.frames.push_back(std::move(frame));
       }
+    }
+  }
+  for (int block_idx = 0; block_idx < program.block().size(); ++block_idx) {
+    const auto& block = program.block(block_idx);
+    for (int ip = 0; ip < block.op_code().size(); ++ip) {
+      const auto& op = block.op_code(ip);
+      if (op.op_code_case() != OpCode::kCreateFrame) {
+        continue;
+      }
+      if (block_idx == 0 || op.create_frame().block_type() == BlockType::FUNCTION_BLOCK) {
+        continue;
+      }
+      frame_metadata frame;
+      frame.block_type = op.create_frame().block_type();
+      frame.block_idx = block_idx;
+      frame.ip = ip;
+      for (const auto& symbol : op.create_frame().symbol()) {
+        frame.symbols.push_back(symbol);
+      }
+      result.frames.push_back(std::move(frame));
     }
   }
   for (int block_idx = 1; block_idx < program.block().size(); ++block_idx) {
@@ -63,6 +87,33 @@ const function_signature_metadata* function_metadata_for_block(const module_meta
     return nullptr;
   }
   return &metadata.functions[fn_idx];
+}
+
+const frame_metadata* frame_metadata_for(const module_metadata& metadata, BlockType block_type) {
+  for (const auto& frame : metadata.frames) {
+    if (frame.block_type == block_type && frame.block_idx == 0) {
+      return &frame;
+    }
+  }
+  return nullptr;
+}
+
+int frame_meta_index(const module_metadata& metadata, BlockType block_type) {
+  for (std::size_t i = 0; i < metadata.frames.size(); ++i) {
+    if (metadata.frames[i].block_type == block_type && metadata.frames[i].block_idx == 0) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
+}
+
+int frame_meta_index_at(const module_metadata& metadata, int32_t block_idx, int32_t ip) {
+  for (std::size_t i = 0; i < metadata.frames.size(); ++i) {
+    if (metadata.frames[i].block_idx == block_idx && metadata.frames[i].ip == ip) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
 }
 
 }  // namespace vm

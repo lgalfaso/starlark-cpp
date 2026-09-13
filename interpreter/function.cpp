@@ -8,14 +8,12 @@
 #include <utility>
 #include <vector>
 
-#include "containers/linked_hash_map.hpp"
 #include "errors/runtime_error_messages.hpp"
 #include "interpreter/runner_state.hpp"
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
-#include "string/levenshtein.hpp"
-#include "vm/module_metadata.hpp"
+#include "vm/function_call_binding.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_v2_arguments_exactly;
@@ -36,9 +34,8 @@ using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
 using ::starlark::vm::builtin_star_module;
 using ::starlark::vm::frame;
+using ::starlark::vm::function_call_binding_state;
 using ::starlark::vm::function_metadata_for_block;
-
-using kwargs_map_t = starlark::cnt::linked_hash_map<std::string_view, starlark_obj*, std::hash<std::string_view>, std::equal_to<std::string_view>>;
 
 namespace starlark {
 namespace interpreter {
@@ -364,119 +361,18 @@ starlark_obj* interpreter_function::call(
   state->fns_in_stack[this]++;
   state->call_fns.push_back(this);
   auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
-  starlark_obj::pos_args_t args;
-  kwargs_map_t kwargs;
-  int next_positional_param = 0;
-  assert(fn_meta() != nullptr);
-  const int number_positional_params = fn_meta()->positional_param_count;
-
-  std::vector<bool> filled_elements(frame_names->size());
-  // Process the positional arguments.
-  for (auto* param : pos_args) {
-    if (next_positional_param < number_positional_params) {
-      auto& signature_param = fn_meta()->params[next_positional_param];
-      new_frame->elements[signature_param.pos_in_frame] = param;
-      filled_elements[next_positional_param] = true;
-      next_positional_param++;
-    } else if (fn_meta()->has_star_argument) {
-      args.push_back(param);
-    } else {
-      error_callback.add_error(error_v2_arguments_exactly(
-          fn_name,
-          pos_args.size(),
-          number_positional_params));
-      return nullptr;
-    }
+  function_call_binding_state binding_state;
+  if (!starlark::vm::bind_function_arguments(*fn_meta(),
+          named_argument_index,
+          default_arguments,
+          new_frame->elements,
+          pos_args,
+          named_args,
+          binding_state,
+          error_callback)) {
+    return nullptr;
   }
-  // Process the named arguments.
-  for (auto& kwparam : named_args) {
-    auto it = named_argument_index.find(kwparam.first->as_string());
-    if (it == named_argument_index.end()) {
-      if (fn_meta()->has_star_star_argument) {
-        kwargs.insert(kwparam.first->as_string(), kwparam.second);
-      } else {
-        std::vector<std::string> all_candidates;
-        for (const auto& param : fn_meta()->params) {
-          all_candidates.emplace_back(param.name);
-        }
-        auto candidate = starlark::string::levenshtein(kwparam.first->as_string(), all_candidates);
-        if (candidate >= 0) {
-          error_callback.add_error(error_v2_unexpected_keyword_argument_with_hint(
-              fn_name,
-              kwparam.first->as_string(),
-              all_candidates[candidate]), all_candidates[candidate]);
-        } else {
-          error_callback.add_error(error_v2_unexpected_keyword_argument(
-              fn_name,
-              kwparam.first->as_string()));
-        }
-        return nullptr;
-      }
-      continue;
-    }
-    auto pos = it->second;
-    if (filled_elements[pos]) {
-      error_callback.add_error(error_v2_multiple_values_for_argument(
-          fn_name,
-          kwparam.first->as_string()));
-      return nullptr;
-    }
-    new_frame->elements[fn_meta()->params[pos].pos_in_frame] = kwparam.second;
-    filled_elements[pos] = true;
-  }
-  // Put the default arguments, and check that all the slots are filled on positional arguments.
-  int default_argument_pos = 0;
-  for (int i = 0; i < number_positional_params; ++i) {
-    if (!filled_elements[i]) {
-      if (fn_meta()->params[i].default_initialization) {
-        new_frame->elements[fn_meta()->params[i].pos_in_frame] = default_arguments[default_argument_pos];
-      } else {
-        error_callback.add_error(error_v2_missing_positional_argument(
-            fn_name,
-            fn_meta()->params[i].name));
-        return nullptr;
-      }
-    }
-    if (fn_meta()->params[i].default_initialization) {
-      default_argument_pos++;
-    }
-  }
-  // Put the default arguments, and check that all the slots are filled on keyword-only arguments.
-  auto keyword_only_parameter_start = number_positional_params;
-  if (fn_meta()->has_star_argument) {
-    keyword_only_parameter_start++;
-  }
-  for (int i = keyword_only_parameter_start; i < keyword_only_parameter_start + fn_meta()->keyword_only_parameter_count; ++i) {
-    if (!filled_elements[i]) {
-      if (fn_meta()->params[i].default_initialization) {
-        new_frame->elements[fn_meta()->params[i].pos_in_frame] = default_arguments[default_argument_pos];
-      } else {
-        error_callback.add_error(error_v2_missing_keyword_only_argument(
-            fn_name,
-            fn_meta()->params[i].name));
-        return nullptr;
-      }
-    }
-    if (fn_meta()->params[i].default_initialization) {
-      default_argument_pos++;
-    }
-  }
-  // Fill *args.
-  if (fn_meta()->has_star_argument) {
-    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), args.size());
-    for (auto* element : args) {
-      tuple->add(element);
-    }
-    new_frame->elements[fn_meta()->params[number_positional_params].pos_in_frame] = tuple;
-  }
-  // Fill **kwargs.
-  if (fn_meta()->has_star_star_argument) {
-    auto* dict = Arena::Create<starlark_dictionary>(&ctx.arena());
-    for (auto& element : kwargs) {
-      dict->insert(Arena::Create<starlark_string>(&ctx.arena(), element.first), element.second, error_callback);
-    }
-    new_frame->elements[fn_meta()->params[fn_meta()->param_count - 1].pos_in_frame] = dict;
-  }
+  finish_bound_function_frame(*fn_meta(), ctx.arena(), new_frame->elements, binding_state, error_callback);
 
   state->frame_stacks.push_back(frame_stack);
   state->frame_stacks.back().push_back(new_frame);

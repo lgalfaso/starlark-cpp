@@ -17,6 +17,8 @@ namespace vm {
 
 struct frame_metadata {
   starlark::bytecode::BlockType block_type = starlark::bytecode::BlockType::FUNCTION_BLOCK;
+  int32_t block_idx = 0;
+  int32_t ip = 0;
   std::vector<std::string> symbols;
 };
 
@@ -45,6 +47,9 @@ struct module_metadata {
 };
 
 const function_signature_metadata* function_metadata_for_block(const module_metadata& metadata, int32_t block_idx);
+const frame_metadata* frame_metadata_for(const module_metadata& metadata, starlark::bytecode::BlockType block_type);
+int frame_meta_index(const module_metadata& metadata, starlark::bytecode::BlockType block_type);
+int frame_meta_index_at(const module_metadata& metadata, int32_t block_idx, int32_t ip);
 
 }  // namespace vm
 }  // namespace starlark

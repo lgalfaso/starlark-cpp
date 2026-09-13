@@ -2,9 +2,8 @@
 
 #include "interpreter/interpreter.hpp"
 
-#include <iostream>
-
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <map>
 #include <optional>
@@ -20,7 +19,6 @@
 #include "errors/runtime_error_messages.hpp"
 #include "errors/source_highlight.hpp"
 #include "interpreter/function.hpp"
-#include "interpreter/runner_state.hpp"
 #include "runtime/builtin_pos.hpp"
 #include "runtime/error_fn.hpp"
 #include "runtime/starlark_bigint.hpp"
@@ -36,8 +34,11 @@
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
 #include "runtime/starlark_types.hpp"
+#include "vm/fast_compare.hpp"
 #include "vm/frame.hpp"
+#include "vm/module_load_tracker.hpp"
 #include "vm/module_metadata.hpp"
+#include "vm/predeclared_context.hpp"
 #include "vm/program_limits.hpp"
 
 using ::google::protobuf::Arena;
@@ -78,6 +79,7 @@ using ::starlark::runtime::builtin_pos::sorted_pos1;
 using ::starlark::runtime::context;
 using ::starlark::runtime::create_function;
 using ::starlark::runtime::error_fn;
+using ::starlark::runtime::object_kind;
 using ::starlark::runtime::runtime_options;
 using ::starlark::runtime::starlark_bigint;
 using ::starlark::runtime::starlark_bool;
@@ -112,7 +114,6 @@ using ::starlark::runtime::starlark_fn_type;
 using ::starlark::runtime::starlark_fn_zip;
 using ::starlark::runtime::starlark_integer;
 using ::starlark::runtime::starlark_list;
-using ::starlark::runtime::object_kind;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
@@ -120,6 +121,7 @@ using ::starlark::runtime::starlark_types;
 using ::starlark::vm::frame;
 using ::starlark::vm::get_dependencies;
 using ::starlark::vm::module_loader;
+
 namespace starlark {
 namespace interpreter {
 
@@ -127,33 +129,6 @@ namespace {
 
 frame* create_frame(Arena& arena, const RepeatedPtrField<std::string>* names) {
   return Arena::Create<frame>(&arena, names);
-}
-
-bool fast_equals(starlark_obj* lhs, starlark_obj* rhs) {
-  if (lhs == rhs) {
-    return true;
-  }
-  if (lhs->kind() == object_kind::kInt &&
-      rhs->kind() == object_kind::kInt) {
-    return lhs->as_int64() == rhs->as_int64();
-  }
-  return lhs->equals(*rhs);
-}
-
-std::optional<int> fast_int_cmp(starlark_obj* lhs, starlark_obj* rhs) {
-  if (lhs->kind() == object_kind::kInt &&
-      rhs->kind() == object_kind::kInt) {
-    auto l = lhs->as_int64();
-    auto r = rhs->as_int64();
-    if (l < r) {
-      return -1;
-    }
-    if (l > r) {
-      return 1;
-    }
-    return 0;
-  }
-  return std::nullopt;
 }
 
 void execute_call_pos(std::vector<starlark_obj*>& stack, std::size_t arg_count, context& ctx, error_fn& error_callback) {
@@ -511,21 +486,21 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (fast_equals(stack.back(), element) ? ctx.true_value() : ctx.false_value());
+        stack.back() = (starlark::vm::fast_equals(stack.back(), element) ? ctx.true_value() : ctx.false_value());
         break;
       }
       case OpCode::kBinaryBangEquals: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        stack.back() = (fast_equals(stack.back(), element) ? ctx.false_value() : ctx.true_value());
+        stack.back() = (starlark::vm::fast_equals(stack.back(), element) ? ctx.false_value() : ctx.true_value());
         break;
       }
       case OpCode::kBinaryLessThan: {
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+        if (auto cmp = starlark::vm::fast_int_cmp(stack.back(), element)) {
           stack.back() = (*cmp < 0 ? ctx.true_value() : ctx.false_value());
           break;
         }
@@ -540,7 +515,7 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+        if (auto cmp = starlark::vm::fast_int_cmp(stack.back(), element)) {
           stack.back() = (*cmp <= 0 ? ctx.true_value() : ctx.false_value());
           break;
         }
@@ -555,7 +530,7 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+        if (auto cmp = starlark::vm::fast_int_cmp(stack.back(), element)) {
           stack.back() = (*cmp > 0 ? ctx.true_value() : ctx.false_value());
           break;
         }
@@ -570,7 +545,7 @@ frame* run_program(
         assert(stack.size() >= 2);
         starlark_obj* element = stack.back();
         stack.pop_back();
-        if (auto cmp = fast_int_cmp(stack.back(), element)) {
+        if (auto cmp = starlark::vm::fast_int_cmp(stack.back(), element)) {
           stack.back() = (*cmp >= 0 ? ctx.true_value() : ctx.false_value());
           break;
         }
@@ -1085,25 +1060,7 @@ frame* run_program(
 }
 
 std::string report_recursion_in_modules(const std::vector<std::string>& module_lookup, std::size_t initial_pos) {
-  std::string result;
-
-  for (std::size_t i = 0; i < initial_pos; ++i) {
-    result += "    ";
-    result += module_lookup[i];
-    result += "\n";
-  }
-  result += "+-> ";
-  result += module_lookup[initial_pos];
-  result += "\n";
-  for (std::size_t i = initial_pos + 1; i < module_lookup.size(); ++i) {
-    result += "|   ";
-    result += module_lookup[i];
-    result += "\n";
-  }
-  result += "+-> ";
-  result += module_lookup[initial_pos];
-  result += "\n";
-  return result;
+  return starlark::vm::report_recursion_in_modules(module_lookup, initial_pos);
 }
 
 }  // namespace
@@ -1127,8 +1084,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
     .program = nullptr,
   });
   frame* last_frame = nullptr;
-  std::vector<std::string> module_lookup;
-  std::map<std::string, std::size_t, std::less<>> module_processing;
+  starlark::vm::module_load_tracker module_tracker;
   bool module_reduction = false;
   while (!to_run.empty()) {
     // It would be nice not to have to retrieve the module every single time, but `module_info*` in
@@ -1151,18 +1107,18 @@ status_or<frame*> interpreter::run(module_loader& loader,
 
     // Begin - Find out whether there are recursions in modules.
     std::string_view c_name = (*mod_info)->cannonical_name();
-    auto module_processing_it = module_processing.find(c_name);
-    if (module_processing_it != module_processing.end() &&
-        (!module_reduction || module_processing_it->second + 1 != module_lookup.size())) {
+    auto module_processing_it = module_tracker.module_processing.find(c_name);
+    if (module_processing_it != module_tracker.module_processing.end() &&
+        (!module_reduction || module_processing_it->second + 1 != module_tracker.module_lookup.size())) {
       logging.log(LogLevel::LOG_LEVEL_ERROR,
-                  std::format("recursion found during module lookup\n{}", report_recursion_in_modules(module_lookup, module_processing[std::string{c_name}])),
+                  std::format("recursion found during module lookup\n{}", report_recursion_in_modules(module_tracker.module_lookup, module_tracker.module_processing[std::string{c_name}])),
                   entry.caller_module_name,
                   Position::default_instance());
       return status_or<frame*>(status_code::kStaticError);
     }
-    if (module_processing_it == module_processing.end()) {
-      module_processing[std::string{c_name}] = module_lookup.size();
-      module_lookup.push_back(std::string{c_name});
+    if (module_processing_it == module_tracker.module_processing.end()) {
+      module_tracker.module_processing[std::string{c_name}] = module_tracker.module_lookup.size();
+      module_tracker.module_lookup.push_back(std::string{c_name});
     }
     module_reduction = false;
     // End - Find out whether there are recursions in modules.
@@ -1217,33 +1173,30 @@ status_or<frame*> interpreter::run(module_loader& loader,
     }
     (*mod_info)->loaded(last_frame, entry.program);
     to_run.pop_back();
-    module_processing.erase(std::string{c_name});
-    module_lookup.pop_back();
+    module_tracker.module_processing.erase(std::string{c_name});
+    module_tracker.module_lookup.pop_back();
     module_reduction = true;
   }
   return status_or<frame*>(last_frame);
 }
 
 void interpreter::add_base_global_context(std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx) const {
-  global_context["True"] = ctx.true_value();
-  global_context["False"] = ctx.false_value();
-  global_context["None"] = ctx.none_value();
-  add_predeclared_builtins(global_context, ctx);
+  starlark::vm::add_core_predeclared_globals(global_context, ctx);
   global_context[starlark_built_in_functions::max_f] = create_function(ctx, nullptr, builtin_entrypoints{
-    .call = starlark_fn_max_impl,
-    .pos1 = max_pos1,
-    .pos2 = max_pos2,
-    .pos3 = max_pos3,
+      .call = starlark_fn_max_impl,
+      .pos1 = max_pos1,
+      .pos2 = max_pos2,
+      .pos3 = max_pos3,
   }, starlark_built_in_functions::max_f);
   global_context[starlark_built_in_functions::min_f] = create_function(ctx, nullptr, builtin_entrypoints{
-    .call = starlark_fn_min_impl,
-    .pos1 = min_pos1,
-    .pos2 = min_pos2,
-    .pos3 = min_pos3,
+      .call = starlark_fn_min_impl,
+      .pos1 = min_pos1,
+      .pos2 = min_pos2,
+      .pos3 = min_pos3,
   }, starlark_built_in_functions::min_f);
   global_context[starlark_built_in_functions::sorted_f] = create_function(ctx, nullptr, builtin_entrypoints{
-    .call = starlark_fn_sorted_impl,
-    .pos1 = sorted_pos1,
+      .call = starlark_fn_sorted_impl,
+      .pos1 = sorted_pos1,
   }, starlark_built_in_functions::sorted_f);
 }
 
