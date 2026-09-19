@@ -18,7 +18,20 @@ engine_program_tests(
     star_labels = _STAR_LABELS,
 )
 
+engine_program_tests(
+    name_prefix = "native_test",
+    program = "//native/runner:native_test",
+    star_labels = _STAR_LABELS,
+    tags = ["native"],
+)
+
 test_suite(
     name = "interpreter_tests",
     tests = ["interpreter_test_" + star.removesuffix(".star") for star in _STARS],
+)
+
+test_suite(
+    name = "native_tests",
+    tags = ["native"],
+    tests = ["native_test_" + star.removesuffix(".star") for star in _STARS],
 )

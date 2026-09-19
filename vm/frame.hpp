@@ -21,6 +21,8 @@ struct frame {
   std::vector<starlark::runtime::starlark_obj*> elements;
   const google::protobuf::RepeatedPtrField<std::string>* names;
   std::vector<starlark::runtime::starlark_iterator*> iterators;
+  // Set when a nested function captures this frame live; keeps pooled frames distinct across calls.
+  bool pinned_for_closure = false;
 };
 
 }  // namespace vm

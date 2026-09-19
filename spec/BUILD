@@ -15,6 +15,20 @@ cc_library(
     alwayslink = 1,
 )
 
+cc_library(
+    name = "spec_native_test_base",
+    testonly = True,
+    srcs = ["spec_native_test.cpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//io:read_file",
+        "//native/runner:native_test_runner",
+        "//vm:test_case",
+        "@googletest//:gtest",
+    ],
+    alwayslink = 1,
+)
+
 cc_binary(
     name = "spec_interpreter_test",
     testonly = True,
@@ -22,5 +36,41 @@ cc_binary(
     deps = [
         ":spec_interpreter_test_base",
         "@googletest//:gtest_main",
+    ],
+)
+
+cc_binary(
+    name = "spec_native_test",
+    testonly = True,
+    visibility = ["//spec:__subpackages__"],
+    deps = [
+        ":spec_native_test_base",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "conformance_test",
+    srcs = ["conformance_test.cpp"],
+    tags = [
+        "native",
+        "spec",
+    ],
+    deps = [
+        "//interpreter",
+        "//native/runner:native_runner",
+        "//vm:module_loader",
+        "@googletest//:gtest_main",
+    ],
+)
+
+test_suite(
+    name = "native_spec_tests",
+    tags = [
+        "native",
+        "spec",
+    ],
+    tests = [
+        "//spec/tests:all_native_spec_tests",
     ],
 )

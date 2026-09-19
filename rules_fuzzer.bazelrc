@@ -1,7 +1,13 @@
-build --repo_env=CC=/usr/local/opt/llvm/bin/clang
-build --repo_env=CXX=/usr/local/opt/llvm/bin/clang++
-build --action_env=CC=/usr/local/opt/llvm/bin/clang
-build --action_env=CXX=/usr/local/opt/llvm/bin/clang++
+# Homebrew LLVM is required for libFuzzer builds; do not set globally or BCR
+# llvm-project 17 fails to compile (e.g. CodeGen/RDFGraph.cpp) with newer libc++.
+build:asan-libfuzzer --repo_env=CC=/usr/local/opt/llvm/bin/clang
+build:asan-libfuzzer --repo_env=CXX=/usr/local/opt/llvm/bin/clang++
+build:asan-libfuzzer --action_env=CC=/usr/local/opt/llvm/bin/clang
+build:asan-libfuzzer --action_env=CXX=/usr/local/opt/llvm/bin/clang++
+build:asan-ubsan-libfuzzer --repo_env=CC=/usr/local/opt/llvm/bin/clang
+build:asan-ubsan-libfuzzer --repo_env=CXX=/usr/local/opt/llvm/bin/clang++
+build:asan-ubsan-libfuzzer --action_env=CC=/usr/local/opt/llvm/bin/clang
+build:asan-ubsan-libfuzzer --action_env=CXX=/usr/local/opt/llvm/bin/clang++
 # Define the --config=asan-libfuzzer configuration.
 build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine=@rules_fuzzing//fuzzing/engines:libfuzzer
 build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_instrumentation=libfuzzer
