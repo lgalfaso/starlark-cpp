@@ -4,6 +4,7 @@
 #define CONTAINERS_LINKED_HASH_MAP_HPP_
 
 #include <functional>
+#include <iterator>
 #include <list>
 #include <unordered_map>
 #include <utility>
@@ -100,6 +101,17 @@ class linked_hash_map {
     order.erase(result->second);
     values.erase(result);
     return 1;
+  }
+
+  // Removes and returns the last inserted key-value pair.
+  // Precondition: !empty()
+  value_type popitem() {
+    auto it = std::prev(order.end());
+    value_type result = *it;
+    auto map_it = values.find(it->first);
+    values.erase(map_it);
+    order.erase(it);
+    return result;
   }
 
  private:

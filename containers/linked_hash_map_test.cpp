@@ -119,5 +119,18 @@ TEST(LinkedHashMap, Erase) {
   EXPECT_TRUE(map.empty());
 }
 
+TEST(LinkedHashMap, Popitem) {
+  linked_hash_map<int, int, int_hash, int_equals_to> map;
+  map.insert(1, 101);
+  map.insert(2, 102);
+  map.insert(3, 103);
+  EXPECT_THAT(map.popitem(), Eq(std::make_pair(3, 103)));
+  EXPECT_THAT(map, ElementsAre(std::make_pair(1, 101), std::make_pair(2, 102)));
+  EXPECT_THAT(map.popitem(), Eq(std::make_pair(2, 102)));
+  EXPECT_THAT(map, ElementsAre(std::make_pair(1, 101)));
+  EXPECT_THAT(map.popitem(), Eq(std::make_pair(1, 101)));
+  EXPECT_TRUE(map.empty());
+}
+
 }  // namespace
 

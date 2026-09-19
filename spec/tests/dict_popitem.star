@@ -1,7 +1,7 @@
 # No arguments.
 a = {"key0": 0, "key1": 1, "key2": 2}
-assert_eq(a.popitem(), ("key0", 0))
-assert_eq(a, {"key1": 1, "key2": 2})
+assert_eq(a.popitem(), ("key2", 2))
+assert_eq(a, {"key0": 0, "key1": 1})
 
 assert_fail('''{}.popitem()''')
 

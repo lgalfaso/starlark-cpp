@@ -274,6 +274,8 @@ starlark_obj* starlark_dictionary::pop(starlark_obj* key, starlark_obj* default_
   return result;
 }
 
+  // This removes the last item.
+  // Context: https://github.com/bazelbuild/starlark/issues/286
 starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callback) {
   if (!can_modify("popitem", error_callback)) {
     return nullptr;
@@ -283,10 +285,9 @@ starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callbac
     return nullptr;
   }
   starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
-  auto it = values_.begin();
-  result->add(it->first);
-  result->add(it->second);
-  values_.erase(it->first);
+  auto item = values_.popitem();
+  result->add(item.first);
+  result->add(item.second);
   return result;
 }
 

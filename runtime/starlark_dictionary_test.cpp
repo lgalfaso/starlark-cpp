@@ -1325,8 +1325,8 @@ TEST(StarlarkDictionary, Popitem) {
   auto* result = method->call(pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
   EXPECT_EQ(result->type(), starlark_types::tuple_t);
-  EXPECT_EQ(result->str(), "(\"key0\", 0)");
-  EXPECT_EQ(dictionary.str(), "{\"key1\": 1}");
+  EXPECT_EQ(result->str(), "(\"key1\", 1)");
+  EXPECT_EQ(dictionary.str(), "{\"key0\": 0}");
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 
