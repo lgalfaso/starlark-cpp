@@ -121,10 +121,9 @@ bool starlark_built_in_function::inner_equals(equals_comparator& comp, const sta
   }
   if (this_obj != nullptr) {
     if (this_obj->primitive()) {
-      comp.add_task(equals_comparator::pending_task{
-        .lhs = this_obj,
-        .rhs = fother->this_obj,
-      });
+      if (!comp.compare(this_obj, fother->this_obj)) {
+        return false;
+      }
     } else {
       if (this_obj != fother->this_obj) {
         return false;

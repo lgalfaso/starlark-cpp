@@ -57,6 +57,29 @@ inline bool is_numeric_kind(object_kind kind) {
   return kind == object_kind::kInt || kind == object_kind::kBigInt || kind == object_kind::kFloat;
 }
 
+// Types that cannot contain other starlark objects and never need cycle tracking for ==.
+inline bool is_leaf_for_equals(object_kind kind) {
+  switch (kind) {
+    case object_kind::kNone:
+    case object_kind::kBool:
+    case object_kind::kInt:
+    case object_kind::kBigInt:
+    case object_kind::kFloat:
+    case object_kind::kString:
+    case object_kind::kStringElems:
+    case object_kind::kStringElemOrds:
+    case object_kind::kStringCodepoints:
+    case object_kind::kStringCodepointOrds:
+    case object_kind::kBytes:
+    case object_kind::kBytesElems:
+    case object_kind::kBytesElemOrds:
+    case object_kind::kRange:
+      return true;
+    default:
+      return false;
+  }
+}
+
 // Ordinal values preserved for the JIT runtime ABI (formerly starlark_numeric_type).
 constexpr int32_t kNumericAbiInt64 = 0;
 constexpr int32_t kNumericAbiBigInt = 1;

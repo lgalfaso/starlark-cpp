@@ -485,10 +485,9 @@ bool starlark_list::inner_equals(equals_comparator& comp, const starlark_obj* ot
     return false;
   }
   for (int i = 0; i < values.size(); ++i) {
-    comp.add_task(equals_comparator::pending_task{
-      .lhs = values[i],
-      .rhs = l_other->values[i],
-    });
+    if (!comp.compare(values[i], l_other->values[i])) {
+      return false;
+    }
   }
   return true;
 }

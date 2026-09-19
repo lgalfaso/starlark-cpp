@@ -189,10 +189,9 @@ bool starlark_tuple::inner_equals(equals_comparator& comp, const starlark_obj* o
     return false;
   }
   for (int i = 0; i < values.size(); ++i) {
-    comp.add_task(equals_comparator::pending_task{
-      .lhs = values[i],
-      .rhs = t_other->values[i],
-    });
+    if (!comp.compare(values[i], t_other->values[i])) {
+      return false;
+    }
   }
   return true;
 }

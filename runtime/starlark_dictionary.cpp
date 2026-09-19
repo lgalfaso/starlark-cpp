@@ -382,10 +382,9 @@ bool starlark_dictionary::inner_equals(equals_comparator& comp, const starlark_o
     if (other_element == n_other->values_.end()) {
       return false;
     }
-    comp.add_task(equals_comparator::pending_task{
-      .lhs = element.second,
-      .rhs = other_element->second,
-    });
+    if (!comp.compare(element.second, other_element->second)) {
+      return false;
+    }
   }
   return true;
 }

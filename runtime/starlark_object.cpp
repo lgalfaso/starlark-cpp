@@ -4,6 +4,9 @@
 
 #include <stdckdint.h>
 
+#include <cstddef>
+#include <cmath>
+
 #include <algorithm>
 #include <bit>
 #include <functional>
@@ -80,21 +83,82 @@ void printer::run() {
   }
 }
 
+namespace {
+
+equals_comparator& leaf_inner_equals_comparator() {
+  static equals_comparator comp;
+  return comp;
+}
+
+}  // namespace
+
+std::optional<bool> try_fast_equals(const starlark_obj* lhs, const starlark_obj* rhs) {
+  if (lhs == rhs) {
+    return true;
+  }
+  if (lhs == nullptr || rhs == nullptr) {
+    return false;
+  }
+  const object_kind lk = lhs->kind();
+  const object_kind rk = rhs->kind();
+  if (lk == rk) {
+    switch (lk) {
+      case object_kind::kNone:
+        return true;
+      case object_kind::kBool:
+        return lhs->truthy() == rhs->truthy();
+      case object_kind::kInt:
+        return lhs->as_int64() == rhs->as_int64();
+      case object_kind::kBigInt:
+        return lhs->as_bigint() == rhs->as_bigint();
+      case object_kind::kFloat: {
+        const double l = lhs->as_float();
+        const double r = rhs->as_float();
+        if (std::isnan(l) && std::isnan(r)) {
+          return true;
+        }
+        return l == r;
+      }
+      case object_kind::kString:
+      case object_kind::kBytes:
+        return lhs->as_string() == rhs->as_string();
+      default:
+        break;
+    }
+  }
+  if (is_leaf_for_equals(lk)) {
+    return lhs->inner_equals(leaf_inner_equals_comparator(), rhs);
+  }
+  if (is_leaf_for_equals(rk)) {
+    return rhs->inner_equals(leaf_inner_equals_comparator(), lhs);
+  }
+  return std::nullopt;
+}
+
 void equals_comparator::add_task(pending_task&& task) {
   tasks.emplace_back(std::move(task));
+}
+
+bool equals_comparator::compare(const starlark_obj* lhs, const starlark_obj* rhs) {
+  if (auto fast = try_fast_equals(lhs, rhs)) {
+    return *fast;
+  }
+  const pending_task task{
+      .lhs = lhs,
+      .rhs = rhs,
+  };
+  if (!executed_tasks.insert(task).second) {
+    return true;
+  }
+  return lhs->inner_equals(*this, rhs);
 }
 
 bool equals_comparator::run() {
   while (!tasks.empty()) {
     auto top = tasks.back();
     tasks.pop_back();
-    if (top.lhs == top.rhs) {
-      continue;
-    }
-    if (executed_tasks.insert(top).second) {
-      if (!top.lhs->inner_equals(*this, top.rhs)) {
-        return false;
-      }
+    if (!compare(top.lhs, top.rhs)) {
+      return false;
     }
   }
   return true;
@@ -207,12 +271,11 @@ bool starlark_obj::equals(const starlark_obj& other) const {
   if (&other == this) {
     return true;
   }
+  if (auto fast = try_fast_equals(this, &other)) {
+    return *fast;
+  }
   equals_comparator cmp;
-  cmp.add_task(equals_comparator::pending_task{
-    .lhs = this,
-    .rhs = &other,
-  });
-  return cmp.run();
+  return cmp.compare(this, &other);
 }
 
 status_or<int> starlark_obj::cmp(const starlark_obj& other, std::string_view op, error_fn& error_callback) const {
@@ -726,6 +789,9 @@ size_t starlark_hash_op::operator()(const starlark_obj* value) const {
 }
 
 bool starlark_equals_to::operator()(const starlark_obj* lhs, const starlark_obj* rhs) const {
+  if (auto fast = try_fast_equals(lhs, rhs)) {
+    return *fast;
+  }
   return lhs->equals(*rhs);
 }
 

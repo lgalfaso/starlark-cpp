@@ -3,9 +3,10 @@
 #ifndef RUNTIME_STARLARK_OBJECT_HPP_
 #define RUNTIME_STARLARK_OBJECT_HPP_
 
-#include <cstdint>
+#include <cstddef>
 
 #include <functional>
+#include <optional>
 #include <map>
 #include <span>
 #include <string>
@@ -64,6 +65,7 @@ class equals_comparator {
   };
 
   void add_task(pending_task&& task);
+  bool compare(const starlark_obj* lhs, const starlark_obj* rhs);
   bool run();
 
  private:
@@ -266,9 +268,13 @@ class starlark_obj {
   friend class printer;
   friend class equals_comparator;
   friend class order_comparator;
+  friend std::optional<bool> try_fast_equals(const starlark_obj* lhs, const starlark_obj* rhs);
 };
 
 int64_t starlark_hash(std::span<int64_t> values);
+// Equality fast path for leaf values and dict/set key lookup. Returns nullopt when
+// equals_comparator cycle tracking is required (lists, tuples, dicts, sets, functions).
+std::optional<bool> try_fast_equals(const starlark_obj* lhs, const starlark_obj* rhs);
 starlark_obj* create_function(context& ctx, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
 
 starlark_obj* find_named_arg(const starlark_obj::named_args_t& named_args, std::string_view key);
