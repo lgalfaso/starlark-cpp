@@ -18,7 +18,7 @@
 namespace starlark {
 namespace vm {
 
-using kwargs_map_t = starlark::cnt::linked_hash_map<std::string, starlark::runtime::starlark_obj*, std::hash<std::string>, std::equal_to<std::string>>;
+typedef starlark::cnt::linked_hash_map<std::string, starlark::runtime::starlark_obj*, std::hash<std::string>, std::equal_to<std::string>> kwargs_map_t;
 
 struct function_call_binding_state {
   starlark::runtime::starlark_obj::pos_args_t star_args;

@@ -56,8 +56,8 @@ starlark::result::status_or<starlark::runtime::runtime_options> parse_runtime_op
     starlark::runtime::context& ctx,
     starlark::runtime::error_fn& error_callback);
 
-using program_runner = std::function<starlark::result::status_or<starlark::vm::frame*>(
-    starlark::vm::module_loader&, starlark::logging::logger&, const starlark::runtime::runtime_options&)>;
+typedef std::function<starlark::result::status_or<starlark::vm::frame*>(
+    starlark::vm::module_loader&, starlark::logging::logger&, const starlark::runtime::runtime_options&)> program_runner; 
 
 starlark::runtime::starlark_obj* check_assert_fail_with_loader(starlark::vm::module_loader& loader,
     std::string_view source,
