@@ -14,7 +14,7 @@ using ::starlark::ucd::word_break_type;
 using ::starlark::ucd::is_Extended_Pictographic;
 using ::starlark::ucd::word_break;
 
-// Based on Unicode Standard Annex #29, revision 47.
+// Based on Unicode Standard Annex #29, revision 49.
 void word_break(const std::vector<char32_t>& code_points, std::vector<std::uint64_t>& output) {
   if (code_points.empty()) {
     return;
