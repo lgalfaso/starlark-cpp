@@ -4,7 +4,7 @@
 #include "google/protobuf/arena.h"
 #include "gtest/gtest.h"
 #include "logging/logging.hpp"
-#include "compiler/analysis/stack_depth_test_support.hpp"
+#include "compiler/test/stack_depth_test_support.hpp"
 #include "proto/starlark_bytecode.pb.h"
 
 using ::google::protobuf::Arena;

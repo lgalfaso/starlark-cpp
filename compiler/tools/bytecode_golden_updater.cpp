@@ -1,6 +1,6 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include "proto/bytecode_formatter/bytecode_golden_updater.hpp"
+#include "compiler/tools/bytecode_golden_updater.hpp"
 
 #include <cstdlib>
 
@@ -28,7 +28,8 @@ using ::starlark::logging::logger;
 using ::starlark::proto::print_bytecode_txtpb;
 
 namespace starlark {
-namespace proto {
+namespace compiler {
+namespace tools {
 namespace {
 
 std::string resolve_path(std::string_view path) {
@@ -118,5 +119,6 @@ int update_bytecode_goldens(std::string_view directory) {
   return 0;
 }
 
-}  // namespace proto
+}  // namespace tools
+}  // namespace compiler
 }  // namespace starlark

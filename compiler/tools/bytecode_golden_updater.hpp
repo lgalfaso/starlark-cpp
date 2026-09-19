@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef PROTO_BYTECODE_FORMATTER_GOLDEN_UPDATER_HPP_
-#define PROTO_BYTECODE_FORMATTER_GOLDEN_UPDATER_HPP_
+#ifndef COMPILER_TOOLS_BYTECODE_GOLDEN_UPDATER_HPP_
+#define COMPILER_TOOLS_BYTECODE_GOLDEN_UPDATER_HPP_
 
 #include <string>
 #include <string_view>
@@ -17,7 +17,8 @@ namespace bytecode {
 class Program;
 }  // namespace bytecode
 
-namespace proto {
+namespace compiler {
+namespace tools {
 
 bool compile_bytecode_from_star(std::string_view star_path,
     google::protobuf::Arena& arena,
@@ -27,7 +28,8 @@ bool write_bytecode_txtpb_file(const starlark::bytecode::Program& program, std::
 
 int update_bytecode_goldens(std::string_view directory);
 
-}  // namespace proto
+}  // namespace tools
+}  // namespace compiler
 }  // namespace starlark
 
-#endif  // PROTO_BYTECODE_FORMATTER_GOLDEN_UPDATER_HPP_
+#endif  // COMPILER_TOOLS_BYTECODE_GOLDEN_UPDATER_HPP_

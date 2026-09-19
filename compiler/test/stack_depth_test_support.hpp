@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef COMPILER_ANALYSIS_STACK_DEPTH_TEST_SUPPORT_HPP_
-#define COMPILER_ANALYSIS_STACK_DEPTH_TEST_SUPPORT_HPP_
+#ifndef COMPILER_TEST_STACK_DEPTH_TEST_SUPPORT_HPP_
+#define COMPILER_TEST_STACK_DEPTH_TEST_SUPPORT_HPP_
 
 #include <cstdlib>
 
@@ -39,9 +39,9 @@ inline std::string read_stack_depth_test_file(const std::string& filename) {
   const char* test_workspace = std::getenv("TEST_WORKSPACE");
   std::vector<std::filesystem::path> candidates;
   if (test_srcdir != nullptr && test_workspace != nullptr) {
-    candidates.push_back(std::filesystem::path(test_srcdir) / test_workspace / "compiler/analysis/stack_depth_tests" / filename);
+    candidates.push_back(std::filesystem::path(test_srcdir) / test_workspace / "compiler/test/stack_depth_tests" / filename);
   }
-  candidates.push_back(std::filesystem::path("compiler/analysis/stack_depth_tests") / filename);
+  candidates.push_back(std::filesystem::path("compiler/test/stack_depth_tests") / filename);
 
   for (const auto& path : candidates) {
     std::ifstream input(path);
@@ -845,4 +845,4 @@ inline std::string format_opcode_coverage_report(const std::map<bytecode::OpCode
 }  // namespace compiler
 }  // namespace starlark
 
-#endif  // COMPILER_ANALYSIS_STACK_DEPTH_TEST_SUPPORT_HPP_
+#endif  // COMPILER_TEST_STACK_DEPTH_TEST_SUPPORT_HPP_

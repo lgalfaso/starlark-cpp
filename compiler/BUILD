@@ -72,5 +72,5 @@ cc_binary(
     testonly = True,
     srcs = ["update_bytecode_goldens.cpp"],
     tags = ["manual"],
-    deps = ["//proto/bytecode_formatter:bytecode_golden_updater"],
+    deps = ["//compiler/tools:bytecode_golden_updater"],
 )

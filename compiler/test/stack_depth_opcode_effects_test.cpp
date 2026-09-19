@@ -8,7 +8,7 @@
 #include "google/protobuf/arena.h"
 #include "gtest/gtest.h"
 #include "logging/logging.hpp"
-#include "compiler/analysis/stack_depth_test_support.hpp"
+#include "compiler/test/stack_depth_test_support.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::bytecode::OpCode;
