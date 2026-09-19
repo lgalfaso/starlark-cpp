@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "runtime/hex_format.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
 
@@ -12,12 +13,6 @@ using ::starlark::unicode::utf8_encode_code_point;
 
 namespace starlark {
 namespace runtime {
-
-namespace {
-
-static const char hex[] = "0123456789abcdef";
-
-}  // namespace
 
 void write_printable(uint64_t codepoint, bool allow_non_ascii_printable, std::string& output) {
   if (codepoint == '\\' || codepoint == '"') {
@@ -31,32 +26,32 @@ void write_printable(uint64_t codepoint, bool allow_non_ascii_printable, std::st
     output += "\\r";
   } else if (codepoint < 0x20 || codepoint == 0x7f) {
     output += "\\x";
-    output += hex[(codepoint >> 4) & 0xf];
-    output += hex[codepoint & 0xf];
+    output += kHexDigitsLower[(codepoint >> 4) & 0xf];
+    output += kHexDigitsLower[codepoint & 0xf];
   } else if (codepoint <= 0x7f) {
     utf8_encode_code_point(codepoint, output, false, false);
   } else if (allow_non_ascii_printable && is_printable(codepoint)) {
     utf8_encode_code_point(codepoint, output, false, false);
   } else if (codepoint <= 0xff) {
     output += "\\x";
-    output += hex[(codepoint >> 4) & 0xf];
-    output += hex[codepoint & 0xf];
+    output += kHexDigitsLower[(codepoint >> 4) & 0xf];
+    output += kHexDigitsLower[codepoint & 0xf];
   } else if (codepoint <= 0xffff) {
     output += "\\u";
-    output += hex[(codepoint >> 12) & 0xf];
-    output += hex[(codepoint >> 8) & 0xf];
-    output += hex[(codepoint >> 4) & 0xf];
-    output += hex[codepoint & 0xf];
+    output += kHexDigitsLower[(codepoint >> 12) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 8) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 4) & 0xf];
+    output += kHexDigitsLower[codepoint & 0xf];
   } else {
     output += "\\U";
-    output += hex[(codepoint >> 28) & 0xf];
-    output += hex[(codepoint >> 24) & 0xf];
-    output += hex[(codepoint >> 20) & 0xf];
-    output += hex[(codepoint >> 16) & 0xf];
-    output += hex[(codepoint >> 12) & 0xf];
-    output += hex[(codepoint >> 8) & 0xf];
-    output += hex[(codepoint >> 4) & 0xf];
-    output += hex[codepoint & 0xf];
+    output += kHexDigitsLower[(codepoint >> 28) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 24) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 20) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 16) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 12) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 8) & 0xf];
+    output += kHexDigitsLower[(codepoint >> 4) & 0xf];
+    output += kHexDigitsLower[codepoint & 0xf];
   }
 }
 

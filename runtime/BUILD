@@ -8,10 +8,17 @@ cc_library(
 )
 
 cc_library(
+    name = "hex_format",
+    hdrs = ["hex_format.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
     name = "hex_encoder",
     srcs = ["hex_encoder.cpp"],
     hdrs = ["hex_encoder.hpp"],
     deps = [
+        ":hex_format",
         "//unicode:encode",
     ],
 )
