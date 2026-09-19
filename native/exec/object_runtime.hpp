@@ -52,7 +52,7 @@ bool starlark_obj_rt_truthy(starlark::runtime::starlark_obj* value);
 starlark::runtime::starlark_obj* starlark_obj_rt_ctx_none_value(starlark::runtime::context* ctx);
 starlark::runtime::starlark_obj* starlark_obj_rt_ctx_true_value(starlark::runtime::context* ctx);
 starlark::runtime::starlark_obj* starlark_obj_rt_ctx_false_value(starlark::runtime::context* ctx);
-int32_t starlark_obj_rt_obj_numeric_type(starlark::runtime::starlark_obj* value);
+bool starlark_obj_rt_obj_is_int(starlark::runtime::starlark_obj* value);
 int64_t starlark_obj_rt_obj_as_int64(starlark::runtime::starlark_obj* value);
 
 void starlark_obj_rt_dot(native_exec_context* exec, const char* member, std::size_t len, starlark::runtime::context* ctx, starlark::runtime::error_fn* err);

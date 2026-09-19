@@ -22,10 +22,8 @@ namespace {
 
 using ::starlark::bytecode::BlockType;
 
-constexpr int32_t kNumericTypeInt64 = ::starlark::runtime::kNumericAbiInt64;
-
-llvm::Value* emit_obj_numeric_type(ir_exec_context& ir_exec, llvm::IRBuilderBase& builder, llvm::Value* obj) {
-  return builder.CreateCall(ir_exec.object_fn("starlark_obj_rt_obj_numeric_type"), {obj});
+llvm::Value* emit_obj_is_int(ir_exec_context& ir_exec, llvm::IRBuilderBase& builder, llvm::Value* obj) {
+  return builder.CreateCall(ir_exec.object_fn("starlark_obj_rt_obj_is_int"), {obj});
 }
 
 llvm::Value* emit_obj_as_int64(ir_exec_context& ir_exec, llvm::IRBuilderBase& builder, llvm::Value* obj) {
@@ -94,7 +92,7 @@ llvm::Value* emit_ctx_false(ir_exec_context& ir_exec, llvm::IRBuilderBase& build
 //   if (value == nullptr || value == ctx->none_value()) return false;
 //   if (value == ctx->false_value()) return false;
 //   if (value == ctx->true_value()) return true;
-//   if (kind_to_numeric_abi(value->kind()) == kNumericAbiInt64) return value->as_int64() != 0;
+//   if (value->kind() == object_kind::kInt) return value->as_int64() != 0;
 //   return value->truthy();
 llvm::Value* emit_obj_truthy(ir_exec_context& ir_exec,
     llvm::IRBuilderBase& builder,
@@ -136,8 +134,7 @@ llvm::Value* emit_obj_truthy(ir_exec_context& ir_exec,
   builder.CreateBr(done);
 
   builder.SetInsertPoint(check_int);
-  auto* num_ty = emit_obj_numeric_type(ir_exec, builder, value);
-  auto* is_int = builder.CreateICmpEQ(num_ty, llvm::ConstantInt::get(ir_exec.i32_ty(), kNumericTypeInt64));
+  auto* is_int = emit_obj_is_int(ir_exec, builder, value);
   auto* int_fast = llvm::BasicBlock::Create(entry->getContext(), "truthy_int_fast", fn);
   auto* fallback = llvm::BasicBlock::Create(entry->getContext(), "truthy_fallback", fn);
   builder.CreateCondBr(is_int, int_fast, fallback);
@@ -165,8 +162,7 @@ void emit_push_none(lowering_context& lowering, llvm::IRBuilderBase& builder, ll
 // Equivalent C++:
 //   auto* rhs = exec->eval_stack.pop();
 //   auto* lhs = exec->eval_stack.peek();
-//   if (kind_to_numeric_abi(lhs->kind()) == kNumericAbiInt64 &&
-//       kind_to_numeric_abi(rhs->kind()) == kNumericAbiInt64) {
+//   if (lhs->kind() == object_kind::kInt && rhs->kind() == object_kind::kInt) {
 //     int64_t a = lhs->as_int64(), b = rhs->as_int64();
 //     // result_i64 = a op b (+, -, *, &, |, ^, <<, >>); for +/-/*, fall back on signed overflow
 //     exec->eval_stack.pop();
@@ -191,10 +187,8 @@ void emit_binary_with_int_fastpath(lowering_context& lowering,
   auto* slow = llvm::BasicBlock::Create(entry->getContext(), "bin_slow", fn);
   auto* done = llvm::BasicBlock::Create(entry->getContext(), "bin_done", fn);
 
-  auto* lhs_ty = emit_obj_numeric_type(ir_exec, builder, lhs);
-  auto* rhs_ty = emit_obj_numeric_type(ir_exec, builder, rhs);
-  auto* lhs_int = builder.CreateICmpEQ(lhs_ty, llvm::ConstantInt::get(ir_exec.i32_ty(), kNumericTypeInt64));
-  auto* rhs_int = builder.CreateICmpEQ(rhs_ty, llvm::ConstantInt::get(ir_exec.i32_ty(), kNumericTypeInt64));
+  auto* lhs_int = emit_obj_is_int(ir_exec, builder, lhs);
+  auto* rhs_int = emit_obj_is_int(ir_exec, builder, rhs);
   auto* both_int = builder.CreateAnd(lhs_int, rhs_int);
   auto* fast = llvm::BasicBlock::Create(entry->getContext(), "bin_fast", fn);
   builder.CreateCondBr(both_int, fast, slow);
@@ -241,8 +235,7 @@ void emit_binary_with_int_fastpath(lowering_context& lowering,
 // Equivalent C++:
 //   auto* rhs = exec->eval_stack.pop();
 //   auto* lhs = exec->eval_stack.peek();
-//   if (kind_to_numeric_abi(lhs->kind()) == kNumericAbiInt64 &&
-//       kind_to_numeric_abi(rhs->kind()) == kNumericAbiInt64) {
+//   if (lhs->kind() == object_kind::kInt && rhs->kind() == object_kind::kInt) {
 //     int64_t a = lhs->as_int64(), b = rhs->as_int64();
 //     bool result = compare(a, b, kind);  // ==, !=, <, <=, >, >=
 //     exec->eval_stack.pop();
@@ -267,10 +260,9 @@ void emit_cmp_with_int_fastpath(lowering_context& lowering,
   auto* slow = llvm::BasicBlock::Create(entry->getContext(), "bin_slow", fn);
   auto* done = llvm::BasicBlock::Create(entry->getContext(), "bin_done", fn);
 
-  auto* lhs_ty = emit_obj_numeric_type(ir_exec, builder, lhs);
-  auto* rhs_ty = emit_obj_numeric_type(ir_exec, builder, rhs);
-  auto* both_int = builder.CreateAnd(builder.CreateICmpEQ(lhs_ty, llvm::ConstantInt::get(ir_exec.i32_ty(), kNumericTypeInt64)),
-      builder.CreateICmpEQ(rhs_ty, llvm::ConstantInt::get(ir_exec.i32_ty(), kNumericTypeInt64)));
+  auto* lhs_int = emit_obj_is_int(ir_exec, builder, lhs);
+  auto* rhs_int = emit_obj_is_int(ir_exec, builder, rhs);
+  auto* both_int = builder.CreateAnd(lhs_int, rhs_int);
   auto* fast = llvm::BasicBlock::Create(entry->getContext(), "bin_fast", fn);
   builder.CreateCondBr(both_int, fast, slow);
 

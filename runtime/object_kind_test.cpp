@@ -9,11 +9,6 @@ using ::starlark::runtime::is_bytes_kind;
 using ::starlark::runtime::is_int_kind;
 using ::starlark::runtime::is_numeric_kind;
 using ::starlark::runtime::is_string_kind;
-using ::starlark::runtime::kNumericAbiBigInt;
-using ::starlark::runtime::kNumericAbiFloat;
-using ::starlark::runtime::kNumericAbiInt64;
-using ::starlark::runtime::kNumericAbiNotNumeric;
-using ::starlark::runtime::kind_to_numeric_abi;
 using ::starlark::runtime::kind_to_type_name;
 using ::starlark::runtime::object_kind;
 using ::starlark::runtime::same_starlark_type;
@@ -106,11 +101,7 @@ TEST(ObjectKind, SameStarlarkTypeMatchesLegacyTypeEquality) {
   }
 }
 
-TEST(ObjectKind, NumericAbiMapping) {
-  EXPECT_EQ(kind_to_numeric_abi(object_kind::kInt), kNumericAbiInt64);
-  EXPECT_EQ(kind_to_numeric_abi(object_kind::kBigInt), kNumericAbiBigInt);
-  EXPECT_EQ(kind_to_numeric_abi(object_kind::kFloat), kNumericAbiFloat);
-  EXPECT_EQ(kind_to_numeric_abi(object_kind::kString), kNumericAbiNotNumeric);
+TEST(ObjectKind, NumericKindPredicate) {
   EXPECT_TRUE(is_numeric_kind(object_kind::kInt));
   EXPECT_TRUE(is_numeric_kind(object_kind::kBigInt));
   EXPECT_TRUE(is_numeric_kind(object_kind::kFloat));

@@ -80,25 +80,6 @@ inline bool is_leaf_for_equals(object_kind kind) {
   }
 }
 
-// Ordinal values preserved for the JIT runtime ABI (formerly starlark_numeric_type).
-constexpr int32_t kNumericAbiInt64 = 0;
-constexpr int32_t kNumericAbiBigInt = 1;
-constexpr int32_t kNumericAbiFloat = 2;
-constexpr int32_t kNumericAbiNotNumeric = 3;
-
-inline int32_t kind_to_numeric_abi(object_kind kind) {
-  switch (kind) {
-    case object_kind::kInt:
-      return kNumericAbiInt64;
-    case object_kind::kBigInt:
-      return kNumericAbiBigInt;
-    case object_kind::kFloat:
-      return kNumericAbiFloat;
-    default:
-      return kNumericAbiNotNumeric;
-  }
-}
-
 }  // namespace runtime
 }  // namespace starlark
 

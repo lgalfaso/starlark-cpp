@@ -426,11 +426,11 @@ starlark_obj* starlark_obj_rt_ctx_true_value(context* ctx) {
 starlark_obj* starlark_obj_rt_ctx_false_value(context* ctx) {
   return ctx->false_value();
 }
-int32_t starlark_obj_rt_obj_numeric_type(starlark_obj* value) {
-  return value == nullptr ? starlark::runtime::kNumericAbiNotNumeric : starlark::runtime::kind_to_numeric_abi(value->kind());
-}
 int64_t starlark_obj_rt_obj_as_int64(starlark_obj* value) {
   return value == nullptr ? 0 : value->as_int64();
+}
+bool starlark_obj_rt_obj_is_int(starlark_obj* value) {
+  return value != nullptr && value->kind() == starlark::runtime::object_kind::kInt;
 }
 
 void starlark_obj_rt_dot(native_exec_context* exec, const char* member, std::size_t len, context* ctx, error_fn* err) {
@@ -455,9 +455,6 @@ void starlark_obj_rt_slice_range(native_exec_context* exec, context* ctx, error_
 }
 
 bool starlark_obj_rt_is_native_function(starlark_obj* value) {
-  if (value == nullptr || !is_function_kind(value->kind())) {
-    return false;
-  }
   return value != nullptr && is_function_kind(value->kind());
 }
 
@@ -1047,7 +1044,7 @@ void retain_object_runtime_symbols_for_jit() {
       reinterpret_cast<void*>(&starlark_obj_rt_ctx_none_value),
       reinterpret_cast<void*>(&starlark_obj_rt_ctx_true_value),
       reinterpret_cast<void*>(&starlark_obj_rt_ctx_false_value),
-      reinterpret_cast<void*>(&starlark_obj_rt_obj_numeric_type),
+      reinterpret_cast<void*>(&starlark_obj_rt_obj_is_int),
       reinterpret_cast<void*>(&starlark_obj_rt_obj_as_int64),
       reinterpret_cast<void*>(&starlark_obj_rt_dot),
       reinterpret_cast<void*>(&starlark_obj_rt_index),

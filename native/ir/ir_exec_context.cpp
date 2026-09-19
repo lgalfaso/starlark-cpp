@@ -88,7 +88,7 @@ void ir_exec_context::declare_object_runtime_functions() {
   declare_fn(module_, "starlark_obj_rt_ctx_none_value", llvm::FunctionType::get(obj_ptr, {ctx_ptr}, false));
   declare_fn(module_, "starlark_obj_rt_ctx_true_value", llvm::FunctionType::get(obj_ptr, {ctx_ptr}, false));
   declare_fn(module_, "starlark_obj_rt_ctx_false_value", llvm::FunctionType::get(obj_ptr, {ctx_ptr}, false));
-  declare_fn(module_, "starlark_obj_rt_obj_numeric_type", llvm::FunctionType::get(i32_ty_, {obj_ptr}, false));
+  declare_fn(module_, "starlark_obj_rt_obj_is_int", llvm::FunctionType::get(i1_ty_, {obj_ptr}, false));
   declare_fn(module_, "starlark_obj_rt_obj_as_int64", llvm::FunctionType::get(i64_ty_, {obj_ptr}, false));
   declare_fn(module_, "starlark_obj_rt_dot", llvm::FunctionType::get(void_ty, {exec_ptr, llvm::PointerType::getUnqual(context_), i64_ty_, ctx_ptr, err_ptr}, false));
   declare_fn(module_, "starlark_obj_rt_index", bin_ty);
