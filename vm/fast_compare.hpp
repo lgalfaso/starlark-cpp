@@ -14,12 +14,8 @@ namespace starlark {
 namespace vm {
 
 inline bool fast_equals(starlark::runtime::starlark_obj* lhs, starlark::runtime::starlark_obj* rhs) {
-  if (lhs == rhs) {
-    return true;
-  }
-  if (lhs != nullptr && rhs != nullptr && lhs->kind() == starlark::runtime::object_kind::kInt &&
-      rhs->kind() == starlark::runtime::object_kind::kInt) {
-    return lhs->as_int64() == rhs->as_int64();
+  if (auto fast = starlark::runtime::try_fast_equals(lhs, rhs)) {
+    return *fast;
   }
   return lhs != nullptr && rhs != nullptr && lhs->equals(*rhs);
 }
