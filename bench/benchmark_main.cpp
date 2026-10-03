@@ -68,7 +68,7 @@ void run_native_code(benchmark::State& state, const char* file_name, std::string
     std::basic_ostringstream<char> out;
     kv_module_loader loader{modules};
     logger logging;
-    runtime_options r_options{.allow_recursion = allow_recursion, .out = out};
+    runtime_options r_options{.out = out, .allow_recursion = allow_recursion};
     runner.run(loader, module_name, grammar_options{}, r_options, n_options, logging);
   }
 }
@@ -88,7 +88,7 @@ void run_native_steady_code(benchmark::State& state, const char* file_name, std:
     std::basic_ostringstream<char> out;
     kv_module_loader loader{modules};
     logger logging;
-    runtime_options r_options{.allow_recursion = allow_recursion, .out = out};
+    runtime_options r_options{.out = out, .allow_recursion = allow_recursion};
     auto warmup = runner.run(loader, module_name, grammar_options{}, r_options, n_options, logging);
     if (!warmup.ok()) {
       for (const auto& entry : logging) {
@@ -104,7 +104,7 @@ void run_native_steady_code(benchmark::State& state, const char* file_name, std:
     std::basic_ostringstream<char> out;
     kv_module_loader loader{modules};
     logger logging;
-    runtime_options r_options{.allow_recursion = allow_recursion, .out = out};
+    runtime_options r_options{.out = out, .allow_recursion = allow_recursion};
     auto result = runner.rerun(loader, module_name, grammar_options{}, r_options, n_options, logging);
     if (!result.ok()) {
       state.SkipWithError("Native steady rerun failed");
