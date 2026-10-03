@@ -23,3 +23,26 @@ llvm_orc(
         ],
     }),
 )
+
+llvm_orc(
+    name = "llvm_lld",
+    tags = ["no-sandbox"],
+    visibility = ["//visibility:public"],
+    deps = select({
+        "@platforms//os:macos": [
+            "@llvm-project//lld:MachO",
+            "@llvm-project//llvm:AllTargetsAsmParsers",
+            "@llvm-project//llvm:AllTargetsCodeGens",
+        ],
+        "@platforms//os:linux": [
+            "@llvm-project//lld:ELF",
+            "@llvm-project//llvm:AllTargetsAsmParsers",
+            "@llvm-project//llvm:AllTargetsCodeGens",
+        ],
+        "//conditions:default": [
+            "@llvm-project//lld:ELF",
+            "@llvm-project//llvm:AllTargetsAsmParsers",
+            "@llvm-project//llvm:AllTargetsCodeGens",
+        ],
+    }),
+)

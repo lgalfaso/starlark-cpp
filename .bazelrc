@@ -8,6 +8,7 @@ coverage --cxxopt=-fno-inline
 coverage --features=-coverage --copt=-coverage --linkopt=-coverage --test_env=GCOV_PREFIX_STRIP=12
 
 build:asan --strip=never
+build:asan --@llvm//config:asan=true
 build:asan --copt -fsanitize=address
 build:asan --copt -DADDRESS_SANITIZER
 build:asan --copt -O1

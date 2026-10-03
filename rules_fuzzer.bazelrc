@@ -1,18 +1,20 @@
-# Homebrew LLVM is required for libFuzzer builds; do not set globally or BCR
-# llvm-project 17 fails to compile (e.g. CodeGen/RDFGraph.cpp) with newer libc++.
-build:asan-libfuzzer --repo_env=CC=/usr/local/opt/llvm/bin/clang
-build:asan-libfuzzer --repo_env=CXX=/usr/local/opt/llvm/bin/clang++
-build:asan-libfuzzer --action_env=CC=/usr/local/opt/llvm/bin/clang
-build:asan-libfuzzer --action_env=CXX=/usr/local/opt/llvm/bin/clang++
-build:asan-ubsan-libfuzzer --repo_env=CC=/usr/local/opt/llvm/bin/clang
-build:asan-ubsan-libfuzzer --repo_env=CXX=/usr/local/opt/llvm/bin/clang++
-build:asan-ubsan-libfuzzer --action_env=CC=/usr/local/opt/llvm/bin/clang
-build:asan-ubsan-libfuzzer --action_env=CXX=/usr/local/opt/llvm/bin/clang++
-# Define the --config=asan-libfuzzer configuration.
+# Fuzz targets use the hermetic @llvm toolchain (see MODULE.bazel); no Homebrew LLVM required.
 build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine=@rules_fuzzing//fuzzing/engines:libfuzzer
 build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_instrumentation=libfuzzer
 build:asan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_sanitizer=asan
+# Build compiler-rt ASan + libFuzzer runtimes into the hermetic clang resource dir.
+build:asan-libfuzzer --@llvm//config:asan=true
+build:asan-libfuzzer --@llvm//config:fuzzer=true
+build:asan-libfuzzer --strip=never
+run:asan-libfuzzer --run_under=//tools/fuzz:macos_asan_run_under
+test:asan-libfuzzer --run_under=//tools/fuzz:macos_asan_run_under
 
 build:asan-ubsan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine=@rules_fuzzing//fuzzing/engines:libfuzzer
 build:asan-ubsan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_instrumentation=libfuzzer
 build:asan-ubsan-libfuzzer --@rules_fuzzing//fuzzing:cc_engine_sanitizer=asan-ubsan
+build:asan-ubsan-libfuzzer --@llvm//config:asan=true
+build:asan-ubsan-libfuzzer --@llvm//config:ubsan=true
+build:asan-ubsan-libfuzzer --@llvm//config:fuzzer=true
+build:asan-ubsan-libfuzzer --strip=never
+run:asan-ubsan-libfuzzer --run_under=//tools/fuzz:macos_asan_run_under
+test:asan-ubsan-libfuzzer --run_under=//tools/fuzz:macos_asan_run_under

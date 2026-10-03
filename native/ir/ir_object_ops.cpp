@@ -205,7 +205,11 @@ void emit_binary_with_int_fastpath(lowering_context& lowering,
       intrinsic_id = llvm::Intrinsic::smul_with_overflow;
     }
     auto* i64 = ir_exec.i64_ty();
-    auto* intrinsic = llvm::Intrinsic::getDeclaration(&lowering.module, intrinsic_id, {i64});
+    auto& llvm_ctx = entry->getContext();
+    auto* i1 = llvm::Type::getInt1Ty(llvm_ctx);
+    auto* pair_ty = llvm::StructType::get(llvm_ctx, {i64, i1});
+    auto* intrinsic =
+        llvm::Intrinsic::getOrInsertDeclaration(&lowering.module, intrinsic_id, pair_ty, {i64, i64});
     auto* pair = builder.CreateCall(intrinsic, {lhs_i64, rhs_i64});
     auto* result_i64 = builder.CreateExtractValue(pair, 0);
     auto* overflow = builder.CreateExtractValue(pair, 1);

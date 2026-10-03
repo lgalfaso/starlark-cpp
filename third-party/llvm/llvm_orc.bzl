@@ -1,11 +1,11 @@
-"""LLVM OrcJIT dependency bundle with compile settings for @llvm-project."""
+"""LLVM OrcJIT dependency bundle with compile settings for @llvm-project (via hermetic llvm module)."""
 
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 
 def _llvm_orc_transition_impl(_settings, _attr):
     llvm_copts = [
-        "-std=c++17",
+        "-std=c++20",
         "-fexceptions",
         "-frtti",
         "-UGTEST_HAS_RTTI",

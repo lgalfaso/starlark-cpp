@@ -79,7 +79,7 @@ void ensure_block_labels(llvm::LLVMContext& context,
 void close_open_labels(std::map<int, llvm::BasicBlock*>& labels, int last_label, llvm::BasicBlock* fallback) {
   for (int ip = 0; ip <= last_label; ++ip) {
     auto it = labels.find(ip);
-    if (it == labels.end() || it->second->getTerminator() != nullptr) {
+    if (it == labels.end() || it->second->hasTerminator()) {
       continue;
     }
     llvm::IRBuilder<> builder(it->second);
@@ -295,7 +295,7 @@ llvm::Function* bytecode_lowering::lower_function_block(int block_idx) {
   const int last_label = max_label_index(block);
   for (int ip = block.op_code().size(); ip <= last_label; ++ip) {
     auto it = labels.find(ip);
-    if (it == labels.end() || it->second->getTerminator() != nullptr) {
+    if (it == labels.end() || it->second->hasTerminator()) {
       continue;
     }
     llvm::IRBuilder<> merge_builder(it->second);
@@ -321,7 +321,7 @@ void bytecode_lowering::emit_opcode(llvm::Function* fn,
   lowering_context lowering_ctx{ir_exec_, module_, options_, function_blocks_};
   lower_opcode(lowering_ctx, builder, fn, exec, ctx, err, error_bb, next_bb, block_idx, ip, program_.block(block_idx).op_code(ip), program_);
   llvm::BasicBlock* tail = builder.GetInsertBlock();
-  if (tail->getTerminator() == nullptr) {
+  if (!tail->hasTerminator()) {
     ir_exec_.emit_branch_if_failed(builder, exec, error_bb, next_bb);
   }
 }

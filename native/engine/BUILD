@@ -16,11 +16,21 @@ cc_library(
 )
 
 cc_library(
+    name = "dylib_linker",
+    srcs = ["dylib_linker.cpp"],
+    hdrs = ["dylib_linker.hpp"],
+    deps = [
+        "//third-party/llvm:llvm_lld",
+    ],
+)
+
+cc_library(
     name = "orc_engine",
     srcs = ["orc_engine.cpp"],
     hdrs = ["orc_engine.hpp"],
     tags = ["no-sandbox"],
     deps = [
+        ":dylib_linker",
         "//native/abi:starlark_module_abi",
         "//status_or:status",
         "//third-party/llvm:llvm_orc",
@@ -36,6 +46,20 @@ cc_test(
         "//runtime:starlark_function",
         "//runtime:starlark_function_builder_impl",
         "//runtime:starlark_object_impl",
+        "//status_or:status",
+        "//third-party/llvm:llvm_orc",
+        "//vm:module_metadata",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "orc_engine_write_back_test",
+    srcs = ["orc_engine_write_back_test.cpp"],
+    tags = ["no-sandbox"],
+    deps = [
+        ":orc_engine",
+        "//native/ir:llvm_ir_generator",
         "//status_or:status",
         "//third-party/llvm:llvm_orc",
         "//vm:module_metadata",

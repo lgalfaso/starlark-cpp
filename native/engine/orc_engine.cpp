@@ -2,22 +2,24 @@
 
 #include "native/engine/orc_engine.hpp"
 
-#include <cstdlib>
-
 #include <format>
 #include <utility>
 
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
+#include "llvm/TargetParser/Triple.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/Error.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/TargetParser/Host.h"
+
+#include "native/engine/dylib_linker.hpp"
 
 using ::starlark::result::status_or;
 using status = ::starlark::result::status;
@@ -54,10 +56,10 @@ orc_engine::orc_engine() : impl_(std::make_unique<impl>()) {
     llvm::consumeError(jit_tmb.takeError());
     return;
   }
-  jit_tmb->setCodeGenOptLevel(llvm::CodeGenOpt::Aggressive);
+  jit_tmb->setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
   auto jit = llvm::orc::LLJITBuilder().setJITTargetMachineBuilder(std::move(*jit_tmb)).create();
   if (!jit) {
-  llvm::consumeError(jit.takeError());
+    llvm::consumeError(jit.takeError());
     return;
   }
   impl_->jit = std::move(*jit);
@@ -168,20 +170,20 @@ const starlark_module_descriptor* orc_engine::find_loaded(uint64_t cache_key) co
 status orc_engine::write_back(uint64_t cache_key, llvm::Module& module, std::filesystem::path dylib_path) {
   (void)cache_key;
   std::string error;
-  std::string triple_str = llvm::sys::getDefaultTargetTriple();
-  const llvm::Target* target = llvm::TargetRegistry::lookupTarget(triple_str, error);
+  llvm::Triple triple(llvm::sys::getDefaultTargetTriple());
+  const llvm::Target* target = llvm::TargetRegistry::lookupTarget(triple, error);
   if (target == nullptr) {
     return status{status_code::kStaticError};
   }
 
   llvm::TargetOptions options;
-  auto machine = target->createTargetMachine(triple_str,
+  auto machine = target->createTargetMachine(triple,
       llvm::sys::getHostCPUName().str(),
       "",
       options,
       llvm::Reloc::PIC_,
       std::nullopt,
-      llvm::CodeGenOpt::Aggressive);
+      llvm::CodeGenOptLevel::Aggressive);
   if (machine == nullptr) {
     return status{status_code::kStaticError};
   }
@@ -197,18 +199,13 @@ status orc_engine::write_back(uint64_t cache_key, llvm::Module& module, std::fil
   }
 
   llvm::legacy::PassManager pass;
-  if (machine->addPassesToEmitFile(pass, out, nullptr, llvm::CGFT_ObjectFile)) {
+  if (machine->addPassesToEmitFile(pass, out, nullptr, llvm::CodeGenFileType::ObjectFile)) {
     return status{status_code::kStaticError};
   }
   pass.run(module);
   out.flush();
 
-#if defined(__APPLE__)
-  std::string link_cmd = std::format("clang -shared -undefined dynamic_lookup -o '{}' '{}'", dylib_path.string(), object_path.string());
-#else
-  std::string link_cmd = std::format("clang -shared -o '{}' '{}'", dylib_path.string(), object_path.string());
-#endif
-  if (std::system(link_cmd.c_str()) != 0) {
+  if (!link_object_to_dylib(triple, object_path, dylib_path)) {
     return status{status_code::kStaticError};
   }
   return starlark::result::ok_status();

@@ -27,8 +27,9 @@ Both backends use the same `runtime/` object model and `vm/` module-loading infr
 ## Requirements
 
 - [Bazel](https://bazel.build/) 9.2.0 (use [Bazelisk](https://github.com/bazelbuild/bazelisk); version is pinned in `.bazeliskrc`)
-- A C++23-capable toolchain (the project builds with `-std=c++2b`, no exceptions, no RTTI)
-- macOS is the primary development platform; other platforms may work but are less tested
+- Builds use the hermetic [LLVM toolchain](https://github.com/hermeticbuild/hermetic-llvm) from Bzlmod (`llvm` 0.8.x, LLVM 23.x for JIT libraries and the C/C++ compiler). The first build downloads the macOS SDK and compiles LLVM; allow substantial time, disk, and RAM.
+- Application code is built with `-std=c++2b`, no exceptions, and no RTTI (LLVM JIT dependencies are compiled separately with exceptions and RTTI).
+- Bazel selects the host CPU automatically on macOS and Linux (arm64 vs x86_64 follows the Bazel binary). Use explicit `//platforms:*` labels only for cross-compiles. Optional personal flags: copy nothing required; add `user.bazelrc` (gitignored, `try-import` in `.bazelrc`) if needed.
 
 ## Building
 
@@ -79,15 +80,16 @@ bazel test //runtime:all
 bazel test //grammar:all
 ```
 
-Fuzz tests are available for the lexer, parser, interpreter, and native runner. They require a Homebrew LLVM toolchain and the `asan-libfuzzer` config:
+Fuzz tests are available for the lexer, parser, interpreter, and native runner. They use the hermetic toolchain and the `asan-libfuzzer` config (see `rules_fuzzer.bazelrc`, which enables hermetic compiler-rt and a macOS `run_under` helper binary):
 
 ```bash
 bazel test --config=asan-libfuzzer //grammar:lexer_fuzz_test
 bazel test --config=asan-libfuzzer //interpreter:interpreter_fuzz_test
 bazel test --config=asan-libfuzzer //native/runner:native_fuzz_test
+bazel run --config=asan-libfuzzer -c opt //native/runner:native_fuzz_test_run
 ```
 
-Address-sanitizer builds are available via `--config=asan`.
+Address-sanitizer builds use `--config=asan` (enables hermetic compiler-rt via `@llvm//config:asan`).
 
 ## Benchmarks
 
