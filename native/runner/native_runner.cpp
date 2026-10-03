@@ -78,24 +78,22 @@ class native_error_handler : public starlark::runtime::error_fn {
 
   void add_error(std::string_view error_msg, const Position& pos, std::string_view hint) override {
     mark_failed();
-    if (state_ != nullptr && state_->program != nullptr && state_->starlark_loader != nullptr) {
-      const auto& block = state_->program->block(state_->error_block_ptr);
-      if (state_->error_ip >= 0 && state_->error_ip < block.op_code().size()) {
-        const auto& op = block.op_code(state_->error_ip);
-        if (op.has_sh()) {
-          auto mod = state_->starlark_loader->load_module(state_->module_name);
-          if (mod.ok()) {
-            auto msg = std::format("{}\n{}",
-                error_msg,
-                starlark::error_messages::get_line_and_underline((*mod)->source_code(),
-                    op.sh().start(),
-                    op.sh().highlight_start(),
-                    op.sh().highlight_end(),
-                    op.sh().end(),
-                    hint));
-            log_.log(LogLevel::LOG_LEVEL_ERROR, msg, module_, op.sh().highlight_start());
-            return;
-          }
+    const module_runtime_state* loc = location_state();
+    if (loc != nullptr && loc->program != nullptr && loc->starlark_loader != nullptr) {
+      const starlark::bytecode::OpCode* op = nullptr;
+      if (try_error_opcode(loc, &op) && op->has_sh()) {
+        auto mod = loc->starlark_loader->load_module(loc->module_name);
+        if (mod.ok()) {
+          auto msg = std::format("{}\n{}",
+              error_msg,
+              starlark::error_messages::get_line_and_underline((*mod)->source_code(),
+                  op->sh().start(),
+                  op->sh().highlight_start(),
+                  op->sh().highlight_end(),
+                  op->sh().end(),
+                  hint));
+          log_.log(LogLevel::LOG_LEVEL_ERROR, msg, loc->module_name, op->sh().highlight_start());
+          return;
         }
       }
     }
@@ -103,18 +101,44 @@ class native_error_handler : public starlark::runtime::error_fn {
   }
 
  private:
+  module_runtime_state* location_state() const {
+    module_runtime_state* loc = state_;
+    if (state_ != nullptr && !state_->active_exec_stack.empty()) {
+      if (auto* exec = state_->active_exec_stack.back()) {
+        if (exec->code_mod != nullptr) {
+          loc = exec->code_mod;
+        } else if (exec->mod != nullptr) {
+          loc = exec->mod;
+        }
+      }
+    }
+    return loc;
+  }
+
+  static bool try_error_opcode(const module_runtime_state* loc, const starlark::bytecode::OpCode** out_op) {
+    *out_op = nullptr;
+    if (loc == nullptr || loc->program == nullptr) {
+      return false;
+    }
+    if (loc->error_block_ptr < 0 || loc->error_block_ptr >= loc->program->block_size()) {
+      return false;
+    }
+    const auto& block = loc->program->block(loc->error_block_ptr);
+    if (loc->error_ip < 0 || loc->error_ip >= block.op_code().size()) {
+      return false;
+    }
+    *out_op = &block.op_code(loc->error_ip);
+    return true;
+  }
+
   Position error_position(const Position& provided = Position::default_instance()) const {
     if (provided.has_row()) {
       return provided;
     }
-    if (state_ != nullptr && state_->program != nullptr) {
-      const auto& block = state_->program->block(state_->error_block_ptr);
-      if (state_->error_ip >= 0 && state_->error_ip < block.op_code().size()) {
-        const auto& op = block.op_code(state_->error_ip);
-        if (op.has_sh()) {
-          return op.sh().highlight_start();
-        }
-      }
+    const module_runtime_state* loc = location_state();
+    const starlark::bytecode::OpCode* op = nullptr;
+    if (try_error_opcode(loc, &op) && op->has_sh()) {
+      return op->sh().highlight_start();
     }
     return Position::default_instance();
   }

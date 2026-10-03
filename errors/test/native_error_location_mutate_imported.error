@@ -1,0 +1,3 @@
+//:test1.bzl:5:11: error: trying to mutate a frozen list value
+    5 |   a.append(1)
+      |   ~~~~~~~~^^^

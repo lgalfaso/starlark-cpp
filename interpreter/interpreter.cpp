@@ -209,49 +209,70 @@ class error_handler : public error_fn {
     static const starlark::vm::module_metadata fail_metadata = starlark::vm::module_metadata::build(fail_program);
     static runner_state::program_info base_program{&fail_program, "@@//:fail.star", nullptr, &fail_metadata};
 
-    // Get the current operation that is being executed. Skip the operation if this is an internal module.
-    runner_state::program_info* program_stack = nullptr;
-    int block_ptr = 0;
-    int instruction_ptr = 0;
-     std::string_view source_code;
-    if (state.instruction_ptr != 0) {
-      auto current_module = loader.load_module(state.current_program.module_name);
-      if (!current_module.ok()) {
-        log.log(LogLevel::LOG_LEVEL_ERROR, "internal error (0)", state.current_program.module_name, pos);
-      } else if (!(*current_module)->inner()) {
-        program_stack = &state.current_program;
-        block_ptr = state.block_ptr;
-        instruction_ptr = state.instruction_ptr;
-        source_code = (*current_module)->source_code();
+    struct error_location {
+      const runner_state::program_info* program = nullptr;
+      int block_ptr = 0;
+      int instruction_ptr = 0;
+      std::string_view source_code;
+    };
+
+    auto try_location = [&](const runner_state::program_info& program, int block_ptr, int instruction_ptr, error_location& out) -> bool {
+      if (instruction_ptr <= 0) {
+        return false;
       }
+      auto current_module = loader.load_module(program.module_name);
+      if (!current_module.ok()) {
+        return false;
+      }
+      if ((*current_module)->inner()) {
+        return false;
+      }
+      if (block_ptr < 0 || block_ptr >= program.bytecode->block_size()) {
+        return false;
+      }
+      const auto& block = program.bytecode->block(block_ptr);
+      const int op_index = instruction_ptr - 1;
+      if (op_index < 0 || op_index >= block.op_code().size()) {
+        return false;
+      }
+      out.program = &program;
+      out.block_ptr = block_ptr;
+      out.instruction_ptr = instruction_ptr;
+      out.source_code = (*current_module)->source_code();
+      return true;
+    };
+
+    error_location location;
+    if (!state.call_fns.empty()) {
+      (void)try_location(state.call_fns.back()->code_program(), state.block_ptr, state.instruction_ptr, location);
     }
-    for (int i = state.current_program_stack.size() - 1; program_stack == nullptr && i >= 0; --i) {
-      auto current_module = loader.load_module(state.current_program_stack[i].module_name);
-      if (!current_module.ok()) {
-        log.log(LogLevel::LOG_LEVEL_ERROR, "internal error (1)", state.current_program_stack[i].module_name, pos);
-        break;
-      }
-      if (!(*current_module)->inner()) {
-        program_stack = &state.current_program_stack[i];
-        block_ptr = state.call_stack[i].block_ptr;
-        instruction_ptr = state.call_stack[i].instruction_ptr;
-        assert(!state.call_stack[i].inner);
-        source_code = (*current_module)->source_code();
-      }
+    if (location.program == nullptr) {
+      (void)try_location(state.current_program, state.block_ptr, state.instruction_ptr, location);
+    }
+    for (int i = static_cast<int>(state.current_program_stack.size()) - 1; location.program == nullptr && i >= 0; --i) {
+      (void)try_location(state.current_program_stack[i],
+          state.call_stack[static_cast<std::size_t>(i)].block_ptr,
+          state.call_stack[static_cast<std::size_t>(i)].instruction_ptr,
+          location);
     }
 
-    // Log the error message.
-    if (program_stack == nullptr) {
+    if (location.program == nullptr) {
       log.log(LogLevel::LOG_LEVEL_ERROR, error_msg, state.current_program.module_name, pos);
     } else {
-      const auto& op_code = program_stack->bytecode->block(block_ptr).op_code(instruction_ptr - 1);
-      // If we have the position, then use it.
+      const auto& op_code =
+          location.program->bytecode->block(location.block_ptr).op_code(location.instruction_ptr - 1);
       if (op_code.has_sh()) {
-        auto msg = std::format("{}\n{}", error_msg, get_line_and_underline(source_code, op_code.sh().start(), op_code.sh().highlight_start(), op_code.sh().highlight_end(), op_code.sh().end(), hint));
-        log.log(LogLevel::LOG_LEVEL_ERROR, msg, program_stack->module_name, op_code.sh().highlight_start());
+        auto msg = std::format("{}\n{}",
+            error_msg,
+            get_line_and_underline(location.source_code,
+                op_code.sh().start(),
+                op_code.sh().highlight_start(),
+                op_code.sh().highlight_end(),
+                op_code.sh().end(),
+                hint));
+        log.log(LogLevel::LOG_LEVEL_ERROR, msg, location.program->module_name, op_code.sh().highlight_start());
       } else {
-        // There are a few operations that do not have code assigned to them.
-        log.log(LogLevel::LOG_LEVEL_ERROR, std::format("{}\n", error_msg), program_stack->module_name, pos);
+        log.log(LogLevel::LOG_LEVEL_ERROR, std::format("{}\n", error_msg), location.program->module_name, pos);
       }
     }
 

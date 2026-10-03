@@ -306,12 +306,14 @@ llvm::Value* ir_exec_context::emit_load_err(llvm::IRBuilderBase& builder, llvm::
 
 void ir_exec_context::emit_set_location(llvm::IRBuilderBase& builder, llvm::Value* exec, int32_t block_idx, int32_t ip) const {
   auto* mod = load_exec_field(builder, exec, offsetof(native_exec_context, mod), obj_ptr_ty_);
+  auto* code_mod = load_exec_field(builder, exec, offsetof(native_exec_context, code_mod), obj_ptr_ty_);
+  auto* loc = builder.CreateSelect(builder.CreateIsNotNull(code_mod), code_mod, mod);
   auto* block_ptr = builder.CreateGEP(llvm::Type::getInt8Ty(context_),
-      mod,
+      loc,
       llvm::ConstantInt::get(i64_ty_, jit_exec_layout::offsetof_mod_error_block()));
   builder.CreateStore(llvm::ConstantInt::get(i32_ty_, block_idx), builder.CreateBitCast(block_ptr, llvm::PointerType::getUnqual(context_)));
   auto* ip_ptr = builder.CreateGEP(llvm::Type::getInt8Ty(context_),
-      mod,
+      loc,
       llvm::ConstantInt::get(i64_ty_, jit_exec_layout::offsetof_mod_error_ip()));
   builder.CreateStore(llvm::ConstantInt::get(i32_ty_, ip), builder.CreateBitCast(ip_ptr, llvm::PointerType::getUnqual(context_)));
 }
