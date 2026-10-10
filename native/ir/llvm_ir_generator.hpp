@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_LLVM_IR_GENERATOR_HPP_
-#define NATIVE_LLVM_IR_GENERATOR_HPP_
+#ifndef NATIVE_IR_LLVM_IR_GENERATOR_HPP_
+#define NATIVE_IR_LLVM_IR_GENERATOR_HPP_
 
 #include <memory>
 #include <string>
@@ -37,4 +37,4 @@ class llvm_ir_generator {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_LLVM_IR_GENERATOR_HPP_
+#endif  // NATIVE_IR_LLVM_IR_GENERATOR_HPP_

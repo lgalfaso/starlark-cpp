@@ -9,6 +9,8 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "bigint/number.hpp"
 #include "errors/runtime_error_messages.hpp"
@@ -994,7 +996,7 @@ void starlark_obj_rt_load_module_symbol(native_exec_context* exec,
   auto* module_frame = (*mod_info)->get().first;
   bool found = false;
   for (int i = 0; i < module_frame->names->size(); ++i) {
-    if (std::string_view{remote_symbol, remote_len} == module_frame->names->Get(i)) {
+    if (std::string_view {remote_symbol, remote_len} == module_frame->names->Get(i)) {
       exec->frame_chain.at(static_cast<uint32_t>(frame))->elements[static_cast<std::size_t>(slot)] = module_frame->elements[i];
       found = true;
       break;

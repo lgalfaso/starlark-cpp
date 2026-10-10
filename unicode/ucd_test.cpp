@@ -13,7 +13,6 @@
 
 #include "unicode/extract/extract.hpp"
 #include "unicode/ucd_code_points.hpp"
-#include "unicode/extract/extract.hpp"
 
 using testing::SizeIs;
 

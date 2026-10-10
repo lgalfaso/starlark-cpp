@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_IR_EXEC_CONTEXT_HPP_
-#define NATIVE_IR_EXEC_CONTEXT_HPP_
+#ifndef NATIVE_IR_IR_EXEC_CONTEXT_HPP_
+#define NATIVE_IR_IR_EXEC_CONTEXT_HPP_
 
 #include <cstddef>
 #include <cstdint>
@@ -84,4 +84,4 @@ class ir_exec_context {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_IR_EXEC_CONTEXT_HPP_
+#endif  // NATIVE_IR_IR_EXEC_CONTEXT_HPP_

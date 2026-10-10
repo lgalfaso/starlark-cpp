@@ -4,10 +4,11 @@
 
 #include <unistd.h>
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <format>
 #include <map>
 #include <sstream>
+#include <string>
 
 #include "google/protobuf/arena.h"
 #include "grammar/options.hpp"

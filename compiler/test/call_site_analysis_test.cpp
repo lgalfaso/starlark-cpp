@@ -1,10 +1,13 @@
 // Copyright 2026 Lucas Mirelmann
 
 #include "compiler/analysis/call_site_analysis.hpp"
+
+#include <string>
+
+#include "compiler/test/stack_depth_test_support.hpp"
 #include "google/protobuf/arena.h"
 #include "gtest/gtest.h"
 #include "logging/logging.hpp"
-#include "compiler/test/stack_depth_test_support.hpp"
 #include "proto/starlark_bytecode.pb.h"
 
 using ::google::protobuf::Arena;

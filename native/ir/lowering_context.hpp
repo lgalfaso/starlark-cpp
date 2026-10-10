@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_LOWERING_CONTEXT_HPP_
-#define NATIVE_LOWERING_CONTEXT_HPP_
+#ifndef NATIVE_IR_LOWERING_CONTEXT_HPP_
+#define NATIVE_IR_LOWERING_CONTEXT_HPP_
 
 #include <map>
 
@@ -30,4 +30,4 @@ struct lowering_context {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_LOWERING_CONTEXT_HPP_
+#endif  // NATIVE_IR_LOWERING_CONTEXT_HPP_

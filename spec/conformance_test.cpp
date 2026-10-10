@@ -1,9 +1,11 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <map>
 #include <sstream>
 #include <string>
+#include <functional>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "interpreter/interpreter.hpp"

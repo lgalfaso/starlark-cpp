@@ -2,7 +2,8 @@
 
 #include "native/engine/dylib_linker.hpp"
 
-#include <filesystem>
+#include <cstdlib>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <string>
 #include <vector>
 

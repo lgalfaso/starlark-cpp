@@ -5,6 +5,7 @@
 
 #include <map>
 #include <string>
+#include <functional>
 
 #include "runtime/starlark_object.hpp"
 #include "runtime/starlark_types.hpp"

@@ -1289,7 +1289,7 @@ void remove_extra_store(Program* program) {
     }
     const auto& op_code = program->block(traverse.back().block).op_code(traverse.back().pos);
     traverse.back().pos++;
-    switch(op_code.op_code_case()) {
+    switch (op_code.op_code_case()) {
       case OpCode::kLoad:
         frames[frames.size() - 1 - op_code.load().frame()][op_code.load().pos_in_frame()].found_load = true;
         break;

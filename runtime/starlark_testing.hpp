@@ -16,9 +16,9 @@ namespace testing {
 
 struct error_handler : public starlark::runtime::error_fn {
   void add_error(std::string_view error_msg) override;
-  void add_error(std::string_view error_msg,std::string_view hint) override;
+  void add_error(std::string_view error_msg, std::string_view hint) override;
   void add_error(std::string_view error_msg, const starlark::logging::Position& pos) override;
-  void add_error(std::string_view error_msg, const starlark::logging::Position& pos,std::string_view hint) override;
+  void add_error(std::string_view error_msg, const starlark::logging::Position& pos, std::string_view hint) override;
 
   std::vector<std::string> messages;
 };

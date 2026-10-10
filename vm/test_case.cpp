@@ -4,6 +4,9 @@
 
 #include <iostream>
 #include <string>
+#include <functional>
+#include <map>
+#include <utility>
 
 #include "vm/module_loader.hpp"
 

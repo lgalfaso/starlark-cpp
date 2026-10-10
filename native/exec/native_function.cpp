@@ -4,6 +4,8 @@
 
 #include <map>
 #include <vector>
+#include <string>
+#include <utility>
 
 #include "errors/runtime_error_messages.hpp"
 #include "errors/source_highlight.hpp"

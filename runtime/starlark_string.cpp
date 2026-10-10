@@ -2,8 +2,9 @@
 
 #include "runtime/starlark_string.hpp"
 
-#include <cassert>
 #include <stdckdint.h>
+
+#include <cassert>
 
 #include <algorithm>
 #include <functional>

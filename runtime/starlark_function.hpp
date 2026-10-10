@@ -7,6 +7,7 @@
 #include <span>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "runtime/starlark_object.hpp"
 

@@ -1,11 +1,11 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_CACHE_HPP_
-#define NATIVE_CACHE_HPP_
+#ifndef NATIVE_ENGINE_CACHE_HPP_
+#define NATIVE_ENGINE_CACHE_HPP_
 
 #include <cstdint>
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <optional>
 #include <string>
 #include <string_view>
@@ -35,4 +35,4 @@ std::filesystem::path dylib_path_for_key(uint64_t cache_key, std::filesystem::pa
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_CACHE_HPP_
+#endif  // NATIVE_ENGINE_CACHE_HPP_

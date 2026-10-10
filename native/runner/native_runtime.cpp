@@ -5,6 +5,9 @@
 #include <format>
 #include <set>
 #include <vector>
+#include <memory>
+#include <string>
+#include <utility>
 
 #include "native/exec/native_exec_context.hpp"
 #include "proto/starlark_bytecode.pb.h"

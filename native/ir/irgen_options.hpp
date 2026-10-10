@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_IRGEN_OPTIONS_HPP_
-#define NATIVE_IRGEN_OPTIONS_HPP_
+#ifndef NATIVE_IR_IRGEN_OPTIONS_HPP_
+#define NATIVE_IR_IRGEN_OPTIONS_HPP_
 
 #include <cstdint>
 
@@ -23,4 +23,4 @@ struct irgen_options {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_IRGEN_OPTIONS_HPP_
+#endif  // NATIVE_IR_IRGEN_OPTIONS_HPP_

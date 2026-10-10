@@ -47,7 +47,7 @@ std::filesystem::path default_cache_root() {
     return std::filesystem::path{env};
   }
   if (const char* home = std::getenv("HOME")) {
-    return std::filesystem::path{home} / ".cache" / "starlark-native";
+    return std::filesystem::path {home} / ".cache" / "starlark-native";
   }
   return std::filesystem::path{"/tmp/starlark-native-cache"};
 }

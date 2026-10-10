@@ -1,6 +1,8 @@
 // Copyright 2026 Lucas Mirelmann
 
 #include "vm/module_load_tracker.hpp"
+#include <string>
+#include <vector>
 
 namespace starlark {
 namespace vm {

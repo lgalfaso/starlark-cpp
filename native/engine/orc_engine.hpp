@@ -1,11 +1,11 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_ORC_ENGINE_HPP_
-#define NATIVE_ORC_ENGINE_HPP_
+#ifndef NATIVE_ENGINE_ORC_ENGINE_HPP_
+#define NATIVE_ENGINE_ORC_ENGINE_HPP_
 
 #include <cstdint>
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <map>
 #include <memory>
 #include <mutex>
@@ -62,4 +62,4 @@ class orc_engine {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_ORC_ENGINE_HPP_
+#endif  // NATIVE_ENGINE_ORC_ENGINE_HPP_

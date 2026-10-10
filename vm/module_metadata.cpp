@@ -1,6 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
 #include "vm/module_metadata.hpp"
+#include <utility>
 
 namespace starlark {
 namespace vm {

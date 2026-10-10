@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_NATIVE_RUNNER_HPP_
-#define NATIVE_NATIVE_RUNNER_HPP_
+#ifndef NATIVE_RUNNER_NATIVE_RUNNER_HPP_
+#define NATIVE_RUNNER_NATIVE_RUNNER_HPP_
 
 #include <string>
 #include <string_view>
@@ -50,4 +50,4 @@ class native_runner {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_NATIVE_RUNNER_HPP_
+#endif  // NATIVE_RUNNER_NATIVE_RUNNER_HPP_

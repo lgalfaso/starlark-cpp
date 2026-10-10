@@ -7,6 +7,7 @@
 #include <span>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "containers/linked_hash_map.hpp"
 #include "google/protobuf/arena.h"

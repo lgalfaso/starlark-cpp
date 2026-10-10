@@ -1,11 +1,12 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_FRAME_SETUP_CACHE_HPP_
-#define NATIVE_FRAME_SETUP_CACHE_HPP_
+#ifndef NATIVE_EXEC_FRAME_SETUP_CACHE_HPP_
+#define NATIVE_EXEC_FRAME_SETUP_CACHE_HPP_
 
 #include <cstdint>
 
 #include <vector>
+#include <string>
 
 #include "google/protobuf/repeated_field.h"
 #include "native/exec/native_exec_context.hpp"
@@ -60,4 +61,4 @@ bool setup_native_fn_frame_for_invoke(native_exec_context& exec,
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_FRAME_SETUP_CACHE_HPP_
+#endif  // NATIVE_EXEC_FRAME_SETUP_CACHE_HPP_

@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_NATIVE_EXEC_CONTEXT_HPP_
-#define NATIVE_NATIVE_EXEC_CONTEXT_HPP_
+#ifndef NATIVE_EXEC_NATIVE_EXEC_CONTEXT_HPP_
+#define NATIVE_EXEC_NATIVE_EXEC_CONTEXT_HPP_
 
 #include <cstdint>
 
@@ -69,4 +69,4 @@ void native_frame_chain_push(native_exec_context* exec, starlark::vm::frame* fra
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_NATIVE_EXEC_CONTEXT_HPP_
+#endif  // NATIVE_EXEC_NATIVE_EXEC_CONTEXT_HPP_

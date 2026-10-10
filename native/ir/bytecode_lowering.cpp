@@ -5,6 +5,8 @@
 #include <cassert>
 
 #include <format>
+#include <algorithm>
+#include <map>
 
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"

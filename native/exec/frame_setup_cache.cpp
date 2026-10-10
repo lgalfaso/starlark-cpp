@@ -3,6 +3,7 @@
 #include "native/exec/frame_setup_cache.hpp"
 
 #include <algorithm>
+#include <string>
 
 #include "google/protobuf/arena.h"
 #include "vm/frame_factory.hpp"

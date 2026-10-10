@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
 
 #pragma GCC visibility push(default)
 

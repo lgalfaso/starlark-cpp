@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <functional>
 
 #include "interpreter/runner_state.hpp"
 #include "proto/starlark_bytecode.pb.h"

@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_EXEC_ERROR_HPP_
-#define NATIVE_EXEC_ERROR_HPP_
+#ifndef NATIVE_EXEC_EXEC_ERROR_HPP_
+#define NATIVE_EXEC_EXEC_ERROR_HPP_
 
 #include <string_view>
 
@@ -68,4 +68,4 @@ class tracked_error_bridge : public starlark::runtime::error_fn {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_EXEC_ERROR_HPP_
+#endif  // NATIVE_EXEC_EXEC_ERROR_HPP_

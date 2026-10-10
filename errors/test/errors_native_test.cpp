@@ -2,11 +2,16 @@
 
 #include <unistd.h>
 
-#include <filesystem>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include <filesystem>  // NOLINT(build/c++17)
 #include <format>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <string>
+#include <utility>
 
 #include "grammar/parsing_options.hpp"
 #include "io/read_file.hpp"
@@ -17,8 +22,6 @@
 #include "runtime/starlark_object.hpp"
 #include "vm/module_loader.hpp"
 #include "vm/test_case.hpp"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 using ::starlark::grammar::get_parsing_options;
 using ::starlark::grammar::grammar_options;

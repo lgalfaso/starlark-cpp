@@ -1,6 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
 #include <memory>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "llvm/IR/LLVMContext.h"

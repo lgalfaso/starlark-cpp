@@ -2,8 +2,9 @@
 
 #include "runtime/starlark_bytes.hpp"
 
-#include <cassert>
 #include <stdckdint.h>
+
+#include <cassert>
 
 #include <algorithm>
 #include <functional>

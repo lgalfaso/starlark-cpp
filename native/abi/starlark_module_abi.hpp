@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_STARLARK_MODULE_ABI_HPP_
-#define NATIVE_STARLARK_MODULE_ABI_HPP_
+#ifndef NATIVE_ABI_STARLARK_MODULE_ABI_HPP_
+#define NATIVE_ABI_STARLARK_MODULE_ABI_HPP_
 
 #include <cstdint>
 
@@ -39,4 +39,4 @@ struct starlark_module_descriptor {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_STARLARK_MODULE_ABI_HPP_
+#endif  // NATIVE_ABI_STARLARK_MODULE_ABI_HPP_

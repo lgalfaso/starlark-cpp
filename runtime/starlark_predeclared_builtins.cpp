@@ -1,17 +1,19 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include "runtime/builtin_pos.hpp"
-
 #include <cerrno>
 #include <cmath>
 #include <cstdlib>
 
 #include <algorithm>
+#include <functional>
 #include <limits>
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "errors/runtime_error_messages.hpp"
+#include "runtime/builtin_pos.hpp"
 #include "runtime/starlark_bool.hpp"
 #include "runtime/starlark_bytes.hpp"
 #include "runtime/starlark_dictionary.hpp"

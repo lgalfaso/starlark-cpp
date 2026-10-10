@@ -3,6 +3,8 @@
 #include "native/exec/runtime_shim.hpp"
 
 #include <map>
+#include <functional>
+#include <string>
 
 #include "google/protobuf/arena.h"
 #include "native/exec/exec_error.hpp"

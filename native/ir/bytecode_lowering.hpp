@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_BYTECODE_LOWERING_HPP_
-#define NATIVE_BYTECODE_LOWERING_HPP_
+#ifndef NATIVE_IR_BYTECODE_LOWERING_HPP_
+#define NATIVE_IR_BYTECODE_LOWERING_HPP_
 
 #include <functional>
 #include <map>
@@ -78,4 +78,4 @@ class bytecode_lowering {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_BYTECODE_LOWERING_HPP_
+#endif  // NATIVE_IR_BYTECODE_LOWERING_HPP_

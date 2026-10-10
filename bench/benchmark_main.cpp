@@ -2,11 +2,13 @@
 
 #include <benchmark/benchmark.h>
 
+#include <cstdlib>
 #include <format>
 #include <map>
 #include <sstream>
 #include <string>
 #include <utility>
+#include <functional>
 
 #include "grammar/options.hpp"
 #include "interpreter/interpreter.hpp"
@@ -27,6 +29,12 @@ using ::starlark::runtime::starlark_obj;
 using ::starlark::vm::kv_module_loader;
 
 namespace {
+
+void apply_native_cache_from_env(native_options& n_options) {
+  if (const char* cache_root = std::getenv("STARLARK_NATIVE_CACHE")) {
+    n_options.cache_root = cache_root;
+  }
+}
 
 std::map<std::string, std::pair<std::string, const std::map<std::string, starlark_obj*, std::less<>>>, std::less<>> make_modules(const char* file_name, std::string_view module_name) {
   auto starlark_code = starlark::io::read_file(file_name);
@@ -64,6 +72,7 @@ void run_native_code(benchmark::State& state, const char* file_name, std::string
   native_runtime runtime;
   native_runner runner(runtime);
   native_options n_options{};
+  apply_native_cache_from_env(n_options);
   for (auto _ : state) {
     std::basic_ostringstream<char> out;
     kv_module_loader loader{modules};
@@ -83,6 +92,7 @@ void run_native_steady_code(benchmark::State& state, const char* file_name, std:
   native_runtime runtime;
   native_runner runner(runtime);
   native_options n_options{};
+  apply_native_cache_from_env(n_options);
 
   {
     std::basic_ostringstream<char> out;

@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_RUNTIME_SHIM_HPP_
-#define NATIVE_RUNTIME_SHIM_HPP_
+#ifndef NATIVE_EXEC_RUNTIME_SHIM_HPP_
+#define NATIVE_EXEC_RUNTIME_SHIM_HPP_
 
 #include <cstddef>
 #include <cstdint>
@@ -44,4 +44,4 @@ void retain_runtime_symbols_for_jit();
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_RUNTIME_SHIM_HPP_
+#endif  // NATIVE_EXEC_RUNTIME_SHIM_HPP_

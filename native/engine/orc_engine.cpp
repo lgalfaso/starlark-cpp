@@ -4,6 +4,8 @@
 
 #include <format>
 #include <utility>
+#include <memory>
+#include <string>
 
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"

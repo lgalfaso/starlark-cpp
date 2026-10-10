@@ -3,7 +3,7 @@
 #ifndef NATIVE_ENGINE_DYLIB_LINKER_HPP_
 #define NATIVE_ENGINE_DYLIB_LINKER_HPP_
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <string>
 
 #include "llvm/TargetParser/Triple.h"

@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_OPCODE_LOWERING_HPP_
-#define NATIVE_OPCODE_LOWERING_HPP_
+#ifndef NATIVE_IR_OPCODE_LOWERING_HPP_
+#define NATIVE_IR_OPCODE_LOWERING_HPP_
 
 #include "native/ir/lowering_context.hpp"
 #include "proto/starlark_bytecode.pb.h"
@@ -37,4 +37,4 @@ void lower_opcode(lowering_context& lowering,
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_OPCODE_LOWERING_HPP_
+#endif  // NATIVE_IR_OPCODE_LOWERING_HPP_

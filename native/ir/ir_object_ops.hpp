@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_IR_OBJECT_OPS_HPP_
-#define NATIVE_IR_OBJECT_OPS_HPP_
+#ifndef NATIVE_IR_IR_OBJECT_OPS_HPP_
+#define NATIVE_IR_IR_OBJECT_OPS_HPP_
 
 #include "native/ir/ir_exec_context.hpp"
 #include "native/ir/lowering_context.hpp"
@@ -115,4 +115,4 @@ void emit_call_pos_inline(lowering_context& lowering,
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_IR_OBJECT_OPS_HPP_
+#endif  // NATIVE_IR_IR_OBJECT_OPS_HPP_

@@ -5,7 +5,7 @@
 
 #include <cstdlib>
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <fstream>
 #include <map>
 #include <optional>
@@ -13,6 +13,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <functional>
 
 #include "compiler/analysis/stack_depth_analysis.hpp"
 #include "compiler/compiler.hpp"

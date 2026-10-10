@@ -6,6 +6,7 @@
 
 #include <format>
 #include <string_view>
+#include <vector>
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"

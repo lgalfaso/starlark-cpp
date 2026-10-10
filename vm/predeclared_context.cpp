@@ -2,6 +2,10 @@
 
 #include "vm/predeclared_context.hpp"
 
+#include <functional>
+#include <map>
+#include <string>
+
 #include "runtime/starlark_function.hpp"
 
 namespace starlark {

@@ -2,6 +2,8 @@
 
 #include "native/exec/module_runtime_state.hpp"
 
+#include <memory>
+
 #include "google/protobuf/arena.h"
 #include "native/exec/native_exec_context.hpp"
 #include "runtime/starlark_string.hpp"

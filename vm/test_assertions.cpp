@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <string>
 
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_string.hpp"

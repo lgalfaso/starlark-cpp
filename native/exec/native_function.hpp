@@ -1,11 +1,12 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_NATIVE_FUNCTION_HPP_
-#define NATIVE_NATIVE_FUNCTION_HPP_
+#ifndef NATIVE_EXEC_NATIVE_FUNCTION_HPP_
+#define NATIVE_EXEC_NATIVE_FUNCTION_HPP_
 
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "native/exec/module_runtime_state.hpp"
 #include "runtime/starlark_function.hpp"
@@ -71,4 +72,4 @@ class native_starlark_function : public starlark::runtime::starlark_function {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_NATIVE_FUNCTION_HPP_
+#endif  // NATIVE_EXEC_NATIVE_FUNCTION_HPP_

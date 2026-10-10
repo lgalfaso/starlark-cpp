@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_JIT_STACK_HPP_
-#define NATIVE_JIT_STACK_HPP_
+#ifndef NATIVE_EXEC_JIT_STACK_HPP_
+#define NATIVE_EXEC_JIT_STACK_HPP_
 
 #include <cstdint>
 
@@ -47,4 +47,4 @@ struct jit_frame_chain {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_JIT_STACK_HPP_
+#endif  // NATIVE_EXEC_JIT_STACK_HPP_

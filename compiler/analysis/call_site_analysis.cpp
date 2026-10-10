@@ -6,6 +6,7 @@
 
 #include <optional>
 #include <utility>
+#include <map>
 
 #include "compiler/analysis/stack_depth_analysis.hpp"
 

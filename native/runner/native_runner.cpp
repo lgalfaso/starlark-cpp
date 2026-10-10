@@ -10,6 +10,8 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <functional>
+#include <utility>
 
 #include "compiler/compiler.hpp"
 #include "errors/source_highlight.hpp"

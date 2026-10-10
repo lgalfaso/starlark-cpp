@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef PROTO_BYTECODE_FORMATTER_TXTPB_PRINTER_HPP_
-#define PROTO_BYTECODE_FORMATTER_TXTPB_PRINTER_HPP_
+#ifndef PROTO_BYTECODE_FORMATTER_BYTECODE_TXTPB_PRINTER_HPP_
+#define PROTO_BYTECODE_FORMATTER_BYTECODE_TXTPB_PRINTER_HPP_
 
 #include <ostream>
 
@@ -17,4 +17,4 @@ void print_bytecode_txtpb(const starlark::bytecode::Program& program, std::ostre
 }  // namespace proto
 }  // namespace starlark
 
-#endif  // PROTO_BYTECODE_FORMATTER_TXTPB_PRINTER_HPP_
+#endif  // PROTO_BYTECODE_FORMATTER_BYTECODE_TXTPB_PRINTER_HPP_

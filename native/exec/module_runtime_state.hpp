@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_MODULE_RUNTIME_STATE_HPP_
-#define NATIVE_MODULE_RUNTIME_STATE_HPP_
+#ifndef NATIVE_EXEC_MODULE_RUNTIME_STATE_HPP_
+#define NATIVE_EXEC_MODULE_RUNTIME_STATE_HPP_
 
 #include <cstdint>
 
@@ -95,4 +95,4 @@ struct active_exec_stack_guard {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_MODULE_RUNTIME_STATE_HPP_
+#endif  // NATIVE_EXEC_MODULE_RUNTIME_STATE_HPP_

@@ -3,8 +3,9 @@
 #ifndef RUNTIME_SIPHASH_HPP_
 #define RUNTIME_SIPHASH_HPP_
 
-#include <cstdint>
 #include <stddef.h>
+
+#include <cstdint>
 
 namespace starlark {
 namespace runtime {

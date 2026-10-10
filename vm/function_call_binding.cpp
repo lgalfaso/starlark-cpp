@@ -3,6 +3,10 @@
 #include "vm/function_call_binding.hpp"
 
 #include <string_view>
+#include <functional>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "errors/runtime_error_messages.hpp"
 #include "runtime/starlark_dictionary.hpp"

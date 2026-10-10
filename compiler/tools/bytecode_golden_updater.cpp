@@ -4,13 +4,14 @@
 
 #include <cstdlib>
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <functional>
 
 #include "compiler/compiler.hpp"
 #include "google/protobuf/arena.h"

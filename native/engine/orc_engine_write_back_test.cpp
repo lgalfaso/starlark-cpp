@@ -1,6 +1,6 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include <filesystem>
+#include <filesystem>  // NOLINT(build/c++17)
 #include <format>
 #include <memory>
 

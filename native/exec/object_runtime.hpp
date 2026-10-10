@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_OBJECT_RUNTIME_HPP_
-#define NATIVE_OBJECT_RUNTIME_HPP_
+#ifndef NATIVE_EXEC_OBJECT_RUNTIME_HPP_
+#define NATIVE_EXEC_OBJECT_RUNTIME_HPP_
 
 #include <cstddef>
 #include <cstdint>
@@ -145,4 +145,4 @@ void retain_object_runtime_symbols_for_jit();
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_OBJECT_RUNTIME_HPP_
+#endif  // NATIVE_EXEC_OBJECT_RUNTIME_HPP_

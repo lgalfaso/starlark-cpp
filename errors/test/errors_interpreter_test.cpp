@@ -6,6 +6,8 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <functional>
+#include <utility>
 
 #include "grammar/parsing_options.hpp"
 #include "interpreter/interpreter.hpp"

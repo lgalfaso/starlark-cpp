@@ -3,6 +3,8 @@
 #ifndef VM_FRAME_FACTORY_HPP_
 #define VM_FRAME_FACTORY_HPP_
 
+#include <string>
+
 #include "google/protobuf/arena.h"
 #include "google/protobuf/repeated_ptr_field.h"
 #include "vm/frame.hpp"

@@ -1,13 +1,14 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_NATIVE_RUNTIME_HPP_
-#define NATIVE_NATIVE_RUNTIME_HPP_
+#ifndef NATIVE_RUNNER_NATIVE_RUNTIME_HPP_
+#define NATIVE_RUNNER_NATIVE_RUNTIME_HPP_
 
 #include <cstdint>
 
 #include <map>
 #include <memory>
 #include <string>
+#include <functional>
 
 #include "native/engine/orc_engine.hpp"
 #include "google/protobuf/arena.h"
@@ -61,4 +62,4 @@ class native_runtime {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_NATIVE_RUNTIME_HPP_
+#endif  // NATIVE_RUNNER_NATIVE_RUNTIME_HPP_

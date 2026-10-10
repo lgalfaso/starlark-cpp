@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_RUNNER_STATE_HPP_
-#define NATIVE_RUNNER_STATE_HPP_
+#ifndef NATIVE_RUNNER_RUNNER_STATE_HPP_
+#define NATIVE_RUNNER_RUNNER_STATE_HPP_
 
 #include <string>
 
@@ -30,4 +30,4 @@ struct native_runner_state {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_RUNNER_STATE_HPP_
+#endif  // NATIVE_RUNNER_RUNNER_STATE_HPP_

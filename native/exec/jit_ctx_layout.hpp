@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_JIT_CTX_LAYOUT_HPP_
-#define NATIVE_JIT_CTX_LAYOUT_HPP_
+#ifndef NATIVE_EXEC_JIT_CTX_LAYOUT_HPP_
+#define NATIVE_EXEC_JIT_CTX_LAYOUT_HPP_
 
 #include <cstddef>
 #include <cstdint>
@@ -24,4 +24,4 @@ struct jit_ctx_layout {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_JIT_CTX_LAYOUT_HPP_
+#endif  // NATIVE_EXEC_JIT_CTX_LAYOUT_HPP_

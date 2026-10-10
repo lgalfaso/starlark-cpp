@@ -1,7 +1,7 @@
 // Copyright 2026 Lucas Mirelmann
 
-#ifndef NATIVE_NATIVE_OPTIONS_HPP_
-#define NATIVE_NATIVE_OPTIONS_HPP_
+#ifndef NATIVE_RUNNER_NATIVE_OPTIONS_HPP_
+#define NATIVE_RUNNER_NATIVE_OPTIONS_HPP_
 
 #include <string>
 
@@ -24,4 +24,4 @@ struct native_options {
 
 #pragma GCC visibility pop
 
-#endif  // NATIVE_NATIVE_OPTIONS_HPP_
+#endif  // NATIVE_RUNNER_NATIVE_OPTIONS_HPP_

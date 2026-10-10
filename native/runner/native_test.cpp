@@ -1,14 +1,15 @@
 // Copyright 2026 Lucas Mirelmann
 
+#include <gmock/gmock.h>
+#include <gtest/gtest-matchers.h>
+#include <gtest/gtest.h>
+
 #include <string>
 
 #include "io/read_file.hpp"
 #include "native/runner/native_test_runner.hpp"
 #include "vm/frame.hpp"
 #include "vm/test_case.hpp"
-#include <gmock/gmock.h>
-#include <gtest/gtest-matchers.h>
-#include <gtest/gtest.h>
 
 using ::starlark::logging::logger;
 using ::starlark::native_test_runner::run_native_test;

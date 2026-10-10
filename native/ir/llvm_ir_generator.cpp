@@ -6,6 +6,7 @@
 
 #include <format>
 #include <set>
+#include <memory>
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
