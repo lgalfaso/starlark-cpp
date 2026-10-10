@@ -31,6 +31,16 @@ constexpr ::lld::DriverDef kLldDrivers[] = {{::lld::Gnu, &::lld::elf::link}};
 constexpr char kLldArgv0[] = "ld.lld";
 #endif
 
+std::string macos_syslibroot() {
+  if (const char* sdkroot = std::getenv("SDKROOT"); sdkroot != nullptr && sdkroot[0] != '\0') {
+    return sdkroot;
+  }
+  if (const char* developer = std::getenv("DEVELOPER_DIR"); developer != nullptr && developer[0] != '\0') {
+    return std::string(developer) + "/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
+  }
+  return "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
+}
+
 std::string lld_arch_name(const llvm::Triple& triple) {
   switch (triple.getArch()) {
     case llvm::Triple::aarch64:
@@ -75,6 +85,12 @@ bool link_object_to_dylib(const llvm::Triple& triple,
   args.push_back("macos");
   args.push_back(version);
   args.push_back(version);
+  const std::string syslibroot = macos_syslibroot();
+  if (std::filesystem::exists(syslibroot)) {
+    args.push_back("-syslibroot");
+    args.push_back(syslibroot);
+  }
+  args.push_back("-lSystem");
 #else
   args.push_back("-shared");
 #endif
