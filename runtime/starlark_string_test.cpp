@@ -51,7 +51,6 @@ using ::starlark::testing::error_handler;
 using ::starlark::testing::starlark_testing_function;
 using ::starlark::ucd::is_printable;
 using ::starlark::unicode::utf8_encode_code_point;
-using ::starlark::unicode::utf8_is_well_formed;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Contains;
 using ::testing::Eq;
@@ -82,7 +81,6 @@ TEST(StarlarkString, Repr) {
   EXPECT_EQ("\"\\t\\r\\n\"", starlark_string("\t\r\n"sv).repr());
   EXPECT_EQ("\"\\x01\\x02\\x7f\"", starlark_string("\001\002\177"sv).repr());
   EXPECT_EQ("\"\\x90\"", starlark_string("\302\220"sv).repr());
-  EXPECT_FALSE(utf8_is_well_formed(std::string("🙂"sv).substr(0, 1)));
   EXPECT_EQ("\"\xC3\xA0\"", starlark_string("\303\240"sv).repr());
   EXPECT_EQ("\"\xC8\xB4\"", starlark_string("\310\264"sv).repr());
   EXPECT_EQ("\"\\u0378\"", starlark_string("\315\270"sv).repr());

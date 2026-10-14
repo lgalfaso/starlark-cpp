@@ -15,7 +15,6 @@
 #include "grammar/numeric_parser.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
-#include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
 
 using ::starlark::bigint::parse_number;
@@ -36,8 +35,6 @@ using ::starlark::logging::Position;
 using ::starlark::logging::logger;
 using ::starlark::unicode::replacement_character_utf8;
 using ::starlark::unicode::utf8_encode_code_point;
-using ::starlark::unicode::utf8_is_well_formed;
-
 namespace starlark {
 namespace grammar {
 
@@ -449,9 +446,6 @@ void lexer::read_string() {
             auto end = get_position();
             current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
           } else {
-            if (!utf8_is_well_formed(result)) {
-              found_errors = true;
-            }
             current = token{is_bytes ? token_type::kBytes : token_type::kString, start, get_position(), result};
           }
           return;
@@ -548,7 +542,7 @@ void lexer::read_string() {
           case '6':
           case '7': {
             int max_octal =  is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127;
-            if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, max_octal, 1, 3, 8)) {
+            if (!read_escaped_char(result, !is_bytes, max_octal, 1, 3, 8)) {
               add_error(error_v2_invalid_escape_sequence_octal(max_octal, input, escape_start, get_position()), escape_start);
               found_errors = true;
             }
@@ -557,7 +551,7 @@ void lexer::read_string() {
           case 'x': {
             source_code.skip();
             int max_hex = is_bytes || !opts.escaped_octal_and_hex_char_are_ascii ? 255 : 127;
-            if (!read_escaped_char(result, !is_bytes && opts.escaped_octal_and_hex_char_are_ascii, max_hex, 2, 2, 16)) {
+            if (!read_escaped_char(result, !is_bytes, max_hex, 2, 2, 16)) {
               add_error(error_v2_invalid_escape_sequence_hex(max_hex, input, escape_start, get_position()), escape_start);
               found_errors = true;
             }

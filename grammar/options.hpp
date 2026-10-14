@@ -12,14 +12,12 @@ namespace starlark {
 namespace grammar {
 
 struct grammar_options {
-  // Whether when parsing a string, to allow octal or hex escape sequences
-  // for characters in the 128-255 rangei (ASCII characters are always
-  // allowed). Enabling this option has the undesirable side-effect that
-  // octal and hex escaped sequences will be added literally to the string
-  // and not as UTF-8 encoding of the character.
-  // This is one of the options that would have been best not to
-  // have but there are libraries(1) that make use of these sequences even
-  // when the spec states:
+  // Whether when parsing a text string, to allow octal or hex escape sequences
+  // for code points in the 128-255 range (values 0-127 are always allowed).
+  // Octal/hex values are always UTF-8-encoded in text strings; bytes literals
+  // still treat escapes as raw bytes. This is one of the options that would
+  // have been best not to have but there are libraries(1) that use these
+  // sequences even when the spec states:
   //
   //     It is an error if the value of an octal or hexadecimal escape is
   //     greater than decimal 127.

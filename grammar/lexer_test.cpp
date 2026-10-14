@@ -180,9 +180,10 @@ void checkComments(std::string_view input, const std::vector<std::string>& expec
   EXPECT_EQ(expected_comments, comments);
 }
 
-void checkErrors(std::string_view input, std::string_view expected, const std::vector<std::string>& expected_errors) {
+void checkErrors(std::string_view input, std::string_view expected, grammar_options options,
+                  const std::vector<std::string>& expected_errors) {
   logger logging;
-  lexer l("main", input, logging);
+  lexer l("main", input, options, logging);
   EXPECT_EQ(expected, join(read_tokens(l, input)));
 
   std::vector<std::string> errors;
@@ -194,6 +195,10 @@ void checkErrors(std::string_view input, std::string_view expected, const std::v
     errors.back() += std::to_string(log_entry.pos().column());
   }
   EXPECT_EQ(expected_errors, errors);
+}
+
+void checkErrors(std::string_view input, std::string_view expected, const std::vector<std::string>& expected_errors) {
+  checkErrors(input, expected, grammar_options{}, expected_errors);
 }
 
 TEST(LexerTest, Indentation) {
@@ -436,7 +441,7 @@ foo = "bar\z")starlark",
         "IDENTIFIER(\"foo\"):1,1:1,4 EQUALS:1,5:1,6 STRING(\"bar\"):1,7:1,13 NEWLINE:1,13:1,13 EOF:1,13:1,13");
   check(R"starlark(
 foo = "\200")starlark",
-      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\200\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13",
+      "IDENTIFIER(\"foo\"):2,1:2,4 EQUALS:2,5:2,6 STRING(\"\\302\\200\"):2,7:2,13 NEWLINE:2,13:2,13 EOF:2,13:2,13",
       grammar_options{
         .escaped_octal_and_hex_char_are_ascii = false,
   });
