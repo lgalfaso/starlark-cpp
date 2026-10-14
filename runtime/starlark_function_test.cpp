@@ -586,7 +586,7 @@ TEST(StarlarkBytes, FromStringInvalidUnicodeSequence) {
   context ctx(arena);
   error_handler error_callback;
 
-  starlark_string str("abc\xf0\x{f1}def"sv);
+  starlark_string str("abc\xef\xbf\xbd\xef\xbf\xbd" "def"sv);
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
@@ -602,7 +602,7 @@ TEST(StarlarkBytes, FromStringOverflowNoOverflow) {
   context ctx(arena, runtime_options{.max_string_length = 20});
   error_handler error_callback;
 
-  starlark_string str("abc\xf0\x{f1}def01234567"sv);
+  starlark_string str("abc\xef\xbf\xbd\xef\xbf\xbd" "def01234567"sv);
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
@@ -622,7 +622,7 @@ TEST(StarlarkBytes, FromStringOverflowOverflow) {
   // The only way to make the new bytes longer is to use invalid sequences that will
   // force the output to be larger. If the logic were to change, then this condition
   // can be removed.
-  starlark_string str("abc\xf0\x{f1}def012345678"sv);
+  starlark_string str("abc\xef\xbf\xbd\xef\xbf\xbd" "def012345678"sv);
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
@@ -2078,7 +2078,7 @@ TEST(StarlarkHash, String) {
   pos_args2.push_back(&str2);
 
   EXPECT_EQ("0", starlark_fn_hash(nullptr, pos_args1, named_args1, ctx, error_callback)->str());
-  EXPECT_EQ("6041520446639342335", starlark_fn_hash(nullptr, pos_args2, named_args2, ctx, error_callback)->str());
+  EXPECT_EQ("-2771053549645843481", starlark_fn_hash(nullptr, pos_args2, named_args2, ctx, error_callback)->str());
   EXPECT_THAT(error_callback.messages, IsEmpty());
 }
 

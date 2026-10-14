@@ -81,11 +81,11 @@ int ccc(char32_t code_point);
 
 std::optional<char32_t> canonical_composition(char32_t lhs, char32_t rhs);
 
-std::optional<std::string_view> to_upper(char32_t code_point);
+std::optional<std::span<const char32_t>> to_upper(char32_t code_point);
 
-std::optional<std::string_view> to_title(char32_t code_point);
+std::optional<std::span<const char32_t>> to_title(char32_t code_point);
 
-std::optional<std::pair<std::string_view, std::optional<std::string_view>>> to_lower(char32_t code_point);
+std::optional<std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>> to_lower(char32_t code_point);
 
 word_break_type word_break(char32_t code_point);
 
@@ -375,30 +375,12 @@ void print_canonical_composition(FILE* output, const std::map<char32_t, starlark
   FWRITE("}\n\n", output);
 }
 
-void utf8_encode(std::vector<char>& output, char32_t code_point) {
-  if (code_point <= 0x7f) {
-    output.push_back(static_cast<char>(code_point));
-  } else if (code_point <= 0x7ff) {
-    output.push_back('\xc0' | static_cast<char>(code_point >> 6));
-    output.push_back('\x80' | static_cast<char>(code_point & 0x3f));
-  } else if (code_point <= 0xffff) {
-    output.push_back('\xe0' | static_cast<char>(code_point >> 12));
-    output.push_back('\x80' | static_cast<char>((code_point >> 6) & 0x3f));
-    output.push_back('\x80' | static_cast<char>(code_point & 0x3f));
-  } else if (code_point <= 0x10'ffff) {
-    output.push_back('\xf0' | static_cast<char>(code_point >> 18));
-    output.push_back('\x80' | static_cast<char>((code_point >> 12) & 0x3f));
-    output.push_back('\x80' | static_cast<char>((code_point >> 6) & 0x3f));
-    output.push_back('\x80' | static_cast<char>(code_point & 0x3f));
-  }
-}
-
 void print_to_upper(FILE* output,
                     const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::optional<std::string_view> to_upper(char32_t code_point) {\n", output);
+  FWRITE("std::optional<std::span<const char32_t>> to_upper(char32_t code_point) {\n", output);
   std::map<char32_t, char32_t> entries;
-  std::vector<char> elements;
+  std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -419,11 +401,11 @@ void print_to_upper(FILE* output,
 
       // We are safe, use the sequence from special_cases.
       for (const auto& element : special_case.upper) {
-        utf8_encode(elements, element);
+        elements.push_back(element);
       }
       entries[entry.first] = elements.size();
     } else if (entry.second.uppercase_mapping != 0x110000) {
-      utf8_encode(elements, entry.second.uppercase_mapping);
+      elements.push_back(entry.second.uppercase_mapping);
       entries[entry.first] = elements.size();
     }
   }
@@ -437,13 +419,13 @@ void print_to_upper(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  fprintf(output, "  static constexpr std::array<char, %zu> all_upper{", elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_upper{", elements.size());
   pos = 0;
   for (const auto& element : elements) {
-    if (pos % 16 == 0) {
+    if (pos % 12 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " '\\x%02X',", static_cast<unsigned char>(element));
+    fprintf(output, " 0x%05X,", element);
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
@@ -453,7 +435,7 @@ void print_to_upper(FILE* output,
   FWRITE("    if (upper_candidate != all_upper_index.begin()) {\n", output);
   FWRITE("      begin = (--upper_candidate)->second;\n", output);
   FWRITE("    }\n", output);
-  FWRITE("    return std::string_view{&all_upper[begin], end - begin};\n", output);
+  FWRITE("    return std::span<const char32_t>(all_upper).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
   FWRITE("  return {};\n", output);
   FWRITE("}\n\n", output);
@@ -462,9 +444,9 @@ void print_to_upper(FILE* output,
 void print_to_title(FILE* output,
                     const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::optional<std::string_view> to_title(char32_t code_point) {\n", output);
+  FWRITE("std::optional<std::span<const char32_t>> to_title(char32_t code_point) {\n", output);
   std::map<char32_t, char32_t> entries;
-  std::vector<char> elements;
+  std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -485,11 +467,11 @@ void print_to_title(FILE* output,
 
       // We are safe, use the sequence from special_cases.
       for (const auto& element : special_case.title) {
-        utf8_encode(elements, element);
+        elements.push_back(element);
       }
       entries[entry.first] = elements.size();
     } else if (entry.second.titlecase_mapping != 0x110000) {
-      utf8_encode(elements, entry.second.titlecase_mapping);
+      elements.push_back(entry.second.titlecase_mapping);
       entries[entry.first] = elements.size();
     }
   }
@@ -503,13 +485,13 @@ void print_to_title(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
-  fprintf(output, "  static constexpr std::array<char, %zu> all_title{", elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_title{", elements.size());
   pos = 0;
   for (const auto& element : elements) {
-    if (pos % 16 == 0) {
+    if (pos % 12 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " '\\x%02X',", static_cast<unsigned char>(element));
+    fprintf(output, " 0x%05X,", element);
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
@@ -519,7 +501,7 @@ void print_to_title(FILE* output,
   FWRITE("    if (title_candidate != all_title_index.begin()) {\n", output);
   FWRITE("      begin = (--title_candidate)->second;\n", output);
   FWRITE("    }\n", output);
-  FWRITE("    return std::string_view{&all_title[begin], end - begin};\n", output);
+  FWRITE("    return std::span<const char32_t>(all_title).subspan(begin, end - begin);\n", output);
   FWRITE("  }\n", output);
   FWRITE("  return {};\n", output);
   FWRITE("}\n\n", output);
@@ -528,11 +510,11 @@ void print_to_title(FILE* output,
 void print_to_lower(FILE* output,
                     const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::optional<std::pair<std::string_view, std::optional<std::string_view>>> to_lower(char32_t code_point) {\n", output);
+  FWRITE("std::optional<std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>> to_lower(char32_t code_point) {\n", output);
   std::map<char32_t, char32_t> entries;
-  std::vector<char> elements;
+  std::vector<char32_t> elements;
   std::map<char32_t, char32_t> conditional_entries;
-  std::vector<char> conditional_elements;
+  std::vector<char32_t> conditional_elements;
   for (const auto& entry : unicode_data) {
     if (special_casing.contains(entry.first)) {
       const auto& special_case = special_casing.at(entry.first);
@@ -553,24 +535,24 @@ void print_to_lower(FILE* output,
           // This is somethign that we are currently not supporting, so abort.
           exit(1);
         }
-        utf8_encode(elements, entry.second.lowercase_mapping);
+        elements.push_back(entry.second.lowercase_mapping);
         entries[entry.first] = elements.size();
         if (skip) {
           continue;
         }
         for (const auto& element : special_case.lower) {
-          utf8_encode(conditional_elements, element);
+          conditional_elements.push_back(element);
         }
         conditional_entries[entry.first] = conditional_elements.size();
       } else {
         // We are safe, use the sequence from special_cases.
         for (const auto& element : special_case.lower) {
-          utf8_encode(elements, element);
+          elements.push_back(element);
         }
         entries[entry.first] = elements.size();
       }
     } else if (entry.second.lowercase_mapping != 0x110000) {
-      utf8_encode(elements, entry.second.lowercase_mapping);
+      elements.push_back(entry.second.lowercase_mapping);
       entries[entry.first] = elements.size();
     }
   }
@@ -584,13 +566,13 @@ void print_to_lower(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<char, %zu> all_lower{", elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_lower{", elements.size());
   pos = 0;
   for (const auto& element : elements) {
-    if (pos % 16 == 0) {
+    if (pos % 12 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " '\\x%02X',", static_cast<unsigned char>(element));
+    fprintf(output, " 0x%05X,", element);
     ++pos;
   }
   FWRITE("\n  };\n", output);
@@ -605,13 +587,13 @@ void print_to_lower(FILE* output,
     ++pos;
   }
   FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<char, %zu> conditional_all_lower{", conditional_elements.size());
+  fprintf(output, "  static constexpr std::array<char32_t, %zu> conditional_all_lower{", conditional_elements.size());
   pos = 0;
   for (const auto& element : conditional_elements) {
-    if (pos % 16 == 0) {
+    if (pos % 12 == 0) {
       FWRITE("\n   ", output);
     }
-    fprintf(output, " '\\x%02X',", static_cast<unsigned char>(element));
+    fprintf(output, " 0x%05X,", element);
     ++pos;
   }
   FWRITE("\n  };\n\n", output);
@@ -622,7 +604,7 @@ void print_to_lower(FILE* output,
   FWRITE("    if (lower_candidate != all_lower_index.begin()) {\n", output);
   FWRITE("      begin = (--lower_candidate)->second;\n", output);
   FWRITE("    }\n", output);
-  FWRITE("    auto entries = std::string_view{&all_lower[begin], end - begin};\n", output);
+  FWRITE("    auto entries = std::span<const char32_t>(all_lower).subspan(begin, end - begin);\n", output);
   FWRITE("    if (auto conditional_lower_candidate = conditional_all_lower_index.find(code_point); conditional_lower_candidate != conditional_all_lower_index.end()) {\n", output);
 
   FWRITE("      std::size_t conditional_begin = 0;\n", output);
@@ -630,11 +612,11 @@ void print_to_lower(FILE* output,
   FWRITE("      if (conditional_lower_candidate != conditional_all_lower_index.begin()) {\n", output);
   FWRITE("        conditional_begin = (--conditional_lower_candidate)->second;\n", output);
   FWRITE("      }\n", output);
-  FWRITE("      auto conditional_entries = std::string_view{&conditional_all_lower[conditional_begin], conditional_end - conditional_begin};\n", output);
-  FWRITE("      return std::pair<std::string_view, std::optional<std::string_view>>(entries, conditional_entries);\n", output);
+  FWRITE("      auto conditional_entries = std::span<const char32_t>(conditional_all_lower).subspan(conditional_begin, conditional_end - conditional_begin);\n", output);
+  FWRITE("      return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, conditional_entries);\n", output);
 
   FWRITE("    }\n", output);
-  FWRITE("    return std::pair<std::string_view, std::optional<std::string_view>>(entries, {});\n", output);
+  FWRITE("    return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, {});\n", output);
   FWRITE("  }\n", output);
   FWRITE("  return {};\n", output);
   FWRITE("}\n\n", output);

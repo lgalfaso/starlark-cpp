@@ -15,6 +15,7 @@
 #include "grammar/numeric_parser.hpp"
 #include "unicode/encode.hpp"
 #include "unicode/ucd_code_points.hpp"
+#include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
 
 using ::starlark::bigint::parse_number;
@@ -35,6 +36,7 @@ using ::starlark::logging::Position;
 using ::starlark::logging::logger;
 using ::starlark::unicode::replacement_character_utf8;
 using ::starlark::unicode::utf8_encode_code_point;
+using ::starlark::unicode::utf8_is_well_formed;
 
 namespace starlark {
 namespace grammar {
@@ -447,6 +449,9 @@ void lexer::read_string() {
             auto end = get_position();
             current = token{token_type::kIllegal, start, end, std::string{input.substr(start.pos(), end.pos() - start.pos())}};
           } else {
+            if (!utf8_is_well_formed(result)) {
+              found_errors = true;
+            }
             current = token{is_bytes ? token_type::kBytes : token_type::kString, start, get_position(), result};
           }
           return;

@@ -29,7 +29,7 @@ assert_eq(float("-Inf"), -1e308*10)
 l = []
 assert_eq(getattr(l, "append"), l.append)
 assert_eq(hasattr(b'', "elems"), True)
-assert_eq(hash("abc"), 6041520446639342335)
+assert_eq(hash("abc"), -2771053549645843481)
 assert_eq(int("0123", 10), 123)
 assert_eq(int("0123"), 123)
 assert_fail('int("0123", 0)', error_message = """invalid literal for int() with base 0: '0123'

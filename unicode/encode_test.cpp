@@ -67,4 +67,24 @@ TEST(EncodeTest, OutsideUnicodeRange) {
   EXPECT_EQ("\xef\xbf\xbd", encoded);
 }
 
+TEST(EncodeTest, Utf8DecodeValid) {
+  std::vector<char32_t> codepoints;
+  EXPECT_TRUE(starlark::unicode::utf8_decode("abc", codepoints));
+  ASSERT_EQ(3u, codepoints.size());
+  EXPECT_EQ('a', codepoints[0]);
+  EXPECT_EQ('b', codepoints[1]);
+  EXPECT_EQ('c', codepoints[2]);
+}
+
+TEST(EncodeTest, Utf8DecodeInvalid) {
+  std::vector<char32_t> codepoints;
+  EXPECT_FALSE(starlark::unicode::utf8_is_well_formed(std::string("🙂").substr(0, 1)));
+  EXPECT_FALSE(starlark::unicode::utf8_decode(std::string("🙂").substr(0, 1), codepoints));
+}
+
+TEST(EncodeTest, Utf8EncodedSize) {
+  EXPECT_EQ(1u, starlark::unicode::utf8_encoded_size('a'));
+  EXPECT_EQ(2u, starlark::unicode::utf8_encoded_size(0x00e0));
+}
+
 }  // namespace

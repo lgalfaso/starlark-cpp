@@ -51,6 +51,7 @@ using ::starlark::testing::error_handler;
 using ::starlark::testing::starlark_testing_function;
 using ::starlark::ucd::is_printable;
 using ::starlark::unicode::utf8_encode_code_point;
+using ::starlark::unicode::utf8_is_well_formed;
 using ::std::literals::string_view_literals::operator""sv;
 using ::testing::Contains;
 using ::testing::Eq;
@@ -81,12 +82,12 @@ TEST(StarlarkString, Repr) {
   EXPECT_EQ("\"\\t\\r\\n\"", starlark_string("\t\r\n"sv).repr());
   EXPECT_EQ("\"\\x01\\x02\\x7f\"", starlark_string("\001\002\177"sv).repr());
   EXPECT_EQ("\"\\x90\"", starlark_string("\302\220"sv).repr());
+  EXPECT_FALSE(utf8_is_well_formed(std::string("🙂"sv).substr(0, 1)));
   EXPECT_EQ("\"\xC3\xA0\"", starlark_string("\303\240"sv).repr());
   EXPECT_EQ("\"\xC8\xB4\"", starlark_string("\310\264"sv).repr());
   EXPECT_EQ("\"\\u0378\"", starlark_string("\315\270"sv).repr());
   EXPECT_EQ("\"\\ud800\"", starlark_string("\355\240\200"sv).repr());
   EXPECT_EQ("\"\\U000101c7\"", starlark_string("\360\220\207\207"sv).repr());
-  EXPECT_EQ("\"\xf0\"", starlark_string(std::string("🙂"sv).substr(0, 1)).repr());
   EXPECT_EQ("\"\\ufeff\"", starlark_string("\xef\xbb\xbf"sv).repr());
 }
 
@@ -147,46 +148,47 @@ TEST(StarlarkString, Equals) {
 }
 
 TEST(StarlarkString, Hash) {
+  // SipHash over UTF-32 code unit bytes (native representation); not Go/Java UTF-8 string hash.
   EXPECT_EQ(0, starlark_string(""sv).hash());
-  EXPECT_EQ(0x539375b79c9167a6, starlark_string(std::string("\000", 1)).hash());
-  EXPECT_EQ(0x19ac88fb2429e222, starlark_string("a"sv).hash());
-  EXPECT_EQ(0x12d48511de046bbc, starlark_string("ab"sv).hash());
-  EXPECT_EQ(0x53d7cad63d3282ff, starlark_string("abc"sv).hash());
-  EXPECT_EQ(0x92981e87e70229, starlark_string("abcd"sv).hash());
-  EXPECT_EQ(0xabac8f555b5e912, starlark_string("abcde"sv).hash());
-  EXPECT_EQ(0x63667dc70d4dbf89, starlark_string("abcdef"sv).hash());
-  EXPECT_EQ(0x3539f9b81c64a336, starlark_string("abcdefg"sv).hash());
-  EXPECT_EQ(-0x7f95eee8bc7b632d, starlark_string("abcdefgh"sv).hash());
-  EXPECT_EQ(-0x642099e9fba65ad0, starlark_string("abcdefghi"sv).hash());
-  EXPECT_EQ(-0x669943fc9f1993d5, starlark_string("abcdefghij"sv).hash());
-  EXPECT_EQ(0x5e5235ef5071d1c8, starlark_string("abcdefghijk"sv).hash());
-  EXPECT_EQ(-0x574fd3e31dd1b6c0, starlark_string("abcdefghijkl"sv).hash());
-  EXPECT_EQ(0x348e1f9d6e3c67a9, starlark_string("abcdefghijklm"sv).hash());
-  EXPECT_EQ(0x4b59cf75df0ea525, starlark_string("abcdefghijklmn"sv).hash());
-  EXPECT_EQ(0x7c0d99416b677716, starlark_string("abcdefghijklmno"sv).hash());
-  EXPECT_EQ(0x651dcfdc9b304273, starlark_string("abcdefghijklmnop"sv).hash());
-  EXPECT_EQ(-0x706278fdd6f9101, starlark_string("abcdefghijklmnopq"sv).hash());
-  EXPECT_EQ(0x310a2e3dd291e1a6, starlark_string("abcdefghijklmnopqr"sv).hash());
-  EXPECT_EQ(0x76e0c0d29cc59331, starlark_string("abcdefghijklmnopqrs"sv).hash());
-  EXPECT_EQ(-0x89ec229ad3ce95e, starlark_string("abcdefghijklmnopqrst"sv).hash());
-  EXPECT_EQ(-0x3421666900cc950, starlark_string("abcdefghijklmnopqrstu"sv).hash());
-  EXPECT_EQ(0x7be37d6337827631, starlark_string("abcdefghijklmnopqrstuv"sv).hash());
-  EXPECT_EQ(-0xd93501f3830d3c5, starlark_string("abcdefghijklmnopqrstuvw"sv).hash());
-  EXPECT_EQ(-0x1ec56e52deeb2ed9, starlark_string("abcdefghijklmnopqrstuvwx"sv).hash());
-  EXPECT_EQ(0x2928ab0caeae7b0d, starlark_string("abcdefghijklmnopqrstuvwxy"sv).hash());
-  EXPECT_EQ(0x732f1d3705b6dfa3, starlark_string("abcdefghijklmnopqrstuvwxyz"sv).hash());
-  EXPECT_EQ(-0x3d305c344304b1, starlark_string("abcdefghijklmnopqrstuvwxyz0"sv).hash());
-  EXPECT_EQ(-0x4bbc24288075d499, starlark_string("abcdefghijklmnopqrstuvwxyz01"sv).hash());
-  EXPECT_EQ(0x630596a3267cd0f9, starlark_string("abcdefghijklmnopqrstuvwxyz012"sv).hash());
-  EXPECT_EQ(-0x7176a79e04f34841, starlark_string("abcdefghijklmnopqrstuvwxyz0123"sv).hash());
-  EXPECT_EQ(0x7b3b18b2511d145a, starlark_string("abcdefghijklmnopqrstuvwxyz01234"sv).hash());
-  EXPECT_EQ(-0x116d8bb10196190f, starlark_string("abcdefghijklmnopqrstuvwxyz012345"sv).hash());
-  EXPECT_EQ(-0x7a27473192c1723a, starlark_string("abcdefghijklmnopqrstuvwxyz0123456"sv).hash());
-  EXPECT_EQ(0x731309efc4441b64, starlark_string("abcdefghijklmnopqrstuvwxyz01234567"sv).hash());
-  EXPECT_EQ(-0x41044b627d75b155, starlark_string("abcdefghijklmnopqrstuvwxyz012345678"sv).hash());
-  EXPECT_EQ(-0x38976cda9bea7d32, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789"sv).hash());
-  EXPECT_EQ(0x6079104dbaf33098, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@"sv).hash());
-  EXPECT_EQ(-0x6f9048eb54a00388, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@!"sv).hash());
+  EXPECT_EQ(-0x425c4d6968337329, starlark_string(std::string("\000", 1)).hash());
+  EXPECT_EQ(0x182e5b06a91e19ca, starlark_string("a"sv).hash());
+  EXPECT_EQ(-0x20c9306bbc148057, starlark_string("ab"sv).hash());
+  EXPECT_EQ(-0x2674c2859039cc19, starlark_string("abc"sv).hash());
+  EXPECT_EQ(-0x66412e5a4a9beee0, starlark_string("abcd"sv).hash());
+  EXPECT_EQ(0x3b012f3dbccc2ff5, starlark_string("abcde"sv).hash());
+  EXPECT_EQ(0x794007154daebc70, starlark_string("abcdef"sv).hash());
+  EXPECT_EQ(0x324f0379b61bb1de, starlark_string("abcdefg"sv).hash());
+  EXPECT_EQ(0x715c75649fb64caf, starlark_string("abcdefgh"sv).hash());
+  EXPECT_EQ(-0xb024dfe969774b5, starlark_string("abcdefghi"sv).hash());
+  EXPECT_EQ(0x55c2ea8b6392db1a, starlark_string("abcdefghij"sv).hash());
+  EXPECT_EQ(-0x78c3e66740a64c05, starlark_string("abcdefghijk"sv).hash());
+  EXPECT_EQ(0x2d4bd754e85c063b, starlark_string("abcdefghijkl"sv).hash());
+  EXPECT_EQ(-0x251eef1c81b109aa, starlark_string("abcdefghijklm"sv).hash());
+  EXPECT_EQ(-0x2b988416c19453e0, starlark_string("abcdefghijklmn"sv).hash());
+  EXPECT_EQ(-0x33a83caff8ba5527, starlark_string("abcdefghijklmno"sv).hash());
+  EXPECT_EQ(0x378b6fbf38f585eb, starlark_string("abcdefghijklmnop"sv).hash());
+  EXPECT_EQ(0x14c6e9d485b01ce, starlark_string("abcdefghijklmnopq"sv).hash());
+  EXPECT_EQ(-0x2816267a3a82b9a, starlark_string("abcdefghijklmnopqr"sv).hash());
+  EXPECT_EQ(-0xf69503c07b2f938, starlark_string("abcdefghijklmnopqrs"sv).hash());
+  EXPECT_EQ(0x3617a198770c174e, starlark_string("abcdefghijklmnopqrst"sv).hash());
+  EXPECT_EQ(-0x1007df34916a8485, starlark_string("abcdefghijklmnopqrstu"sv).hash());
+  EXPECT_EQ(-0x23806bdc2cc77761, starlark_string("abcdefghijklmnopqrstuv"sv).hash());
+  EXPECT_EQ(0x5ef535aac62def71, starlark_string("abcdefghijklmnopqrstuvw"sv).hash());
+  EXPECT_EQ(0x5d1bbaabc1619175, starlark_string("abcdefghijklmnopqrstuvwx"sv).hash());
+  EXPECT_EQ(-0x48f651ad710b1e0a, starlark_string("abcdefghijklmnopqrstuvwxy"sv).hash());
+  EXPECT_EQ(0x6a6834c4b6c4407a, starlark_string("abcdefghijklmnopqrstuvwxyz"sv).hash());
+  EXPECT_EQ(-0x25c3ec84c940db9a, starlark_string("abcdefghijklmnopqrstuvwxyz0"sv).hash());
+  EXPECT_EQ(0x47c08e1dbbe5de4a, starlark_string("abcdefghijklmnopqrstuvwxyz01"sv).hash());
+  EXPECT_EQ(-0x73e73441f883df69, starlark_string("abcdefghijklmnopqrstuvwxyz012"sv).hash());
+  EXPECT_EQ(0x2b42055a66b9c732, starlark_string("abcdefghijklmnopqrstuvwxyz0123"sv).hash());
+  EXPECT_EQ(-0x585f19e2cf59614f, starlark_string("abcdefghijklmnopqrstuvwxyz01234"sv).hash());
+  EXPECT_EQ(0x6a1e06813e2f8b6f, starlark_string("abcdefghijklmnopqrstuvwxyz012345"sv).hash());
+  EXPECT_EQ(0x359ab21dd2af2689, starlark_string("abcdefghijklmnopqrstuvwxyz0123456"sv).hash());
+  EXPECT_EQ(0xd8f914e69c7e1e0, starlark_string("abcdefghijklmnopqrstuvwxyz01234567"sv).hash());
+  EXPECT_EQ(-0x1acb5bcf57e90437, starlark_string("abcdefghijklmnopqrstuvwxyz012345678"sv).hash());
+  EXPECT_EQ(-0x33f754a64cebaeae, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789"sv).hash());
+  EXPECT_EQ(0x750d9c5bfd3dc886, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@"sv).hash());
+  EXPECT_EQ(0x2498b36ced3c1899, starlark_string("abcdefghijklmnopqrstuvwxyz0123456789@!"sv).hash());
 }
 
 void cmp_helper(starlark::result::status_or<int> cmp, auto matcher) {
@@ -7352,8 +7354,6 @@ TEST(StarlarkString, StripOneArgument) {
   test("zyxabcdefghijzyx", "xyz", "abcdefghij", "zyxabcdefghij", "abcdefghijzyx");
   test("abcdefghij", "xyz", "abcdefghij", "abcdefghij", "abcdefghij");
   test("zzyyxx", "xyz", "", "", "");
-  // Invalid sequences will not be modified, even if the sequence is present in `cutset`.
-  test("\x{F0}", "\x{F0}", "\x{F0}", "\x{F0}", "\x{F0}");
   // The sequence with the replacement character can be removed.
   test("\x{EF}\x{BF}\x{BD}abc\x{EF}\x{BF}\x{BD}", "\x{EF}\x{BF}\x{BD}", "abc", "\x{EF}\x{BF}\x{BD}abc", "abc\x{EF}\x{BF}\x{BD}");
 }

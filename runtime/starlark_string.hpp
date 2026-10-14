@@ -3,8 +3,11 @@
 #ifndef RUNTIME_STARLARK_STRING_HPP_
 #define RUNTIME_STARLARK_STRING_HPP_
 
+#include <cstdint>
 #include <functional>
 #include <map>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -21,6 +24,9 @@ class starlark_string : public starlark_obj {
  public:
   explicit starlark_string(std::string&& value);
   explicit starlark_string(std::string_view value);
+  explicit starlark_string(std::vector<char32_t>&& codepoints);
+  explicit starlark_string(std::span<const char32_t> codepoints);
+  explicit starlark_string(char32_t codepoint);
   bool primitive() const override;
   std::string str() const override;
   bool truthy() const override;
@@ -39,25 +45,25 @@ class starlark_string : public starlark_obj {
   starlark_obj* slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const override;
   std::string_view as_string() const override;
 
-  int64_t count(std::string_view sub, int64_t start, int64_t end) const;
-  bool endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const;
-  bool startswith(const std::vector<std::string_view>& begins, int64_t start, int64_t end) const;
-  int64_t find(std::string_view sub, int64_t start, int64_t end) const;
-  int64_t rfind(std::string_view sub, int64_t start, int64_t end) const;
-  starlark_obj* join(const std::vector<std::string_view>& elements, context& ctx) const;
-  starlark_obj* partition(std::string_view sub, context& ctx, error_fn& error_callback);
-  starlark_obj* rpartition(std::string_view sub, context& ctx, error_fn& error_callback);
-  starlark_obj* replace(std::string_view old, std::string_view new_, int64_t count, context& ctx) const;
+  int64_t count(std::span<const char32_t> sub, int64_t start, int64_t end) const;
+  bool endswith(const std::vector<std::span<const char32_t>>& ends, int64_t start, int64_t end) const;
+  bool startswith(const std::vector<std::span<const char32_t>>& begins, int64_t start, int64_t end) const;
+  int64_t find(std::span<const char32_t> sub, int64_t start, int64_t end) const;
+  int64_t rfind(std::span<const char32_t> sub, int64_t start, int64_t end) const;
+  starlark_obj* join(const std::vector<std::span<const char32_t>>& elements, context& ctx) const;
+  starlark_obj* partition(std::span<const char32_t> sub, context& ctx, error_fn& error_callback);
+  starlark_obj* rpartition(std::span<const char32_t> sub, context& ctx, error_fn& error_callback);
+  starlark_obj* replace(std::span<const char32_t> old, std::span<const char32_t> new_, int64_t count, context& ctx) const;
   starlark_obj* rsplit(int64_t maxsplit, context& ctx) const;
-  starlark_obj* rsplit(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
+  starlark_obj* rsplit(std::span<const char32_t> sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
   starlark_obj* split(int64_t maxsplit, context& ctx) const;
-  starlark_obj* split(std::string_view sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
+  starlark_obj* split(std::span<const char32_t> sep, int64_t maxsplit, context& ctx, error_fn& error_callback) const;
   starlark_obj* lstrip(context& ctx) const;
-  starlark_obj* lstrip(std::string_view cutset, context& ctx) const;
+  starlark_obj* lstrip(std::span<const char32_t> cutset, context& ctx) const;
   starlark_obj* rstrip(context& ctx) const;
-  starlark_obj* rstrip(std::string_view cutset, context& ctx) const;
+  starlark_obj* rstrip(std::span<const char32_t> cutset, context& ctx) const;
   starlark_obj* strip(context& ctx) const;
-  starlark_obj* strip(std::string_view cutset, context& ctx) const;
+  starlark_obj* strip(std::span<const char32_t> cutset, context& ctx) const;
   starlark_obj* splitlines(bool keepends, context& ctx) const;
   bool isalnum() const;
   bool isalpha() const;
@@ -72,12 +78,14 @@ class starlark_string : public starlark_obj {
   starlark_obj* capitalize(context& ctx);
   starlark_obj* format(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback);
 
-  starlark_obj* removeprefix(std::string_view sub, context& ctx);
-  starlark_obj* removesuffix(std::string_view sub, context& ctx);
+  starlark_obj* removeprefix(std::span<const char32_t> sub, context& ctx);
+  starlark_obj* removesuffix(std::span<const char32_t> sub, context& ctx);
   starlark_obj* elems(context& ctx) const;
   starlark_obj* elem_ords(context& ctx) const;
   starlark_obj* codepoints(context& ctx) const;
   starlark_obj* codepoint_ords(context& ctx) const;
+
+  const std::vector<char32_t>& codepoint_data() const { return codepoints_; }
 
   class string_elems : public starlark_obj {
    public:
@@ -128,19 +136,18 @@ class starlark_string : public starlark_obj {
  private:
   static const std::map<std::string, fn*, std::less<>>& method_refs();
   static const std::vector<std::string>& attributes();
-  void build_index();
-  std::string_view element_at(std::size_t element) const;
-  char32_t ord_element_at(std::size_t element) const;
+  void init_from_utf8(std::string_view value);
+  void ensure_utf8_cache() const;
+  char32_t codepoint_at(std::size_t element) const;
 
-  std::string::size_type size;
-  std::string value;
-  std::vector<std::string::size_type> value_index;
+  std::vector<char32_t> codepoints_;
+  mutable std::optional<std::string> utf8_cache_;
   mutable bool hash_computed = false;
   mutable int64_t cached_hash = 0;
-  static constexpr std::string::size_type index_step = 64;
 };
 
 void append_for_repr(std::string& output, std::string_view input);
+void append_for_repr(std::string& output, char32_t code_point);
 starlark::result::status chr_fn(std::string& output, int64_t input, error_fn& error_callback);
 starlark::result::status chr_fn(std::string& output, const starlark::bigint::number& input, error_fn& error_callback);
 
@@ -150,4 +157,3 @@ starlark::result::status chr_fn(std::string& output, const starlark::bigint::num
 #pragma GCC visibility pop
 
 #endif  // RUNTIME_STARLARK_STRING_HPP_
-

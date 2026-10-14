@@ -634,6 +634,7 @@ cc_library(
         ":starlark_types",
         "//bigint:number",
         "//errors:runtime_error_messages",
+        "//unicode:encode",
         "//unicode:utf8_reader",
         "//unicode:utf8_reverse_reader",
         "//unicode:word_break",
