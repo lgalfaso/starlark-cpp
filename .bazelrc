@@ -6,6 +6,8 @@ common --cxxopt=-fno-rtti --host_cxxopt=-fno-rtti --cxxopt=-DGTEST_HAS_RTTI=0 --
 common:macos --cxxopt=-fconstexpr-steps=40000000
 coverage --cxxopt=-fno-inline
 coverage --features=-coverage --copt=-coverage --linkopt=-coverage --test_env=GCOV_PREFIX_STRIP=12
+coverage --java_runtime_version=remotejdk_21
+coverage --tool_java_runtime_version=remotejdk_21
 
 build:asan --strip=never
 build:asan --@llvm//config:asan=true
