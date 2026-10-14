@@ -82,7 +82,6 @@ using ::starlark::ucd::to_lower;
 using ::starlark::ucd::to_title;
 using ::starlark::ucd::to_upper;
 using ::starlark::unicode::utf8_encode;
-using ::starlark::unicode::utf8_encoded_size;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 using ::starlark::unicode::utf8_reverse_reader;
@@ -456,7 +455,7 @@ starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other
   const auto& this_cp = this_obj.codepoint_data();
   const auto& other_cp = static_cast<const starlark_string&>(other).codepoint_data();
   std::size_t expected_size;
-  if (ckd_add(&expected_size, utf8_encoded_size(this_cp), utf8_encoded_size(other_cp)) ||
+  if (ckd_add(&expected_size, this_cp.size(), other_cp.size()) ||
       expected_size > ctx.options().max_string_length) {
     error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
     return nullptr;
@@ -479,7 +478,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       std::vector<char32_t> result;
       if (multiplier > 0) {
         std::size_t expected_size;
-        if (ckd_mul(&expected_size, utf8_encoded_size(this_cp), static_cast<std::size_t>(multiplier)) ||
+        if (ckd_mul(&expected_size, this_cp.size(), static_cast<std::size_t>(multiplier)) ||
             expected_size > ctx.options().max_string_length) {
           error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
           return nullptr;
@@ -505,7 +504,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       }
       int64_t int_value = multiplier.at(0);
       std::size_t expected_size;
-      if (ckd_mul(&expected_size, utf8_encoded_size(this_cp), static_cast<std::size_t>(int_value)) ||
+      if (ckd_mul(&expected_size, this_cp.size(), static_cast<std::size_t>(int_value)) ||
           expected_size > ctx.options().max_string_length) {
         error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
         return nullptr;

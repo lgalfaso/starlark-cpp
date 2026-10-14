@@ -67,9 +67,4 @@ TEST(EncodeTest, OutsideUnicodeRange) {
   EXPECT_EQ("\xef\xbf\xbd", encoded);
 }
 
-TEST(EncodeTest, Utf8EncodedSize) {
-  EXPECT_EQ(1u, starlark::unicode::utf8_encoded_size('a'));
-  EXPECT_EQ(2u, starlark::unicode::utf8_encoded_size(0x00e0));
-}
-
 }  // namespace

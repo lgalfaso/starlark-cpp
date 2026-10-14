@@ -13,10 +13,16 @@
 #include "unicode/encode.hpp"
 #include "unicode/utf8_reader.hpp"
 
+using ::starlark::unicode::utf8_code_point_count;
 using ::starlark::unicode::utf8_encode_code_point;
 using ::starlark::unicode::utf8_reader;
 
 namespace {
+
+TEST(SourceTest, Utf8CodePointCount) {
+  EXPECT_EQ(3u, utf8_code_point_count("abc"));
+  EXPECT_EQ(2u, utf8_code_point_count("\xf0\x9f\x98\x80\xf0\x9f\x98\x81"));
+}
 
 TEST(SourceTest, BOM) {
   EXPECT_EQ('a', utf8_reader("a", true, true).read_code_point());

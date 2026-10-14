@@ -1,6 +1,6 @@
 # Copyright 2026 Lucas Mirelmann
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
     name = "fast_compare",
@@ -132,6 +132,19 @@ cc_library(
         "//errors:runtime_error_messages",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:options",
+        "//unicode:utf8_reader",
+    ],
+)
+
+cc_test(
+    name = "program_limits_test",
+    size = "small",
+    srcs = ["program_limits_test.cpp"],
+    deps = [
+        ":program_limits",
+        "//proto:starlark_bytecode_cc_proto",
+        "//runtime:options",
+        "@googletest//:gtest_main",
     ],
 )
 

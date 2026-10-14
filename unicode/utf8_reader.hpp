@@ -22,6 +22,9 @@ bool is_utf8_continue(char input);
 
 std::string_view replacement_character_utf8();
 
+// Number of Unicode scalar values in a UTF-8 sequence (same decoding as starlark_string).
+std::size_t utf8_code_point_count(std::string_view input);
+
 class utf8_reader {
  public:
   explicit utf8_reader(std::string_view input, bool strict, bool remove_bom);

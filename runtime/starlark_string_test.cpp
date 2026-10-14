@@ -352,6 +352,21 @@ TEST(StarlarkString, PlusEqualsAssignOverflowNoOverflow) {
   EXPECT_EQ(result->str(), "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
 }
 
+TEST(StarlarkString, PlusConcatLimitUsesCodepointCount) {
+  // Four code points but 16 UTF-8 bytes; limit is element count, not encoded size.
+  starlark_string str_1("\xf0\x90\x80\x80\xf0\x90\x80\x80"sv);
+  starlark_string str_2("\xf0\x90\x80\x80\xf0\x90\x80\x80"sv);
+  Arena arena;
+  context ctx(arena, starlark::runtime::runtime_options{.max_string_length = 10});
+  error_handler error_callback;
+
+  auto* result = str_1.plus_equals_assign(str_2, ctx, error_callback);
+
+  ASSERT_NE(result, nullptr);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+  EXPECT_EQ(4, static_cast<const starlark_string*>(result)->unsafe_len());
+}
+
 TEST(StarlarkString, BinaryStar) {
   starlark_bigint minus_two(-2);
   starlark_integer minus_one(-1);

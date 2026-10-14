@@ -28,6 +28,16 @@ std::string_view replacement_character_utf8() {
   return "\xEF\xBF\xBD";
 }
 
+std::size_t utf8_code_point_count(std::string_view input) {
+  utf8_reader reader(input, false, false);
+  std::size_t count = 0;
+  while (reader.pending()) {
+    reader.read_code_point();
+    ++count;
+  }
+  return count;
+}
+
 const char32_t utf8_reader::kReplacementCharacter;
 const char32_t utf8_reader::kBomCharacter;
 const char32_t utf8_reader::kMaxCodePoint;
