@@ -464,7 +464,7 @@ starlark_obj* plus_op(const starlark_string& this_obj, const starlark_obj& other
   result.reserve(this_cp.size() + other_cp.size());
   result.insert(result.end(), this_cp.begin(), this_cp.end());
   result.insert(result.end(), other_cp.begin(), other_cp.end());
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
@@ -472,7 +472,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
   switch (other.kind()) {
     case object_kind::kInt: {
       if (this_cp.empty()) {
-        return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
+        return ctx.create<starlark_string>(std::string_view{});
       }
       auto multiplier = other.as_int64();
       std::vector<char32_t> result;
@@ -488,15 +488,15 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
           result.insert(result.end(), this_cp.begin(), this_cp.end());
         }
       }
-      return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+      return ctx.create<starlark_string>(std::move(result));
     }
     case object_kind::kBigInt: {
       if (this_cp.empty()) {
-        return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
+        return ctx.create<starlark_string>(std::string_view{});
       }
       const auto& multiplier = other.as_bigint();
       if (multiplier <= number::zero()) {
-        return Arena::Create<starlark_string>(&ctx.arena(), std::string_view{});
+        return ctx.create<starlark_string>(std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
         error_callback.add_error(error_v2_max_string_length(ctx.options().max_string_length));
@@ -514,7 +514,7 @@ starlark_obj* star_op(const starlark_string& this_obj, const starlark_obj& other
       for (int64_t i = 0; i < int_value; ++i) {
         result.insert(result.end(), this_cp.begin(), this_cp.end());
       }
-      return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+      return ctx.create<starlark_string>(std::move(result));
     }
     default:
       error_callback.add_error(error_v2_no_multiply_sequence(other.type()));
@@ -871,7 +871,7 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
       return nullptr;
     }
     result += parts[1];
-    return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+    return ctx.create<starlark_string>(std::move(result));
   }
 
   const starlark_tuple& t_other = static_cast<const starlark_tuple&>(other);
@@ -890,7 +890,7 @@ starlark_obj* percent_op(const starlark_string& this_obj, const starlark_obj& ot
     }
     result += parts[i + 1];
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 enum class case_condition {
@@ -1036,7 +1036,7 @@ starlark_obj* starlark_string::index(const starlark_obj& other, context& ctx, er
   if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), codepoint_at(*idx));
+  return ctx.create<starlark_string>(codepoint_at(*idx));
 }
 
 starlark_obj* starlark_string::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
@@ -1069,7 +1069,7 @@ starlark_obj* starlark_string::slice_range(const starlark_obj& start, const star
       result.push_back(codepoints_[static_cast<std::size_t>(i)]);
     }
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 std::string_view starlark_string::as_string() const {
@@ -1143,7 +1143,7 @@ starlark_obj* starlark_string::join(const std::vector<std::span<const char32_t>>
     }
     result.insert(result.end(), element.begin(), element.end());
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::partition(std::span<const char32_t> sub, context& ctx, error_fn& error_callback) {
@@ -1152,7 +1152,7 @@ starlark_obj* starlark_string::partition(std::span<const char32_t> sub, context&
     return nullptr;
   }
   auto pos = find_codepoints(codepoints_, 0, static_cast<int64_t>(codepoints_.size()), sub);
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  auto* result = ctx.create<starlark_tuple>(3);
   if (pos < 0) {
     result->add(this);
     result->add(ctx.empty_string());
@@ -1160,9 +1160,9 @@ starlark_obj* starlark_string::partition(std::span<const char32_t> sub, context&
   } else {
     std::vector<char32_t> before(codepoints_.begin(), codepoints_.begin() + static_cast<std::ptrdiff_t>(pos));
     std::vector<char32_t> after(codepoints_.begin() + static_cast<std::ptrdiff_t>(pos + sub.size()), codepoints_.end());
-    result->add(Arena::Create<starlark_string>(&ctx.arena(), std::move(before)));
-    result->add(Arena::Create<starlark_string>(&ctx.arena(), sub));
-    result->add(Arena::Create<starlark_string>(&ctx.arena(), std::move(after)));
+    result->add(ctx.create<starlark_string>(std::move(before)));
+    result->add(ctx.create<starlark_string>(sub));
+    result->add(ctx.create<starlark_string>(std::move(after)));
   }
   return result;
 }
@@ -1173,7 +1173,7 @@ starlark_obj* starlark_string::rpartition(std::span<const char32_t> sub, context
     return nullptr;
   }
   auto pos = rfind_codepoints(codepoints_, 0, static_cast<int64_t>(codepoints_.size()), sub);
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  auto* result = ctx.create<starlark_tuple>(3);
   if (pos < 0) {
     result->add(ctx.empty_string());
     result->add(ctx.empty_string());
@@ -1181,9 +1181,9 @@ starlark_obj* starlark_string::rpartition(std::span<const char32_t> sub, context
   } else {
     std::vector<char32_t> before(codepoints_.begin(), codepoints_.begin() + static_cast<std::ptrdiff_t>(pos));
     std::vector<char32_t> after(codepoints_.begin() + static_cast<std::ptrdiff_t>(pos + sub.size()), codepoints_.end());
-    result->add(Arena::Create<starlark_string>(&ctx.arena(), std::move(before)));
-    result->add(Arena::Create<starlark_string>(&ctx.arena(), sub));
-    result->add(Arena::Create<starlark_string>(&ctx.arena(), std::move(after)));
+    result->add(ctx.create<starlark_string>(std::move(before)));
+    result->add(ctx.create<starlark_string>(sub));
+    result->add(ctx.create<starlark_string>(std::move(after)));
   }
   return result;
 }
@@ -1219,11 +1219,11 @@ starlark_obj* starlark_string::replace(std::span<const char32_t> old, std::span<
     }
     result.insert(result.end(), codepoints_.begin() + static_cast<std::ptrdiff_t>(pos), codepoints_.end());
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::rsplit(int64_t maxsplit, context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
   }
@@ -1238,7 +1238,7 @@ starlark_obj* starlark_string::rsplit(int64_t maxsplit, context& ctx) const {
     }
     std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(begin),
                                codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+    result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
     end = begin;
     while (end > 0 && is_space(codepoints_[end - 1])) {
       --end;
@@ -1247,7 +1247,7 @@ starlark_obj* starlark_string::rsplit(int64_t maxsplit, context& ctx) const {
   }
   if (end > 0) {
     std::vector<char32_t> part(codepoints_.begin(), codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+    result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
   }
   result->unsafe_reverse();
   return result;
@@ -1258,7 +1258,7 @@ starlark_obj* starlark_string::rsplit(std::span<const char32_t> sep, int64_t max
     error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   std::size_t end = codepoints_.size();
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
@@ -1270,18 +1270,18 @@ starlark_obj* starlark_string::rsplit(std::span<const char32_t> sep, int64_t max
     }
     std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(pos + sep.size()),
                                codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+    result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
     end = static_cast<std::size_t>(pos);
     maxsplit--;
   }
   std::vector<char32_t> part(codepoints_.begin(), codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-  result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+  result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
   result->unsafe_reverse();
   return result;
 }
 
 starlark_obj* starlark_string::split(int64_t maxsplit, context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
   }
@@ -1296,7 +1296,7 @@ starlark_obj* starlark_string::split(int64_t maxsplit, context& ctx) const {
     }
     std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(begin),
                                codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+    result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
     begin = end;
     while (begin < codepoints_.size() && is_space(codepoints_[begin])) {
       ++begin;
@@ -1305,7 +1305,7 @@ starlark_obj* starlark_string::split(int64_t maxsplit, context& ctx) const {
   }
   if (begin < codepoints_.size()) {
     std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(begin), codepoints_.end());
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+    result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
   }
   return result;
 }
@@ -1315,7 +1315,7 @@ starlark_obj* starlark_string::split(std::span<const char32_t> sep, int64_t maxs
     error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   std::size_t begin = 0;
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
@@ -1327,12 +1327,12 @@ starlark_obj* starlark_string::split(std::span<const char32_t> sep, int64_t maxs
     }
     std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(begin),
                                codepoints_.begin() + static_cast<std::ptrdiff_t>(pos));
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+    result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
     begin = static_cast<std::size_t>(pos) + sep.size();
     maxsplit--;
   }
   std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(begin), codepoints_.end());
-  result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+  result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
   return result;
 }
 
@@ -1342,7 +1342,7 @@ starlark_obj* starlark_string::lstrip(context& ctx) const {
     ++start;
   }
   std::vector<char32_t> result(codepoints_.begin() + static_cast<std::ptrdiff_t>(start), codepoints_.end());
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::lstrip(std::span<const char32_t> cutset, context& ctx) const {
@@ -1351,7 +1351,7 @@ starlark_obj* starlark_string::lstrip(std::span<const char32_t> cutset, context&
     ++start;
   }
   std::vector<char32_t> result(codepoints_.begin() + static_cast<std::ptrdiff_t>(start), codepoints_.end());
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::rstrip(context& ctx) const {
@@ -1360,7 +1360,7 @@ starlark_obj* starlark_string::rstrip(context& ctx) const {
     --end;
   }
   std::vector<char32_t> result(codepoints_.begin(), codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::rstrip(std::span<const char32_t> cutset, context& ctx) const {
@@ -1369,7 +1369,7 @@ starlark_obj* starlark_string::rstrip(std::span<const char32_t> cutset, context&
     --end;
   }
   std::vector<char32_t> result(codepoints_.begin(), codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::strip(context& ctx) const {
@@ -1383,7 +1383,7 @@ starlark_obj* starlark_string::strip(context& ctx) const {
   }
   std::vector<char32_t> result(codepoints_.begin() + static_cast<std::ptrdiff_t>(start),
                                codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::strip(std::span<const char32_t> cutset, context& ctx) const {
@@ -1397,11 +1397,11 @@ starlark_obj* starlark_string::strip(std::span<const char32_t> cutset, context& 
   }
   std::vector<char32_t> result(codepoints_.begin() + static_cast<std::ptrdiff_t>(start),
                                codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::splitlines(bool keepends, context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   std::size_t begin = 0;
   std::size_t pos = 0;
   while (pos < codepoints_.size()) {
@@ -1437,13 +1437,13 @@ starlark_obj* starlark_string::splitlines(bool keepends, context& ctx) const {
       std::size_t end = keepends ? pos : line_end;
       std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(begin),
                                  codepoints_.begin() + static_cast<std::ptrdiff_t>(end));
-      result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+      result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
       begin = pos;
     }
   }
   if (begin < codepoints_.size()) {
     std::vector<char32_t> part(codepoints_.begin() + static_cast<std::ptrdiff_t>(begin), codepoints_.end());
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), std::move(part)));
+    result->unsafe_append(ctx.create<starlark_string>(std::move(part)));
   }
   return result;
 }
@@ -1551,12 +1551,12 @@ starlark_obj* starlark_string::lower(context& ctx) {
     }
     pos++;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), merge_parts(parts, codepoints_));
+  return ctx.create<starlark_string>(merge_parts(parts, codepoints_));
 }
 
 starlark_obj* starlark_string::title(context& ctx) {
   bool ignore;
-  return Arena::Create<starlark_string>(&ctx.arena(), to_title_string(codepoints_, ignore));
+  return ctx.create<starlark_string>(to_title_string(codepoints_, ignore));
 }
 
 starlark_obj* starlark_string::upper(context& ctx) {
@@ -1570,7 +1570,7 @@ starlark_obj* starlark_string::upper(context& ctx) {
       result.push_back(code_point);
     }
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_string>(std::move(result));
 }
 
 starlark_obj* starlark_string::capitalize(context& ctx) {
@@ -1605,7 +1605,7 @@ starlark_obj* starlark_string::capitalize(context& ctx) {
     }
     pos++;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), merge_parts(parts, codepoints_));
+  return ctx.create<starlark_string>(merge_parts(parts, codepoints_));
 }
 
 starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
@@ -1659,13 +1659,13 @@ starlark_obj* starlark_string::format(const starlark_obj::pos_args_t& pos_args, 
     }
   }
   result += parts.back();
-  return Arena::Create<starlark_string>(&ctx.arena(), result);
+  return ctx.create<starlark_string>(result);
 }
 
 starlark_obj* starlark_string::removeprefix(std::span<const char32_t> sub, context& ctx) {
   if (codepoints_.size() >= sub.size() && codepoints_match_at(codepoints_, 0, sub)) {
     std::vector<char32_t> result(codepoints_.begin() + static_cast<std::ptrdiff_t>(sub.size()), codepoints_.end());
-    return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+    return ctx.create<starlark_string>(std::move(result));
   }
   return this;
 }
@@ -1673,25 +1673,25 @@ starlark_obj* starlark_string::removeprefix(std::span<const char32_t> sub, conte
 starlark_obj* starlark_string::removesuffix(std::span<const char32_t> sub, context& ctx) {
   if (codepoints_.size() >= sub.size() && codepoints_match_at(codepoints_, codepoints_.size() - sub.size(), sub)) {
     std::vector<char32_t> result(codepoints_.begin(), codepoints_.end() - static_cast<std::ptrdiff_t>(sub.size()));
-    return Arena::Create<starlark_string>(&ctx.arena(), std::move(result));
+    return ctx.create<starlark_string>(std::move(result));
   }
   return this;
 }
 
 starlark_obj* starlark_string::elems(context& ctx) const {
-  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), false, false);
+  return ctx.create<starlark_string::string_elems>(this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), false, false);
 }
 
 starlark_obj* starlark_string::elem_ords(context& ctx) const {
-  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), false, true);
+  return ctx.create<starlark_string::string_elems>(this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), false, true);
 }
 
 starlark_obj* starlark_string::codepoints(context& ctx) const {
-  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), true, false);
+  return ctx.create<starlark_string::string_elems>(this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), true, false);
 }
 
 starlark_obj* starlark_string::codepoint_ords(context& ctx) const {
-  return Arena::Create<starlark_string::string_elems>(&ctx.arena(), this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), true, true);
+  return ctx.create<starlark_string::string_elems>(this, calculate_state(0, static_cast<int64_t>(codepoints_.size()), 1), true, true);
 }
 
 starlark_string::string_elems::string_elems(const starlark_string* str, range_state state, bool is_cp, bool ords) :
@@ -1752,7 +1752,7 @@ int64_t starlark_string::string_elems::unsafe_len() const {
 }
 
 starlark_iterator* starlark_string::string_elems::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), str, state.start, state.step, state.len, ords, ctx);
+  return ctx.create<starlark_elems_iterator>(str, state.start, state.step, state.len, ords, ctx);
 }
 
 starlark_obj* starlark_string::string_elems::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -1763,7 +1763,7 @@ starlark_obj* starlark_string::string_elems::index(const starlark_obj& other, co
   if (ords) {
     return create_integer(str->codepoints_[static_cast<std::size_t>(state.start + (*idx) * state.step)], ctx);
   } else {
-    return Arena::Create<starlark_string>(&ctx.arena(), str->codepoints_[static_cast<std::size_t>(state.start + (*idx) * state.step)]);
+    return ctx.create<starlark_string>(str->codepoints_[static_cast<std::size_t>(state.start + (*idx) * state.step)]);
   }
 }
 
@@ -1772,7 +1772,7 @@ starlark_obj* starlark_string::string_elems::slice_range(const starlark_obj& sta
   if (!slice_result.ok()) {
     return nullptr;
   }
-  return Arena::Create<string_elems>(&ctx.arena(), str, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)), is_cp, ords);
+  return ctx.create<string_elems>(str, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)), is_cp, ords);
 }
 
 bool starlark_string::string_elems::inner_repr(printer& print, printer_action action) const {
@@ -1844,7 +1844,7 @@ starlark_obj* starlark_string::starlark_elems_iterator::next() {
   if (ords) {
     result = create_integer(str->codepoints_[static_cast<std::size_t>(current_pos)], ctx);
   } else {
-    result = Arena::Create<starlark_string>(&ctx.arena(), str->codepoints_[static_cast<std::size_t>(current_pos)]);
+    result = ctx.create<starlark_string>(str->codepoints_[static_cast<std::size_t>(current_pos)]);
   }
   current_pos += step;
   remaining--;

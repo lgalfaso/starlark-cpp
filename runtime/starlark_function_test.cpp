@@ -278,7 +278,7 @@ TEST(StarlarkAbs, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_abs(nullptr, pos_args, named_args, ctx, error_callback));
@@ -372,7 +372,7 @@ TEST(StarlarkAll, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_all(nullptr, pos_args, named_args, ctx, error_callback));
@@ -473,7 +473,7 @@ TEST(StarlarkAny, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_any(nullptr, pos_args, named_args, ctx, error_callback));
@@ -545,7 +545,7 @@ TEST(StarlarkBool, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_bool(nullptr, pos_args, named_args, ctx, error_callback));
@@ -789,7 +789,7 @@ TEST(StarlarkBytes, UnknownNamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&bytes);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
@@ -806,7 +806,7 @@ TEST(StarlarkBytes, SourceAsNamedArgument) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_source), &str);
+  named_args.emplace_back(ctx.create<starlark_string>(s_source), &str);
 
   auto* result = starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(result, nullptr);
@@ -825,7 +825,7 @@ TEST(StarlarkBytes, SourceAsNamedAndPositionalArgument) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_source), &str);
+  named_args.emplace_back(ctx.create<starlark_string>(s_source), &str);
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -948,7 +948,7 @@ TEST(StarlarkChr, NamedArguments) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
 
   EXPECT_EQ(nullptr, starlark_fn_chr(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -1024,8 +1024,8 @@ TEST(StarlarkDict, FromNamedArguments) {
   starlark_obj::named_args_t named_args;
   starlark_integer one(1);
   starlark_integer two(2);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_two), &two);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_two), &two);
 
   auto* result = starlark_fn_dict(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -1240,7 +1240,7 @@ TEST(StarlarkDir, NamedArguments) {
   starlark_obj::named_args_t named_args;
   starlark_list list(0);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
 
   auto* result = starlark_fn_dir(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
@@ -1287,8 +1287,8 @@ TEST(StarlarkEnumerate, FromIterableWithIterableAsNamedArgument) {
   list.append(&s_two, ctx, error_callback);
   list.append(&s_three, ctx, error_callback);
   starlark_integer start(100);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_iterable), &list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_start), &start);
+  named_args.emplace_back(ctx.create<starlark_string>(s_iterable), &list);
+  named_args.emplace_back(ctx.create<starlark_string>(s_start), &start);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -1313,7 +1313,7 @@ TEST(StarlarkEnumerate, FromIterableWithStartAsNamedArgument) {
   list.append(&s_three, ctx, error_callback);
   pos_args.push_back(&list);
   starlark_integer start(100);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_start), &start);
+  named_args.emplace_back(ctx.create<starlark_string>(s_start), &start);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -1362,7 +1362,7 @@ TEST(StarlarkEnumerate, InvalidStartAsNamedArgument) {
   list.append(&s_three, ctx, error_callback);
   pos_args.push_back(&list);
   starlark_string start("100"sv);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_start), &start);
+  named_args.emplace_back(ctx.create<starlark_string>(s_start), &start);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
@@ -1412,7 +1412,7 @@ TEST(StarlarkEnumerate, IterableAsNamedArgumentAndPositionalArgument) {
   list.append(&s_three, ctx, error_callback);
   pos_args.push_back(&list);
   pos_args.push_back(&start);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_iterable), &list);
+  named_args.emplace_back(ctx.create<starlark_string>(s_iterable), &list);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
@@ -1437,7 +1437,7 @@ TEST(StarlarkEnumerate, StartAsNamedArgumentAndPositionalArgument) {
   list.append(&s_three, ctx, error_callback);
   pos_args.push_back(&list);
   starlark_integer start(100);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_start), &start);
+  named_args.emplace_back(ctx.create<starlark_string>(s_start), &start);
   pos_args.push_back(&start);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
@@ -1463,7 +1463,7 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
   list.append(&s_three, ctx, error_callback);
   pos_args.push_back(&list);
   starlark_string end("100"sv);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_end), &end);
+  named_args.emplace_back(ctx.create<starlark_string>(s_end), &end);
 
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
@@ -1577,7 +1577,7 @@ TEST(StarlarkFail, NamedArgs) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
 
   EXPECT_EQ(nullptr, starlark_fn_fail(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -1821,7 +1821,7 @@ TEST(StarlarkFloat, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&one);
 
   EXPECT_EQ(nullptr, starlark_fn_float(nullptr, pos_args, named_args, ctx, error_callback));
@@ -1962,7 +1962,7 @@ TEST(StarlarkGetattr, NamedArguments) {
 
   pos_args.push_back(&list);
   pos_args.push_back(&attribute);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), ctx.one());
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), ctx.one());
 
   auto* result = starlark_fn_getattr(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -2055,7 +2055,7 @@ TEST(StarlarkHasattr, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&one);
 
   EXPECT_EQ(nullptr, starlark_fn_hasattr(nullptr, pos_args, named_args, ctx, error_callback));
@@ -2154,7 +2154,7 @@ TEST(StarlarkHash, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &str);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &str);
   pos_args.push_back(&str);
 
   EXPECT_EQ(nullptr, starlark_fn_hash(nullptr, pos_args, named_args, ctx, error_callback));
@@ -2204,7 +2204,7 @@ TEST(StarlarkInt, FromIntWithBaseAsNamedArgument) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&one);
   std::string s_base("base"sv);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &two);
+  named_args.emplace_back(ctx.create<starlark_string>(s_base), &two);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2283,7 +2283,7 @@ TEST(StarlarkInt, FromFloatWithBaseWithNamedArgument) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
   std::string s_base("base"sv);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &two);
+  named_args.emplace_back(ctx.create<starlark_string>(s_base), &two);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2337,7 +2337,7 @@ TEST(StarlarkInt, FromBoolWithBaseAsNamedArgument) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&value);
   std::string s_base("base"sv);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &two);
+  named_args.emplace_back(ctx.create<starlark_string>(s_base), &two);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2391,9 +2391,9 @@ TEST(StarlarkInt, FromStringWithBase) {
     pos_args2.push_back(&str);
     pos_args2.push_back(&bbase);
     pos_args3.push_back(&str);
-    named_args3.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &ibase);
+    named_args3.emplace_back(ctx.create<starlark_string>(s_base), &ibase);
     pos_args4.push_back(&str);
-    named_args4.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &bbase);
+    named_args4.emplace_back(ctx.create<starlark_string>(s_base), &bbase);
 
     auto* result1 = starlark_fn_int(nullptr, pos_args1, named_args1, ctx, error_callback);
     auto* result2 = starlark_fn_int(nullptr, pos_args2, named_args2, ctx, error_callback);
@@ -2446,7 +2446,7 @@ void test_invalid_base(int base, bool positional) {
   if (positional) {
     pos_args.push_back(&ibase);
   } else {
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &ibase);
+    named_args.emplace_back(ctx.create<starlark_string>(s_base), &ibase);
   }
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
@@ -2501,7 +2501,7 @@ TEST(StarlarkInt, FromStringBaseNotIntAsNamedArgument) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &list);
+  named_args.emplace_back(ctx.create<starlark_string>(s_base), &list);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2576,7 +2576,7 @@ TEST(StarlarkInt, NoPosArgsAndBase) {
   std::string s_base("base");
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &base);
+  named_args.emplace_back(ctx.create<starlark_string>(s_base), &base);
 
   auto* result = starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(result, nullptr);
@@ -2596,7 +2596,7 @@ TEST(StarlarkInt, BaseAsNamedAndPositionalArgument) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
   pos_args.push_back(&base);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_base), &base);
+  named_args.emplace_back(ctx.create<starlark_string>(s_base), &base);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -2629,7 +2629,7 @@ TEST(StarlarkInt, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &str);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &str);
   pos_args.push_back(&str);
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
@@ -2713,7 +2713,7 @@ TEST(StarlarkLen, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_len(nullptr, pos_args, named_args, ctx, error_callback));
@@ -2798,7 +2798,7 @@ TEST(StarlarkList, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_list(nullptr, pos_args, named_args, ctx, error_callback));
@@ -2922,7 +2922,7 @@ TEST(StarlarkMax, OnePosArgsWithKey) {
   list.append(&two, ctx, error_callback);
   list.append(&three, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -2947,7 +2947,7 @@ TEST(StarlarkMax, OnePosArgsWithKeyAsNone) {
   list.append(&two, ctx, error_callback);
   list.append(&three, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), ctx.none_value());
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), ctx.none_value());
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -2971,7 +2971,7 @@ TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_1) {
   list.append(&two, ctx, error_callback);
   list.append(&three, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -2994,7 +2994,7 @@ TEST(StarlarkMax, OnePosArgsWithKeyErrorInKeyCall_2) {
   list.append(ctx.one(), ctx, error_callback);
   list.append(&three, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3015,7 +3015,7 @@ TEST(StarlarkMax, OnePosArgsResultOfKeyAreNotComparable) {
   tuple.add(&list);
   tuple.add(&list);
   pos_args.push_back(&tuple);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3070,7 +3070,7 @@ TEST(StarlarkMax, ManyPosArgsWithKey) {
   pos_args.push_back(&one);
   pos_args.push_back(&two);
   pos_args.push_back(&three);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -3093,7 +3093,7 @@ TEST(StarlarkMax, ManyPosArgsWithKeyAsNone) {
   pos_args.push_back(&one);
   pos_args.push_back(&two);
   pos_args.push_back(&three);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), ctx.none_value());
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), ctx.none_value());
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -3115,7 +3115,7 @@ TEST(StarlarkMax, TwoPosArgsWithKeyErrorInKeyCall_1) {
   pos_args.push_back(ctx.one());
   pos_args.push_back(&two);
   pos_args.push_back(&three);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3136,7 +3136,7 @@ TEST(StarlarkMax, TwoPosArgsWithKeyErrorInKeyCall_2) {
   pos_args.push_back(&two);
   pos_args.push_back(ctx.one());
   pos_args.push_back(&three);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3155,7 +3155,7 @@ TEST(StarlarkMax, TwoPosArgsResultOfKeyAreNotComparable) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
 
   auto* result = starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3173,7 +3173,7 @@ TEST(StarlarkMax, UnknownNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
   pos_args.push_back(ctx.zero());
   pos_args.push_back(ctx.one());
@@ -3299,7 +3299,7 @@ TEST(StarlarkMin, OnePosArgsWithKey) {
   list.append(&one, ctx, error_callback);
   list.append(&two, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -3326,7 +3326,7 @@ TEST(StarlarkMin, OnePosArgsWithKeyAsNone) {
   list.append(&one, ctx, error_callback);
   list.append(&two, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), ctx.none_value());
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), ctx.none_value());
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -3350,7 +3350,7 @@ TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_1) {
   list.append(&two, ctx, error_callback);
   list.append(&three, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3373,7 +3373,7 @@ TEST(StarlarkMin, OnePosArgsWithKeyErrorInKeyCall_2) {
   list.append(ctx.one(), ctx, error_callback);
   list.append(&three, ctx, error_callback);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3394,7 +3394,7 @@ TEST(StarlarkMin, OnePosArgsResultOfKeyAreNotComparable) {
   tuple.add(&list);
   tuple.add(&list);
   pos_args.push_back(&tuple);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3450,7 +3450,7 @@ TEST(StarlarkMin, ManyPosArgsWithKey) {
   pos_args.push_back(&three);
   pos_args.push_back(&one);
   pos_args.push_back(&two);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -3475,7 +3475,7 @@ TEST(StarlarkMin, ManyPosArgsWithKeyAsNone) {
   pos_args.push_back(&four);
   pos_args.push_back(&one);
   pos_args.push_back(&two);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), ctx.none_value());
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), ctx.none_value());
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(nullptr, result);
@@ -3497,7 +3497,7 @@ TEST(StarlarkMin, TwoPosArgsWithKeyErrorInKeyCall_1) {
   pos_args.push_back(ctx.one());
   pos_args.push_back(&two);
   pos_args.push_back(&three);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3518,7 +3518,7 @@ TEST(StarlarkMin, TwoPosArgsWithKeyErrorInKeyCall_2) {
   pos_args.push_back(&two);
   pos_args.push_back(ctx.one());
   pos_args.push_back(&three);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3537,7 +3537,7 @@ TEST(StarlarkMin, TwoPosArgsResultOfKeyAreNotComparable) {
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&list);
   pos_args.push_back(&list);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
+  named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_set, "set"));
 
   auto* result = starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
@@ -3555,7 +3555,7 @@ TEST(StarlarkMin, UnknownNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
   pos_args.push_back(ctx.zero());
   pos_args.push_back(ctx.one());
@@ -3707,7 +3707,7 @@ TEST(StarlarkOrd, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&bytes);
 
   EXPECT_EQ(nullptr, starlark_fn_ord(nullptr, pos_args, named_args, ctx, error_callback));
@@ -3776,7 +3776,7 @@ TEST(StarlarkPrint, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_sep), &sep);
+  named_args.emplace_back(ctx.create<starlark_string>(s_sep), &sep);
   pos_args.push_back(ctx.zero());
   pos_args.push_back(ctx.one());
 
@@ -3796,7 +3796,7 @@ TEST(StarlarkPrint, NamedArgumentsSepAsNone) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_sep), ctx.none_value());
+  named_args.emplace_back(ctx.create<starlark_string>(s_sep), ctx.none_value());
   pos_args.push_back(ctx.zero());
   pos_args.push_back(ctx.one());
 
@@ -3816,7 +3816,7 @@ TEST(StarlarkPrint, NamedArgumentsEnd) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_end), &end);
+  named_args.emplace_back(ctx.create<starlark_string>(s_end), &end);
   pos_args.push_back(ctx.zero());
   pos_args.push_back(ctx.one());
 
@@ -4043,7 +4043,7 @@ TEST(StarlarkRange, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&one);
 
   EXPECT_EQ(nullptr, starlark_fn_range(nullptr, pos_args, named_args, ctx, error_callback));
@@ -4104,7 +4104,7 @@ TEST(StarlarkRepr, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&one);
 
   EXPECT_EQ(nullptr, starlark_fn_repr(nullptr, pos_args, named_args, ctx, error_callback));
@@ -4190,7 +4190,7 @@ TEST(StarlarkReversed, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_reversed(nullptr, pos_args, named_args, ctx, error_callback));
@@ -4291,7 +4291,7 @@ TEST(StarlarkSet, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &list);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &list);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_set(nullptr, pos_args, named_args, ctx, error_callback));
@@ -4373,7 +4373,7 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), ctx.none_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_key), ctx.none_value());
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"five\", \"four\", \"one\", \"seven\", \"six\", \"three\", \"two\"]");
@@ -4381,7 +4381,7 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+    named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"one\", \"two\", \"six\", \"four\", \"five\", \"three\", \"seven\"]");
@@ -4389,7 +4389,7 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_reverse), ctx.false_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_reverse), ctx.false_value());
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"five\", \"four\", \"one\", \"seven\", \"six\", \"three\", \"two\"]");
@@ -4397,8 +4397,8 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_reverse), ctx.false_value());
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), ctx.none_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_reverse), ctx.false_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_key), ctx.none_value());
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"five\", \"four\", \"one\", \"seven\", \"six\", \"three\", \"two\"]");
@@ -4406,8 +4406,8 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_reverse), ctx.false_value());
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+    named_args.emplace_back(ctx.create<starlark_string>(s_reverse), ctx.false_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"one\", \"two\", \"six\", \"four\", \"five\", \"three\", \"seven\"]");
@@ -4415,7 +4415,7 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_reverse), ctx.true_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_reverse), ctx.true_value());
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"two\", \"three\", \"six\", \"seven\", \"one\", \"four\", \"five\"]");
@@ -4423,8 +4423,8 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_reverse), ctx.true_value());
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), ctx.none_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_reverse), ctx.true_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_key), ctx.none_value());
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"two\", \"three\", \"six\", \"seven\", \"one\", \"four\", \"five\"]");
@@ -4432,8 +4432,8 @@ TEST(StarlarkSorted, OneArguments) {
   }
   {
     starlark_obj::named_args_t named_args;
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_reverse), ctx.true_value());
-    named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
+    named_args.emplace_back(ctx.create<starlark_string>(s_reverse), ctx.true_value());
+    named_args.emplace_back(ctx.create<starlark_string>(s_key), create_function(ctx, nullptr, starlark::runtime::starlark_fn_len, "len"));
     auto* result = starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback);
     ASSERT_NE(nullptr, result);
     EXPECT_EQ(result->str(), "[\"seven\", \"three\", \"five\", \"four\", \"six\", \"two\", \"one\"]");
@@ -4453,7 +4453,7 @@ TEST(StarlarkSorted, OneArgumentsReverseNone) {
   starlark_obj::pos_args_t pos_args;
   pos_args.push_back(&tuple);
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_reverse), ctx.none_value());
+  named_args.emplace_back(ctx.create<starlark_string>(s_reverse), ctx.none_value());
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -4470,7 +4470,7 @@ TEST(StarlarkSorted, OneArgumentsUnknownNamedArgument) {
   starlark_obj::pos_args_t pos_args;
   pos_args.push_back(&tuple);
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_foo), ctx.none_value());
+  named_args.emplace_back(ctx.create<starlark_string>(s_foo), ctx.none_value());
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -4598,7 +4598,7 @@ TEST(StarlarkStr, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_object), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_object), &one);
 
   auto* result = starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_NE(result, nullptr) << error_callback.messages[0];
@@ -4617,7 +4617,7 @@ TEST(StarlarkStr, ObjectAsNamedAndPositionalArgument) {
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
   pos_args.push_back(&str);
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_object), &str);
+  named_args.emplace_back(ctx.create<starlark_string>(s_object), &str);
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
@@ -4633,7 +4633,7 @@ TEST(StarlarkStr, UnknownNamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&one);
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
@@ -4714,7 +4714,7 @@ TEST(StarlarkTuple, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &list);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &list);
   pos_args.push_back(&list);
 
   EXPECT_EQ(nullptr, starlark_fn_tuple(nullptr, pos_args, named_args, ctx, error_callback));
@@ -4775,7 +4775,7 @@ TEST(StarlarkType, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&one);
 
   EXPECT_EQ(nullptr, starlark_fn_type(nullptr, pos_args, named_args, ctx, error_callback));
@@ -4871,7 +4871,7 @@ TEST(StarlarkZip, NamedArguments) {
 
   starlark_obj::pos_args_t pos_args;
   starlark_obj::named_args_t named_args;
-  named_args.emplace_back(Arena::Create<starlark_string>(&ctx.arena(), s_one), &one);
+  named_args.emplace_back(ctx.create<starlark_string>(s_one), &one);
   pos_args.push_back(&one);
 
   EXPECT_EQ(nullptr, starlark_fn_zip(nullptr, pos_args, named_args, ctx, error_callback));

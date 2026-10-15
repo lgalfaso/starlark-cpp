@@ -4,13 +4,11 @@
 #include <utility>
 
 #include "errors/runtime_error_messages.hpp"
-#include "google/protobuf/arena.h"
 #include "runtime/starlark_bigint.hpp"
 #include "runtime/starlark_float.hpp"
 #include "runtime/starlark_integer.hpp"
 #include "runtime/starlark_numeric.hpp"
 
-using ::google::protobuf::Arena;
 using ::starlark::bigint::number;
 using ::starlark::error_messages::error_v2_convert_float_infinity_to_integer;
 using ::starlark::error_messages::error_v2_convert_float_nan_to_integer;
@@ -22,7 +20,7 @@ starlark_obj* create_integer(std::int64_t value, context& ctx) {
   if (context::MIN_SMALL_INT <= value && value <= context::MAX_SMALL_INT) {
     return ctx.small_integers[value - context::MIN_SMALL_INT];
   }
-  return Arena::Create<starlark_integer>(&ctx.arena(), value);
+  return ctx.create<starlark_integer>(value);
 }
 
 starlark_obj* create_integer(number&& value, context& ctx) {
@@ -30,7 +28,7 @@ starlark_obj* create_integer(number&& value, context& ctx) {
   if (value.fits_in_int64()) {
     return create_integer(value.as_int64(), ctx);
   }
-  return Arena::Create<starlark_bigint>(&ctx.arena(), std::move(value));
+  return ctx.create<starlark_bigint>(std::move(value));
 }
 
 starlark_obj* create_integer_from_float(double value, context& ctx, error_fn& error_callback) {
@@ -86,7 +84,7 @@ starlark_obj* create_integer_from_float(double value, context& ctx, error_fn& er
 }
 
 starlark_obj* create_float(double value, context& ctx) {
-  return Arena::Create<starlark_float>(&ctx.arena(), value);
+  return ctx.create<starlark_float>(value);
 }
 
 }  // namespace runtime

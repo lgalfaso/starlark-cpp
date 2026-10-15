@@ -131,13 +131,13 @@ bool starlark_rt_exec_create_predeclared(native_exec_context* exec, module_runti
     fail_exec_invariant(exec, "predeclared frame metadata must exist");
     return false;
   }
-  auto* symbols = copy_frame_symbols_to_arena(ctx->arena(), *metadata);
+  auto* symbols = copy_frame_symbols_to_arena(*ctx, *metadata);
   if (metadata->symbols.empty()) {
-    native_frame_chain_push(exec, create_frame_on_arena(ctx->arena(), symbols));
+    native_frame_chain_push(exec, create_frame_on_arena(*ctx, symbols));
     return true;
   }
   auto global_context = build_predeclared(state, *ctx);
-  auto* global_frame = create_frame_on_arena(ctx->arena(), symbols);
+  auto* global_frame = create_frame_on_arena(*ctx, symbols);
   int count = 0;
   for (const auto& symbol : metadata->symbols) {
     auto pos = global_context.find(symbol);
@@ -158,9 +158,10 @@ void starlark_rt_exec_create_frame_meta(native_exec_context* exec, std::uint32_t
   }
   const frame_metadata* metadata = &exec->mod->init_metadata.frames[meta_index];
   auto* ctx = effective_ctx(exec, nullptr);
-  google::protobuf::Arena& arena = metadata->block_type == BlockType::MODULE_BLOCK ? exec->mod->native_ctx->arena() : ctx->arena();
-  auto* symbols = copy_frame_symbols_to_arena(arena, *metadata);
-  auto* frame = create_frame_on_arena(arena, symbols);
+  starlark::runtime::context& alloc_ctx =
+      metadata->block_type == BlockType::MODULE_BLOCK ? *exec->mod->native_ctx : *ctx;
+  auto* symbols = copy_frame_symbols_to_arena(alloc_ctx, *metadata);
+  auto* frame = create_frame_on_arena(alloc_ctx, symbols);
   if (metadata->block_type == BlockType::MODULE_BLOCK) {
     exec->module_result_frame = frame;
   }

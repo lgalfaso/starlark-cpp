@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "google/protobuf/arena.h"
 #include "google/protobuf/repeated_field.h"
 #include "runtime/starlark_object.hpp"
 

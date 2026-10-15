@@ -17,6 +17,7 @@
 namespace starlark {
 namespace vm {
 
+using starlark::runtime::context;
 using starlark::runtime::error_fn;
 using starlark::runtime::starlark_dictionary;
 using starlark::runtime::starlark_obj;
@@ -126,21 +127,21 @@ bool bind_function_arguments(const function_signature_metadata& fn_meta,
 }
 
 void finish_bound_function_frame(const function_signature_metadata& fn_meta,
-    google::protobuf::Arena& arena,
+    context& ctx,
     std::vector<starlark_obj*>& frame_elements,
     const function_call_binding_state& binding_state,
     error_fn& error_callback) {
   if (fn_meta.has_star_argument) {
-    auto* tuple = google::protobuf::Arena::Create<starlark_tuple>(&arena, binding_state.star_args.size());
+    auto* tuple = ctx.create<starlark_tuple>(binding_state.star_args.size());
     for (auto* element : binding_state.star_args) {
       tuple->add(element);
     }
     frame_elements[fn_meta.params[static_cast<std::size_t>(fn_meta.positional_param_count)].pos_in_frame] = tuple;
   }
   if (fn_meta.has_star_star_argument) {
-    auto* dict = google::protobuf::Arena::Create<starlark_dictionary>(&arena);
+    auto* dict = ctx.create<starlark_dictionary>();
     for (const auto& [name, value] : binding_state.kwargs) {
-      dict->insert(google::protobuf::Arena::Create<starlark_string>(&arena, name), value, error_callback);
+      dict->insert(ctx.create<starlark_string>(name), value, error_callback);
     }
     frame_elements[fn_meta.params[static_cast<std::size_t>(fn_meta.param_count - 1)].pos_in_frame] = dict;
   }

@@ -175,7 +175,7 @@ starlark_obj* interpreter_function::call_pos_fixed_0(context& ctx, error_fn& err
   if (!begin_call(state, ctx, error_callback)) {
     return nullptr;
   }
-  auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
+  auto* new_frame = ctx.create<frame>(frame_names);
   apply_keyword_only_defaults(new_frame);
   commit_frame(new_frame, state, ctx);
   return ctx.none_value();
@@ -187,7 +187,7 @@ starlark_obj* interpreter_function::call_pos_fixed_1(starlark_obj* arg0, context
   if (!begin_call(state, ctx, error_callback)) {
     return nullptr;
   }
-  auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
+  auto* new_frame = ctx.create<frame>(frame_names);
   new_frame->elements[positional_param_frame_pos_[0]] = arg0;
   apply_keyword_only_defaults(new_frame);
   commit_frame(new_frame, state, ctx);
@@ -200,7 +200,7 @@ starlark_obj* interpreter_function::call_pos_fixed_2(starlark_obj* arg0, starlar
   if (!begin_call(state, ctx, error_callback)) {
     return nullptr;
   }
-  auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
+  auto* new_frame = ctx.create<frame>(frame_names);
   new_frame->elements[positional_param_frame_pos_[0]] = arg0;
   new_frame->elements[positional_param_frame_pos_[1]] = arg1;
   apply_keyword_only_defaults(new_frame);
@@ -219,7 +219,7 @@ starlark_obj* interpreter_function::call_pos_fixed_3(
   if (!begin_call(state, ctx, error_callback)) {
     return nullptr;
   }
-  auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
+  auto* new_frame = ctx.create<frame>(frame_names);
   new_frame->elements[positional_param_frame_pos_[0]] = arg0;
   new_frame->elements[positional_param_frame_pos_[1]] = arg1;
   new_frame->elements[positional_param_frame_pos_[2]] = arg2;
@@ -262,7 +262,7 @@ starlark_obj* interpreter_function::call_pos_general(
   }
   state->fns_in_stack[this]++;
   state->call_fns.push_back(this);
-  auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
+  auto* new_frame = ctx.create<frame>(frame_names);
   starlark_obj::pos_args_t star_args;
   int next_positional_param = 0;
   assert(fn_meta() != nullptr);
@@ -321,14 +321,14 @@ starlark_obj* interpreter_function::call_pos_general(
     }
   }
   if (fn_meta()->has_star_argument) {
-    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), star_args.size());
+    auto* tuple = ctx.create<starlark_tuple>(star_args.size());
     for (auto* element : star_args) {
       tuple->add(element);
     }
     new_frame->elements[fn_meta()->params[number_positional_params].pos_in_frame] = tuple;
   }
   if (fn_meta()->has_star_star_argument) {
-    auto* dict = Arena::Create<starlark_dictionary>(&ctx.arena());
+    auto* dict = ctx.create<starlark_dictionary>();
     new_frame->elements[fn_meta()->params[fn_meta()->param_count - 1].pos_in_frame] = dict;
   }
 
@@ -360,7 +360,7 @@ starlark_obj* interpreter_function::call(
   }
   state->fns_in_stack[this]++;
   state->call_fns.push_back(this);
-  auto* new_frame = Arena::Create<frame>(&ctx.arena(), frame_names);
+  auto* new_frame = ctx.create<frame>(frame_names);
   function_call_binding_state binding_state;
   if (!starlark::vm::bind_function_arguments(*fn_meta(),
           named_argument_index,
@@ -372,7 +372,7 @@ starlark_obj* interpreter_function::call(
           error_callback)) {
     return nullptr;
   }
-  finish_bound_function_frame(*fn_meta(), ctx.arena(), new_frame->elements, binding_state, error_callback);
+  finish_bound_function_frame(*fn_meta(), ctx, new_frame->elements, binding_state, error_callback);
 
   state->frame_stacks.push_back(frame_stack);
   state->frame_stacks.back().push_back(new_frame);

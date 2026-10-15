@@ -80,7 +80,7 @@ status read_range_int64(starlark_obj* value, int64_t& output, error_fn& error_ca
 }
 
 starlark_obj* make_range_int64(int64_t start, int64_t end, int64_t step, context& ctx, error_fn& error_callback) {
-  auto* result = Arena::Create<starlark_range>(&ctx.arena(), start, end, step);
+  auto* result = ctx.create<starlark_range>(start, end, step);
   if (!result->valid()) {
     error_callback.add_error(error_v2_overflow(starlark_types::int_t, starlark_types::int64));
     return nullptr;
@@ -97,13 +97,13 @@ starlark_obj* enumerate_from(starlark_obj* iterable, starlark_obj* start, contex
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, iterable->unsafe_len()));
+  auto* result = ctx.create<starlark_list>(std::max<int64_t>(0, iterable->unsafe_len()));
   if (start == nullptr) {
     start = ctx.zero();
   }
   auto* one = ctx.one();
   while (it->has_next()) {
-    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
+    auto* tuple = ctx.create<starlark_tuple>(2);
     tuple->add(start);
     tuple->add(it->next());
     result->unsafe_append(tuple);
@@ -127,7 +127,7 @@ starlark_obj* bytes_from_source(starlark_obj* source, context& ctx, error_fn& er
       error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
       return nullptr;
     }
-    return Arena::Create<starlark_bytes>(&ctx.arena(), result);
+    return ctx.create<starlark_bytes>(result);
   }
   auto* it = source->get_iterator(false, ctx, error_callback);
   if (it == nullptr) {
@@ -166,7 +166,7 @@ starlark_obj* bytes_from_source(starlark_obj* source, context& ctx, error_fn& er
     }
   }
   it->end_iterator();
-  return Arena::Create<starlark_bytes>(&ctx.arena(), result);
+  return ctx.create<starlark_bytes>(result);
 }
 
 starlark_obj* int_from_value(starlark_obj* value, starlark_obj* base_param, context& ctx, error_fn& error_callback) {
@@ -323,7 +323,7 @@ starlark_obj* zip_from(std::span<starlark_obj*> pos_args, context& ctx, error_fn
   };
 
   if (pos_args.empty()) {
-    return Arena::Create<starlark_list>(&ctx.arena(), 0);
+    return ctx.create<starlark_list>(0);
   }
   auto len = std::numeric_limits<int64_t>::max();
   std::vector<starlark_iterator*> its;
@@ -339,9 +339,9 @@ starlark_obj* zip_from(std::span<starlark_obj*> pos_args, context& ctx, error_fn
     its.push_back(it);
     len = std::min<int64_t>(len, element->unsafe_len());
   }
-  starlark_list* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, len));
+  starlark_list* result = ctx.create<starlark_list>(std::max<int64_t>(0, len));
   while (all_available(its)) {
-    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), its.size());
+    auto* tuple = ctx.create<starlark_tuple>(its.size());
     for (auto* it : its) {
       tuple->add(it->next());
     }
@@ -444,15 +444,15 @@ starlark_obj* chr_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx
       error_callback.add_error(error_v2_interpreted_as_integer(value->type()));
       return nullptr;
   }
-  return Arena::Create<starlark_string>(&ctx.arena(), result);
+  return ctx.create<starlark_string>(result);
 }
 
 starlark_obj* dict_pos0(starlark_obj* this_obj, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_dictionary>(&ctx.arena());
+  return ctx.create<starlark_dictionary>();
 }
 
 starlark_obj* dict_pos1(starlark_obj* this_obj, starlark_obj* iterable, context& ctx, error_fn& error_callback) {
-  starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
+  starlark_dictionary* result = ctx.create<starlark_dictionary>();
   starlark_obj::named_args_t named_args;
   if (!result->update(iterable, named_args, ctx, error_callback).ok()) {
     return nullptr;
@@ -462,9 +462,9 @@ starlark_obj* dict_pos1(starlark_obj* this_obj, starlark_obj* iterable, context&
 
 starlark_obj* dir_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
   const auto& attributes = value->dir();
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), attributes.size());
+  auto* result = ctx.create<starlark_list>(attributes.size());
   for (const auto& attribute : attributes) {
-    result->unsafe_append(Arena::Create<starlark_string>(&ctx.arena(), attribute));
+    result->unsafe_append(ctx.create<starlark_string>(attribute));
   }
   return result;
 }
@@ -580,7 +580,7 @@ starlark_obj* len_pos1(starlark_obj* this_obj, starlark_obj* obj, context& ctx, 
 }
 
 starlark_obj* list_pos0(starlark_obj* this_obj, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_list>(&ctx.arena(), 0);
+  return ctx.create<starlark_list>(0);
 }
 
 starlark_obj* list_pos1(starlark_obj* this_obj, starlark_obj* iterable, context& ctx, error_fn& error_callback) {
@@ -588,7 +588,7 @@ starlark_obj* list_pos1(starlark_obj* this_obj, starlark_obj* iterable, context&
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, iterable->unsafe_len()));
+  auto* result = ctx.create<starlark_list>(std::max<int64_t>(0, iterable->unsafe_len()));
   while (it->has_next()) {
     result->unsafe_append(it->next());
   }
@@ -690,7 +690,7 @@ starlark_obj* range_pos3(starlark_obj* this_obj, starlark_obj* start, starlark_o
 }
 
 starlark_obj* repr_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_string>(&ctx.arena(), value->repr());
+  return ctx.create<starlark_string>(value->repr());
 }
 
 starlark_obj* reversed_pos1(starlark_obj* this_obj, starlark_obj* iterable, context& ctx, error_fn& error_callback) {
@@ -704,7 +704,7 @@ starlark_obj* reversed_pos1(starlark_obj* this_obj, starlark_obj* iterable, cont
   }
   it->end_iterator();
   std::reverse(elements.begin(), elements.end());
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), elements.size());
+  auto* result = ctx.create<starlark_list>(elements.size());
   for (auto* element : elements) {
     result->unsafe_append(element);
   }
@@ -712,7 +712,7 @@ starlark_obj* reversed_pos1(starlark_obj* this_obj, starlark_obj* iterable, cont
 }
 
 starlark_obj* set_pos0(starlark_obj* this_obj, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_set>(&ctx.arena());
+  return ctx.create<starlark_set>();
 }
 
 starlark_obj* set_pos1(starlark_obj* this_obj, starlark_obj* iterable, context& ctx, error_fn& error_callback) {
@@ -720,7 +720,7 @@ starlark_obj* set_pos1(starlark_obj* this_obj, starlark_obj* iterable, context& 
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   while (it->has_next()) {
     if (!result->add(it->next(), error_callback).ok()) {
       return nullptr;
@@ -758,7 +758,7 @@ starlark_obj* sorted_pos1(starlark_obj* this_obj, starlark_obj* iterable, contex
     return nullptr;
   }
 
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), elems.size());
+  auto* result = ctx.create<starlark_list>(elems.size());
   for (auto& elem : elems) {
     result->unsafe_append(elem.second);
   }
@@ -770,11 +770,11 @@ starlark_obj* str_pos0(starlark_obj* this_obj, context& ctx, error_fn& error_cal
 }
 
 starlark_obj* str_pos1(starlark_obj* this_obj, starlark_obj* object, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_string>(&ctx.arena(), object->str());
+  return ctx.create<starlark_string>(object->str());
 }
 
 starlark_obj* tuple_pos0(starlark_obj* this_obj, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+  return ctx.create<starlark_tuple>(0);
 }
 
 starlark_obj* tuple_pos1(starlark_obj* this_obj, starlark_obj* iterable, context& ctx, error_fn& error_callback) {
@@ -782,7 +782,7 @@ starlark_obj* tuple_pos1(starlark_obj* this_obj, starlark_obj* iterable, context
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), std::max<int64_t>(0, iterable->unsafe_len()));
+  auto* result = ctx.create<starlark_tuple>(std::max<int64_t>(0, iterable->unsafe_len()));
   while (it->has_next()) {
     result->add(it->next());
   }
@@ -791,11 +791,11 @@ starlark_obj* tuple_pos1(starlark_obj* this_obj, starlark_obj* iterable, context
 }
 
 starlark_obj* type_pos1(starlark_obj* this_obj, starlark_obj* value, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_string>(&ctx.arena(), value->type());
+  return ctx.create<starlark_string>(value->type());
 }
 
 starlark_obj* zip_pos0(starlark_obj* this_obj, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_list>(&ctx.arena(), 0);
+  return ctx.create<starlark_list>(0);
 }
 
 starlark_obj* zip_pos1(starlark_obj* this_obj, starlark_obj* a0, context& ctx, error_fn& error_callback) {

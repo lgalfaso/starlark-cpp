@@ -138,7 +138,7 @@ bool starlark_range::binary_in(const starlark_obj& other, error_fn& error_callba
 }
 
 starlark_iterator* starlark_range::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_range_iterator>(&ctx.arena(), state.start, state.step, state.len, ctx);
+  return ctx.create<starlark_range_iterator>(state.start, state.step, state.len, ctx);
 }
 
 starlark_obj* starlark_range::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -154,7 +154,7 @@ starlark_obj* starlark_range::slice_range(const starlark_obj& start, const starl
   if (!slice_result.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_range>(&ctx.arena(), std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result));
+  return ctx.create<starlark_range>(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result));
 }
 
 bool starlark_range::valid() const {

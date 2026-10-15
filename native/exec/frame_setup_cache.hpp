@@ -29,7 +29,7 @@ const google::protobuf::RepeatedPtrField<std::string>* function_frame_names(modu
     const starlark::vm::function_signature_metadata& fn_meta);
 
 starlark::vm::frame* acquire_function_frame(native_exec_context& exec,
-    google::protobuf::Arena& arena,
+    starlark::runtime::context& ctx,
     const google::protobuf::RepeatedPtrField<std::string>* names);
 
 void recycle_top_function_frame(native_exec_context& exec);

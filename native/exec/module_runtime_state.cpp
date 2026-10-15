@@ -4,7 +4,6 @@
 
 #include <memory>
 
-#include "google/protobuf/arena.h"
 #include "native/exec/native_exec_context.hpp"
 #include "runtime/starlark_string.hpp"
 
@@ -49,7 +48,7 @@ void module_runtime_state::materialize_const_strings() {
   const_strings.resize(static_cast<std::size_t>(count));
   for (int i = 0; i < count; ++i) {
     const_strings[static_cast<std::size_t>(i)] =
-        google::protobuf::Arena::Create<starlark_string>(&native_ctx->arena(), program->const_string(i));
+        native_ctx->create<starlark_string>(program->const_string(i));
   }
 }
 

@@ -5,8 +5,8 @@
 
 #include <string>
 
-#include "google/protobuf/arena.h"
 #include "google/protobuf/repeated_ptr_field.h"
+#include "runtime/starlark_object.hpp"
 #include "vm/frame.hpp"
 #include "vm/module_metadata.hpp"
 
@@ -15,23 +15,23 @@
 namespace starlark {
 namespace vm {
 
-inline frame* create_frame_on_arena(google::protobuf::Arena& arena,
+inline frame* create_frame_on_arena(starlark::runtime::context& ctx,
     const google::protobuf::RepeatedPtrField<std::string>* names) {
-  return google::protobuf::Arena::Create<frame>(&arena, names);
+  return ctx.create<frame>(names);
 }
 
-inline google::protobuf::RepeatedPtrField<std::string>* copy_frame_symbols_to_arena(google::protobuf::Arena& arena,
+inline google::protobuf::RepeatedPtrField<std::string>* copy_frame_symbols_to_arena(starlark::runtime::context& ctx,
     const function_signature_metadata& fn_meta) {
-  auto* symbols = google::protobuf::Arena::Create<google::protobuf::RepeatedPtrField<std::string>>(&arena);
+  auto* symbols = ctx.create<google::protobuf::RepeatedPtrField<std::string>>();
   for (const auto& symbol : fn_meta.frame_symbols) {
     *symbols->Add() = symbol;
   }
   return symbols;
 }
 
-inline google::protobuf::RepeatedPtrField<std::string>* copy_frame_symbols_to_arena(google::protobuf::Arena& arena,
+inline google::protobuf::RepeatedPtrField<std::string>* copy_frame_symbols_to_arena(starlark::runtime::context& ctx,
     const frame_metadata& metadata) {
-  auto* symbols = google::protobuf::Arena::Create<google::protobuf::RepeatedPtrField<std::string>>(&arena);
+  auto* symbols = ctx.create<google::protobuf::RepeatedPtrField<std::string>>();
   for (const auto& symbol : metadata.symbols) {
     *symbols->Add() = symbol;
   }

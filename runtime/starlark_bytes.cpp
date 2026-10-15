@@ -194,14 +194,14 @@ starlark_obj* plus_op(const starlark_bytes& this_obj, const starlark_obj& other,
   }
   std::string value{this_obj.as_string()};
   value += other.as_string();
-  return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(value));
+  return ctx.create<starlark_bytes>(std::move(value));
 }
 
 starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other, std::string_view op, context& ctx, error_fn& error_callback) {
   switch (other.kind()) {
     case object_kind::kInt: {
       if (this_obj.as_string().empty()) {
-        return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
+        return ctx.create<starlark_bytes>(std::string_view{});
       }
       std::string result;
       auto multiplier = other.as_int64();
@@ -216,15 +216,15 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
           result += this_obj.as_string();
         }
       }
-      return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
+      return ctx.create<starlark_bytes>(std::move(result));
     }
     case object_kind::kBigInt: {
       if (this_obj.as_string().empty()) {
-        return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
+        return ctx.create<starlark_bytes>(std::string_view{});
       }
       const auto& multiplier = other.as_bigint();
       if (multiplier <= number::zero()) {
-        return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view{});
+        return ctx.create<starlark_bytes>(std::string_view{});
       }
       if (multiplier.bit_size() >= 63) {
         error_callback.add_error(error_v2_max_bytes_length(ctx.options().max_string_length));
@@ -241,7 +241,7 @@ starlark_obj* star_op(const starlark_bytes& this_obj, const starlark_obj& other,
       for (int64_t i = 0; i < int_value; ++i) {
         result += this_obj.as_string();
       }
-      return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
+      return ctx.create<starlark_bytes>(std::move(result));
     }
     default:
       error_callback.add_error(error_v2_no_multiply_sequence(other.type()));
@@ -272,7 +272,7 @@ starlark_obj* starlark_bytes::index(const starlark_obj& other, context& ctx, err
   if (!idx.ok()) {
     return nullptr;
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(*idx, 1));
+  return ctx.create<starlark_bytes>(value.substr(*idx, 1));
 }
 
 starlark_obj* starlark_bytes::slice_range(const starlark_obj& start, const starlark_obj& stop, const starlark_obj& stride, context& ctx, error_fn& error_callback) const {
@@ -294,7 +294,7 @@ starlark_obj* starlark_bytes::slice_range(const starlark_obj& start, const starl
       result += value[i];
     }
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), result);
+  return ctx.create<starlark_bytes>(result);
 }
 
 std::string_view starlark_bytes::as_string() const {
@@ -331,11 +331,11 @@ int64_t starlark_bytes::count(std::string_view sub, int64_t start, int64_t end) 
 }
 
 starlark_obj* starlark_bytes::elems(context& ctx) const {
-  return Arena::Create<starlark_bytes::bytes_elems>(&ctx.arena(), this, calculate_state(0, value.size(), 1), false);
+  return ctx.create<starlark_bytes::bytes_elems>(this, calculate_state(0, value.size(), 1), false);
 }
 
 starlark_obj* starlark_bytes::elem_ords(context& ctx) const {
-  return Arena::Create<starlark_bytes::bytes_elems>(&ctx.arena(), this, calculate_state(0, value.size(), 1), true);
+  return ctx.create<starlark_bytes::bytes_elems>(this, calculate_state(0, value.size(), 1), true);
 }
 
 bool starlark_bytes::endswith(const std::vector<std::string_view>& ends, int64_t start, int64_t end) const {
@@ -391,7 +391,7 @@ starlark_obj* starlark_bytes::join(const std::vector<std::string_view>& elements
     }
     result += element;
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_bytes>(std::move(result));
 }
 
 starlark_obj* starlark_bytes::lstrip(context& ctx) const {
@@ -399,15 +399,15 @@ starlark_obj* starlark_bytes::lstrip(context& ctx) const {
   while (i < value.size() && is_space(value[i])) {
     ++i;
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(i));
+  return ctx.create<starlark_bytes>(value.substr(i));
 }
 
 starlark_obj* starlark_bytes::lstrip(std::string_view cutset, context& ctx) const {
   auto pos = value.find_first_not_of(cutset);
   if (pos == std::string::npos) {
-    return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view());
+    return ctx.create<starlark_bytes>(std::string_view());
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(pos));
+  return ctx.create<starlark_bytes>(value.substr(pos));
 }
 
 starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx, error_fn& error_callback) {
@@ -416,15 +416,15 @@ starlark_obj* starlark_bytes::partition(std::string_view sub, context& ctx, erro
     return nullptr;
   }
   auto pos = value.find(sub);
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  auto* result = ctx.create<starlark_tuple>(3);
   if (pos == std::string::npos) {
     result->add(this);
     result->add(ctx.empty_bytes());
     result->add(ctx.empty_bytes());
   } else {
-    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, pos)));
-    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), sub));
-    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(pos + sub.length())));
+    result->add(ctx.create<starlark_bytes>(value.substr(0, pos)));
+    result->add(ctx.create<starlark_bytes>(sub));
+    result->add(ctx.create<starlark_bytes>(value.substr(pos + sub.length())));
   }
   return result;
 }
@@ -458,7 +458,7 @@ starlark_obj* starlark_bytes::replace(std::string_view old, std::string_view new
     }
   }
   result += remaining_view;
-  return Arena::Create<starlark_bytes>(&ctx.arena(), std::move(result));
+  return ctx.create<starlark_bytes>(std::move(result));
 }
 
 int64_t starlark_bytes::rfind(std::string_view sub, int64_t start, int64_t end) const {
@@ -488,21 +488,21 @@ starlark_obj* starlark_bytes::rpartition(std::string_view sub, context& ctx, err
     return nullptr;
   }
   auto pos = value.rfind(sub);
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), 3);
+  auto* result = ctx.create<starlark_tuple>(3);
   if (pos == std::string::npos) {
     result->add(ctx.empty_bytes());
     result->add(ctx.empty_bytes());
     result->add(this);
   } else {
-    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, pos)));
-    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), sub));
-    result->add(Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(pos + sub.length())));
+    result->add(ctx.create<starlark_bytes>(value.substr(0, pos)));
+    result->add(ctx.create<starlark_bytes>(sub));
+    result->add(ctx.create<starlark_bytes>(value.substr(pos + sub.length())));
   }
   return result;
 }
 
 starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   std::string_view remaining_view = value;
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
@@ -512,14 +512,14 @@ starlark_obj* starlark_bytes::rsplit(int64_t maxsplit, context& ctx) const {
   remaining_view = remaining_view.substr(0, pos);
   while (!remaining_view.empty() && maxsplit > 0) {
     for (pos = remaining_view.size(); pos > 0 && !is_space(remaining_view[pos - 1]); --pos) {}
-    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(pos)));
+    result->unsafe_append(ctx.create<starlark_bytes>(remaining_view.substr(pos)));
     remaining_view = remaining_view.substr(0, pos);
     for (pos = remaining_view.size(); pos > 0 && is_space(remaining_view[pos - 1]); --pos) {}
     remaining_view = remaining_view.substr(0, pos);
     maxsplit--;
   }
   if (!remaining_view.empty()) {
-    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+    result->unsafe_append(ctx.create<starlark_bytes>(remaining_view));
   }
   result->unsafe_reverse();
   return result;
@@ -530,7 +530,7 @@ starlark_obj* starlark_bytes::rsplit(std::string_view sep, int64_t maxsplit, con
     error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   std::string_view remaining_view = value;
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
@@ -540,11 +540,11 @@ starlark_obj* starlark_bytes::rsplit(std::string_view sep, int64_t maxsplit, con
     if (pos == std::string_view::npos) {
       break;
     }
-    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(pos + sep.length())));
+    result->unsafe_append(ctx.create<starlark_bytes>(remaining_view.substr(pos + sep.length())));
     remaining_view = remaining_view.substr(0, pos);
     maxsplit--;
   }
-  result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+  result->unsafe_append(ctx.create<starlark_bytes>(remaining_view));
   result->unsafe_reverse();
   return result;
 }
@@ -554,19 +554,19 @@ starlark_obj* starlark_bytes::rstrip(context& ctx) const {
   while (i > 0 && is_space(value[i - 1])) {
     --i;
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, i));
+  return ctx.create<starlark_bytes>(value.substr(0, i));
 }
 
 starlark_obj* starlark_bytes::rstrip(std::string_view cutset, context& ctx) const {
   auto pos = value.find_last_not_of(cutset);
   if (pos == std::string::npos) {
-    return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view());
+    return ctx.create<starlark_bytes>(std::string_view());
   }
-  return Arena::Create<starlark_bytes>(&ctx.arena(), value.substr(0, pos + 1));
+  return ctx.create<starlark_bytes>(value.substr(0, pos + 1));
 }
 
 starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   std::string_view remaining_view = value;
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
@@ -576,14 +576,14 @@ starlark_obj* starlark_bytes::split(int64_t maxsplit, context& ctx) const {
   remaining_view = remaining_view.substr(pos);
   while (!remaining_view.empty() && maxsplit > 0) {
     for (pos = 0; pos < remaining_view.size() && !is_space(remaining_view[pos]); ++pos) {}
-    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(0, pos)));
+    result->unsafe_append(ctx.create<starlark_bytes>(remaining_view.substr(0, pos)));
     remaining_view = remaining_view.substr(pos);
     for (pos = 0; pos < remaining_view.size() && is_space(remaining_view[pos]); ++pos) {}
     remaining_view = remaining_view.substr(pos);
     maxsplit--;
   }
   if (!remaining_view.empty()) {
-    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+    result->unsafe_append(ctx.create<starlark_bytes>(remaining_view));
   }
   return result;
 }
@@ -593,7 +593,7 @@ starlark_obj* starlark_bytes::split(std::string_view sep, int64_t maxsplit, cont
     error_callback.add_error(error_v2_empty_separator());
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), 0);
+  auto* result = ctx.create<starlark_list>(0);
   std::string_view remaining_view = value;
   if (maxsplit < 0) {
     maxsplit = std::numeric_limits<int64_t>::max();
@@ -603,11 +603,11 @@ starlark_obj* starlark_bytes::split(std::string_view sep, int64_t maxsplit, cont
     if (pos == std::string_view::npos) {
       break;
     }
-    result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view.substr(0, pos)));
+    result->unsafe_append(ctx.create<starlark_bytes>(remaining_view.substr(0, pos)));
     remaining_view = remaining_view.substr(pos + sep.length());
     maxsplit--;
   }
-  result->unsafe_append(Arena::Create<starlark_bytes>(&ctx.arena(), remaining_view));
+  result->unsafe_append(ctx.create<starlark_bytes>(remaining_view));
   return result;
 }
 
@@ -637,20 +637,20 @@ starlark_obj* starlark_bytes::strip(context& ctx) const {
   std::string::size_type start, end;
   for (start = 0; start < view.size() && is_space(view[start]); ++start) {}
   for (end = view.size(); end > start && is_space(view[end - 1]); --end) {}
-  return Arena::Create<starlark_bytes>(&ctx.arena(), view.substr(start, end - start));
+  return ctx.create<starlark_bytes>(view.substr(start, end - start));
 }
 
 starlark_obj* starlark_bytes::strip(std::string_view cutset, context& ctx) const {
   std::string_view view = value;
   auto pos = view.find_first_not_of(cutset);
   if (pos == std::string_view::npos) {
-    return Arena::Create<starlark_bytes>(&ctx.arena(), std::string_view());
+    return ctx.create<starlark_bytes>(std::string_view());
   }
   view = view.substr(pos);
   pos = view.find_last_not_of(cutset);
   // `pos != std::string_view::npos` as in the previous check, we know that
   // there is at least one element that does not match cutset.
-  return Arena::Create<starlark_bytes>(&ctx.arena(), view.substr(0, pos + 1));
+  return ctx.create<starlark_bytes>(view.substr(0, pos + 1));
 }
 
 bool starlark_bytes::inner_equals(equals_comparator& comp, const starlark_obj* other) const {
@@ -1216,7 +1216,7 @@ int64_t starlark_bytes::bytes_elems::unsafe_len() const {
 }
 
 starlark_iterator* starlark_bytes::bytes_elems::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_elems_iterator>(&ctx.arena(), bytes, state.start, state.step, state.len, ords, ctx);
+  return ctx.create<starlark_elems_iterator>(bytes, state.start, state.step, state.len, ords, ctx);
 }
 
 starlark_obj* starlark_bytes::bytes_elems::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -1227,7 +1227,7 @@ starlark_obj* starlark_bytes::bytes_elems::index(const starlark_obj& other, cont
   if (ords) {
     return create_integer(static_cast<unsigned char>(bytes->value[state.start + (*idx) * state.step]), ctx);
   } else {
-    return Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(state.start + (*idx) * state.step, 1));
+    return ctx.create<starlark_bytes>(bytes->value.substr(state.start + (*idx) * state.step, 1));
   }
 }
 
@@ -1236,7 +1236,7 @@ starlark_obj* starlark_bytes::bytes_elems::slice_range(const starlark_obj& start
   if (!slice_result.ok()) {
     return nullptr;
   }
-  return Arena::Create<bytes_elems>(&ctx.arena(), bytes, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)), ords);
+  return ctx.create<bytes_elems>(bytes, calculate_state(std::get<0>(*slice_result), std::get<1>(*slice_result), std::get<2>(*slice_result)), ords);
 }
 
 bool starlark_bytes::bytes_elems::inner_repr(printer& print, printer_action action) const {
@@ -1299,7 +1299,7 @@ starlark_obj* starlark_bytes::starlark_elems_iterator::next() {
   if (ords) {
     result = create_integer(static_cast<unsigned char>(bytes->value[current_pos]), ctx);
   } else {
-    result = Arena::Create<starlark_bytes>(&ctx.arena(), bytes->value.substr(current_pos, 1));
+    result = ctx.create<starlark_bytes>(bytes->value.substr(current_pos, 1));
   }
   current_pos += step;
   remaining--;

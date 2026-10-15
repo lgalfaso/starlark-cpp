@@ -10,7 +10,6 @@
 #include <functional>
 
 #include "containers/linked_hash_map.hpp"
-#include "google/protobuf/arena.h"
 #include "runtime/starlark_object.hpp"
 #include "vm/module_metadata.hpp"
 
@@ -37,7 +36,7 @@ bool bind_function_arguments(const function_signature_metadata& fn_meta,
     starlark::runtime::error_fn& error_callback);
 
 void finish_bound_function_frame(const function_signature_metadata& fn_meta,
-    google::protobuf::Arena& arena,
+    starlark::runtime::context& ctx,
     std::vector<starlark::runtime::starlark_obj*>& frame_elements,
     const function_call_binding_state& binding_state,
     starlark::runtime::error_fn& error_callback);

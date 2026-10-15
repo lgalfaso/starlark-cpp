@@ -169,7 +169,7 @@ starlark_obj* starlark_set::binary_and(const starlark_obj& other, context& ctx, 
   if (other.type() != type()) {
     return starlark_obj::binary_and(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
     if (auto it = s_other.values.find(key); it != s_other.values.end()) {
@@ -183,7 +183,7 @@ starlark_obj* starlark_set::binary_pipe(const starlark_obj& other, context& ctx,
   if (other.type() != type()) {
     return starlark_obj::binary_pipe(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   for (auto& key : values) {
     result->add(key, error_callback);
   }
@@ -198,7 +198,7 @@ starlark_obj* starlark_set::binary_hat(const starlark_obj& other, context& ctx, 
   if (other.type() != type()) {
     return starlark_obj::binary_hat(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
     if (!s_other.values.contains(key)) {
@@ -217,7 +217,7 @@ starlark_obj* starlark_set::binary_minus(const starlark_obj& other, context& ctx
   if (other.type() != type()) {
     return starlark_obj::binary_minus(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   const starlark_set& s_other = static_cast<const starlark_set&>(other);
   for (auto& key : values) {
     if (!s_other.values.contains(key)) {
@@ -290,7 +290,7 @@ starlark_obj* starlark_set::hat_equals_assign(const starlark_obj& other, context
 }
 
 starlark_iterator* starlark_set::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_set_iterator>(&ctx.arena(), this);
+  return ctx.create<starlark_set_iterator>(this);
 }
 
 status_or<bool> starlark_set::add(starlark_obj* element, error_fn& error_callback) {
@@ -313,7 +313,7 @@ status starlark_set::clear(error_fn& error_callback) {
 }
 
 starlark_obj* starlark_set::difference(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const {
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   for (auto* value : values) {
     result->values.insert(value);
   }
@@ -370,7 +370,7 @@ status starlark_set::discard(starlark_obj* element, error_fn& error_callback) {
 }
 
 starlark_obj* starlark_set::intersection(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) const {
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   for (auto* value : values) {
     result->values.insert(value);
   }
@@ -544,7 +544,7 @@ status starlark_set::remove(starlark_obj* element, error_fn& error_callback) {
 }
 
 starlark_obj* starlark_set::symmetric_difference(starlark_obj* other, context& ctx, error_fn& error_callback) const {
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   for (auto* value : values) {
     result->values.insert(value);
   }
@@ -596,7 +596,7 @@ status starlark_set::symmetric_difference_update(starlark_obj* other, context& c
 }
 
 starlark_obj* starlark_set::union_(const std::vector<starlark_obj*>& others, context& ctx, error_fn& error_callback) {
-  auto* result = Arena::Create<starlark_set>(&ctx.arena());
+  auto* result = ctx.create<starlark_set>();
   for (auto* value : values) {
     result->values.insert(value);
   }

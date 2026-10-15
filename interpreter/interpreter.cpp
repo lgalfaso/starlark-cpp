@@ -127,8 +127,8 @@ namespace interpreter {
 
 namespace {
 
-frame* create_frame(Arena& arena, const RepeatedPtrField<std::string>* names) {
-  return Arena::Create<frame>(&arena, names);
+frame* create_frame(context& ctx, const RepeatedPtrField<std::string>* names) {
+  return ctx.create<frame>(names);
 }
 
 void execute_call_pos(std::vector<starlark_obj*>& stack, std::size_t arg_count, context& ctx, error_fn& error_callback) {
@@ -335,11 +335,10 @@ frame* run_program(
         stack.push_back(create_integer(op_code.const_int().value(), ctx));
         break;
       case OpCode::kConstBigInt:
-        stack.push_back(Arena::Create<starlark_bigint>(&ctx.arena(),
-            parse_number(op_code.const_big_int().value(), nullptr, 0)));
+        stack.push_back(ctx.create<starlark_bigint>(parse_number(op_code.const_big_int().value(), nullptr, 0)));
         break;
       case OpCode::kConstFloat:
-        stack.push_back(Arena::Create<starlark_float>(&ctx.arena(), op_code.const_float().value()));
+        stack.push_back(ctx.create<starlark_float>(op_code.const_float().value()));
         break;
       case OpCode::kConstString:
         assert(op_code.const_string().const_string_pos() < state.current_program.bytecode->const_string().size());
@@ -352,10 +351,10 @@ frame* run_program(
         stack.push_back((*state.current_program.const_strings)[op_code.const_string_view().const_string_pos()]);
         break;
       case OpCode::kConstBytes:
-        stack.push_back(Arena::Create<starlark_bytes>(&ctx.arena(), op_code.const_bytes().value()));
+        stack.push_back(ctx.create<starlark_bytes>(op_code.const_bytes().value()));
         break;
       case OpCode::kMakeList:
-        stack.push_back(Arena::Create<starlark_list>(&ctx.arena(), op_code.make_list().reserve_size()));
+        stack.push_back(ctx.create<starlark_list>(op_code.make_list().reserve_size()));
         break;
       case OpCode::kAddToList: {
         assert(stack.size() > op_code.add_to_list().number_of_elements());
@@ -371,7 +370,7 @@ frame* run_program(
       }
       case OpCode::kMakeDictionary:
         // Note: The reserve size is not used.
-        stack.push_back(Arena::Create<starlark_dictionary>(&ctx.arena()));
+        stack.push_back(ctx.create<starlark_dictionary>());
         break;
       case OpCode::kAddToDictionary: {
         assert(stack.size() > op_code.add_to_dictionary().number_of_elements() * 2);
@@ -395,7 +394,7 @@ frame* run_program(
       }
       case OpCode::kMakeTuple: {
         assert(stack.size() >= op_code.make_tuple().number_of_elements());
-        starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), op_code.make_tuple().number_of_elements());
+        starlark_tuple* result = ctx.create<starlark_tuple>(op_code.make_tuple().number_of_elements());
         for (int i = op_code.make_tuple().number_of_elements(); i > 0; --i) {
           result->add(stack[stack.size() - i]);
         }
@@ -453,7 +452,7 @@ frame* run_program(
         switch (op_code.create_frame().block_type()) {
           case BlockType::PREDECLARED_BLOCK: {
             assert(state.frame_stacks.empty());
-            auto* global_frame = create_frame(ctx.arena(), &op_code.create_frame().symbol());
+            auto* global_frame = create_frame(ctx, &op_code.create_frame().symbol());
             int count = 0;
             for (const auto& symbol : op_code.create_frame().symbol()) {
               auto pos = global_context.find(symbol);
@@ -471,14 +470,14 @@ frame* run_program(
           }
           case BlockType::MODULE_BLOCK:
             assert(result == nullptr);
-            result = create_frame(ctx.arena(), &op_code.create_frame().symbol());
+            result = create_frame(ctx, &op_code.create_frame().symbol());
             state.frame_stacks.back().push_back(result);
             break;
           case BlockType::FUNCTION_BLOCK:
             // This frame will be created by the function call.
             break;
           default:
-            state.frame_stacks.back().push_back(create_frame(ctx.arena(), &op_code.create_frame().symbol()));
+            state.frame_stacks.back().push_back(create_frame(ctx, &op_code.create_frame().symbol()));
             break;
         }
         break;
@@ -999,9 +998,7 @@ frame* run_program(
         const auto entrypoint = op_code.make_function().entrypoint();
         const auto* fn_meta = starlark::vm::function_metadata_for_block(*state.current_program.metadata, entrypoint);
         assert(fn_meta != nullptr);
-        stack.push_back(Arena::Create<interpreter_function>(
-            &ctx.arena(),
-            entrypoint,
+        stack.push_back(ctx.create<interpreter_function>(entrypoint,
             std::move(default_values),
             state.current_program,
             state.inner,
@@ -1183,9 +1180,9 @@ status_or<frame*> interpreter::run(module_loader& loader,
         &(*mod_info)->metadata_for(*entry.program),
     };
     if (!current_program.bytecode->const_string().empty()) {
-      current_program.const_strings = Arena::Create<std::vector<starlark_string*>>(&ctx.arena(), current_program.bytecode->const_string().size());
+      current_program.const_strings = ctx.create<std::vector<starlark_string*>>(current_program.bytecode->const_string().size());
       for (int i = 0; i < current_program.bytecode->const_string().size(); ++i) {
-        (*current_program.const_strings)[i] = Arena::Create<starlark_string>(&ctx.arena(), current_program.bytecode->const_string(i));
+        (*current_program.const_strings)[i] = ctx.create<starlark_string>(current_program.bytecode->const_string(i));
       }
     }
     last_frame = run_program(loader, current_program, (*mod_info)->inner(), global_context, ctx, logging);

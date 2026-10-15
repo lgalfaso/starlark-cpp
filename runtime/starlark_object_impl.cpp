@@ -62,10 +62,6 @@ starlark_obj* context::empty_string() const {
   return empty_string_;
 }
 
-Arena& context::arena() {
-  return arena_;
-}
-
 const runtime_options& context::options() {
   return options_;
 }

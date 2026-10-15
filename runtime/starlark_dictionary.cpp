@@ -162,7 +162,7 @@ starlark_obj* starlark_dictionary::binary_pipe(const starlark_obj& other, contex
   if (other.type() != type()) {
     return starlark_obj::binary_pipe(other, ctx, error_callback);
   }
-  auto* result = Arena::Create<starlark_dictionary>(&ctx.arena());
+  auto* result = ctx.create<starlark_dictionary>();
   for (const auto& [key, value] : values_) {
     result->insert(key, value, error_callback);
   }
@@ -188,7 +188,7 @@ starlark_obj* starlark_dictionary::pipe_equals_assign(const starlark_obj& other,
 }
 
 starlark_iterator* starlark_dictionary::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_dictionary_iterator>(&ctx.arena(), this);
+  return ctx.create<starlark_dictionary_iterator>(this);
 }
 
 starlark_obj* starlark_dictionary::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -236,9 +236,9 @@ starlark_obj* starlark_dictionary::get(starlark_obj* key, starlark_obj* default_
 }
 
 starlark_obj* starlark_dictionary::items(context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
+  auto* result = ctx.create<starlark_list>(values_.size());
   for (auto entry : values_) {
-    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
+    auto* tuple = ctx.create<starlark_tuple>(2);
     tuple->add(entry.first);
     tuple->add(entry.second);
     result->unsafe_append(tuple);
@@ -247,7 +247,7 @@ starlark_obj* starlark_dictionary::items(context& ctx) const {
 }
 
 starlark_obj* starlark_dictionary::keys(context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
+  auto* result = ctx.create<starlark_list>(values_.size());
   for (auto entry : values_) {
     result->unsafe_append(entry.first);
   }
@@ -284,7 +284,7 @@ starlark_obj* starlark_dictionary::popitem(context& ctx, error_fn& error_callbac
     error_callback.add_error(error_v2_empty_dictionary("popitem"));
     return nullptr;
   }
-  starlark_tuple* result = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
+  starlark_tuple* result = ctx.create<starlark_tuple>(2);
   auto item = values_.popitem();
   result->add(item.first);
   result->add(item.second);
@@ -363,7 +363,7 @@ status starlark_dictionary::update(starlark_obj* iterable, const starlark_obj::n
 }
 
 starlark_obj* starlark_dictionary::values(context& ctx) const {
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values_.size());
+  auto* result = ctx.create<starlark_list>(values_.size());
   for (auto entry : values_) {
     result->unsafe_append(entry.second);
   }

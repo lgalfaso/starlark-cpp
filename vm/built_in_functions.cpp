@@ -166,7 +166,7 @@ starlark_obj* starlark_fn_inner_sorted(starlark_obj* this_obj, const starlark_ob
   }
 
   // Create the output.
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), elems.size());
+  auto* result = ctx.create<starlark_list>(elems.size());
   for (auto& elem : elems) {
     result->unsafe_append(elem.second);
   }

@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <string>
 
-#include "google/protobuf/arena.h"
 #include "vm/frame_factory.hpp"
 
 using starlark_obj = ::starlark::runtime::starlark_obj;
@@ -40,13 +39,12 @@ void build_function_frame_cache(module_runtime_state& state) {
   if (state.native_ctx == nullptr) {
     return;
   }
-  google::protobuf::Arena& arena = state.native_ctx->arena();
   const auto& functions = state.init_metadata.functions;
   state.function_frame_cache.resize(functions.size());
   for (std::size_t fn_idx = 0; fn_idx < functions.size(); ++fn_idx) {
     auto& cache = state.function_frame_cache[fn_idx];
     const auto& fn_meta = functions[fn_idx];
-    cache.names = copy_frame_symbols_to_arena(arena, fn_meta);
+    cache.names = copy_frame_symbols_to_arena(*state.native_ctx, fn_meta);
     build_positional_slots(cache, fn_meta);
   }
 }
@@ -58,10 +56,10 @@ const google::protobuf::RepeatedPtrField<std::string>* function_frame_names(modu
   if (fn_idx < mod_state.function_frame_cache.size() && mod_state.function_frame_cache[fn_idx].names != nullptr) {
     return mod_state.function_frame_cache[fn_idx].names;
   }
-  return copy_frame_symbols_to_arena(ctx.arena(), fn_meta);
+  return copy_frame_symbols_to_arena(ctx, fn_meta);
 }
 
-frame* acquire_function_frame(native_exec_context& exec, google::protobuf::Arena& arena, const google::protobuf::RepeatedPtrField<std::string>* names) {
+frame* acquire_function_frame(native_exec_context& exec, starlark::runtime::context& ctx, const google::protobuf::RepeatedPtrField<std::string>* names) {
   if (names != nullptr) {
     const std::size_t slot_count = static_cast<std::size_t>(names->size());
     if (slot_count < exec.frame_pool_by_slot_count.size()) {
@@ -76,7 +74,7 @@ frame* acquire_function_frame(native_exec_context& exec, google::protobuf::Arena
       }
     }
   }
-  return create_frame_on_arena(arena, names);
+  return create_frame_on_arena(ctx, names);
 }
 
 void recycle_top_function_frame(native_exec_context& exec) {
@@ -168,7 +166,7 @@ bool setup_native_fn_frame_for_invoke(native_exec_context& exec,
   const native_function_frame_cache& cache =
       fn_idx < mod_state.function_frame_cache.size() ? mod_state.function_frame_cache[fn_idx] : native_function_frame_cache{};
   auto* symbols = function_frame_names(mod_state, fn_idx, *ctx, fn_meta);
-  auto* fn_frame = acquire_function_frame(exec, ctx->arena(), symbols);
+  auto* fn_frame = acquire_function_frame(exec, *ctx, symbols);
   if (from_eval_stack) {
     const uint32_t callee_idx = exec.eval_stack.size - static_cast<uint32_t>(argc) - 1;
     bind_positional_args_from_eval_stack(*fn_frame, exec, fn_meta, cache, fn_idx, callee_idx, argc);

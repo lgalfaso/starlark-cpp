@@ -9,7 +9,6 @@
 
 #include "errors/runtime_error_messages.hpp"
 #include "errors/source_highlight.hpp"
-#include "google/protobuf/arena.h"
 #include "native/abi/starlark_module_abi.hpp"
 #include "native/exec/exec_error.hpp"
 #include "native/exec/native_exec_context.hpp"
@@ -296,7 +295,7 @@ starlark::runtime::starlark_obj* native_starlark_function::call(const starlark::
 
   const auto fn_idx = static_cast<std::size_t>(block_idx_ - 1);
   auto* symbols = function_frame_names(*mod_state_, fn_idx, ctx, fn_meta);
-  auto* fn_frame = acquire_function_frame(exec, ctx.arena(), symbols);
+  auto* fn_frame = acquire_function_frame(exec, ctx, symbols);
   function_call_binding_state binding_state;
   if (!starlark::vm::bind_function_arguments(fn_meta,
           named_argument_index_,
@@ -308,7 +307,7 @@ starlark::runtime::starlark_obj* native_starlark_function::call(const starlark::
           error_callback)) {
     return nullptr;
   }
-  finish_bound_function_frame(fn_meta, ctx.arena(), fn_frame->elements, binding_state, error_callback);
+  finish_bound_function_frame(fn_meta, ctx, fn_frame->elements, binding_state, error_callback);
 
   native_frame_chain_push(&exec, fn_frame);
   auto* fn = reinterpret_cast<native_fn_t>(code_ptr);

@@ -14,7 +14,6 @@
 
 #include "bigint/number.hpp"
 #include "errors/runtime_error_messages.hpp"
-#include "google/protobuf/arena.h"
 #include "native/abi/starlark_module_abi.hpp"
 #include "native/exec/exec_error.hpp"
 #include "native/exec/native_exec_context.hpp"
@@ -246,7 +245,7 @@ starlark_obj* starlark_obj_rt_create_int(context* ctx, int64_t value) {
 }
 
 starlark_obj* starlark_obj_rt_create_float(context* ctx, double value) {
-  return google::protobuf::Arena::Create<starlark_float>(&ctx->arena(), value);
+  return ctx->create<starlark_float>(value);
 }
 
 starlark_obj* starlark_obj_rt_get_const_string(native_exec_context* exec, int64_t index) {
@@ -722,11 +721,11 @@ void starlark_obj_rt_call_full(native_exec_context* exec, int32_t positional_cou
 
 void starlark_obj_rt_make_list(native_exec_context* exec, int32_t reserve, context* ctx) {
   ctx = effective_ctx(exec, ctx);
-  eval_stack_push(exec, google::protobuf::Arena::Create<starlark_list>(&ctx->arena(), reserve));
+  eval_stack_push(exec, ctx->create<starlark_list>(reserve));
 }
 void starlark_obj_rt_make_dict(native_exec_context* exec, context* ctx) {
   ctx = effective_ctx(exec, ctx);
-  eval_stack_push(exec, google::protobuf::Arena::Create<starlark_dictionary>(&ctx->arena()));
+  eval_stack_push(exec, ctx->create<starlark_dictionary>());
 }
 void starlark_obj_rt_add_to_list(native_exec_context* exec, int32_t count, context* ctx, error_fn* err) {
   ctx = effective_ctx(exec, ctx);
@@ -754,11 +753,11 @@ void starlark_obj_rt_add_to_dict(native_exec_context* exec, int32_t count, conte
 }
 void starlark_obj_rt_make_bigint(native_exec_context* exec, const char* digits, context* ctx) {
   ctx = effective_ctx(exec, ctx);
-  eval_stack_push(exec, google::protobuf::Arena::Create<starlark_bigint>(&ctx->arena(), starlark::bigint::parse_number(digits, nullptr, 0)));
+  eval_stack_push(exec, ctx->create<starlark_bigint>(starlark::bigint::parse_number(digits, nullptr, 0)));
 }
 void starlark_obj_rt_make_bytes(native_exec_context* exec, const char* data, std::size_t len, context* ctx) {
   ctx = effective_ctx(exec, ctx);
-  eval_stack_push(exec, google::protobuf::Arena::Create<starlark_bytes>(&ctx->arena(), std::string{std::string_view{data, len}}));
+  eval_stack_push(exec, ctx->create<starlark_bytes>(std::string{std::string_view{data, len}}));
 }
 
 void starlark_obj_rt_unpack(native_exec_context* exec, int32_t count, context* ctx, error_fn* err) {
@@ -833,7 +832,7 @@ void starlark_obj_rt_end_iterator(native_exec_context* exec) {
 
 void starlark_obj_rt_make_tuple(native_exec_context* exec, int32_t count, context* ctx) {
   ctx = effective_ctx(exec, ctx);
-  auto* result = google::protobuf::Arena::Create<starlark_tuple>(&ctx->arena(), count);
+  auto* result = ctx->create<starlark_tuple>(count);
   for (int i = count; i > 0; --i) {
     result->add(exec->eval_stack.at(exec->eval_stack.size - static_cast<uint32_t>(i)));
   }
@@ -872,8 +871,7 @@ void starlark_obj_rt_make_native_function_meta(native_exec_context* exec,
     closure.push_back(captured);
     pin_live_closure_frame(captured, exec);
   }
-  auto* fn = google::protobuf::Arena::Create<native_starlark_function>(&ctx->arena(),
-      fn_ptr,
+  auto* fn = ctx->create<native_starlark_function>(fn_ptr,
       block_idx,
       fn_name_str,
       exec->mod->module_name,

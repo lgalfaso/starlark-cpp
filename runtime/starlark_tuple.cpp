@@ -50,7 +50,7 @@ starlark_obj* plus_op(const starlark_tuple& this_obj, const starlark_obj& other,
     error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
+  auto* result = ctx.create<starlark_tuple>(expected_size);
   for (auto& key : this_values) {
     result->add(key);
   }
@@ -65,11 +65,11 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
   switch (other.kind()) {
     case object_kind::kInt: {
       if (this_values.empty()) {
-        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+        return ctx.create<starlark_tuple>(0);
       }
       auto value = other.as_int64();
       if (value <= 0) {
-        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+        return ctx.create<starlark_tuple>(0);
       }
       std::size_t expected_size;
       if (ckd_mul(&expected_size, this_values.size(), value) ||
@@ -77,7 +77,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
         error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
-      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
+      auto* result = ctx.create<starlark_tuple>(expected_size);
       for (int64_t i = 0; i < value; ++i) {
         for (auto& key : this_values) {
           result->add(key);
@@ -87,11 +87,11 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
     }
     case object_kind::kBigInt: {
       if (this_values.empty()) {
-        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+        return ctx.create<starlark_tuple>(0);
       }
       const auto& value = other.as_bigint();
       if (value <= number::zero()) {
-        return Arena::Create<starlark_tuple>(&ctx.arena(), 0);
+        return ctx.create<starlark_tuple>(0);
       }
       if (value.bit_size() >= 63) {
         error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
@@ -104,7 +104,7 @@ starlark_obj* star_op(const starlark_tuple& this_obj, const starlark_obj& other,
         error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
-      auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), expected_size);
+      auto* result = ctx.create<starlark_tuple>(expected_size);
       for (int64_t i = 0; i < int_value; ++i) {
         for (auto& key : this_values) {
           result->add(key);
@@ -239,7 +239,7 @@ bool starlark_tuple::binary_in(const starlark_obj& other, error_fn& error_callba
 }
 
 starlark_iterator* starlark_tuple::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_tuple_iterator>(&ctx.arena(), this);
+  return ctx.create<starlark_tuple_iterator>(this);
 }
 
 starlark_obj* starlark_tuple::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -258,7 +258,7 @@ starlark_obj* starlark_tuple::slice_range(const starlark_obj& start, const starl
   auto i_start = std::get<0>(*slice_result);
   auto i_end = std::get<1>(*slice_result);
   auto i_stride = std::get<2>(*slice_result);
-  auto* result = Arena::Create<starlark_tuple>(&ctx.arena(), calculate_len(i_start, i_end, i_stride));
+  auto* result = ctx.create<starlark_tuple>(calculate_len(i_start, i_end, i_stride));
   if (i_stride > 0) {
     for (auto i = i_start; i < i_end; i += i_stride) {
       result->values.push_back(values[i]);

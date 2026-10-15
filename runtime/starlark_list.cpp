@@ -163,7 +163,7 @@ starlark_obj* starlark_list::binary_plus(const starlark_obj& other, context& ctx
     error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), values.size() + l_other.values.size());
+  auto* result = ctx.create<starlark_list>(values.size() + l_other.values.size());
   result->values.insert(result->values.end(), values.begin(), values.end());
   result->values.insert(result->values.end(), l_other.values.begin(), l_other.values.end());
   return result;
@@ -173,11 +173,11 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
   switch (other.kind()) {
     case object_kind::kInt: {
       if (values.empty()) {
-        return Arena::Create<starlark_list>(&ctx.arena(), 0);
+        return ctx.create<starlark_list>(0);
       }
       auto value = other.as_int64();
       if (value <= 0) {
-        return Arena::Create<starlark_list>(&ctx.arena(), 0);
+        return ctx.create<starlark_list>(0);
       }
       std::size_t expected_size;
       if (ckd_mul(&expected_size, values.size(), value) ||
@@ -185,7 +185,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
         error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
-      auto* result = Arena::Create<starlark_list>(&ctx.arena(), expected_size);
+      auto* result = ctx.create<starlark_list>(expected_size);
       for (int64_t i = 0; i < value; ++i) {
         result->values.insert(result->values.end(), values.begin(), values.end());
       }
@@ -193,11 +193,11 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
     }
     case object_kind::kBigInt: {
       if (values.empty()) {
-        return Arena::Create<starlark_list>(&ctx.arena(), 0);
+        return ctx.create<starlark_list>(0);
       }
       const auto& value = other.as_bigint();
       if (value <= number::zero()) {
-        return Arena::Create<starlark_list>(&ctx.arena(), 0);
+        return ctx.create<starlark_list>(0);
       }
       if (value.bit_size() >= 63) {
         error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
@@ -210,7 +210,7 @@ starlark_obj* starlark_list::binary_star(const starlark_obj& other, context& ctx
         error_callback.add_error(error_v2_max_sequence_length(ctx.options().max_sequence_size));
         return nullptr;
       }
-      auto* result = Arena::Create<starlark_list>(&ctx.arena(), expected_size);
+      auto* result = ctx.create<starlark_list>(expected_size);
       for (int64_t i = 0; i < int_value; ++i) {
         result->values.insert(result->values.end(), values.begin(), values.end());
       }
@@ -310,7 +310,7 @@ starlark_obj* starlark_list::star_equals_assign(const starlark_obj& other, conte
 }
 
 starlark_iterator* starlark_list::get_iterator(bool produce_error, context& ctx, error_fn& error_callback) {
-  return Arena::Create<starlark_list_iterator>(&ctx.arena(), this);
+  return ctx.create<starlark_list_iterator>(this);
 }
 
 starlark_obj* starlark_list::index(const starlark_obj& other, context& ctx, error_fn& error_callback) const {
@@ -341,7 +341,7 @@ starlark_obj* starlark_list::slice_range(const starlark_obj& start, const starla
   auto i_end = std::get<1>(*slice_result);
   auto i_stride = std::get<2>(*slice_result);
 
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), calculate_len(i_start, i_end, i_stride));
+  auto* result = ctx.create<starlark_list>(calculate_len(i_start, i_end, i_stride));
   if (i_stride > 0) {
     for (auto i = i_start; i < i_end; i += i_stride) {
       result->values.push_back(values[i]);

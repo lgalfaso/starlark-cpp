@@ -278,13 +278,13 @@ starlark_obj* starlark_fn_dict(starlark_obj* this_obj, const starlark_obj::pos_a
     return nullptr;
   }
   if (pos_args.empty()) {
-    starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
+    starlark_dictionary* result = ctx.create<starlark_dictionary>();
     if (!result->update(nullptr, named_args, ctx, error_callback).ok()) {
       return nullptr;
     }
     return result;
   }
-  starlark_dictionary* result = Arena::Create<starlark_dictionary>(&ctx.arena());
+  starlark_dictionary* result = ctx.create<starlark_dictionary>();
   if (!result->update(pos_args.front(), named_args, ctx, error_callback).ok()) {
     return nullptr;
   }
@@ -356,13 +356,13 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
   if (it == nullptr) {
     return nullptr;
   }
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, iterable->unsafe_len()));
+  auto* result = ctx.create<starlark_list>(std::max<int64_t>(0, iterable->unsafe_len()));
   if (start == nullptr) {
     start = ctx.zero();
   }
   auto* one = ctx.one();
   while (it->has_next()) {
-    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), 2);
+    auto* tuple = ctx.create<starlark_tuple>(2);
     tuple->add(start);
     tuple->add(it->next());
     result->unsafe_append(tuple);
@@ -903,7 +903,7 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
   }
 
   // Create the output.
-  auto* result = Arena::Create<starlark_list>(&ctx.arena(), elems.size());
+  auto* result = ctx.create<starlark_list>(elems.size());
   for (auto& elem : elems) {
     result->unsafe_append(elem.second);
   }
@@ -998,9 +998,9 @@ starlark_obj* starlark_fn_zip(starlark_obj* this_obj, const starlark_obj::pos_ar
     its.push_back(it);
     len = std::min<int64_t>(len, element->unsafe_len());
   }
-  starlark_list* result = Arena::Create<starlark_list>(&ctx.arena(), std::max<int64_t>(0, len));
+  starlark_list* result = ctx.create<starlark_list>(std::max<int64_t>(0, len));
   while (all_available(its)) {
-    auto* tuple = Arena::Create<starlark_tuple>(&ctx.arena(), its.size());
+    auto* tuple = ctx.create<starlark_tuple>(its.size());
     for (auto* it : its) {
       tuple->add(it->next());
     }
