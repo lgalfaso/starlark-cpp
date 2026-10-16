@@ -857,7 +857,12 @@ void starlark_obj_rt_make_native_function_meta(native_exec_context* exec,
     defaults.push_back(exec->eval_stack.at(exec->eval_stack.size - static_cast<uint32_t>(i)));
   }
   exec->eval_stack.resize(exec->eval_stack.size - static_cast<uint32_t>(default_count));
-  const auto* fn_meta = function_metadata_for_block(exec->mod->init_metadata, block_idx);
+  module_runtime_state* owner = exec->code_mod != nullptr ? exec->code_mod : exec->mod;
+  if (owner == nullptr) {
+    fail_exec_invariant(exec, "make_native_function requires module state");
+    return;
+  }
+  const auto* fn_meta = function_metadata_for_block(owner->init_metadata, block_idx);
   std::string fn_name_str;
   if (fn_meta != nullptr) {
     fn_name_str = fn_meta->fn_name;
@@ -874,8 +879,8 @@ void starlark_obj_rt_make_native_function_meta(native_exec_context* exec,
   auto* fn = ctx->create<native_starlark_function>(fn_ptr,
       block_idx,
       fn_name_str,
-      exec->mod->module_name,
-      exec->mod,
+      owner->module_name,
+      owner,
       std::move(defaults),
       closure,
       exec->inner);
