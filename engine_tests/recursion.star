@@ -48,3 +48,32 @@ foo(1)
     2 |   return foo(a=a)
       |          ~~~^^^^^
 """)
+
+assert_fail("""
+def outer(on_call):
+  def inner():
+    if on_call != None:
+      return on_call()
+    return 1
+  return inner
+
+one = outer(None)
+two = outer(one)
+two()
+""", error_message = """function 'inner' called recursively
+    4 |       return on_call()
+      |              ~~~~~~~^^
+""")
+
+assert_succeed("""
+def outer(on_call):
+  def inner():
+    if on_call != None:
+      return on_call()
+    return 1
+  return inner
+
+one = outer(None)
+two = outer(one)
+two()
+""", allow_recursion = True)
