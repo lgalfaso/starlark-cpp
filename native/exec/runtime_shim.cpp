@@ -95,7 +95,8 @@ bool starlark_rt_exec_jit_function_entry(native_exec_context* exec) {
   if (exec == nullptr || exec->mod == nullptr) {
     return false;
   }
-  starlark_obj_rt_ensure_stack_capacity(exec, static_cast<int32_t>(exec->mod->max_stack_depth));
+  module_runtime_state* owner = exec->code_mod != nullptr ? exec->code_mod : exec->mod;
+  starlark_obj_rt_ensure_stack_capacity(exec, static_cast<int32_t>(owner->max_stack_depth));
   return true;
 }
 
