@@ -152,14 +152,15 @@ bool starlark_rt_exec_create_predeclared(native_exec_context* exec, module_runti
 }
 
 void starlark_rt_exec_create_frame_meta(native_exec_context* exec, std::uint32_t meta_index) {
-  if (exec->mod == nullptr || meta_index >= exec->mod->init_metadata.frames.size()) {
+  module_runtime_state* owner = exec->code_mod != nullptr ? exec->code_mod : exec->mod;
+  if (owner == nullptr || meta_index >= owner->init_metadata.frames.size()) {
     fail_exec_invariant(exec, "frame metadata index out of range");
     return;
   }
-  const frame_metadata* metadata = &exec->mod->init_metadata.frames[meta_index];
+  const frame_metadata* metadata = &owner->init_metadata.frames[meta_index];
   auto* ctx = effective_ctx(exec, nullptr);
   starlark::runtime::context& alloc_ctx =
-      metadata->block_type == BlockType::MODULE_BLOCK ? *exec->mod->native_ctx : *ctx;
+      metadata->block_type == BlockType::MODULE_BLOCK ? *owner->native_ctx : *ctx;
   auto* symbols = copy_frame_symbols_to_arena(alloc_ctx, *metadata);
   auto* frame = create_frame_on_arena(alloc_ctx, symbols);
   if (metadata->block_type == BlockType::MODULE_BLOCK) {
