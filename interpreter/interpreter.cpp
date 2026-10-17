@@ -1154,9 +1154,9 @@ status_or<frame*> interpreter::run(module_loader& loader,
       entry.program = starlark_program;
       auto deps = get_dependencies(entry.program);
       bool needs_work = false;
-      for (const auto& dep : deps) {
+      for (auto dep_it = deps.rbegin(); dep_it != deps.rend(); ++dep_it) {
         to_run.push_back(dependency{
-          .module_name = std::string{dep},
+          .module_name = std::string{*dep_it},
           .caller_module_name = std::string{(*mod_info)->cannonical_name()},
           .program = nullptr,
         });

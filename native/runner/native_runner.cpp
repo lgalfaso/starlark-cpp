@@ -262,7 +262,7 @@ status_or<frame*> run_impl(native_runtime& runtime,
   for (const auto& dep : deps) {
     auto dep_result = run_impl(runtime, loader, dep, g_options, r_options, n_options, logging, load_ctx, (*mod_info)->cannonical_name());
     if (!dep_result.ok()) {
-      return status_or<frame*>(status_code::kStaticError);
+      return status_or<frame*>(dep_result.error());
     }
   }
 
