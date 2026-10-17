@@ -108,19 +108,25 @@ cc_library(
 )
 
 cc_library(
+    name = "split_test_case",
+    srcs = ["split_test_case.cpp"],
+    hdrs = ["split_test_case.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
     name = "test_case",
-    testonly = True,
     srcs = ["test_case.cpp"],
     hdrs = ["test_case.hpp"],
     visibility = ["//visibility:public"],
     deps = [
         ":module_loader",
+        ":split_test_case",
     ],
 )
 
 cc_library(
     name = "test_assertions",
-    testonly = True,
     srcs = ["test_assertions.cpp"],
     hdrs = ["test_assertions.hpp"],
     visibility = ["//visibility:public"],

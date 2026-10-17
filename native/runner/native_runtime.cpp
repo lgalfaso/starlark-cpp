@@ -19,7 +19,7 @@ std::string native_runtime::bytecode_cache_key(std::string_view module_name, std
   return std::format("{}\x1f{}", module_name, source);
 }
 
-native_runtime::native_runtime() = default;
+native_runtime::native_runtime(jit_codegen_opt codegen) : engine_(codegen) {}
 
 native_runtime::~native_runtime() = default;
 

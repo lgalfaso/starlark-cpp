@@ -29,9 +29,14 @@ class ThreadSafeModule;
 namespace starlark {
 namespace native {
 
+enum class jit_codegen_opt {
+  kAggressive,
+  kDefault,
+};
+
 class orc_engine {
  public:
-  orc_engine();
+  explicit orc_engine(jit_codegen_opt codegen = jit_codegen_opt::kAggressive);
   ~orc_engine();
 
   orc_engine(const orc_engine&) = delete;

@@ -22,7 +22,7 @@ namespace native {
 
 class native_runtime {
  public:
-  native_runtime();
+  explicit native_runtime(jit_codegen_opt codegen = jit_codegen_opt::kAggressive);
   ~native_runtime();
 
   native_runtime(const native_runtime&) = delete;

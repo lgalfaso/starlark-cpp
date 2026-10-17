@@ -12,6 +12,8 @@ namespace native {
 
 struct native_options {
   std::string cache_root;
+  // Lower LLVM codegen effort for long-running fuzzing (less RAM and CPU per JIT).
+  bool fast_jit = false;
   bool write_back_dylib = false;
   // Re-execute module init (block 0) even when JIT module state is cached.
   bool rerun_module = false;

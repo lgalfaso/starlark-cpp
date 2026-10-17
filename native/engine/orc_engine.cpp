@@ -3,9 +3,10 @@
 #include "native/engine/orc_engine.hpp"
 
 #include <format>
-#include <utility>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <utility>
 
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
@@ -41,6 +42,15 @@ T unwrap_or(T fallback, llvm::Expected<T> value) {
   return std::move(*value);
 }
 
+void ensure_llvm_native_target_initialized() {
+  static std::once_flag once;
+  std::call_once(once, [] {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+    llvm::InitializeNativeTargetAsmParser();
+  });
+}
+
 }  // namespace
 
 struct orc_engine::impl {
@@ -48,17 +58,17 @@ struct orc_engine::impl {
   std::unique_ptr<llvm::orc::LLJIT> jit;
 };
 
-orc_engine::orc_engine() : impl_(std::make_unique<impl>()) {
-  llvm::InitializeNativeTarget();
-  llvm::InitializeNativeTargetAsmPrinter();
-  llvm::InitializeNativeTargetAsmParser();
+orc_engine::orc_engine(jit_codegen_opt codegen) : impl_(std::make_unique<impl>()) {
+  ensure_llvm_native_target_initialized();
 
   auto jit_tmb = llvm::orc::JITTargetMachineBuilder::detectHost();
   if (!jit_tmb) {
     llvm::consumeError(jit_tmb.takeError());
     return;
   }
-  jit_tmb->setCodeGenOptLevel(llvm::CodeGenOptLevel::Aggressive);
+  const llvm::CodeGenOptLevel level =
+      codegen == jit_codegen_opt::kDefault ? llvm::CodeGenOptLevel::Default : llvm::CodeGenOptLevel::Aggressive;
+  jit_tmb->setCodeGenOptLevel(level);
   auto jit = llvm::orc::LLJITBuilder().setJITTargetMachineBuilder(std::move(*jit_tmb)).create();
   if (!jit) {
     llvm::consumeError(jit.takeError());
