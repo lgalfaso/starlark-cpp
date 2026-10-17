@@ -80,14 +80,17 @@ bazel test //runtime:all
 bazel test //grammar:all
 ```
 
-Fuzz tests are available for the lexer, parser, interpreter, and native runner. They use the hermetic toolchain and the `asan-libfuzzer` config (see `rules_fuzzer.bazelrc`, which enables hermetic compiler-rt and a macOS `run_under` helper binary):
+Fuzz tests are available for the lexer, parser, interpreter, native runner, and interpreter-vs-native differential checking. They use the hermetic toolchain and the `asan-libfuzzer` config (see `rules_fuzzer.bazelrc`, which enables hermetic compiler-rt and a macOS `run_under` helper binary):
 
 ```bash
 bazel test --config=asan-libfuzzer //grammar:lexer_fuzz_test
 bazel test --config=asan-libfuzzer //interpreter:interpreter_fuzz_test
 bazel test --config=asan-libfuzzer //native/runner:native_fuzz_test
+bazel test --config=asan-libfuzzer //differential:fuzz_test
 bazel run --config=asan-libfuzzer -c opt //native/runner:native_fuzz_test_run
 ```
+
+See `differential/README.md` for long-running differential fuzz (`fuzz_test_run`) and `differential_check`.
 
 Address-sanitizer builds use `--config=asan` (enables hermetic compiler-rt via `@llvm//config:asan`).
 
@@ -107,6 +110,7 @@ For optimized builds, add `-c opt`. See `native/runner/PERF_REGRESSIONS.md` for 
 |-----------|---------|
 | `grammar/` | Lexer, parser, and AST construction |
 | `compiler/` | Bytecode generation and static analysis |
+| `differential/` | Interpreter vs native comparison and differential fuzzing |
 | `interpreter/` | Bytecode virtual machine |
 | `native/` | LLVM IR generation, JIT engine, and native execution runtime |
 | `runtime/` | Starlark types, builtins, and object model |
