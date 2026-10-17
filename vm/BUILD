@@ -83,6 +83,18 @@ cc_library(
 )
 
 cc_library(
+    name = "builtin_star_trampoline",
+    srcs = ["builtin_star_trampoline.cpp"],
+    hdrs = ["builtin_star_trampoline.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//errors:runtime_error_messages",
+        "//runtime:starlark_object",
+        "//vm:module_loader",
+    ],
+)
+
+cc_library(
     name = "built_in_functions",
     srcs = ["built_in_functions.cpp"],
     hdrs = ["built_in_functions.hpp"],

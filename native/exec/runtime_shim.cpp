@@ -11,8 +11,11 @@
 #include "native/exec/frame_setup_cache.hpp"
 #include "native/exec/native_exec_context.hpp"
 #include "native/exec/module_runtime_state.hpp"
+#include "native/runner/runner_state.hpp"
+#include "runtime/builtin_pos.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_object.hpp"
+#include "vm/builtin_star_trampoline.hpp"
 #include "vm/frame.hpp"
 #include "vm/frame_factory.hpp"
 #include "vm/module_loader.hpp"
@@ -30,9 +33,78 @@ namespace native {
 namespace {
 
 using ::starlark::bytecode::BlockType;
+using ::starlark::runtime::builtin_entrypoints;
+using ::starlark::runtime::builtin_pos::max_pos1;
+using ::starlark::runtime::builtin_pos::max_pos2;
+using ::starlark::runtime::builtin_pos::max_pos3;
+using ::starlark::runtime::builtin_pos::min_pos1;
+using ::starlark::runtime::builtin_pos::min_pos2;
+using ::starlark::runtime::builtin_pos::min_pos3;
+using ::starlark::runtime::builtin_pos::sorted_pos1;
+using ::starlark::runtime::create_function;
+using ::starlark::runtime::starlark_built_in_functions;
+using ::starlark::vm::call_builtin_star_function;
 using ::starlark::vm::copy_frame_symbols_to_arena;
 using ::starlark::vm::create_frame_on_arena;
 using ::starlark::vm::frame_metadata;
+
+starlark_obj* native_max_via_builtin_star(starlark_obj* this_obj,
+    const starlark_obj::pos_args_t& pos_args,
+    const starlark_obj::named_args_t& named_args,
+    context& ctx,
+    error_fn& error_callback) {
+  auto* state = static_cast<native_runner_state*>(ctx.runner_context());
+  if (state == nullptr || state->loader == nullptr) {
+    error_callback.add_error("builtin module trampoline requires an active native runner");
+    return nullptr;
+  }
+  return call_builtin_star_function(*state->loader, starlark_built_in_functions::max_f, pos_args, named_args, ctx, error_callback);
+}
+
+starlark_obj* native_min_via_builtin_star(starlark_obj* this_obj,
+    const starlark_obj::pos_args_t& pos_args,
+    const starlark_obj::named_args_t& named_args,
+    context& ctx,
+    error_fn& error_callback) {
+  auto* state = static_cast<native_runner_state*>(ctx.runner_context());
+  if (state == nullptr || state->loader == nullptr) {
+    error_callback.add_error("builtin module trampoline requires an active native runner");
+    return nullptr;
+  }
+  return call_builtin_star_function(*state->loader, starlark_built_in_functions::min_f, pos_args, named_args, ctx, error_callback);
+}
+
+starlark_obj* native_sorted_via_builtin_star(starlark_obj* this_obj,
+    const starlark_obj::pos_args_t& pos_args,
+    const starlark_obj::named_args_t& named_args,
+    context& ctx,
+    error_fn& error_callback) {
+  auto* state = static_cast<native_runner_state*>(ctx.runner_context());
+  if (state == nullptr || state->loader == nullptr) {
+    error_callback.add_error("builtin module trampoline requires an active native runner");
+    return nullptr;
+  }
+  return call_builtin_star_function(*state->loader, starlark_built_in_functions::sorted_f, pos_args, named_args, ctx, error_callback);
+}
+
+void install_builtin_star_trampoline_globals(std::map<std::string, starlark_obj*, std::less<>>& global_context, context& ctx) {
+  global_context[starlark_built_in_functions::max_f] = create_function(ctx, nullptr, builtin_entrypoints{
+      .call = native_max_via_builtin_star,
+      .pos1 = max_pos1,
+      .pos2 = max_pos2,
+      .pos3 = max_pos3,
+  }, starlark_built_in_functions::max_f);
+  global_context[starlark_built_in_functions::min_f] = create_function(ctx, nullptr, builtin_entrypoints{
+      .call = native_min_via_builtin_star,
+      .pos1 = min_pos1,
+      .pos2 = min_pos2,
+      .pos3 = min_pos3,
+  }, starlark_built_in_functions::min_f);
+  global_context[starlark_built_in_functions::sorted_f] = create_function(ctx, nullptr, builtin_entrypoints{
+      .call = native_sorted_via_builtin_star,
+      .pos1 = sorted_pos1,
+  }, starlark_built_in_functions::sorted_f);
+}
 
 const frame_metadata* find_init_frame(const module_runtime_state* state, BlockType block_type) {
   if (state == nullptr) {
@@ -47,13 +119,7 @@ std::map<std::string, starlark_obj*, std::less<>> build_predeclared(module_runti
   if (state != nullptr && state->starlark_loader != nullptr) {
     auto builtin = state->starlark_loader->load_module("@@//:builtin.star");
     if (builtin.ok() && (*builtin)->ready()) {
-      auto* builtin_frame = (*builtin)->get().first;
-      for (int i = 0; i < builtin_frame->names->size(); ++i) {
-        const auto& name = builtin_frame->names->Get(i);
-        if (name == "max" || name == "min" || name == "sorted") {
-          global_context[name] = builtin_frame->elements[static_cast<std::size_t>(i)];
-        }
-      }
+      install_builtin_star_trampoline_globals(global_context, ctx);
     }
   }
   if (state != nullptr && state->starlark_loader != nullptr && !state->module_name.empty()) {

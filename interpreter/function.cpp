@@ -13,16 +13,15 @@
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
+#include "vm/builtin_star_trampoline.hpp"
 #include "vm/function_call_binding.hpp"
 
 using ::google::protobuf::Arena;
 using ::starlark::error_messages::error_v2_arguments_exactly;
 using ::starlark::error_messages::error_v2_missing_keyword_only_argument;
 using ::starlark::error_messages::error_v2_missing_positional_argument;
-using ::starlark::error_messages::error_v2_module_does_not_define_symbol;
 using ::starlark::error_messages::error_v2_multiple_values_for_argument;
 using ::starlark::error_messages::error_v2_recursive_call;
-using ::starlark::error_messages::error_v2_unable_to_load_module;
 using ::starlark::error_messages::error_v2_unexpected_keyword_argument;
 using ::starlark::error_messages::error_v2_unexpected_keyword_argument_with_hint;
 using ::starlark::runtime::context;
@@ -32,7 +31,6 @@ using ::starlark::runtime::starlark_dictionary;
 using ::starlark::runtime::starlark_obj;
 using ::starlark::runtime::starlark_string;
 using ::starlark::runtime::starlark_tuple;
-using ::starlark::vm::builtin_star_module;
 using ::starlark::vm::frame;
 using ::starlark::vm::function_call_binding_state;
 using ::starlark::vm::function_metadata_for_block;
@@ -419,20 +417,7 @@ namespace {
 
 starlark_obj* starlark_fn_trampoline(std::string_view fn_name, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   runner_state* state = static_cast<runner_state*>(ctx.runner_context());
-  auto mod_info = state->loader->load_module(builtin_star_module);
-  if (!mod_info.ok() || !(*mod_info)->ready()) {
-    // This should never happen.
-    error_callback.add_error(error_v2_unable_to_load_module(builtin_star_module));
-    return nullptr;
-  }
-  for (std::size_t i = 0; i < (*mod_info)->get().first->elements.size(); ++i) {
-    if ((*mod_info)->get().first->names->Get(i) == fn_name) {
-      return (*mod_info)->get().first->elements[i]->call(pos_args, named_args, ctx, error_callback);
-    }
-  }
-  // This should never happen.
-  error_callback.add_error(error_v2_module_does_not_define_symbol(builtin_star_module, fn_name));
-  return nullptr;
+  return starlark::vm::call_builtin_star_function(*state->loader, fn_name, pos_args, named_args, ctx, error_callback);
 }
 
 }  // namespace

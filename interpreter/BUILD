@@ -27,6 +27,7 @@ cc_library(
         "//runtime:starlark_object",
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
+        "//vm:builtin_star_trampoline",
         "//vm:frame",
         "//vm:function_call_binding",
         "//vm:module_metadata",
