@@ -15,12 +15,12 @@ bazel_dep(name = "rules_fuzzing", version = "0.8.0")
 # Added as the build is too noisy when using @20260526.0 from the dependencies.
 bazel_dep(name = "abseil-cpp", version = "20260817.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")
-bazel_dep(name = "llvm", version = "0.8.24")
+bazel_dep(name = "llvm", version = "0.8.25")
 bazel_dep(name = "platforms", version = "1.1.0")
 
 llvm = use_extension("@llvm//extensions:llvm.bzl", "llvm")
 llvm.version(llvm_version = "23.1.2")
-use_repo(llvm, "llvm-project", "llvm_version")
+use_repo(llvm, "llvm-project")
 
 register_toolchains("@llvm//toolchain:all")
 
