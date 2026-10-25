@@ -129,4 +129,6 @@ Grammar and runtime behavior can be tuned via `grammar_options` and `runtime_opt
 
 ## License
 
+BSD 2-Clause License. See [LICENSE](LICENSE) for the full text.
+
 Copyright 2024–2026 Lucas Mirelmann
