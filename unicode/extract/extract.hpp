@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+#include <filesystem>  // NOLINT(build/c++17)
 #include <map>
 #include <set>
 #include <string>
@@ -34,10 +35,10 @@ struct special_casing_record {
   std::vector<std::string> conditions;
 };
 
-void read_raw_code_points(const char* file,
+void read_raw_code_points(const std::filesystem::path& file,
                           std::set<char32_t>& set);
 
-void read_all_code_points(const char* file,
+void read_all_code_points(const std::filesystem::path& file,
     std::map<std::string,
              std::set<std::pair<char32_t, char32_t>>>& set,
     const std::set<std::string>& properties);
@@ -46,13 +47,13 @@ void read_all_code_points(const char* file,
  * The output parameter `unicode_data` maps the unicode code point using the logic from
  * https://www.unicode.org/L2/L1999/UnicodeData.html
  */
-void read_unicode_data(const char* file, std::map<char32_t, unicode_data_record>& unicode_data);
+void read_unicode_data(const std::filesystem::path& file, std::map<char32_t, unicode_data_record>& unicode_data);
 
-void read_special_casing(const char* file, std::map<char32_t, special_casing_record>& special_casing);
+void read_special_casing(const std::filesystem::path& file, std::map<char32_t, special_casing_record>& special_casing);
 
-void read_word_break(const char* file, std::map<std::pair<char32_t, char32_t>, std::string>& word_break);
+void read_word_break(const std::filesystem::path& file, std::map<std::pair<char32_t, char32_t>, std::string>& word_break);
 
-std::vector<std::vector<std::string>> read_file(const char* file);
+std::vector<std::vector<std::string>> read_file(const std::filesystem::path& file);
 
 }  // namespace ucd
 }  // namespace starlark
