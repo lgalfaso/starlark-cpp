@@ -4,8 +4,7 @@
 #include <gtest/gtest-matchers.h>
 #include <gmock/gmock.h>
 
-#include <cstdio>
-
+#include <filesystem>  // NOLINT(build/c++17)
 #include <string>
 #include <utility>
 #include <vector>
@@ -22,7 +21,7 @@ namespace {
 
 std::vector<std::tuple<std::vector<char32_t>, std::vector<std::uint64_t>, std::string>>
 read_unicode_word_break_tests(const char* file) {
-  auto content = starlark::ucd::read_file(file);
+  auto content = starlark::ucd::read_file(std::filesystem::path(file));
   std::vector<std::tuple<std::vector<char32_t>, std::vector<std::uint64_t>, std::string>> result;
   for (const auto& entry : content) {
     std::uint64_t pos = 0;

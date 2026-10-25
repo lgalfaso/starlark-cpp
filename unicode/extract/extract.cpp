@@ -2,10 +2,10 @@
 
 #include "unicode/extract/extract.hpp"
 
-#include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
+#include <filesystem>  // NOLINT(build/c++17)
+#include <fstream>
 #include <map>
 #include <set>
 #include <string>
@@ -16,39 +16,33 @@
 namespace starlark {
 namespace ucd {
 
-std::vector<std::vector<std::string>> read_file(const char* file) {
-  FILE* fp = fopen(file, "r");
-  if (fp == nullptr) {
+std::vector<std::vector<std::string>> read_file(const std::filesystem::path& file) {
+  std::ifstream in(file);
+  if (!in) {
     std::exit(1);
   }
-  char* line = nullptr;
-  size_t len = 0;
   std::vector<std::vector<std::string>> result;
-  while ((getline(&line, &len, fp)) != -1) {
+  std::string line;
+  while (std::getline(in, line)) {
     std::vector<std::string> entry;
     std::string element;
     bool found = false;
-    for (int i = 0; i < len; ++i) {
-      if (line[i] == '#' || line[i] == '\n') {
+    for (const char ch : line) {
+      if (ch == '#') {
         break;
       }
       found = true;
-      if (line[i] == ';') {
+      if (ch == ';') {
         entry.emplace_back(element);
         element.clear();
       } else {
-        element += line[i];
+        element += ch;
       }
     }
     if (found) {
       entry.emplace_back(element);
       result.emplace_back(entry);
     }
-  }
-
-  fclose(fp);
-  if (line) {
-    free(line);
   }
   return result;
 }
@@ -100,7 +94,7 @@ int parse_decimal_value(const std::string& input) {
 
 }  // namespace
 
-void read_raw_code_points(const char* file, std::set<char32_t>& set) {
+void read_raw_code_points(const std::filesystem::path& file, std::set<char32_t>& set) {
   auto content = read_file(file);
   for (const auto& entry : content) {
     if (entry.size() != 1) {
@@ -110,7 +104,7 @@ void read_raw_code_points(const char* file, std::set<char32_t>& set) {
   }
 }
 
-void read_all_code_points(const char* file,
+void read_all_code_points(const std::filesystem::path& file,
     std::map<std::string, std::set<std::pair<char32_t, char32_t>>>& set,
     const std::set<std::string>& properties) {
   auto content = read_file(file);
@@ -131,7 +125,7 @@ void read_all_code_points(const char* file,
   }
 }
 
-void read_unicode_data(const char* file, std::map<char32_t, unicode_data_record>& unicode_data) {
+void read_unicode_data(const std::filesystem::path& file, std::map<char32_t, unicode_data_record>& unicode_data) {
   auto content = read_file(file);
   char32_t previous_code_point = 0;
   for (auto& entry : content) {
@@ -204,7 +198,7 @@ void read_unicode_data(const char* file, std::map<char32_t, unicode_data_record>
   }
 }
 
-void read_special_casing(const char* file, std::map<char32_t, special_casing_record>& special_casing) {
+void read_special_casing(const std::filesystem::path& file, std::map<char32_t, special_casing_record>& special_casing) {
   auto content = read_file(file);
   for (auto& entry : content) {
     if (entry.size() < 5) {
@@ -252,7 +246,7 @@ void read_special_casing(const char* file, std::map<char32_t, special_casing_rec
   }
 }
 
-void read_word_break(const char* file, std::map<std::pair<char32_t, char32_t>, std::string>& word_break) {
+void read_word_break(const std::filesystem::path& file, std::map<std::pair<char32_t, char32_t>, std::string>& word_break) {
   auto content = read_file(file);
   for (const auto& entry : content) {
     if (entry.size() < 2) {

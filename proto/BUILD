@@ -47,7 +47,6 @@ cc_library(
     testonly = True,
     hdrs = ["base_proto_encoder.hpp"],
     deps = [
-        "//third-party:defer",
         "@protobuf",
     ],
 )

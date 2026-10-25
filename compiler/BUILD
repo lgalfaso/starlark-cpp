@@ -29,7 +29,6 @@ cc_library(
         ":compiler",
         "//io:read_file",
         "//proto:starlark_bytecode_cc_proto",
-        "//third-party:defer",
         "@googletest//:gtest",
         "@protobuf",
         "@protobuf-matchers//protobuf-matchers",

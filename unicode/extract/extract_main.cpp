@@ -1,13 +1,18 @@
 // Copyright 2024-2026 Lucas Mirelmann
 
-#include <cstdio>
+#include <cstdint>
 #include <cstdlib>
-#include <cstring>
 
 #include <algorithm>
+#include <cctype>
+#include <filesystem>  // NOLINT(build/c++17)
+#include <format>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -15,12 +20,12 @@
 
 namespace {
 
-const char* HPP_HEADER = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
+constexpr char HPP_HEADER[] = R"CPP(// Copyright 2024-2025 Lucas Mirelmann
 
 // Generated file, do not edit.
 
-#ifndef %s
-#define %s
+#ifndef @@@HEADER_GUARD@@@
+#define @@@HEADER_GUARD@@@
 
 #include <cstdint>
 
@@ -91,28 +96,28 @@ word_break_type word_break(char32_t code_point);
 
 )CPP";
 
-const char* HPP_FOOTER = R"CPP(}  // namespace ucd
+constexpr char HPP_FOOTER[] = R"CPP(}  // namespace ucd
 }  // namespace starlark
 
-#endif  // %s
+#endif  // @@@HEADER_GUARD@@@
 
 )CPP";
 
-const char* CPP_HEADER = R"CPP(// Copyright 2024-2026 Lucas Mirelmann
+constexpr char CPP_HEADER[] = R"CPP(// Copyright 2024-2026 Lucas Mirelmann
 
 // Generated file, do not edit.
 
 #include <bitset>
 #include <map>
 
-#include "%s"
+#include "@@@INCLUDE_H@@@"
 
 namespace starlark {
 namespace ucd {
 
 )CPP";
 
-const char* CPP_FOOTER = R"CPP(}  // namespace ucd
+constexpr char CPP_FOOTER[] = R"CPP(}  // namespace ucd
 }  // namespace starlark
 
 )CPP";
@@ -132,33 +137,47 @@ std::set<std::string> numeric_properties = {
   "Numeric", "Digit", "Decimal",
 };
 
-#define FWRITE(STR, OUTPUT) fwrite(STR, sizeof(char), std::strlen(STR), OUTPUT)
+template<typename T>
+void ostream_write(std::ostream& output, const T& value) {
+  output << value;
+}
 
-void print_in_multiple_lines(const char* characters, int& count, int to_print, FILE* output) {
+uint32_t format_code_point(char32_t code_point) {
+  return static_cast<uint32_t>(code_point);
+}
+
+std::string replace_all(std::string_view text, std::string_view placeholder, std::string_view value) {
+  std::string result(text);
+  std::size_t pos = 0;
+  while ((pos = result.find(placeholder, pos)) != std::string::npos) {
+    result.replace(pos, placeholder.size(), value);
+    pos += value.size();
+  }
+  return result;
+}
+
+
+void print_in_multiple_lines(const char* characters, int& count, int to_print, std::ostream& output) {
   while (to_print != 0) {
     if (count % CODEPOINTS_PER_LINE == 0) {
       if (count != 0) {
-        FWRITE("\"\n", output);
+        ostream_write(output, "\"\n");
       }
-      FWRITE("    \"", output);
+      ostream_write(output, "    \"");
     }
     int will_print = std::min<int>(CODEPOINTS_PER_LINE - (count % CODEPOINTS_PER_LINE), to_print);
-    fwrite(characters, sizeof(char), will_print, output);
+    output.write(characters, will_print);
     count += will_print;
     to_print -= will_print;
   }
 }
 
 void print_code_points(
-      FILE* output,
+      std::ostream& output,
       const std::set<std::pair<char32_t, char32_t>>& set,
                       const std::string& fn) {
   if (set.size() == 0) {
-    fprintf(output,
-            "bool %s(char32_t code_point) {\n"
-            "  return false;\n"
-            "}\n\n",
-            fn.c_str());
+    ostream_write(output, std::format("bool {}(char32_t code_point) {{\n  return false;\n}}\n\n", fn));
     return;
   }
 
@@ -192,7 +211,7 @@ void print_code_points(
       if (mini_block.size() == 1) {
         continue;
       }
-      fprintf(output, "constexpr const char* %s_bitset_%lu =\n", fn.c_str(), pos);
+      ostream_write(output, std::format("constexpr const char* {}_bitset_{} =\n", fn, pos));
       int count = 0;
       char32_t previous_min = mini_block.back().second + 1;
       for (auto it = mini_block.rbegin(); it < mini_block.rend(); ++it) {
@@ -201,12 +220,12 @@ void print_code_points(
         print_in_multiple_lines(ones_string.c_str(), count, max_cp - min_cp + 1, output);
         previous_min = min_cp;
       }
-      FWRITE("\";\n\n", output);
+      ostream_write(output, "\";\n\n");
     }
   }
   {
     // Print the functions that check for the code points.
-    fprintf(output, "bool %s(char32_t code_point) {\n", fn.c_str());
+    ostream_write(output, std::format("bool {}(char32_t code_point) {{\n", fn));
     bool add_blank_line = false;
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
@@ -214,37 +233,37 @@ void print_code_points(
         continue;
       }
       add_blank_line = true;
-      fprintf(output,
-              "  static constexpr std::bitset<0x%X> all_cp_%lu(%s_bitset_%lu);\n",
-              mini_block.back().second + 1 - mini_block.front().first,
-              pos, fn.c_str(), pos);
+      ostream_write(output, std::format(
+          "  static constexpr std::bitset<0x{:X}> all_cp_{}({}_bitset_{});\n",
+          static_cast<uint32_t>(mini_block.back().second + 1 - mini_block.front().first),
+          pos, fn, pos));
     }
     if (add_blank_line) {
-      FWRITE("\n", output);
+      ostream_write(output, "\n");
     }
     for (std::size_t pos = 0; pos < blocks.size(); ++pos) {
       const auto& mini_block = blocks[pos];
       if (pos == 0) {
-        FWRITE("  return ", output);
+        ostream_write(output, "  return ");
       } else {
-        FWRITE(" ||\n         ", output);
+        ostream_write(output, " ||\n         ");
       }
       auto min_cp = mini_block.front().first;
       auto max_cp = mini_block.back().second;
       if (min_cp == max_cp) {
-        fprintf(output, "(code_point == 0x%X)", min_cp);
+        ostream_write(output, std::format("(code_point == 0x{:X})", static_cast<uint32_t>(min_cp)));
       } else if (mini_block.size() != 1) {
-        fprintf(output, "(0x%X <= code_point && code_point <= 0x%X && all_cp_%lu[code_point - 0x%X])", min_cp, max_cp, pos, min_cp);
+        ostream_write(output, std::format("(0x{:X} <= code_point && code_point <= 0x{:X} && all_cp_{}[code_point - 0x{:X}])", static_cast<uint32_t>(min_cp), static_cast<uint32_t>(max_cp), pos, static_cast<uint32_t>(min_cp)));
       } else {
-        fprintf(output, "(0x%X <= code_point && code_point <= 0x%X)", min_cp, max_cp);
+        ostream_write(output, std::format("(0x{:X} <= code_point && code_point <= 0x{:X})", static_cast<uint32_t>(min_cp), static_cast<uint32_t>(max_cp)));
       }
     }
-    FWRITE(";\n}\n\n", output);
+    ostream_write(output, ";\n}\n\n");
   }
 }
 
-void print_decomposition(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  FWRITE("std::span<const char32_t> decomposition(char32_t code_point) {\n", output);
+void print_decomposition(std::ostream& output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  ostream_write(output, "std::span<const char32_t> decomposition(char32_t code_point) {\n");
   std::map<char32_t, char32_t> entries;
   std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
@@ -256,91 +275,91 @@ void print_decomposition(FILE* output, const std::map<char32_t, starlark::ucd::u
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_dc_index = {", entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<char32_t, char32_t, {}> all_dc_index = {{", entries.size()));
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {0x%05X, 0x%05X}, ", entry.first, entry.second);
+    ostream_write(output, std::format(" {{0x{:05X}, 0x{:05X}}}, ", format_code_point(entry.first), format_code_point(entry.second)));
     ++pos;
   }
-  FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_dc{", elements.size());
+  ostream_write(output, "\n  };\n");
+  ostream_write(output, std::format("  static constexpr std::array<char32_t, {}> all_dc{{", elements.size()));
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " 0x%05X,", element);
+    ostream_write(output, std::format(" 0x{:05X},", format_code_point(element)));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto dc_candidate = all_dc_index.find(code_point); dc_candidate != all_dc_index.end()) {\n", output);
-  FWRITE("    std::size_t begin = 0;\n", output);
-  FWRITE("    auto end = dc_candidate->second;\n", output);
-  FWRITE("    if (dc_candidate != all_dc_index.begin()) {\n", output);
-  FWRITE("      begin = (--dc_candidate)->second;\n", output);
-  FWRITE("    }\n", output);
-  FWRITE("    return std::span<const char32_t>(all_dc).subspan(begin, end - begin);\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return std::span<const char32_t>{};\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, "  if (auto dc_candidate = all_dc_index.find(code_point); dc_candidate != all_dc_index.end()) {\n");
+  ostream_write(output, "    std::size_t begin = 0;\n");
+  ostream_write(output, "    auto end = dc_candidate->second;\n");
+  ostream_write(output, "    if (dc_candidate != all_dc_index.begin()) {\n");
+  ostream_write(output, "      begin = (--dc_candidate)->second;\n");
+  ostream_write(output, "    }\n");
+  ostream_write(output, "    return std::span<const char32_t>(all_dc).subspan(begin, end - begin);\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return std::span<const char32_t>{};\n");
+  ostream_write(output, "}\n\n");
 }
 
-void print_decimal_value(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  FWRITE("int32_t decimal_value(char32_t code_point) {\n", output);
+void print_decimal_value(std::ostream& output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  ostream_write(output, "int32_t decimal_value(char32_t code_point) {\n");
   std::map<char32_t, int> entries;
   for (const auto& entry : unicode_data) {
     if (entry.second.decimal_value != -1) {
       entries[entry.first] = entry.second.decimal_value;
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<char32_t, int32_t, %zu> all_decimal_values = {", entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<char32_t, int32_t, {}> all_decimal_values = {{", entries.size()));
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {0x%05X, %d},", entry.first, entry.second);
+    ostream_write(output, std::format(" {{0x{:05X}, {}}},", format_code_point(entry.first), entry.second));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto decimal_value_candidate = all_decimal_values.find(code_point); decimal_value_candidate != all_decimal_values.end()) {\n", output);
-  FWRITE("    return decimal_value_candidate->second;\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return -1;\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, "  if (auto decimal_value_candidate = all_decimal_values.find(code_point); decimal_value_candidate != all_decimal_values.end()) {\n");
+  ostream_write(output, "    return decimal_value_candidate->second;\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return -1;\n");
+  ostream_write(output, "}\n\n");
 }
 
-void print_ccc(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
-  FWRITE("int ccc(char32_t code_point) {\n", output);
+void print_ccc(std::ostream& output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data) {
+  ostream_write(output, "int ccc(char32_t code_point) {\n");
   std::map<char32_t, int> entries;
   for (const auto& entry : unicode_data) {
     if (entry.second.canonical_combining_class != 0) {
       entries[entry.first] = entry.second.canonical_combining_class;
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<char32_t, int, %zu> all_ccc = {", entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<char32_t, int, {}> all_ccc = {{", entries.size()));
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {0x%05X, %3d},", entry.first, entry.second);
+    ostream_write(output, std::format(" {{0x{:05X}, {:3d}}},", format_code_point(entry.first), entry.second));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto ccc_candidate = all_ccc.find(code_point); ccc_candidate != all_ccc.end()) {\n", output);
-  FWRITE("    return ccc_candidate->second;\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return 0;\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, "  if (auto ccc_candidate = all_ccc.find(code_point); ccc_candidate != all_ccc.end()) {\n");
+  ostream_write(output, "    return ccc_candidate->second;\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return 0;\n");
+  ostream_write(output, "}\n\n");
 }
 
-void print_canonical_composition(FILE* output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
+void print_canonical_composition(std::ostream& output, const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
                const std::set<char32_t>& comp_exclusions) {
-  FWRITE("std::optional<char32_t> canonical_composition(char32_t lhs, char32_t rhs) {\n", output);
+  ostream_write(output, "std::optional<char32_t> canonical_composition(char32_t lhs, char32_t rhs) {\n");
   std::map<std::pair<char32_t, char32_t>, char32_t> entries;
   for (const auto& entry : unicode_data) {
     if (entry.second.canonical_combining_class == 0 && entry.second.canonical_character_decomposition_mapping && !comp_exclusions.contains(entry.first)) {
@@ -358,27 +377,28 @@ void print_canonical_composition(FILE* output, const std::map<char32_t, starlark
       entries[std::make_pair(cc[0], cc[1])] = entry.first;
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<std::pair<char32_t, char32_t>, char32_t, %zu> all_cc = {", entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<std::pair<char32_t, char32_t>, char32_t, {}> all_cc = {{", entries.size()));
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {{0x%05X, 0x%05X}, 0x%05X},", entry.first.first, entry.first.second, entry.second);
+    ostream_write(output, std::format(" {{{{0x{:05X}, 0x{:05X}}}, 0x{:05X}}},",
+        format_code_point(entry.first.first), format_code_point(entry.first.second), format_code_point(entry.second)));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto cc_candidate = all_cc.find(std::make_pair(lhs, rhs)); cc_candidate != all_cc.end()) {\n", output);
-  FWRITE("    return cc_candidate->second;\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return {};\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, "  if (auto cc_candidate = all_cc.find(std::make_pair(lhs, rhs)); cc_candidate != all_cc.end()) {\n");
+  ostream_write(output, "    return cc_candidate->second;\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return {};\n");
+  ostream_write(output, "}\n\n");
 }
 
-void print_to_upper(FILE* output,
+void print_to_upper(std::ostream& output,
                     const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::optional<std::span<const char32_t>> to_upper(char32_t code_point) {\n", output);
+  ostream_write(output, "std::optional<std::span<const char32_t>> to_upper(char32_t code_point) {\n");
   std::map<char32_t, char32_t> entries;
   std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
@@ -409,42 +429,42 @@ void print_to_upper(FILE* output,
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_upper_index = {", entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<char32_t, char32_t, {}> all_upper_index = {{", entries.size()));
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
+    ostream_write(output, std::format(" {{0x{:05X}, 0x{:05X}}},", format_code_point(entry.first), format_code_point(entry.second)));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_upper{", elements.size());
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, std::format("  static constexpr std::array<char32_t, {}> all_upper{{", elements.size()));
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " 0x%05X,", element);
+    ostream_write(output, std::format(" 0x{:05X},", format_code_point(element)));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto upper_candidate = all_upper_index.find(code_point); upper_candidate != all_upper_index.end()) {\n", output);
-  FWRITE("    std::size_t begin = 0;\n", output);
-  FWRITE("    auto end = upper_candidate->second;\n", output);
-  FWRITE("    if (upper_candidate != all_upper_index.begin()) {\n", output);
-  FWRITE("      begin = (--upper_candidate)->second;\n", output);
-  FWRITE("    }\n", output);
-  FWRITE("    return std::span<const char32_t>(all_upper).subspan(begin, end - begin);\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return {};\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, "  if (auto upper_candidate = all_upper_index.find(code_point); upper_candidate != all_upper_index.end()) {\n");
+  ostream_write(output, "    std::size_t begin = 0;\n");
+  ostream_write(output, "    auto end = upper_candidate->second;\n");
+  ostream_write(output, "    if (upper_candidate != all_upper_index.begin()) {\n");
+  ostream_write(output, "      begin = (--upper_candidate)->second;\n");
+  ostream_write(output, "    }\n");
+  ostream_write(output, "    return std::span<const char32_t>(all_upper).subspan(begin, end - begin);\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return {};\n");
+  ostream_write(output, "}\n\n");
 }
 
-void print_to_title(FILE* output,
+void print_to_title(std::ostream& output,
                     const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::optional<std::span<const char32_t>> to_title(char32_t code_point) {\n", output);
+  ostream_write(output, "std::optional<std::span<const char32_t>> to_title(char32_t code_point) {\n");
   std::map<char32_t, char32_t> entries;
   std::vector<char32_t> elements;
   for (const auto& entry : unicode_data) {
@@ -475,42 +495,42 @@ void print_to_title(FILE* output,
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_title_index = {", entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<char32_t, char32_t, {}> all_title_index = {{", entries.size()));
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
+    ostream_write(output, std::format(" {{0x{:05X}, 0x{:05X}}},", format_code_point(entry.first), format_code_point(entry.second)));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_title{", elements.size());
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, std::format("  static constexpr std::array<char32_t, {}> all_title{{", elements.size()));
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " 0x%05X,", element);
+    ostream_write(output, std::format(" 0x{:05X},", format_code_point(element)));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  FWRITE("  if (auto title_candidate = all_title_index.find(code_point); title_candidate != all_title_index.end()) {\n", output);
-  FWRITE("    std::size_t begin = 0;\n", output);
-  FWRITE("    auto end = title_candidate->second;\n", output);
-  FWRITE("    if (title_candidate != all_title_index.begin()) {\n", output);
-  FWRITE("      begin = (--title_candidate)->second;\n", output);
-  FWRITE("    }\n", output);
-  FWRITE("    return std::span<const char32_t>(all_title).subspan(begin, end - begin);\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return {};\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, "  if (auto title_candidate = all_title_index.find(code_point); title_candidate != all_title_index.end()) {\n");
+  ostream_write(output, "    std::size_t begin = 0;\n");
+  ostream_write(output, "    auto end = title_candidate->second;\n");
+  ostream_write(output, "    if (title_candidate != all_title_index.begin()) {\n");
+  ostream_write(output, "      begin = (--title_candidate)->second;\n");
+  ostream_write(output, "    }\n");
+  ostream_write(output, "    return std::span<const char32_t>(all_title).subspan(begin, end - begin);\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return {};\n");
+  ostream_write(output, "}\n\n");
 }
 
-void print_to_lower(FILE* output,
+void print_to_lower(std::ostream& output,
                     const std::map<char32_t, starlark::ucd::unicode_data_record>& unicode_data,
                     const std::map<char32_t, starlark::ucd::special_casing_record>& special_casing) {
-  FWRITE("std::optional<std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>> to_lower(char32_t code_point) {\n", output);
+  ostream_write(output, "std::optional<std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>> to_lower(char32_t code_point) {\n");
   std::map<char32_t, char32_t> entries;
   std::vector<char32_t> elements;
   std::map<char32_t, char32_t> conditional_entries;
@@ -556,95 +576,96 @@ void print_to_lower(FILE* output,
       entries[entry.first] = elements.size();
     }
   }
-  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> all_lower_index = {", entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<char32_t, char32_t, {}> all_lower_index = {{", entries.size()));
   int pos = 0;
   for (const auto& entry : entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
+    ostream_write(output, std::format(" {{0x{:05X}, 0x{:05X}}},", format_code_point(entry.first), format_code_point(entry.second)));
     ++pos;
   }
-  FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<char32_t, %zu> all_lower{", elements.size());
+  ostream_write(output, "\n  };\n");
+  ostream_write(output, std::format("  static constexpr std::array<char32_t, {}> all_lower{{", elements.size()));
   pos = 0;
   for (const auto& element : elements) {
     if (pos % 12 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " 0x%05X,", element);
+    ostream_write(output, std::format(" 0x{:05X},", format_code_point(element)));
     ++pos;
   }
-  FWRITE("\n  };\n", output);
+  ostream_write(output, "\n  };\n");
 
-  fprintf(output, "  static constexpr cnt::flat_map<char32_t, char32_t, %zu> conditional_all_lower_index = {", conditional_entries.size());
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<char32_t, char32_t, {}> conditional_all_lower_index = {{", conditional_entries.size()));
   pos = 0;
   for (const auto& entry : conditional_entries) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {0x%05X, 0x%05X},", entry.first, entry.second);
+    ostream_write(output, std::format(" {{0x{:05X}, 0x{:05X}}},", format_code_point(entry.first), format_code_point(entry.second)));
     ++pos;
   }
-  FWRITE("\n  };\n", output);
-  fprintf(output, "  static constexpr std::array<char32_t, %zu> conditional_all_lower{", conditional_elements.size());
+  ostream_write(output, "\n  };\n");
+  ostream_write(output, std::format("  static constexpr std::array<char32_t, {}> conditional_all_lower{{", conditional_elements.size()));
   pos = 0;
   for (const auto& element : conditional_elements) {
     if (pos % 12 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " 0x%05X,", element);
+    ostream_write(output, std::format(" 0x{:05X},", format_code_point(element)));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
+  ostream_write(output, "\n  };\n\n");
 
-  FWRITE("  if (auto lower_candidate = all_lower_index.find(code_point); lower_candidate != all_lower_index.end()) {\n", output);
-  FWRITE("    std::size_t begin = 0;\n", output);
-  FWRITE("    auto end = lower_candidate->second;\n", output);
-  FWRITE("    if (lower_candidate != all_lower_index.begin()) {\n", output);
-  FWRITE("      begin = (--lower_candidate)->second;\n", output);
-  FWRITE("    }\n", output);
-  FWRITE("    auto entries = std::span<const char32_t>(all_lower).subspan(begin, end - begin);\n", output);
-  FWRITE("    if (auto conditional_lower_candidate = conditional_all_lower_index.find(code_point); conditional_lower_candidate != conditional_all_lower_index.end()) {\n", output);
+  ostream_write(output, "  if (auto lower_candidate = all_lower_index.find(code_point); lower_candidate != all_lower_index.end()) {\n");
+  ostream_write(output, "    std::size_t begin = 0;\n");
+  ostream_write(output, "    auto end = lower_candidate->second;\n");
+  ostream_write(output, "    if (lower_candidate != all_lower_index.begin()) {\n");
+  ostream_write(output, "      begin = (--lower_candidate)->second;\n");
+  ostream_write(output, "    }\n");
+  ostream_write(output, "    auto entries = std::span<const char32_t>(all_lower).subspan(begin, end - begin);\n");
+  ostream_write(output, "    if (auto conditional_lower_candidate = conditional_all_lower_index.find(code_point); conditional_lower_candidate != conditional_all_lower_index.end()) {\n");
 
-  FWRITE("      std::size_t conditional_begin = 0;\n", output);
-  FWRITE("      auto conditional_end = conditional_lower_candidate->second;\n", output);
-  FWRITE("      if (conditional_lower_candidate != conditional_all_lower_index.begin()) {\n", output);
-  FWRITE("        conditional_begin = (--conditional_lower_candidate)->second;\n", output);
-  FWRITE("      }\n", output);
-  FWRITE("      auto conditional_entries = std::span<const char32_t>(conditional_all_lower).subspan(conditional_begin, conditional_end - conditional_begin);\n", output);
-  FWRITE("      return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, conditional_entries);\n", output);
+  ostream_write(output, "      std::size_t conditional_begin = 0;\n");
+  ostream_write(output, "      auto conditional_end = conditional_lower_candidate->second;\n");
+  ostream_write(output, "      if (conditional_lower_candidate != conditional_all_lower_index.begin()) {\n");
+  ostream_write(output, "        conditional_begin = (--conditional_lower_candidate)->second;\n");
+  ostream_write(output, "      }\n");
+  ostream_write(output, "      auto conditional_entries = std::span<const char32_t>(conditional_all_lower).subspan(conditional_begin, conditional_end - conditional_begin);\n");
+  ostream_write(output, "      return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, conditional_entries);\n");
 
-  FWRITE("    }\n", output);
-  FWRITE("    return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, {});\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return {};\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "    }\n");
+  ostream_write(output, "    return std::pair<std::span<const char32_t>, std::optional<std::span<const char32_t>>>(entries, {});\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return {};\n");
+  ostream_write(output, "}\n\n");
 }
 
-void print_word_break(FILE* output,
+void print_word_break(std::ostream& output,
                       const std::map<std::pair<char32_t, char32_t>, std::string>& word_break) {
-  FWRITE("word_break_type word_break(char32_t code_point) {\n", output);
-  fprintf(output, "  static constexpr cnt::flat_map<std::pair<char32_t, char32_t>, word_break_type, %zu> all_word_break = {", word_break.size());
+  ostream_write(output, "word_break_type word_break(char32_t code_point) {\n");
+  ostream_write(output, std::format("  static constexpr cnt::flat_map<std::pair<char32_t, char32_t>, word_break_type, {}> all_word_break = {{", word_break.size()));
   int pos = 0;
   for (const auto& entry : word_break) {
     if (pos % 6 == 0) {
-      FWRITE("\n   ", output);
+      ostream_write(output, "\n   ");
     }
-    fprintf(output, " {{0x%05X, 0x%05X}, word_break_type::k%s},", entry.first.first, entry.first.second, entry.second.c_str());
+    ostream_write(output, std::format(" {{{{0x{:05X}, 0x{:05X}}}, word_break_type::k{}}},",
+        format_code_point(entry.first.first), format_code_point(entry.first.second), entry.second));
     ++pos;
   }
-  FWRITE("\n  };\n\n", output);
-  FWRITE("  auto up_bound = all_word_break.upper_bound(std::pair<char32_t, char32_t>(code_point, 0x110000));\n", output);
-  FWRITE("  if (up_bound == all_word_break.begin()) {\n", output);
-  FWRITE("    return word_break_type::kOther;\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  --up_bound;\n", output);
-  FWRITE("  if (up_bound->first.first <= code_point && code_point <= up_bound->first.second) {\n", output);
-  FWRITE("    return up_bound->second;\n", output);
-  FWRITE("  }\n", output);
-  FWRITE("  return word_break_type::kOther;\n", output);
-  FWRITE("}\n\n", output);
+  ostream_write(output, "\n  };\n\n");
+  ostream_write(output, "  auto up_bound = all_word_break.upper_bound(std::pair<char32_t, char32_t>(code_point, 0x110000));\n");
+  ostream_write(output, "  if (up_bound == all_word_break.begin()) {\n");
+  ostream_write(output, "    return word_break_type::kOther;\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  --up_bound;\n");
+  ostream_write(output, "  if (up_bound->first.first <= code_point && code_point <= up_bound->first.second) {\n");
+  ostream_write(output, "    return up_bound->second;\n");
+  ostream_write(output, "  }\n");
+  ostream_write(output, "  return word_break_type::kOther;\n");
+  ostream_write(output, "}\n\n");
 }
 
 std::set<std::pair<char32_t, char32_t>> create_ranges(const std::set<char32_t>& input) {
@@ -754,7 +775,7 @@ std::set<std::pair<char32_t, char32_t>> space_set(
   return create_ranges(keys);
 }
 
-void write_header(const char* output_file,
+void write_header(const std::filesystem::path& output_file,
                   const char* include_h) {
   std::string header_guard{include_h};
   for (auto& c : header_guard) {
@@ -765,35 +786,38 @@ void write_header(const char* output_file,
   }
   header_guard += '_';
 
-  FILE* h_output = fopen(output_file, "w");
-  fprintf(h_output, HPP_HEADER, header_guard.c_str(), header_guard.c_str());
+  std::ofstream h_output(output_file);
+  if (!h_output) {
+    std::exit(1);
+  }
+  ostream_write(h_output, replace_all(HPP_HEADER, "@@@HEADER_GUARD@@@", header_guard));
 
   for (const auto& normalization_property : normalization_properties) {
-    fprintf(h_output, "bool is_%s_nm(char32_t);\n\n",
-            normalization_property.c_str());
+    ostream_write(h_output, std::format("bool is_{}_nm(char32_t);\n\n", normalization_property));
   }
   for (const auto& binary_property : binary_unicode_properties) {
-    fprintf(h_output, "bool is_%s(char32_t);\n\n",
-            binary_property.c_str());
+    ostream_write(h_output, std::format("bool is_{}(char32_t);\n\n", binary_property));
   }
 
-  fprintf(h_output, HPP_FOOTER, header_guard.c_str());
-  fclose(h_output);
+  ostream_write(h_output, replace_all(HPP_FOOTER, "@@@HEADER_GUARD@@@", header_guard));
 }
 
-void write_impl(const char* derived_core_properties_file,
-                const char* unicode_data_file,
-                const char* composition_exclusions,
-                const char* derived_normalization_props,
-                const char* prop_list,
-                const char* derived_numeric_type,
-                const char* special_casing_file,
-                const char* word_break_file,
-                const char* emoji_data,
-                const char* output_file,
-                const char* include_h) {
-  FILE* cc_output = fopen(output_file, "w");
-  fprintf(cc_output, CPP_HEADER, include_h);
+void write_impl(const std::filesystem::path& derived_core_properties_file,
+                const std::filesystem::path& unicode_data_file,
+                const std::filesystem::path& composition_exclusions,
+                const std::filesystem::path& derived_normalization_props,
+                const std::filesystem::path& prop_list,
+                const std::filesystem::path& derived_numeric_type,
+                const std::filesystem::path& special_casing_file,
+                const std::filesystem::path& word_break_file,
+                const std::filesystem::path& emoji_data,
+                const std::filesystem::path& output_file,
+                const std::filesystem::path& include_h) {
+  std::ofstream cc_output(output_file);
+  if (!cc_output) {
+    std::exit(1);
+  }
+  ostream_write(cc_output, replace_all(CPP_HEADER, "@@@INCLUDE_H@@@", include_h.string()));
 
   {
     std::map<char32_t, starlark::ucd::unicode_data_record> unicode_data;
@@ -863,28 +887,27 @@ void write_impl(const char* derived_core_properties_file,
     print_code_points(cc_output, numeric_set(extracted_numeric_properties), "is_numeric");
   }
 
-  FWRITE(CPP_FOOTER, cc_output);
-  fclose(cc_output);
+  ostream_write(cc_output, CPP_FOOTER);
 }
 
 }  // namespace
 
 int main(int argc, char *argv[]) {
   if (argc == 13) {
-    const char* derived_core_properties_file = argv[1];
-    const char* unicode_data_file = argv[2];
-    const char* composition_exclusions = argv[3];
-    const char* derived_normalization_props = argv[4];
-    const char* prop_list = argv[5];
-    const char* derived_numeric_type = argv[6];
-    const char* special_casing = argv[7];
-    const char* word_break = argv[8];
-    const char* emoji_data = argv[9];
-    const char* output_cpp_file = argv[10];
-    const char* output_hpp_file = argv[11];
-    const char* include_h = argv[12];
+    const std::filesystem::path derived_core_properties_file = argv[1];
+    const std::filesystem::path unicode_data_file = argv[2];
+    const std::filesystem::path composition_exclusions = argv[3];
+    const std::filesystem::path derived_normalization_props = argv[4];
+    const std::filesystem::path prop_list = argv[5];
+    const std::filesystem::path derived_numeric_type = argv[6];
+    const std::filesystem::path special_casing = argv[7];
+    const std::filesystem::path word_break = argv[8];
+    const std::filesystem::path emoji_data = argv[9];
+    const std::filesystem::path output_cpp_file = argv[10];
+    const std::filesystem::path output_hpp_file = argv[11];
+    const std::filesystem::path include_h = argv[12];
 
-    write_header(output_hpp_file, include_h);
+    write_header(output_hpp_file, include_h.c_str());
     write_impl(derived_core_properties_file,
                unicode_data_file,
                composition_exclusions,

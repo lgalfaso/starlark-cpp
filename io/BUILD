@@ -7,9 +7,6 @@ cc_library(
     srcs = ["read_file.cpp"],
     hdrs = ["read_file.hpp"],
     visibility = ["//visibility:public"],
-    deps = [
-        "//third-party:defer",
-    ],
 )
 
 cc_test(

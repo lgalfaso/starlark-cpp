@@ -3,19 +3,14 @@
 #ifndef PROTO_BASE_PROTO_ENCODER_HPP_
 #define PROTO_BASE_PROTO_ENCODER_HPP_
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 
-#include <memory>
-
-#include "third-party/defer.hpp"
+#include <filesystem>  // NOLINT(build/c++17)
+#include <fstream>
 
 using google::protobuf::TextFormat;
-using google::protobuf::io::FileInputStream;
+using google::protobuf::io::IstreamInputStream;
 
 template<typename T>
 int encode_proto(int argc, char* argv[]) {
@@ -23,37 +18,28 @@ int encode_proto(int argc, char* argv[]) {
     return 1;
   }
 
-  int in_fd = open(argv[1], O_RDONLY);
-  if (in_fd < 0) {
+  std::ifstream in(argv[1]);
+  if (!in) {
     return 2;
   }
-  defer { close(in_fd); };
-
-  auto input = std::make_unique<FileInputStream>(in_fd);
   T starlark_type;
-  if (!TextFormat::Parse(input.get(), &starlark_type)) {
+  IstreamInputStream input(&in);
+  if (!TextFormat::Parse(&input, &starlark_type)) {
     return 3;
   }
 
-#ifdef __APPLE__
-  int out_fd = open(argv[2], O_WRONLY | O_CREAT | O_EXCL);
-#else
-  int out_fd = open(argv[2], O_WRONLY | O_CREAT | O_EXCL, S_IRUSR);
-#endif
-  if (out_fd < 0) {
+  if (std::filesystem::exists(argv[2])) {
     return 4;
   }
-  defer { close(out_fd); };
-
-  if (!starlark_type.SerializeToFileDescriptor(out_fd)) {
-    return 5;
+  std::ofstream out(argv[2], std::ios::binary);
+  if (!out) {
+    return 4;
   }
-  if (fchmod(out_fd, S_IRUSR) != 0) {
-    return 6;
+  if (!starlark_type.SerializeToOstream(&out)) {
+    return 5;
   }
 
   return 0;
 }
 
 #endif  // PROTO_BASE_PROTO_ENCODER_HPP_
-

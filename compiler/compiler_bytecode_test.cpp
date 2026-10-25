@@ -1,12 +1,11 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
-#include <fcntl.h>
-
 #include <gmock/gmock.h>
 #include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>
 
+#include <fstream>
 #include <functional>
 #include <set>
 #include <string>
@@ -15,7 +14,6 @@
 #include "io/read_file.hpp"
 #include "proto/starlark_bytecode.pb.h"
 #include "protobuf-matchers/protocol-buffer-matchers.h"
-#include "third-party/defer.hpp"
 
 using ::google::protobuf::Arena;
 using ::google::protobuf::Message;
@@ -45,12 +43,9 @@ TEST(CompilerBytecode, TestCase) {
   ASSERT_TRUE(starlark_code.has_value());
 
   Program expected_starlark_program;
-  {
-    int proto_fd = open(argv[2].c_str(), O_RDONLY);
-    ASSERT_GT(proto_fd, 0);
-    defer { close(proto_fd); };
-    ASSERT_TRUE(expected_starlark_program.ParseFromFileDescriptor(proto_fd));
-  }
+  std::ifstream expected_proto(argv[2], std::ios::binary);
+  ASSERT_TRUE(expected_proto.is_open());
+  ASSERT_TRUE(expected_starlark_program.ParseFromIstream(&expected_proto));
 
   // We are only using the predeclared symbols.
   std::set<std::string, std::less<>> binding{};

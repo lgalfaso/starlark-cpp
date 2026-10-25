@@ -1,7 +1,5 @@
 // Copyright 2024-2025 Lucas Mirelmann
 
-#include <fcntl.h>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest-matchers.h>
 #include <gtest/gtest.h>

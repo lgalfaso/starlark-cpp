@@ -1,7 +1,5 @@
 // Copyright 2026 Lucas Mirelmann
 
-#include <fcntl.h>
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -12,22 +10,20 @@
 #include "google/protobuf/text_format.h"
 #include "proto/bytecode_formatter/bytecode_txtpb_printer.hpp"
 #include "proto/starlark_bytecode.pb.h"
-#include "third-party/defer.hpp"
 
 using ::google::protobuf::TextFormat;
-using ::google::protobuf::io::FileInputStream;
+using ::google::protobuf::io::IstreamInputStream;
 using ::starlark::bytecode::Program;
 using ::starlark::proto::print_bytecode_txtpb;
 
 namespace {
 
 bool parse_txtpb(std::string_view path, Program& program) {
-  const int fd = open(std::string{path}.c_str(), O_RDONLY);
-  if (fd < 0) {
+  std::ifstream in(std::string{path});
+  if (!in) {
     return false;
   }
-  defer { close(fd); };
-  FileInputStream input(fd);
+  IstreamInputStream input(&in);
   return TextFormat::Parse(&input, &program);
 }
 

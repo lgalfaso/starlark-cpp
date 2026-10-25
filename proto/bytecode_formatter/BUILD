@@ -21,7 +21,6 @@ cc_binary(
     deps = [
         ":bytecode_txtpb_printer",
         "//proto:starlark_bytecode_cc_proto",
-        "//third-party:defer",
         "@protobuf",
     ],
 )

@@ -157,7 +157,6 @@ cc_library(
         ":parsing_options",
         "//io:read_file",
         "//proto:starlark_ast_cc_proto",
-        "//third-party:defer",
         "@googletest//:gtest",
         "@protobuf",
         "@protobuf-matchers//protobuf-matchers",
