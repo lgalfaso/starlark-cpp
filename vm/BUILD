@@ -131,6 +131,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":test_case",
+        "//grammar:options",
         "//logging",
         "//runtime:options",
         "//runtime:starlark_function",

@@ -41,7 +41,7 @@ using ::starlark::vm::test::check_assert_fail;
 using ::starlark::vm::test::check_assert_succeed;
 using ::starlark::vm::test::make_common_test_bindings;
 using ::starlark::vm::test::make_test_loader;
-using ::starlark::vm::test::parse_runtime_options;
+using ::starlark::vm::test::parse_options;
 using ::starlark::vm::test::program_runner;
 
 namespace starlark {
@@ -63,9 +63,9 @@ native_runner_state* as_native_runner_state(context& ctx, error_fn& error_callba
 }
 
 program_runner make_native_program_runner(native_runner_state& state) {
-  return [&state](module_loader& loader, logger& log, const runtime_options& opts) -> status_or<frame*> {
+  return [&state](module_loader& loader, logger& log, const grammar_options& g_options, const runtime_options& r_options) -> status_or<frame*> {
     native_runner nested(*state.runtime);
-    return nested.run(loader, "main", grammar_options{}, opts, *state.options, log);
+    return nested.run(loader, "main", g_options, r_options, *state.options, log);
   };
 }
 
@@ -82,8 +82,8 @@ starlark_obj* native_assert_fail_fn(starlark_obj* this_obj,
   std::basic_ostringstream<char> out;
   starlark_obj* error = nullptr;
   bool allow_static_error = false;
-  auto r_options = parse_runtime_options(&error, nullptr, &allow_static_error, out, named_args, ctx, error_callback);
-  if (!r_options.ok()) {
+  auto options = parse_options(&error, nullptr, &allow_static_error, out, named_args, ctx, error_callback);
+  if (!options.ok()) {
     return nullptr;
   }
   if (pos_args.size() != 1) {
@@ -100,7 +100,7 @@ starlark_obj* native_assert_fail_fn(starlark_obj* this_obj,
     return nullptr;
   }
   logger logging;
-  auto* result = check_assert_fail(source_code->str(), *r_options, error, allow_static_error, make_native_program_runner(*state), logging, ctx, error_callback);
+  auto* result = check_assert_fail(source_code->str(), options->first, options->second, error, allow_static_error, make_native_program_runner(*state), logging, ctx, error_callback);
   const uint64_t keep_builtin = state->has_builtin_module_cache_key ? state->builtin_module_cache_key : 0;
   const uint64_t keep_main = state->has_main_module_cache_key ? state->main_module_cache_key : 0;
   state->runtime->discard_nested_module_states(keep_main, keep_builtin);
@@ -121,8 +121,8 @@ starlark_obj* native_assert_succeed_fn(starlark_obj* this_obj,
   }
   std::basic_ostringstream<char> out;
   starlark_obj* print = nullptr;
-  auto r_options = parse_runtime_options(nullptr, &print, nullptr, out, named_args, ctx, error_callback);
-  if (!r_options.ok()) {
+  auto options = parse_options(nullptr, &print, nullptr, out, named_args, ctx, error_callback);
+  if (!options.ok()) {
     return nullptr;
   }
   if (pos_args.size() != 1) {
@@ -139,7 +139,7 @@ starlark_obj* native_assert_succeed_fn(starlark_obj* this_obj,
     return nullptr;
   }
   logger logging;
-  auto* result = check_assert_succeed(source_code->str(), *r_options, print, make_native_program_runner(*state), logging, out, ctx, error_callback);
+  auto* result = check_assert_succeed(source_code->str(), options->first, options->second, print, make_native_program_runner(*state), logging, out, ctx, error_callback);
   const uint64_t keep_builtin = state->has_builtin_module_cache_key ? state->builtin_module_cache_key : 0;
   const uint64_t keep_main = state->has_main_module_cache_key ? state->main_module_cache_key : 0;
   state->runtime->discard_nested_module_states(keep_main, keep_builtin);

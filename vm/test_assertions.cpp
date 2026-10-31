@@ -8,11 +8,13 @@
 #include <sstream>
 #include <string>
 
+#include "grammar/options.hpp"
 #include "runtime/starlark_function.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_types.hpp"
 #include "vm/test_case.hpp"
 
+using ::starlark::grammar::grammar_options;
 using ::starlark::logging::logger;
 using ::starlark::result::status_code;
 using ::starlark::result::status_or;
@@ -156,13 +158,14 @@ starlark_obj* assert_false_fn(starlark_obj* this_obj,
   return ctx.none_value();
 }
 
-status_or<runtime_options> parse_runtime_options(starlark_obj** error,
+status_or<test_options> parse_options(starlark_obj** error,
     starlark_obj** print,
     bool* allow_static_error,
     std::ostream& out,
     const starlark_obj::named_args_t& named_args,
     context& ctx,
     error_fn& error_callback) {
+  grammar_options g_options{};
   auto log2_max_bigint = ctx.options().log2_max_bigint;
   auto max_sequence_size = ctx.options().max_sequence_size;
   auto max_string_length = ctx.options().max_string_length;
@@ -170,57 +173,75 @@ status_or<runtime_options> parse_runtime_options(starlark_obj** error,
   for (auto& [key, value] : named_args) {
     if (value == nullptr) {
       error_callback.add_error(std::format("invalid '{}' parameter (nullptr).", key->as_string()));
-      return status_or<runtime_options>(status_code::kRuntimeError);
+      return status_or<test_options>(status_code::kRuntimeError);
     }
     if (key->as_string() == "print") {
       if (!is_string_kind(value->kind())) {
         error_callback.add_error(std::format("invalid '{}' parameter ({}).", key->as_string(), value->type()));
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       if (print == nullptr) {
         error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       *print = value;
     } else if (key->as_string() == "error_message") {
       if (!is_string_kind(value->kind())) {
         error_callback.add_error(std::format("invalid '{}' parameter ({}).", key->as_string(), value->type()));
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       if (error == nullptr) {
         error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       *error = value;
     } else if (key->as_string() == "allow_static_error") {
       if (allow_static_error == nullptr) {
         error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       *allow_static_error = value->truthy();
     } else if (key->as_string() == "log2_max_bigint") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       log2_max_bigint = *r;
     } else if (key->as_string() == "max_sequence_size") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       max_sequence_size = *r;
     } else if (key->as_string() == "max_string_length") {
       auto r = to_int64_with_clamping(*value, error_callback);
       if (!r.ok()) {
-        return status_or<runtime_options>(status_code::kRuntimeError);
+        return status_or<test_options>(status_code::kRuntimeError);
       }
       max_string_length = *r;
     } else if (key->as_string() == "allow_recursion") {
       allow_recursion = value->truthy();
+    } else if (key->as_string() == "escaped_octal_and_hex_char_are_ascii") {
+      g_options.escaped_octal_and_hex_char_are_ascii = value->truthy();
+    } else if (key->as_string() == "allow_load_private_symbols") {
+      g_options.allow_load_private_symbols = value->truthy();
+    } else if (key->as_string() == "allow_function_definitions") {
+      g_options.allow_function_definitions = value->truthy();
+    } else if (key->as_string() == "require_load_statements_first") {
+      g_options.require_load_statements_first = value->truthy();
+    } else if (key->as_string() == "allow_variadic_arguments") {
+      g_options.allow_variadic_arguments = value->truthy();
+    } else if (key->as_string() == "allow_top_level_rebinding") {
+      g_options.allow_top_level_rebinding = value->truthy();
+    } else if (key->as_string() == "allow_top_level_for") {
+      g_options.allow_top_level_for = value->truthy();
+    } else if (key->as_string() == "allow_top_level_if") {
+      g_options.allow_top_level_if = value->truthy();
+    } else if (key->as_string() == "allow_binary_integer_literals") {
+      g_options.allow_binary_integer_literals = value->truthy();
     } else {
       error_callback.add_error(std::format("Unknown named argument '{}'.", key->as_string()));
-      return status_or<runtime_options>(status_code::kRuntimeError);
+      return status_or<test_options>(status_code::kRuntimeError);
     }
   }
   runtime_options r_options = runtime_options{
@@ -230,11 +251,12 @@ status_or<runtime_options> parse_runtime_options(starlark_obj** error,
       .out = out,
       .allow_recursion = allow_recursion,
   };
-  return status_or<runtime_options>(r_options);
+  return status_or<test_options>(test_options{g_options, r_options});
 }
 
 starlark_obj* check_assert_fail_with_loader(module_loader& loader,
     std::string_view source,
+    const grammar_options& g_options,
     const runtime_options& r_options,
     starlark_obj* expected_error,
     bool allow_static_error,
@@ -242,7 +264,7 @@ starlark_obj* check_assert_fail_with_loader(module_loader& loader,
     logger& logging,
     context& ctx,
     error_fn& error_callback) {
-  auto result = run(loader, logging, r_options);
+  auto result = run(loader, logging, g_options, r_options);
   if (result.ok()) {
     error_callback.add_error(std::format("Program executed without errors, it was expected that it would fail.\n{}", source));
     return nullptr;
@@ -268,6 +290,7 @@ starlark_obj* check_assert_fail_with_loader(module_loader& loader,
 }
 
 starlark_obj* check_assert_fail(std::string_view source,
+    const grammar_options& g_options,
     const runtime_options& r_options,
     starlark_obj* expected_error,
     bool allow_static_error,
@@ -277,11 +300,12 @@ starlark_obj* check_assert_fail(std::string_view source,
     error_fn& error_callback) {
   auto modules_parts = split_test_case(source);
   auto loader = make_test_loader(modules_parts, {});
-  return check_assert_fail_with_loader(loader, source, r_options, expected_error, allow_static_error, run, logging, ctx, error_callback);
+  return check_assert_fail_with_loader(loader, source, g_options, r_options, expected_error, allow_static_error, run, logging, ctx, error_callback);
 }
 
 starlark_obj* check_assert_succeed_with_loader(module_loader& loader,
     std::string_view source,
+    const grammar_options& g_options,
     const runtime_options& r_options,
     starlark_obj* expected_print,
     const program_runner& run,
@@ -289,7 +313,7 @@ starlark_obj* check_assert_succeed_with_loader(module_loader& loader,
     std::ostringstream& out,
     context& ctx,
     error_fn& error_callback) {
-  auto result = run(loader, logging, r_options);
+  auto result = run(loader, logging, g_options, r_options);
   if (!result.ok()) {
     error_callback.add_error("Program executed with errors, it was expected that it would succeed.");
     for (const auto& entry : logging) {
@@ -309,6 +333,7 @@ starlark_obj* check_assert_succeed_with_loader(module_loader& loader,
 }
 
 starlark_obj* check_assert_succeed(std::string_view source,
+    const grammar_options& g_options,
     const runtime_options& r_options,
     starlark_obj* expected_print,
     const program_runner& run,
@@ -318,7 +343,7 @@ starlark_obj* check_assert_succeed(std::string_view source,
     error_fn& error_callback) {
   auto modules_parts = split_test_case(source);
   auto loader = make_test_loader(modules_parts, {});
-  return check_assert_succeed_with_loader(loader, source, r_options, expected_print, run, logging, out, ctx, error_callback);
+  return check_assert_succeed_with_loader(loader, source, g_options, r_options, expected_print, run, logging, out, ctx, error_callback);
 }
 
 }  // namespace test

@@ -33,7 +33,7 @@ using ::starlark::vm::test::check_assert_fail;
 using ::starlark::vm::test::check_assert_succeed;
 using ::starlark::vm::test::make_common_test_bindings;
 using ::starlark::vm::test::make_test_loader;
-using ::starlark::vm::test::parse_runtime_options;
+using ::starlark::vm::test::parse_options;
 using ::starlark::vm::test::program_runner;
 using interpreter_engine = ::starlark::interpreter::interpreter;
 
@@ -42,16 +42,16 @@ namespace interpreter_runner {
 
 namespace {
 
-status_or<frame*> run_program(interpreter_engine& runner, module_loader& loader, logger& logging, const runtime_options& r_options) {
-  return runner.run(loader, "main", grammar_options{}, r_options, logging);
+status_or<frame*> run_program(interpreter_engine& runner, module_loader& loader, logger& logging, const grammar_options& g_options, const runtime_options& r_options) {
+  return runner.run(loader, "main", g_options, r_options, logging);
 }
 
 starlark_obj* interpreter_assert_fail_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   std::basic_ostringstream<char> out;
   starlark_obj* error = nullptr;
   bool allow_static_error = false;
-  auto r_options = parse_runtime_options(&error, nullptr, &allow_static_error, out, named_args, ctx, error_callback);
-  if (!r_options.ok()) {
+  auto options = parse_options(&error, nullptr, &allow_static_error, out, named_args, ctx, error_callback);
+  if (!options.ok()) {
     return nullptr;
   }
   if (pos_args.size() != 1) {
@@ -69,17 +69,17 @@ starlark_obj* interpreter_assert_fail_fn(starlark_obj* this_obj, const starlark_
   }
   logger logging;
   interpreter_engine nested;
-  program_runner run = [&](module_loader& loader, logger& log, const runtime_options& opts) {
-    return run_program(nested, loader, log, opts);
+  program_runner run = [&](module_loader& loader, logger& log, const grammar_options& g_options, const runtime_options& r_options) {
+    return run_program(nested, loader, log, g_options, r_options);
   };
-  return check_assert_fail(source_code->str(), *r_options, error, allow_static_error, run, logging, ctx, error_callback);
+  return check_assert_fail(source_code->str(), options->first, options->second, error, allow_static_error, run, logging, ctx, error_callback);
 }
 
 starlark_obj* interpreter_assert_succeed_fn(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
   std::basic_ostringstream<char> out;
   starlark_obj* print = nullptr;
-  auto r_options = parse_runtime_options(nullptr, &print, nullptr, out, named_args, ctx, error_callback);
-  if (!r_options.ok()) {
+  auto options = parse_options(nullptr, &print, nullptr, out, named_args, ctx, error_callback);
+  if (!options.ok()) {
     return nullptr;
   }
   if (pos_args.size() != 1) {
@@ -97,10 +97,10 @@ starlark_obj* interpreter_assert_succeed_fn(starlark_obj* this_obj, const starla
   }
   logger logging;
   interpreter_engine nested;
-  program_runner run = [&](module_loader& loader, logger& log, const runtime_options& opts) {
-    return run_program(nested, loader, log, opts);
+  program_runner run = [&](module_loader& loader, logger& log, const grammar_options& g_options, const runtime_options& r_options) {
+    return run_program(nested, loader, log, g_options, r_options);
   };
-  return check_assert_succeed(source_code->str(), *r_options, print, run, logging, out, ctx, error_callback);
+  return check_assert_succeed(source_code->str(), options->first, options->second, print, run, logging, out, ctx, error_callback);
 }
 
 starlark::vm::module_info::bindings_t make_interpreter_test_bindings(Arena& arena) {
@@ -118,8 +118,7 @@ status_or<frame*> run_test(std::map<std::string, std::string> programs, logger& 
   auto loader = make_test_loader(programs, custom_binding);
 
   interpreter_engine runner;
-  runtime_options options{};
-  return run_program(runner, loader, logging, options);
+  return run_program(runner, loader, logging, grammar_options{}, runtime_options{});
 }
 
 }  // namespace interpreter_runner

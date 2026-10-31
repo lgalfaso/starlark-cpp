@@ -7,8 +7,10 @@
 #include <ostream>
 #include <sstream>
 #include <string_view>
+#include <utility>
 
 #include "google/protobuf/arena.h"
+#include "grammar/options.hpp"
 #include "logging/logging.hpp"
 #include "runtime/options.hpp"
 #include "runtime/starlark_object.hpp"
@@ -48,7 +50,9 @@ starlark::runtime::starlark_obj* assert_false_fn(starlark::runtime::starlark_obj
     starlark::runtime::context& ctx,
     starlark::runtime::error_fn& error_callback);
 
-starlark::result::status_or<starlark::runtime::runtime_options> parse_runtime_options(starlark::runtime::starlark_obj** error,
+using test_options = std::pair<starlark::grammar::grammar_options, starlark::runtime::runtime_options>;
+
+starlark::result::status_or<test_options> parse_options(starlark::runtime::starlark_obj** error,
     starlark::runtime::starlark_obj** print,
     bool* allow_static_error,
     std::ostream& out,
@@ -57,10 +61,14 @@ starlark::result::status_or<starlark::runtime::runtime_options> parse_runtime_op
     starlark::runtime::error_fn& error_callback);
 
 typedef std::function<starlark::result::status_or<starlark::vm::frame*>(
-    starlark::vm::module_loader&, starlark::logging::logger&, const starlark::runtime::runtime_options&)> program_runner;
+    starlark::vm::module_loader&,
+    starlark::logging::logger&,
+    const starlark::grammar::grammar_options&,
+    const starlark::runtime::runtime_options&)> program_runner;
 
 starlark::runtime::starlark_obj* check_assert_fail_with_loader(starlark::vm::module_loader& loader,
     std::string_view source,
+    const starlark::grammar::grammar_options& g_options,
     const starlark::runtime::runtime_options& r_options,
     starlark::runtime::starlark_obj* expected_error,
     bool allow_static_error,
@@ -70,6 +78,7 @@ starlark::runtime::starlark_obj* check_assert_fail_with_loader(starlark::vm::mod
     starlark::runtime::error_fn& error_callback);
 
 starlark::runtime::starlark_obj* check_assert_fail(std::string_view source,
+    const starlark::grammar::grammar_options& g_options,
     const starlark::runtime::runtime_options& r_options,
     starlark::runtime::starlark_obj* expected_error,
     bool allow_static_error,
@@ -80,6 +89,7 @@ starlark::runtime::starlark_obj* check_assert_fail(std::string_view source,
 
 starlark::runtime::starlark_obj* check_assert_succeed_with_loader(starlark::vm::module_loader& loader,
     std::string_view source,
+    const starlark::grammar::grammar_options& g_options,
     const starlark::runtime::runtime_options& r_options,
     starlark::runtime::starlark_obj* expected_print,
     const program_runner& run,
@@ -89,6 +99,7 @@ starlark::runtime::starlark_obj* check_assert_succeed_with_loader(starlark::vm::
     starlark::runtime::error_fn& error_callback);
 
 starlark::runtime::starlark_obj* check_assert_succeed(std::string_view source,
+    const starlark::grammar::grammar_options& g_options,
     const starlark::runtime::runtime_options& r_options,
     starlark::runtime::starlark_obj* expected_print,
     const program_runner& run,
