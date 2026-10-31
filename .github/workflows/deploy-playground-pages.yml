@@ -1,0 +1,45 @@
+# Build //web:dist and push static files to the gh-pages branch for GitHub Pages.
+name: Deploy playground to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/deploy-playground-pages.yml"
+      - "MODULE.bazel"
+      - "MODULE.bazel.lock"
+      - "interpreter/**"
+      - "web/**"
+      - "compiler/**"
+      - "grammar/**"
+      - "runtime/**"
+      - "vm/**"
+      - "logging/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-playground
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: bazelbuild/setup-bazelisk@v3
+
+      - name: Build playground
+        run: bazel build -c opt //web:dist
+
+      - name: Publish to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: bazel-bin/web/dist
+          publish_branch: gh-pages
+          enable_jekyll: false
+          commit_message: "Deploy Starlark web playground"
