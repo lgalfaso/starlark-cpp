@@ -2,8 +2,8 @@ common --enable_platform_specific_config
 common --cxxopt=-std=c++2b --host_cxxopt=-std=c++2b
 common --cxxopt=-fno-exceptions --host_cxxopt=-fno-exceptions
 common --cxxopt=-fno-rtti --host_cxxopt=-fno-rtti --cxxopt=-DGTEST_HAS_RTTI=0 --host_cxxopt=-DGTEST_HAS_RTTI=0
-
-common:macos --cxxopt=-fconstexpr-steps=40000000
+# Generated unicode/ucd_code_points.cpp needs a high constexpr step limit (macOS, Linux CI, Emscripten).
+common --cxxopt=-fconstexpr-steps=40000000 --host_cxxopt=-fconstexpr-steps=40000000
 coverage --cxxopt=-fno-inline
 coverage --features=-coverage --copt=-coverage --linkopt=-coverage --test_env=GCOV_PREFIX_STRIP=12
 coverage --java_runtime_version=remotejdk_21
