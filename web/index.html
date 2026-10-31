@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Starlark playground (interpreter / WASM)</title>
+    <link rel="stylesheet" href="playground.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Starlark playground</h1>
+      <p class="subtitle">Starlark-CPP interpreter compiled to WebAssembly</p>
+    </header>
+    <main>
+      <aside class="modules-panel" aria-label="Modules">
+        <div class="panel-header">
+          <span>Modules</span>
+          <button id="add-module" type="button" class="module-action-btn" title="Add module">+</button>
+        </div>
+        <ul id="module-list" class="module-list"></ul>
+        <p class="modules-hint">Edit module names inline. Flat names only - use the exact same string in <code>load("name", …)</code>.</p>
+      </aside>
+      <section class="editor-panel">
+        <div class="panel-header editor-toolbar">
+          <div class="toolbar-left">
+            <label for="entry-module">Entry</label>
+            <select id="entry-module" aria-label="Entry module"></select>
+            <span id="active-module-label" class="active-module"></span>
+          </div>
+          <div class="toolbar-right">
+            <label class="auto-run-toggle">
+              <input id="auto-run" type="checkbox" checked />
+              Auto-run
+            </label>
+            <button id="run" type="button" disabled>Run</button>
+          </div>
+        </div>
+        <div id="editor" class="monaco-host" aria-label="Starlark source editor"></div>
+      </section>
+      <section class="output-panel">
+        <div class="panel-header">
+          <span>Output</span>
+        </div>
+        <pre id="output" class="pane"></pre>
+        <div class="panel-header errors-header">
+          <span>Errors</span>
+        </div>
+        <pre id="errors" class="pane errors"></pre>
+      </section>
+    </main>
+    <footer>
+      <p id="status">Loading editor and WebAssembly module…</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+    <script src="starlark_wasm.js"></script>
+    <script src="playground.js"></script>
+  </body>
+</html>

@@ -38,6 +38,22 @@ Both backends use the same `runtime/` object model and `vm/` module-loading infr
 bazel build //interpreter:interpreter_main //native/runner:native_main
 ```
 
+## Web playground (interpreter / WASM)
+
+Build a static browser playground that runs the bytecode interpreter compiled to WebAssembly (Emscripten via [emsdk](https://github.com/emscripten-core/emsdk) 6.0.13 in `MODULE.bazel`). The native LLVM JIT backend is not included in the WASM build.
+
+```bash
+bazel build //web:dist
+```
+
+Artifacts land under `bazel-bin/web/dist/`. Serve that directory over HTTP (WASM does not work from `file://`):
+
+```bash
+cd bazel-bin/web/dist && python3 -m http.server 8765
+```
+
+Then open `http://127.0.0.1:8765/` in a browser. The playground uses Monaco (Python syntax highlighting) with a flat module list on the left; pick an **entry** module and use `load("other_module", …)` with matching module names. Use **Run** to see `print` output or diagnostics in the errors pane.
+
 ## Running programs
 
 The CLI runners accept a single Starlark source file. Pass an absolute path (or a path relative to your current working directory):
@@ -121,6 +137,7 @@ For optimized builds, add `-c opt`. See `native/runner/PERF_REGRESSIONS.md` for 
 | `unicode/` | Unicode data tables and UTF-8 handling |
 | `bigint/` | Arbitrary-precision integer arithmetic |
 | `bench/` | Google Benchmark harness |
+| `web/` | WASM interpreter playground (static HTML + Emscripten build) |
 | `bzl/` | Bazel macros (`program_test`, etc.) |
 
 ## Language options

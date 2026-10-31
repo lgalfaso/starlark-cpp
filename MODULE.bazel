@@ -18,6 +18,16 @@ bazel_dep(name = "rules_shell", version = "0.8.0")
 bazel_dep(name = "llvm", version = "0.8.25")
 bazel_dep(name = "platforms", version = "1.1.0")
 
+EMSDK_VERSION = "6.0.13"
+
+bazel_dep(name = "emsdk", version = EMSDK_VERSION)
+git_override(
+    module_name = "emsdk",
+    remote = "https://github.com/emscripten-core/emsdk.git",
+    strip_prefix = "bazel",
+    tag = EMSDK_VERSION,
+)
+
 llvm = use_extension("@llvm//extensions:llvm.bzl", "llvm")
 llvm.version(llvm_version = "23.1.2")
 use_repo(llvm, "llvm-project")
