@@ -2,6 +2,8 @@
 
 A high-performance [Starlark](https://github.com/bazelbuild/starlark/blob/master/spec.md) implementation in C++, built with Bazel. Starlark is a small, deterministic Python-like language used by Bazel and other build systems.
 
+**[Try the web playground →](https://lgalfaso.github.io/starlark-cpp/)** — edit multi-module Starlark in the browser and run it with the bytecode interpreter compiled to WebAssembly (no install required).
+
 This project provides two execution backends that share the same frontend (parser, compiler, and runtime object model):
 
 - **Interpreter** — a bytecode virtual machine for correctness, fast iteration, and reference behavior.
@@ -40,7 +42,9 @@ bazel build //interpreter:interpreter_main //native/runner:native_main
 
 ## Web playground (interpreter / WASM)
 
-Build a static browser playground that runs the bytecode interpreter compiled to WebAssembly (Emscripten via [emsdk](https://github.com/emscripten-core/emsdk) 6.0.13 in `MODULE.bazel`). The native LLVM JIT backend is not included in the WASM build.
+The hosted playground lives at **[lgalfaso.github.io/starlark-cpp](https://lgalfaso.github.io/starlark-cpp/)** (GitHub Pages, built from `//web:dist` on `main`).
+
+To build and serve locally, compile the same static site with Emscripten ([emsdk](https://github.com/emscripten-core/emsdk) 6.0.13 in `MODULE.bazel`). The native LLVM JIT backend is not included in the WASM build.
 
 ```bash
 bazel build //web:dist
