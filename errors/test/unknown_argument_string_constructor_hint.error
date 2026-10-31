@@ -1,0 +1,4 @@
+main:2:8: error: str() got an unexpected keyword argument 'ojbect'. Did you mean: 'object'?
+    2 | a = str(ojbect = 1)
+      |     ~~~^^^^^^^^^^^^
+      |        object

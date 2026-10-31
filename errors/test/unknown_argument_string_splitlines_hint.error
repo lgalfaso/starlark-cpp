@@ -1,0 +1,4 @@
+main:2:22: error: splitlines() got an unexpected keyword argument 'keepend'. Did you mean: 'keepends'?
+    2 | a = 'a\nb'.splitlines(keepend = True)
+      |     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+      |                      keepends

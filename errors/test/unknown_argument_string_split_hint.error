@@ -1,0 +1,4 @@
+main:2:16: error: split() got an unexpected keyword argument 'maxspli'. Did you mean: 'maxsplit'?
+    2 | a = 'abc'.split(maxspli = 1)
+      |     ~~~~~~~~~~~^^^^^^^^^^^^^
+      |                maxsplit

@@ -1,0 +1,4 @@
+main:2:18: error: replace() got an unexpected keyword argument 'cont'. Did you mean: 'count'?
+    2 | a = 'abc'.replace('a', 'b', cont = 1)
+      |     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+      |                  count

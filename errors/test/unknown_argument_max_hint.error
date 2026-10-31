@@ -1,0 +1,4 @@
+main:2:8: error: max() got an unexpected keyword argument 'kye'. Did you mean: 'key'?
+    2 | a = max([1], kye = None)
+      |     ~~~^^^^^^^^^^^^^^^^^
+      |        key

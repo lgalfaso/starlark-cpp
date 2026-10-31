@@ -280,6 +280,10 @@ std::optional<bool> try_fast_equals(const starlark_obj* lhs, const starlark_obj*
 starlark_obj* create_function(context& ctx, starlark_obj* this_obj, starlark_obj::fn native_fn, std::string_view fn_name);
 
 starlark_obj* find_named_arg(const starlark_obj::named_args_t& named_args, std::string_view key);
+void report_unexpected_keyword_argument(error_fn& error_callback,
+    std::string_view fn_name,
+    std::string_view argument_name,
+    std::span<const std::string_view> parameter_names);
 starlark::result::status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name);
 starlark::result::status min_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_min);
 starlark::result::status max_args(const starlark_obj::pos_args_t& pos_args, error_fn& error_callback, std::string_view fn_name, int expected_max);

@@ -1,0 +1,4 @@
+main:2:14: error: enumerate() got an unexpected keyword argument 'strat'. Did you mean: 'start'?
+    2 | a = enumerate([], strat = 0)
+      |     ~~~~~~~~~^^^^^^^^^^^^^^^
+      |              start

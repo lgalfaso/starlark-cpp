@@ -1,0 +1,4 @@
+main:2:8: error: int() got an unexpected keyword argument 'bae'. Did you mean: 'base'?
+    2 | a = int('1', bae = 16)
+      |     ~~~^^^^^^^^^^^^^^^
+      |        base

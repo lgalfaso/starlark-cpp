@@ -56,7 +56,6 @@ cc_library(
         "//runtime:starlark_object",
         "//runtime:starlark_string",
         "//runtime:starlark_tuple",
-        "//string:levenshtein",
         "@protobuf",
     ],
 )

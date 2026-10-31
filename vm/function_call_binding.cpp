@@ -12,7 +12,6 @@
 #include "runtime/starlark_dictionary.hpp"
 #include "runtime/starlark_string.hpp"
 #include "runtime/starlark_tuple.hpp"
-#include "string/levenshtein.hpp"
 
 namespace starlark {
 namespace vm {
@@ -22,6 +21,7 @@ using starlark::runtime::error_fn;
 using starlark::runtime::starlark_dictionary;
 using starlark::runtime::starlark_obj;
 using starlark::runtime::starlark_string;
+using starlark::runtime::report_unexpected_keyword_argument;
 using starlark::runtime::starlark_tuple;
 
 bool bind_function_arguments(const function_signature_metadata& fn_meta,
@@ -59,19 +59,13 @@ bool bind_function_arguments(const function_signature_metadata& fn_meta,
       if (fn_meta.has_star_star_argument) {
         state.kwargs.insert(std::string{kwparam.first->as_string()}, kwparam.second);
       } else {
-        std::vector<std::string> all_candidates;
+        std::vector<std::string_view> parameter_names;
+        parameter_names.reserve(fn_meta.params.size());
         for (const auto& param : fn_meta.params) {
-          all_candidates.emplace_back(param.name);
+          parameter_names.emplace_back(param.name);
         }
-        const auto candidate = starlark::string::levenshtein(kwparam.first->as_string(), all_candidates);
-        if (candidate >= 0) {
-          error_callback.add_error(starlark::error_messages::error_v2_unexpected_keyword_argument_with_hint(
-                                     fn_meta.fn_name, kwparam.first->as_string(), all_candidates[candidate]),
-              all_candidates[candidate]);
-        } else {
-          error_callback.add_error(starlark::error_messages::error_v2_unexpected_keyword_argument(
-              fn_meta.fn_name, kwparam.first->as_string()));
-        }
+        report_unexpected_keyword_argument(
+            error_callback, fn_meta.fn_name, kwparam.first->as_string(), parameter_names);
         return false;
       }
       continue;

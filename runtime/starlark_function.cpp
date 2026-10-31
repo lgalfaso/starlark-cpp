@@ -54,7 +54,6 @@ using ::starlark::error_messages::error_v2_named_argument_must_be_type;
 using ::starlark::error_messages::error_v2_non_string_with_base;
 using ::starlark::error_messages::error_v2_overflow;
 using ::starlark::error_messages::error_v2_overflow_float_too_large;
-using ::starlark::error_messages::error_v2_unknown_argument;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
 using ::starlark::result::status;
@@ -234,6 +233,7 @@ starlark_obj* starlark_fn_bool(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kBytesKeywordParams[] = {"source"};
   // The Python version of `bytes` can take zero arguments and returns `b''`.
   // The spec is not clear whether zero arguments is ok, but a strict reading would be that this parameter is mandatory.
   // See: https://github.com/bazelbuild/starlark/issues/351
@@ -243,7 +243,8 @@ starlark_obj* starlark_fn_bytes(starlark_obj* this_obj, const starlark_obj::pos_
       assert(value != nullptr);
       source = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::bytes_f, key->as_string(), kBytesKeywordParams);
       return nullptr;
     }
   }
@@ -301,6 +302,7 @@ starlark_obj* starlark_fn_dir(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kEnumerateKeywordParams[] = {"iterable", "start"};
   // Bazel allows the first parameter to be named with the name `list`, Python does the same with the name `iterable`, the spec calls this parameter `x`.
   // Check https://github.com/bazelbuild/starlark/issues/355
   starlark_obj* iterable = nullptr;
@@ -313,7 +315,8 @@ starlark_obj* starlark_fn_enumerate(starlark_obj* this_obj, const starlark_obj::
       assert(value != nullptr);
       iterable = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::enumerate_f, key->as_string(), kEnumerateKeywordParams);
       return nullptr;
     }
   }
@@ -439,6 +442,7 @@ starlark_obj* starlark_fn_hash(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kIntKeywordParams[] = {"base"};
   // Python allows the variation with zero parameters, so we allow it here.
   starlark_obj* base_param = nullptr;
   for (auto& [key, value] : named_args) {
@@ -450,7 +454,8 @@ starlark_obj* starlark_fn_int(starlark_obj* this_obj, const starlark_obj::pos_ar
       }
       base_param = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::int_f, key->as_string(), kIntKeywordParams);
       return nullptr;
     }
   }
@@ -562,6 +567,7 @@ starlark_obj* starlark_fn_list(starlark_obj* this_obj, const starlark_obj::pos_a
 }
 
 starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kMaxKeywordParams[] = {"key"};
   if (!min_args(pos_args, error_callback, starlark_built_in_functions::max_f, 1).ok()) {
     return nullptr;
   }
@@ -573,7 +579,8 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::max_f, key->as_string(), kMaxKeywordParams);
       return nullptr;
     }
   }
@@ -658,6 +665,7 @@ starlark_obj* starlark_fn_max(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kMinKeywordParams[] = {"key"};
   if (!min_args(pos_args, error_callback, starlark_built_in_functions::min_f, 1).ok()) {
     return nullptr;
   }
@@ -669,7 +677,8 @@ starlark_obj* starlark_fn_min(starlark_obj* this_obj, const starlark_obj::pos_ar
         key_fn = const_cast<starlark_obj*>(value);
       }
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::min_f, key->as_string(), kMinKeywordParams);
       return nullptr;
     }
   }
@@ -763,6 +772,7 @@ starlark_obj* starlark_fn_ord(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kPrintKeywordParams[] = {"sep"};
   if (named_args.empty() && pos_args.size() == 1) {
     return builtin_pos::print_pos1(this_obj, pos_args.front(), ctx, error_callback);
   }
@@ -779,7 +789,8 @@ starlark_obj* starlark_fn_print(starlark_obj* this_obj, const starlark_obj::pos_
       }
       sep = value->str();
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::print_f, key->as_string(), kPrintKeywordParams);
       return nullptr;
     }
   }
@@ -839,6 +850,7 @@ starlark_obj* starlark_fn_set(starlark_obj* this_obj, const starlark_obj::pos_ar
 }
 
 starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kSortedKeywordParams[] = {"key", "reverse"};
   if (pos_args.size() != 1) {
     error_callback.add_error(error_v2_arguments_exactly_one(starlark_built_in_functions::sorted_f, pos_args.size()));
     return nullptr;
@@ -861,7 +873,8 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
       }
       reverse = value->truthy();
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::sorted_f, key->as_string(), kSortedKeywordParams);
       return nullptr;
     }
   }
@@ -911,6 +924,7 @@ starlark_obj* starlark_fn_sorted(starlark_obj* this_obj, const starlark_obj::pos
 }
 
 starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kStrKeywordParams[] = {"object"};
   // The Python version of `str` can take zero arguments and returns `''`.
   // The spec is not clear whether zero arguments is ok, but a strict reading would be that this parameter is mandatory.
   // See: https://github.com/bazelbuild/starlark/issues/351
@@ -920,7 +934,8 @@ starlark_obj* starlark_fn_str(starlark_obj* this_obj, const starlark_obj::pos_ar
       assert(value != nullptr);
       object = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(
+          error_callback, starlark_built_in_functions::str_f, key->as_string(), kStrKeywordParams);
       return nullptr;
     }
   }

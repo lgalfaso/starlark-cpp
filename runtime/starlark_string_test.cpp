@@ -5252,8 +5252,34 @@ TEST(StarlarkString, ReplaceWithOldNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'old'");
+  EXPECT_EQ(error_callback.messages[0], "replace() got an unexpected keyword argument 'old'");
   EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, ReplaceWithUnknownNamedArgumentHint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+  starlark_string old("b"sv);
+  starlark_string new_("x"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&old);
+  pos_args.push_back(&new_);
+  named_args.emplace_back(ctx.create<starlark_string>("cont"sv), ctx.one());
+  auto* method = str.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "replace() got an unexpected keyword argument 'cont'. Did you mean: 'count'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkString, ReplaceWithCountNamedArguments) {
@@ -6835,8 +6861,30 @@ TEST(StarlarkString, SplitWithNamedArgumentsUnknown) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "split() got an unexpected keyword argument 'unknown'");
   EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, SplitWithNamedArgumentsUnknownHint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>("maxspli"sv), ctx.minus_one());
+  auto* method = str.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "split() got an unexpected keyword argument 'maxspli'. Did you mean: 'maxsplit'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkString, RsplitNoArguments) {
@@ -7239,8 +7287,30 @@ TEST(StarlarkString, RsplitWithNamedArgumentsUnknown) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() got an unexpected keyword argument 'unknown'");
   EXPECT_EQ(str.str(), "abc");
+}
+
+TEST(StarlarkString, RsplitWithNamedArgumentsUnknownHint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>("maxspli"sv), ctx.minus_one());
+  auto* method = str.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "rsplit() got an unexpected keyword argument 'maxspli'. Did you mean: 'maxsplit'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkString, StripNoArguments) {
@@ -7667,8 +7737,30 @@ TEST(StarlarkString, SplitlinesWithUnknownNamedArgument) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "splitlines() got an unexpected keyword argument 'unknown'");
   EXPECT_EQ(str.str(), "abc\ndef");
+}
+
+TEST(StarlarkString, SplitlinesWithUnknownNamedArgumentHint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_string str("abc\ndef"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>("keepend"sv), ctx.true_value());
+  auto* method = str.dot("splitlines", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "splitlines() got an unexpected keyword argument 'keepend'. Did you mean: 'keepends'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkString, ElemsWithNoArguments) {

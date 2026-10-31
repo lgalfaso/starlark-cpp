@@ -1,0 +1,4 @@
+main:2:14: error: enumerate() got an unexpected keyword argument 'iterabel'. Did you mean: 'iterable'?
+    2 | a = enumerate(iterabel = [])
+      |     ~~~~~~~~~^^^^^^^^^^^^^^^
+      |              iterable

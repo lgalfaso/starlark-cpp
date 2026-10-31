@@ -1,0 +1,4 @@
+main:2:6: error: print() got an unexpected keyword argument 'sepp'. Did you mean: 'sep'?
+    2 | print(1, sepp = '|')
+      | ~~~~~^^^^^^^^^^^^^^^
+      |      sep

@@ -1,0 +1,4 @@
+main:2:17: error: rsplit() got an unexpected keyword argument 'maxspli'. Did you mean: 'maxsplit'?
+    2 | a = 'abc'.rsplit(maxspli = 1)
+      |     ~~~~~~~~~~~~^^^^^^^^^^^^^
+      |                 maxsplit

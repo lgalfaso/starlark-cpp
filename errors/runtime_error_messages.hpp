@@ -72,7 +72,6 @@ std::string error_v2_int_base(std::string_view fn_name);
 std::string error_v2_invalid_literal_with_base(std::string_view fn_name, int64_t base, std::string_view literal_value);
 
 std::string error_v2_no_keyword(std::string_view fn_name);
-std::string error_v2_unknown_argument(std::string_view argument_name);
 std::string error_v2_no_pos_args(std::string_view fn_name, int64_t actual);
 std::string error_v2_arguments_too_few(std::string_view fn_name, int64_t actual, int64_t expected);
 std::string error_v2_arguments_too_many(std::string_view fn_name, int64_t actual, int64_t expected);

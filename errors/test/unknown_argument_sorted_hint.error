@@ -1,0 +1,4 @@
+main:2:11: error: sorted() got an unexpected keyword argument 'reverese'. Did you mean: 'reverse'?
+    2 | a = sorted([1, 2, 3], reverese = True)
+      |     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |           reverse

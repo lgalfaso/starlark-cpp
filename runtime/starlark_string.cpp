@@ -61,7 +61,6 @@ using ::starlark::error_messages::error_v2_switch_from_manual_to_automatic_numbe
 using ::starlark::error_messages::error_v2_tuple_must_contain_type;
 using ::starlark::error_messages::error_v2_unexpected_in_field_name;
 using ::starlark::error_messages::error_v2_unicode_in_range;
-using ::starlark::error_messages::error_v2_unknown_argument;
 using ::starlark::error_messages::error_v2_unknown_conversion;
 using ::starlark::error_messages::error_v2_unsupported_format_character;
 using ::starlark::result::error_status;
@@ -2206,13 +2205,14 @@ starlark_obj* starlark_string_fn_partition(starlark_obj* this_obj, const starlar
 }
 
 starlark_obj* starlark_string_fn_replace(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kReplaceKeywordParams[] = {"count"};
   starlark_obj* count = nullptr;
   for (auto& [key, value] : named_args) {
     if (key->as_string() == "count") {
       assert(value != nullptr);
       count = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(error_callback, "replace", key->as_string(), kReplaceKeywordParams);
       return nullptr;
     }
   }
@@ -2332,6 +2332,7 @@ starlark_obj* starlark_string_fn_rpartition(starlark_obj* this_obj, const starla
 }
 
 starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kSplitKeywordParams[] = {"sep", "maxsplit"};
   starlark_obj* sep = nullptr;
   starlark_obj* maxsplit = nullptr;
   for (auto& [key, value] : named_args) {
@@ -2342,7 +2343,7 @@ starlark_obj* starlark_string_fn_rsplit(starlark_obj* this_obj, const starlark_o
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(error_callback, "rsplit", key->as_string(), kSplitKeywordParams);
       return nullptr;
     }
   }
@@ -2398,6 +2399,7 @@ starlark_obj* starlark_string_fn_rstrip(starlark_obj* this_obj, const starlark_o
 }
 
 starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kSplitKeywordParams[] = {"sep", "maxsplit"};
   starlark_obj* sep = nullptr;
   starlark_obj* maxsplit = nullptr;
   for (auto& [key, value] : named_args) {
@@ -2408,7 +2410,7 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
       assert(value != nullptr);
       maxsplit = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(error_callback, "split", key->as_string(), kSplitKeywordParams);
       return nullptr;
     }
   }
@@ -2448,6 +2450,7 @@ starlark_obj* starlark_string_fn_split(starlark_obj* this_obj, const starlark_ob
 }
 
 starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
+  static constexpr std::string_view kSplitlinesKeywordParams[] = {"keepends"};
   assert(this_obj != nullptr);
   assert(is_string_kind(this_obj->kind()));
   starlark_obj* keepends = nullptr;
@@ -2456,7 +2459,7 @@ starlark_obj* starlark_string_fn_splitlines(starlark_obj* this_obj, const starla
       assert(value != nullptr);
       keepends = value;
     } else {
-      error_callback.add_error(error_v2_unknown_argument(key->as_string()));
+      report_unexpected_keyword_argument(error_callback, "splitlines", key->as_string(), kSplitlinesKeywordParams);
       return nullptr;
     }
   }

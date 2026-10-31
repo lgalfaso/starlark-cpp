@@ -5011,8 +5011,30 @@ TEST(StarlarkBytes, SplitWithNamedArgumentsUnknown) {
   ASSERT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "split() got an unexpected keyword argument 'unknown'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, SplitWithNamedArgumentsUnknownHint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>("maxspli"sv), ctx.minus_one());
+  auto* method = bytes.dot("split", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "split() got an unexpected keyword argument 'maxspli'. Did you mean: 'maxsplit'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, RsplitNoArguments) {
@@ -5434,8 +5456,30 @@ TEST(StarlarkBytes, RsplitWithNamedArgumentsUnknown) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'unknown'");
+  EXPECT_EQ(error_callback.messages[0], "rsplit() got an unexpected keyword argument 'unknown'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, RsplitWithNamedArgumentsUnknownHint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>("maxspli"sv), ctx.minus_one());
+  auto* method = bytes.dot("rsplit", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "rsplit() got an unexpected keyword argument 'maxspli'. Did you mean: 'maxsplit'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, ReplaceWithNoArguments) {
@@ -5736,8 +5780,34 @@ TEST(StarlarkBytes, ReplaceWithOldNamedArguments) {
   EXPECT_EQ(nullptr, result);
 
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'old'");
+  EXPECT_EQ(error_callback.messages[0], "replace() got an unexpected keyword argument 'old'");
   EXPECT_EQ(bytes.str(), "b\"abc\"");
+}
+
+TEST(StarlarkBytes, ReplaceWithUnknownNamedArgumentHint) {
+  error_handler error_callback;
+  Arena arena;
+  context ctx(arena);
+  starlark_bytes bytes("abc"sv);
+  starlark_bytes old("b"sv);
+  starlark_bytes new_("x"sv);
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  pos_args.push_back(&old);
+  pos_args.push_back(&new_);
+  named_args.emplace_back(ctx.create<starlark_string>("cont"sv), ctx.one());
+  auto* method = bytes.dot("replace", ctx, error_callback);
+  ASSERT_NE(nullptr, method);
+  EXPECT_THAT(error_callback.messages, IsEmpty());
+
+  auto* result = method->call(pos_args, named_args, ctx, error_callback);
+  EXPECT_EQ(nullptr, result);
+
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "replace() got an unexpected keyword argument 'cont'. Did you mean: 'count'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, ReplaceWithCountNamedArguments) {

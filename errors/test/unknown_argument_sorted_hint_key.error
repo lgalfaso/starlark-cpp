@@ -1,0 +1,4 @@
+main:2:11: error: sorted() got an unexpected keyword argument 'kye'. Did you mean: 'key'?
+    2 | a = sorted([1, 2, 3], kye = None)
+      |     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+      |           key

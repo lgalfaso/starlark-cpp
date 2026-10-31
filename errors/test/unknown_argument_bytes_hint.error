@@ -1,0 +1,4 @@
+main:2:10: error: bytes() got an unexpected keyword argument 'soruce'. Did you mean: 'source'?
+    2 | a = bytes('', soruce = 'x')
+      |     ~~~~~^^^^^^^^^^^^^^^^^^
+      |          source

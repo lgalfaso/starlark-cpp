@@ -46,6 +46,8 @@ using ::starlark::error_messages::error_v2_read_only_attribute;
 using ::starlark::error_messages::error_v2_step_non_zero;
 using ::starlark::error_messages::error_v2_uniterable;
 using ::starlark::error_messages::error_v2_unpackable;
+using ::starlark::error_messages::error_v2_unexpected_keyword_argument;
+using ::starlark::error_messages::error_v2_unexpected_keyword_argument_with_hint;
 using ::starlark::error_messages::error_v2_unsubscriptable;
 using ::starlark::result::error_status;
 using ::starlark::result::ok_status;
@@ -823,6 +825,25 @@ starlark_obj* find_named_arg(const starlark_obj::named_args_t& named_args, std::
     }
   }
   return nullptr;
+}
+
+void report_unexpected_keyword_argument(error_fn& error_callback,
+    std::string_view fn_name,
+    std::string_view argument_name,
+    std::span<const std::string_view> parameter_names) {
+  std::vector<std::string> candidates;
+  candidates.reserve(parameter_names.size());
+  for (const auto name : parameter_names) {
+    candidates.emplace_back(name);
+  }
+  const auto candidate = levenshtein(argument_name, candidates);
+  if (candidate >= 0) {
+    error_callback.add_error(
+        error_v2_unexpected_keyword_argument_with_hint(fn_name, argument_name, candidates[candidate]),
+        candidates[candidate]);
+  } else {
+    error_callback.add_error(error_v2_unexpected_keyword_argument(fn_name, argument_name));
+  }
 }
 
 status no_named_args(const starlark_obj::named_args_t& named_args, error_fn& error_callback, std::string_view fn_name) {

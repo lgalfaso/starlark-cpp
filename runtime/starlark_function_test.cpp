@@ -794,7 +794,25 @@ TEST(StarlarkBytes, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("bytes() got an unexpected keyword argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkBytes, UnknownNamedArgumentHint) {
+  starlark_string str("123"sv);
+  std::string s_soruce("soruce");
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_soruce), &str);
+
+  EXPECT_EQ(nullptr, starlark_fn_bytes(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "bytes() got an unexpected keyword argument 'soruce'. Did you mean: 'source'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkBytes, SourceAsNamedArgument) {
@@ -1468,7 +1486,44 @@ TEST(StarlarkEnumerate, InvalidNamedArgument) {
   auto* result = starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback);
   EXPECT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'end'");
+  EXPECT_EQ(error_callback.messages[0], "enumerate() got an unexpected keyword argument 'end'");
+}
+
+TEST(StarlarkEnumerate, UnknownNamedArgumentHintIterable) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  std::string s_iterabel("iterabel");
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_iterabel), &list);
+
+  EXPECT_EQ(nullptr, starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "enumerate() got an unexpected keyword argument 'iterabel'. Did you mean: 'iterable'?",
+      error_callback.messages[0]);
+}
+
+TEST(StarlarkEnumerate, UnknownNamedArgumentHintStart) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  std::string s_strat("strat");
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&list);
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_strat), ctx.zero());
+
+  EXPECT_EQ(nullptr, starlark_fn_enumerate(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "enumerate() got an unexpected keyword argument 'strat'. Did you mean: 'start'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkEnumerate, TooFewPosArguments) {
@@ -2634,7 +2689,24 @@ TEST(StarlarkInt, NamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("int() got an unexpected keyword argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkInt, UnknownNamedArgumentHint) {
+  std::string s_bae("bae");
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_bae), ctx.zero());
+
+  EXPECT_EQ(nullptr, starlark_fn_int(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "int() got an unexpected keyword argument 'bae'. Did you mean: 'base'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkLen, List) {
@@ -3180,7 +3252,26 @@ TEST(StarlarkMax, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("max() got an unexpected keyword argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkMax, UnknownNamedArgumentHint) {
+  std::string s_kye("kye");
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&list);
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_kye), ctx.none_value());
+
+  EXPECT_EQ(nullptr, starlark_fn_max(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "max() got an unexpected keyword argument 'kye'. Did you mean: 'key'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkMin, NoPosArgs) {
@@ -3562,7 +3653,26 @@ TEST(StarlarkMin, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("min() got an unexpected keyword argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkMin, UnknownNamedArgumentHint) {
+  std::string s_kye("kye");
+  starlark_list list(0);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&list);
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_kye), ctx.none_value());
+
+  EXPECT_EQ(nullptr, starlark_fn_min(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "min() got an unexpected keyword argument 'kye'. Did you mean: 'key'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkOrd, NoPosArgs) {
@@ -3823,7 +3933,27 @@ TEST(StarlarkPrint, NamedArgumentsEnd) {
   auto* result = starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback);
   ASSERT_EQ(nullptr, result);
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ(error_callback.messages[0], "unknown named argument 'end'");
+  EXPECT_EQ(error_callback.messages[0], "print() got an unexpected keyword argument 'end'");
+}
+
+TEST(StarlarkPrint, UnknownNamedArgumentHint) {
+  std::string s_sepp("sepp");
+  starlark_string sep("|"sv);
+  std::basic_ostringstream<char> out;
+  Arena arena;
+  context ctx(arena, runtime_options{.out = out});
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(ctx.zero());
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_sepp), &sep);
+
+  EXPECT_EQ(nullptr, starlark_fn_print(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "print() got an unexpected keyword argument 'sepp'. Did you mean: 'sep'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkRange, OneArgument) {
@@ -4474,7 +4604,45 @@ TEST(StarlarkSorted, OneArgumentsUnknownNamedArgument) {
 
   EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("unknown named argument 'foo'", error_callback.messages[0]);
+  EXPECT_EQ("sorted() got an unexpected keyword argument 'foo'", error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, UnknownNamedArgumentHint) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  std::string s_reverese("reverese");
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&list);
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_reverese), ctx.true_value());
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "sorted() got an unexpected keyword argument 'reverese'. Did you mean: 'reverse'?",
+      error_callback.messages[0]);
+}
+
+TEST(StarlarkSorted, UnknownNamedArgumentHintKey) {
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+  starlark_list list(0);
+  std::string s_kye("kye");
+
+  starlark_obj::pos_args_t pos_args;
+  pos_args.push_back(&list);
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_kye), ctx.none_value());
+
+  EXPECT_EQ(nullptr, starlark_fn_sorted(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "sorted() got an unexpected keyword argument 'kye'. Did you mean: 'key'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkSorted, OneArgumentsNotIterable) {
@@ -4638,7 +4806,25 @@ TEST(StarlarkStr, UnknownNamedArguments) {
 
   EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
   ASSERT_THAT(error_callback.messages, SizeIs(1));
-  EXPECT_EQ("unknown named argument '1'", error_callback.messages[0]);
+  EXPECT_EQ("str() got an unexpected keyword argument '1'", error_callback.messages[0]);
+}
+
+TEST(StarlarkStr, UnknownNamedArgumentHint) {
+  std::string s_ojbect("ojbect");
+  starlark_integer one(1);
+  Arena arena;
+  context ctx(arena);
+  error_handler error_callback;
+
+  starlark_obj::pos_args_t pos_args;
+  starlark_obj::named_args_t named_args;
+  named_args.emplace_back(ctx.create<starlark_string>(s_ojbect), &one);
+
+  EXPECT_EQ(nullptr, starlark_fn_str(nullptr, pos_args, named_args, ctx, error_callback));
+  ASSERT_THAT(error_callback.messages, SizeIs(1));
+  EXPECT_EQ(
+      "str() got an unexpected keyword argument 'ojbect'. Did you mean: 'object'?",
+      error_callback.messages[0]);
 }
 
 TEST(StarlarkTuple, NoArguments) {

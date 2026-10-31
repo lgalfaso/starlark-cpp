@@ -214,11 +214,6 @@ std::string error_v2_no_keyword(std::string_view fn_name) {
   return std::format("{}() takes no keyword arguments", fn_name);
 }
 
-std::string error_v2_unknown_argument(std::string_view argument_name) {
-  // TODO(lmirelmann): Replace all references of this with `error_v2_unexpected_keyword_argument` and maybe provide the hint.
-  return std::format("unknown named argument '{}'", argument_name);
-}
-
 std::string error_v2_no_pos_args(std::string_view fn_name, int64_t actual) {
   return std::format("{}() takes no arguments ({} given)", fn_name, actual);
 }
