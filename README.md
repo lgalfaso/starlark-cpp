@@ -28,7 +28,7 @@ Both backends use the same `runtime/` object model and `vm/` module-loading infr
 
 ## Requirements
 
-- [Bazel](https://bazel.build/) 9.3.1 (use [Bazelisk](https://github.com/bazelbuild/bazelisk); version is pinned in `.bazeliskrc`)
+- [Bazel](https://bazel.build/) 9.3.2 (use [Bazelisk](https://github.com/bazelbuild/bazelisk); version is pinned in `.bazeliskrc`)
 - Builds use the hermetic [LLVM toolchain](https://github.com/hermeticbuild/hermetic-llvm) from Bzlmod (`llvm` 0.8.x, LLVM 23.x for JIT libraries and the C/C++ compiler). The first build downloads the macOS SDK and compiles LLVM; allow substantial time, disk, and RAM.
 - Application code is built with `-std=c++2b`, no exceptions, and no RTTI (LLVM JIT dependencies are compiled separately with exceptions and RTTI).
 - Bazel selects the host CPU automatically on macOS and Linux (arm64 vs x86_64 follows the Bazel binary). Use explicit `//platforms:*` labels only for cross-compiles. Optional personal flags: copy nothing required; add `user.bazelrc` (gitignored, `try-import` in `.bazelrc`) if needed.
@@ -44,7 +44,7 @@ bazel build //interpreter:interpreter_main //native/runner:native_main
 
 The hosted playground lives at **[lgalfaso.github.io/starlark-cpp](https://lgalfaso.github.io/starlark-cpp/)** (GitHub Pages, built from `//web:dist` on `main`).
 
-To build and serve locally, compile the same static site with Emscripten ([emsdk](https://github.com/emscripten-core/emsdk) 6.0.13 in `MODULE.bazel`). The native LLVM JIT backend is not included in the WASM build.
+To build and serve locally, compile the same static site with Emscripten ([emsdk](https://github.com/emscripten-core/emsdk) 7.0.0 in `MODULE.bazel`). The native LLVM JIT backend is not included in the WASM build.
 
 ```bash
 bazel build //web:dist
