@@ -71,7 +71,7 @@ using ::starlark::error_messages::error_v2_illegal_target_for_augmented_assignme
 using ::starlark::error_messages::error_v2_load_at_least_one_symbol;
 using ::starlark::error_messages::error_v2_load_first;
 using ::starlark::error_messages::error_v2_load_not_at_top_level;
-using ::starlark::error_messages::error_v2_params_duplicate_keyword_variadic_paramter;
+using ::starlark::error_messages::error_v2_params_duplicate_keyword_variadic_parameter;
 using ::starlark::error_messages::error_v2_params_duplicate_params;
 using ::starlark::error_messages::error_v2_params_expected_identifier_after_star_star_token;
 using ::starlark::error_messages::error_v2_params_keyword_variadic_param_must_be_last;
@@ -2107,7 +2107,7 @@ void parser::parse_statement(RepeatedPtrField<Statement>& statements) {
               add_error(error_v2_params_named_param_must_follow_bare_star(input, lex.current_token().start(), lex.current_token().end()));
             }
             if (top.found_star_star_parameter) {
-              add_error(error_v2_params_duplicate_keyword_variadic_paramter(input, lex.current_token().start(), lex.current_token().end()));
+              add_error(error_v2_params_duplicate_keyword_variadic_parameter(input, lex.current_token().start(), lex.current_token().end()));
             }
             Parameter* param = top.parameters->Add();
             *param->mutable_star_star()->mutable_pif()->mutable_start() = lex.current_token().start();

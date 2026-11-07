@@ -50,7 +50,7 @@ std::string error_v2_params_keyword_variadic_param_must_be_last(std::string_view
   return std::format("parameters cannot follow the keyword-variadic parameter\n{}", get_line_and_underline(program, start, end));
 }
 
-std::string error_v2_params_duplicate_keyword_variadic_paramter(std::string_view program, const Position& start, const Position& end) {
+std::string error_v2_params_duplicate_keyword_variadic_parameter(std::string_view program, const Position& start, const Position& end) {
   return std::format("duplicate keyword-variadic parameter\n{}", get_line_and_underline(program, start, end));
 }
 

@@ -1124,7 +1124,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
     }
 
     // Begin - Find out whether there are recursions in modules.
-    std::string_view c_name = (*mod_info)->cannonical_name();
+    std::string_view c_name = (*mod_info)->canonical_name();
     auto module_processing_it = module_tracker.module_processing.find(c_name);
     if (module_processing_it != module_tracker.module_processing.end() &&
         (!module_reduction || module_processing_it->second + 1 != module_tracker.module_lookup.size())) {
@@ -1147,7 +1147,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
         binding.insert(key);
       }
       class compiler star_compiler(binding);
-      Program* starlark_program = star_compiler.compile((*mod_info)->cannonical_name(), (*mod_info)->source_code(), g_options, logging, (*mod_info)->arena());
+      Program* starlark_program = star_compiler.compile((*mod_info)->canonical_name(), (*mod_info)->source_code(), g_options, logging, (*mod_info)->arena());
       if (starlark_program == nullptr) {
         return status_or<frame*>(status_code::kStaticError);
       }
@@ -1157,7 +1157,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
       for (auto dep_it = deps.rbegin(); dep_it != deps.rend(); ++dep_it) {
         to_run.push_back(dependency{
           .module_name = std::string{*dep_it},
-          .caller_module_name = std::string{(*mod_info)->cannonical_name()},
+          .caller_module_name = std::string{(*mod_info)->canonical_name()},
           .program = nullptr,
         });
         needs_work = true;
@@ -1175,7 +1175,7 @@ status_or<frame*> interpreter::run(module_loader& loader,
     }
     auto current_program = runner_state::program_info{
         entry.program,
-        std::string{(*mod_info)->cannonical_name()},
+        std::string{(*mod_info)->canonical_name()},
         nullptr,
         &(*mod_info)->metadata_for(*entry.program),
     };

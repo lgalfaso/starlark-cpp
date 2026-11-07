@@ -182,12 +182,12 @@ status_or<frame*> init_cached_module(native_runtime& runtime,
   if (descriptor == nullptr) {
     logging.log(LogLevel::LOG_LEVEL_ERROR,
         std::format("native module cache key {:x} is missing JIT code", state.cache_key),
-        mod_info->cannonical_name(),
+        mod_info->canonical_name(),
         Position::default_instance());
     return status_or<frame*>(status_code::kStaticError);
   }
 
-  native_error_handler err(logging, mod_info->cannonical_name(), &state);
+  native_error_handler err(logging, mod_info->canonical_name(), &state);
   if (descriptor->init != nullptr && !descriptor->init(&state, err)) {
     return status_or<frame*>(status_code::kRuntimeError);
   }
@@ -224,7 +224,7 @@ status_or<frame*> run_impl(native_runtime& runtime,
     load_ctx.runner_state->has_main_module_cache_key = false;
   }
 
-  std::string_view c_name = (*mod_info)->cannonical_name();
+  std::string_view c_name = (*mod_info)->canonical_name();
   auto module_processing_it = load_ctx.tracker.module_processing.find(std::string{c_name});
   if (module_processing_it != load_ctx.tracker.module_processing.end() &&
       (!load_ctx.tracker.module_reduction || module_processing_it->second + 1 != load_ctx.tracker.module_lookup.size())) {
@@ -247,7 +247,7 @@ status_or<frame*> run_impl(native_runtime& runtime,
   }
   starlark::compiler::compiler star_compiler(binding);
   const auto module_source = (*mod_info)->source_code();
-  const auto module_c_name = (*mod_info)->cannonical_name();
+  const auto module_c_name = (*mod_info)->canonical_name();
   Program* program = const_cast<Program*>(runtime.find_bytecode(module_c_name, module_source));
   std::unique_ptr<google::protobuf::Arena> bytecode_arena;
   if (program == nullptr) {
@@ -260,7 +260,7 @@ status_or<frame*> run_impl(native_runtime& runtime,
 
   auto deps = starlark::vm::get_dependencies(program);
   for (const auto& dep : deps) {
-    auto dep_result = run_impl(runtime, loader, dep, g_options, r_options, n_options, logging, load_ctx, (*mod_info)->cannonical_name());
+    auto dep_result = run_impl(runtime, loader, dep, g_options, r_options, n_options, logging, load_ctx, (*mod_info)->canonical_name());
     if (!dep_result.ok()) {
       return status_or<frame*>(dep_result.error());
     }
@@ -285,7 +285,7 @@ status_or<frame*> run_impl(native_runtime& runtime,
     load_ctx.runner_state->has_main_module_cache_key = true;
   }
 
-  if (load_ctx.runner_state != nullptr && (*mod_info)->cannonical_name() == starlark::vm::builtin_star_module) {
+  if (load_ctx.runner_state != nullptr && (*mod_info)->canonical_name() == starlark::vm::builtin_star_module) {
     load_ctx.runner_state->builtin_module_cache_key = cache_key;
     load_ctx.runner_state->has_builtin_module_cache_key = true;
   }
@@ -308,7 +308,7 @@ status_or<frame*> run_impl(native_runtime& runtime,
   state_ref.program = program;
   state_ref.starlark_loader = &loader;
   state_ref.runtime_options = &r_options;
-  state_ref.module_name = (*mod_info)->cannonical_name();
+  state_ref.module_name = (*mod_info)->canonical_name();
   state_ref.inner_module = (*mod_info)->inner();
 
   assert(program->max_eval_stack_depth() > 0);
@@ -317,7 +317,7 @@ status_or<frame*> run_impl(native_runtime& runtime,
   state_ref.init_metadata = starlark::vm::module_metadata::build(*program);
 
   if (auto violation = starlark::vm::check_program_limits(*program, (*mod_info)->source_code(), r_options)) {
-    logging.log(LogLevel::LOG_LEVEL_ERROR, violation->message, (*mod_info)->cannonical_name(), violation->position);
+    logging.log(LogLevel::LOG_LEVEL_ERROR, violation->message, (*mod_info)->canonical_name(), violation->position);
     return status_or<frame*>(status_code::kRuntimeError);
   }
 

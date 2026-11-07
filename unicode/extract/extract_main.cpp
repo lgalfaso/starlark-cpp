@@ -201,7 +201,7 @@ void print_code_points(
     }
   }
   {
-    // Print the strings that will be used to initalize the bitsets.
+    // Print the strings that will be used to initialize the bitsets.
     // The bitsets position 0 comes from the last character in the string.
     std::string zeros_string(CODEPOINTS_PER_LINE, '0');
     std::string ones_string(CODEPOINTS_PER_LINE, '1');

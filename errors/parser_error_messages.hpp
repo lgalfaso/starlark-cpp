@@ -24,7 +24,7 @@ std::string error_v2_load_at_least_one_symbol(std::string_view program, const st
 std::string error_v2_params_star_parameter_may_appear_only_once(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_non_optional_after_optional(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_keyword_variadic_param_must_be_last(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
-std::string error_v2_params_duplicate_keyword_variadic_paramter(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
+std::string error_v2_params_duplicate_keyword_variadic_parameter(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_named_param_must_follow_bare_star(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_expected_identifier_after_star_star_token(std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);
 std::string error_v2_params_duplicate_params(std::string_view name, std::string_view program, const starlark::logging::Position& start, const starlark::logging::Position& end);

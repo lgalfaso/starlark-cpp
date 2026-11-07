@@ -30,7 +30,7 @@ class module_info {
   bool ready() const;
   const bindings_t& custom_binding() const;
   google::protobuf::Arena& arena();
-  std::string_view cannonical_name() const;
+  std::string_view canonical_name() const;
   std::string_view source_code() const;
   bool inner() const;
   void loaded(frame* base_frame, const starlark::bytecode::Program* program);
@@ -38,7 +38,7 @@ class module_info {
   const module_metadata& metadata_for(const starlark::bytecode::Program& program);
 
  private:
-  std::string cannonical_name_;
+  std::string canonical_name_;
   std::string source_code_;
   const bool inner_;
   const bindings_t custom_binding_;
@@ -50,12 +50,12 @@ class module_info {
 class module_loader {
  public:
   module_loader();
-  starlark::result::status_or<module_info*> load_module(std::string_view module_name, std::string_view caller_cannonical_name);
-  starlark::result::status_or<module_info*> load_module(std::string_view cannonical_module_name);
+  starlark::result::status_or<module_info*> load_module(std::string_view module_name, std::string_view caller_canonical_name);
+  starlark::result::status_or<module_info*> load_module(std::string_view canonical_module_name);
 
  protected:
-  virtual std::string cannonical_name(std::string_view module_name, std::string_view caller_module_name);
-  virtual starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> inner_load(std::string_view cannonical_name_) = 0;
+  virtual std::string canonical_name(std::string_view module_name, std::string_view caller_module_name);
+  virtual starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> inner_load(std::string_view canonical_name_) = 0;
 
  private:
   std::map<std::string, module_info, std::less<>> modules;
@@ -68,7 +68,7 @@ class kv_module_loader : public module_loader {
   explicit kv_module_loader(const std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>>& values);
 
  protected:
-  starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> inner_load(std::string_view cannonical_name_) override;
+  starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> inner_load(std::string_view canonical_name_) override;
 
  private:
   std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>> values;

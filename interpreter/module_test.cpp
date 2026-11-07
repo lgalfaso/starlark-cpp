@@ -289,14 +289,14 @@ class bad_module_loader : public kv_module_loader {
       : kv_module_loader(values) {}
 
  protected:
-  std::string cannonical_name(std::string_view module_name, std::string_view caller_module_name) override {
+  std::string canonical_name(std::string_view module_name, std::string_view caller_module_name) override {
     if (module_name == ":foo.star") {
       if (foo_retrieved) {
         return ":bar.star";
       }
       foo_retrieved = true;
     }
-    return kv_module_loader::cannonical_name(module_name, caller_module_name);
+    return kv_module_loader::canonical_name(module_name, caller_module_name);
   }
 
  private:

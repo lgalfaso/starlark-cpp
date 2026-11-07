@@ -62,7 +62,7 @@ std::vector<std::string_view> get_dependencies(const starlark::bytecode::Program
 }
 
 starlark::vm::module_info::module_info(std::string_view c_name, std::string_view source, bool inner_module, const bindings_t& bindings) :
-    cannonical_name_(c_name),
+    canonical_name_(c_name),
     source_code_(source),
     inner_(inner_module),
     custom_binding_(bindings),
@@ -80,8 +80,8 @@ Arena& starlark::vm::module_info::arena() {
   return arena_;
 }
 
-std::string_view starlark::vm::module_info::cannonical_name() const {
-  return cannonical_name_;
+std::string_view starlark::vm::module_info::canonical_name() const {
+  return canonical_name_;
 }
 
 std::string_view starlark::vm::module_info::source_code() const {
@@ -121,40 +121,40 @@ module_loader::module_loader() {
   custom_binding["inner_sorted"] = Arena::Create<starlark_built_in_function>(&arena, nullptr, builtin_entrypoints{.call = starlark_fn_inner_sorted}, "inner_sorted");
 }
 
-status_or<module_info*> module_loader::load_module(std::string_view local_module_name, std::string_view caller_cannonical_name) {
-  return load_module(cannonical_name(local_module_name, caller_cannonical_name));
+status_or<module_info*> module_loader::load_module(std::string_view local_module_name, std::string_view caller_canonical_name) {
+  return load_module(canonical_name(local_module_name, caller_canonical_name));
 }
 
-status_or<module_info*> module_loader::load_module(std::string_view cannonical_module_name) {
+status_or<module_info*> module_loader::load_module(std::string_view canonical_module_name) {
   // If this is one of the built-in modules, then use it.
-  if (cannonical_module_name == builtin_star_module) {
-    auto it = modules.find(cannonical_module_name);
+  if (canonical_module_name == builtin_star_module) {
+    auto it = modules.find(canonical_module_name);
     if (it != modules.end()) {
       return status_or<module_info*>(&it->second);
     }
-    auto result = modules.try_emplace(std::string{cannonical_module_name}, cannonical_module_name, builtin_star, true, custom_binding);
+    auto result = modules.try_emplace(std::string{canonical_module_name}, canonical_module_name, builtin_star, true, custom_binding);
     return status_or<module_info*>(&result.first->second);
   }
-  auto it = modules.find(cannonical_module_name);
+  auto it = modules.find(canonical_module_name);
   if (it != modules.end()) {
     return status_or<module_info*>(&it->second);
   }
-  auto source_and_bindings = inner_load(cannonical_module_name);
+  auto source_and_bindings = inner_load(canonical_module_name);
   if (!source_and_bindings.ok()) {
     return status_or<module_info*>(status_code::kStaticError);
   }
-  auto result = modules.try_emplace(std::string{cannonical_module_name}, cannonical_module_name, source_and_bindings->first, false, source_and_bindings->second);
+  auto result = modules.try_emplace(std::string{canonical_module_name}, canonical_module_name, source_and_bindings->first, false, source_and_bindings->second);
   return status_or<module_info*>(&result.first->second);
 }
 
-std::string module_loader::cannonical_name(std::string_view module_name, std::string_view caller_module_name) {
+std::string module_loader::canonical_name(std::string_view module_name, std::string_view caller_module_name) {
   return std::string{module_name};
 }
 
 kv_module_loader::kv_module_loader(const std::map<std::string, std::pair<std::string, const starlark::vm::module_info::bindings_t>, std::less<>>& values) : values(values) {}
 
-status_or<std::pair<std::string, const starlark::vm::module_info::bindings_t>> kv_module_loader::inner_load(std::string_view cannonical_name_) {
-  auto it = values.find(cannonical_name_);
+status_or<std::pair<std::string, const starlark::vm::module_info::bindings_t>> kv_module_loader::inner_load(std::string_view canonical_name_) {
+  auto it = values.find(canonical_name_);
   if (it == values.end()) {
     return status_or<std::pair<std::string, const starlark::vm::module_info::bindings_t>>(status_code::kStaticError);
   }

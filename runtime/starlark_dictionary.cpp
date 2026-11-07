@@ -494,7 +494,7 @@ starlark_obj* starlark_dictionary_fn_keys(starlark_obj* this_obj, const starlark
 }
 
 starlark_obj* starlark_dictionary_fn_pop(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // Bazel allows the second paramter to be a named argument with name `unbound`. This is not allowed in Python. In the spec and Python the name of the argument is called `default`.
+  // Bazel allows the second parameter to be a named argument with name `unbound`. This is not allowed in Python. In the spec and Python the name of the argument is called `default`.
   assert(this_obj != nullptr);
   assert(is_dict_kind(this_obj->kind()));
   if (!no_named_args(named_args, error_callback, "dict.pop").ok() ||
@@ -516,7 +516,7 @@ starlark_obj* starlark_dictionary_fn_popitem(starlark_obj* this_obj, const starl
 }
 
 starlark_obj* starlark_dictionary_fn_setdefault(starlark_obj* this_obj, const starlark_obj::pos_args_t& pos_args, const starlark_obj::named_args_t& named_args, context& ctx, error_fn& error_callback) {
-  // Bazel allows the second paramter to be a named argument with name `unbound`. This is not allowed in Python. In the spec and Python the name of the argument is called `default`.
+  // Bazel allows the second parameter to be a named argument with name `unbound`. This is not allowed in Python. In the spec and Python the name of the argument is called `default`.
   if (!no_named_args(named_args, error_callback, "dict.setdefault").ok() ||
       !min_args(pos_args, error_callback, "setdefault", 1).ok() ||
       !max_args(pos_args, error_callback, "setdefault", 2).ok()) {
