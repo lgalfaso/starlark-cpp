@@ -28,15 +28,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: bazelbuild/setup-bazelisk@v3
+      - uses: bazel-contrib/setup-bazel@0.19.1
 
       - name: Build playground
         run: bazel build -c opt //web:dist
 
       - name: Publish to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: bazel-bin/web/dist
