@@ -180,7 +180,10 @@ cc_library(
         ":module_metadata",
         "//proto:starlark_bytecode_cc_proto",
         "//runtime:starlark_function",
+        "//runtime:starlark_function_builder_impl",
+        "//runtime:starlark_numeric_impl",
         "//runtime:starlark_object",
+        "//runtime:starlark_object_impl",
         "//status_or:status",
     ],
 )

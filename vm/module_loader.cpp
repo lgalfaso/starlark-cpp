@@ -61,6 +61,20 @@ std::vector<std::string_view> get_dependencies(const starlark::bytecode::Program
   return result;
 }
 
+namespace {
+
+const module_info::bindings_t& empty_module_bindings() {
+  static const module_info::bindings_t kEmpty;
+  return kEmpty;
+}
+
+}  // namespace
+
+module_source::module_source() : bindings(empty_module_bindings()) {}
+
+module_source::module_source(std::string source_, const module_info::bindings_t& bindings_)
+    : source(std::move(source_)), bindings(bindings_) {}
+
 starlark::vm::module_info::module_info(std::string_view c_name, std::string_view source, bool inner_module, const bindings_t& bindings) :
     canonical_name_(c_name),
     source_code_(source),
@@ -122,7 +136,7 @@ module_loader::module_loader() {
 }
 
 status_or<module_info*> module_loader::load_module(std::string_view local_module_name, std::string_view caller_canonical_name) {
-  return load_module(canonical_name(local_module_name, caller_canonical_name));
+  return load_module(resolve_canonical_name(local_module_name, caller_canonical_name));
 }
 
 status_or<module_info*> module_loader::load_module(std::string_view canonical_module_name) {
@@ -139,26 +153,27 @@ status_or<module_info*> module_loader::load_module(std::string_view canonical_mo
   if (it != modules.end()) {
     return status_or<module_info*>(&it->second);
   }
-  auto source_and_bindings = inner_load(canonical_module_name);
+  auto source_and_bindings = resolve_source(canonical_module_name);
   if (!source_and_bindings.ok()) {
     return status_or<module_info*>(status_code::kStaticError);
   }
-  auto result = modules.try_emplace(std::string{canonical_module_name}, canonical_module_name, source_and_bindings->first, false, source_and_bindings->second);
+  auto result = modules.try_emplace(
+      std::string{canonical_module_name}, canonical_module_name, source_and_bindings->source, false, source_and_bindings->bindings);
   return status_or<module_info*>(&result.first->second);
 }
 
-std::string module_loader::canonical_name(std::string_view module_name, std::string_view caller_module_name) {
+std::string module_loader::resolve_canonical_name(std::string_view module_name, std::string_view caller_module_name) {
   return std::string{module_name};
 }
 
 kv_module_loader::kv_module_loader(const std::map<std::string, std::pair<std::string, const starlark::vm::module_info::bindings_t>, std::less<>>& values) : values(values) {}
 
-status_or<std::pair<std::string, const starlark::vm::module_info::bindings_t>> kv_module_loader::inner_load(std::string_view canonical_name_) {
+status_or<module_source> kv_module_loader::resolve_source(std::string_view canonical_name_) {
   auto it = values.find(canonical_name_);
   if (it == values.end()) {
-    return status_or<std::pair<std::string, const starlark::vm::module_info::bindings_t>>(status_code::kStaticError);
+    return status_or<module_source>(status_code::kStaticError);
   }
-  return status_or<std::pair<std::string, const starlark::vm::module_info::bindings_t>>(it->second);
+  return status_or<module_source>(module_source{it->second.first, it->second.second});
 }
 
 }  // namespace vm

@@ -47,15 +47,23 @@ class module_info {
   const module_metadata* metadata_ = nullptr;
 };
 
+struct module_source {
+  std::string source;
+  const module_info::bindings_t& bindings;
+
+  module_source();
+  module_source(std::string source_, const module_info::bindings_t& bindings_);
+};
+
 class module_loader {
  public:
   module_loader();
+  virtual ~module_loader() = default;
   starlark::result::status_or<module_info*> load_module(std::string_view module_name, std::string_view caller_canonical_name);
   starlark::result::status_or<module_info*> load_module(std::string_view canonical_module_name);
 
- protected:
-  virtual std::string canonical_name(std::string_view module_name, std::string_view caller_module_name);
-  virtual starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> inner_load(std::string_view canonical_name_) = 0;
+  virtual std::string resolve_canonical_name(std::string_view module_name, std::string_view caller_module_name);
+  virtual starlark::result::status_or<module_source> resolve_source(std::string_view canonical_name_) = 0;
 
  private:
   std::map<std::string, module_info, std::less<>> modules;
@@ -67,8 +75,7 @@ class kv_module_loader : public module_loader {
  public:
   explicit kv_module_loader(const std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>>& values);
 
- protected:
-  starlark::result::status_or<std::pair<std::string, const module_info::bindings_t>> inner_load(std::string_view canonical_name_) override;
+  starlark::result::status_or<module_source> resolve_source(std::string_view canonical_name_) override;
 
  private:
   std::map<std::string, std::pair<std::string, const module_info::bindings_t>, std::less<>> values;
