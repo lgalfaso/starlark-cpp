@@ -167,6 +167,92 @@ cc_test(
 )
 
 cc_library(
+    name = "module_label",
+    srcs = ["module_label.cpp"],
+    hdrs = ["module_label.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "module_label_test",
+    size = "small",
+    srcs = ["module_label_test.cpp"],
+    deps = [
+        ":module_label",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "directory_module_loader",
+    srcs = ["directory_module_loader.cpp"],
+    hdrs = ["directory_module_loader.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":module_label",
+        ":module_loader",
+        "//io:read_file",
+    ],
+)
+
+cc_library(
+    name = "scoped_temp_directory",
+    testonly = True,
+    hdrs = ["scoped_temp_directory.hpp"],
+    deps = ["@googletest//:gtest"],
+)
+
+cc_test(
+    name = "directory_module_loader_test",
+    size = "small",
+    srcs = ["directory_module_loader_test.cpp"],
+    deps = [
+        ":directory_module_loader",
+        ":module_label",
+        ":scoped_temp_directory",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "composite_module_loader",
+    srcs = ["composite_module_loader.cpp"],
+    hdrs = ["composite_module_loader.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":module_label",
+        ":module_loader",
+    ],
+)
+
+cc_test(
+    name = "composite_module_loader_test",
+    size = "small",
+    srcs = ["composite_module_loader_test.cpp"],
+    deps = [
+        ":composite_module_loader",
+        ":directory_module_loader",
+        ":module_label",
+        ":scoped_temp_directory",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "module_loader_integration_test",
+    size = "small",
+    srcs = ["module_loader_integration_test.cpp"],
+    deps = [
+        ":composite_module_loader",
+        ":directory_module_loader",
+        ":module_label",
+        ":scoped_temp_directory",
+        "//interpreter",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "module_loader",
     srcs = ["module_loader.cpp"],
     hdrs = [
