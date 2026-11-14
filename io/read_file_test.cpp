@@ -12,7 +12,7 @@ namespace io {
 namespace {
 
 TEST(ReadFile, ReadsExistingFile) {
-  const std::string path = testing::TempDir() + "/read_file_test.txt";
+  const std::string path = ::testing::TempDir() + "/read_file_test.txt";
   {
     std::ofstream out{path};
     ASSERT_TRUE(out.is_open());
