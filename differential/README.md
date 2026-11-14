@@ -29,7 +29,7 @@ Each fuzz **input** is a byte string treated as Starlark source. The harness run
 
 ### Short smoke run (CI-friendly)
 
-`bazel test` runs a **single** fuzzer process. Cap work with libFuzzer flags via `--test_arg`:
+`bazel test` runs a **single** fuzzer process. Cap work with **libFuzzer** flags via `--test_arg` (these are forwarded to the instrumented binary, not the rules_fuzzing launcher):
 
 ```bash
 bazel test //differential:fuzz_test --config=asan-libfuzzer \
@@ -51,36 +51,60 @@ Use `max_total_time` slightly below Bazel’s `test_timeout` so the run exits cl
 
 | Flag | Unit | Meaning |
 |------|------|--------|
-| `-runs=N` | count | Stop after N inputs (corpus replay + mutations). |
+| `-runs=N` | count | Stop after N executions (see note below on seed corpus). |
 | `-max_total_time=S` | **seconds** | Stop after S seconds of wall time. `0` = no limit (run until stopped). |
 | `-timeout=T` | seconds | Per-input execution limit (raise for slow native JIT). |
 | `-max_len=N` | bytes | Max input size (harness also skips inputs over 64 KiB). |
 
 Without `-runs` or `-max_total_time`, libFuzzer keeps going until a crash or the Bazel test timeout.
 
+`-runs=N` is a ceiling on **total** executions; libFuzzer still replays every file in the bundled seed corpus once at startup, so smoke runs with a large seed tree may do more than `N` individual runs if `N` is below the seed file count.
+
 ### Continuous / long-running fuzz
 
-For a persistent corpus and an open-ended session, use the **`fuzz_test_run`** binary (not `bazel test`):
+Two entry points exist:
+
+| Target | What accepts CLI flags |
+|--------|-------------------------|
+| `//differential:fuzz_test_bin` | **libFuzzer** (`-max_total_time`, `-timeout`, `-max_len`, …) |
+| `//differential:fuzz_test_run` | **rules_fuzzing launcher** (`--timeout_secs`, `--fuzzing_output_root`, `--clean`; run `-- --helpshort`) |
+
+**Do not** pass libFuzzer `-flag=value` arguments to `fuzz_test_run`. Bazel forwards them to the Python launcher, which rejects unknown flags (for example `Unknown command line flag 'max_total_time'`).
+
+For full libFuzzer control and a corpus directory you own, run the instrumented binary directly:
 
 ```bash
 CORPUS="${HOME}/starlark-differential-fuzz-corpus"
 mkdir -p "${CORPUS}"
 
-bazel run --config=asan-libfuzzer -c opt //differential:fuzz_test_run -- \
-  "${CORPUS}" \
+bazel run --config=asan-libfuzzer -c opt //differential:fuzz_test_bin -- \
   -max_total_time=0 \
   -timeout=10 \
   -max_len=8192 \
-  -artifact_prefix=/tmp/differential-fuzz-crash-
+  -artifact_prefix=/tmp/differential-fuzz-crash- \
+  -dict=differential/fuzz_test.dict \
+  "${CORPUS}" \
+  differential/fuzz_test_corpus
 ```
 
-- Point `CORPUS` at a writable directory; libFuzzer replays and adds interesting inputs over time.
+- Put **libFuzzer flags before corpus paths** (the harness inserts defaults in `LLVMFuzzerInitialize` before trailing argv entries).
+- The first directory (`"${CORPUS}"`) is your writable on-disk corpus; `differential/fuzz_test_corpus` is the read-only Bazel seed corpus (path is relative to the runfiles dir that `bazel run` uses).
 - Run under `tmux`, `nohup`, or a scheduler for overnight soaks.
 - On mismatch or crash, the harness traps; use `-artifact_prefix` to save reproducers and minimize with libFuzzer if needed.
 
+**Convenience wrapper** (`fuzz_test_run`): seeds, dictionary, and artifact paths are prewired; new inputs go under `/tmp/fuzzing/corpus` unless you set `--fuzzing_output_root`. Example time-bounded soak (launcher flag, not libFuzzer):
+
+```bash
+bazel run --config=asan-libfuzzer -c opt //differential:fuzz_test_run -- \
+  --fuzzing_output_root="${HOME}/starlark-differential-fuzz" \
+  --timeout_secs=0
+```
+
+`--timeout_secs=0` (default) means no wall-clock limit; omitting it is the same as open-ended fuzz until you stop the process.
+
 ### Memory (ASAN + native JIT)
 
-The differential fuzz binary links LLVM and runs JIT codegen per interesting input, so libFuzzer’s default **2048 MiB** RSS cap is easy to hit. For libFuzzer runs (`fuzz_test_run` / OSS-Fuzz), the harness sets **`LLVMFuzzerInitialize` defaults** unless you override them on the command line. Bazel’s seed-corpus regression test (`bazel test //differential:fuzz_test`) uses the replay engine and skips argv injection so corpus paths are not mistaken for inputs.
+The differential fuzz binary links LLVM and runs JIT codegen per interesting input, so libFuzzer’s default **2048 MiB** RSS cap is easy to hit. For libFuzzer runs (`fuzz_test_bin` / OSS-Fuzz), the harness sets **`LLVMFuzzerInitialize` defaults** unless you override them on the command line. Bazel’s seed-corpus regression test (`bazel test //differential:fuzz_test`) uses the replay engine and skips argv injection so corpus paths are not mistaken for inputs.
 
 | Flag | Default injected | Why |
 |------|------------------|-----|

@@ -28,10 +28,10 @@ Both backends use the same `runtime/` object model and `vm/` module-loading infr
 
 ## Requirements
 
-- [Bazel](https://bazel.build/) 9.3.2 (use [Bazelisk](https://github.com/bazelbuild/bazelisk); version is pinned in `.bazeliskrc`)
-- Builds use the hermetic [LLVM toolchain](https://github.com/hermeticbuild/hermetic-llvm) from Bzlmod (`llvm` 0.8.x, LLVM 23.x for JIT libraries and the C/C++ compiler). The first build downloads the macOS SDK and compiles LLVM; allow substantial time, disk, and RAM.
-- Application code is built with `-std=c++2b`, no exceptions, and no RTTI (LLVM JIT dependencies are compiled separately with exceptions and RTTI).
-- Bazel selects the host CPU automatically on macOS and Linux (arm64 vs x86_64 follows the Bazel binary). Use explicit `//platforms:*` labels only for cross-compiles. Optional personal flags: copy nothing required; add `user.bazelrc` (gitignored, `try-import` in `.bazelrc`) if needed.
+- [Bazel](https://bazel.build/) (it is recommended that people use [Bazelisk](https://github.com/bazelbuild/bazelisk))
+- Substantial time, disk, and RAM. Builds use the hermetic [LLVM toolchain](https://github.com/hermeticbuild/hermetic-llvm) from Bzlmod. The first build downloads the macOS SDK and compiles LLVM
+- Application code is built with `-std=c++2b`, no exceptions, and no RTTI (LLVM JIT dependencies are compiled separately with exceptions and RTTI)
+- Bazel selects the host automatically on macOS and Linux (hermetic LLVM toolchains; CPU matches the host Bazel runs on). Plain `bazel build` / `bazel test` need no `--platforms`. Use `//platforms:*` for cross-compiles; `//web:dist` uses Emscripten separately. Shared flags live in `.bazelrc` (and `rules_fuzzer.bazelrc` for fuzz configs)
 
 ## Building
 
